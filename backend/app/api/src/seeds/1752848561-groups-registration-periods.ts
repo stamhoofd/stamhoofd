@@ -3,6 +3,7 @@ import { Group, Organization, OrganizationRegistrationPeriod, Registration, Regi
 import type { CycleInformation } from '@stamhoofd/structures';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { LoggingTools } from '@stamhoofd/utility';
+import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -26,38 +27,44 @@ export default new Migration(async () => {
 const cycleIfMigrated = -99;
 
 async function start(dryRun: boolean) {
+    const batchProcessor = SeedTools.createBatchProcessor({
+        batchSize: 50,
+        action: async (organization: Organization) => {
+            const groups: Group[] = await Group.select().where('organizationId', organization.id).fetch();
+
+            if (groups.length === 0) {
+                await createDefaultRegistrationPeriod(organization, dryRun);
+                return;
+            }
+
+            if (groups.some(g => g.cycle === cycleIfMigrated)) {
+                return;
+            }
+
+            console.log('Organization: ' + organization.name);
+
+            // sort groups by start date
+            groups.sort((a, b) => a.settings.startDate.getTime() - b.settings.startDate.getTime());
+
+            const bestCurrentPeriodSpan = await calculateBestCurrentPeriodSpan(groups);
+
+            const allGroups: Group[] = await migrateGroups({ groups, organization, periodSpan: bestCurrentPeriodSpan }, dryRun);
+
+            // cleanup
+            for (const group of allGroups) {
+                await cleanupGroup(group, dryRun);
+            }
+        },
+    });
+
     const progressLogger = await LoggingTools.createProgressLoggerFromQuery(Organization.select());
+    batchProcessor.setProgressLogger(progressLogger);
 
     for await (const organization of Organization.select().all()) {
-        const groups: Group[] = await Group.select().where('organizationId', organization.id).fetch();
-
-        if (groups.length === 0) {
-            await createDefaultRegistrationPeriod(organization, dryRun);
-            progressLogger.update();
-            continue;
-        }
-
-        if (groups.some(g => g.cycle === cycleIfMigrated)) {
-            progressLogger.update();
-            continue;
-        }
-
-        console.log('Organization: ' + organization.name);
-
-        // sort groups by start date
-        groups.sort((a, b) => a.settings.startDate.getTime() - b.settings.startDate.getTime());
-
-        const bestCurrentPeriodSpan = await calculateBestCurrentPeriodSpan(groups);
-
-        const allGroups: Group[] = await migrateGroups({ groups, organization, periodSpan: bestCurrentPeriodSpan }, dryRun);
-
-        // cleanup
-        for (const group of allGroups) {
-            await cleanupGroup(group, dryRun);
-        }
-
-        progressLogger.update();
+        await batchProcessor.execute(organization);
     }
+
+    await batchProcessor.finish();
 }
 
 async function cleanupGroup(group: Group, dryRun: boolean) {
