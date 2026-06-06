@@ -27,6 +27,9 @@
 
         .menu-button, .st-menu-item {
             --block-width: 20px;
+            // Firefox fix
+            --block-aside-scale: 0.7;
+
             margin: 0 calc(-1 * var(--item-padding));
             padding: 8px var(--item-padding) 8px calc(var(--item-padding) + var(--left-offset));
             font-size: 14px;
@@ -45,7 +48,7 @@
             }
 
             .style-image-with-icon aside {
-                display: none;
+                //display: none;
             }
 
             > div {
@@ -129,6 +132,7 @@
                 width: 20px;
                 height: 20px;
                 display: block;
+                overflow: visible !important;
             }
 
             .right {

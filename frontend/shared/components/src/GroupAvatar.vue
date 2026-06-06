@@ -1,5 +1,10 @@
 <template>
-    <IconContainer v-color="group.id" v-tooltip="group.closed ? $t('Inschrijvingen zijn gesloten via het ledenprotaal') : null" :aside-icon="group.type === GroupType.WaitingList ? 'clock tiny' : (group.closed ? 'dot red stroke' : 'dot green stroke')">
+    <IconContainer
+        v-color="group.id"
+        v-tooltip="tooltip"
+        :class="logoSrc ? 'white transparent' : ''"
+        :aside-icon="asideIcon"
+    >
         <figure class="group-avatar">
             <div v-if="logoSrc" class="logo">
                 <img :src="logoSrc" :srcset="logoSrcSet">
@@ -18,6 +23,7 @@ import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import IconContainer from './icons/IconContainer.vue';
+import { useOrganization } from './hooks/useOrganization.ts';
 
 const props = withDefaults(defineProps<{
     group: Group;
@@ -25,9 +31,38 @@ const props = withDefaults(defineProps<{
 }>(), {
     allowEmpty: false,
 });
-
+const organization = useOrganization();
 const letters = computed(() => Formatter.firstLetters(props.group.settings.name, 2));
 const t = ref(0);
+const isDifferentPeriod = computed(() => organization.value && organization.value.period.period.id !== props.group.periodId);
+
+const asideIcon = computed(() => {
+    if (props.group.type === GroupType.WaitingList) {
+        return 'clock tiny stroke';
+    }
+
+    if (isDifferentPeriod.value) {
+        return 'lock tiny stroke';
+    }
+
+    if (props.group.closed) {
+        return 'dot red stroke';
+    }
+
+    return 'dot green stroke';
+});
+
+const tooltip = computed(() => {
+    if (isDifferentPeriod.value) {
+        return $t('Dit werkjaar is niet actief, inschrijvingen via het ledenportaal zijn nog niet mogelijk.');
+    }
+
+    if (props.group.closed) {
+        return $t('Inschrijvingen zijn gesloten via het ledenportaal');
+    }
+
+    return undefined;
+});
 
 setInterval(() => {
     t.value += 1;

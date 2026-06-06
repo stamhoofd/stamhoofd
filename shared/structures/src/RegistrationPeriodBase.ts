@@ -67,4 +67,16 @@ export class RegistrationPeriodBase extends AutoEncoder {
     getDiffValue() {
         return this.name;
     }
+
+    /**
+     * Earliest date an organization is allowed to switch to this period as default.
+     */
+    get switchDate() {
+        if (STAMHOOFD.userMode === 'organization') {
+            return null;
+        }
+
+        const d = Formatter.luxon(this.startDate).minus({ months: STAMHOOFD.environment === 'development' ? 6 : 2 }).startOf('month');
+        return d.toJSDate();
+    }
 }

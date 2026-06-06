@@ -169,37 +169,39 @@
                     <hr><h2>{{ $t('%16X') }}</h2>
 
                     <STList>
-                        <STListItem v-if="!isArchive && !isOpen" :selectable="true" class="left-center" @click="openGroup()">
-                            <template #left>
-                                <IconContainer icon="unlock" class="success" />
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%Lh') }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t('%Li') }}
-                            </p>
+                        <template v-if="!isDifferentPeriod">
+                            <STListItem v-if="!isArchive && !isOpen" :selectable="true" class="left-center" @click="openGroup()">
+                                <template #left>
+                                    <IconContainer icon="unlock" class="success" />
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('%Lh') }}
+                                </h2>
+                                <p class="style-description-small">
+                                    {{ $t('%Li') }}
+                                </p>
 
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
 
-                        <STListItem v-if="!isArchive && isOpen" class="left-center" :selectable="true" @click="closeGroup()">
-                            <template #left>
-                                <IconContainer icon="lock" class="error" />
-                            </template>
+                            <STListItem v-if="!isArchive && isOpen" class="left-center" :selectable="true" @click="closeGroup()">
+                                <template #left>
+                                    <IconContainer icon="lock" class="error" />
+                                </template>
 
-                            <h2 class="style-title-list">
-                                {{ $t('%Lj') }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t('%1QD') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                                <h2 class="style-title-list">
+                                    {{ $t('%Lj') }}
+                                </h2>
+                                <p class="style-description-small">
+                                    {{ $t('%1QD') }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+                        </template>
 
                         <STListItem :selectable="true" class="left-center" @click="deleteGroup()">
                             <template #left>
@@ -286,6 +288,7 @@ const context = useContext();
 const getGroupsById = useGetGroupsById();
 const getPeriods = useGetPeriods();
 const featureFlag = useFeatureFlag();
+const isDifferentPeriod = computed(() => organization.value && organization.value.period.period.id !== props.group.periodId);
 
 const invitationsCount = ref<number | null>(null);
 

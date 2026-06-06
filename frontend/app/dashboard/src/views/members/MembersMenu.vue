@@ -51,7 +51,7 @@
                         </button>
 
                         <button v-for="group in category.groups" :key="group.id" class="menu-button button sub-button" :class="{ selected: checkRoute(Routes.Group, {properties: {group, period}}) }" type="button" @click="$navigate(Routes.Group, {properties: {group, period}})">
-                            <GroupAvatar :group="group" :allow-empty="true" />
+                            <GroupAvatar :group="group" :allow-empty="false" />
                             <span>{{ group.settings.name }}</span>
                             <span v-if="group.settings.registeredMembers !== null" class="count">{{ formatInteger(group.settings.registeredMembers) }}</span>
                         </button>

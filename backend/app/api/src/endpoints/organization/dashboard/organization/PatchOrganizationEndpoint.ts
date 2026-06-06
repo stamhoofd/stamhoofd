@@ -432,19 +432,35 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set is already closed',
-                            human: $t('%15i'),
+                            human: $t('Je kan niet (meer) overschakelen naar dit werkjaar omdat het is vergrendeld'),
                             field: 'period',
                         });
                     }
 
-                    const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
-                    if (period.startDate > new Date(Date.now() + maximumStart) && STAMHOOFD.environment !== 'development') {
+                    const struct = period.getBaseStructure();
+                    if (struct.switchDate && struct.switchDate > new Date()) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set has not started yet',
-                            human: $t('%15k'),
+                            human: $t('Je kan ten vroegste vanaf {date} overschakelen naar dit werkjaar', { date: Formatter.date(struct.switchDate) }),
                             field: 'period',
                         });
+                    }
+
+                    if (period.organizationId === null) {
+                        // Not allowed to return to a period lower than the currently active platform period
+                        const platform = await Platform.getShared();
+                        const platformPeriod = await RegistrationPeriod.getByID(platform.periodId);
+                        if (platformPeriod) {
+                            if (period.startDate < platformPeriod.startDate) {
+                                throw new SimpleError({
+                                    code: 'invalid_field',
+                                    message: 'Cannot return to period with a start date before the currently active platform period',
+                                    human: $t('Je kan niet terugkeren naar een werkjaar in het verleden', {}),
+                                    field: 'period',
+                                });
+                            }
+                        }
                     }
 
                     organization.periodId = period.id;

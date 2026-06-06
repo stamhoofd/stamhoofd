@@ -7,6 +7,10 @@
                 <span>{{ props.period ? period.period.name : $t('Leden') }}</span>
             </h1>
 
+            <p v-if="period.id !== organization.period.id && period.period.startDate > organization.period.period.startDate && !canSetDefaultPeriod && period.period.switchDate" class="info-box small">
+                {{ $t('Dit is het toekomstig werkjaar. Het is nog niet actief. Leden kunnen nog niet inschrijven. Overschakelen kan ten vroegste vanaf {switchDate}.', {switchDate: Formatter.date(period.period.switchDate)}) }}
+            </p>
+
             <div class="block">
                 <div class="items">
                     <button
@@ -49,7 +53,7 @@
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, StartNewRegistrationPeriodView, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
+import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, StartNewRegistrationPeriodView, Toast, useFeatureFlag, usePlatform, useSetFeatureFlag } from '@stamhoofd/components';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -73,6 +77,7 @@ const props = withDefaults(defineProps<{
 const context = useContext();
 const $navigate = useNavigate();
 const auth = useAuth();
+const platform = usePlatform();
 
 const hasFullAccess = computed(() => auth.hasFullAccess());
 const period = computed(() => props.period ?? organization.value.period);
@@ -279,7 +284,7 @@ async function switchPeriod(event: MouseEvent) {
         periods.periods.map((p) => {
             return new ContextMenuItem({
                 name: p.name,
-                disabled: p.id === period.value.period.id,
+                disabled: p.id === period.value.period.id ? $t('Dit is je huidige werkjaar') : false,
                 action: async () => {
                     const existing = periods.organizationPeriods.find(pp => pp.period.id === p.id);
                     if (existing) {
@@ -296,16 +301,20 @@ async function switchPeriod(event: MouseEvent) {
             });
         }),
 
-        [
-            new ContextMenuItem({
-                name: $t('Werkjaren beheren'),
-                icon: 'settings',
-                action: async () => {
-                    await $navigate(Routes.OrganizationRegistrationPeriods);
-                    return true;
-                },
-            }),
-        ],
+        ...(STAMHOOFD.userMode === 'organization'
+            ? ([
+                    [
+                        new ContextMenuItem({
+                            name: $t('Werkjaren beheren'),
+                            icon: 'settings',
+                            action: async () => {
+                                await $navigate(Routes.OrganizationRegistrationPeriods);
+                                return true;
+                            },
+                        }),
+                    ],
+                ])
+            : []),
     ]);
     menu.show({ clickEvent: event }).catch(console.error);
 }
@@ -359,8 +368,32 @@ type Action = {
     }
 );
 
+const canSetDefaultPeriod = computed(() => {
+    if (period.value.id === organization.value.period.id) {
+        return false;
+    }
+    if (STAMHOOFD.userMode === 'organization') {
+        return true;
+    }
+
+    return (
+        (period.value.period.startDate >= platform.value.period.startDate && !period.value.period.locked)
+        && (period.value.period.startDate > organization.value.period.period.startDate && !period.value.period.locked && (period.value.period.switchDate === null || period.value.period.switchDate < new Date()))
+    );
+});
+
 const allActions = computed(() => {
     const list: Action[] = [];
+
+    if (canSetDefaultPeriod.value) {
+        list.push({
+            icon: 'flag',
+            title: $t('%8R'),
+            action: () => {
+                // return startPeriod(newestPeriod.value);
+            },
+        });
+    }
 
     if (auth.hasFullAccess()) {
         // Checklist
