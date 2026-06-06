@@ -249,7 +249,7 @@ describe('calculateHungarianAlgorithm', () => {
 
             // Note: timeout here is for testing if the random matrix generated a real optimum using brute force techniques.
             // The algorithm itself should resolve in a much shorter time frame
-        }, 10_000);
+        }, 20_000);
 
         it('should handle larger matrices efficiently', () => {
             const size = 500;
