@@ -50,12 +50,12 @@ declare global {
          * Removed in v2
          */
         admin?: string;
-        
+
         /**
          * @deprecated
          * Removed in v2
          */
-        adminApi?: string,
+        adminApi?: string;
 
         // MX + SPF (both for email) + A record for webshops
         webshopCname?: string;
@@ -110,7 +110,7 @@ declare global {
         readonly DB_USER: string;
         readonly DB_PASS: string;
         readonly DB_DATABASE: string;
-        readonly DB_PORT: number;
+        readonly DB_PORT?: number;
         readonly DB_CONNECTION_LIMIT?: number;
 
         // E-mail
@@ -176,8 +176,8 @@ declare global {
 
         readonly CRONS_DISABLED?: boolean;
 
-         // RECOMMAND
-        readonly RECOMMAND_TEAM_ID?: string;        
+        // RECOMMAND
+        readonly RECOMMAND_TEAM_ID?: string;
         readonly RECOMMAND_COMPANY_ID?: string;
         readonly RECOMMAND_KEY?: string;
         readonly RECOMMAND_SECRET?: string;
