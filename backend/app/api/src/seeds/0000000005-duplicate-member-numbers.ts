@@ -85,25 +85,38 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
 
     const mergeBatchProcessor = SeedTools.createBatchProcessor({
         batchSize: 100,
-        action: async ([number, members]: [string, Member[]]) => {
-            if (members.length < 2) {
-                return;
+        action: async ([number, allDuplicateMembers]: [string, Member[]]) => {
+            const membersGroupedByOrganization = new Map<string, Member[]>();
+
+            for (const member of allDuplicateMembers) {
+                const array = membersGroupedByOrganization.get(member.organizationId ?? '');
+                if (array) {
+                    array.push(member);
+                } else {
+                    membersGroupedByOrganization.set(member.organizationId ?? '', [member]);
+                }
             }
 
-            const areSame = areSameMembers(members);
-            if (areSame) {
-                if (doLog) {
-                    console.log(`Merge duplicate member number: ${number} (memberIds: ${members.map(m => m.id).join(', ')})`);
-                }
-                if (!dryRun) {
-                    await mergeMultipleMembers(members);
-                }
-            } else {
-                if (doLog) {
-                    console.log('Duplicate member numbers are not the same: ' + members.map(m => m.details.name).join(', '));
+            for (const [orgganizationId, duplicateMembersWithinOrganization] of membersGroupedByOrganization.entries()) {
+                if (duplicateMembersWithinOrganization.length < 2) {
+                    continue;
                 }
 
-                await removeMemberNumbersOfNotRecentUpdatedMembers(members, { doLog, dryRun });
+                const areSame = areSameMembers(duplicateMembersWithinOrganization);
+                if (areSame) {
+                    if (doLog) {
+                        console.log(`Merge duplicate member number for organization ${orgganizationId}: ${number} (memberIds: ${duplicateMembersWithinOrganization.map(m => m.id).join(', ')})`);
+                    }
+                    if (!dryRun) {
+                        await mergeMultipleMembers(duplicateMembersWithinOrganization);
+                    }
+                } else {
+                    if (doLog) {
+                        console.log(`Duplicate member numbers are not the same for organization ${orgganizationId}: ` + duplicateMembersWithinOrganization.map(m => m.details.name).join(', '));
+                    }
+
+                    await removeMemberNumbersOfNotRecentUpdatedMembers(duplicateMembersWithinOrganization, { doLog, dryRun });
+                }
             }
         },
     });
@@ -200,7 +213,7 @@ function isValidNumber(value: string): boolean {
     const normalized = value.toString().toLowerCase();
 
     // all duplicate short numbers are assigned to multiple different members -> these cannot be valid
-    if (normalized.length < 4) {
+    if (!normalized.length) {
         return false;
     }
 
