@@ -5,7 +5,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
-import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, mergeTwoMembers, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
 import type { MemberResponsibility, MembersBlob } from '@stamhoofd/structures';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -23,6 +23,7 @@ import { MemberNumberService } from '../../../services/MemberNumberService.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate.js';
+import { mergeTwoMembers } from '../../../helpers/MemberMerger.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

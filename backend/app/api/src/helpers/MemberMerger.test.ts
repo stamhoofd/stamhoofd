@@ -16,7 +16,7 @@ import {
 } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
-import { Member } from '../models/index.js';
+import { Member } from '@stamhoofd/models';
 import { mergeMemberDetails, selectBaseMember } from './MemberMerger.js';
 
 describe('member merge', () => {

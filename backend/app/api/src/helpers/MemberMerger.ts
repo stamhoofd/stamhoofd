@@ -21,7 +21,7 @@ import {
     MergedMember,
     Registration,
     User,
-} from '../models/index.js';
+} from '@stamhoofd/models';
 
 export async function mergeMultipleMembers(members: Member[]) {
     const { base, others } = selectBaseMember(members);
