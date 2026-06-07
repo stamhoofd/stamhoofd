@@ -22,6 +22,7 @@
     "stam": "exec node shared/cli/bin/stam.js",
     "stam-dev": "yarn --cwd shared/cli -s build && node shared/cli/bin/stam.js",
     "dev:build": "yarn -s build:shared && STAMHOOFD_ENV=stamhoofd lerna run dev:build",
+    "build:backend:apps": "lerna run build --scope=@stamhoofd/backend --scope=@stamhoofd/backend-renderer --scope=@stamhoofd/backend-backup --scope=@stamhoofd/backend-redirecter",
     "dev:watch-env": "yarn -s stam dev all",
     "dev:watch-env:full": "yarn -s stam dev all",
     "dev": "yarn -s stam dev all",
