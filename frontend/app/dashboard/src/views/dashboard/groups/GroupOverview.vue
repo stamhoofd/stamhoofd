@@ -252,7 +252,7 @@ import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, PlatformEventType, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
-import { EmailTemplateType, Event, EventMeta, GroupStatus, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { countAll, RegistrationInvitationsTableView, useRegistrationInvitationEventListener } from '@stamhoofd/components';
@@ -756,6 +756,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         meta: EventMeta.create({
             visible: true,
             description: descriptionToRichtText(group.settings.description),
+            location: group.settings.location ? EventLocation.create({ name: group.settings.location }) : null,
             groups: groupNamedObjects.length === 0 ? undefined : groupNamedObjects,
             coverPhoto: group.settings.coverPhoto,
             minAge: group.settings.minAge,
