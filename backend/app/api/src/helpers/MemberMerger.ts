@@ -1,3 +1,13 @@
+import {
+    BalanceItem,
+    Document,
+    Member,
+    MemberPlatformMembership,
+    MemberResponsibilityRecord,
+    MergedMember,
+    Registration,
+    User,
+} from '@stamhoofd/models';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type {
     Address,
@@ -12,17 +22,9 @@ import {
     ParentType,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import {
-    BalanceItem,
-    Document,
-    Member,
-    MemberPlatformMembership,
-    MemberResponsibilityRecord,
-    MergedMember,
-    Registration,
-    User,
-} from '@stamhoofd/models';
+import { PlatformMembershipService } from '../services/PlatformMembershipService.js';
 import { RegistrationService } from '../services/RegistrationService.js';
+import { MemberUserSyncer } from './MemberUserSyncer.js';
 
 export async function mergeMultipleMembers(members: Member[]) {
     const { base, others } = selectBaseMember(members);
@@ -95,6 +97,10 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
 
         await other.delete();
     }
+
+    await MemberUserSyncer.onChangeMember(base);
+    await PlatformMembershipService.updateMembershipsForId(base.id);
+    await Document.updateForMember(base);
 }
 
 async function mergeRegistrations(base: Member, other: Member) {
