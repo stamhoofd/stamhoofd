@@ -26,5 +26,6 @@ const root = new ComponentWithProperties(VerifyEmailView, {
     code,
     email,
 });
+root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
 
 </script>
