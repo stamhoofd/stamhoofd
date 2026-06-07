@@ -80,24 +80,24 @@ class BatchProcessor<T> {
     }
 
     async execute(item: T): Promise<void> {
-        if (this.currentBatch.length === this.batchSize) {
+        if (this.currentBatch.length >= this.batchSize) {
             await this.finishCurrentBatch();
         }
 
-        if (this.currentBatch.length < this.batchSize) {
-            this.currentBatch.push(this.action(item));
-        }
+        this.currentBatch.push(this.action(item));
     }
 
     private async finishCurrentBatch() {
+        const batch = this.currentBatch;
+        this.currentBatch = [];
+
         if (this.useTransactionPerBatch) {
             await Database.beginTransaction(async () => {
-                await allSettledButThrowFirst(this.currentBatch);
+                await allSettledButThrowFirst(batch);
             });
         } else {
-            await allSettledButThrowFirst(this.currentBatch);
+            await allSettledButThrowFirst(batch);
         }
-        this.currentBatch = [];
     }
 
     async finish(): Promise<void> {
