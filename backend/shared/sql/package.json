@@ -15,10 +15,10 @@
         "lint": "eslint"
     },
     "peerDependencies": {
-        "@simonbackx/simple-database": "1.36.12"
+        "@simonbackx/simple-database": "1.37.1"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.36.12"
+        "@simonbackx/simple-database": "1.37.1"
     },
     "publishConfig": {
         "access": "public"
