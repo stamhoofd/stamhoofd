@@ -1,15 +1,21 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Webshop } from '@stamhoofd/models';
-import { LoggingTools } from '@stamhoofd/utility';
+import { SeedTools } from '../helpers/SeedTools.js';
 
-export async function startRecordsConfigurationMigration() {
-    const webshopProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Webshop.select());
+export async function startWebshopRecordsConfigurationMigration() {
+    let realSave = 0;
 
-    // migrate recordsConfiguration of webshops
-    for await (const webshop of Webshop.select().limit(100).all()) {
-        await webshop.save();
-        webshopProgressLogger.update();
-    }
+    const result = await SeedTools.loop({
+        batchSize: 100,
+        query: Webshop.select(),
+        useTransactionPerBatch: true,
+        action: async (webshop: Webshop) => {
+            if (await webshop.save()) {
+                realSave += 1;
+            }
+        },
+    });
+    console.log('Succesfully fetched and saved ' + realSave + ' webshops of ' + result.total + ' looped webshops');
 }
 
 export default new Migration(async () => {
@@ -23,5 +29,5 @@ export default new Migration(async () => {
         return;
     }
 
-    await startRecordsConfigurationMigration();
+    await startWebshopRecordsConfigurationMigration();
 });
