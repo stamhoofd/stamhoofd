@@ -1,6 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Order } from '@stamhoofd/models';
-import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
@@ -9,23 +8,20 @@ export default new Migration(async () => {
         return;
     }
 
+    if (STAMHOOFD.platformName !== 'stamhoofd') {
+        // Already ran, or not required for new servers
+        return;
+    }
+
     console.log('Start saving orders.');
 
-    const batchProcessor = SeedTools.createBatchProcessor({
-        batchSize: 100,
+    const result = await SeedTools.loop({
+        query: Order.select(),
+        batchSize: 200,
         action: async (order: Order) => {
             await order.save();
         },
     });
 
-    const ordersProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Order.select(), { tag: 'Update-orders' });
-    batchProcessor.setProgressLogger(ordersProgressLogger);
-
-    for await (const order of Order.select().limit(150).all()) {
-        await batchProcessor.execute(order);
-    }
-
-    await batchProcessor.finish();
-
-    console.log('Finished saving ' + ordersProgressLogger.total + ' orders.');
+    console.log('Finished saving ' + result.total + ' orders.');
 });
