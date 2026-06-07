@@ -22,6 +22,7 @@ import {
     Registration,
     User,
 } from '@stamhoofd/models';
+import { RegistrationService } from '../services/RegistrationService.js';
 
 export async function mergeMultipleMembers(members: Member[]) {
     const { base, others } = selectBaseMember(members);
@@ -215,6 +216,7 @@ async function mergeModels<M extends typeof ModelWithMemberId>(
 
     for (const otherModel of otherModels) {
         otherModel.memberId = baseId;
+
         if (otherModel instanceof Document) {
             await otherModel.save({
                 forceSave: true,
@@ -226,6 +228,10 @@ async function mergeModels<M extends typeof ModelWithMemberId>(
                 skipMarkSaved: true,
                 skipSendEvents: true,
             });
+        }
+
+        if (otherModel instanceof Registration) {
+            await RegistrationService.scheduleStockUpdateAsync(otherModel.id);
         }
     }
 }
