@@ -4,8 +4,7 @@ import { maildevInternalHttpPort, maildevInternalSmtpPort, mysqlInternalPort, ru
 export function buildPorts(context: CliContext) {
     const offset = context.instance.portOffset;
     return {
-        dashboard: 8080 + offset,
-        registration: 8081 + offset,
+        webApp: 8080 + offset,
         webshop: 8082 + offset,
         api: 9091 + offset,
         renderer: 9093 + offset,

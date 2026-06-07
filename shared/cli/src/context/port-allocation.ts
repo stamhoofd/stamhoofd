@@ -6,15 +6,14 @@ const portResolutionStep = 100;
 const maxResolutionAttempts = 100;
 
 enum AppPortName {
-    Dashboard = 'dashboard',
-    Registration = 'registration',
+    WebApp = 'webApp',
     Webshop = 'webshop',
     Api = 'api',
     Renderer = 'renderer',
     Sso = 'sso',
 }
 
-const appPortNames: AppPortName[] = [AppPortName.Dashboard, AppPortName.Registration, AppPortName.Webshop, AppPortName.Api, AppPortName.Renderer, AppPortName.Sso];
+const appPortNames: AppPortName[] = [AppPortName.WebApp, AppPortName.Webshop, AppPortName.Api, AppPortName.Renderer, AppPortName.Sso];
 
 export async function resolvePortOffset(context: CliContext): Promise<CliContext> {
     if (process.env.STAMHOOFD_PORT_OFFSET_LOCKED === '1') {
@@ -64,7 +63,7 @@ async function appPortsAvailable(context: CliContext): Promise<boolean> {
 
 async function occupiedAppPorts(context: CliContext): Promise<Array<{ name: AppPortName; port: number }>> {
     const ports = buildPorts(context);
-    const results = await Promise.all(appPortNames.map(async (name) => ({
+    const results = await Promise.all(appPortNames.map(async name => ({
         name,
         port: ports[name],
         available: await isPortAvailable(ports[name]),
@@ -76,7 +75,7 @@ async function occupiedAppPorts(context: CliContext): Promise<Array<{ name: AppP
 }
 
 async function isPortAvailable(port: number): Promise<boolean> {
-    return await new Promise(resolve => {
+    return await new Promise((resolve) => {
         const server = net.createServer();
 
         server.once('error', (error: NodeJS.ErrnoException) => {

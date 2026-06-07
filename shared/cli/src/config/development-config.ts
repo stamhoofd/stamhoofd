@@ -17,11 +17,10 @@ export enum BackendApp {
 }
 
 export enum FrontendApp {
-    Dashboard = 'dashboard',
-    Registration = 'registration',
     Webshop = 'webshop',
     Calculator = 'calculator',
     Mobile = 'mobile',
+    WebApp = 'web-app',
 }
 
 export type BackendAppName = `${BackendApp}`;
@@ -190,11 +189,8 @@ function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType
     // Keep the public API string-compatible while using enum values internally for comparisons.
     const app = service as FrontendApp;
 
-    if (app === FrontendApp.Dashboard) {
-        return ports.dashboard;
-    }
-    if (app === FrontendApp.Registration) {
-        return ports.registration;
+    if (app === FrontendApp.WebApp) {
+        return ports.webApp;
     }
     if (app === FrontendApp.Webshop) {
         return ports.webshop;
