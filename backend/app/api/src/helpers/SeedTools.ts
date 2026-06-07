@@ -32,6 +32,10 @@ export class SeedTools {
             await batchProcessor.execute(item as T);
         }
         await batchProcessor.finish();
+
+        return {
+            total: progressLogger.total,
+        };
     }
 }
 
