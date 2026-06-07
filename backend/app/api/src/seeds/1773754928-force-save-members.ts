@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member } from '@stamhoofd/models';
 import { SeedTools } from '../helpers/SeedTools.js';
+import { QueryableModel } from '@stamhoofd/sql';
 
 export default new Migration(async () => {
     process.stdout.write('\n');
@@ -24,6 +25,10 @@ async function migrateMembers() {
                 skipSendEvents: true,
             })) {
                 realUpdate += 1;
+            }
+
+            if (QueryableModel.shutdownMigrations) {
+                throw new Error('Stopping migration gracefully');
             }
         },
     });
