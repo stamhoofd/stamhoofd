@@ -49,8 +49,10 @@ export class OldOrganization extends QueryableModel {
 }
 
 export async function startRecordsConfigurationMigration() {
-    const batchProcessor = SeedTools.createBatchProcessor({
+    await SeedTools.loop({
         batchSize: 100,
+        query: OldOrganization.select().where(SQL.jsonValue(SQL.column('meta'), '$.version'), '<', Version),
+        useTransactionPerBatch: true,
         action: async (oldOrganization: OldOrganization) => {
             const oldFinancialSupport = oldOrganization.meta.recordsConfiguration.financialSupport;
             const oldDataPermission = oldOrganization.meta.recordsConfiguration.dataPermission;
@@ -69,20 +71,6 @@ export async function startRecordsConfigurationMigration() {
             }
         },
     });
-
-    const createOldOrganizationsQuery = () => OldOrganization.select()
-    // prevent migrating same organizations twice if something goes wrong
-        .where(SQL.jsonValue(SQL.column('meta'), '$.version'), '<', Version);
-
-    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(createOldOrganizationsQuery());
-    batchProcessor.setProgressLogger(progressLogger);
-
-    // migrate recordsConfiguration of organizations
-    for await (const oldOrganization of createOldOrganizationsQuery().all()) {
-        await batchProcessor.execute(oldOrganization);
-    }
-
-    await batchProcessor.finish();
 
     const webshopProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Webshop.select());
 
