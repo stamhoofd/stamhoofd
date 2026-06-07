@@ -1,6 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Registration } from '@stamhoofd/models';
-import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 import { RegistrationService } from '../services/RegistrationService.js';
 
@@ -15,19 +14,13 @@ export default new Migration(async () => {
         return;
     }
 
-    const batchProcessor = SeedTools.createBatchProcessor({
+    const result = await SeedTools.loop({
+        query: Registration.select(),
         batchSize: 100,
         action: async (registration: Registration) => {
             await RegistrationService.scheduleStockUpdateAsync(registration.id);
         },
     });
 
-    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(Registration.select());
-    batchProcessor.setProgressLogger(progressLogger);
-
-    for await (const registration of Registration.select().all()) {
-        await batchProcessor.execute(registration);
-    }
-
-    await batchProcessor.finish();
+    console.log('Looped ' + result.total + ' registrations');
 });
