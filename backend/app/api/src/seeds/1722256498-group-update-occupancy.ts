@@ -15,7 +15,8 @@ export default new Migration(async () => {
 
     await SeedTools.loop<Group>({
         query: Group.select(),
-        batchSize: 50,
+        useTransactionPerBatch: true,
+        batchSize: 200,
         action: async (group) => {
             await group.updateOccupancy();
             await group.save();

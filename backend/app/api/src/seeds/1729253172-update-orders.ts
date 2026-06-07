@@ -17,7 +17,8 @@ export default new Migration(async () => {
 
     const result = await SeedTools.loop({
         query: Order.select(),
-        batchSize: 200,
+        batchSize: 1000,
+        useTransactionPerBatch: true,
         action: async (order: Order) => {
             await order.save();
         },
