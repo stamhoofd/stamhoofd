@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-networking';
-import type { SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, LimitedFilteredRequest, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';
 import type { ObjectFetcher } from './ObjectFetcher';
@@ -41,9 +41,9 @@ export class TableObjectFetcher<O extends { id: string }> {
     fetchingData = false;
     delayFetchUntil: Date | null = null;
 
-    limit = STAMHOOFD.environment === 'development' ? 1 : 100; // To help catch bugs in pagination
+    limit = STAMHOOFD.environment === 'development' ? 100 : 100; // To help catch bugs in pagination
     maxLimit = 100;
-    minimumLimit = STAMHOOFD.environment === 'development' ? 1 : 10; // To help catch bugs in pagination
+    minimumLimit = STAMHOOFD.environment === 'development' ? 10 : 10; // To help catch bugs in pagination
     sort: SortList = [];
 
     retryTimer: NodeJS.Timeout | null = null;
@@ -169,8 +169,7 @@ export class TableObjectFetcher<O extends { id: string }> {
         if (this.searchQuery || query) {
             // force debounce for search queries
             this.delayFetchUntil = new Date(new Date().getTime() + 500);
-        }
-        else {
+        } else {
             // Shorter debounce
             this.delayFetchUntil = new Date(new Date().getTime() + 100);
         }
@@ -363,14 +362,12 @@ export class TableObjectFetcher<O extends { id: string }> {
                 console.info('Stopped fetching');
                 this.fetchingData = false;
                 this.fetchIfNeeded().catch(console.error);
-            }
-            else {
+            } else {
                 console.info('Stopped fetching');
                 this.fetchingData = false;
                 console.log('No fetch required.', this.objects.length, '/', this.totalFilteredCount);
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (currentClearIndex === this._clearIndex) {
                 console.error('Stopped fetching due to error');
                 console.error(e);
