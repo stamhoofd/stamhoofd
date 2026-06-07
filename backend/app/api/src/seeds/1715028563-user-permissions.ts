@@ -13,7 +13,7 @@ export default new Migration(async () => {
     let realUpdate = 0;
 
     const result = await SeedTools.loop({
-        batchSize: 100,
+        batchSize: 1000,
         query: User.select().whereNot('organizationPermissions', null).whereNot('organizationId', null),
         useTransactionPerBatch: true,
         action: async (admin: User) => {
