@@ -163,7 +163,7 @@ async function migrateNumbersOfOrganization(organization: Organization, dryRun: 
 }
 
 function getType(record: RecordSettings, doLog: boolean): RrnTypes {
-    const name = record.name.toString().toLowerCase();
+    const name = Formatter.slug(record.name.toString()).replaceAll('-', '');
 
     if (['papa', 'vader'].some(x => name.includes(x))) {
         return RrnTypes.Father;
@@ -173,15 +173,15 @@ function getType(record: RecordSettings, doLog: boolean): RrnTypes {
         return RrnTypes.Mother;
     }
 
-    if (['ouder 1', 'parent 1', 'parent1', 'voogd 1'].some(x => name.includes(x))) {
+    if (['ouder1', 'parent1', 'voogd1'].some(x => name.includes(x))) {
         return RrnTypes.Parent1;
     }
 
-    if (['ouder 2', 'parent 2', 'parent2', 'voogd 2', 'tweede ouder'].some(x => name.includes(x))) {
+    if (['ouder2', 'parent2', 'parent2', 'voogd2', 'tweedeouder'].some(x => name.includes(x))) {
         return RrnTypes.Parent2;
     }
 
-    if (['kind', 'lid', 'dochter', 'zoon', 'kampdeelnemer', "ksa'er"].some(x => name.includes(x))) {
+    if (['kind', 'lid', 'dochter', 'zoon', 'kampdeelnemer', 'ksaer'].some(x => name.includes(x))) {
         return RrnTypes.Member;
     }
 
