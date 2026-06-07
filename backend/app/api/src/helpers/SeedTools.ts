@@ -1,13 +1,12 @@
 import { Database } from '@simonbackx/simple-database';
 import type { SQLSelect } from '@stamhoofd/sql';
-import { QueryableModel } from '@stamhoofd/sql';
 import type { ProgressLogger } from '@stamhoofd/utility';
 import { LoggingTools } from '@stamhoofd/utility';
 
 /**
  * If an error is thrown, first await all pending items before throwing, otherwise we risk quiting mid running actions
  */
-function allSettledButThrowFirst<T>(promises: Promise<T>[]): Promise<T[]> {
+export function allSettledButThrowFirst<T>(promises: Promise<T>[]): Promise<T[]> {
     return Promise.allSettled(promises).then((results) => {
         return results.map((r) => {
             if (r.status === 'fulfilled') {
