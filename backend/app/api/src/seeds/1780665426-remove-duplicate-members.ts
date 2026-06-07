@@ -23,6 +23,11 @@ export default new Migration(async () => {
         return;
     }
 
+    if (STAMHOOFD.platformName.toLowerCase() !== 'stamhoofd') {
+        console.log('skipped for platform (already ran): ' + STAMHOOFD.platformName);
+        return;
+    }
+
     const q = new SQLSelect(
         (row: SQLResultNamespacedRow): MergeType => {
             return {
