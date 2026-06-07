@@ -881,7 +881,7 @@ function getFilterType(filter: Filter): FilterType {
 
 function groupFilterHelper(mode: 'Or' | 'And' | 'Nand' | 'Nor', filters: StamhoofdFilter[]): StamhoofdFilter {
     if (filters.length === 0) {
-        console.error('filterGroupToStamhoofdFilter: no filters');
+        // console.error('filterGroupToStamhoofdFilter: no filters');
         return null;
     }
 
