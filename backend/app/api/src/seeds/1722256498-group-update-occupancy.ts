@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group } from '@stamhoofd/models';
+import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {
@@ -12,40 +13,14 @@ export default new Migration(async () => {
         return;
     }
 
-    process.stdout.write('\n');
-    let c = 0;
-    let id: string = '';
-
-    while (true) {
-        const rawGroups = await Group.where({
-            id: {
-                value: id,
-                sign: '>',
-            },
-        }, { limit: 100, sort: ['id'] });
-
-        const groups = await Group.getByIDs(...rawGroups.map(g => g.id));
-
-        for (const group of groups) {
+    await SeedTools.loop<Group>({
+        query: Group.select(),
+        batchSize: 50,
+        action: async (group) => {
             await group.updateOccupancy();
             await group.save();
-
-            c++;
-
-            if (c % 1000 === 0) {
-                process.stdout.write('.');
-            }
-            if (c % 10000 === 0) {
-                process.stdout.write('\n');
-            }
         }
-
-        if (groups.length === 0) {
-            break;
-        }
-
-        id = groups[groups.length - 1].id;
-    }
+    })
 
     // Do something here
     return Promise.resolve();
