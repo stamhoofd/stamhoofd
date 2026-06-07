@@ -10,7 +10,10 @@ export async function startWebshopRecordsConfigurationMigration() {
         query: Webshop.select(),
         useTransactionPerBatch: true,
         action: async (webshop: Webshop) => {
-            if (await webshop.save()) {
+            if (await webshop.save({
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            })) {
                 realSave += 1;
             }
         },

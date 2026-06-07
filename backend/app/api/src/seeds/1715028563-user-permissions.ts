@@ -23,7 +23,10 @@ export default new Migration(async () => {
             p.organizationPermissions.set(admin.organizationId, admin.organizationPermissions);
             admin.permissions = UserPermissions.limitedAdd(admin.permissions, p, admin.organizationId);
             admin.organizationPermissions = null;
-            await admin.save();
+            await admin.save({
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            });
         },
     });
 

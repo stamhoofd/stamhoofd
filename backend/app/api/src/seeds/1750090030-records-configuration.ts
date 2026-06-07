@@ -67,7 +67,10 @@ export async function startRecordsConfigurationMigration() {
                 newOrganization.meta.financialSupport = oldFinancialSupport;
                 newOrganization.meta.dataPermission = oldDataPermission;
 
-                await newOrganization.save();
+                await newOrganization.save({
+                    skipMarkSaved: true,
+                    skipSendEvents: true,
+                });
             }
         },
     });

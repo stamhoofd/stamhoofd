@@ -19,7 +19,10 @@ export default new Migration(async () => {
         batchSize: 200,
         action: async (group) => {
             await group.updateOccupancy();
-            await group.save();
+            await group.save({
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            });
         },
     });
 

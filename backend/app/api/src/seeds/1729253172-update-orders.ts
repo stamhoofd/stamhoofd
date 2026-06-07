@@ -20,7 +20,10 @@ export default new Migration(async () => {
         batchSize: 1000,
         useTransactionPerBatch: true,
         action: async (order: Order) => {
-            await order.save();
+            await order.save({
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            });
         },
     });
 
