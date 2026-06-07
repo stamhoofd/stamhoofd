@@ -10,8 +10,10 @@ import { SQLLogger } from '@stamhoofd/sql';
 import { ContextInstance } from './helpers/Context.js';
 
 export function loadDebugFunctions({ routerServer }: { routerServer: RouterServer }) {
-    SQLLogger.slowQueryThresholdMs = 75;
-    SQLLogger.explainAllAndLogInefficient = true;
+    if (process.env.LOG_SLOW_QUERIES) {
+        SQLLogger.slowQueryThresholdMs = 75;
+        SQLLogger.explainAllAndLogInefficient = true;
+    }
 
     if (process.env.LOG_REQUEST_QUERIES) {
         loadRequestQueries({ routerServer });
