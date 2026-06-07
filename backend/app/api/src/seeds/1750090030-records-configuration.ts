@@ -49,7 +49,7 @@ export class OldOrganization extends QueryableModel {
 }
 
 export async function startRecordsConfigurationMigration() {
-    await SeedTools.loop({
+    const result = await SeedTools.loop({
         batchSize: 100,
         query: OldOrganization.select().where(SQL.jsonValue(SQL.column('meta'), '$.version'), '<', Version),
         useTransactionPerBatch: true,
@@ -71,6 +71,8 @@ export async function startRecordsConfigurationMigration() {
             }
         },
     });
+
+    console.log('Succesfully migrated financialSupport and dataPermissions for ' + result.total + ' organizations');
 }
 
 export default new Migration(async () => {
