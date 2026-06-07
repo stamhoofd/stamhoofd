@@ -5,7 +5,7 @@ import type {
     MemberDetails,
     Parent,
     RecordAnswer,
-    UitpasNumberDetails
+    UitpasNumberDetails,
 } from '@stamhoofd/structures';
 import {
     Gender,
@@ -216,9 +216,16 @@ async function mergeModels<M extends typeof ModelWithMemberId>(
     for (const otherModel of otherModels) {
         otherModel.memberId = baseId;
         if (otherModel instanceof Document) {
-            await otherModel.save(true);
+            await otherModel.save({
+                forceSave: true,
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            });
         } else {
-            await otherModel.save();
+            await otherModel.save({
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            });
         }
     }
 }

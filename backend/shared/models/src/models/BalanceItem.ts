@@ -5,9 +5,9 @@ import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { Payment } from './Payment.js';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -557,7 +557,7 @@ export class BalanceItem extends QueryableModel {
         await Database.update(query, params);
     }
 
-        /**
+    /**
      * Update the outstanding balance of multiple members in one go (or all members)
      */
     static async updateInvoiced(balanceItemIds: string[] | 'all') {
@@ -677,7 +677,7 @@ export class BalanceItem extends QueryableModel {
             .whereNot('status', BalanceItemStatus.Hidden);
 
         if (organizationId) {
-            base.andWhere('organizationId', organizationId)
+            base.andWhere('organizationId', organizationId);
         }
 
         if (memberIds.length && userIds.length) {
@@ -685,20 +685,20 @@ export class BalanceItem extends QueryableModel {
             base.andWhere(
                 SQL.where('memberId', memberIds)
                 // Include null member
-                .or(
+                    .or(
                     // Don't include balances of other members, even when userId matches
                     // this allows removing access for a member
-                    SQL.where('userId', userIds)
-                    .and('memberId', null)
-                )
-            )
+                        SQL.where('userId', userIds)
+                            .and('memberId', null),
+                    ),
+            );
         } else if (memberIds.length) {
-            base.andWhere('memberId', memberIds)
+            base.andWhere('memberId', memberIds);
         } else if (userIds.length) {
-            base.andWhere('userId', userIds)
+            base.andWhere('userId', userIds);
         }
 
-        base.andWhere('priceOpen', '!=', 0)
+        base.andWhere('priceOpen', '!=', 0);
 
         return await base.fetch();
     }
@@ -709,20 +709,20 @@ export class BalanceItem extends QueryableModel {
             .whereNot('status', BalanceItemStatus.Hidden);
 
         if (organizationId) {
-            base.where('organizationId', organizationId)
+            base.where('organizationId', organizationId);
         }
 
         return await base.fetch();
     }
 
-    override save(): Promise<boolean> {
+    override save(...args: Parameters<QueryableModel['save']>): Promise<boolean> {
         if (this.unitPrice % 100 !== 0) {
             throw new SimpleError({
                 statusCode: 500,
                 code: 'unrounded_balance_item',
-                message: 'Balance item unitPrices should be rounded up to 1 cent'
-            })
+                message: 'Balance item unitPrices should be rounded up to 1 cent',
+            });
         }
-        return super.save()
+        return super.save(...args);
     }
 }

@@ -1,3 +1,4 @@
+import { Database } from '@simonbackx/simple-database';
 import type { SQLSelect } from '@stamhoofd/sql';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { ProgressLogger } from '@stamhoofd/utility';
@@ -37,10 +38,24 @@ export class SeedTools {
             total: progressLogger.total,
         };
     }
+
+    static async loopBatched<T extends { id: string }>(options: { batchSize: number; batchAction: (items: T[]) => Promise<void>; query: SQLSelect<T> }) {
+        const progressLogger = await LoggingTools.createProgressLoggerFromQuery(options.query.clone());
+
+        for await (const batch of options.query.limit(options.batchSize).allBatched()) {
+            await options.batchAction(batch as T[]);
+            progressLogger.update(batch.length);
+        }
+
+        return {
+            total: progressLogger.total,
+        };
+    }
 }
 
 type BatchProcessorArgs<T> = {
     batchSize: number;
+    useTransactionPerBatch?: boolean;
     action: (item: T) => Promise<void>;
 };
 
@@ -49,11 +64,13 @@ class BatchProcessor<T> {
     private readonly batchSize: number;
     private readonly originalAction: (item: T) => Promise<void>;
     private action: (item: T) => Promise<void>;
+    private readonly useTransactionPerBatch: boolean;
 
-    constructor({ batchSize, action }: BatchProcessorArgs<T>) {
+    constructor({ batchSize, action, useTransactionPerBatch }: BatchProcessorArgs<T>) {
         this.batchSize = batchSize;
         this.originalAction = action;
         this.action = action;
+        this.useTransactionPerBatch = useTransactionPerBatch ?? false;
     }
 
     setProgressLogger(progressLogger: ProgressLogger) {
@@ -74,7 +91,13 @@ class BatchProcessor<T> {
     }
 
     private async finishCurrentBatch() {
-        await allSettledButThrowFirst(this.currentBatch);
+        if (this.useTransactionPerBatch) {
+            await Database.beginTransaction(async () => {
+                await allSettledButThrowFirst(this.currentBatch);
+            });
+        } else {
+            await allSettledButThrowFirst(this.currentBatch);
+        }
         this.currentBatch = [];
     }
 

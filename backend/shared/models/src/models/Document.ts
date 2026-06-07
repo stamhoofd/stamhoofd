@@ -67,8 +67,8 @@ export class Document extends QueryableModel {
     })
     updatedAt: Date;
 
-    override save(forceSave = false): Promise<boolean> {
-        if (!forceSave && this.isLocked) {
+    override save(options?: Parameters<QueryableModel['save']>[0] & { forceSave?: boolean }): Promise<boolean> {
+        if (!options?.forceSave && this.isLocked) {
             throw new SimpleError({
                 code: 'locked',
                 message: 'Document is locked',
@@ -76,7 +76,7 @@ export class Document extends QueryableModel {
             });
         }
 
-        return super.save();
+        return super.save(options);
     }
 
     getStructure() {

@@ -47,7 +47,11 @@ export async function migrateDocumentYears() {
             }
 
             document.year = year;
-            await document.save(true);
+            await document.save({
+                forceSave: true,
+                skipMarkSaved: true,
+                skipSendEvents: true,
+            });
         }
 
         progressLogger.update();

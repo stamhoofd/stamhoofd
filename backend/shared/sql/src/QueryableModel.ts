@@ -143,11 +143,11 @@ export class QueryableModel extends Model {
     }
 
     #disableSave = false;
-    override save() {
+    override save(...args: Parameters<Model['save']>) {
         if (this.#disableSave) {
             throw new Error('Saving is not allowed for this payment');
         }
 
-        return super.save();
+        return super.save(...args);
     }
 }
