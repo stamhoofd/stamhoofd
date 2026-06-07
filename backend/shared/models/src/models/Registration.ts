@@ -166,6 +166,6 @@ export class Registration extends QueryableModel {
     }
 
     shouldIncludeStock() {
-        return (this.registeredAt !== null && this.deactivatedAt === null) || this.canRegister || (this.reservedUntil && this.reservedUntil > new Date());
+        return (this.registeredAt !== null && this.deactivatedAt === null) || (this.reservedUntil && this.reservedUntil > new Date());
     }
 }

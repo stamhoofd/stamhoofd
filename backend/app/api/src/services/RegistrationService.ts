@@ -287,6 +287,58 @@ export const RegistrationService = {
         this.scheduleStockUpdateAsync(id);
     },
 
+    /**
+     * Avoid calling this method directly. This can cause race conditions.
+     */
+    async unsafeStockUpdate(updated: Registration) {
+        // Start with clearing all the stock reservations we've already made
+        if (updated.stockReservations) {
+            const groupIds = Formatter.uniqueArray(updated.stockReservations.flatMap(r => r.objectType === 'Group' ? [r.objectId] : []));
+            for (const groupId of groupIds) {
+                const stocks = StockReservation.filter('Group', groupId, updated.stockReservations);
+
+                // Technically we don't need to await this, but okay...
+                await Group.freeStockReservations(groupId, stocks);
+            }
+        }
+
+        if (updated.shouldIncludeStock()) {
+            const groupStockReservations: StockReservation[] = [
+            // Group level stock reservations (stored in the group)
+                StockReservation.create({
+                    objectId: updated.groupPrice.id,
+                    objectType: 'GroupPrice',
+                    amount: 1,
+                }),
+                ...updated.options.map((o) => {
+                    return StockReservation.create({
+                        objectId: o.option.id,
+                        objectType: 'GroupOption',
+                        amount: o.amount,
+                    });
+                }),
+            ];
+
+            await Group.applyStockReservations(updated.groupId, groupStockReservations);
+
+            updated.stockReservations = [
+            // Global level stock reservations (stored in each group)
+                StockReservation.create({
+                    objectId: updated.groupId,
+                    objectType: 'Group',
+                    amount: 1,
+                    children: groupStockReservations,
+                }),
+            ];
+            await updated.save();
+        } else {
+            if (updated.stockReservations.length) {
+                updated.stockReservations = [];
+                await updated.save();
+            }
+        }
+    },
+
     async scheduleStockUpdateAsync(id: string) {
         QueueHandler.cancel('registration-stock-update-' + id);
 
@@ -298,52 +350,7 @@ export const RegistrationService = {
                     return;
                 }
 
-                // Start with clearing all the stock reservations we've already made
-                if (updated.stockReservations) {
-                    const groupIds = Formatter.uniqueArray(updated.stockReservations.flatMap(r => r.objectType === 'Group' ? [r.objectId] : []));
-                    for (const groupId of groupIds) {
-                        const stocks = StockReservation.filter('Group', groupId, updated.stockReservations);
-
-                        // Technically we don't need to await this, but okay...
-                        await Group.freeStockReservations(groupId, stocks);
-                    }
-                }
-
-                if (updated.shouldIncludeStock()) {
-                    const groupStockReservations: StockReservation[] = [
-                    // Group level stock reservations (stored in the group)
-                        StockReservation.create({
-                            objectId: updated.groupPrice.id,
-                            objectType: 'GroupPrice',
-                            amount: 1,
-                        }),
-                        ...updated.options.map((o) => {
-                            return StockReservation.create({
-                                objectId: o.option.id,
-                                objectType: 'GroupOption',
-                                amount: o.amount,
-                            });
-                        }),
-                    ];
-
-                    await Group.applyStockReservations(updated.groupId, groupStockReservations);
-
-                    updated.stockReservations = [
-                    // Global level stock reservations (stored in each group)
-                        StockReservation.create({
-                            objectId: updated.groupId,
-                            objectType: 'Group',
-                            amount: 1,
-                            children: groupStockReservations,
-                        }),
-                    ];
-                    await updated.save();
-                } else {
-                    if (updated.stockReservations.length) {
-                        updated.stockReservations = [];
-                        await updated.save();
-                    }
-                }
+                await RegistrationService.unsafeStockUpdate(updated);
             });
         }).catch(console.error);
     },

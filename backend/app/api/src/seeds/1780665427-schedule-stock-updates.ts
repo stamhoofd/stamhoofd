@@ -16,11 +16,11 @@ export default new Migration(async () => {
     }
 
     const result = await SeedTools.loop({
-        query: Registration.select('id'),
-        batchSize: 1000,
+        query: Registration.select(),
+        batchSize: 10_000,
         // dot not use transactions here: this breaks the stock behaviour
         action: async (registration: Registration) => {
-            await RegistrationService.scheduleStockUpdateAsync(registration.id);
+            await RegistrationService.unsafeStockUpdate(registration);
 
             if (QueryableModel.shutdownMigrations) {
                 throw new Error('Stopping migration gracefully');
