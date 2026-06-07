@@ -19,8 +19,8 @@ export default new Migration(async () => {
         action: async (group) => {
             await group.updateOccupancy();
             await group.save();
-        }
-    })
+        },
+    });
 
     // Do something here
     return Promise.resolve();
