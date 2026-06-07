@@ -71,14 +71,6 @@ export async function startRecordsConfigurationMigration() {
             }
         },
     });
-
-    const webshopProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Webshop.select());
-
-    // migrate recordsConfiguration of webshops
-    for await (const webshop of Webshop.select().limit(100).all()) {
-        await webshop.save();
-        webshopProgressLogger.update();
-    }
 }
 
 export default new Migration(async () => {
