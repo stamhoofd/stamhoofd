@@ -1,5 +1,7 @@
 <template>
-    <ComponentWithPropertiesInstance :component="root" />
+    <div data-testid="app-root-verify-email" style="display: contents">
+        <ComponentWithPropertiesInstance :component="root" />
+    </div>
 </template>
 
 <script lang="ts" setup>

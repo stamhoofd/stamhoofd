@@ -13,7 +13,7 @@
                         <template #left>
                             <ContextLogo :organization="option.organization" :app="option.app" />
                         </template>
-                        <h1 class="style-title-list">
+                        <h1 class="style-title-list" :data-testid="'app-option-' + option.id">
                             {{ getAppTitle(option.app, option.organization) }}
                         </h1>
                         <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
@@ -37,7 +37,7 @@
                     <template #left>
                         <ContextLogo :organization="option.organization" :app="option.app" />
                     </template>
-                    <h1 class="style-title-list">
+                    <h1 class="style-title-list" :data-testid="'app-option-' + option.id">
                         {{ getAppTitle(option.app, option.organization) }}
                     </h1>
                     <p v-if="getAppDescription(option.app, option.organization)" class="style-description">

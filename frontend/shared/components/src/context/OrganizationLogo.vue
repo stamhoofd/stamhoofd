@@ -1,5 +1,5 @@
 <template>
-    <MetaLogo :meta-data="metaData" :name="name" />
+    <span data-testid="org-logo" style="display: contents"><MetaLogo :meta-data="metaData" :name="name" /></span>
 </template>
 
 <script lang="ts">
