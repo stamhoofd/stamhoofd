@@ -27,7 +27,7 @@
                 {{ $t('%KY') }}
             </p>
 
-            <p v-if="!isDraft && template.updatesEnabled" class="warning-box">
+            <p v-if="!isLocked && !isDraft && template.updatesEnabled" class="warning-box">
                 {{ $t('%KZ') }}
             </p>
 
