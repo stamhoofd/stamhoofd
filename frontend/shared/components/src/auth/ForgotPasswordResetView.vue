@@ -171,8 +171,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                     new Toast($t(`%uv`), 'error red').show();
                     this.dismiss({ force: true }).catch(console.error);
                 });
-        }
-        else {
+        } else {
             new Toast($t(`%EF`), 'error red').show();
             this.dismiss({ force: true }).catch(console.error);
         }
@@ -205,8 +204,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                     }));
                 }
                 errors.throwIfNotEmpty();
-            }
-            catch (e) {
+            } catch (e) {
                 this.errorBox = new ErrorBox(e);
                 return;
             }
@@ -272,12 +270,13 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             const org = this.session.organization;
 
             if (verificationToken) {
-                const query = new URLSearchParams({ token: verificationToken, email: this.email });
-                if (org) {
-                    await appNavigate(AppRoute.OrgScopedVerifyEmail, { properties: { organization: org }, query });
-                } else {
-                    await appNavigate(AppRoute.UnscopedVerifyEmail, { query });
-                }
+                await appNavigate(AppRoute.VerifyEmail, {
+                    properties: {
+                        token: verificationToken,
+                        email: this.email,
+                        organization: org,
+                    },
+                });
             } else {
                 if (org) {
                     await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } });
@@ -288,8 +287,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
 
             await this.dismiss({ force: true });
             this.loading = false;
-        }
-        catch (e) {
+        } catch (e) {
             this.loading = false;
             this.errorBox = new ErrorBox(e);
             return;

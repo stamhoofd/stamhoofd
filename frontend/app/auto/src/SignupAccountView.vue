@@ -178,8 +178,12 @@ async function goNext() {
 
         await dismiss({ force: true });
         const appNavigate = useAppNavigate();
-        await appNavigate(AppRoute.OrgScopedVerifyEmail, {
-            properties: { organization: props.organization, token, email: email.value },
+        await appNavigate(AppRoute.VerifyEmail, {
+            properties: {
+                organization: props.organization,
+                token,
+                email: email.value,
+            },
         });
 
         // Show popup to confirm e-mail

@@ -200,29 +200,29 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import ChangePasswordView from '#views/ChangePasswordView.vue';
-import ConfirmEmailView from '#auth/ConfirmEmailView.vue';
-import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import LoadingButton from '#navigation/LoadingButton.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import STInputBox from '#inputs/STInputBox.vue';
-import STNavigationBar from '#navigation/STNavigationBar.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { useLoginMethod, useLoginMethodEnabled } from '#hooks/useLoginMethods.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
-import { useValidation } from '#errors/useValidation.ts';
+import EmailInput from '#inputs/EmailInput.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import ChangePasswordView from '#views/ChangePasswordView.vue';
+import { SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
+import { AppRoute, LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
+import { useAppNavigate } from '../hooks/useAppNavigate.ts';
 import DeleteView from './DeleteView.vue';
 import { useSwitchLanguage } from './hooks/useSwitchLanguage';
 
@@ -295,6 +295,8 @@ useValidation(errors.validator, () => {
     return true;
 });
 
+const appNavigate = useAppNavigate();
+
 async function save() {
     if (saving.value) {
         return;
@@ -312,19 +314,22 @@ async function save() {
         const result = await LoginHelper.patchUser($context.value, patch.value);
 
         if (result.verificationToken) {
-            await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle('sheet'));
-        }
-        else {
+            await appNavigate(AppRoute.VerifyEmail, {
+                properties: {
+                    organization: $context.value.organization,
+                    token: result.verificationToken,
+                    email: email.value,
+                },
+            });
+        } else {
             const toast = new Toast($t(`%HA`), 'success green');
             toast.show();
         }
 
         await dismiss({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }
@@ -385,8 +390,7 @@ async function disconnectProvider(provider: LoginProviderType) {
         try {
             await LoginHelper.patchUser($context.value, patch);
             Toast.success($t(`%12H`)).show();
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
     }
@@ -405,8 +409,7 @@ async function deletePassword() {
         try {
             await LoginHelper.patchUser($context.value, patch);
             Toast.success($t(`%12J`)).show();
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
     }
@@ -434,8 +437,7 @@ async function logout() {
         // Prevent auto sign in via sso
         try {
             sessionStorage.setItem('triedLogin', 'true');
-        }
-        catch (e) {
+        } catch (e) {
             // Ignore error
             console.error(e);
         }

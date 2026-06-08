@@ -1,4 +1,3 @@
-export { default as ConfirmEmailView } from './ConfirmEmailView.vue';
 export { default as ForgotPasswordResetView } from './ForgotPasswordResetView.vue';
 export { default as ForgotPasswordView } from './ForgotPasswordView.vue';
 export { default as LoginMethodConfigView } from './LoginMethodConfigView.vue';

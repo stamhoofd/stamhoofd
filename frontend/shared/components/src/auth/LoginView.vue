@@ -93,19 +93,21 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, ref } from 'vue';
 
-import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
+import { AppRoute, LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import VersionFooter from '../context/VersionFooter.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useContext, useLoginMethod } from '../hooks';
+import { useAppNavigate } from '../hooks/useAppNavigate.ts';
+import { useContext } from '../hooks/useContext.ts';
+import { useLoginMethod } from '../hooks/useLoginMethods.ts';
+
 import EmailInput from '../inputs/EmailInput.vue';
-import ConfirmEmailView from './ConfirmEmailView.vue';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import PlatformFooter from './PlatformFooter.vue';
 
@@ -149,9 +151,9 @@ defineRoutes([
 
 const errors = useErrors();
 const $context = useContext();
-const present = usePresent();
 const dismiss = useDismiss();
 const $navigate = useNavigate();
+const appNavigate = useAppNavigate();
 
 const loading = ref(false);
 const email = ref(props.initialEmail);
@@ -258,15 +260,12 @@ async function submit() {
         }
 
         if (result.verificationToken) {
-            await present({
-                components: [
-                    new ComponentWithProperties(ConfirmEmailView, {
-                        login: true,
-                        token: result.verificationToken,
-                        email: email.value,
-                    }),
-                ],
-                modalDisplayStyle: 'sheet',
+            await appNavigate(AppRoute.VerifyEmail, {
+                properties: {
+                    token: result.verificationToken,
+                    email: email.value,
+                    organization: $context.value.organization,
+                },
             });
         } else {
             await dismiss({ force: true });

@@ -144,7 +144,7 @@ if (orgInDomain) {
 // VERIFY-EMAIL
 if (orgInDomain) {
     defineRoute({
-        name: AppRoute.OrgScopedVerifyEmail,
+        name: AppRoute.VerifyEmail,
         url: $t('verify-email'),
         defaultProperties: query => ({
             token: query?.get('token') ?? '',
@@ -158,7 +158,7 @@ if (orgInDomain) {
     });
 } else if (STAMHOOFD.userMode === 'platform') {
     defineRoute({
-        name: AppRoute.UnscopedVerifyEmail,
+        name: AppRoute.VerifyEmail,
         url: $t('verify-email'),
         defaultProperties: query => ({
             token: query?.get('token') ?? '',
@@ -172,17 +172,17 @@ if (orgInDomain) {
     });
 } else {
     defineRoute({
-        name: AppRoute.OrgScopedVerifyEmail,
+        name: AppRoute.VerifyEmail,
         url: 'verify-email/@organizationUri',
         params: { organizationUri: String },
         paramsToProps: async (params, query) => {
             const org = await uriToOrganization(params.organizationUri);
             if (!org) {
-                Toast.error($t('Er bestaat geen #organisatie op link "{uri}"', { uri: params.organizationUri })).show();
+                Toast.error($t('Kan je e-mailadres niet verifiëren: deze vereniging bestaat niet (meer)', { uri: params.organizationUri })).show();
                 throw new Error('No organization found for the given URI, but required for this route');
             }
             if (!query?.get('token') || !query?.get('email')) {
-                Toast.error($t('Ongeldige verificatielink, token of email ontbreekt')).show();
+                Toast.error($t('Kan je e-mailadres niet verifiëren: ongeldige link')).show();
                 throw new Error('Token or email missing in query parameters for verify-email route');
             }
             console.log('Loaded verify email route with organization', org, 'and query', query);

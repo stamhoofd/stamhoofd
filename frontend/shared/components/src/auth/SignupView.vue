@@ -56,12 +56,12 @@ import { ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useContext } from '../hooks';
+import { useAppNavigate, useContext } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import PasswordStrength from '../inputs/PasswordStrength.vue';
-import ConfirmEmailView from './ConfirmEmailView.vue';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 import BoxedController from '../containers/BoxedController.vue';
+import { AppRoute } from '@stamhoofd/structures/AppRoute.js';
 
 const props = withDefaults(
     defineProps<{
@@ -76,7 +76,7 @@ const props = withDefaults(
 const errors = useErrors();
 const $context = useContext();
 const show = useShow();
-
+const appNavigate = useAppNavigate();
 const email = ref(props.initialEmail);
 const password = ref('');
 const passwordRepeat = ref('');
@@ -118,15 +118,13 @@ async function submit() {
     try {
         const token = await LoginHelper.signUp($context.value, email.value, password.value);
         loading.value = false;
-        await show({
-            components: [
-                new ComponentWithProperties(BoxedController, {
-                    root: new ComponentWithProperties(ConfirmEmailView, {
-                        token,
-                        email: email.value,
-                    }),
-                }),
-            ],
+
+        await appNavigate(AppRoute.VerifyEmail, {
+            properties: {
+                organization: $context.value.organization,
+                token,
+                email: email.value,
+            },
         });
         return;
     } catch (e) {
