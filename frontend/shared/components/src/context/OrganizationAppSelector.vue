@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { usePopup } from '@simonbackx/vue-app-navigation';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, shallowRef } from 'vue';
 
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
@@ -73,10 +73,13 @@ import { PromiseComponent } from '../containers/AsyncComponent';
 import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
 import { useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
-import type { Option} from './hooks/useContextOptions';
+import type { Option } from './hooks/useContextOptions';
 import { useContextOptions } from './hooks/useContextOptions';
+import { useAppNavigate } from '.././hooks/useAppNavigate';
+import { AppRoute } from '@stamhoofd/structures';
 
 const popup = usePopup();
+const appNavigate = useAppNavigate();
 
 const { getAllOptions, getDefaultOptions, selectOption, isCurrent } = useContextOptions();
 const { getAppTitle, getAppDescription } = useAppData();
@@ -86,8 +89,7 @@ onMounted(async () => {
     // Update options when the default options change
     try {
         options.value = await getAllOptions();
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load organization options:', e);
     }
 });
@@ -105,10 +107,8 @@ const hasAdmin = computed(() => {
 });
 
 const searchOrganizations = async () => {
-    await ReplaceRootEventBus.sendEvent('replace', PromiseComponent(async () => {
-        const dashboard = await import('@stamhoofd/dashboard');
-        return dashboard.getOrganizationSelectionRoot(await SessionManager.getLastGlobalSession());
-    }));
+    await appNavigate(AppRoute.UnscopedAuto);
+    throw new Error('Should have been navigated away');
 };
 
 </script>

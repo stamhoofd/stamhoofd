@@ -151,11 +151,11 @@ export function instanceManifestToRouteManifest(manifest: InstanceManifest): Rou
     const routes: RouteManifestRoute[] = [
         { hosts: [manifest.domains.renderer], port: manifest.ports.renderer },
         { hosts: [manifest.domains.api, `*.${manifest.domains.api}`], port: manifest.ports.api },
-        { hosts: [manifest.domains.dashboard], port: manifest.ports.dashboard },
+        { hosts: [manifest.domains.dashboard], port: manifest.ports.webApp },
     ];
 
     if (manifest.domains.registration) {
-        routes.push({ hosts: [manifest.domains.registration, `*.${manifest.domains.registration}`], port: manifest.ports.registration });
+        routes.push({ hosts: [manifest.domains.registration, `*.${manifest.domains.registration}`], port: manifest.ports.webApp });
     }
     if (manifest.domains.webshop) {
         routes.push({ hosts: [manifest.domains.webshop], port: manifest.ports.webshop });

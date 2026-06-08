@@ -180,6 +180,7 @@ async function goNext() {
         }
 
         const session = new SessionContext(props.organization);
+
         await SessionManager.prepareSessionForUsage(session, true);
         const dashboardContext = await getScopedAutoRoot(session, {
             initialPresents: [

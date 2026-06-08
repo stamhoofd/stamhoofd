@@ -13,7 +13,7 @@ export class GroupOverviewPage {
     private get url() {
         const slug = Formatter.slug(this.group.settings.name);
 
-        return `${WorkerData.urls.dashboard}/dashboard/${this.organization.uri}/leden/${slug}`;
+        return `${WorkerData.urls.dashboard}/beheerders/${this.organization.uri}/leden/${slug}`;
     }
 
     async goto() {

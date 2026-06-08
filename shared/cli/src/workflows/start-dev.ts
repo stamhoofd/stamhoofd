@@ -5,7 +5,8 @@ import { buildBackendEnv, buildDomains } from '../config/build-config.js';
 import { successSymbol } from '../config/shared-service-config.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { sharedBuildReadyCommand, sharedBuildWatchCommand } from '../runtime/monorepo-runner.js';
-import { createLiveOutput, StatusItemKind, type StatusItem } from '../runtime/live-output.js';
+import { createLiveOutput, StatusItemKind } from '../runtime/live-output.js';
+import type { StatusItem } from '../runtime/live-output.js';
 import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { sharedServicesRunning } from '../services/shared-services.js';
@@ -85,11 +86,9 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 servicesState = await sharedServicesRunning(context)
                     ? PrerequisiteState.Ready
                     : PrerequisiteState.Missing;
-            }
-            catch {
+            } catch {
                 servicesState = PrerequisiteState.Missing;
-            }
-            finally {
+            } finally {
                 setStatus();
                 servicesCheckPromise = undefined;
             }
@@ -118,8 +117,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 startedServices = result.started.length > 0;
                 servicesState = PrerequisiteState.Ready;
                 setStatus();
-            }
-            catch (error) {
+            } catch (error) {
                 servicesState = PrerequisiteState.Missing;
                 setStatus();
                 throw error;
@@ -214,13 +212,11 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                             await stopServices(context, sharedServiceDefinitions);
                             output.stop({ persistStatus: true });
                             output.log(`${successSymbol} Shared services stopped because this session started them`);
-                        }
-                        else {
+                        } else {
                             output.stop({ persistStatus: true });
                         }
                         output.log(`${successSymbol} Development session stopped`);
-                    }
-                    finally {
+                    } finally {
                         if (forceShutdownTimer) {
                             clearTimeout(forceShutdownTimer);
                         }
@@ -270,15 +266,13 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                             return;
                         }
                         resolveOnce();
-                    }
-                    catch (error) {
+                    } catch (error) {
                         rejectOnce(error);
                     }
                 })();
             });
         });
-    }
-    finally {
+    } finally {
         setActiveOutputTarget(undefined);
     }
 }
@@ -352,7 +346,7 @@ function commandForTarget(target: DevTarget): string {
         return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --parallel --stream';
     }
     if (target === DevTarget.Frontend) {
-        return 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/webshop --parallel --stream';
+        return 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
     }
-    return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/webshop --parallel --stream';
+    return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
 }

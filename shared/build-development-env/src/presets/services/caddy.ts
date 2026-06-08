@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import type {ConcurrentlyCommandInput} from 'concurrently';
+import type { ConcurrentlyCommandInput } from 'concurrently';
 import fs from 'fs/promises';
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -17,8 +17,7 @@ export async function init(config: SharedEnvironment): Promise<ConcurrentlyComma
     try {
         const cmd = 'brew services stop caddy';
         await exec(cmd);
-    }
-    catch (error) {
+    } catch (error) {
         // ignore
     }
 
@@ -26,8 +25,7 @@ export async function init(config: SharedEnvironment): Promise<ConcurrentlyComma
     try {
         const cmd = 'caddy stop';
         await exec(cmd);
-    }
-    catch (error) {
+    } catch (error) {
         // ignore
     }
 
@@ -171,7 +169,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                     },
                     upstreams: [
                         {
-                            dial: '127.0.0.1:8081',
+                            dial: '127.0.0.1:8080',
                         },
                     ],
                 },
@@ -198,7 +196,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                     },
                     upstreams: [
                         {
-                            dial: '127.0.0.1:8081',
+                            dial: '127.0.0.1:8080',
                         },
                     ],
                 },

@@ -94,7 +94,6 @@ import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
 import { useAppData } from '@stamhoofd/components/context/appContext.ts';
 import type { Option } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
@@ -116,7 +115,6 @@ const input = ref<HTMLInputElement | null>(null);
 const resultElements = reactive<HTMLElement[]>([]);
 const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.value : results.value);
 const isPlatform = STAMHOOFD.userMode === 'platform';
-const platform = usePlatform();
 const { getAppTitle, getAppDescription } = useAppData();
 
 const { getAllOptions, getDefaultOptions, selectOption, getOptionForOrganization } = useContextOptions();

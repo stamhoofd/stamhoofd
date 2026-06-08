@@ -9,7 +9,7 @@ import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
 // https://vitejs.dev/config/
-export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
+export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
     if (process.env.NODE_ENV === 'production') {
         console.log('Building for production...');
     }

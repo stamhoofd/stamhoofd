@@ -1,263 +1,309 @@
 <template>
-    <div id="app">
-        <ModalStackComponent ref="modalStack" :root="root" />
-        <ToastBox />
-    </div>
+    <ComponentWithPropertiesInstance :component="root" />
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
-import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
-import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { AppManager } from '@stamhoofd/networking/AppManager';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { Storage } from '@stamhoofd/networking/Storage';
-import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { EmailAddressSettings, Platform, uriToApp } from '@stamhoofd/structures';
-import { Country } from '@stamhoofd/types/Country';
-import { Language } from '@stamhoofd/types/Language';
-import type { Ref } from 'vue';
-import { nextTick, onMounted, ref } from 'vue';
-import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFromUrl } from './getRootViews';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
+import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
+import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
+import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { computed, ref } from 'vue';
 
-const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
-HistoryManager.activate();
-// HistoryManager.debug = STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development';
-// ComponentWithProperties.debug = true;
+import { WhatsNewCount } from './classes/WhatsNewCount';
+import { AccessRight, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { usePlatformManager } from '@stamhoofd/networking';
+import { AuthenticatedView, useContext, getLoginRoot } from '@stamhoofd/components';
 
-if (STAMHOOFD.environment === 'development') {
-    Error.stackTraceLimit = Infinity; // unlimited stack trace to debug infinite loops
+const context = useContext();
+const platformManager = usePlatformManager();
+
+function wrapWithModalStack(component: ComponentWithProperties) {
+    return new ComponentWithProperties(ModalStackComponent, { root: component });
 }
 
-const root = new ComponentWithProperties(PromiseView, {
-    promise: async () => {
-        // Load locales first
-        try {
-            await I18nController.loadDefault(null, Country.Belgium, Language.Dutch);
-        } catch (e) {
-            console.error('Failed to load default locale', e);
+const root = new ComponentWithProperties(AuthenticatedView, {
+    noPermissionsRoot: wrapWithModalStack(getNoPermissionsView()),
+    loginRoot: wrapWithModalStack(getLoginRoot()),
+    root: wrapWithModalStack(getRoot()),
+});
+root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
+
+function getNoPermissionsView() {
+    return new ComponentWithProperties(TabBarController, {
+        tabs: [
+            new TabBarItem({
+                icon: 'key',
+                name: $t(`%GV`),
+                component: new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(NoPermissionsView, {}),
+                }),
+            }),
+        ],
+    });
+}
+
+function getRoot() {
+    const organization = context.value.organization;
+    if (!organization) {
+        throw new Error('Organization should be provided in dashboard route');
+    }
+    // When switching between organizations, we allso need to load the right locale, which can happen async normally
+    const startView = new ComponentWithProperties(NavigationController, {
+        root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {}),
+    });
+
+    setTitleSuffix(context.value.organization?.name ?? '');
+
+    const startTab = new TabBarItem({
+        id: 'start',
+        icon: 'home',
+        name: $t(`%I`),
+        component: startView,
+    });
+
+    const onboardingTab = new TabBarItem({
+        id: 'onboarding',
+        icon: 'home',
+        name: $t(`Start`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: AsyncComponent(() => import('./views/onboarding/OnboardingStartView.vue'), {}),
+        }),
+    });
+
+    const membersTab = new TabBarItem({
+        id: 'members',
+        icon: 'group',
+        name: $t(`%1EH`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {}),
+        }),
+    });
+
+    const membersTabNew = new TabBarItem({
+        id: 'members',
+        icon: 'group',
+        name: $t(`%1EH`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(SplitViewController, {
+                root: AsyncComponent(() => import('./views/members/MembersMenuModern.vue'), {}),
+            }),
+        }),
+    });
+
+    const calendarTab = new TabBarItem({
+        id: 'events',
+        icon: 'calendar',
+        name: $t(`%uB`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(ManageEventsView, {}),
+        }),
+    });
+
+    const webshopsTab = new TabBarItem({
+        id: 'webshops',
+        icon: 'basket',
+        name: $t(`Verkopen`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
+        }),
+    });
+
+    const whatsNewBadge = ref('');
+
+    const loadWhatsNew = () => {
+        const currentCount = localStorage.getItem('what-is-new');
+        if (currentCount) {
+            const c = parseInt(currentCount);
+            if (!isNaN(c) && WhatsNewCount - c > 0) {
+                whatsNewBadge.value = (WhatsNewCount - c).toString();
+            }
+        } else {
+            localStorage.setItem('what-is-new', WhatsNewCount.toString());
         }
+    };
+    loadWhatsNew();
 
-        try {
-            let app: 'dashboard' | 'admin' | 'registration' | 'auto' = 'auto';
+    const settingsTab = new TabBarItem({
+        id: 'settings',
+        icon: 'settings',
+        name: $t(`%xU`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {}),
+        }),
+    });
 
-            let parts = UrlHelper.shared.getParts();
+    const financesTab = new TabBarItem({
+        id: 'finances',
+        icon: 'calculator',
+        name: $t(`%tx`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {}),
+        }),
+    });
 
-            // Check mollie oauth redirect replacement
-            // We cannot customize the redirect url for Mollie, but that causes us not to know to which organization url we need to redirect after oauth
-            if (parts[0] === 'oauth' && parts[1] === 'mollie') {
-                const savedRedirectUrl = await Storage.keyValue.getItem('mollie-saved-redirect-url');
-                if (savedRedirectUrl) {
-                    // Redirect to the saved URL (removing /oauth/mollie)
-                    UrlHelper.shared.url.pathname = savedRedirectUrl;
-                    console.log('Redirecting to saved mollie redirect url', savedRedirectUrl);
-                    parts = UrlHelper.shared.getParts();
+    const documentsTab = new TabBarItem({
+        id: 'documents',
+        icon: 'file-filled',
+        name: $t(`%tw`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {}),
+        }),
+    });
+
+    const auditLogsTab = new TabBarItem({
+        id: 'audit-logs',
+        icon: 'history',
+        name: $t(`%GY`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: new ComponentWithProperties(AuditLogsView, {}),
+        }),
+    });
+
+    const communicationTab = new TabBarItem({
+        id: 'communication',
+        icon: 'email-filled',
+        name: $t(`%1DK`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(CommunicationView, {}),
+        }),
+    });
+
+    const sharedMoreItems: TabBarItem[] = [];
+
+    if (STAMHOOFD.CHANGELOG_URL) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                id: 'whats-new',
+                icon: 'gift',
+                name: $t(`%xV`),
+                badge: whatsNewBadge,
+                action: async function () {
+                    window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? context.value.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank');
+                    whatsNewBadge.value = '';
+                    localStorage.setItem('what-is-new', WhatsNewCount.toString());
+                },
+            }),
+        );
+    }
+
+    if (STAMHOOFD.domains.documentation) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                id: 'documentation',
+                icon: 'book',
+                name: $t(`%xW`),
+                action: async function () {
+                    window.open('https://' + LocalizedDomains.documentation, '_blank');
+                },
+            }),
+        );
+    }
+
+    if (STAMHOOFD.NOLT_URL) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                id: 'feedback',
+                icon: 'feedback',
+                name: $t(`%18`),
+                action: async function () {
+                    const NoltHelper = (await import('./classes/NoltHelper'));
+                    await NoltHelper.openNolt(context.value, false);
+                },
+            }),
+        );
+    } else if (STAMHOOFD.FEEDBACK_URL) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                id: 'feedback',
+                icon: 'feedback',
+                name: $t(`%18`),
+                action: async function () {
+                    window.open(STAMHOOFD.FEEDBACK_URL!, '_blank');
+                },
+            }),
+        );
+    }
+    return new ComponentWithProperties(TabBarController, {
+        tabs: computed(() => {
+            const organization = context.value.organization;
+
+            let tabs: (TabBarItem | TabBarItemGroup)[] = [
+            ];
+
+            if (STAMHOOFD.userMode === 'platform') {
+                tabs.push(startTab);
+            }
+
+            if (organization?.meta.packages.useMembers) {
+                if (manualFeatureFlag('new-members-tab', context.value)) {
+                    tabs.push(membersTabNew);
                 } else {
-                    console.warn('No saved mollie redirect url found');
+                    tabs.push(membersTab);
+                }
+
+                if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value)) {
+                    tabs.push(calendarTab);
                 }
             }
 
-            if (parts.length >= 1) {
-                app = uriToApp(parts[0]);
+            if (organization?.meta.packages.useWebshops && STAMHOOFD.domains.webshop) {
+                if (context.value.auth.hasAccessRight(AccessRight.OrganizationCreateWebshops) || !!organization.webshops.find(w => context.value.auth.canAccessWebshop(w, PermissionLevel.Read))) {
+                    tabs.push(webshopsTab);
+                }
+            }
+
+            if (tabs.length === 0) {
+                tabs.push(startTab);
+            }
+
+            const moreTab = new TabBarItemGroup({
+                icon: 'category',
+                name: $t(`%GZ`),
+                items: [
+                    ...sharedMoreItems, // need to create a new array, don't pass directly!
+                ],
+            });
+
+            if (context.value.auth.hasFullAccess()) {
+                moreTab.items.unshift(auditLogsTab);
+                moreTab.items.unshift(documentsTab);
+                moreTab.items.unshift(financesTab);
+                moreTab.items.unshift(communicationTab);
+
+                if (STAMHOOFD.userMode === 'organization') {
+                    // In Stamhoofd we show settings in the top bar
+                    tabs.push(settingsTab);
+                } else {
+                    moreTab.items.unshift(settingsTab);
+                }
             } else {
-                app = 'auto';
+                if (context.value.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                    moreTab.items.unshift(financesTab);
+                }
+
+                if (context.value.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)
+                    || context.value.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages)) {
+                    moreTab.items.unshift(communicationTab);
+                }
             }
 
-            let component: ComponentWithProperties;
-            if (app === 'auto') {
-                component = (await getScopedAutoRootFromUrl());
-            } else if (app === 'dashboard') {
-                component = (await getScopedDashboardRootFromUrl());
-            } else if (app === 'admin') {
-                component = (await getScopedAdminRootFromUrl({ $t }));
-            } else {
-                component = (await getScopedRegistrationRootFromUrl());
+            if (moreTab.items.length > 0) {
+                tabs.push(moreTab);
             }
 
-            console.log('Resolved root component');
-            return component;
-        } catch (e) {
-            console.error('Error in dashboard.App promise', e);
-            Toast.fromError(e).setHide(null).show();
-            throw e;
-        }
-    },
-}).setCheckRoutes();
-
-async function checkGlobalRoutes() {
-    if (!modalStack.value) {
-        await nextTick();
-        return await checkGlobalRoutes();
-    }
-
-    const currentPath = UrlHelper.initial.getPath({ removeLocale: true });
-    const parts = UrlHelper.initial.getParts();
-    const queryString = UrlHelper.initial.getSearchParams();
-    console.log('check global routes', parts, queryString, currentPath);
-
-    if (parts.length === 1 && parts[0] === 'unsubscribe') {
-        const id = queryString.get('id');
-        const token = queryString.get('token');
-        const type = queryString.get('type') ?? 'all';
-
-        if (id && token && ['all', 'marketing'].includes(type)) {
-            await unsubscribe(id, token, type as 'all' | 'marketing');
-        }
-    }
-
-    if (parts.length >= 1 && parts[0] === 'verify-email') {
-        const token = queryString.get('token');
-        const code = queryString.get('code');
-
-        if (token && code) {
-            const toast = new Toast($t(`%IZ`), 'spinner').setHide(null).show();
-
-            try {
-                const session = parts[1] ? await SessionContext.createFrom({ organizationId: parts[1] }) : new SessionContext(null);
-                await session.loadFromStorage();
-                await LoginHelper.verifyEmail(session, code, token);
-                toast.hide();
-                new Toast($t(`%Ia`), 'success green').show();
-
-                const dashboardContext = await getScopedAutoRoot(session);
-                await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
-            } catch (e) {
-                toast.hide();
-                CenteredMessage.fromError(e).addCloseButton().show();
+            if (STAMHOOFD.userMode === 'organization' && !organization!.meta.packages.useMembers && !organization!.meta.packages.useWebshops && !organization!.meta.packages.wasPaid) {
+                // Override to onboarding
+                tabs = [onboardingTab];
             }
-        }
-    }
+
+            return tabs;
+        }),
+    });
 }
-const manualPresent = useManualPresent();
-
-onMounted(async () => {
-    if (!modalStack.value) {
-        throw new Error('Modal stack not loaded');
-    }
-
-    const stack = modalStack.value;
-
-    ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
-        if (!(options as any).components) {
-            await manualPresent(stack.present, { components: [options as ComponentWithProperties] });
-        } else {
-            await manualPresent(stack.present, options);
-        }
-    });
-
-    ReplaceRootEventBus.addListener(this, 'replace', async (component: ComponentWithProperties) => {
-        component.setCheckRoutes();
-        stack.replace(component, false);
-    });
-
-    CenteredMessage.addListener(this, async (centeredMessage) => {
-        await manualPresent(stack.present, {
-            components: [
-                new ComponentWithProperties(CenteredMessageView, {
-                    centeredMessage,
-                }, {
-                    forceCanHaveFocus: true,
-                }),
-            ],
-            modalDisplayStyle: 'overlay',
-        });
-    });
-
-    // First check updates, and only after that, check for global routes
-    // reason: otherwise the checkUpdates will dismiss the modal stack, and that can hide the reset password view instead of the update view
-    try {
-        await AppManager.shared.checkUpdates({
-            visibleCheck: 'spinner',
-            visibleDownload: true,
-            installAutomatically: true,
-        });
-    } catch (e) {
-        console.error(e);
-    }
-
-    // Check routes
-    checkGlobalRoutes().catch(console.error);
-});
-
-async function unsubscribe(id: string, token: string, type: 'all' | 'marketing') {
-    const toast = new Toast($t(`%Ib`), 'spinner').setHide(null).show();
-
-    try {
-        const response = await NetworkManager.server.request({
-            method: 'GET',
-            path: '/email/manage',
-            query: {
-                id,
-                token,
-            },
-            decoder: EmailAddressSettings as Decoder<EmailAddressSettings>,
-        });
-
-        const details = response.data;
-        toast.hide();
-
-        let unsubscribe = true;
-        const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing';
-
-        if (details[fieldName]) {
-            if (!await CenteredMessage.confirm($t(`%Ic`), $t(`%Id`), $t(`%Ie`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email, complaintEmail: $t('%W') }))) {
-                return;
-            }
-
-            unsubscribe = false;
-        } else {
-            if (!await CenteredMessage.confirm($t(`%If`), $t(`%Ig`), $t(`%Ih`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email }))) {
-                return;
-            }
-            toast.show();
-        }
-
-        await NetworkManager.server.request({
-            method: 'POST',
-            path: '/email/manage',
-            body: {
-                id,
-                token,
-                [fieldName]: unsubscribe,
-            },
-        });
-        toast.hide();
-
-        if (unsubscribe) {
-            new Toast($t(`%Ii`), 'success').setHide(15 * 1000).show();
-        } else {
-            new Toast($t(`%Ij`), 'success').setHide(15 * 1000).show();
-        }
-    } catch (e) {
-        console.error(e);
-        toast.hide();
-        Toast.fromError(e).show();
-    }
-}
-
 </script>
-
-<style lang="scss">
-// We need to include the component styling of vue-app-navigation first
-@use "@stamhoofd/scss/main";
-@use "@stamhoofd/scss/base/dark-modus";
-@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
-
-html {
-    -webkit-touch-callout:none;
-    //user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-    -webkit-tap-highlight-color: transparent;
-}
-</style>

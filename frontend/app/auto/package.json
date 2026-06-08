@@ -1,0 +1,27 @@
+{
+    "name": "@stamhoofd/auto",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/exports.ts",
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "@stamhoofd/assets": "*",
+        "@stamhoofd/components": "*",
+        "@stamhoofd/document-helper": "*",
+        "@stamhoofd/frontend-excel-export": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/frontend-pdf-builder": "*",
+        "@stamhoofd/ticket-builder": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/scss": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/utility": "*"
+    }
+}
