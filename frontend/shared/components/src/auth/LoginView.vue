@@ -1,5 +1,5 @@
 <template>
-    <form class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
+    <form class="st-view login-view" data-testid="login-view" data-submit-last-field novalidate @submit.prevent="submit">
         <STNavigationBar :large="true" class="transparent" :title="$t(`%Qg`)" />
 
         <main class="center small flex">

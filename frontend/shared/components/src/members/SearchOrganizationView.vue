@@ -48,7 +48,7 @@ import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { ref, watch } from 'vue';
 
 const props = withDefaults(
@@ -98,8 +98,7 @@ const updateResults = async () => {
             return;
         }
         results.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         if (cachedCount !== counter) {
             // A new request have started already
             return;
@@ -145,8 +144,7 @@ async function doSelectOrganization(organization: Organization) {
     try {
         errors.errorBox = null;
         await props.selectOrganization(organization, navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

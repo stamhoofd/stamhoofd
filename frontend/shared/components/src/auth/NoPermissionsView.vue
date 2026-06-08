@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="no-permissions-view">
         <main class="center">
             <h1 v-if="organization">
                 {{ $t('%WC') }}

@@ -36,6 +36,7 @@
     "dev:init": "yarn -s stam setup check",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
     "test": "lerna run test --ignore @stamhoofd/playwright",
+    "test:playwright:skip-build": "cd tests/playwright && STAMHOOFD_SKIP_FRONTEND_BUILD=true yarn -s test",
     "test:playwright": "yarn -s build:shared && cd backend/app/api && yarn build:playwright:pre && cd ../../.. && cd tests/playwright && yarn -s test",
     "test:playwright:ui": "yarn -s build:shared && cd backend/app/api && yarn build:playwright:pre && cd ../../.. && cd tests/playwright && yarn -s test --ui",
     "lint": "lerna run lint -- --quiet",

@@ -1,5 +1,5 @@
 <template>
-    <section class="st-view">
+    <section class="st-view" data-testid="dashboard-start-view">
         <STNavigationBar :title="$t('%44')" />
         <main class="center">
             <aside v-copyable class="style-title-prefix">

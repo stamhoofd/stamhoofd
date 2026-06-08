@@ -17,7 +17,7 @@ export default defineConfig({
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 2 : 2,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: 'line',
+    reporter: 'dot',
 
     build: {
         // Disable buggy transpilation we don't need
@@ -37,10 +37,10 @@ export default defineConfig({
         trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
 
         // todo
-        headless: true,
+        headless: process.env.HEADED ? false : true,
         // ignoreHTTPSErrors: true,
         launchOptions: {
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--window-position=2721,66'],
         },
         navigationTimeout: process.env.CI ? 30_000 : 10_000,
         actionTimeout: process.env.CI ? 30_000 : 10_000,
