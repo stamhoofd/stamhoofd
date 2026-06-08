@@ -23,7 +23,7 @@ env:
 
 jobs:
   job_setup:
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
@@ -60,7 +60,7 @@ jobs:
   # duplicated `yarn build:shared` step from each consumer job.
   job_build_shared:
     name: 'Build shared packages'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup]
     steps:
       - uses: actions/checkout@v5
@@ -81,7 +81,7 @@ jobs:
 
   job_test_backend:
     name: 'Backend API Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_backend == 'true'
     services:
@@ -111,7 +111,7 @@ jobs:
 
   job_test_models:
     name: 'Backend Models Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_models == 'true'
     services:
@@ -141,7 +141,7 @@ jobs:
 
   job_test_sql:
     name: 'Backend SQL Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_sql == 'true'
     services:
@@ -171,7 +171,7 @@ jobs:
 
   job_test_structures:
     name: 'Structures Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_structures == 'true'
     steps:
@@ -188,7 +188,7 @@ jobs:
 
   job_boot:
     name: 'API boot and shutdown'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     services:
       mysql:
@@ -223,7 +223,7 @@ jobs:
 
   job_test_lint_typecheck_checking:
     name: 'Lint and Typecheck'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     steps:
       - uses: actions/checkout@v5
@@ -239,7 +239,7 @@ jobs:
 
   job_test_components_vitest:
     name: 'Components Browser Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_frontend == 'true'
     steps:
@@ -262,7 +262,7 @@ jobs:
   job_test_playwright:
     name: 'Playwright Tests'
     timeout-minutes: 60
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_backend == 'true' || needs.job_setup.outputs.changed_frontend == 'true'
     permissions:
@@ -433,7 +433,7 @@ jobs:
   # ---------------------------------------------------------------------------
   notify_setup:
     name: 'Notify · Setup'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_setup]
     if: ${{ !cancelled() && needs.job_setup.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -454,7 +454,7 @@ jobs:
 
   notify_build_shared:
     name: 'Notify · Build shared packages'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_build_shared, notify_setup]
     if: ${{ !cancelled() && needs.job_build_shared.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -475,7 +475,7 @@ jobs:
 
   notify_structures:
     name: 'Notify · Structures Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_structures, notify_build_shared]
     if: ${{ !cancelled() && needs.job_test_structures.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -496,7 +496,7 @@ jobs:
 
   notify_sql:
     name: 'Notify · Backend SQL Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_sql, notify_structures]
     if: ${{ !cancelled() && needs.job_test_sql.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -517,7 +517,7 @@ jobs:
 
   notify_lint:
     name: 'Notify · Lint and Typecheck'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_lint_typecheck_checking, notify_sql]
     if: ${{ !cancelled() && needs.job_test_lint_typecheck_checking.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -538,7 +538,7 @@ jobs:
 
   notify_models:
     name: 'Notify · Backend Models Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_models, notify_lint]
     if: ${{ !cancelled() && needs.job_test_models.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -559,7 +559,7 @@ jobs:
 
   notify_backend:
     name: 'Notify · Backend API Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_backend, notify_models]
     if: ${{ !cancelled() && needs.job_test_backend.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -580,7 +580,7 @@ jobs:
 
   notify_components:
     name: 'Notify · Components Browser Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_components_vitest, notify_backend]
     if: ${{ !cancelled() && needs.job_test_components_vitest.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -601,7 +601,7 @@ jobs:
 
   notify_boot:
     name: 'Notify · API boot and shutdown'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_boot, notify_components]
     if: ${{ !cancelled() && needs.job_boot.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -622,7 +622,7 @@ jobs:
 
   notify_playwright:
     name: 'Notify · Playwright Tests'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs: [job_test_playwright, notify_boot]
     if: ${{ !cancelled() && needs.job_test_playwright.result == 'failure' && github.event_name != 'pull_request' }}
     permissions:
@@ -646,7 +646,7 @@ jobs:
   # at least one job actually ran) and an incident is open, post ✅ and close it.
   job_notify_recovery:
     name: 'Notify · recovery'
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     needs:
       - job_setup
       - job_build_shared
