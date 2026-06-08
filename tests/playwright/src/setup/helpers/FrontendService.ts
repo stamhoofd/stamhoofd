@@ -33,6 +33,10 @@ export class FrontendService implements ServiceHelper {
             },
             kill: async () => {
                 await new Promise<void>((resolve, reject) => {
+                    // Kill open connections
+                    server.headersTimeout = 1;
+                    server.keepAliveTimeout = 1;
+
                     server.close((error) => {
                         if (error) {
                             reject(error);
@@ -51,6 +55,9 @@ export class FrontendService implements ServiceHelper {
         const server = createServer((request, response) => {
             void this.handleStaticRequest(root, request, response);
         });
+
+        // Set a timeout for all requests to make sure nothing keeps hanging for too long
+        server.timeout = 10_000;
 
         await new Promise<void>((resolveListen, rejectListen) => {
             server.once('error', rejectListen);
