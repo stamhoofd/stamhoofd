@@ -56,4 +56,6 @@ runs:
         COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         GITHUB_RUN_ID: ${{ github.run_id }}
-      run: bash "$GITHUB_WORKSPACE/.github/scripts/slack-incident.sh" "${{ inputs.mode }}" "${{ inputs.job-label }}"
+        MODE: ${{ inputs.mode }}
+        JOB_LABEL: ${{ inputs.job-label }}
+      run: bash "$GITHUB_WORKSPACE/.github/scripts/slack-incident.sh" "$MODE" "$JOB_LABEL"
