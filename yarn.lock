@@ -3949,12 +3949,11 @@
   dependencies:
     undici-types "~6.21.0"
 
-"@types/nodemailer@^7":
-  version "7.0.4"
-  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-7.0.4.tgz#1a38d8bce85f7da066cc7fd6f57090bc741860f0"
-  integrity sha512-ee8fxWqOchH+Hv6MDDNNy028kwvVnLplrStm4Zf/3uHWw5zzo8FoYYeffpJtGs2wWysEumMH0ZIdMGMY1eMAow==
+"@types/nodemailer@^8":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-8.0.0.tgz#ea189a9c151c04cc65c8a2a4c668c65d952a24e2"
+  integrity sha512-fyf8jWULsCo0d0BuoQ75i6IeoHs47qcqxWc7yUdUcV0pOZGjUTTOvwdG1PRXUDqN/8A64yQdQdnA2pZgcdi+cA==
   dependencies:
-    "@aws-sdk/client-sesv2" "^3.839.0"
     "@types/node" "*"
 
 "@types/normalize-package-data@^2.4.0":
@@ -9949,10 +9948,10 @@ node-rsa@1.1.1:
   dependencies:
     asn1 "^0.2.4"
 
-nodemailer@7.0.11, nodemailer@7.0.13, nodemailer@^6.9.14, nodemailer@^7, nodemailer@^7.0.0:
-  version "7.0.13"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-7.0.13.tgz#74acaa55f0c6f9476384c29f27f53e467e8483cd"
-  integrity sha512-PNDFSJdP+KFgdsG3ZzMXCgquO7I6McjY2vlqILjtJd0hy8wEvtugS9xKRF2NWlPNGxvLCXlTNIae4serI7dinw==
+nodemailer@7.0.11, nodemailer@7.0.13, nodemailer@^6.9.14, nodemailer@^8, nodemailer@^8.0.4:
+  version "8.0.10"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.10.tgz#009d4deaa06f54b6bd7ddc6cac1bf78e3bcb0bf2"
+  integrity sha512-BLFuSth7QtHOkBzyqTehWWyub0NTRDuK2Q2SQfnGLsrJnzyU+Yeh4WpV1eZGuARFj1xQJHIdnTuJZLP+b9R1GQ==
 
 nodemon@^3.1.0:
   version "3.1.10"

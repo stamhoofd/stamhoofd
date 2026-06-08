@@ -127,7 +127,7 @@
     "elliptic": "^6.5.4",
     "fast-xml-parser": "^5.7.2",
     "sortablejs": "1.15.6",
-    "nodemailer": "^7.0.0",
+    "nodemailer": "^8.0.4",
     "yargs": "17.7.2",
     "sharp": "0.34.2",
     "tar": "6.2.1",
