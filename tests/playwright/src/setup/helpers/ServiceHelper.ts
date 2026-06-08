@@ -3,6 +3,7 @@ export interface ServiceHelper {
 }
 
 export type ServiceProcess = {
+    readonly name: string;
     wait: () => Promise<void>;
     kill?: () => Promise<void>;
 };

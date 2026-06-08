@@ -19,6 +19,7 @@ export class ApiService implements ServiceHelper {
         const { shutdown } = await boot({ killProcess: false });
 
         return {
+            name: 'API backend',
             wait: async () => {
                 console.log('Waiting for backend server...');
                 await NetworkHelper.waitForUrl(

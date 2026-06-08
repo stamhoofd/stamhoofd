@@ -1,7 +1,8 @@
 import { getProjectPath } from '@stamhoofd/cli';
 import { createReadStream } from 'node:fs';
 import { cp, readFile, stat, writeFile } from 'node:fs/promises';
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { createServer } from 'node:http';
+import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { extname, join, resolve } from 'node:path';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { NetworkHelper } from './NetworkHelper.js';
@@ -24,6 +25,7 @@ export class FrontendService implements ServiceHelper {
         const server = await this.startStaticServer();
 
         return {
+            name: 'Static frontend server ' + this.name,
             wait: async () => {
                 await NetworkHelper.waitForUrl(
                     CaddyConfigHelper.getUrl(this.name, this.workerId),
@@ -73,8 +75,7 @@ export class FrontendService implements ServiceHelper {
 
             response.setHeader('Content-Type', contentType(resolvedPath));
             createReadStream(resolvedPath).pipe(response);
-        }
-        catch (error) {
+        } catch (error) {
             response.statusCode = 500;
             response.end('Internal server error');
         }
@@ -96,8 +97,7 @@ export class FrontendService implements ServiceHelper {
                 recursive: true,
                 force: true,
             });
-        }
-        catch (err) {
+        } catch (err) {
             console.error('Failed to copy project dist');
             console.error(err);
             throw err; // re-throw so CI fails
@@ -136,8 +136,7 @@ export class FrontendService implements ServiceHelper {
 
         if (html.includes(placeholder)) {
             html = html.replace(placeholder, scriptToInject);
-        }
-        else {
+        } else {
             throw new Error(`Placeholder ${placeholder} not found in ${path}`);
         }
 

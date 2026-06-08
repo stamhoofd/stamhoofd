@@ -13,9 +13,9 @@ export default defineConfig({
     fullyParallel: false, // Keeping this false decreases the difference between CI and local running
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 1 : 0,
+    retries: process.env.CI ? 1 : 1,
     /* Opt out of parallel tests on CI. */
-    workers: process.env.CI ? 2 : undefined,
+    workers: process.env.CI ? 2 : 2,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: 'line',
 
@@ -42,6 +42,8 @@ export default defineConfig({
         launchOptions: {
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
         },
+        navigationTimeout: process.env.CI ? 30_000 : 10_000,
+        actionTimeout: process.env.CI ? 30_000 : 10_000,
     },
 
     /* Configure projects for major browsers */

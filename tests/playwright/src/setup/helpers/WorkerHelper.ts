@@ -4,7 +4,7 @@ import { WorkerData } from '../../helpers/worker/WorkerData.js';
 import { ApiService } from './ApiService.js';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { DatabaseHelper } from './DatabaseHelper.js';
-import type { FrontendProjectName} from './FrontendService.js';
+import type { FrontendProjectName } from './FrontendService.js';
 import { FrontendService } from './FrontendService.js';
 import type { ServiceProcess } from './ServiceHelper.js';
 
@@ -60,7 +60,25 @@ class WorkerHelperInstance {
             teardown: async () => {
                 // kill processes
                 // eslint-disable-next-line @typescript-eslint/await-thenable
-                await Promise.all(allProcesses.map(p => p.kill?.()));
+                await Promise.all(allProcesses.map((p) => {
+                    let resolved = false;
+                    const promise = p.kill?.();
+
+                    const timeout = setInterval(() => {
+                        if (resolved) {
+                            return;
+                        }
+                        console.error('Worker ' + workerId + ' teardown: Waiting for ' + p.name);
+                    }, 5_000);
+
+                    return promise?.then((r) => {
+                        console.error('Worker ' + workerId + ' teardown: ' + p.name + ' succeeded');
+                        resolved = true;
+                        clearInterval(timeout);
+
+                        return r;
+                    });
+                }));
             },
         };
     }
@@ -83,10 +101,10 @@ class WorkerHelperInstance {
         if (WorkerData.id === undefined) {
             throw new Error('WorkerData.id is not set');
         }
-        
+
         console.log('Loading environment');
         TestUtils.loadEnvironment();
-        
+
         const config: Partial<BackendEnvironment> = {
             PORT: CaddyConfigHelper.getPort('api', WorkerData.id),
             domains: {
@@ -117,7 +135,7 @@ class WorkerHelperInstance {
                 // Todo: these don't work yet
                 webshopCname: CaddyConfigHelper.getDomain('webshop', WorkerData.id),
                 registrationCname: {
-                    '': CaddyConfigHelper.getDomain('registration', WorkerData.id)
+                    '': CaddyConfigHelper.getDomain('registration', WorkerData.id),
                 },
             },
             translationNamespace: 'stamhoofd',

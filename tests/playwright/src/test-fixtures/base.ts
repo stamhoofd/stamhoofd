@@ -1,7 +1,7 @@
 // Setup environment + register beforeAll/before/... hooks with Playwright
 import { TestUtils } from '@stamhoofd/test-utils';
 import { PlaywrightHooks } from '../setup/helpers/PlaywrightHooks.js';
- import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
 
 global.expect = expect;
 TestUtils.globalSetup(new PlaywrightHooks());
@@ -39,7 +39,7 @@ export const test = base.extend<
             console.log('Running tests for worker ', workerInfo.parallelIndex);
 
             // Make sure we have a membership organization set
-            await initMembershipOrganization()
+            await initMembershipOrganization();
 
             await use();
 
