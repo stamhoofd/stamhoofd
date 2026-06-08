@@ -1,6 +1,7 @@
 import type { RegistrationPeriod } from '@stamhoofd/models';
 import { DocumentTemplate, DocumentTemplateFactory, GroupFactory, OrganizationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { migrateDocumentYears } from './1750090029-document-update-year.js';
+import { Formatter } from '@stamhoofd/utility';
 
 describe('migration.document-update-year', () => {
     describe('should use most frequent year of groups', () => {
@@ -9,8 +10,8 @@ describe('migration.document-update-year', () => {
             }).create();
 
             const period1 = await new RegistrationPeriodFactory({
-                startDate: new Date(2021, 0, 1),
-                endDate: new Date(2021, 11, 31),
+                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2021 }).toJSDate(),
+                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2021 }).toJSDate(),
                 organization,
             }).create();
 
@@ -18,8 +19,8 @@ describe('migration.document-update-year', () => {
             await organization.save();
 
             const period2 = await new RegistrationPeriodFactory({
-                startDate: new Date(2019, 0, 1),
-                endDate: new Date(2019, 11, 31),
+                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2019 }).toJSDate(),
+                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2019 }).toJSDate(),
                 organization,
             }).create();
 
@@ -32,9 +33,9 @@ describe('migration.document-update-year', () => {
             };
 
             // groups
-            const group1 = await createGroup(new Date(2021, 0, 1), new Date(2021, 11, 31), period1);
-            const group2 = await createGroup(new Date(2021, 0, 1), new Date(2021, 11, 31), period1);
-            const group3 = await createGroup(new Date(2019, 0, 1), new Date(2019, 11, 31), period2);
+            const group1 = await createGroup(Formatter.luxon().set({ day: 1, month: 1, year: 2021 }).toJSDate(), Formatter.luxon().set({ day: 31, month: 12, year: 2021 }).toJSDate(), period1);
+            const group2 = await createGroup(Formatter.luxon().set({ day: 1, month: 1, year: 2021 }).toJSDate(), Formatter.luxon().set({ day: 31, month: 12, year: 2021 }).toJSDate(), period1);
+            const group3 = await createGroup(Formatter.luxon().set({ day: 1, month: 1, year: 2019 }).toJSDate(), Formatter.luxon().set({ day: 31, month: 12, year: 2019 }).toJSDate(), period2);
 
             // document created in 2021
             const document1 = await new DocumentTemplateFactory({
@@ -42,7 +43,7 @@ describe('migration.document-update-year', () => {
                 year: 0,
             }).create();
 
-            document1.createdAt = new Date(2022, 0, 1);
+            document1.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2022 }).toJSDate();
             await document1.save();
 
             // document created in 2020
@@ -51,7 +52,7 @@ describe('migration.document-update-year', () => {
                 year: 0,
             }).create();
 
-            document2.createdAt = new Date(2021, 0, 1);
+            document2.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2021 }).toJSDate();
             await document2.save();
 
             // document created in 2019
@@ -60,7 +61,7 @@ describe('migration.document-update-year', () => {
                 year: 0,
             }).create();
 
-            document3.createdAt = new Date(2020, 0, 1);
+            document3.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2020 }).toJSDate();
             await document3.save();
 
             // act
@@ -82,8 +83,8 @@ describe('migration.document-update-year', () => {
             }).create();
 
             const period1 = await new RegistrationPeriodFactory({
-                startDate: new Date(2021, 0, 1),
-                endDate: new Date(2021, 11, 31),
+                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2021 }).toJSDate(),
+                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2021 }).toJSDate(),
                 organization,
             }).create();
 
@@ -91,14 +92,14 @@ describe('migration.document-update-year', () => {
             await organization.save();
 
             const period2 = await new RegistrationPeriodFactory({
-                startDate: new Date(2020, 0, 1),
-                endDate: new Date(2020, 11, 31),
+                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2020 }),
+                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2020 }),
                 organization,
             }).create();
 
             const period3 = await new RegistrationPeriodFactory({
-                startDate: new Date(2019, 0, 1),
-                endDate: new Date(2019, 11, 31),
+                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2019 }).toJSDate(),
+                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2019 }).toJSDate(),
                 organization,
             }).create();
 
@@ -111,9 +112,9 @@ describe('migration.document-update-year', () => {
             };
 
             // groups
-            const group1 = await createGroup(new Date(2020, 6, 1), new Date(2021, 5, 30), period1);
-            const group2 = await createGroup(new Date(2020, 7, 5), new Date(2021, 4, 3), period1);
-            const group3 = await createGroup(new Date(2018, 5, 1), new Date(2019, 10, 14), period3);
+            const group1 = await createGroup(Formatter.luxon().set({ day: 1, month: 7, year: 2020 }).toJSDate(), Formatter.luxon().set({ day: 30, month: 6, year: 2021 }).toJSDate(), period1);
+            const group2 = await createGroup(Formatter.luxon().set({ day: 5, month: 8, year: 2020 }).toJSDate(), Formatter.luxon().set({ day: 3, month: 5, year: 2021 }).toJSDate(), period1);
+            const group3 = await createGroup(Formatter.luxon().set({ day: 1, month: 6, year: 2018 }).toJSDate(), Formatter.luxon().set({ day: 14, month: 11, year: 2019 }).toJSDate(), period3);
 
             // document created in 2021
             const document1 = await new DocumentTemplateFactory({
@@ -121,7 +122,7 @@ describe('migration.document-update-year', () => {
                 year: 0,
             }).create();
 
-            document1.createdAt = new Date(2022, 0, 1);
+            document1.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2022 }).toJSDate();
             await document1.save();
 
             // document created in 2020
@@ -130,7 +131,7 @@ describe('migration.document-update-year', () => {
                 year: 0,
             }).create();
 
-            document2.createdAt = new Date(2021, 0, 1);
+            document2.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2021 }).toJSDate();
             await document2.save();
 
             // document created in 2019
@@ -139,7 +140,7 @@ describe('migration.document-update-year', () => {
                 year: 0,
             }).create();
 
-            document3.createdAt = new Date(2020, 0, 1);
+            document3.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2020 }).toJSDate();
             await document3.save();
 
             // act
@@ -165,7 +166,7 @@ describe('migration.document-update-year', () => {
             year: 0,
         }).create();
 
-        document.createdAt = new Date(2025, 0, 1);
+        document.createdAt = Formatter.luxon().set({ day: 1, month: 1, year: 2025 }).toJSDate();
         await document.save();
 
         // act
