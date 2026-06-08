@@ -108,11 +108,14 @@ export class CaddyHelper {
         const id = workerId.toString();
         const dashboard = CaddyConfigHelper.getDomain('dashboard', id);
         const registration = CaddyConfigHelper.getDomain('registration', id);
+        const orgDomain = CaddyConfigHelper.getOrgDomain(id);
         const webshop = CaddyConfigHelper.getDomain('webshop', id);
         const api = CaddyConfigHelper.getDomain('api', id);
         const routes = [
             { hosts: [dashboard], port: CaddyConfigHelper.getFrontendPort('dashboard', id) },
-            { hosts: [registration], port: CaddyConfigHelper.getFrontendPort('registration', id) },
+            // The registration frontend serves the unified web-app; the simulated
+            // organization (custom CNAME) domain points to the same upstream.
+            { hosts: [registration, orgDomain], port: CaddyConfigHelper.getFrontendPort('registration', id) },
             { hosts: [webshop], port: CaddyConfigHelper.getFrontendPort('webshop', id) },
             { hosts: [api, `*.${api}`], port: CaddyConfigHelper.getPort('api', id) },
         ];

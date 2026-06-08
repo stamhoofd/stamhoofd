@@ -37,6 +37,18 @@ export class CaddyConfigHelper {
     }
 
     /**
+     * Custom "organization domain" used to simulate an organization that points a
+     * CNAME DNS record at us.
+     */
+    static getOrgDomain(workerId: string) {
+        return `playwright-org-${this.cycledWorkerId(workerId)}.stamhoofd`;
+    }
+
+    static getOrgDomainUrl(workerId: string) {
+        return 'https://' + this.getOrgDomain(workerId);
+    }
+
+    /**
      * Get the url for the service and worker id
      */
     static getUrl(
@@ -68,11 +80,17 @@ export class CaddyConfigHelper {
         );
         const port = this.getFrontendPort(service, workerId);
 
+        // The registration frontend serves the unified web-app. Route the simulated
+        // organization domain (custom CNAME) to the same upstream so scenario 4 works.
+        const hosts = service === 'registration'
+            ? [domain, CaddyConfigHelper.getOrgDomain(workerId)]
+            : [domain];
+
         return {
             group,
             match: [
                 {
-                    host: [domain],
+                    host: hosts,
                 },
             ],
             handle: [

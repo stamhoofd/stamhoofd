@@ -9,6 +9,8 @@ export type StamhoofdUrls = {
     readonly dashboard: string;
     readonly webshop: string;
     readonly registration: string;
+    /** Simulated organization domain (custom CNAME), routed to the web-app. */
+    readonly orgDomain: string;
 };
 
 /**
@@ -69,6 +71,7 @@ class WorkerDataInstance {
                 dashboard: '',
                 webshop: '',
                 registration: '',
+                orgDomain: '',
             };
         }
 
@@ -77,6 +80,7 @@ class WorkerDataInstance {
             dashboard: CaddyConfigHelper.getUrl('dashboard', workerId),
             webshop: CaddyConfigHelper.getUrl('webshop', workerId),
             registration: CaddyConfigHelper.getUrl('registration', workerId),
+            orgDomain: CaddyConfigHelper.getOrgDomainUrl(workerId),
         };
     }
 
@@ -119,7 +123,7 @@ class WorkerDataInstance {
         // reset the database, except for the user if one
         await this.databaseHelper.reset(this._user ? this._user.id : null);
         await this.resetUser();
-        await initMembershipOrganization()
+        await initMembershipOrganization();
     }
 
     /**

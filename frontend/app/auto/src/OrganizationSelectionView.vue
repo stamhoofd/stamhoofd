@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div data-testid="app-root-selector">
         <STGradientBackground v-if="$isStamhoofd" />
 
         <div class="st-view" :class="{ transparent: $isStamhoofd }">

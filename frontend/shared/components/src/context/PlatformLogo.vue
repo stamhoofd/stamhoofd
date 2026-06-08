@@ -1,5 +1,5 @@
 <template>
-    <a alt="Stamhoofd" :href="'https://'+$domains.marketing+''" rel="noopener" class="platform-logo" :class="{expand: logo && platform.config.expandLogo, center: !logo}">
+    <a alt="Stamhoofd" :href="'https://'+$domains.marketing+''" rel="noopener" class="platform-logo" data-testid="platform-logo" :class="{expand: logo && platform.config.expandLogo, center: !logo}">
         <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark" />
         <template v-else>
             <Logo class="responsive" />
