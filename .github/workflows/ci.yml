@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Determine changed packages
-        uses: AurorNZ/paths-filter@v3.0.1
+        uses: AurorNZ/paths-filter@7c547bdd24124b0d69e07c96b62fd7fec5ced19a # v3.0.1
         id: changed
         with:
           filters: |
