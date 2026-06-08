@@ -124,6 +124,7 @@
   "resolutions": {
     "vue": "3.5.17",
     "elliptic": "^6.5.4",
+    "fast-xml-parser": "^5.7.2",
     "sortablejs": "1.15.6",
     "nodemailer": "^7.0.0",
     "yargs": "17.7.2",
