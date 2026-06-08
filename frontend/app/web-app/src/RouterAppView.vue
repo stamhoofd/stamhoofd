@@ -156,54 +156,52 @@ if (orgInDomain) {
             await loadVerifyEmail(await orgInDomain(), $t('verify-email'), token, email, code);
         },
     });
+} else if (STAMHOOFD.userMode === 'platform') {
+    defineRoute({
+        name: AppRoute.UnscopedVerifyEmail,
+        url: $t('verify-email'),
+        defaultProperties: query => ({
+            token: query?.get('token') ?? '',
+            email: query?.get('email') ?? '',
+            code: query?.get('code') ?? undefined,
+        }),
+        handler: async ({ componentProperties }) => {
+            const { token, email, code } = componentProperties;
+            await loadVerifyEmail(null, $t('verify-email'), token, email, code);
+        },
+    });
 } else {
-    if (STAMHOOFD.userMode === 'platform') {
-        defineRoute({
-            name: AppRoute.UnscopedVerifyEmail,
-            url: $t('verify-email'),
-            defaultProperties: query => ({
+    defineRoute({
+        name: AppRoute.OrgScopedVerifyEmail,
+        url: 'verify-email/@organizationUri',
+        params: { organizationUri: String },
+        paramsToProps: async (params, query) => {
+            const org = await uriToOrganization(params.organizationUri);
+            if (!org) {
+                Toast.error($t('Er bestaat geen #organisatie op link "{uri}"', { uri: params.organizationUri })).show();
+                throw new Error('No organization found for the given URI, but required for this route');
+            }
+            if (!query?.get('token') || !query?.get('email')) {
+                Toast.error($t('Ongeldige verificatielink, token of email ontbreekt')).show();
+                throw new Error('Token or email missing in query parameters for verify-email route');
+            }
+            console.log('Loaded verify email route with organization', org, 'and query', query);
+            return {
+                organization: org,
                 token: query?.get('token') ?? '',
                 email: query?.get('email') ?? '',
                 code: query?.get('code') ?? undefined,
-            }),
-            handler: async ({ componentProperties }) => {
-                const { token, email, code } = componentProperties;
-                await loadVerifyEmail(null, $t('verify-email'), token, email, code);
-            },
-        });
-    } else {
-        defineRoute({
-            name: AppRoute.OrgScopedVerifyEmail,
-            url: 'verify-email/@organizationUri',
-            params: { organizationUri: String },
-            paramsToProps: async (params, query) => {
-                const org = await uriToOrganization(params.organizationUri);
-                if (!org) {
-                    Toast.error($t('Er bestaat geen #organisatie op link "{uri}"', { uri: params.organizationUri })).show();
-                    throw new Error('No organization found for the given URI, but required for this route');
-                }
-                if (!query?.get('token') || !query?.get('email')) {
-                    Toast.error($t('Ongeldige verificatielink, token of email ontbreekt')).show();
-                    throw new Error('Token or email missing in query parameters for verify-email route');
-                }
-                console.log('Loaded verify email route with organization', org, 'and query', query);
-                return {
-                    organization: org,
-                    token: query?.get('token') ?? '',
-                    email: query?.get('email') ?? '',
-                    code: query?.get('code') ?? undefined,
-                };
-            },
-            propsToParams: props => ({
-                params: { organizationUri: props.organization.uri },
-            }),
-            handler: async ({ componentProperties }) => {
-                const { organization, token, email, code } = componentProperties;
-                console.log('Loading verify email for organization', organization, 'with token', token, 'and email', email);
-                await loadVerifyEmail(organization, $t('verify-email') + '/' + organization.uri, token, email, code);
-            },
-        });
-    }
+            };
+        },
+        propsToParams: props => ({
+            params: { organizationUri: props.organization.uri },
+        }),
+        handler: async ({ componentProperties }) => {
+            const { organization, token, email, code } = componentProperties;
+            console.log('Loading verify email for organization', organization, 'with token', token, 'and email', email);
+            await loadVerifyEmail(organization, $t('verify-email') + '/' + organization.uri, token, email, code);
+        },
+    });
 }
 
 // AUTO (DEFAULT)
