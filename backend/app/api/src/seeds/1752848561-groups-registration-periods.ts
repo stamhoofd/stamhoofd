@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod, V1GroupMigrationData, V1WaitingListMigrationData } from '@stamhoofd/models';
 import type { CycleInformation } from '@stamhoofd/structures';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { LoggingTools } from '@stamhoofd/utility';
@@ -139,6 +139,16 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         // first migrate registrations for the current cycle
         await migrateRegistrations({ organization, period: currentGroupPeriod, originalGroup, newGroup: originalGroup, cycle: currentCycle }, dryRun);
 
+        // create migration data for current cycle
+        const migrationData = new V1GroupMigrationData();
+        // new and old id are the same for the current cycle
+        migrationData.oldGroupId = originalGroup.id;
+        migrationData.newGroupId = originalGroup.id;
+        migrationData.oldCycle = currentCycle;
+        if (!dryRun) {
+            await migrationData.save();
+        }
+
         const cycleSettingEntries = [...originalGroup.settings.cycleSettings.entries()].filter(([cycle]) => {
             return cycle !== currentCycle;
         });
@@ -151,6 +161,10 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
             const [cycle, cycleInformation] = cycleSettingEntries[previousPeriodIndex];
             const newGroup = createPreviousGroup({ originalGroup, period: archivePeriod, cycleInformation, index: previousPeriodIndex });
 
+            const migrationData = new V1GroupMigrationData();
+            migrationData.oldGroupId = originalGroup.id;
+            migrationData.oldCycle = cycle;
+
             const registrationCount = await Registration.select()
                 .where('groupId', originalGroup.id)
                 .andWhere('cycle', cycle)
@@ -160,6 +174,8 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
             if (registrationCount > 0) {
                 if (!dryRun) {
                     await newGroup.save();
+                    migrationData.newGroupId = newGroup.id;
+                    await migrationData.save();
                 }
 
                 await migrateRegistrations({ organization, period: archivePeriod, originalGroup, newGroup, cycle }, dryRun);
@@ -418,8 +434,14 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
             name: TranslatedString.create($t(`%yh`) + ' ' + newGroup.settings.name.toString()),
         });
 
+        const migrationData = new V1WaitingListMigrationData();
+        migrationData.oldGroupId = originalGroup.id;
+        migrationData.oldCycle = cycle;
+
         if (!dryRun) {
             await newWaitingList.save();
+            migrationData.newGroupId = newWaitingList.id;
+            await migrationData.save();
         }
 
         waitingList = newWaitingList;

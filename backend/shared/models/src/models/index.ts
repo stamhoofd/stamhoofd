@@ -63,4 +63,6 @@ export * from './Invoice.js';
 export * from './InvoicedBalanceItem.js';
 export * from './RegistrationInvitation.js';
 
+export * from './v1GroupMigrationData.js';
+
 import './_relations.js';
