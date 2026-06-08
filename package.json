@@ -123,6 +123,7 @@
   },
   "resolutions": {
     "vue": "3.5.17",
+    "axios": "1.16.0",
     "elliptic": "^6.5.4",
     "fast-xml-parser": "^5.7.2",
     "sortablejs": "1.15.6",
