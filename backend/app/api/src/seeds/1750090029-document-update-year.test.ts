@@ -75,7 +75,7 @@ describe('migration.document-update-year', () => {
             // take most frequent year and prefer date of document creation
             expect(updatedDocument1?.year).toBe(2021);
             expect(updatedDocument2?.year).toBe(2021);
-            expect(updatedDocument3?.year).toBe(2021);
+            expect(updatedDocument3?.year).toBe(2020); // maxed at creation year
         });
 
         test('groups overlapping period', async () => {
@@ -92,8 +92,8 @@ describe('migration.document-update-year', () => {
             await organization.save();
 
             const period2 = await new RegistrationPeriodFactory({
-                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2020 }),
-                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2020 }),
+                startDate: Formatter.luxon().set({ day: 1, month: 1, year: 2020 }).toJSDate(),
+                endDate: Formatter.luxon().set({ day: 31, month: 12, year: 2020 }).toJSDate(),
                 organization,
             }).create();
 
