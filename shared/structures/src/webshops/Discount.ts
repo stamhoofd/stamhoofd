@@ -186,7 +186,6 @@ export class ProductsSelector extends AutoEncoder {
     }
 
     override encode(context: EncodeContext): PlainObject {
-        console.error('test encode products selector');
         if (this.products.length === 1) {
             // Soft version upgrade: encode as ProductSelector
             return this.products[0].encode(context);
