@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@simonbackx/simple-encoding';
 
 import { GenericBalance } from '../GenericBalance.js';
+import type { Group } from '../Group.js';
+import { GroupType } from '../GroupType.js';
 import { Organization } from '../Organization.js';
 import { User } from '../User.js';
 import { EmailRecipient } from '../email/Email.js';
@@ -14,6 +16,17 @@ import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
 import { MemberRegistrationInvitation } from './RegistrationInvitation.js';
 import type { Filterable } from './records/RecordCategory.js';
+
+/** High-level SGV sync state shown in member lists and used to decide whether attention is needed. */
+export enum SGVSyncStatus {
+    Never = 'never',
+    Outdated = 'outdated',
+    Changed = 'changed',
+    Ok = 'ok',
+}
+
+const SGV_OUTDATED_AFTER_MS = 1000 * 60 * 60 * 24 * 30 * 9;
+const SGV_SYNC_UPDATE_TOLERANCE_MS = 1000 * 5;
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })
@@ -137,6 +150,51 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
         return recipients;
     }
+}
+
+/**
+ * Determines whether a member still reflects the latest SGV sync.
+ * New membership registrations and old sync timestamps become outdated, while local edits after sync become changed.
+ */
+export function getSGVSyncStatus(member: MemberWithRegistrationsBlob, options: { now?: Date; periodId?: string | null } = {}): SGVSyncStatus {
+    const lastExternalSync = member.details.lastExternalSync;
+    if (!lastExternalSync) {
+        return SGVSyncStatus.Never;
+    }
+
+    for (const registration of member.registrations) {
+        if (options.periodId && registration.group.periodId !== options.periodId) {
+            continue;
+        }
+
+        if (registration.group.type !== GroupType.Membership || registration.deactivatedAt !== null || registration.registeredAt === null) {
+            continue;
+        }
+
+        if (registration.registeredAt > lastExternalSync) {
+            return SGVSyncStatus.Outdated;
+        }
+    }
+
+    if (lastExternalSync.getTime() < (options.now ?? new Date()).getTime() - SGV_OUTDATED_AFTER_MS) {
+        return SGVSyncStatus.Outdated;
+    }
+
+    if (Math.abs(lastExternalSync.getTime() - member.updatedAt.getTime()) < SGV_SYNC_UPDATE_TOLERANCE_MS) {
+        return SGVSyncStatus.Ok;
+    }
+
+    return SGVSyncStatus.Changed;
+}
+
+/** Returns whether SGV should manage this member because they have an active membership registration. */
+export function isSGVManagedMember(member: MemberWithRegistrationsBlob, groups?: Group[]): boolean {
+    return member.registrations.some((registration) => {
+        const group = groups?.find(g => g.id === registration.groupId) ?? registration.group;
+        return group.type === GroupType.Membership
+            && registration.deactivatedAt === null
+            && registration.registeredAt !== null;
+    });
 }
 
 export class MembersBlob extends AutoEncoder {

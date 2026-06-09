@@ -1,43 +1,19 @@
 import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { CaddyRoute } from '../config/caddy-config.js';
 import type { CliContext } from '../context/create-context.js';
-import type { OutputWriter } from './output-target.js';
-import { defaultOutputWriter } from './output-target.js';
-import { buildPorts } from '../context/ports.js';
+import { defaultOutputWriter, type OutputWriter } from './output-target.js';
 
-/**
- * Upgrading version ignores old manifests
- */
 const CurrentManifestVersion = '2';
 
-export type CaddyRouteOptions = { routes: CaddyRoute[]; tlsSubjects: string[] };
-type Domains = {
-    dashboard: string;
-    api: string;
-    renderer: string;
-    registration?: string;
-    webshop?: string;
-};
-export type InstanceManifest = {
-    version: string;
-    name: string;
-    kind?: RouteManifestKind;
-    pid?: number;
-    env: string;
-    workspace: string;
-    primary: boolean;
-    prefix: string;
-    portOffset: number;
-    startedAt: string;
-    rootPath: string;
-    domains: Domains;
-    ports: ReturnType<typeof buildPorts>;
-    caddy?: CaddyRouteOptions;
-};
-
-export type RouteManifestKind = 'instance' | 'playwright-worker';
+/** Distinguishes the process types that can publish local routes into shared Caddy/CoreDNS config. */
+export enum RouteManifestKind {
+    DevInstance = 'dev-instance',
+    PlaywrightWorker = 'playwright-worker',
+    SharedService = 'shared-service',
+    SgvMock = 'sgv-mock',
+    Sso = 'sso',
+}
 
 export type RouteManifest = {
     version: string;
@@ -48,41 +24,49 @@ export type RouteManifest = {
     expiresAt?: string;
     rootPath: string;
     workspace: string;
-    caddy: CaddyRouteOptions;
+    routes: RouteManifestRoute[];
+    tlsSubjects: string[];
 };
 
-export async function writeInstanceManifest(context: CliContext, options: { domains: Domains; caddy?: CaddyRouteOptions }): Promise<void> {
-    const manifest: InstanceManifest = {
-        version: CurrentManifestVersion,
-        name: context.instance.name,
-        kind: 'instance',
-        pid: process.pid,
-        env: context.env,
-        workspace: context.workspace,
-        primary: context.instance.primary,
-        prefix: context.instance.prefix,
-        portOffset: context.instance.portOffset,
-        startedAt: new Date().toISOString(),
-        rootPath: context.rootDir,
-        domains: options?.domains,
-        ports: buildPorts(context),
-        caddy: options?.caddy,
-    };
-    await fs.mkdir(instanceDir(context), { recursive: true });
-    await fs.writeFile(instancePath(context, context.instance.name), JSON.stringify(manifest, null, 4));
-}
+export type RouteManifestRoute = {
+    hosts: string[];
+    port: number;
+};
 
-export async function removeInstanceManifest(context: CliContext): Promise<void> {
-    await fs.rm(instancePath(context, context.instance.name), { force: true });
-}
+export type ServiceRouteRegistration = {
+    name: string;
+    kind: RouteManifestKind;
+    routes: RouteManifestRoute[];
+    expiresAt?: string;
+};
 
 export async function writeRouteManifest(context: CliContext, manifest: RouteManifest): Promise<void> {
     await fs.mkdir(instanceDir(context), { recursive: true });
     await fs.writeFile(instancePath(context, manifest.name), JSON.stringify(manifest, null, 4));
 }
 
+/** Registers routes for the current process and records its pid so stale manifests can be pruned automatically. */
+export async function registerServiceRoutes(context: CliContext, registration: ServiceRouteRegistration): Promise<void> {
+    await writeRouteManifest(context, {
+        version: CurrentManifestVersion,
+        name: registration.name,
+        kind: registration.kind,
+        pid: process.pid,
+        startedAt: new Date().toISOString(),
+        expiresAt: registration.expiresAt,
+        rootPath: context.rootDir,
+        workspace: context.workspace,
+        routes: registration.routes,
+        tlsSubjects: [...new Set(registration.routes.flatMap(route => route.hosts))],
+    });
+}
+
 export async function removeRouteManifest(context: CliContext, name: string): Promise<void> {
     await fs.rm(instancePath(context, name), { force: true });
+}
+
+export async function unregisterServiceRoutes(context: CliContext, name: string): Promise<void> {
+    await removeRouteManifest(context, name);
 }
 
 export async function removeRouteManifestsByKind(context: CliContext, kind: RouteManifestKind): Promise<void> {
@@ -120,55 +104,6 @@ export async function listActiveRouteManifests(context: CliContext, options: { w
     return active;
 }
 
-export async function listInstanceManifests(context: CliContext, options: { writeOutputLine?: OutputWriter } = {}): Promise<InstanceManifest[]> {
-    const writeOutputLine = options.writeOutputLine ?? defaultOutputWriter;
-    let files: string[];
-
-    try {
-        files = (await fs.readdir(instanceDir(context))).filter(file => file.endsWith('.json'));
-    } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-            return [];
-        }
-        throw error;
-    }
-
-    const manifests = await Promise.all(files.map(async (file) => {
-        try {
-            return JSON.parse(await fs.readFile(path.join(instanceDir(context), file), 'utf-8')) as InstanceManifest;
-        } catch (error) {
-            // One corrupt manifest should not hide the rest of the active instances.
-            writeOutputLine(`${chalk.yellow('!')} Ignoring invalid instance manifest ${file}: ${error instanceof Error ? error.message : String(error)}`);
-            return undefined;
-        }
-    }));
-
-    return manifests.filter((manifest): manifest is InstanceManifest => manifest !== undefined);
-}
-
-export async function listActiveInstanceManifests(context: CliContext, options: { writeOutputLine?: OutputWriter } = {}): Promise<InstanceManifest[]> {
-    const activeRouteManifests = await listActiveRouteManifests(context, options);
-    const activeInstanceNames = new Set(activeRouteManifests.filter(manifest => manifest.kind === 'instance').map(manifest => manifest.name));
-    const instanceManifests = await listInstanceManifests(context, options);
-    return instanceManifests.filter(manifest => activeInstanceNames.has(manifest.name));
-}
-
-export function instanceManifestToRouteManifest(manifest: InstanceManifest): RouteManifest {
-    return {
-        version: manifest.version,
-        name: manifest.name,
-        kind: 'instance',
-        pid: manifest.pid,
-        startedAt: manifest.startedAt,
-        rootPath: manifest.rootPath,
-        workspace: manifest.workspace,
-        caddy: manifest.caddy ?? {
-            routes: [],
-            tlsSubjects: [],
-        },
-    };
-}
-
 export function sharedDir(context: CliContext): string {
     return path.join(context.generatedDir, 'shared');
 }
@@ -191,7 +126,8 @@ async function listRouteManifestEntries(context: CliContext, options: { writeOut
 
     try {
         files = (await fs.readdir(instanceDir(context))).filter(file => file.endsWith('.json'));
-    } catch (error) {
+    }
+    catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
             return [];
         }
@@ -204,7 +140,8 @@ async function listRouteManifestEntries(context: CliContext, options: { writeOut
             const raw = JSON.parse(await fs.readFile(filePath, 'utf-8')) as unknown;
             const manifest = parseRouteManifest(raw, { writeOutputLine: options.writeOutputLine });
             return manifest ? { path: filePath, manifest } : { path: filePath };
-        } catch (error) {
+        }
+        catch (error) {
             writeOutputLine(`${chalk.yellow('!')} Ignoring invalid route manifest ${file}: ${error instanceof Error ? error.message : String(error)}`);
             return { path: filePath };
         }
@@ -217,18 +154,21 @@ function parseRouteManifest(value: unknown, options: { writeOutputLine?: OutputW
     if (!value || typeof value !== 'object') {
         return undefined;
     }
-    const raw = value as Partial<RouteManifest> & Partial<InstanceManifest>;
+
+    const raw = value as Partial<RouteManifest>;
     if (raw.version !== CurrentManifestVersion) {
         writeOutputLine(`${chalk.yellow('!')} Ignoring old manifest: please restart all services`);
         return undefined;
     }
-    if (raw.kind === 'playwright-worker') {
+
+    if (isRouteManifestKind(raw.kind) && Array.isArray(raw.routes) && Array.isArray(raw.tlsSubjects)) {
         return raw as RouteManifest;
     }
-    if ((raw.kind === 'instance')) {
-        return instanceManifestToRouteManifest(raw as InstanceManifest);
-    }
     return undefined;
+}
+
+function isRouteManifestKind(kind: unknown): kind is RouteManifestKind {
+    return typeof kind === 'string' && Object.values(RouteManifestKind).includes(kind as RouteManifestKind);
 }
 
 function isRouteManifestActive(manifest: RouteManifest): boolean {
@@ -245,7 +185,8 @@ function processIsAlive(pid: number): boolean {
     try {
         process.kill(pid, 0);
         return true;
-    } catch {
+    }
+    catch {
         return false;
     }
 }

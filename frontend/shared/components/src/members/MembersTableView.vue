@@ -5,6 +5,13 @@
                 {{ $t('%1HO') }}
             </p>
 
+            <p v-if="sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="openSGVSync">
+                {{ sgvSyncWarning.text }}
+                <button v-if="auth.hasFullAccess()" class="button text" type="button">
+                    {{ $t('Synchroniseer') }}
+                </button>
+            </p>
+
             <template #empty>
                 {{ $t('%e3') }}
             </template>
@@ -24,6 +31,7 @@ import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequir
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import { GlobalEventBus } from '#EventBus.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
@@ -35,6 +43,8 @@ import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filte
 import { useRegistrationInvitationEventListener } from '../registrations';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from './helpers';
+import { getSGVSyncWarning } from './helpers/getSGVSyncWarning';
+import { SGVSyncStatus } from '@stamhoofd/structures';
 import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;
@@ -223,6 +233,14 @@ const objectFetcher = useMembersObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
+const sgvSyncWarning = computed(() => getSGVSyncWarning(tableObjectFetcher.objects.map(member => member.member), organization.value, auth.hasFullAccess()));
+
+function openSGVSync() {
+    if (!auth.hasFullAccess()) {
+        return;
+    }
+    GlobalEventBus.sendEvent('open-sgv-sync', undefined).catch(console.error);
+}
 
 const allColumns = getMemberColumns({
     dateRange: props.dateRange,

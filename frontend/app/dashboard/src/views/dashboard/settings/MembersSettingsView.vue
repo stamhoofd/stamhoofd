@@ -186,6 +186,19 @@
                             {{ $t('%18d') }}
                         </p>
                     </STListItem>
+
+                    <STListItem v-if="showSGVSync" :selectable="true" class="left-center" data-testid="sgv-groepsadministratie-button" @click="openSGVSync">
+                        <template #left>
+                            <IconContainer icon="sync" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Groepsadministratie synchroniseren') }}
+                        </h2>
+
+                        <p class="style-description-small">
+                            {{ $t('Synchroniseer leden met Scouts en Gidsen Vlaanderen.') }}
+                        </p>
+                    </STListItem>
                 </STList>
             </template>
         </main>
@@ -204,14 +217,18 @@ import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegis
 import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { Storage } from '@stamhoofd/networking/Storage';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
+import { computed, onMounted } from 'vue';
+import { SGV_OAUTH_CALLBACK_CODE_STORAGE_KEY, SGV_OAUTH_CALLBACK_STATE_STORAGE_KEY } from '../../../classes/SGVOAuthStorage';
+import SGVGroupAdministrationView from '../sgv/SGVGroupAdministrationView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
@@ -235,9 +252,15 @@ enum Routes {
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
+const present = usePresent();
 const buildEditGroupsView = useEditGroupsView();
 const organization = useRequiredOrganization();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const auth = useAuth();
+
+const showSGVSync = computed(() => auth.hasFullAccess()
+    && organization.value.meta.type === OrganizationType.Youth
+    && organization.value.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen);
 
 const props = withDefaults(
     defineProps<{
@@ -362,5 +385,28 @@ defineRoutes([
 ]);
 
 const $navigate = useNavigate();
+
+async function openSGVSync(oauth?: { code: string; state: string }) {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(SGVGroupAdministrationView, oauth ?? {}),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+onMounted(async () => {
+    if (!showSGVSync.value) {
+        return;
+    }
+
+    const code = await Storage.keyValue.getItem(SGV_OAUTH_CALLBACK_CODE_STORAGE_KEY);
+    const state = await Storage.keyValue.getItem(SGV_OAUTH_CALLBACK_STATE_STORAGE_KEY);
+    if (code && state) {
+        await openSGVSync({ code, state });
+    }
+});
 
 </script>

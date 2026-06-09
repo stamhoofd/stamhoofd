@@ -14,5 +14,6 @@ export function buildPorts(context: CliContext) {
         rustfs: Number.parseInt(process.env.RUSTFS_PORT ?? String(rustfsInternalApiPort), 10),
         rustfsConsole: Number.parseInt(process.env.RUSTFS_CONSOLE_PORT ?? String(rustfsInternalConsolePort), 10),
         sso: 5556 + offset,
+        sgvMock: 9094 + offset,
     };
 }

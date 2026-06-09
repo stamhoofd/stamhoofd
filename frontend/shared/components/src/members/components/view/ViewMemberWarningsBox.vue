@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import type { MemberPlatformMembership, PlatformMember} from '@stamhoofd/structures';
-import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
+import { getSGVSyncStatus, isSGVManagedMember, MembershipStatus, OrganizationType, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, SGVSyncStatus, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
@@ -144,6 +144,30 @@ const warnings = computed(() => {
         }));
     }
 
+    if (isSGVOrganization.value && isSGVManagedMember(props.member.member)) {
+        const status = getSGVSyncStatus(props.member.member, { periodId: organization.value?.period.period.id ?? null });
+        const actionText = auth.hasFullAccess() ? $t('Synchroniseer met de groepsadministratie.') : $t('Vraag je VGA of groepsleiding om te synchroniseren.');
+
+        if (status === SGVSyncStatus.Never) {
+            warnings.push(RecordWarning.create({
+                text: TranslatedString.create($t('Dit lid staat nog niet in de groepsadministratie van Scouts en Gidsen Vlaanderen en is mogelijk niet verzekerd. {action}', { action: actionText })),
+                type: RecordWarningType.Error,
+            }));
+        }
+        else if (status === SGVSyncStatus.Outdated) {
+            warnings.push(RecordWarning.create({
+                text: TranslatedString.create($t('De inschrijving van dit lid is nog niet opnieuw gesynchroniseerd met Scouts en Gidsen Vlaanderen. {action}', { action: actionText })),
+                type: RecordWarningType.Warning,
+            }));
+        }
+        else if (status === SGVSyncStatus.Changed) {
+            warnings.push(RecordWarning.create({
+                text: TranslatedString.create($t('De gegevens van dit lid zijn gewijzigd sinds de laatste synchronisatie met Scouts en Gidsen Vlaanderen. {action}', { action: actionText })),
+                type: RecordWarningType.Info,
+            }));
+        }
+    }
+
     return warnings;
 });
 const hasWarnings = computed(() => warnings.value.length > 0);
@@ -164,4 +188,5 @@ const getNextMembership = (): MemberPlatformMembership | null => {
 
     return null;
 };
+const isSGVOrganization = computed(() => organization.value?.meta.type === OrganizationType.Youth && organization.value.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen);
 </script>

@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import dns from 'node:dns/promises';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
@@ -11,11 +10,9 @@ import { run } from '../runtime/command-runner.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
 import { command, confirm, statusCell, success, table, Table, type TableCellInput, type TableRow, warning } from '../runtime/ux.js';
-import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
+import { expectedOsDnsConfig, inspectDns } from './dns-inspection.js';
 import { runServices } from './start-services.js';
-
-const directDnsQueryTimeoutMs = 1000;
 
 export type SetupReport = {
     docker: CheckResult;
@@ -199,7 +196,11 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean; verbose
         throw new Error('Automatic DNS setup is not supported on this platform.');
     }
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
-    const content = `[Resolve]\nDNS=${localIpv4Host}:${profile.corednsHostPort}\nDomains=~${domain}\n`;
+    const expected = expectedOsDnsConfig(domain, profile);
+    const content = expected.content;
+    if (!content) {
+        throw new Error('Automatic DNS setup is not supported on this platform.');
+    }
     const tempPath = path.join(os.tmpdir(), `stamhoofd-resolved-${process.pid}.conf`);
 
     console.log(`This will configure temporary split DNS for .${domain}.`);
@@ -229,8 +230,12 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean; verbose
 
 async function setupMacosDns(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
-    const resolverPath = macosResolverPath(domain);
-    const content = macosResolverContent();
+    const expected = expectedOsDnsConfig(domain, await currentSharedServiceProfile());
+    const resolverPath = expected.path;
+    const content = expected.content;
+    if (!resolverPath || !content) {
+        throw new Error('Automatic DNS setup is not supported on this platform.');
+    }
     const tempPath = path.join(os.tmpdir(), `stamhoofd-resolver-${process.pid}.conf`);
     const existing = await readFileIfExists(resolverPath);
 
@@ -343,73 +348,23 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
     success('Caddy local CA trusted.');
 }
 
-async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Promise<CheckResult> {
-    const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
-
-    if (profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver) {
-        return await macosDnsCheck(context, domain);
+async function dnsCheck(context: CliContext, _profile: SharedServiceProfile): Promise<CheckResult> {
+    const inspection = await inspectDns(context, { stopAfterOsConfigFailure: true });
+    const osConfig = inspection.checks.find(check => check.key === 'os-config');
+    if (!osConfig?.ok) {
+        const automaticFix = osConfig?.details.includes('is missing') ? { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } : undefined;
+        return { ok: false, details: osConfig?.details ?? `Local DNS is not configured for .${inspection.domain}`, manualFix: 'stam setup dns', automaticFix };
     }
-
-    if (!(await dnsConfigurationCheck(domain, profile))) {
-        return { ok: false, details: `Local DNS is not configured for .${domain}`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
+    const coredns = inspection.checks.find(check => check.key === 'coredns');
+    if (!coredns?.ok) {
+        return { ok: false, details: coredns?.details ?? 'CoreDNS is not running', manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
     }
-
-    const result = await run('resolvectl', ['query', `dashboard.${domain}`], { capture: true, allowFailure: true });
-    if (result.stdout.includes(localIpv4Host)) {
-        return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
+    const directCoredns = inspection.checks.find(check => check.key === 'direct-coredns');
+    const systemResolver = inspection.checks.find(check => check.key === 'system-resolver');
+    if (systemResolver?.ok || (inspection.profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver && directCoredns?.ok)) {
+        return { ok: true, details: `${inspection.query} resolves to ${localIpv4Host}` };
     }
-
-    const corednsStatus = await corednsService.status(context);
-    if (!corednsStatus.running) {
-        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
-    }
-
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
-}
-
-async function macosDnsCheck(context: CliContext, domain: string): Promise<CheckResult> {
-    const resolverPath = macosResolverPath(domain);
-    const content = await readFileIfExists(resolverPath);
-    if (content === undefined) {
-        return { ok: false, details: `${resolverPath} does not exist`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
-    }
-    if (content !== macosResolverContent()) {
-        return { ok: false, details: `${resolverPath} exists with unexpected contents`, manualFix: 'stam setup dns' };
-    }
-
-    const corednsStatus = await corednsService.status(context);
-    if (!corednsStatus.running) {
-        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
-    }
-
-    if (await directCorednsCheck(domain)) {
-        return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
-    }
-
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
-}
-
-async function directCorednsCheck(domain: string): Promise<boolean> {
-    const resolver = new dns.Resolver({ timeout: directDnsQueryTimeoutMs, tries: 1 });
-    resolver.setServers([localIpv4Host]);
-    try {
-        const addresses = await resolver.resolve4(`dashboard.${domain}`);
-        return addresses.includes(localIpv4Host);
-    } catch {
-        return false;
-    }
-}
-
-async function dnsConfigurationCheck(domain: string, profile: SharedServiceProfile): Promise<boolean> {
-    const [dns, domains] = await Promise.all([
-        run('resolvectl', ['dns'], { capture: true, allowFailure: true }),
-        run('resolvectl', ['domain'], { capture: true, allowFailure: true }),
-    ]);
-
-    return dns.status === 0
-        && domains.status === 0
-        && dns.stdout.includes(`${localIpv4Host}:${profile.corednsHostPort}`)
-        && domains.stdout.includes(`~${domain}`);
+    return { ok: false, details: systemResolver?.details ?? `${inspection.query} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
 }
 
 async function certCheck(): Promise<CheckResult> {
@@ -480,14 +435,6 @@ async function currentSharedServiceProfile(): Promise<SharedServiceProfile> {
         // Setup can still report DNS and Caddy issues before Docker is running.
     }
     return buildSharedServiceProfile(runtime);
-}
-
-function macosResolverPath(domain: string): string {
-    return path.join('/etc/resolver', domain);
-}
-
-function macosResolverContent(): string {
-    return `nameserver ${localIpv4Host}\n`;
 }
 
 async function readFileIfExists(filePath: string): Promise<string | undefined> {

@@ -18,17 +18,22 @@
         "dist"
     ],
     "dependencies": {
+        "@stamhoofd/admin-frontend": "*",
         "@stamhoofd/assets": "*",
+        "@stamhoofd/auto": "*",
         "@stamhoofd/utility": "*",
         "@stamhoofd/components": "*",
+        "@stamhoofd/dashboard": "*",
         "@stamhoofd/document-helper": "*",
         "@stamhoofd/frontend-excel-export": "*",
         "@stamhoofd/frontend-i18n": "*",
         "@stamhoofd/frontend-pdf-builder": "*",
         "@stamhoofd/ticket-builder": "*",
         "@stamhoofd/networking": "*",
+        "@stamhoofd/registration": "*",
         "@stamhoofd/scss": "*",
         "@stamhoofd/structures": "*",
+        "@stamhoofd/verify-email": "*",
         "qr-scanner": "^1.3.0"
     }
 }

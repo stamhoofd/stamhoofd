@@ -9,11 +9,16 @@ import PaymentPendingView from '@stamhoofd/components/payments/PaymentPendingVie
 import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { Storage } from '@stamhoofd/networking/Storage';
 import { EmailAddressSettings, Platform } from '@stamhoofd/structures';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { PaymentStatus } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;
+const SGV_OAUTH_SAVED_REDIRECT_URL_STORAGE_KEY = 'sgv-saved-redirect-url';
+const SGV_OAUTH_CALLBACK_CODE_STORAGE_KEY = 'sgv-callback-code';
+const SGV_OAUTH_CALLBACK_STATE_STORAGE_KEY = 'sgv-callback-state';
+
 export function useGlobalRoutes() {
     const modalStackComponent = useModalStackComponent();
     const context = useContext();
@@ -70,6 +75,19 @@ export function useGlobalRoutes() {
         const parts = UrlHelper.shared.getParts();
         const queryString = UrlHelper.shared.getSearchParams();
         console.log('Checking global routes', parts, queryString, currentPath);
+
+        if (parts[0] === 'oauth' && parts[1] === 'sgv') {
+            const code = queryString.get('code');
+            const state = queryString.get('state');
+            if (code && state) {
+                await Storage.keyValue.setItem(SGV_OAUTH_CALLBACK_CODE_STORAGE_KEY, code);
+                await Storage.keyValue.setItem(SGV_OAUTH_CALLBACK_STATE_STORAGE_KEY, state);
+            }
+
+            const savedRedirectUrl = await Storage.keyValue.getItem(SGV_OAUTH_SAVED_REDIRECT_URL_STORAGE_KEY);
+            window.location.replace(savedRedirectUrl || '/beheerders/instellingen/ledenadministratie');
+            return;
+        }
 
         if (queryString.get('paymentId')) {
             const paymentId = queryString.get('paymentId');

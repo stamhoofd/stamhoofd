@@ -7,6 +7,8 @@ export enum CliStatus {
     Running = 'running',
     Stopped = 'stopped',
     Missing = 'missing',
+    Configured = 'configured',
+    Unavailable = 'unavailable',
     Failed = 'failed',
 }
 
@@ -22,6 +24,10 @@ export function formatStatusLabel(status: CliStatus): string {
             return `${chalk.yellow('!')} ${chalk.yellow('stopped')}`;
         case CliStatus.Missing:
             return `${chalk.yellow('!')} ${chalk.yellow('missing')}`;
+        case CliStatus.Configured:
+            return `${chalk.green(successSymbol)} ${chalk.green('configured')}`;
+        case CliStatus.Unavailable:
+            return `${chalk.yellow('-')} ${chalk.yellow('unavailable')}`;
         case CliStatus.Failed:
             return `${chalk.red('✖')} ${chalk.red('failed')}`;
     }

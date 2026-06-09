@@ -41,7 +41,7 @@ export default defineConfig({
 
         // todo
         headless: process.env.HEADED ? false : true,
-        // ignoreHTTPSErrors: true,
+        ignoreHTTPSErrors: true,
         launchOptions: {
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--window-position=2721,66'],
         },

@@ -14,6 +14,7 @@ export enum BackendApp {
     Renderer = 'renderer',
     Redirecter = 'redirecter',
     Backup = 'backup',
+    SgvMock = 'sgv-mock',
 }
 
 export enum FrontendApp {
@@ -110,6 +111,8 @@ function buildDevelopmentDomains(context: CliContext) {
         files: `files.${domain}`,
         filesConsole: `files-console.${domain}`,
         sso: appDomain('sso'),
+        loginSgv: appDomain('login.sgv'),
+        adminSgv: appDomain('admin.sgv'),
         mysql: `mysql.${domain}`,
     };
 }
@@ -206,6 +209,8 @@ function buildStamhoofdDomains(domains: DevelopmentDomains, preset: EnvironmentP
         webshop: { '': domains.webshop, 'BE': domains.webshop, 'NL': domains.webshop },
         api: domains.api,
         rendererApi: domains.renderer,
+        sgvLoginUrl: `https://${domains.loginSgv}`,
+        sgvAdminUrl: `https://${domains.adminSgv}`,
         webshopCname: domains.webshop,
         registrationCname: { '': domains.registration },
         defaultTransactionalEmail: { '': 'stamhoofd.be', 'NL': 'stamhoofd.nl' },
@@ -220,6 +225,9 @@ function backendPort(service: BackendAppService['backend'], ports: ReturnType<ty
 
     if (app === BackendApp.Renderer) {
         return ports.renderer;
+    }
+    if (app === BackendApp.SgvMock) {
+        return ports.sgvMock;
     }
     return ports.api;
 }

@@ -164,6 +164,7 @@
                                 <span class="icon arrow-right-small gray" />
                             </template>
                         </STListItem>
+
                     </STList>
 
                     <hr><h2>{{ $t('%16X') }}</h2>
