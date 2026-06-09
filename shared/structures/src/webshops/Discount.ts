@@ -1,12 +1,12 @@
 import type { Data, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
-import type { CartItem, CartItemPrice } from './CartItem.js';
-import { v4 as uuidv4 } from 'uuid';
-import type { Checkout } from './Checkout.js';
-import type { Webshop } from './Webshop.js';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, ObjectData, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import type { OptionMenu, Option } from './Product.js';
+import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import type { CartItem, CartItemPrice } from './CartItem.js';
+import type { Checkout } from './Checkout.js';
+import type { Option, OptionMenu } from './Product.js';
+import type { Webshop } from './Webshop.js';
 
 export enum OptionSelectionRequirement {
     Required = 'Required',
@@ -176,12 +176,17 @@ export class ProductsSelector extends AutoEncoder {
             });
             return pss as InstanceType<T>;
         }
-        const decoded = super.decode<T>(data);
+        const decoded = super.decodeField<T>(data.value, data.context, data.currentField);
 
         return decoded;
     }
 
+    static override decodeField<T extends typeof AutoEncoder>(value: unknown, context: EncodeContext, currentField?: string): InstanceType<T> {
+        return this.decode(new ObjectData(value, context, currentField)) as InstanceType<T>;
+    }
+
     override encode(context: EncodeContext): PlainObject {
+        console.error('test encode products selector');
         if (this.products.length === 1) {
             // Soft version upgrade: encode as ProductSelector
             return this.products[0].encode(context);
