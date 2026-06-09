@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
+import type { CaddyRoute } from '../../config/caddy-config.js';
 import { buildCaddyRouteOptions, writeCaddyConfig } from '../../config/caddy-config.js';
 import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
 import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
 import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
-import type { CaddyRouteOptions } from '../../runtime/manifest-store.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import type { ServiceStatus } from '../service.js';
@@ -68,7 +68,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         await caddyService.start(context, undefined);
     }
 
-    static buildRouteOptions(context: CliContext): CaddyRouteOptions {
+    static buildRouteOptions(context: CliContext): { routes: CaddyRoute[]; tlsSubjects: string[] } {
         const profile = buildCaddyServiceProfile();
         return buildCaddyRouteOptions(context, {
             proxyHost: profile.caddyProxyHost,
@@ -102,6 +102,19 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
 
     static dataDir(): string {
         return caddyDataDir();
+    }
+
+    static adminUrl(): string {
+        return `http://${localhostPort(caddyAdminPort)}`;
+    }
+
+    static async fetchAdmin(path: string, init: RequestInit = {}): Promise<Response> {
+        const headers = new Headers(init.headers);
+        if (!headers.has('Origin')) {
+            headers.set('Origin', CaddyService.adminUrl());
+        }
+
+        return await fetch(`${CaddyService.adminUrl()}${path.startsWith('/') ? path : `/${path}`}`, { ...init, headers });
     }
 
     private static async runsInHostNetwork(): Promise<boolean> {

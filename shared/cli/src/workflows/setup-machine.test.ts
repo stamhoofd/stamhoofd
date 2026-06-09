@@ -25,6 +25,10 @@ vi.mock('../runtime/command-runner.js', () => ({
 }));
 
 vi.mock('../services/definitions/coredns-service.js', () => ({
+    CorednsService: {
+        corefileContent: vi.fn((domain: string) => `${domain} {\n    log\n}\n`),
+        records: vi.fn((domain: string) => [{ zone: domain, type: 'A', value: '127.0.0.1', appliesTo: `Every hostname under .${domain}` }]),
+    },
     corednsService: { status: vi.fn() },
 }));
 
@@ -218,7 +222,7 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({ ok: true });
         expect(fs.readFile).toHaveBeenCalledWith('/etc/resolver/stamhoofd', 'utf8');
-        expect(dnsResolver.setServers).toHaveBeenCalledWith(['127.0.0.1']);
+        expect(dnsResolver.setServers).toHaveBeenCalledWith(['127.0.0.1:53']);
         expect(dnsResolver.resolve4).toHaveBeenCalledWith('dashboard.stamhoofd');
     });
 
@@ -369,6 +373,14 @@ function mockSetupCommands(options: { dns?: string; domains?: string; query?: st
                 throw error;
             }
             return options.resolver;
+        }
+        if (filePath === '/run/systemd/resolved.conf.d/stamhoofd.conf') {
+            if (options.dns?.includes('127.0.0.1:1053') && options.domains?.includes('~stamhoofd')) {
+                return '[Resolve]\nDNS=127.0.0.1:1053\nDomains=~stamhoofd\n';
+            }
+            const error = new Error('missing') as NodeJS.ErrnoException;
+            error.code = 'ENOENT';
+            throw error;
         }
         const unexpectedPath = typeof filePath === 'string'
             ? filePath

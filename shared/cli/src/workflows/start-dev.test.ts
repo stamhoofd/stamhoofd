@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import chalk from 'chalk';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
+import { registerServiceRoutes, RouteManifestKind, unregisterServiceRoutes } from '../runtime/manifest-store.js';
 import { createLiveOutput } from '../runtime/live-output.js';
 import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
@@ -17,8 +17,11 @@ vi.mock('node:child_process', () => ({
 }));
 
 vi.mock('../runtime/manifest-store.js', () => ({
-    removeInstanceManifest: vi.fn(),
-    writeInstanceManifest: vi.fn(),
+    registerServiceRoutes: vi.fn(),
+    unregisterServiceRoutes: vi.fn(),
+    RouteManifestKind: {
+        DevInstance: 'dev-instance',
+    },
 }));
 
 vi.mock('../runtime/live-output.js', () => ({
@@ -109,8 +112,8 @@ describe.skip('runDev', () => {
         vi.mocked(isSetupReady).mockReturnValue(true);
         vi.mocked(printSetupReport).mockImplementation(() => undefined);
         vi.mocked(sharedServicesRunning).mockResolvedValue(true);
-        vi.mocked(writeInstanceManifest).mockResolvedValue(undefined);
-        vi.mocked(removeInstanceManifest).mockResolvedValue(undefined);
+        vi.mocked(registerServiceRoutes).mockResolvedValue(undefined);
+        vi.mocked(unregisterServiceRoutes).mockResolvedValue(undefined);
         vi.mocked(CaddyService.reload).mockResolvedValue(undefined);
         vi.mocked(startServices).mockResolvedValue({ env: {}, started: [] });
         vi.mocked(stopServices).mockResolvedValue(undefined);
@@ -143,13 +146,7 @@ describe.skip('runDev', () => {
         const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
-        expect(spawn).toHaveBeenCalledWith('yarn', [
-            '-s',
-            'concurrently',
-            '-r',
-            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+yarn --cwd shared\/cli -s build.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
-            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && yarn -s lerna run dev --scope @stamhoofd\/backend --scope @stamhoofd\/backend-renderer --scope @stamhoofd\/dashboard --scope @stamhoofd\/registration --scope @stamhoofd\/webshop --parallel --stream/),
-        ], expect.objectContaining({
+        expect(spawn).toHaveBeenCalledWith('yarn', expect.any(Array), expect.objectContaining({
             cwd: context.rootDir,
             stdio: ['inherit', 'pipe', 'pipe'],
             env: expect.objectContaining({
@@ -157,6 +154,19 @@ describe.skip('runDev', () => {
                 npm_config_color: 'always',
             }),
         }));
+        const [, spawnArgs] = vi.mocked(spawn).mock.calls[0];
+        expect(spawnArgs.slice(0, 3)).toEqual(['-s', 'concurrently', '-r']);
+        expect(spawnArgs[3]).toContain('rm -f .development/cli/generated/shared-build-');
+        expect(spawnArgs[3]).toContain('yarn --cwd shared/cli -s build');
+        expect(spawnArgs[3]).toContain('yarn --cwd shared/sgv -s build');
+        expect(spawnArgs[3]).toContain('touch .development/cli/generated/shared-build-');
+        expect(spawnArgs[4]).toContain('wait-on .development/cli/generated/shared-build-');
+        expect(spawnArgs[4]).toContain('shared/cli/dist/index.js shared/locales/dist/index.d.ts');
+        expect(spawnArgs[4]).toContain('yarn -s lerna run dev');
+        expect(spawnArgs[4]).toContain('--scope @stamhoofd/backend');
+        expect(spawnArgs[4]).toContain('--scope @stamhoofd/dashboard');
+        expect(spawnArgs[4]).toContain('--scope @stamhoofd/webshop');
+        expect(spawnArgs[4]).toContain('--parallel --stream');
 
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
             { label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`, href: 'https://dashboard.stamhoofd' },
@@ -291,7 +301,7 @@ describe.skip('runDev', () => {
         const child = createChild();
         const calls: string[] = [];
         vi.mocked(spawn).mockReturnValue(child as any);
-        vi.mocked(removeInstanceManifest).mockImplementation(async () => {
+        vi.mocked(unregisterServiceRoutes).mockImplementation(async () => {
             calls.push('remove-manifest');
         });
         vi.mocked(CaddyService.reload).mockImplementation(async () => {

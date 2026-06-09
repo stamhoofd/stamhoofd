@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { caddyDataDir } from '../config/shared-service-config.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import * as docker from '../services/docker.js';
@@ -33,6 +33,10 @@ vi.mock('../services/definitions/caddy-service.js', () => ({
 }));
 
 describe('monorepo runner', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('passes the Caddy root CA to Playwright', async () => {
         await testE2e(context(), { ci: false, clear: false, ui: false, workers: 2 });
 
@@ -46,6 +50,13 @@ describe('monorepo runner', () => {
             DB_PORT: '55103',
             NODE_EXTRA_CA_CERTS: path.join(caddyDataDir(), 'pki/authorities/local/root.crt'),
         });
+    });
+
+    it('passes Playwright test filters', async () => {
+        await testE2e(context(), { ci: false, clear: false, grep: 'SGV OAuth login', tests: ['sgv-sync-organization.spec.ts'], ui: false, workers: 1 });
+
+        const playwrightRun = vi.mocked(run).mock.calls.find(([command, args]) => command === 'yarn' && args.includes('tests/playwright'));
+        expect(playwrightRun?.[1]).toEqual(expect.arrayContaining(['sgv-sync-organization.spec.ts', '--grep', 'SGV OAuth login', '--workers', '1']));
     });
 });
 

@@ -20,8 +20,11 @@ vi.mock('./docker.js', async (importOriginal) => ({
 }));
 
 describe('shared service Docker args', () => {
+    const originalFetch = global.fetch;
+
     beforeEach(() => {
         vi.clearAllMocks();
+        global.fetch = originalFetch;
     });
 
     it('builds MySQL args with local port binding and volume', () => {
@@ -96,6 +99,22 @@ describe('shared service Docker args', () => {
         expect(detail).toContain(`HTTP ${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyUnprivilegedHttpPort)}`);
         expect(detail).toContain(`HTTPS ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyUnprivilegedHttpsPort)}`);
         expect(detail).toContain(`admin ${localhostPort(caddyAdminPort)}`);
+    });
+
+    it('fetches Caddy admin endpoints with the allowed local origin', async () => {
+        const signal = AbortSignal.timeout(1_000);
+        const fetch = vi.fn(async () => new Response('{}'));
+        global.fetch = fetch;
+
+        await CaddyService.fetchAdmin('config/', { signal, headers: { Accept: 'application/json' } });
+
+        expect(fetch).toHaveBeenCalledWith(`http://${localhostPort(caddyAdminPort)}/config/`, {
+            signal,
+            headers: expect.any(Headers),
+        });
+        const headers = fetch.mock.calls[0][1].headers as Headers;
+        expect(headers.get('Origin')).toBe(`http://${localhostPort(caddyAdminPort)}`);
+        expect(headers.get('Accept')).toBe('application/json');
     });
 
     it('tails all shared service logs through concurrently', async () => {
