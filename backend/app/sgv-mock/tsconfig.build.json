@@ -1,0 +1,18 @@
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "dist",
+        "skipLibCheck": true
+    },
+    "include": [
+        "./src"
+    ],
+    "exclude": [
+        "./src/**/*.spec.ts",
+        "./src/**/*.test.ts"
+    ],
+    "references": [
+        { "path": "../../../shared/sgv/tsconfig.build.json" }
+    ]
+}
