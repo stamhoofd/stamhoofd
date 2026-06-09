@@ -3,38 +3,33 @@ import path from 'node:path';
 import os from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { listActiveRouteManifests, listInstanceManifests, writeRouteManifest } from './manifest-store.js';
+import { listActiveRouteManifests, registerServiceRoutes, RouteManifestKind, writeRouteManifest } from './manifest-store.js';
 
 describe('manifest store', () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
 
-    it('returns an empty list when the manifest directory is missing', async () => {
+    it('returns an empty route list when the manifest directory is missing', async () => {
         const context = await testContext();
 
-        await expect(listInstanceManifests(context)).resolves.toEqual([]);
+        await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
     });
 
-    it('ignores corrupt manifests and returns valid ones', async () => {
+    it('ignores corrupt route manifests and returns valid ones', async () => {
         const context = await testContext();
         const instancesDir = path.join(context.generatedDir, 'instances');
         await fs.mkdir(instancesDir, { recursive: true });
         await fs.writeFile(path.join(instancesDir, 'valid.json'), JSON.stringify({
+            version: '2',
             name: 'main',
-            env: 'stamhoofd',
-            workspace: 'main',
-            primary: true,
-            prefix: '',
-            portOffset: 0,
+            kind: RouteManifestKind.DevInstance,
+            pid: process.pid,
             startedAt: '2026-01-01T00:00:00.000Z',
             rootPath: '/repo',
-            domains: {
-                dashboard: 'dashboard.stamhoofd',
-                api: 'api.stamhoofd',
-                renderer: 'renderer.stamhoofd',
-            },
-            ports: {},
+            workspace: 'main',
+            routes: [{ hosts: ['dashboard.stamhoofd'], port: 8080 }],
+            tlsSubjects: ['dashboard.stamhoofd'],
         }, null, 4));
         await fs.writeFile(path.join(instancesDir, 'broken.json'), '{broken');
         const warnings: string[] = [];
@@ -42,18 +37,41 @@ describe('manifest store', () => {
             warnings.push(message);
         });
 
-        await expect(listInstanceManifests(context, { writeOutputLine })).resolves.toMatchObject([
-            { name: 'main', env: 'stamhoofd' },
+        await expect(listActiveRouteManifests(context, { writeOutputLine })).resolves.toMatchObject([
+            { name: 'main', kind: RouteManifestKind.DevInstance },
         ]);
         expect(warnings).toHaveLength(1);
         expect(warnings[0]).toContain('broken.json');
     });
 
+    it('registers service routes with the current process id and TLS subjects', async () => {
+        const context = await testContext();
+
+        await registerServiceRoutes(context, {
+            name: 'main-sgv-mock',
+            kind: RouteManifestKind.SgvMock,
+            routes: [
+                { hosts: ['login.sgv.stamhoofd'], port: 9094 },
+                { hosts: ['admin.sgv.stamhoofd'], port: 9094 },
+            ],
+        });
+
+        await expect(listActiveRouteManifests(context)).resolves.toMatchObject([
+            {
+                name: 'main-sgv-mock',
+                kind: RouteManifestKind.SgvMock,
+                pid: process.pid,
+                tlsSubjects: ['login.sgv.stamhoofd', 'admin.sgv.stamhoofd'],
+            },
+        ]);
+    });
+
     it('returns active route manifests', async () => {
         const context = await testContext();
         await writeRouteManifest(context, {
+            version: '2',
             name: 'playwright-worker-0',
-            kind: 'playwright-worker',
+            kind: RouteManifestKind.PlaywrightWorker,
             pid: process.pid,
             startedAt: new Date().toISOString(),
             expiresAt: new Date(Date.now() + 60_000).toISOString(),
@@ -64,15 +82,16 @@ describe('manifest store', () => {
         });
 
         await expect(listActiveRouteManifests(context)).resolves.toMatchObject([
-            { name: 'playwright-worker-0', kind: 'playwright-worker' },
+            { name: 'playwright-worker-0', kind: RouteManifestKind.PlaywrightWorker },
         ]);
     });
 
     it('ignores and removes expired route manifests', async () => {
         const context = await testContext();
         await writeRouteManifest(context, {
+            version: '2',
             name: 'playwright-worker-0',
-            kind: 'playwright-worker',
+            kind: RouteManifestKind.PlaywrightWorker,
             startedAt: new Date().toISOString(),
             expiresAt: new Date(Date.now() - 60_000).toISOString(),
             rootPath: '/repo',
@@ -94,8 +113,9 @@ describe('manifest store', () => {
             return true;
         }) as typeof process.kill);
         await writeRouteManifest(context, {
+            version: '2',
             name: 'playwright-worker-0',
-            kind: 'playwright-worker',
+            kind: RouteManifestKind.PlaywrightWorker,
             pid: 123456,
             startedAt: new Date().toISOString(),
             expiresAt: new Date(Date.now() + 60_000).toISOString(),

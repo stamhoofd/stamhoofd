@@ -3,9 +3,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { writeInstanceManifest, writeRouteManifest } from '../runtime/manifest-store.js';
+import { registerServiceRoutes, RouteManifestKind, writeRouteManifest } from '../runtime/manifest-store.js';
 import { caddyAdminPort, localhostPort } from './shared-service-config.js';
-import { writeCaddyConfig } from './caddy-config.js';
+import { buildCaddyConfig, writeCaddyConfig } from './caddy-config.js';
 
 describe('Caddy config', () => {
     let rootDir: string;
@@ -43,9 +43,15 @@ describe('Caddy config', () => {
 
     it('keeps normal routes when adding Playwright routes', async () => {
         const ctx = context(rootDir);
+        await registerServiceRoutes(ctx, {
+            name: 'test',
+            kind: RouteManifestKind.DevInstance,
+            routes: [{ hosts: ['dashboard.stamhoofd'], port: 8080 }],
+        });
         await writeRouteManifest(ctx, {
+            version: '2',
             name: 'playwright-worker-0',
-            kind: 'playwright-worker',
+            kind: RouteManifestKind.PlaywrightWorker,
             pid: process.pid,
             startedAt: new Date().toISOString(),
             expiresAt: new Date(Date.now() + 60_000).toISOString(),
@@ -66,14 +72,18 @@ describe('Caddy config', () => {
         expect(subjects).toContain('playwright-dashboard-0.stamhoofd');
     });
 
-    it('includes all frontend app routes from active instance manifests', async () => {
+    it('includes all frontend app routes from active dev instance manifests', async () => {
         const ctx = context(rootDir);
-        await writeInstanceManifest(ctx, {
-            dashboard: 'feature.dashboard.stamhoofd',
-            api: 'feature.api.stamhoofd',
-            renderer: 'feature.renderer.stamhoofd',
-            registration: 'feature.registration.stamhoofd',
-            webshop: 'feature.shop.stamhoofd',
+        await registerServiceRoutes(ctx, {
+            name: 'feature',
+            kind: RouteManifestKind.DevInstance,
+            routes: [
+                { hosts: ['feature.renderer.stamhoofd'], port: 9093 },
+                { hosts: ['feature.api.stamhoofd', '*.feature.api.stamhoofd'], port: 9091 },
+                { hosts: ['feature.dashboard.stamhoofd'], port: 8080 },
+                { hosts: ['feature.registration.stamhoofd', '*.feature.registration.stamhoofd'], port: 8080 },
+                { hosts: ['feature.shop.stamhoofd'], port: 8082 },
+            ],
         });
 
         const config = await writeCaddyConfig(ctx);
@@ -87,6 +97,67 @@ describe('Caddy config', () => {
         expect(hosts).toContain('feature.registration.stamhoofd');
         expect(hosts).toContain('*.feature.registration.stamhoofd');
         expect(hosts).toContain('feature.shop.stamhoofd');
+    });
+
+    it('routes SGV login and admin domains to the SGV mock', async () => {
+        const ctx = context(rootDir);
+        await registerServiceRoutes(ctx, {
+            name: 'test-sgv-mock',
+            kind: RouteManifestKind.SgvMock,
+            routes: [
+                { hosts: ['login.sgv.stamhoofd'], port: 9094 },
+                { hosts: ['admin.sgv.stamhoofd'], port: 9094 },
+            ],
+        });
+
+        const config = await buildCaddyConfig(ctx);
+        const routes = config.apps.http.servers.stamhoofd.routes;
+        const subjects = config.apps.tls.automation.policies.flatMap(policy => policy.subjects);
+
+        expect(routes).toContainEqual(expect.objectContaining({
+            match: [{ host: ['login.sgv.stamhoofd'] }],
+            handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:9094' }] }],
+        }));
+        expect(routes).toContainEqual(expect.objectContaining({
+            match: [{ host: ['admin.sgv.stamhoofd'] }],
+            handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:9094' }] }],
+        }));
+        expect(subjects).toEqual(expect.arrayContaining(['login.sgv.stamhoofd', 'admin.sgv.stamhoofd']));
+    });
+
+    it('keeps SGV routes for active SGV manifests', async () => {
+        const ctx = context(rootDir);
+        await registerServiceRoutes({
+            ...ctx,
+            workspace: 'feature',
+            instance: {
+                name: 'feature',
+                prefix: 'feature',
+                primary: false,
+                portOffset: 1200,
+            },
+        }, {
+            name: 'feature-sgv-mock',
+            kind: RouteManifestKind.SgvMock,
+            routes: [
+                { hosts: ['login.sgv.feature.stamhoofd'], port: 10294 },
+                { hosts: ['admin.sgv.feature.stamhoofd'], port: 10294 },
+            ],
+        });
+
+        const config = await buildCaddyConfig(ctx);
+        const routes = config.apps.http.servers.stamhoofd.routes;
+        const subjects = config.apps.tls.automation.policies.flatMap(policy => policy.subjects);
+
+        expect(routes).toContainEqual(expect.objectContaining({
+            match: [{ host: ['login.sgv.feature.stamhoofd'] }],
+            handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:10294' }] }],
+        }));
+        expect(routes).toContainEqual(expect.objectContaining({
+            match: [{ host: ['admin.sgv.feature.stamhoofd'] }],
+            handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:10294' }] }],
+        }));
+        expect(subjects).toEqual(expect.arrayContaining(['login.sgv.feature.stamhoofd', 'admin.sgv.feature.stamhoofd']));
     });
 });
 

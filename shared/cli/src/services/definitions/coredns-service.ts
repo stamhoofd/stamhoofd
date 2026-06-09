@@ -11,6 +11,13 @@ type CorednsPrepared = {
     corefile: string;
 };
 
+export type CorednsRecord = {
+    zone: string;
+    type: 'A' | 'AAAA' | 'forward';
+    value: string;
+    appliesTo: string;
+};
+
 export class CorednsService extends SharedDockerService<CorednsPrepared> {
     static readonly container = corednsContainer;
 
@@ -31,9 +38,26 @@ export class CorednsService extends SharedDockerService<CorednsPrepared> {
         const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
         await fs.mkdir(path.dirname(corefile), { recursive: true });
         await fs.chmod(path.dirname(corefile), 0o755);
-        await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${localIpv4Host}"\n    }\n    template IN AAAA {\n        answer "{{ .Name }} 300 IN AAAA ${localIpv6Host}"\n    }\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
+        await fs.writeFile(corefile, CorednsService.corefileContent(domain), { mode: 0o644 });
         await fs.chmod(corefile, 0o644);
         return { corefile };
+    }
+
+    static corefileContent(domain: string): string {
+        const records = CorednsService.records(domain);
+        const ipv4 = records.find(record => record.type === 'A')?.value ?? localIpv4Host;
+        const ipv6 = records.find(record => record.type === 'AAAA')?.value ?? localIpv6Host;
+        const upstreams = records.filter(record => record.type === 'forward').map(record => record.value).join(' ');
+        return `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${ipv4}"\n    }\n    template IN AAAA {\n        answer "{{ .Name }} 300 IN AAAA ${ipv6}"\n    }\n}\n. {\n    forward . ${upstreams}\n}\n`;
+    }
+
+    static records(domain: string): CorednsRecord[] {
+        return [
+            { zone: domain, type: 'A', value: localIpv4Host, appliesTo: `Every hostname under .${domain}` },
+            { zone: domain, type: 'AAAA', value: localIpv6Host, appliesTo: `Every hostname under .${domain}` },
+            { zone: '.', type: 'forward', value: '8.8.8.8', appliesTo: 'Non-local DNS forwarded upstream' },
+            { zone: '.', type: 'forward', value: '9.9.9.9', appliesTo: 'Non-local DNS forwarded upstream' },
+        ];
     }
 
     async getDockerArgs(_context: CliContext, _options: void, prepared: CorednsPrepared): Promise<string[]> {

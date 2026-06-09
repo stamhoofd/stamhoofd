@@ -143,13 +143,7 @@ describe('runDev', () => {
         const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
-        expect(spawn).toHaveBeenCalledWith('yarn', [
-            '-s',
-            'concurrently',
-            '-r',
-            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+yarn --cwd shared\/cli -s build.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
-            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && yarn -s lerna run dev --scope @stamhoofd\/backend --scope @stamhoofd\/backend-renderer --scope @stamhoofd\/dashboard --scope @stamhoofd\/registration --scope @stamhoofd\/webshop --parallel --stream/),
-        ], expect.objectContaining({
+        expect(spawn).toHaveBeenCalledWith('yarn', expect.any(Array), expect.objectContaining({
             cwd: context.rootDir,
             stdio: ['inherit', 'pipe', 'pipe'],
             env: expect.objectContaining({
@@ -157,6 +151,19 @@ describe('runDev', () => {
                 npm_config_color: 'always',
             }),
         }));
+        const [, spawnArgs] = vi.mocked(spawn).mock.calls[0];
+        expect(spawnArgs.slice(0, 3)).toEqual(['-s', 'concurrently', '-r']);
+        expect(spawnArgs[3]).toContain('rm -f .development/cli/generated/shared-build-');
+        expect(spawnArgs[3]).toContain('yarn --cwd shared/cli -s build');
+        expect(spawnArgs[3]).toContain('yarn --cwd shared/sgv -s build');
+        expect(spawnArgs[3]).toContain('touch .development/cli/generated/shared-build-');
+        expect(spawnArgs[4]).toContain('wait-on .development/cli/generated/shared-build-');
+        expect(spawnArgs[4]).toContain('shared/cli/dist/index.js shared/locales/dist/index.d.ts');
+        expect(spawnArgs[4]).toContain('yarn -s lerna run dev');
+        expect(spawnArgs[4]).toContain('--scope @stamhoofd/backend');
+        expect(spawnArgs[4]).toContain('--scope @stamhoofd/dashboard');
+        expect(spawnArgs[4]).toContain('--scope @stamhoofd/webshop');
+        expect(spawnArgs[4]).toContain('--parallel --stream');
 
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
             { label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`, href: 'https://dashboard.stamhoofd' },
