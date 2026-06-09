@@ -49,7 +49,7 @@ async function checkScopedTo({ page, organization }: { page: Page; organization:
     await expect(page.locator('[data-organization-scope="' + (organization?.id ?? null) + '"]')).toBeVisible();
 }
 
-test.describe.fixme('Routing on page load @routing', () => {
+test.describe('Routing on page load @routing', () => {
     test.describe('Platform mode', () => {
         test.beforeAll(async () => {
             TestUtils.setPermanentEnvironment('userMode', 'platform');
