@@ -156,8 +156,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             .filter(registration =>
                 registration.registeredAt !== null
                 && registration.deactivatedAt === null
-                && registration.group.type === GroupType.Member
-                // && registration.group.type !== GroupType.WaitingList
+                && registration.group.type === GroupType.Membership
                 && registration.group.periodId === organization.period.period.id,
             )
             .map(registration => registration.group);

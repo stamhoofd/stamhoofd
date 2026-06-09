@@ -21,6 +21,12 @@
             <p v-if="app === 'admin' && !group" class="style-description-block">
                 {{ $t('%1GG') }}
             </p>
+            <p v-if="sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="sgvSyncOpen">
+                {{ sgvSyncWarning.text }}
+                <button v-if="auth.hasFullAccess()" class="button text" type="button">
+                    {{ $t('Synchroniseer') }}
+                </button>
+            </p>
             <template #empty>
                 {{ $t('%173') }}
             </template>
@@ -44,8 +50,9 @@ import type { Column } from '#tables/classes/Column.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, GroupType, mergeFilters, SGVSyncStatus, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -292,6 +299,10 @@ const objectFetcher = useRegistrationsObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
+const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(
+    computed(() => tableObjectFetcher.objects.map(registration => registration.member.member)),
+    computed(() => props.organization ?? organizationScope.value),
+);
 
 const allColumns: Column<ObjectType, any>[] = getRegistrationColumns({
     dateRange: props.dateRange,
