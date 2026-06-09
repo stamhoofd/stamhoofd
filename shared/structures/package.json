@@ -31,6 +31,9 @@
         "@types/uuid": "^8.3.0",
         "uuid": "11.1.1"
     },
+    "dependencies": {
+        "@stamhoofd/sgv": "*"
+    },
     "peerDependencies": {
         "@simonbackx/simple-errors": "^1.5",
         "uuid": "11.1.1"

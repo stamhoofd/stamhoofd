@@ -1,8 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Language } from '@stamhoofd/types/Language';
 import { Address } from './addresses/Address.js';
 import { appToUri } from './AppType.js';
+import { Company } from './Company.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
@@ -13,12 +15,11 @@ import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import type { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
+import { OrganizationType } from './OrganizationType.js';
 import type { RegistrationPeriodList } from './RegistrationPeriod.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from './RegistrationPeriod.js';
+import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
-import type { User } from './User.js';
-import { Company } from './Company.js';
-import { Language } from '@stamhoofd/types/Language';
 
 export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -300,15 +301,14 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
         // Add missing periods
     }
+
+    /** Returns true when the organization is managed by Scouts en Gidsen Vlaanderen. */
+    get isSGVSyncOrganization(): boolean {
+        return this.meta.type === OrganizationType.Youth
+            && this.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen;
+    }
 }
 
-export class OrganizationWithWebshop extends AutoEncoder {
-    @field({ decoder: Organization })
-    organization: Organization;
-
-    @field({ decoder: Webshop })
-    webshop: Webshop;
-}
 
 export class GetWebshopFromDomainResult extends AutoEncoder {
     @field({ decoder: Organization })

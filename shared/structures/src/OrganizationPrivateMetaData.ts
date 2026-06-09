@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
@@ -109,6 +109,21 @@ export class BuckarooSettings extends AutoEncoder {
     paymentMethods: PaymentMethod[] = [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq];
 }
 
+/** Stores organization-level bookkeeping for the latest external SGV synchronization. */
+export class ExternalSyncData extends AutoEncoder {
+    @field({ decoder: DateDecoder, nullable: true })
+    lastExternalSync: Date | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    lastSyncedBy: string | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true })
+    lastDeleted: Date | null = null;
+
+    @field({ decoder: new MapDecoder(StringDecoder, IntegerDecoder) })
+    counts: Map<string, number> = new Map();
+}
+
 export class BalanceNotificationSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     @field({ decoder: BooleanDecoder, version: 363, upgrade: () => (false) }) // Force reset to false
@@ -166,6 +181,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 84 })
     pendingRegisterDomain: string | null = null;
+
+    @field({ decoder: ExternalSyncData, nullable: true, optional: true, ...NextVersion })
+    externalSyncData: ExternalSyncData | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, optional: true, ...NextVersion })
+    externalGroupNumber: string | null = null;
 
     /**
      * Mail domain that is awaiting validation
