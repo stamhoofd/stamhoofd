@@ -15,6 +15,15 @@
                 </dd>
             </template>
 
+            <template v-if="showSGVSyncStatus">
+                <dt>{{ $t('Gesynchroniseerd') }}</dt>
+                <dd>
+                    <span v-tooltip="$t('Leden moeten na wijzigingen opnieuw gesynchroniseerd worden met Scouts en Gidsen Vlaanderen.')" class="style-tooltip">
+                        {{ sgvSyncDate }}
+                    </span>
+                </dd>
+            </template>
+
             <template v-if="member.patchedMember.details.birthDay">
                 <dt>{{ $t('%fn') }}</dt>
                 <dd>
@@ -89,8 +98,11 @@
 
 <script setup lang="ts">
 import type { PlatformMember } from '@stamhoofd/structures';
-import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { isSGVManagedMember, NationalRegisterNumberOptOut, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 import { useCountry } from '../../../hooks';
+import { useOrganization } from '../../../hooks/useOrganization';
 import EmailAddress from '../../../email/EmailAddress.vue';
 
 defineOptions({
@@ -102,4 +114,8 @@ const props = defineProps<{
 }>();
 
 const currentCountry = useCountry();
+const organization = useOrganization();
+const isSGVOrganization = computed(() => organization.value?.meta.type === OrganizationType.Youth && organization.value.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen);
+const showSGVSyncStatus = computed(() => isSGVOrganization.value && (isSGVManagedMember(props.member.member) || !!props.member.patchedMember.details.lastExternalSync));
+const sgvSyncDate = computed(() => props.member.patchedMember.details.lastExternalSync ? Formatter.date(props.member.patchedMember.details.lastExternalSync, true) : $t('Nooit'));
 </script>
