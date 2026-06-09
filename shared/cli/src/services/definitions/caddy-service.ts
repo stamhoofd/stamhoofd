@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises';
-import type { CliContext } from '../../context/create-context.js';
+import { buildCaddyRouteOptions, writeCaddyConfig } from '../../config/caddy-config.js';
 import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
-import { buildSharedServiceProfile, SharedServiceCaddyRunMode, type SharedServiceProfile } from '../../config/shared-service-profile.js';
-import * as docker from '../docker.js';
-import { writeCaddyConfig } from '../../config/caddy-config.js';
+import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
+import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
+import type { CliContext } from '../../context/create-context.js';
+import type { CaddyRouteOptions } from '../../runtime/manifest-store.js';
 import { SharedDockerService } from '../docker-service.js';
+import * as docker from '../docker.js';
 import type { ServiceStatus } from '../service.js';
 
 type CaddyPrepared = {
@@ -43,7 +45,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         if (!status.running) {
             return false;
         }
-        const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        const profile = buildCaddyServiceProfile();
         if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
             return !await CaddyService.runsInHostNetwork();
         }
@@ -64,6 +66,13 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
             return;
         }
         await caddyService.start(context, undefined);
+    }
+
+    static buildRouteOptions(context: CliContext): CaddyRouteOptions {
+        const profile = buildCaddyServiceProfile();
+        return buildCaddyRouteOptions(context, {
+            proxyHost: profile.caddyProxyHost,
+        });
     }
 
     private static async writeRuntimeConfig(context: CliContext): Promise<string> {

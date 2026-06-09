@@ -1,19 +1,19 @@
-import { spawn } from 'node:child_process';
 import chalk from 'chalk';
-import type { CliContext } from '../context/create-context.js';
+import { spawn } from 'node:child_process';
 import { buildBackendEnv, buildDomains } from '../config/build-config.js';
 import { successSymbol } from '../config/shared-service-config.js';
+import type { CliContext } from '../context/create-context.js';
+import type { StatusItem } from '../runtime/live-output.js';
+import { createLiveOutput } from '../runtime/live-output.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { sharedBuildReadyCommand, sharedBuildWatchCommand } from '../runtime/monorepo-runner.js';
-import { createLiveOutput, StatusItemKind } from '../runtime/live-output.js';
-import type { StatusItem } from '../runtime/live-output.js';
 import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
+import { openUrl } from '../runtime/ux.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
-import { sharedServicesRunning } from '../services/shared-services.js';
 import { startServices, stopServices } from '../services/manager.js';
 import { sharedServiceDefinitions } from '../services/registry.js';
+import { sharedServicesRunning } from '../services/shared-services.js';
 import { startStripe, stopStripe } from '../services/stripe.js';
-import { openUrl } from '../runtime/ux.js';
 import { checkSetup, isSetupReady, printSetupReport } from './setup-machine.js';
 
 const forceShutdownGraceMs = 750;
@@ -132,7 +132,17 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
             }
         }
 
-        await writeInstanceManifest(context, { dashboard: domains.dashboard, api: domains.api, renderer: domains.renderer, registration: domains.registration, webshop: domains.webshop });
+        await writeInstanceManifest(context, {
+            caddy: CaddyService.buildRouteOptions(context),
+            domains: {
+                dashboard: domains.dashboard,
+                api: domains.api,
+                renderer: domains.renderer,
+                registration: domains.registration,
+                webshop: domains.webshop,
+            },
+        });
+
         if (options.services) {
             await CaddyService.reload(context);
             servicesCheckInterval = setInterval(() => {

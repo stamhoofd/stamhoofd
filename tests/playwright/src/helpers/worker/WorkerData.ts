@@ -9,6 +9,7 @@ export type StamhoofdUrls = {
     readonly dashboard: string;
     readonly webshop: string;
     registration(uri: string): string;
+    registrationCustomDomain(domain: string): string;
 };
 
 /**
@@ -69,6 +70,7 @@ class WorkerDataInstance {
                 dashboard: '',
                 webshop: '',
                 registration: () => '',
+                registrationCustomDomain: () => '',
             };
         }
 
@@ -77,6 +79,7 @@ class WorkerDataInstance {
             dashboard: CaddyConfigHelper.getUrl('dashboard', workerId),
             webshop: CaddyConfigHelper.getUrl('webshop', workerId),
             registration: (uri: string) => CaddyConfigHelper.getUrl('registration', workerId, uri + '.'),
+            registrationCustomDomain: (domain: string) => CaddyConfigHelper.getRegistrationCustomDomain(domain, workerId),
         };
     }
 

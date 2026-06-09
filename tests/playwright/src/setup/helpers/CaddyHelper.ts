@@ -1,6 +1,6 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
-import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, writeRouteManifest } from '@stamhoofd/cli';
+import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, writeRouteManifest, buildCaddyServiceProfile } from '@stamhoofd/cli';
 import type { RouteManifest } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { ProcessInfo } from './ProcessInfo.js';
@@ -42,13 +42,15 @@ export class CaddyHelper {
 
         // post the initial config
         console.log('Start posting caddy config...');
-        await this.postConfig(CaddyConfigHelper.createDefault({
-            adminListen: this.caddyRuntime.adminListen,
-            adminOrigin: this.caddyRuntime.adminUrl,
-            httpListen: this.caddyRuntime.httpListen,
-            httpsListen: this.caddyRuntime.httpsListen,
-            proxyHost: this.caddyRuntime.proxyHost,
-        }));
+        await this.postConfig(
+            CaddyConfigHelper.createDefault({
+                adminListen: this.caddyRuntime.adminListen,
+                adminOrigin: this.caddyRuntime.adminUrl,
+                httpListen: this.caddyRuntime.httpListen,
+                httpsListen: this.caddyRuntime.httpsListen,
+                proxyHost: this.caddyRuntime.proxyHost,
+            }),
+        );
         console.log('Done posting caddy config.');
     }
 
@@ -106,21 +108,14 @@ export class CaddyHelper {
 
     private createWorkerManifest(workerId: number): RouteManifest {
         const id = workerId.toString();
-        const dashboard = CaddyConfigHelper.getDomain('dashboard', id);
-        const registration = CaddyConfigHelper.getDomain('registration', id);
-        const webshop = CaddyConfigHelper.getDomain('webshop', id);
-        const api = CaddyConfigHelper.getDomain('api', id);
-        const routes = [
-            { hosts: [dashboard], port: CaddyConfigHelper.getFrontendPort('dashboard', id) },
-            {
-                hosts: [registration, '*.' + registration],
-                port: CaddyConfigHelper.getFrontendPort('registration', id),
-            },
-            { hosts: [webshop], port: CaddyConfigHelper.getFrontendPort('webshop', id) },
-            { hosts: [api, `*.${api}`], port: CaddyConfigHelper.getPort('api', id) },
-        ];
+        const profile = buildCaddyServiceProfile();
+
+        const caddy = CaddyConfigHelper.createRouteOptions({
+            proxyHost: profile.caddyProxyHost,
+        });
 
         return {
+            version: '2',
             name: `playwright-worker-${id}`,
             kind: 'playwright-worker',
             pid: process.pid,
@@ -128,22 +123,8 @@ export class CaddyHelper {
             expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
             rootPath: process.cwd(),
             workspace: 'playwright',
-            routes,
-            tlsSubjects: [...new Set(routes.flatMap(route => route.hosts))],
+            caddy,
         };
-    }
-
-    private async putRoute(route: any, index: number) {
-        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes/${index}`;
-
-        try {
-            await exec(
-                `curl -v -X PUT ${url} -d '${JSON.stringify(route)}' -H "Content-Type: application/json"`,
-            );
-        } catch (error) {
-            console.error(`Failed to put route at index ${index}. Url: ${url}`);
-            throw error;
-        }
     }
 
     private async postConfig(caddyConfig: any) {
@@ -160,19 +141,6 @@ export class CaddyHelper {
             throw new Error(
                 `Failed to post config: ${res.status} ${res.statusText} - ${text}`,
             );
-        }
-    }
-
-    private async postPolicySubjects(policySubjects: string[]) {
-        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects/...`;
-
-        try {
-            await exec(
-                `curl -v POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
-            );
-        } catch (error) {
-            console.error(`Failed to post policySubjects. Url: ${url}`);
-            throw error;
         }
     }
 

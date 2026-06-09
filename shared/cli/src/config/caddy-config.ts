@@ -3,13 +3,50 @@ import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { buildDomains } from './build-config.js';
+import type { CaddyRouteOptions } from '../runtime/manifest-store.js';
 import { listActiveRouteManifests, sharedDir } from '../runtime/manifest-store.js';
-import type { RouteManifestRoute } from '../runtime/manifest-store.js';
 import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, caddySetupHttpPort, caddySetupHttpsPort, localIpv4Host, localhostPort } from './shared-service-config.js';
 
-type CaddyRoute = {
-    match: Array<{ host: string[] }>;
-    handle: Array<{ handler: 'reverse_proxy'; upstreams: Array<{ dial: string }> }>;
+export type CaddyRoute = {
+    group?: string;
+    match: (
+        { host: string[] } | { header_regexp: unknown }
+    )[];
+    handle: (
+        {
+            handler: 'reverse_proxy';
+            upstreams: Array<{ dial: string }>;
+            headers?: {
+                request?: {
+                    add?: Record<string, string[]>;
+                    set?: Record<string, string[]>;
+                    delete?: string[];
+                    replace?: Record<string, { search?: string; search_regexp?: string; replace: string }[]>;
+                };
+                response?: {
+                    add?: Record<string, string[]>;
+                    set?: Record<string, string[]>;
+                    delete?: string[];
+                    replace?: Record<string, { search?: string; search_regexp?: string; replace: string }[]>;
+                };
+            };
+        } | {
+            handler: 'headers';
+            request?: {
+                add?: Record<string, string[]>;
+                set?: Record<string, string[]>;
+                delete?: string[];
+                replace?: Record<string, { search?: string; search_regexp?: string; replace: string }[]>;
+            };
+            response?: {
+                add?: Record<string, string[]>;
+                set?: Record<string, string[]>;
+                delete?: string[];
+                replace?: Record<string, { search?: string; search_regexp?: string; replace: string }[]>;
+            };
+        }
+    )[];
+    terminal?: boolean;
 };
 
 type CaddyConfig = {
@@ -27,10 +64,16 @@ type CaddyConfig = {
         tls: {
             automation: {
                 policies: Array<{
-                    subjects: string[];
-                    on_demand: false;
+                    subjects?: string[];
+                    on_demand: false | true;
                     issuers: Array<{ module: 'internal' }>;
                 }>;
+                on_demand?: {
+                    permission: {
+                        module: 'http';
+                        endpoint: string;
+                    };
+                };
             };
         };
     };
@@ -64,6 +107,33 @@ function route(hosts: string[], port: number, proxyHost: string): CaddyRoute {
     };
 }
 
+export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost?: string } = {}): CaddyRouteOptions {
+    const domains = buildDomains(context);
+    const ports = buildPorts(context);
+    const proxyHost = options.proxyHost ?? localIpv4Host;
+    const routes = [
+        route([domains.renderer], ports.renderer, proxyHost),
+        route([domains.api, `*.${domains.api}`], ports.api, proxyHost),
+        route([domains.dashboard], ports.webApp, proxyHost),
+        route([domains.registration, `*.${domains.registration}`], ports.webApp, proxyHost),
+        route([domains.webshop], ports.webshop, proxyHost),
+    ];
+
+    const tlsSubjects = [...new Set([
+        domains.dashboard,
+        domains.api,
+        `*.${domains.api}`,
+        domains.renderer,
+        domains.registration,
+        `*.${domains.registration}`,
+    ])];
+
+    return {
+        routes,
+        tlsSubjects,
+    };
+}
+
 export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<CaddyConfig> {
     const domains = buildDomains(context);
     const ports = buildPorts(context);
@@ -75,30 +145,20 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
     const routes = [
         // Active instance manifests let the shared Caddy container keep routing
         // requests for other running workspaces and test workers.
-        ...activeManifests.flatMap(manifest => manifest.routes.map(manifestRoute => routeFromManifest(manifestRoute, proxyHost))),
-        route([domains.renderer], ports.renderer, proxyHost),
-        route([domains.api, `*.${domains.api}`], ports.api, proxyHost),
-        route([domains.dashboard], ports.webApp, proxyHost),
-        route([domains.registration, `*.${domains.registration}`], ports.webApp, proxyHost),
-        route([domains.webshop], ports.webshop, proxyHost),
+        ...activeManifests.flatMap(manifest => manifest.caddy.routes),
+
+        // Shared services
         route([domains.mail], ports.maildevHttp, proxyHost),
         route([domains.files], ports.rustfs, proxyHost),
         route([domains.filesConsole], ports.rustfsConsole, proxyHost),
         route([domains.sso], ports.sso, proxyHost),
     ];
     const subjects = [...new Set([
-        domains.dashboard,
-        domains.api,
-        `*.${domains.api}`,
-        domains.renderer,
-        domains.registration,
-        `*.${domains.registration}`,
-        domains.webshop,
         domains.mail,
         domains.files,
         domains.filesConsole,
         domains.sso,
-        ...activeManifests.flatMap(manifest => manifest.tlsSubjects),
+        ...activeManifests.flatMap(manifest => manifest.caddy.tlsSubjects),
     ])];
 
     return {
@@ -123,14 +183,28 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
             tls: {
                 automation: {
                     policies: [
-                        { subjects, on_demand: false, issuers: [{ module: 'internal' }] },
+                        {
+                            subjects,
+                            on_demand: false,
+                            issuers: [{ module: 'internal' }],
+                        },
+                        {
+                            on_demand: true,
+                            issuers: [{
+                                module: 'internal',
+                            }],
+                        },
                     ],
+                    on_demand: {
+                        permission: {
+                            module: 'http',
+
+                            // Just a domain that always returns 200 (no redirects!)
+                            endpoint: 'https://www.stamhoofd.be',
+                        },
+                    },
                 },
             },
         },
     };
-}
-
-function routeFromManifest(manifestRoute: RouteManifestRoute, proxyHost: string) {
-    return route(manifestRoute.hosts, manifestRoute.port, proxyHost);
 }

@@ -1,5 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { FrontendProjectName } from './FrontendService.js';
+import type { CaddyRoute, CaddyRouteOptions } from '@stamhoofd/cli';
 
 /**
  * Old domains and ports will get reused
@@ -29,6 +30,23 @@ export class CaddyConfigHelper {
         workerId: string,
     ) {
         return `playwright-${service}-${this.cycledWorkerId(workerId)}.stamhoofd`;
+    }
+
+    static getCustomDomainTld(
+        workerId: string,
+    ) {
+        // IMPORTANT: custom registration domains may never end with getDomain('registration', workerId)
+        // otherwise, the backend will try to resolve by URI, not by domain
+        return `playwright-custom-${this.cycledWorkerId(workerId)}.stamhoofd`;
+    }
+
+    static getRegistrationCustomDomain(
+        domain: string,
+        workerId: string,
+    ) {
+        // IMPORTANT: custom registration domains may never end with getDomain('registration', workerId)
+        // otherwise, the backend will try to resolve by URI, not by domain
+        return `inschrijven.${domain}.${this.getCustomDomainTld(workerId)}`;
     }
 
     static cycledWorkerId(workerId: string) {
@@ -61,7 +79,7 @@ export class CaddyConfigHelper {
     /**
      * Create a frontend route for the caddy config
      */
-    static createFrontendRoute(service: FrontendProjectName, workerId: string, proxyHost: string) {
+    static createFrontendRoutes(service: FrontendProjectName, workerId: string, proxyHost: string): CaddyRoute[] {
         const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
@@ -69,28 +87,56 @@ export class CaddyConfigHelper {
         );
         const port = this.getFrontendPort(service, workerId);
 
-        return {
-            group,
-            match: [
-                {
-                    host: service === 'registration' ? [domain, '*.' + domain] : [domain],
-                },
-            ],
-            handle: [
-                {
-                    handler: 'reverse_proxy',
-                    upstreams: [
-                        {
-                            dial: `${proxyHost}:${port}`,
+        const routes: CaddyRoute[] = [
+            {
+                match: [
+                    {
+                        host: service === 'registration' ? [domain, '*.' + domain] : [domain],
+                    },
+                ],
+                handle: [
+                    {
+                        handler: 'reverse_proxy',
+                        upstreams: [
+                            {
+                                dial: `${proxyHost}:${port}`,
+                            },
+                        ],
+                    },
+                ],
+                terminal: true,
+            },
+        ];
+
+        if (service === 'registration') {
+            routes.push({
+                match: [
+                    {
+                        header_regexp: {
+                            Host: {
+                                pattern: '^inschrijven\\..+\\.' + Formatter.escapeRegex(this.getCustomDomainTld(workerId)) + '$',
+                            },
                         },
-                    ],
-                },
-            ],
-            terminal: true,
-        };
+                    },
+                ],
+                handle: [
+                    {
+                        handler: 'reverse_proxy',
+                        upstreams: [
+                            {
+                                dial: `${proxyHost}:${port}`,
+                            },
+                        ],
+                    },
+                ],
+                terminal: true,
+            });
+        }
+
+        return routes;
     }
 
-    static createBackendRoute(service: 'api', workerId: string, proxyHost: string) {
+    static createBackendRoute(service: 'api', workerId: string, proxyHost: string): CaddyRoute {
         const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
@@ -136,14 +182,14 @@ export class CaddyConfigHelper {
     /**
      * Create the default playwright caddy config
      */
-    static createDefault(options: { adminListen: string; adminOrigin: string; httpListen: string; httpsListen: string; proxyHost: string }) {
-        const routes: { match: { host: string[] }[] }[] = [];
+    static createRouteOptions(options: { proxyHost: string }): CaddyRouteOptions {
+        const routes: CaddyRoute[] = [];
 
         for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
             routes.push(
-                this.createFrontendRoute('dashboard', workerId.toString(), options.proxyHost),
-                this.createFrontendRoute('webshop', workerId.toString(), options.proxyHost),
-                this.createFrontendRoute('registration', workerId.toString(), options.proxyHost),
+                ...this.createFrontendRoutes('dashboard', workerId.toString(), options.proxyHost),
+                ...this.createFrontendRoutes('webshop', workerId.toString(), options.proxyHost),
+                ...this.createFrontendRoutes('registration', workerId.toString(), options.proxyHost),
             );
 
             routes.push(
@@ -151,7 +197,19 @@ export class CaddyConfigHelper {
             );
         }
 
-        const domains = Formatter.uniqueArray(routes.flatMap(r => r.match[0].host));
+        const tlsSubjects = Formatter.uniqueArray(routes.flatMap(r => 'host' in r.match[0] ? r.match[0].host : []));
+
+        return {
+            routes,
+            tlsSubjects,
+        };
+    }
+
+    /**
+     * Create the default playwright caddy config
+     */
+    static createDefault(options: { adminListen: string; adminOrigin: string; httpListen: string; httpsListen: string; proxyHost: string }) {
+        const { routes, tlsSubjects } = this.createRouteOptions(options);
 
         const config = {
             admin: {
@@ -174,7 +232,7 @@ export class CaddyConfigHelper {
                     automation: {
                         policies: [
                             {
-                                subjects: domains,
+                                subjects: tlsSubjects,
                                 on_demand: false,
                                 issuers: [
                                     {

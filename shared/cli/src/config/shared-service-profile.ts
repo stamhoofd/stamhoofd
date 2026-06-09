@@ -1,5 +1,5 @@
 import { caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, corednsPrivilegedHostPort, corednsUnprivilegedHostPort, dockerHostGateway, localIpv4Host } from './shared-service-config.js';
-import { ContainerRuntime } from '../services/docker.js';
+import type { ContainerRuntime } from '../services/docker.js';
 
 export enum SharedServiceCaddyRunMode {
     HostNetwork = 'host-network',
@@ -11,10 +11,7 @@ export enum SharedServiceDnsSetupKind {
     MacosResolver = 'macos-resolver',
 }
 
-export type SharedServiceProfile = {
-    platform: NodeJS.Platform;
-    runtime: ContainerRuntime;
-    corednsHostPort: number;
+export type CaddyServiceProfile = {
     caddyHttpHostPort: number;
     caddyHttpsHostPort: number;
     caddyHttpListenPort: number;
@@ -23,16 +20,19 @@ export type SharedServiceProfile = {
     caddyProxyHost: string;
     caddyListenHost: string;
     caddyRunMode: SharedServiceCaddyRunMode;
-    needsPrivilegedRedirects: boolean;
-    dnsSetupKind: SharedServiceDnsSetupKind;
 };
 
-export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: NodeJS.Platform = process.platform): SharedServiceProfile {
+export type SharedServiceProfile = {
+    platform: NodeJS.Platform;
+    runtime: ContainerRuntime;
+    corednsHostPort: number;
+    needsPrivilegedRedirects: boolean;
+    dnsSetupKind: SharedServiceDnsSetupKind;
+} & CaddyServiceProfile;
+
+export function buildCaddyServiceProfile(platform: NodeJS.Platform = process.platform): CaddyServiceProfile {
     if (platform === 'darwin') {
         return {
-            platform,
-            runtime,
-            corednsHostPort: corednsPrivilegedHostPort,
             caddyHttpHostPort: caddyHttpPort,
             caddyHttpsHostPort: caddyHttpsPort,
             caddyHttpListenPort: caddyHttpPort,
@@ -41,15 +41,10 @@ export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: N
             caddyProxyHost: dockerHostGateway,
             caddyListenHost: '0.0.0.0',
             caddyRunMode: SharedServiceCaddyRunMode.Bridge,
-            needsPrivilegedRedirects: false,
-            dnsSetupKind: SharedServiceDnsSetupKind.MacosResolver,
         };
     }
 
     return {
-        platform,
-        runtime,
-        corednsHostPort: corednsUnprivilegedHostPort,
         caddyHttpHostPort: caddyUnprivilegedHttpPort,
         caddyHttpsHostPort: caddyUnprivilegedHttpsPort,
         caddyHttpListenPort: caddyUnprivilegedHttpPort,
@@ -58,7 +53,27 @@ export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: N
         caddyProxyHost: localIpv4Host,
         caddyListenHost: localIpv4Host,
         caddyRunMode: SharedServiceCaddyRunMode.HostNetwork,
+    };
+}
+
+export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: NodeJS.Platform = process.platform): SharedServiceProfile {
+    if (platform === 'darwin') {
+        return {
+            platform,
+            runtime,
+            corednsHostPort: corednsPrivilegedHostPort,
+            needsPrivilegedRedirects: false,
+            dnsSetupKind: SharedServiceDnsSetupKind.MacosResolver,
+            ...buildCaddyServiceProfile(platform),
+        };
+    }
+
+    return {
+        platform,
+        runtime,
+        corednsHostPort: corednsUnprivilegedHostPort,
         needsPrivilegedRedirects: true,
         dnsSetupKind: SharedServiceDnsSetupKind.SystemdResolved,
+        ...buildCaddyServiceProfile(platform),
     };
 }
