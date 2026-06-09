@@ -81,11 +81,14 @@ async function testRoute({ page, ...options }: {
     // Url should be the same
     await expect(page).toHaveURL(options.expectedUrl);
 
-    // Todo: check switcher left top
+    if (options.expectedSwitcher === undefined) {
+        return;
+    }
+
     if (options.expectedSwitcher) {
-        // Todo: click switcher. Check options.
+        await expect(page.locator('button.organization-switcher')).toHaveCount(1);
     } else {
-        // Todo: check no switcher left top
+        await expect(page.locator('button.organization-switcher')).toHaveCount(0);
     }
 }
 
@@ -95,6 +98,7 @@ test.describe('Routing on page load @routing', () => {
      */
     const user = null;
     let membershipOrganization!: Organization;
+    const expectedSwitcher = false;
 
     test.beforeAll(async () => {
         membershipOrganization = await new OrganizationFactory({
@@ -122,6 +126,7 @@ test.describe('Routing on page load @routing', () => {
 
         test.describe('Platform Admin', () => {
             let user: User;
+            const expectedSwitcher = true;
 
             test.beforeEach(async ({ page }) => {
                 user = await new UserFactory({
@@ -141,6 +146,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/instellingen',
                     expectedScope: null,
                     expectedLocator: '#settings-view',
+                    expectedSwitcher,
                 });
             });
 
@@ -155,6 +161,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
+                    expectedSwitcher,
                 });
             });
 
@@ -169,6 +176,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -180,6 +188,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -191,6 +200,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });
@@ -198,6 +208,7 @@ test.describe('Routing on page load @routing', () => {
         test.describe('Full Organization Admin', () => {
             let organization: Organization;
             let user: User;
+            const expectedSwitcher = true;
 
             test.beforeAll(async () => {
                 organization = await new OrganizationFactory({}).create();
@@ -222,6 +233,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -244,6 +256,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -255,6 +268,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -266,6 +280,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
+                    expectedSwitcher,
                 });
             });
         });
@@ -273,6 +288,7 @@ test.describe('Routing on page load @routing', () => {
         test.describe('Partially Organization Admin', () => {
             let organization: Organization;
             let user: User;
+            const expectedSwitcher = true;
 
             test.beforeAll(async () => {
                 organization = await new OrganizationFactory({}).create();
@@ -297,6 +313,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -308,6 +325,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -319,6 +337,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -330,6 +349,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
                 });
             });
 
@@ -341,6 +361,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
+                    expectedSwitcher,
                 });
             });
         });
@@ -370,6 +391,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
+                    expectedSwitcher: true, // exception: can switch back
                 });
             });
 
@@ -381,6 +403,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/geen-toegang',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="no-permissions-view"]',
+                    expectedSwitcher: true, // exception: can switch back
                 });
             });
 
@@ -392,6 +415,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true, // exception: can switch back to global member portal
                 });
             });
 
@@ -403,6 +427,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: false, // can't switch
                 });
             });
 
@@ -414,6 +439,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: false, // can't switch
                 });
             });
         });
@@ -437,6 +463,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: true, // exception: can switch
                 });
             });
 
@@ -448,6 +475,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: true, // exception: can switch
                 });
             });
 
@@ -459,6 +487,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: true, // exception: can switch
                 });
             });
 
@@ -470,6 +499,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: false,
                 });
             });
 
@@ -481,6 +511,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });

@@ -36,7 +36,7 @@ const { hasAdminOption, getDefaultOptions } = useContextOptions();
 
 const options = getDefaultOptions();
 const hasAdmin = hasAdminOption();
-const canSwitch = options.length > 1 || (STAMHOOFD.userMode !== 'platform' || hasAdmin);
+const canSwitch = options.length > 1 || (options.length === 1 && (((options[0].organization?.id ?? null) !== (organization.value?.id ?? null)) || options[0].app !== app)) || (STAMHOOFD.userMode !== 'platform' || hasAdmin);
 
 withDefaults(
     defineProps<{
