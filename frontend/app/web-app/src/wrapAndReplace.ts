@@ -1,17 +1,16 @@
-import { AccountSwitcher, ContextNavigationBar, ContextProvider, CustomHooksContainer, OrganizationLogo, OrganizationSwitcher, ReplaceRootEventBus } from '@stamhoofd/components';
-import { MemberManager, OrganizationManager, PlatformManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import type { Organization } from '@stamhoofd/structures';
-import type { AppType } from '@stamhoofd/structures';
+import { ComponentWithProperties, ModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { AccountSwitcher, ContextNavigationBar, ContextProvider, CustomHooksContainer, OrganizationSwitcher, ReplaceRootEventBus } from '@stamhoofd/components';
+import { MemberManager, OrganizationManager, PlatformManager, UrlHelper } from '@stamhoofd/networking';
+import type { AppType, Organization } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
-import { useGlobalRoutes } from './useGlobalRoutes';
-import { ModalStackComponent, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { sessionFromOrganization, sessionGlobal } from './sessionBuilders';
+import { useGlobalRoutes } from './useGlobalRoutes';
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
 }
 
-export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, reactive_navigation_url: string) {
+export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: { url: string; checkRoutes: boolean }) {
     const onOurDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
 
     if ((STAMHOOFD.singleOrganization || organization?.resolvedRegisterDomain) && !onOurDomain) {
@@ -44,7 +43,7 @@ export async function wrapAndReplace(organization: Organization | null = null, a
                 'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
             },
             stamhoofd_app: app,
-            reactive_navigation_url,
+            reactive_navigation_url: options.url,
         }),
         root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {
             root: component,
@@ -53,6 +52,10 @@ export async function wrapAndReplace(organization: Organization | null = null, a
             },
         })),
     });
+
+    if (options.checkRoutes) {
+        root.setCheckRoutes();
+    }
 
     await ReplaceRootEventBus.sendEvent('replace', root);
 }

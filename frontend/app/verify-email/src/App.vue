@@ -6,7 +6,7 @@
 import { useContext } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import VerifyEmailView from './VerifyEmailView.vue';
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 
 const props = defineProps<{
     token?: string;
@@ -26,6 +26,9 @@ const root = new ComponentWithProperties(VerifyEmailView, {
     code,
     email,
 });
-root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
+const component = useCurrentComponent();
+if (component?.checkRoutes) {
+    root.setCheckRoutes();
+}
 
 </script>

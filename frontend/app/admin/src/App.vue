@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 import { getLoginRoot, AuthenticatedView, useContext } from '@stamhoofd/components';
 import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
 import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
@@ -34,7 +34,10 @@ const root = new ComponentWithProperties(AuthenticatedView, {
     root: wrapWithModalStack(getRoot()),
     loginRoot: wrapWithModalStack(getLoginRoot()),
 });
-root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
+const component = useCurrentComponent();
+if (component?.checkRoutes) {
+    root.setCheckRoutes();
+}
 
 function getNoPermissionsView() {
     return new ComponentWithProperties(TabBarController, {

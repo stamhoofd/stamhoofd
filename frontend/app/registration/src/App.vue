@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, ComponentWithPropertiesInstance, ModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, ComponentWithPropertiesInstance, ModalStackComponent, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
@@ -29,7 +29,10 @@ const root = new ComponentWithProperties(AuthenticatedView, {
     loginRoot: wrapWithModalStack(getLoginRoot()),
     root: wrapWithModalStack(getRoot()),
 });
-root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
+const component = useCurrentComponent();
+if (component?.checkRoutes) {
+    root.setCheckRoutes();
+}
 
 function getRoot() {
     const startView = new ComponentWithProperties(NavigationController, {

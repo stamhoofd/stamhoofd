@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 import { AuthenticatedView, getLoginRoot, PromiseView, useAppNavigate, useContext } from '@stamhoofd/components';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
@@ -17,7 +17,10 @@ function wrapWithModalStack(component: ComponentWithProperties) {
 }
 
 const root = context.value.organization ? getOrgScopedRoot(context.value.organization) : (STAMHOOFD.userMode === 'platform' ? getUnscopedRootInPlatformMode() : getUnscopedRootInOrganizationMode());
-root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
+const component = useCurrentComponent();
+if (component?.checkRoutes) {
+    root.setCheckRoutes();
+}
 
 function getOrgScopedRoot(organization: Organization) {
     return new ComponentWithProperties(AuthenticatedView, {

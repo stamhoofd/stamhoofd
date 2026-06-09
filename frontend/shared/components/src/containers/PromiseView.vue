@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ComponentWithPropertiesInstance, onCheckRoutes, useCanDismiss, useDismiss } from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance, useCanDismiss, useCurrentComponent, useDismiss } from '@simonbackx/vue-app-navigation';
 import { onMounted, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
@@ -22,14 +22,12 @@ const props = defineProps<{
 
 const root = ref<ComponentWithProperties | null>(null);
 const errorBox = ref<ErrorBox | null>(null);
-let passRoutes = false;
+const component = useCurrentComponent();
+
+let passRoutes = component?.checkRoutes ?? false;
 
 const dismiss = useDismiss();
 const canDismiss = useCanDismiss();
-
-onCheckRoutes(() => {
-    passRoutes = true;
-});
 
 function run() {
     errorBox.value = null;

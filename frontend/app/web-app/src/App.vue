@@ -88,7 +88,6 @@ onMounted(async () => {
     });
 
     ReplaceRootEventBus.addListener(this, 'replace', async (component: ComponentWithProperties) => {
-        component.setCheckRoutes();
         stack.replace(component, false);
     });
 
