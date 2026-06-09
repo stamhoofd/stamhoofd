@@ -7,6 +7,12 @@
             <p v-if="app === 'admin' && !group" class="style-description-block">
                 {{ $t('%1GG') }}
             </p>
+            <p v-if="sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="sgvSyncOpen">
+                {{ sgvSyncWarning.text }}
+                <button v-if="auth.hasFullAccess()" class="button text" type="button">
+                    {{ $t('Synchroniseer') }}
+                </button>
+            </p>
             <template #empty>
                 {{ $t('%173') }}
             </template>
@@ -29,8 +35,9 @@ import type { Column } from '#tables/classes/Column.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, GroupType, mergeFilters, SGVSyncStatus, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -106,8 +113,7 @@ function getDefaultFilter(): StamhoofdFilter {
     if (app === 'admin') {
         if (props.group) {
             return null;
-        }
-        else {
+        } else {
             let filter: StamhoofdFilter = {
                 group: {
                     $elemMatch: {
@@ -126,8 +132,7 @@ function getDefaultFilter(): StamhoofdFilter {
                     filter,
                     { periodId: filterPeriodId },
                 ]);
-            }
-            else {
+            } else {
                 filter = mergeFilters([
                     filter,
                     { member: {
@@ -276,6 +281,10 @@ const objectFetcher = useRegistrationsObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
+const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(
+    computed(() => tableObjectFetcher.objects.map(registration => registration.member.member)),
+    computed(() => props.organization ?? organizationScope.value),
+);
 
 const allColumns: Column<ObjectType, any>[] = getRegistrationColumns({
     dateRange: props.dateRange,
@@ -349,20 +358,20 @@ async function createActions(): Promise<void> {
 
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
-                name: $t(`%zh`),
-                icon: 'add',
-                priority: 0,
-                groupIndex: 1,
-                needsSelection: false,
-                enabled: () => canAdd,
-                handler: async () => {
-                    await chooseOrganizationMembersForGroup({
-                        members: [],
-                        group: props.group!,
-                    });
-                },
-            }),
-            ...registrationActions,
+            name: $t(`%zh`),
+            icon: 'add',
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            enabled: () => canAdd,
+            handler: async () => {
+                await chooseOrganizationMembersForGroup({
+                    members: [],
+                    group: props.group!,
+                });
+            },
+        }),
+        ...registrationActions,
     ];
 
     if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
@@ -386,6 +395,6 @@ if (waitingList.value) {
         if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
             tableObjectFetcher.reset(true, true);
         }
-    })
+    });
 }
 </script>

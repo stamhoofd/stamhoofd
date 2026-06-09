@@ -5,6 +5,13 @@
                 {{ $t('%1HO') }}
             </p>
 
+            <p v-if="sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="sgvSyncOpen">
+                {{ sgvSyncWarning.text }}
+                <button v-if="auth.hasFullAccess()" class="button text" type="button">
+                    {{ $t('Synchroniseer') }}
+                </button>
+            </p>
+
             <template #empty>
                 {{ $t('%e3') }}
             </template>
@@ -26,8 +33,9 @@ import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
+import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType } from '@stamhoofd/structures';
+import { AccessRight, GroupType, SGVSyncStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -223,6 +231,7 @@ const objectFetcher = useMembersObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
+const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(computed(() => tableObjectFetcher.objects.map(member => member.member)));
 
 const allColumns = getMemberColumns({
     dateRange: props.dateRange,
