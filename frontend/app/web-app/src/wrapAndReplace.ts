@@ -24,7 +24,6 @@ export async function wrapAndReplace(organization: Organization | null = null, a
     }
 
     const context = organization ? await sessionFromOrganization(organization) : await sessionGlobal();
-    await SessionManager.prepareSessionForUsage(context, false);
 
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);

@@ -12,5 +12,8 @@ export async function sessionFromOrganization(organization: Organization) {
 }
 
 export async function sessionGlobal() {
-    return await SessionManager.getLastGlobalSession();
+    const session = await SessionManager.getLastGlobalSession();
+    await session.checkSSO();
+    await SessionManager.prepareSessionForUsage(session, false);
+    return session;
 }
