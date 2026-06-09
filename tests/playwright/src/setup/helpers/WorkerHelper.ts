@@ -6,6 +6,7 @@ import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { DatabaseHelper } from './DatabaseHelper.js';
 import type { FrontendProjectName } from './FrontendService.js';
 import { FrontendService } from './FrontendService.js';
+import { SGVMockService } from './SGVMockService.js';
 import type { ServiceProcess } from './ServiceHelper.js';
 
 class WorkerHelperInstance {
@@ -29,6 +30,11 @@ class WorkerHelperInstance {
         const apiProcess = await apiService.start();
         console.log(`API started for worker ${workerId}.`);
 
+        console.log(`Start SGV mock for worker ${workerId}...`);
+        const sgvMockService = new SGVMockService(workerId);
+        const sgvMockProcess = await sgvMockService.start();
+        console.log(`SGV mock started for worker ${workerId}.`);
+
         // start frontend services
         const frontendServiceNames: FrontendProjectName[] = [
             'dashboard',
@@ -46,12 +52,15 @@ class WorkerHelperInstance {
 
         console.log(`Frontend processes built for worker ${workerId}.`);
 
-        const allProcesses = [...frontendProcesses, apiProcess];
+        const allProcesses = [...frontendProcesses, apiProcess, sgvMockProcess];
         console.log(`Services started for worker ${workerId}.`);
 
         // wait until api is ready
         await apiProcess.wait();
         console.log(`API ready for worker ${workerId}.`);
+
+        await sgvMockProcess.wait();
+        console.log(`SGV mock ready for worker ${workerId}.`);
 
         await Promise.all(frontendProcesses.map(p => p.wait()));
         console.log(`Frontend processes ready for worker ${workerId}.`);
@@ -122,6 +131,8 @@ class WorkerHelperInstance {
                     '': CaddyConfigHelper.getDomain('webshop', WorkerData.id),
                 },
                 api: CaddyConfigHelper.getDomain('api', WorkerData.id),
+                sgvLoginUrl: CaddyConfigHelper.getUrl('sgv-login', WorkerData.id),
+                sgvAdminUrl: CaddyConfigHelper.getUrl('sgv-admin', WorkerData.id),
                 rendererApi: CaddyConfigHelper.getDomain('renderer', WorkerData.id),
                 defaultTransactionalEmail: {
                     '': 'stamhoofd.be',

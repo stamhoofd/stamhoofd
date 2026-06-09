@@ -1,6 +1,6 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
-import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, writeRouteManifest, buildCaddyServiceProfile } from '@stamhoofd/cli';
+import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, RouteManifestKind, writeRouteManifest } from '@stamhoofd/cli';
 import type { RouteManifest } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { ProcessInfo } from './ProcessInfo.js';
@@ -61,7 +61,7 @@ export class CaddyHelper {
         }
 
         const context = await createContext({ env: 'stamhoofd', verbose: false });
-        await removeRouteManifestsByKind(context, 'playwright-worker');
+        await removeRouteManifestsByKind(context, RouteManifestKind.PlaywrightWorker);
         await CaddyService.reload(context);
     }
 
@@ -97,7 +97,7 @@ export class CaddyHelper {
     private async configureSharedCaddy(workerCount: number) {
         const context = await createContext({ env: 'stamhoofd', verbose: false });
         await pruneStaleRouteManifests(context);
-        await removeRouteManifestsByKind(context, 'playwright-worker');
+        await removeRouteManifestsByKind(context, RouteManifestKind.PlaywrightWorker);
 
         for (let workerId = 0; workerId < workerCount; workerId += 1) {
             await writeRouteManifest(context, this.createWorkerManifest(workerId));
@@ -108,22 +108,32 @@ export class CaddyHelper {
 
     private createWorkerManifest(workerId: number): RouteManifest {
         const id = workerId.toString();
-        const profile = buildCaddyServiceProfile();
-
-        const caddy = CaddyConfigHelper.createRouteOptions({
-            proxyHost: profile.caddyProxyHost,
-        });
+        const dashboard = CaddyConfigHelper.getDomain('dashboard', id);
+        const registration = CaddyConfigHelper.getDomain('registration', id);
+        const webshop = CaddyConfigHelper.getDomain('webshop', id);
+        const api = CaddyConfigHelper.getDomain('api', id);
+        const sgvLogin = CaddyConfigHelper.getDomain('sgv-login', id);
+        const sgvAdmin = CaddyConfigHelper.getDomain('sgv-admin', id);
+        const routes = [
+            { hosts: [dashboard], port: CaddyConfigHelper.getFrontendPort('dashboard', id) },
+            { hosts: [registration], port: CaddyConfigHelper.getFrontendPort('registration', id) },
+            { hosts: [webshop], port: CaddyConfigHelper.getFrontendPort('webshop', id) },
+            { hosts: [api, `*.${api}`], port: CaddyConfigHelper.getPort('api', id) },
+            { hosts: [sgvLogin], port: CaddyConfigHelper.getPort('sgv-mock', id) },
+            { hosts: [sgvAdmin], port: CaddyConfigHelper.getPort('sgv-mock', id) },
+        ];
 
         return {
             version: '2',
             name: `playwright-worker-${id}`,
-            kind: 'playwright-worker',
+            kind: RouteManifestKind.PlaywrightWorker,
             pid: process.pid,
             startedAt: new Date().toISOString(),
             expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
             rootPath: process.cwd(),
             workspace: 'playwright',
-            caddy,
+            routes,
+            tlsSubjects: [...new Set(routes.flatMap(route => route.hosts))],
         };
     }
 

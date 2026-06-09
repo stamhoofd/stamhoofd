@@ -15,6 +15,9 @@ const maximumRunners = 30;
 export class CaddyConfigHelper {
     static readonly GROUP_PREFIX = 'playwright';
 
+    static readonly frontendServices = ['dashboard', 'registration', 'webshop'] as const;
+    static readonly backendServices = ['api', 'sgv-login', 'sgv-admin'] as const;
+
     /**
      * Get the group name for the caddy routes
      */
@@ -26,7 +29,7 @@ export class CaddyConfigHelper {
      * Get the domain for the service and worker id
      */
     static getDomain(
-        service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
+        service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer' | 'sgv-login' | 'sgv-admin',
         workerId: string,
     ) {
         return `playwright-${service}-${this.cycledWorkerId(workerId)}.stamhoofd`;
@@ -58,7 +61,7 @@ export class CaddyConfigHelper {
      * Get the url for the service and worker id
      */
     static getUrl(
-        service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
+        service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer' | 'sgv-login' | 'sgv-admin',
         workerId: string,
         prefix?: string,
     ) {
@@ -66,9 +69,10 @@ export class CaddyConfigHelper {
     }
 
     static getPort(
-        service: 'api',
+        service: 'api' | 'sgv-mock',
         workerId: string) {
-        return 6000 + this.cycledWorkerId(workerId);
+        const basePort = service === 'api' ? 6000 : 6400;
+        return basePort + this.cycledWorkerId(workerId);
     }
 
     static getFrontendPort(service: FrontendProjectName, workerId: string) {
@@ -179,6 +183,43 @@ export class CaddyConfigHelper {
         };
     }
 
+    /** Routes both SGV OAuth and admin hostnames for a worker to that worker's SGV mock process. */
+    static createSGVMockRoute(service: 'sgv-login' | 'sgv-admin', workerId: string, proxyHost: string) {
+        const group = this.getGroup(service, workerId);
+        const domain = CaddyConfigHelper.getDomain(
+            service,
+            workerId,
+        );
+        const port = this.getPort('sgv-mock', workerId);
+
+        return {
+            group,
+            match: [
+                {
+                    host: [domain],
+                },
+            ],
+            handle: [
+                {
+                    handler: 'reverse_proxy',
+                    upstreams: [
+                        {
+                            dial: `${proxyHost}:${port}`,
+                        },
+                    ],
+                },
+                {
+                    handler: 'headers',
+                    response: {
+                        set: {
+                            'Cache-Control': ['no-store'],
+                        },
+                    },
+                },
+            ],
+        };
+    }
+
     /**
      * Create the default playwright caddy config
      */
@@ -194,6 +235,8 @@ export class CaddyConfigHelper {
 
             routes.push(
                 this.createBackendRoute('api', workerId.toString(), options.proxyHost),
+                this.createSGVMockRoute('sgv-login', workerId.toString(), options.proxyHost),
+                this.createSGVMockRoute('sgv-admin', workerId.toString(), options.proxyHost),
             );
         }
 
@@ -221,6 +264,7 @@ export class CaddyConfigHelper {
                     servers: {
                         stamhoofd: {
                             listen: [options.httpsListen, options.httpListen],
+                            tls_connection_policies: [{}],
                             routes,
                             automatic_https: {
                                 disable_redirects: true,
