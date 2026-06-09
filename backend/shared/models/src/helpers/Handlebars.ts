@@ -130,7 +130,7 @@ Handlebars.registerHelper('div', (a, b, options) => {
         return 0;
     }
     if (options.hash.round) {
-        return Math.round(a / b);
+        return Math.round(a / b / 100) * 100;
     }
     return a / b;
 });
