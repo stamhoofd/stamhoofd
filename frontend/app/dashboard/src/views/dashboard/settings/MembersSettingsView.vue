@@ -186,6 +186,19 @@
                             {{ $t('%18d') }}
                         </p>
                     </STListItem>
+
+                    <STListItem v-if="sgvSyncIsEnabled" :selectable="true" class="left-center" data-testid="sgv-groepsadministratie-button" @click="sgvSyncOpen">
+                        <template #left>
+                            <IconContainer icon="sync" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Groepsadministratie synchroniseren') }}
+                        </h2>
+
+                        <p class="style-description-small">
+                            {{ $t('Synchroniseer leden met Scouts en Gidsen Vlaanderen.') }}
+                        </p>
+                    </STListItem>
                 </STList>
             </template>
         </main>
@@ -209,6 +222,7 @@ import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamh
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -238,6 +252,7 @@ const platform = usePlatform();
 const buildEditGroupsView = useEditGroupsView();
 const organization = useRequiredOrganization();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const { sgvSyncOpen, sgvSyncIsEnabled } = useSGVSync();
 
 const props = withDefaults(
     defineProps<{

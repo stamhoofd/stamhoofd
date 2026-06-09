@@ -78,6 +78,7 @@ import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponen
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';

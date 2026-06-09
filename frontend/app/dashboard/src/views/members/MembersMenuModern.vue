@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, StartNewRegistrationPeriodView, Toast, useFeatureFlag, usePlatform, useSetFeatureFlag } from '@stamhoofd/components';
+import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, StartNewRegistrationPeriodView, Toast, useFeatureFlag, useGlobalEventListener, usePlatform, useSetFeatureFlag } from '@stamhoofd/components';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';

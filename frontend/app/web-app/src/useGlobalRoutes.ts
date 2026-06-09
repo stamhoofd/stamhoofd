@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import ForgotPasswordResetView from '@stamhoofd/components/auth/ForgotPasswordResetView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -9,11 +9,11 @@ import PaymentPendingView from '@stamhoofd/components/payments/PaymentPendingVie
 import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { EmailAddressSettings, Platform } from '@stamhoofd/structures';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { PaymentStatus } from '@stamhoofd/structures';
+import { EmailAddressSettings, PaymentStatus, Platform } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;
+
 export function useGlobalRoutes() {
     const modalStackComponent = useModalStackComponent();
     const context = useContext();

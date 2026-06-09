@@ -287,6 +287,7 @@ const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const context = useContext();
 const getGroupsById = useGetGroupsById();
 const getPeriods = useGetPeriods();
+
 const featureFlag = useFeatureFlag();
 const isDifferentPeriod = computed(() => organization.value && organization.value.period.period.id !== props.group.periodId);
 
