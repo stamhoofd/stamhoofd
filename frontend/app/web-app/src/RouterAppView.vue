@@ -9,7 +9,8 @@ import { AppRoute } from '@stamhoofd/structures';
 import { wrapAndReplace } from './wrapAndReplace';
 import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { provideAppNavigate } from '@stamhoofd/components';
+import { provideAppNavigate, ReplaceRootEventBus } from '@stamhoofd/components';
+import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 
 provideAppNavigate(useNavigate());
 
@@ -33,7 +34,7 @@ const orgInUriParams = !orgInDomain
             paramsToProps: async (params: { organizationUri: string }) => {
                 const org = await uriToOrganization(params.organizationUri);
                 if (!org) {
-                    Toast.error($t('Er bestaat geen #organisatie op link "{uri}"', { uri: params.organizationUri })).show();
+                    Toast.error($t('Deze vereniging bestaat niet (meer)')).show();
                     throw new Error('No organization found for the given URI, but required for this route');
                 }
                 return { organization: org };
@@ -51,6 +52,7 @@ async function loadAdmin(uri: string) {
 
 async function loadDashboard(organization: Organization, uri: string) {
     const dashboard = await import('@stamhoofd/dashboard');
+    console.error('Loading dashboard after', organization.clone());
     await wrapAndReplace(organization, 'dashboard', new ComponentWithProperties(dashboard.App, {}), uri);
 }
 
@@ -60,8 +62,13 @@ async function loadRegistration(organization: Organization | null, uri: string) 
 }
 
 async function loadAuto(organization: Organization | null, uri: string) {
+    console.error('Loading auto after', organization?.clone());
     const auto = await import('@stamhoofd/auto');
     await wrapAndReplace(organization, 'auto', new ComponentWithProperties(auto.App, {}), uri);
+}
+
+async function showSpinner() {
+    await ReplaceRootEventBus.sendEvent('replace', new ComponentWithProperties(LoadingView, {}));
 }
 
 async function loadVerifyEmail(organization: Organization | null, uri: string, token: string, email: string, code?: string) {
@@ -75,6 +82,7 @@ if (UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard) {
         name: AppRoute.Admin,
         url: $t('platform'),
         handler: async () => {
+            await showSpinner();
             await loadAdmin($t('platform'));
         },
     });
@@ -86,6 +94,7 @@ if (orgInDomain) {
         name: AppRoute.Dashboard,
         url: $t('beheerders'),
         handler: async () => {
+            await showSpinner();
             await loadDashboard(await orgInDomain(), $t('beheerders'));
         },
     });
@@ -94,6 +103,7 @@ if (orgInDomain) {
         name: AppRoute.Dashboard,
         url: $t('beheerders') + '/@organizationUri',
         handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+            await showSpinner();
             await loadDashboard(componentProperties.organization, $t('beheerders') + '/' + componentProperties.organization.uri);
         },
         ...orgInUriParams,
@@ -106,6 +116,7 @@ if (orgInDomain) {
         name: AppRoute.OrgScopedRegistration,
         url: $t('leden'),
         handler: async () => {
+            await showSpinner();
             await loadRegistration(await orgInDomain(), $t('leden'));
         },
     });
@@ -117,6 +128,7 @@ if (orgInDomain) {
                 name: AppRoute.UnscopedRegistration,
                 url: $t('leden') + '/' + uri,
                 handler: async () => {
+                    await showSpinner();
                     await loadRegistration(null, $t('leden'));
                 },
             });
@@ -126,6 +138,7 @@ if (orgInDomain) {
         name: AppRoute.OrgScopedRegistration,
         url: $t('leden') + '/@organizationUri',
         handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+            await showSpinner();
             await loadRegistration(componentProperties.organization, $t('leden') + '/' + componentProperties.organization.uri);
         },
         ...orgInUriParams,
@@ -135,6 +148,7 @@ if (orgInDomain) {
             name: AppRoute.UnscopedRegistration,
             url: $t('leden'),
             handler: async () => {
+                await showSpinner();
                 await loadRegistration(null, $t('leden'));
             },
         });
@@ -153,6 +167,7 @@ if (orgInDomain) {
         }),
         handler: async ({ componentProperties }) => {
             const { token, email, code } = componentProperties;
+            await showSpinner();
             await loadVerifyEmail(await orgInDomain(), $t('verify-email'), token, email, code);
         },
     });
@@ -167,6 +182,7 @@ if (orgInDomain) {
         }),
         handler: async ({ componentProperties }) => {
             const { token, email, code } = componentProperties;
+            await showSpinner();
             await loadVerifyEmail(null, $t('verify-email'), token, email, code);
         },
     });
@@ -176,6 +192,7 @@ if (orgInDomain) {
         url: 'verify-email/@organizationUri',
         params: { organizationUri: String },
         paramsToProps: async (params, query) => {
+            await showSpinner();
             const org = await uriToOrganization(params.organizationUri);
             if (!org) {
                 Toast.error($t('Kan je e-mailadres niet verifiëren: deze vereniging bestaat niet (meer)', { uri: params.organizationUri })).show();
@@ -197,6 +214,7 @@ if (orgInDomain) {
             params: { organizationUri: props.organization.uri },
         }),
         handler: async ({ componentProperties }) => {
+            await showSpinner();
             const { organization, token, email, code } = componentProperties;
             console.log('Loading verify email for organization', organization, 'with token', token, 'and email', email);
             await loadVerifyEmail(organization, $t('verify-email') + '/' + organization.uri, token, email, code);
@@ -211,6 +229,7 @@ if (orgInDomain) {
         url: '',
         isDefault: {},
         handler: async () => {
+            await showSpinner();
             await loadAuto(await orgInDomain(), '');
         },
     });
@@ -219,6 +238,7 @@ if (orgInDomain) {
         name: AppRoute.OrgScopedAuto,
         url: 'auto/@organizationUri',
         handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+            await showSpinner();
             await loadAuto(componentProperties.organization, $t('auto') + '/' + componentProperties.organization.uri);
         },
         ...orgInUriParams,
@@ -228,6 +248,7 @@ if (orgInDomain) {
         url: '',
         isDefault: {},
         handler: async () => {
+            await showSpinner();
             await loadAuto(null, '');
         },
     });
