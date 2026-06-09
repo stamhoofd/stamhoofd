@@ -13,6 +13,8 @@ export function build(service: Service): any {
             },
             api: 'jambo.api.stamhoofd',
             rendererApi: 'jambo.renderer.stamhoofd',
+            sgvLoginUrl: 'https://login.sgv.jambo.stamhoofd',
+            sgvAdminUrl: 'https://admin.sgv.jambo.stamhoofd',
 
             defaultTransactionalEmail: {
                 '': 'stamhoofd.be',
