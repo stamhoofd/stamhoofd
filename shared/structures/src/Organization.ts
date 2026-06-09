@@ -15,8 +15,10 @@ import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import type { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
+import { OrganizationType } from './OrganizationType.js';
 import type { RegistrationPeriodList } from './RegistrationPeriod.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from './RegistrationPeriod.js';
+import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 
 export class BaseOrganization extends AutoEncoder {
@@ -307,15 +309,14 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
         // Add missing periods
     }
+
+    /** Returns true when the organization is managed by Scouts en Gidsen Vlaanderen. */
+    get isSGVSyncOrganization(): boolean {
+        return this.meta.type === OrganizationType.Youth
+            && this.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen;
+    }
 }
 
-export class OrganizationWithWebshop extends AutoEncoder {
-    @field({ decoder: Organization })
-    organization: Organization;
-
-    @field({ decoder: Webshop })
-    webshop: Webshop;
-}
 
 export class GetWebshopFromDomainResult extends AutoEncoder {
     @field({ decoder: Organization })
