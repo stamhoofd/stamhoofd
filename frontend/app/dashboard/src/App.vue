@@ -1,9 +1,9 @@
 <template>
-    <ComponentWithPropertiesInstance :component="root" />
+    <ComponentWithPropertiesInstance v-if="root" :component="root" />
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, ComponentWithPropertiesInstance, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
@@ -13,28 +13,60 @@ import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue'
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { Storage } from '@stamhoofd/networking/Storage';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { computed, ref } from 'vue';
 
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { AccessRight, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { AuthenticatedView, useContext, getLoginRoot } from '@stamhoofd/components';
+import { SGV_OAUTH_CALLBACK_CODE_STORAGE_KEY, SGV_OAUTH_CALLBACK_STATE_STORAGE_KEY, SGV_OAUTH_SAVED_REDIRECT_URL_STORAGE_KEY } from './classes/SGVOAuthStorage';
 
 const context = useContext();
 const platformManager = usePlatformManager();
+const root = ref<ComponentWithProperties | null>(null);
+
+initializeRoot().catch(console.error);
+
+async function initializeRoot() {
+    if (await storeSGVOAuthCallback()) {
+        return;
+    }
+
+    root.value = new ComponentWithProperties(AuthenticatedView, {
+        noPermissionsRoot: wrapWithModalStack(getNoPermissionsView()),
+        loginRoot: wrapWithModalStack(getLoginRoot()),
+        root: wrapWithModalStack(getRoot()),
+    });
+    root.value.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
+}
+
+async function storeSGVOAuthCallback(): Promise<boolean> {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts[0]?.match(/^[a-z]{2}-[A-Z]{2}$/)) {
+        parts.shift();
+    }
+
+    if (parts[0] !== 'oauth' || parts[1] !== 'sgv') {
+        return false;
+    }
+
+    const query = UrlHelper.shared.getSearchParams();
+    const code = query.get('code');
+    const state = query.get('state');
+    if (code && state) {
+        await Storage.keyValue.setItem(SGV_OAUTH_CALLBACK_CODE_STORAGE_KEY, code);
+        await Storage.keyValue.setItem(SGV_OAUTH_CALLBACK_STATE_STORAGE_KEY, state);
+    }
+
+    const savedRedirectUrl = await Storage.keyValue.getItem(SGV_OAUTH_SAVED_REDIRECT_URL_STORAGE_KEY);
+    window.location.replace(savedRedirectUrl || '/beheerders/instellingen/ledenadministratie');
+    return true;
+}
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
-}
-
-const root = new ComponentWithProperties(AuthenticatedView, {
-    noPermissionsRoot: wrapWithModalStack(getNoPermissionsView()),
-    loginRoot: wrapWithModalStack(getLoginRoot()),
-    root: wrapWithModalStack(getRoot()),
-});
-const component = useCurrentComponent();
-if (component?.checkRoutes) {
-    root.setCheckRoutes();
 }
 
 function getNoPermissionsView() {

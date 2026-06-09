@@ -137,6 +137,7 @@
                         {{ $t('%1Lu') }}
                     </h3>
                 </STListItem>
+
             </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
