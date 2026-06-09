@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import chalk from 'chalk';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
+import { registerServiceRoutes, RouteManifestKind, unregisterServiceRoutes } from '../runtime/manifest-store.js';
 import { createLiveOutput } from '../runtime/live-output.js';
 import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
@@ -17,8 +17,11 @@ vi.mock('node:child_process', () => ({
 }));
 
 vi.mock('../runtime/manifest-store.js', () => ({
-    removeInstanceManifest: vi.fn(),
-    writeInstanceManifest: vi.fn(),
+    registerServiceRoutes: vi.fn(),
+    unregisterServiceRoutes: vi.fn(),
+    RouteManifestKind: {
+        DevInstance: 'dev-instance',
+    },
 }));
 
 vi.mock('../runtime/live-output.js', () => ({
@@ -109,8 +112,8 @@ describe('runDev', () => {
         vi.mocked(isSetupReady).mockReturnValue(true);
         vi.mocked(printSetupReport).mockImplementation(() => undefined);
         vi.mocked(sharedServicesRunning).mockResolvedValue(true);
-        vi.mocked(writeInstanceManifest).mockResolvedValue(undefined);
-        vi.mocked(removeInstanceManifest).mockResolvedValue(undefined);
+        vi.mocked(registerServiceRoutes).mockResolvedValue(undefined);
+        vi.mocked(unregisterServiceRoutes).mockResolvedValue(undefined);
         vi.mocked(CaddyService.reload).mockResolvedValue(undefined);
         vi.mocked(startServices).mockResolvedValue({ env: {}, started: [] });
         vi.mocked(stopServices).mockResolvedValue(undefined);
@@ -298,7 +301,7 @@ describe('runDev', () => {
         const child = createChild();
         const calls: string[] = [];
         vi.mocked(spawn).mockReturnValue(child as any);
-        vi.mocked(removeInstanceManifest).mockImplementation(async () => {
+        vi.mocked(unregisterServiceRoutes).mockImplementation(async () => {
             calls.push('remove-manifest');
         });
         vi.mocked(CaddyService.reload).mockImplementation(async () => {

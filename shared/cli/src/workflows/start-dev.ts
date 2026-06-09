@@ -1,11 +1,13 @@
 import chalk from 'chalk';
 import { spawn } from 'node:child_process';
 import { buildBackendEnv, buildDomains } from '../config/build-config.js';
+import { buildPorts } from '../context/ports.js';
 import { successSymbol } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
 import type { StatusItem } from '../runtime/live-output.js';
 import { createLiveOutput } from '../runtime/live-output.js';
-import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
+import { registerServiceRoutes, RouteManifestKind, unregisterServiceRoutes } from '../runtime/manifest-store.js';
+import type { RouteManifestRoute } from '../runtime/manifest-store.js';
 import { sharedBuildReadyCommand, sharedBuildWatchCommand } from '../runtime/monorepo-runner.js';
 import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { openUrl } from '../runtime/ux.js';
@@ -132,17 +134,11 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
             }
         }
 
-        await writeInstanceManifest(context, {
-            caddy: CaddyService.buildRouteOptions(context),
-            domains: {
-                dashboard: domains.dashboard,
-                api: domains.api,
-                renderer: domains.renderer,
-                registration: domains.registration,
-                webshop: domains.webshop,
-            },
+        await registerServiceRoutes(context, {
+            name: context.instance.name,
+            kind: RouteManifestKind.DevInstance,
+            routes: devInstanceRoutes(context),
         });
-
         if (options.services) {
             await CaddyService.reload(context);
             servicesCheckInterval = setInterval(() => {
@@ -211,7 +207,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                         if (servicesCheckInterval) {
                             clearInterval(servicesCheckInterval);
                         }
-                        await removeInstanceManifest(context);
+                        await unregisterServiceRoutes(context, context.instance.name);
                         if (startedStripe) {
                             await stopStripe(context);
                         }
@@ -285,6 +281,18 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
     } finally {
         setActiveOutputTarget(undefined);
     }
+}
+
+function devInstanceRoutes(context: CliContext): RouteManifestRoute[] {
+    const domains = buildDomains(context);
+    const ports = buildPorts(context);
+    return [
+        { hosts: [domains.renderer], port: ports.renderer },
+        { hosts: [domains.api, `*.${domains.api}`], port: ports.api },
+        { hosts: [domains.dashboard], port: ports.webApp },
+        { hosts: [domains.registration, `*.${domains.registration}`], port: ports.webApp },
+        { hosts: [domains.webshop], port: ports.webshop },
+    ];
 }
 
 function buildStatusItems(domains: ReturnType<typeof buildDomains>, env: string, setupState: PrerequisiteState, servicesState: PrerequisiteState): StatusItem[] {

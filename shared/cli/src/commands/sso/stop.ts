@@ -1,4 +1,6 @@
 import { BaseCommand } from '../../base-command.js';
+import { unregisterServiceRoutes } from '../../runtime/manifest-store.js';
+import { CaddyService } from '../../services/definitions/caddy-service.js';
 import { ssoService } from '../../services/definitions/sso-service.js';
 
 export default class SsoStop extends BaseCommand {
@@ -14,6 +16,8 @@ export default class SsoStop extends BaseCommand {
         const { flags } = await this.parse(SsoStop);
         const context = await this.createContext(flags);
         await ssoService.stop(context);
+        await unregisterServiceRoutes(context, `${context.instance.name}-sso`);
+        await CaddyService.reload(context);
         this.log('Local SSO server stopped.');
     }
 }

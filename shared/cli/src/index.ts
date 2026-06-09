@@ -4,8 +4,8 @@ export { caddyAdminPort, localIpv4Host } from './config/shared-service-config.js
 export { buildCaddyServiceProfile, buildSharedServiceProfile } from './config/shared-service-profile.js';
 export { createContext } from './context/create-context.js';
 export { getProjectPath } from './context/project-path.js';
-export { pruneStaleRouteManifests, removeRouteManifest, removeRouteManifestsByKind, writeRouteManifest, type CaddyRouteOptions } from './runtime/manifest-store.js';
-export type { RouteManifest } from './runtime/manifest-store.js';
+export { pruneStaleRouteManifests, registerServiceRoutes, removeRouteManifest, removeRouteManifestsByKind, RouteManifestKind, unregisterServiceRoutes, writeRouteManifest } from './runtime/manifest-store.js';
+export type { RouteManifest, ServiceRouteRegistration } from './runtime/manifest-store.js';
 export { CaddyService } from './services/definitions/caddy-service.js';
 export type { CaddyRoute } from './config/caddy-config.js';
 export { getContainerRuntime } from './services/docker.js';

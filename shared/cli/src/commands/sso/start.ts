@@ -1,5 +1,8 @@
 import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
+import { buildDomains } from '../../config/build-config.js';
+import { buildPorts } from '../../context/ports.js';
+import { registerServiceRoutes, RouteManifestKind } from '../../runtime/manifest-store.js';
 import { CaddyService } from '../../services/definitions/caddy-service.js';
 import { ssoService } from '../../services/definitions/sso-service.js';
 import { allRunning, startServices } from '../../services/manager.js';
@@ -25,6 +28,13 @@ export default class SsoStart extends BaseCommand {
         if (!(await allRunning(context, sharedServiceDefinitions))) {
             await startServices(context, sharedServiceDefinitions);
         }
+        const domains = buildDomains(context);
+        const ports = buildPorts(context);
+        await registerServiceRoutes(context, {
+            name: `${context.instance.name}-sso`,
+            kind: RouteManifestKind.Sso,
+            routes: [{ hosts: [domains.sso], port: ports.sso }],
+        });
         await CaddyService.reload(context);
         await ssoService.start(context, { redirectUri: args.redirectUri, background: flags.background });
     }
