@@ -1,6 +1,6 @@
 <template>
     <ExternalOrganizationContainer :organization-id="event.organizationId" @update="setOrganization">
-        <div class="st-view event-view">
+        <div class="st-view event-view" :data-testid="'event-view-'+event.id">
             <STNavigationBar :title="title" />
 
             <main class="center">
@@ -139,18 +139,18 @@ const canRegister = computed(() => {
 
     // in case the group is closed but some member is invited
     for (const member of memberManager.family.members) {
-        const canRegister = member.member.registrationInvitations.some(invitation => {
+        const canRegister = member.member.registrationInvitations.some((invitation) => {
             if (invitation.group.id !== group.id) {
                 return false;
             }
-            
+
             const org = memberManager.family.getOrganization(invitation.organizationId);
             if (!org) {
                 return false;
             }
 
             // extra check if can register (prevent showing the button if the member cannot register next)
-            return member.canRegister(group, org)
+            return member.canRegister(group, org);
         });
 
         if (canRegister) {
@@ -217,8 +217,7 @@ async function loadWebshop() {
             owner,
         });
         loadedWebshop.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load webshop', e);
     }
     loadingWebshop.value = false;
@@ -231,12 +230,10 @@ const levelPrefix = computed(() => {
         if (props.event.meta.organizationTagIds !== null) {
             const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
             prefixes.push(...tagNames);
-        }
-        else {
+        } else {
             prefixes.push($t(`%XF`));
         }
-    }
-    else {
+    } else {
         // Name of the organization
         prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
     }

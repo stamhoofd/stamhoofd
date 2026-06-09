@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { Organization, User } from '@stamhoofd/models';
-import { OrganizationFactory, Platform, Token, UserFactory } from '@stamhoofd/models';
+import { EventFactory, OrganizationFactory, Platform, Token, UserFactory } from '@stamhoofd/models';
 import type { AppType } from '@stamhoofd/structures';
 import { PermissionLevel, Permissions, PlatformEventType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -180,6 +180,35 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const organization = await new OrganizationFactory({}).create();
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher,
+                });
+            });
+
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({}).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: null,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher,
+                });
+            });
+
             test('/leden/start', async ({ page }) => {
                 await testRoute({
                     page,
@@ -256,6 +285,35 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
+                });
+            });
+
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const organization = await new OrganizationFactory({}).create();
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher,
+                });
+            });
+
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({}).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: null,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                     expectedSwitcher,
                 });
             });
@@ -337,6 +395,35 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher,
+                });
+            });
+
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const organization = await new OrganizationFactory({}).create();
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher,
+                });
+            });
+
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({}).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: null,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                     expectedSwitcher,
                 });
             });
@@ -428,6 +515,35 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher: false, // can't switch
+                });
+            });
+
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const organization = await new OrganizationFactory({}).create();
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher: true, // exception: can switch back to global member portal
+                });
+            });
+
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({}).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: null,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher: false,
                 });
             });
 
@@ -583,6 +699,21 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const organization = await createOrganization();
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher: true,
+                });
+            });
+
             test('/leden/start redirects to selection', async ({ page }) => {
                 await testRoute({
                     page,
@@ -663,6 +794,20 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher: true,
+                });
+            });
+
             test('/leden/start should redirect to selection view', async ({ page }) => {
                 await testRoute({
                     page,
@@ -737,6 +882,20 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true,
+                });
+            });
+
+            test('/leden/<uri>/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                     expectedSwitcher: true,
                 });
             });
@@ -904,6 +1063,20 @@ test.describe('Routing on page load @routing', () => {
                     });
                 });
 
+                test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                    const event = await new EventFactory({ organization }).create();
+
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/activiteiten/' + event.slug,
+                        expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                        expectedScope,
+                        expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                        expectedSwitcher: true,
+                    });
+                });
+
                 test('/ should show dashboard', async ({ page }) => {
                     await testRoute({
                         page,
@@ -951,6 +1124,20 @@ test.describe('Routing on page load @routing', () => {
                         expectedUrl: domain + '/nl-BE/leden/start',
                         expectedScope,
                         expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: true,
+                    });
+                });
+
+                test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                    const event = await new EventFactory({ organization }).create();
+
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/activiteiten/' + event.slug,
+                        expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                        expectedScope,
+                        expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                         expectedSwitcher: true,
                     });
                 });
@@ -1012,6 +1199,20 @@ test.describe('Routing on page load @routing', () => {
                         expectedUrl: domain + '/nl-BE/leden/start',
                         expectedScope,
                         expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: false,
+                    });
+                });
+
+                test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                    const event = await new EventFactory({ organization }).create();
+
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/activiteiten/' + event.slug,
+                        expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                        expectedScope,
+                        expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                         expectedSwitcher: false,
                     });
                 });
@@ -1143,6 +1344,20 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher: true,
+                });
+            });
+
             test('/leden/start', async ({ page }) => {
                 await testRoute({
                     page,
@@ -1235,6 +1450,20 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
+                    expectedSwitcher: true,
+                });
+            });
+
             test('/ should show dashboard', async ({ page }) => {
                 await testRoute({
                     page,
@@ -1300,6 +1529,19 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/activiteiten',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="events-overview"]',
+                });
+            });
+
+            test('/leden/activiteiten/<year>/<name>/<id>', async ({ page }) => {
+                const event = await new EventFactory({ organization }).create();
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/activiteiten/' + event.slug,
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
+                    expectedScope: organization,
+                    expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                 });
             });
 

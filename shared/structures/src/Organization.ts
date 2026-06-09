@@ -69,7 +69,7 @@ export class BaseOrganization extends AutoEncoder {
                 d += '/' + i18n.language;
             }
 
-            return d;
+            return d + '/' + appToUri('registration');
         }
         return this.getDefaultRegistrationHost(i18n);
     }
@@ -84,7 +84,7 @@ export class BaseOrganization extends AutoEncoder {
             defaultDomain += '/' + i18n.language;
         }
 
-        return this.uri + '.' + defaultDomain;
+        return this.uri + '.' + defaultDomain + '/' + appToUri('registration');
     }
 
     /**

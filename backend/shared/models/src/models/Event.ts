@@ -68,6 +68,10 @@ export class Event extends QueryableModel {
         });
     }
 
+    get slug() {
+        return this.getStructure().slug;
+    }
+
     /**
      * @deprecated
      */
@@ -101,8 +105,7 @@ export class Event extends QueryableModel {
             group.settings.requireOrganizationIds = [this.organizationId];
             group.settings.requireOrganizationTags = [];
             group.settings.requirePlatformMembershipOn = null;
-        }
-        else {
+        } else {
             group.settings.requireOrganizationTags = this.meta.organizationTagIds ?? [];
 
             // Everyone can register
@@ -118,8 +121,7 @@ export class Event extends QueryableModel {
             if (waitingList) {
                 if (group.settings.allowRegistrationsByOrganization) {
                     waitingList.settings.allowRegistrationsByOrganization = true;
-                }
-                else {
+                } else {
                     waitingList.settings.allowRegistrationsByOrganization = false;
                 }
                 await this.syncGroupRequirements(waitingList);

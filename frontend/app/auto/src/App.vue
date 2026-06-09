@@ -18,7 +18,9 @@ function wrapWithModalStack(component: ComponentWithProperties) {
 
 const root = context.value.organization ? getOrgScopedRoot(context.value.organization) : (STAMHOOFD.userMode === 'platform' ? getUnscopedRootInPlatformMode() : getUnscopedRootInOrganizationMode());
 const component = useCurrentComponent();
+let checkRoutes = false;
 if (component?.checkRoutes) {
+    checkRoutes = true;
     root.setCheckRoutes();
 }
 
@@ -26,13 +28,13 @@ function getOrgScopedRoot(organization: Organization) {
     return new ComponentWithProperties(AuthenticatedView, {
         noPermissionsRoot: wrapWithModalStack(new ComponentWithProperties(PromiseView, {
             promise: async () => {
-                await appNavigate(AppRoute.OrgScopedRegistration, { properties: { organization } });
+                await appNavigate(AppRoute.OrgScopedRegistration, { properties: { organization }, checkRoutes });
                 throw new Error('Should have been navigated away');
             },
         })),
         root: wrapWithModalStack(new ComponentWithProperties(PromiseView, {
             promise: async () => {
-                await appNavigate(AppRoute.Dashboard, { properties: { organization } });
+                await appNavigate(AppRoute.Dashboard, { properties: { organization }, checkRoutes });
                 throw new Error('Should have been navigated away');
             },
         })),
@@ -45,7 +47,7 @@ function getUnscopedRootInPlatformMode() {
         root: wrapWithModalStack(new ComponentWithProperties(PromiseView, {
             promise: async () => {
                 if (context.value.auth.userPermissions?.isEmpty !== false && !context.value.auth.hasSomePlatformAccess()) {
-                    await appNavigate(AppRoute.UnscopedRegistration);
+                    await appNavigate(AppRoute.UnscopedRegistration, { checkRoutes });
                     throw new Error('Should have been navigated away');
                 } else {
                     return getSelectorView();

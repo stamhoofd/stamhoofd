@@ -224,7 +224,7 @@ export class Organization extends QueryableModel {
                 d += '/' + i18n.language;
             }
 
-            return d;
+            return d + '/' + appToUri('registration');
         }
         return this.getDefaultRegistrationHost(i18n);
     }
@@ -239,7 +239,7 @@ export class Organization extends QueryableModel {
             defaultDomain += '/' + i18n.language;
         }
 
-        return this.uri + '.' + defaultDomain;
+        return this.uri + '.' + defaultDomain + '/' + appToUri('registration');
     }
 
     getDashboardHost(i18n?: { language: Language; locale: string }): string {

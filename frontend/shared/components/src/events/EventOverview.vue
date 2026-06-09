@@ -425,7 +425,10 @@ const levelPrefix = computed(() => {
 });
 
 const link = computed(() => {
-    return `https://${STAMHOOFD.domains.dashboard}/${appToUri('registration')}/activiteiten/${props.event.startDate.getFullYear()}/${Formatter.slug(props.event.name)}/${props.event.id}`;
+    if (!eventOrganization.value) {
+        return '';
+    }
+    return `https://${eventOrganization.value.getRegistrationHost()}/activiteiten/${props.event.slug}`;
 });
 
 enum Routes {

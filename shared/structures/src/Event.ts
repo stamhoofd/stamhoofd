@@ -153,4 +153,8 @@ export class Event extends AutoEncoder {
 
         return result as any;
     }
+
+    get slug() {
+        return `${Formatter.luxon(this.startDate).year}/${Formatter.slug(this.name)}/${this.id}`;
+    }
 }
