@@ -13,6 +13,8 @@ export function build(service: Service): any {
             },
             api: 'keeo.api.stamhoofd',
             rendererApi: 'keeo.renderer.stamhoofd',
+            sgvLoginUrl: 'https://login.sgv.keeo.stamhoofd',
+            sgvAdminUrl: 'https://admin.sgv.keeo.stamhoofd',
 
             defaultTransactionalEmail: {
                 '': 'stamhoofd.be',

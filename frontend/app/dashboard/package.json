@@ -26,6 +26,8 @@
         "@stamhoofd/ticket-builder": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
+        "@stamhoofd/sgv": "*",
+        "@stamhoofd/sgv-frontend": "*",
         "@stamhoofd/structures": "*",
         "qr-scanner": "^1.3.0"
     }
