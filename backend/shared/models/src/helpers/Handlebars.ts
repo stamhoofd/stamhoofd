@@ -50,7 +50,12 @@ class AsyncResolver {
 
 Handlebars.registerHelper('eq', (a, b) => a == b);
 Handlebars.registerHelper('neq', (a, b) => a !== b);
-Handlebars.registerHelper('formatPrice', a => typeof a === 'number' ? Formatter.price(a) : a);
+Handlebars.registerHelper('formatPrice', (a, options) => {
+    if (typeof a !== 'number') return a;
+    // round=true rounds to nearest cent (100 units = 1 cent, where 10000 units = €1)
+    const value = options?.hash?.round ? Math.round(a / 100) * 100 : a;
+    return Formatter.price(value);
+});
 Handlebars.registerHelper('formatDate', (a, options) => {
     if (!(a instanceof Date)) {
         return '';
