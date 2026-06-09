@@ -834,235 +834,240 @@ test.describe('Routing on page load @routing', () => {
         });
     });
 
-    test.describe('Organization mode on default register domain', () => {
-        let organization!: Organization;
-        let domain!: string;
-        let expectedScope!: Organization | null;
+    [true, false].forEach((useRegisterDomain) => {
+        test.describe(useRegisterDomain ? 'Organization mode on custom domain' : 'Organization mode on default register domain', () => {
+            let organization!: Organization;
+            let domain!: string;
+            let expectedScope!: Organization | null;
 
-        test.beforeAll(async () => {
-            TestUtils.setPermanentEnvironment('userMode', 'organization');
-            organization = await new OrganizationFactory({
-                packages: [STPackageBundle.Webshops, STPackageBundle.Members],
-            }).create();
-            organization.registerDomain = null; // not set
-            await organization.save();
-            await STPackageService.updateOrganizationPackages(organization.id);
-
-            domain = WorkerData.urls.registration(organization.uri);
-
-            // Always scoped
-            expectedScope = organization;
-        });
-
-        test.describe('Platform Admin', () => {
-            let user: User;
-
-            test.beforeEach(async ({ page }) => {
-                user = await new UserFactory({
-                    globalPermissions: Permissions.create({
-                        level: PermissionLevel.Full,
-                    }),
+            test.beforeAll(async () => {
+                TestUtils.setPermanentEnvironment('userMode', 'organization');
+                organization = await new OrganizationFactory({
+                    packages: [STPackageBundle.Webshops, STPackageBundle.Members],
                 }).create();
+                organization.registerDomain = useRegisterDomain ? WorkerData.urls.registrationCustomDomain('scoutswetteren.be') : null; // not set
+                await organization.save();
+                await STPackageService.updateOrganizationPackages(organization.id);
 
-                await loginAs({ user, page });
+                domain = useRegisterDomain ? 'https://' + organization.registerDomain : WorkerData.urls.registration(organization.uri);
+
+                // Always scoped
+                expectedScope = organization;
             });
 
-            test('/platform/instellingen redirects to /beheerders/leden', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/platform/instellingen',
-                    expectedUrl: domain + '/nl-BE/beheerders/leden',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-menu"]',
-                    expectedSwitcher: true,
+            test.describe('Platform Admin', () => {
+                let user: User;
+
+                test.beforeEach(async ({ page }) => {
+                    user = await new UserFactory({
+                        globalPermissions: Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                    }).create();
+
+                    await loginAs({ user, page });
+                });
+
+                test('/platform/instellingen redirects to /beheerders/leden', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/platform/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders/leden',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-menu"]',
+                        expectedSwitcher: true,
+                    });
+                });
+
+                test('/beheerders/instellingen', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/beheerders/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders/instellingen',
+                        expectedScope,
+                        expectedLocator: '#settings-view',
+                        expectedSwitcher: true,
+                    });
+                });
+
+                test('/leden/start', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/start',
+                        expectedUrl: domain + '/nl-BE/leden/start',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: true,
+                    });
+                });
+
+                test('/ should show dashboard', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain,
+                        expectedUrl: domain + '/nl-BE/beheerders/leden',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-menu"]',
+                        expectedSwitcher: true,
+                    });
                 });
             });
 
-            test('/beheerders/instellingen', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/beheerders/instellingen',
-                    expectedUrl: domain + '/nl-BE/beheerders/instellingen',
-                    expectedScope,
-                    expectedLocator: '#settings-view',
-                    expectedSwitcher: true,
+            test.describe('Full Organization Admin', () => {
+                let user: User;
+
+                test.beforeEach(async ({ page }) => {
+                    user = await new UserFactory({
+                        organization,
+                        permissions: Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                    }).create();
+
+                    await loginAs({ user, page });
+                });
+
+                test('/beheerders/instellingen', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/beheerders/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders/instellingen',
+                        expectedScope,
+                        expectedLocator: '#settings-view',
+                        expectedSwitcher: true,
+                    });
+                });
+
+                test('/leden/start', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/start',
+                        expectedUrl: domain + '/nl-BE/leden/start',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: true,
+                    });
+                });
+
+                test('/ should show dashboard', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain,
+                        expectedUrl: domain + '/nl-BE/beheerders/leden',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-menu"]',
+                        expectedSwitcher: true,
+                    });
                 });
             });
 
-            test('/leden/start', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/leden/start',
-                    expectedUrl: domain + '/nl-BE/leden/start',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-start-view"]',
-                    expectedSwitcher: true,
+            test.describe('Normal user', () => {
+                let user: User;
+
+                test.beforeEach(async ({ page }) => {
+                    user = await new UserFactory({
+                        organization,
+                        permissions: null,
+                    }).create();
+
+                    await loginAs({ user, page });
+                });
+
+                test('/beheerders should show permissions error page', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/beheerders/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders/geen-toegang',
+                        expectedScope,
+                        expectedLocator: '[data-testid="no-permissions-view"]',
+                        expectedSwitcher: true, // exception
+                    });
+                });
+
+                test('/leden', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden',
+                        expectedUrl: domain + '/nl-BE/leden/start',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: false,
+                    });
+                });
+
+                test('/leden/start', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/start',
+                        expectedUrl: domain + '/nl-BE/leden/start',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: false,
+                    });
+                });
+
+                test('/ should redirect to /leden/start', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden/start',
+                        expectedUrl: domain + '/nl-BE/leden/start',
+                        expectedScope,
+                        expectedLocator: '[data-testid="members-start-view"]',
+                        expectedSwitcher: false,
+                    });
                 });
             });
 
-            test('/ should show dashboard', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain,
-                    expectedUrl: domain + '/nl-BE/beheerders/leden',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-menu"]',
-                    expectedSwitcher: true,
+            test.describe('Unauthenticated user', () => {
+                test.beforeEach(async ({ page }) => {
+                    await logout({ page });
                 });
-            });
-        });
 
-        test.describe('Full Organization Admin', () => {
-            let user: User;
-
-            test.beforeEach(async ({ page }) => {
-                user = await new UserFactory({
-                    organization,
-                    permissions: Permissions.create({
-                        level: PermissionLevel.Full,
-                    }),
-                }).create();
-
-                await loginAs({ user, page });
-            });
-
-            test('/beheerders/instellingen', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/beheerders/instellingen',
-                    expectedUrl: domain + '/nl-BE/beheerders/instellingen',
-                    expectedScope,
-                    expectedLocator: '#settings-view',
-                    expectedSwitcher: true,
+                test('/beheerders/instellingen should show login view (scoped)', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/beheerders/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders',
+                        expectedScope,
+                        expectedLocator: '[data-testid="login-view"]',
+                        expectedSwitcher: true, // exception to go back to normal login for members
+                    });
                 });
-            });
 
-            test('/leden/start', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/leden/start',
-                    expectedUrl: domain + '/nl-BE/leden/start',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-start-view"]',
-                    expectedSwitcher: true,
+                test('/leden should show login view (scoped)', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/leden',
+                        expectedUrl: domain + '/nl-BE/leden',
+                        expectedScope,
+                        expectedLocator: '[data-testid="login-view"]',
+                        expectedSwitcher: false, // Not allowed on custom domains if not signed in
+                    });
                 });
-            });
 
-            test('/ should show dashboard', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain,
-                    expectedUrl: domain + '/nl-BE/beheerders/leden',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-menu"]',
-                    expectedSwitcher: true,
-                });
-            });
-        });
-
-        test.describe('Normal user', () => {
-            let user: User;
-
-            test.beforeEach(async ({ page }) => {
-                user = await new UserFactory({
-                    organization,
-                    permissions: null,
-                }).create();
-
-                await loginAs({ user, page });
-            });
-
-            test('/beheerders should show permissions error page', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/beheerders/instellingen',
-                    expectedUrl: domain + '/nl-BE/beheerders/geen-toegang',
-                    expectedScope,
-                    expectedLocator: '[data-testid="no-permissions-view"]',
-                    expectedSwitcher: true, // exception
-                });
-            });
-
-            test('/leden', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/leden',
-                    expectedUrl: domain + '/nl-BE/leden/start',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-start-view"]',
-                    expectedSwitcher: false,
-                });
-            });
-
-            test('/leden/start', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/leden/start',
-                    expectedUrl: domain + '/nl-BE/leden/start',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-start-view"]',
-                    expectedSwitcher: false,
-                });
-            });
-
-            test('/ should redirect to /leden/start', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/leden/start',
-                    expectedUrl: domain + '/nl-BE/leden/start',
-                    expectedScope,
-                    expectedLocator: '[data-testid="members-start-view"]',
-                    expectedSwitcher: false,
-                });
-            });
-        });
-
-        test.describe('Unauthenticated user', () => {
-            test.beforeEach(async ({ page }) => {
-                await logout({ page });
-            });
-
-            test('/beheerders/instellingen should show login view (scoped)', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/beheerders/instellingen',
-                    expectedUrl: domain + '/nl-BE/beheerders',
-                    expectedScope,
-                    expectedLocator: '[data-testid="login-view"]',
-                });
-            });
-
-            test('/leden should show login view (scoped)', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/leden',
-                    expectedUrl: domain + '/nl-BE/leden',
-                    expectedScope,
-                    expectedLocator: '[data-testid="login-view"]',
-                });
-            });
-
-            test('/ should show auto login', async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain,
-                    expectedUrl: domain + '/nl-BE',
-                    expectedScope,
-                    expectedLocator: '[data-testid="login-view"]',
+                test('/ should show auto login', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain,
+                        expectedUrl: domain + '/nl-BE',
+                        expectedScope,
+                        expectedLocator: '[data-testid="login-view"]',
+                        expectedSwitcher: false, // Not allowed on custom domains if not signed in
+                    });
                 });
             });
         });
