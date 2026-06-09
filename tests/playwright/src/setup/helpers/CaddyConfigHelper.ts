@@ -249,7 +249,14 @@ export class CaddyConfigHelper {
                                 ],
                             },
                         ],
-                        on_demand: {},
+                        on_demand: {
+                            permission: {
+                                module: 'http',
+
+                                // Just a domain that always returns 200 (no redirects!)
+                                endpoint: 'https://www.stamhoofd.be',
+                            },
+                        },
                     },
                 },
             },
