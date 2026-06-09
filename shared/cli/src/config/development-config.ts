@@ -1,7 +1,7 @@
-import path from 'node:path';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
-import { createContext } from '../context/create-context.js';
+import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
+import { createContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
 
@@ -235,12 +235,14 @@ function baseDatabase(env: string): string {
 }
 
 function environmentPreset(env: string): EnvironmentPreset {
-    if (env === 'stamhoofd') {
+    if (env === 'keeo') {
         return {
-            userMode: 'organization' as const,
-            translationNamespace: 'stamhoofd',
-            platformName: 'stamhoofd',
-            stripeConnectMethod: 'express' as const,
+            userMode: 'platform' as const,
+            translationNamespace: env,
+            platformName: env,
+            fixedCountry: 'BE' as SharedEnvironment['fixedCountry'],
+            memberNumberAlgorithm: MemberNumberAlgorithm.Incremental,
+            memberNumberAlgorithmLength: 10,
         };
     }
     if (env === 'ravot') {
@@ -265,11 +267,9 @@ function environmentPreset(env: string): EnvironmentPreset {
         };
     }
     return {
-        userMode: 'platform' as const,
-        translationNamespace: env,
-        platformName: env,
-        fixedCountry: 'BE' as SharedEnvironment['fixedCountry'],
-        memberNumberAlgorithm: MemberNumberAlgorithm.Incremental,
-        memberNumberAlgorithmLength: 10,
+        userMode: 'organization' as const,
+        translationNamespace: 'stamhoofd',
+        platformName: 'stamhoofd',
+        stripeConnectMethod: 'express' as const,
     };
 }
