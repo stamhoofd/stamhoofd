@@ -104,6 +104,19 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         return caddyDataDir();
     }
 
+    static adminUrl(): string {
+        return `http://${localhostPort(caddyAdminPort)}`;
+    }
+
+    static async fetchAdmin(path: string, init: RequestInit = {}): Promise<Response> {
+        const headers = new Headers(init.headers);
+        if (!headers.has('Origin')) {
+            headers.set('Origin', CaddyService.adminUrl());
+        }
+
+        return await fetch(`${CaddyService.adminUrl()}${path.startsWith('/') ? path : `/${path}`}`, { ...init, headers });
+    }
+
     private static async runsInHostNetwork(): Promise<boolean> {
         if (!(await docker.containerIsRunning(CaddyService.container))) {
             return false;
