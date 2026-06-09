@@ -28,6 +28,8 @@
         "@stamhoofd/frontend-pdf-builder": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
+        "@stamhoofd/sgv": "*",
+        "@stamhoofd/sgv-frontend": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/ticket-builder": "*",
         "@stamhoofd/types": "*",
