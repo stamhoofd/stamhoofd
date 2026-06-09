@@ -73,7 +73,7 @@ export class CaddyConfigHelper {
             group,
             match: [
                 {
-                    host: [domain],
+                    host: service === 'registration' ? [domain, '*.' + domain] : [domain],
                 },
             ],
             handle: [
