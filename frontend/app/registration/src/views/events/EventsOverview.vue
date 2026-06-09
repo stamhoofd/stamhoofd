@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="events-overview">
         <STNavigationBar :title="$t(`%uB`)" />
 
         <main class="center">

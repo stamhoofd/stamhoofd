@@ -6,7 +6,7 @@ import { FrontendBuilder } from './helpers/FrontendBuilder.js';
 import { PlaywrightHooks } from './helpers/PlaywrightHooks.js';
 
 // Make sure initial env is loaded
- 
+
 TestUtils.globalSetup(new PlaywrightHooks());
 
 export default async function globalSetup() {

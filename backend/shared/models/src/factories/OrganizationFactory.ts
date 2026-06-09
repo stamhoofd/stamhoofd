@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import type { PermissionRoleDetailed } from '@stamhoofd/structures';
+import type { PermissionRoleDetailed, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { Address, OrganizationMetaData, OrganizationType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -7,6 +7,7 @@ import { Organization } from '../models/Organization.js';
 import type { RegistrationPeriod } from '../models/RegistrationPeriod.js';
 import { RegistrationPeriodFactory } from './RegistrationPeriodFactory.js';
 import { Country } from '@stamhoofd/types/Country';
+import { STPackageFactory } from './STPackageFactory.js';
 
 class Options {
     uri?: string;
@@ -17,6 +18,7 @@ class Options {
     roles?: PermissionRoleDetailed[];
     period?: RegistrationPeriod;
     tags?: string[];
+    packages?: STPackageBundle[];
 }
 
 export class OrganizationFactory extends Factory<Options, Organization> {
@@ -45,8 +47,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
 
         if (this.options.period) {
             period = this.options.period;
-        }
-        else {
+        } else {
             period = await new RegistrationPeriodFactory({}).create();
         }
 
@@ -66,6 +67,13 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             // should be saved after creation of organization
             period.organizationId = organization.id;
             await period.save();
+        }
+
+        for (const bundle of this.options.packages ?? []) {
+            await new STPackageFactory({
+                organization,
+                bundle,
+            }).create();
         }
 
         return organization;

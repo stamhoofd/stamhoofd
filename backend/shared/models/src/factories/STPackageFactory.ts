@@ -24,8 +24,7 @@ export class STPackageFactory extends Factory<Options, STPackage> {
 
         if (this.options.removeAt) {
             pack.validAt = new Date(this.options.removeAt.getTime() - 365 * 1000 * 60 * 60 * 24);
-        }
-        else {
+        } else {
             pack.validAt = this.options.validAt !== undefined ? this.options.validAt : new Date();
         }
 
@@ -38,6 +37,7 @@ export class STPackageFactory extends Factory<Options, STPackage> {
         }
 
         await pack.save();
+
         return pack;
     }
 }
