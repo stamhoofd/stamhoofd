@@ -76,7 +76,7 @@
             <hr><h2>{{ $t('%16X') }}</h2>
 
             <STList>
-                <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
+                <STListItem v-if="!isDraft && !isLocked && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
                     <template #left>
                         <IconContainer class="" icon="government">
                             <template #aside>
