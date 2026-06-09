@@ -1,5 +1,5 @@
 <template>
-    <div class="st-menu st-view members-menu">
+    <div class="st-menu st-view members-menu" data-testid="members-menu">
         <STNavigationBar :title="$t(`%1EH`)">
             <template #right>
                 <button v-if="$canEdit" class="button icon settings" type="button" @click="editMe" />

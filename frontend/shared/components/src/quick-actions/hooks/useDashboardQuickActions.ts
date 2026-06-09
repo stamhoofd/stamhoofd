@@ -2,14 +2,14 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onActivated, onMounted, ref, unref } from 'vue';
 import { useContextOptions } from '../../context';
 import PlatformAvatar from '../../context/PlatformAvatar.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
-import { useAuth, useContext, usePlatform } from '../../hooks';
+import { useAuth, useContext, useOrganization, usePlatform, useUser } from '../../hooks';
 import type { QuickAction, QuickActions } from '../classes/QuickActions';
 import { mergeErrorBox } from '../classes/QuickActions';
 import { useRegistrationQuickActions } from './useRegistrationQuickActions';
@@ -26,6 +26,8 @@ export function useDashboardQuickActions(): QuickActions {
     const owner = useRequestOwner();
     const errors = useErrors();
     const auth = useAuth();
+    const user = useUser();
+    const organization = useOrganization();
 
     const platform = usePlatform();
 
@@ -56,8 +58,7 @@ export function useDashboardQuickActions(): QuickActions {
             });
 
             outstandingBalance.value = response.data;
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
     }
@@ -86,7 +87,7 @@ export function useDashboardQuickActions(): QuickActions {
                         ? $t('%6V')
                         : $t('%6X', { count: registrationActions.length.toString() }),
                     action: async () => {
-                        contextOptions.selectOption(contextOptions.getRegistrationOption());
+                        contextOptions.selectOption(contextOptions.getRegistrationOption(STAMHOOFD.userMode === 'platform' ? null : organization.value, user.value));
                     },
                 });
             }

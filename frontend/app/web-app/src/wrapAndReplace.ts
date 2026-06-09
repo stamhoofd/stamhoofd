@@ -39,11 +39,7 @@ export async function wrapAndReplace(organization: Organization | null = null, a
             $memberManager,
             $organizationManager: new OrganizationManager(context),
             reactive_components: {
-                'tabbar-left': UrlHelper.shared.url.host !== STAMHOOFD.domains.dashboard && context.organization
-                    ? new ComponentWithProperties(OrganizationLogo, {
-                        organization: context.organization,
-                    })
-                    : new ComponentWithProperties(OrganizationSwitcher, {}),
+                'tabbar-left': new ComponentWithProperties(OrganizationSwitcher, {}),
                 'tabbar-right': new ComponentWithProperties(AccountSwitcher, {}),
                 'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
             },

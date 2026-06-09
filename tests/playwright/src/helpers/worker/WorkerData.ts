@@ -8,7 +8,7 @@ export type StamhoofdUrls = {
     readonly api: string;
     readonly dashboard: string;
     readonly webshop: string;
-    readonly registration: string;
+    registration(uri: string): string;
 };
 
 /**
@@ -68,7 +68,7 @@ class WorkerDataInstance {
                 api: '',
                 dashboard: '',
                 webshop: '',
-                registration: '',
+                registration: () => '',
             };
         }
 
@@ -76,7 +76,7 @@ class WorkerDataInstance {
             api: CaddyConfigHelper.getUrl('api', workerId),
             dashboard: CaddyConfigHelper.getUrl('dashboard', workerId),
             webshop: CaddyConfigHelper.getUrl('webshop', workerId),
-            registration: CaddyConfigHelper.getUrl('registration', workerId),
+            registration: (uri: string) => CaddyConfigHelper.getUrl('registration', workerId, uri + '.'),
         };
     }
 
@@ -119,7 +119,7 @@ class WorkerDataInstance {
         // reset the database, except for the user if one
         await this.databaseHelper.reset(this._user ? this._user.id : null);
         await this.resetUser();
-        await initMembershipOrganization()
+        await initMembershipOrganization();
     }
 
     /**

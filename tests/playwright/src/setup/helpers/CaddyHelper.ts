@@ -1,6 +1,7 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
-import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, type RouteManifest, writeRouteManifest } from '@stamhoofd/cli';
+import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, writeRouteManifest } from '@stamhoofd/cli';
+import type { RouteManifest } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { ProcessInfo } from './ProcessInfo.js';
 import { STChildProcess } from './STChildProcess.js';
@@ -86,8 +87,7 @@ export class CaddyHelper {
     async stop() {
         try {
             await exec('caddy stop');
-        }
-        catch (error) {
+        } catch (error) {
             // Ignore stop failures: Caddy may already have exited with the parent process.
         }
     }
@@ -112,7 +112,10 @@ export class CaddyHelper {
         const api = CaddyConfigHelper.getDomain('api', id);
         const routes = [
             { hosts: [dashboard], port: CaddyConfigHelper.getFrontendPort('dashboard', id) },
-            { hosts: [registration], port: CaddyConfigHelper.getFrontendPort('registration', id) },
+            {
+                hosts: [registration, '*.' + registration],
+                port: CaddyConfigHelper.getFrontendPort('registration', id),
+            },
             { hosts: [webshop], port: CaddyConfigHelper.getFrontendPort('webshop', id) },
             { hosts: [api, `*.${api}`], port: CaddyConfigHelper.getPort('api', id) },
         ];
@@ -137,8 +140,7 @@ export class CaddyHelper {
             await exec(
                 `curl -v -X PUT ${url} -d '${JSON.stringify(route)}' -H "Content-Type: application/json"`,
             );
-        }
-        catch (error) {
+        } catch (error) {
             console.error(`Failed to put route at index ${index}. Url: ${url}`);
             throw error;
         }
@@ -168,8 +170,7 @@ export class CaddyHelper {
             await exec(
                 `curl -v POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
             );
-        }
-        catch (error) {
+        } catch (error) {
             console.error(`Failed to post policySubjects. Url: ${url}`);
             throw error;
         }
@@ -289,8 +290,7 @@ export class CaddyHelper {
                 signal: AbortSignal.timeout(1_000),
             });
             return res.ok;
-        }
-        catch (error) {
+        } catch (error) {
             return false;
         }
     }
@@ -304,5 +304,4 @@ export class CaddyHelper {
             'Origin': runtime.adminUrl,
         };
     }
-
 }

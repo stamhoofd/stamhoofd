@@ -41,7 +41,7 @@ function getUnscopedRootInPlatformMode() {
     return new ComponentWithProperties(AuthenticatedView, {
         root: wrapWithModalStack(new ComponentWithProperties(PromiseView, {
             promise: async () => {
-                if (context.value.auth.userPermissions?.isEmpty && !context.value.auth.hasSomePlatformAccess()) {
+                if (context.value.auth.userPermissions?.isEmpty !== false && !context.value.auth.hasSomePlatformAccess()) {
                     await appNavigate(AppRoute.UnscopedRegistration);
                     throw new Error('Should have been navigated away');
                 } else {

@@ -44,10 +44,10 @@
                     <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" data-testid="organization-button" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
                         <ContextLogo :organization="option.organization" :app="option.app" />
                         <div>
-                            <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
+                            <h1>{{ getAppTitle(option.app, option.organization, 'other') }}</h1>
 
-                            <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
-                                {{ getAppDescription(option.app, option.organization) }}
+                            <p v-if="getAppDescription(option.app, option.organization, 'other')" class="style-description">
+                                {{ getAppDescription(option.app, option.organization, 'other') }}
                             </p>
                             <p v-if="option.userDescription" class="style-description-small style-em">
                                 {{ $t('%WF') }} {{ option.userDescription }}

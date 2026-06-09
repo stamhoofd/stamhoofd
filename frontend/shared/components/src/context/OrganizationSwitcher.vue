@@ -5,10 +5,10 @@
         <ContextLogo :organization="organization" :app="app" />
         <div>
             <h1>
-                <span data-testid="app-name">{{ small && organization ? organization.name : getAppTitle(app, organization) }}</span><span v-if="small" class="icon arrow-down-small gray" />
+                <span data-testid="app-name">{{ small && organization ? organization.name : getAppTitle(app, organization, 'bar') }}</span><span v-if="small" class="icon arrow-down-small gray" />
             </h1>
-            <h2 v-if="!small && getAppDescription(app, organization) && canSwitch">
-                <span>{{ getAppDescription(app, organization) }}</span>
+            <h2 v-if="!small && getAppDescription(app, organization, 'bar') && canSwitch">
+                <span>{{ getAppDescription(app, organization, 'bar') }}</span>
                 <span v-if="canSwitch" class="icon arrow-down-small gray" />
                 <span v-else class="icon dot" />
             </h2>
@@ -17,10 +17,10 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
 
-import { useOrganization } from '../hooks';
-import { usePositionableSheet } from '../tables';
+import { useOrganization } from '#hooks/useOrganization';
+import { usePositionableSheet } from '#tables/usePositionableSheet';
 import { useAppContext, useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import { useContextOptions } from './hooks/useContextOptions';
@@ -36,7 +36,7 @@ const { hasAdminOption, getDefaultOptions } = useContextOptions();
 
 const options = getDefaultOptions();
 const hasAdmin = hasAdminOption();
-const canSwitch = options.length > 1 || (options.length === 1 && (((options[0].organization?.id ?? null) !== (organization.value?.id ?? null)) || options[0].app !== app)) || (STAMHOOFD.userMode !== 'platform' || hasAdmin);
+const canSwitch = options.length > 1 || (options.length === 1 && (((options[0].organization?.id ?? null) !== (organization.value?.id ?? null)) || (options[0].app !== app && options[0].app !== 'auto'))) || hasAdmin || (STAMHOOFD.userMode === 'organization' && UrlHelper.initial.url.host === STAMHOOFD.domains.dashboard);
 
 withDefaults(
     defineProps<{

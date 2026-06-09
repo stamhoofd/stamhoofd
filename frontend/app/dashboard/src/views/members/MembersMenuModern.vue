@@ -1,5 +1,5 @@
 <template>
-    <div class="st-menu-modern st-view members-menu">
+    <div class="st-menu-modern st-view members-menu" data-testid="members-menu">
         <STNavigationBar :title="props.period ? period.period.name : $t('Leden')" />
 
         <main>

@@ -14,17 +14,13 @@
                             <ContextLogo :organization="option.organization" :app="option.app" />
                         </template>
                         <h1 class="style-title-list">
-                            {{ getAppTitle(option.app, option.organization) }}
+                            {{ getAppTitle(option.app, option.organization, 'current') }}
                         </h1>
-                        <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
-                            {{ getAppDescription(option.app, option.organization) }}
+                        <p v-if="getAppDescription(option.app, option.organization, 'current')" class="style-description-small">
+                            {{ getAppDescription(option.app, option.organization, 'current') }}
                         </p>
-                        <p v-if="option.userDescription" class="style-description-small style-em">
-                            {{ $t('%a2', {user: option.userDescription}) }}
-                        </p>
-
                         <template v-if="isCurrent(option)" #right>
-                            <span class="icon success primary floating" />
+                            <span class="icon success primary floating small" />
                         </template>
                     </STListItem>
                 </STList>
@@ -38,22 +34,32 @@
                         <ContextLogo :organization="option.organization" :app="option.app" />
                     </template>
                     <h1 class="style-title-list">
-                        {{ getAppTitle(option.app, option.organization) }}
+                        {{ getAppTitle(option.app, option.organization, 'other') }}
                     </h1>
-                    <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
-                        {{ getAppDescription(option.app, option.organization) }}
+                    <p v-if="getAppDescription(option.app, option.organization, 'other')" class="style-description-small">
+                        {{ getAppDescription(option.app, option.organization, 'other') }}
                     </p>
                     <p v-if="option.userDescription" class="style-description-small style-em">
                         {{ $t('%WF') }} {{ option.userDescription }}
                     </p>
 
                     <template v-if="isCurrent(option)" #right>
-                        <span class="icon success primary floating" />
+                        <span class="icon success primary floating small" />
                     </template>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="button" class="left-center" @click="searchOrganizations">
+                    <template #left>
+                        <IconContainer icon="search" class="transparent" />
+                    </template>
+
+                    <h1 class="style-title-list">
+                        {{ $t('%a3') }}
+                    </h1>
                 </STListItem>
             </STList>
 
-            <template v-if="(STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization">
+            <template v-else-if="(STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization">
                 <hr v-if="currentOptions.length || otherOptions.length"><button class="button text" type="button" @click="searchOrganizations">
                     <span class="icon search" />
                     <span>{{ $t('%a3') }}</span>
@@ -68,22 +74,24 @@ import { usePopup } from '@simonbackx/vue-app-navigation';
 import type { Ref } from 'vue';
 import { computed, onMounted, shallowRef } from 'vue';
 
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { PromiseComponent } from '../containers/AsyncComponent';
-import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
+import { AppRoute } from '@stamhoofd/structures';
+import { useAppNavigate } from '.././hooks/useAppNavigate';
+import { useOrganization } from '../hooks/useOrganization.ts';
 import { useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import type { Option } from './hooks/useContextOptions';
 import { useContextOptions } from './hooks/useContextOptions';
-import { useAppNavigate } from '.././hooks/useAppNavigate';
-import { AppRoute } from '@stamhoofd/structures';
+import IconContainer from '../icons/IconContainer.vue';
+import { useUser } from '../hooks/useUser.ts';
 
 const popup = usePopup();
 const appNavigate = useAppNavigate();
+const user = useUser();
 
 const { getAllOptions, getDefaultOptions, selectOption, isCurrent } = useContextOptions();
 const { getAppTitle, getAppDescription } = useAppData();
 const options: Ref<Option[]> = shallowRef(getDefaultOptions());
+const organization = useOrganization();
 
 onMounted(async () => {
     // Update options when the default options change
@@ -94,14 +102,20 @@ onMounted(async () => {
     }
 });
 
+function isCurrentOption(o: Option) {
+    // Current option = logged in with the same user
+
+    return (!organization.value || !o.organization || (organization.value && o.organization?.id === organization.value.id)) && user.value && o.context.user?.id === user.value.id;
+}
+
 const currentOptions = computed(() => {
-    const list = options.value.filter(o => o.app !== 'auto');
-    if (list.length > 1) {
+    const list = options.value.filter(o => isCurrentOption(o));
+    if (list.length >= 1) {
         return list;
     }
     return [];
 });
-const otherOptions = computed(() => currentOptions.value.length <= 0 ? options.value : options.value.filter(o => o.app === 'auto'));
+const otherOptions = computed(() => currentOptions.value.length <= 0 ? options.value : options.value.filter(o => !isCurrentOption(o)));
 const hasAdmin = computed(() => {
     return options.value.some(o => o.app === 'admin');
 });
@@ -116,5 +130,6 @@ const searchOrganizations = async () => {
 <style lang="scss">
 .organization-app-switcher {
     --st-hr-margin: 15px;
+    --block-width: 28px;
 }
 </style>

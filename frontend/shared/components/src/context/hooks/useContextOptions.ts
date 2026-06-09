@@ -22,12 +22,13 @@ export function useContextOptions() {
 
     const platform = usePlatform();
 
-    const getRegistrationOption = (): Option => {
-        const context = new SessionContext(null);
+    const getRegistrationOption = (organization: Organization | null, user: UserWithMembers | null): Option => {
+        const context = new SessionContext(organization);
+        context.user = user;
 
         return {
             id: 'registration',
-            organization: null,
+            organization,
             app: 'registration',
             context,
         };
@@ -52,6 +53,7 @@ export function useContextOptions() {
         // Platform level users (present on all platforms)
         if (isPlatformAdmin(user)) {
             const context = new SessionContext(null);
+            context.user = user;
             opts.push({
                 id: 'admin',
                 organization: null,
@@ -62,7 +64,7 @@ export function useContextOptions() {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            opts.push(getRegistrationOption());
+            opts.push(getRegistrationOption(null, user));
         }
 
         let organizationIds = [...user?.permissions?.organizationPermissions.keys() ?? []];
@@ -75,17 +77,54 @@ export function useContextOptions() {
             organizationIds.push(platform.value.membershipOrganizationId);
         }
 
+        if ($organization.value && !organizationIds.includes($organization.value.id)) {
+            organizationIds.push($organization.value.id);
+        }
+
         for (const organizationId of organizationIds) {
             const organization = user?.members.organizations.find(o => o.id === organizationId) ?? ($organization.value?.id === organizationId ? $organization.value : null);
-            if (!organization || user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
+            if (!organization) {
                 continue;
             }
+            let app: AppType = 'auto';
+
+            if (STAMHOOFD.userMode === 'organization') {
+                if (organization.meta.packages.useMembers && $organization.value?.id === organization.id) {
+                    // Only add in the list if focused
+                    opts.push(getRegistrationOption(organization, user));
+
+                    if (!(user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false)) {
+                        // Directly add dashboard only if we have permissions
+                        app = 'dashboard';
+                    } else {
+                        // Don't add auto
+                        continue;
+                    }
+                }
+
+                if (!organization.meta.packages.useMembers && user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
+                    // Hide organizations you don't have permissions for that don't have members package
+                    continue;
+                }
+            } else {
+                // In platform mode, only list organizations you have permission to.
+                // in organization mode, we also list organizations you don't have permission to, because we'll redirect to the login view
+                if (user?.permissions?.forOrganization(organization, platform.value)?.isEmpty !== false) {
+                    continue;
+                }
+
+                if ($organization.value?.id === organization.id) {
+                    app = 'dashboard';
+                }
+            }
+
             const context = new SessionContext(organization);
+            context.user = user;
 
             opts.push({
-                id: 'dashboard-' + organization.id,
+                id: app + '-' + organization.id,
                 organization,
-                app: 'dashboard',
+                app,
                 context,
                 userDescription: STAMHOOFD.userMode === 'organization' && user ? user.email : undefined,
             });
@@ -116,6 +155,31 @@ export function useContextOptions() {
             for (const defaultOption of d) {
                 if (!options.find(o => o.id === defaultOption.id)) {
                     options.push(defaultOption);
+                }
+            }
+        }
+
+        // Append current organization
+        if (STAMHOOFD.userMode === 'organization' && $organization.value) {
+            const organization = $organization.value;
+            if (!options.find(o => o.organization?.id === organization.id)) {
+                if ($organization.value.meta.packages.useMembers) {
+                // Only add in the list if focused
+                    options.push(getRegistrationOption($organization.value, $user.value));
+                }
+
+                if ($user.value && $user.value?.permissions && $user.value.permissions.forOrganization($organization.value, platform.value)?.isEmpty === false) {
+                // Hide organizations you don't have permissions for that don't have members package
+                    const context = new SessionContext($organization.value);
+                    context.user = $user.value;
+                    const app = 'dashboard';
+
+                    options.push({
+                        id: app + '-' + $organization.value.id,
+                        organization: $organization.value,
+                        app,
+                        context,
+                    });
                 }
             }
         }

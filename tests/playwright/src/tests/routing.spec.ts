@@ -98,7 +98,7 @@ test.describe('Routing on page load @routing', () => {
      */
     const user = null;
     let membershipOrganization!: Organization;
-    const expectedSwitcher = false;
+    const domain = WorkerData.urls.dashboard;
 
     test.beforeAll(async () => {
         membershipOrganization = await new OrganizationFactory({
@@ -142,8 +142,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/instellingen',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/instellingen',
                     expectedScope: null,
                     expectedLocator: '#settings-view',
                     expectedSwitcher,
@@ -157,8 +157,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
                     expectedSwitcher,
@@ -172,8 +172,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher,
@@ -184,8 +184,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher,
@@ -196,8 +196,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
                     expectedSwitcher: false,
@@ -229,8 +229,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                     expectedSwitcher,
@@ -241,8 +241,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
                 });
@@ -252,8 +252,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher,
@@ -264,23 +264,23 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher,
                 });
             });
 
-            test.fixme('/ should redirect to /beheerders/<uri>/start', async ({ page }) => {
+            test('/ should show organization selection', async ({ page }) => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/start',
-                    expectedScope: organization,
-                    expectedLocator: '[data-testid="dashboard-start-view"]',
-                    expectedSwitcher,
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
+                    expectedScope: null,
+                    expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });
@@ -309,8 +309,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                     expectedSwitcher,
@@ -321,8 +321,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/start',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                     expectedSwitcher,
@@ -333,8 +333,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher,
@@ -345,23 +345,23 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher,
                 });
             });
 
-            test.fixme('/ should redirect to /beheerders/<uri>/start', async ({ page }) => {
+            test('/ show organization selection', async ({ page }) => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/start',
-                    expectedScope: organization,
-                    expectedLocator: '[data-testid="dashboard-start-view"]',
-                    expectedSwitcher,
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
+                    expectedScope: null,
+                    expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });
@@ -387,8 +387,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                     expectedSwitcher: true, // exception: can switch back
@@ -399,8 +399,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/geen-toegang',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/geen-toegang',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                     expectedSwitcher: true, // exception: can switch back
@@ -411,8 +411,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher: true, // exception: can switch back to global member portal
@@ -423,20 +423,20 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher: false, // can't switch
                 });
             });
 
-            test.fixme('/ should redirect to /leden/start (unscoped)', async ({ page }) => {
+            test('/ should redirect to /leden/start (unscoped)', async ({ page }) => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: null,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedSwitcher: false, // can't switch
@@ -459,8 +459,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
                     expectedSwitcher: true, // exception: can switch
@@ -471,8 +471,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri,
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                     expectedSwitcher: true, // exception: can switch
@@ -483,8 +483,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri,
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                     expectedSwitcher: true, // exception: can switch
@@ -495,8 +495,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
                     expectedSwitcher: false,
@@ -507,8 +507,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
                     expectedSwitcher: false,
@@ -547,10 +547,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/instellingen',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/instellingen',
                     expectedScope: null,
                     expectedLocator: '#settings-view',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -560,10 +561,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -573,10 +575,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -584,10 +587,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
 
@@ -595,10 +599,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });
@@ -626,10 +631,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -637,10 +643,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -648,10 +655,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -659,10 +667,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
 
@@ -670,10 +679,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });
@@ -699,10 +709,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -710,10 +721,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri + '/geen-toegang',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/geen-toegang',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="no-permissions-view"]',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -721,10 +733,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri + '/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri + '/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true,
                 });
             });
 
@@ -732,10 +745,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
 
@@ -743,10 +757,11 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                    expectedSwitcher: false,
                 });
             });
         });
@@ -766,8 +781,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -777,8 +792,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/' + organization.uri,
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -788,8 +803,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/' + organization.uri,
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/' + organization.uri,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -799,8 +814,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
                 });
@@ -810,10 +825,244 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: null,
                     expectedLocator: '[data-testid="organization-selection-view"]',
+                });
+            });
+        });
+    });
+
+    test.describe('Organization mode on default register domain', () => {
+        let organization!: Organization;
+        let domain!: string;
+        let expectedScope!: Organization | null;
+
+        test.beforeAll(async () => {
+            TestUtils.setPermanentEnvironment('userMode', 'organization');
+            organization = await new OrganizationFactory({
+                packages: [STPackageBundle.Webshops, STPackageBundle.Members],
+            }).create();
+            organization.registerDomain = null; // not set
+            await organization.save();
+            await STPackageService.updateOrganizationPackages(organization.id);
+
+            domain = WorkerData.urls.registration(organization.uri);
+
+            // Always scoped
+            expectedScope = organization;
+        });
+
+        test.describe('Platform Admin', () => {
+            let user: User;
+
+            test.beforeEach(async ({ page }) => {
+                user = await new UserFactory({
+                    globalPermissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
+                }).create();
+
+                await loginAs({ user, page });
+            });
+
+            test('/platform/instellingen redirects to /beheerders/leden', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/leden',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-menu"]',
+                    expectedSwitcher: true,
+                });
+            });
+
+            test('/beheerders/instellingen', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/instellingen',
+                    expectedScope,
+                    expectedLocator: '#settings-view',
+                    expectedSwitcher: true,
+                });
+            });
+
+            test('/leden/start', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true,
+                });
+            });
+
+            test('/ should show dashboard', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE/beheerders/leden',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-menu"]',
+                    expectedSwitcher: true,
+                });
+            });
+        });
+
+        test.describe('Full Organization Admin', () => {
+            let user: User;
+
+            test.beforeEach(async ({ page }) => {
+                user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
+                }).create();
+
+                await loginAs({ user, page });
+            });
+
+            test('/beheerders/instellingen', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/instellingen',
+                    expectedScope,
+                    expectedLocator: '#settings-view',
+                    expectedSwitcher: true,
+                });
+            });
+
+            test('/leden/start', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: true,
+                });
+            });
+
+            test('/ should show dashboard', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE/beheerders/leden',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-menu"]',
+                    expectedSwitcher: true,
+                });
+            });
+        });
+
+        test.describe('Normal user', () => {
+            let user: User;
+
+            test.beforeEach(async ({ page }) => {
+                user = await new UserFactory({
+                    organization,
+                    permissions: null,
+                }).create();
+
+                await loginAs({ user, page });
+            });
+
+            test('/beheerders should show permissions error page', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/geen-toegang',
+                    expectedScope,
+                    expectedLocator: '[data-testid="no-permissions-view"]',
+                    expectedSwitcher: true, // exception
+                });
+            });
+
+            test('/leden', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden',
+                    expectedUrl: domain + '/nl-BE/leden/start',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: false,
+                });
+            });
+
+            test('/leden/start', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: false,
+                });
+            });
+
+            test('/ should redirect to /leden/start', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
+                    expectedScope,
+                    expectedLocator: '[data-testid="members-start-view"]',
+                    expectedSwitcher: false,
+                });
+            });
+        });
+
+        test.describe('Unauthenticated user', () => {
+            test.beforeEach(async ({ page }) => {
+                await logout({ page });
+            });
+
+            test('/beheerders/instellingen should show login view (scoped)', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders',
+                    expectedScope,
+                    expectedLocator: '[data-testid="login-view"]',
+                });
+            });
+
+            test('/leden should show login view (scoped)', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/leden',
+                    expectedUrl: domain + '/nl-BE/leden',
+                    expectedScope,
+                    expectedLocator: '[data-testid="login-view"]',
+                });
+            });
+
+            test('/ should show auto login', async ({ page }) => {
+                await testRoute({
+                    page,
+                    user,
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
+                    expectedScope,
+                    expectedLocator: '[data-testid="login-view"]',
                 });
             });
         });
@@ -849,8 +1098,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/instellingen',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/instellingen',
                     expectedScope: null,
                     expectedLocator: '#settings-view',
                 });
@@ -860,8 +1109,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/start',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                 });
@@ -871,8 +1120,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/instellingen',
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
                 });
@@ -882,8 +1131,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                 });
@@ -893,8 +1142,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/start',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/start',
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                 });
@@ -904,8 +1153,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/start',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE/beheerders/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                 });
@@ -930,8 +1179,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                 });
@@ -941,8 +1190,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/start',
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                 });
@@ -952,8 +1201,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/instellingen',
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/instellingen',
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
                 });
@@ -963,8 +1212,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                 });
@@ -974,8 +1223,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/activiteiten',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/activiteiten',
+                    url: domain + '/leden/activiteiten',
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="events-overview"]',
                 });
@@ -985,8 +1234,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/start',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE/beheerders/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                 });
@@ -1009,8 +1258,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform/geen-toegang',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform/geen-toegang',
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                 });
@@ -1020,8 +1269,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders/geen-toegang',
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/geen-toegang',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                 });
@@ -1031,8 +1280,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/' + organization.uri,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain + '/leden/' + organization.uri,
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                 });
@@ -1042,8 +1291,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/activiteiten',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/activiteiten',
+                    url: domain + '/leden/activiteiten',
+                    expectedUrl: domain + '/nl-BE/leden/activiteiten',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="events-overview"]',
                 });
@@ -1053,8 +1302,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden/start',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                 });
@@ -1070,8 +1319,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/platform/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/platform',
+                    url: domain + '/platform/instellingen',
+                    expectedUrl: domain + '/nl-BE/platform',
                     expectedScope: null,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -1081,8 +1330,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/beheerders/instellingen',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/beheerders',
+                    url: domain + '/beheerders/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -1092,8 +1341,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden',
+                    url: domain + '/leden',
+                    expectedUrl: domain + '/nl-BE/leden',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -1103,8 +1352,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard + '/leden/activiteiten',
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE/leden',
+                    url: domain + '/leden/activiteiten',
+                    expectedUrl: domain + '/nl-BE/leden',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                 });
@@ -1114,8 +1363,8 @@ test.describe('Routing on page load @routing', () => {
                 await testRoute({
                     page,
                     user,
-                    url: WorkerData.urls.dashboard,
-                    expectedUrl: WorkerData.urls.dashboard + '/nl-BE',
+                    url: domain,
+                    expectedUrl: domain + '/nl-BE',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
                 });

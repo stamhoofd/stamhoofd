@@ -76,41 +76,66 @@ export function uriToApp(uri: string) {
 
 export const getAppName = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return $t('%44');
+        case 'dashboard': return STAMHOOFD.userMode === 'organization' ? $t('Beheerdersportaal') : $t('%44');
         case 'registration': return $t('%2g');
         case 'admin': return $t(`%IW`);
         case 'webshop': return $t(`%2N`);
     }
+    return STAMHOOFD.platformName;
 };
 
-export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null) => {
-    if (app === 'auto' || app === 'dashboard' || app === 'verify-email') {
-        if (!organization) {
-            return $t(`%Gr`);
-        }
-        return organization.name;
+export const getAppNameDescription = (app: AppType) => {
+    switch (app) {
+        case 'dashboard': return $t(`Beheer je eigen vereniging`);
+        case 'registration': return $t(`%a5`);
+        case 'admin': return $t(`%a6`);
     }
-    return getAppName(app);
+    return null;
 };
 
-export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null) => {
-    if (app === 'auto') {
+/**
+ * Position where an app is displayed.
+ * bar = top bar when currently viewing that option
+ * current = switching between apps in the same scope (member portal <-> admin portal of same organization)
+ * other = switching between different organizations, or when searching organizations
+ */
+export type AppDisplayPosition = 'bar' | 'current' | 'other';
+
+export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
+    if (displayPosition === 'bar') {
         if (organization) {
-            return organization.address.anonymousString();
+            return organization.name;
         }
-        return null;
-    }
-
-    if (app === 'dashboard') {
         return getAppName(app);
     }
 
+    if (displayPosition === 'current' && app !== 'auto') {
+        return getAppName(app);
+    }
+
+    // Other
     if (!organization) {
-        switch (app) {
-            case 'registration': return $t(`%a5`);
-            case 'admin': return $t(`%a6`);
-        }
-        return null;
+        return getAppName(app);
     }
     return organization.name;
+};
+
+export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
+    if (displayPosition === 'bar') {
+        if (organization) {
+            return getAppName(app);
+        }
+        return getAppNameDescription(app);
+    }
+
+    if (displayPosition === 'current' && app !== 'auto') {
+        return getAppNameDescription(app);
+    }
+
+    // Other
+
+    if (!organization) {
+        return getAppNameDescription(app);
+    }
+    return organization.address.anonymousString();
 };

@@ -42,8 +42,9 @@ export class CaddyConfigHelper {
     static getUrl(
         service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
         workerId: string,
+        prefix?: string,
     ) {
-        return 'https://' + this.getDomain(service, workerId);
+        return 'https://' + (prefix ?? '') + this.getDomain(service, workerId);
     }
 
     static getPort(
