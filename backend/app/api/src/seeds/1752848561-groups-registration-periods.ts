@@ -468,6 +468,9 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
 
             registration.groupId = waitingList.id;
 
+            // in V1 registeredAt is not set on waiting list registrations
+            registration.registeredAt = registration.createdAt;
+
             if (registration.canRegister) {
                 // we should create an invitation
                 invitation = new RegistrationInvitation();
