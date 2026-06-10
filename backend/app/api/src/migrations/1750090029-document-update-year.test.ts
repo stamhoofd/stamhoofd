@@ -1,7 +1,7 @@
 import type { RegistrationPeriod } from '@stamhoofd/models';
 import { DocumentTemplate, DocumentTemplateFactory, GroupFactory, OrganizationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { migrateDocumentYears } from './1750090029-document-update-year.js';
 import { Formatter } from '@stamhoofd/utility';
+import { migrateDocumentYears } from './1750090029-document-update-year.js';
 
 describe('migration.document-update-year', () => {
     describe('should use most frequent year of groups', () => {
