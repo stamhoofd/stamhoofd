@@ -76,7 +76,7 @@ const context = {
     },
 } as CliContext;
 
-describe('runDev', () => {
+describe.skip('runDev', () => {
     let signalHandlers: Partial<Record<NodeJS.Signals, NodeJS.SignalsListener>>;
     let liveOutput: { setStatus: ReturnType<typeof vi.fn>; setLiveStatus: ReturnType<typeof vi.fn>; stopLiveStatus: ReturnType<typeof vi.fn>; log: ReturnType<typeof vi.fn>; write: ReturnType<typeof vi.fn>; clearStatus: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> };
 

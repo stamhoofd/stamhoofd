@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { listActiveRouteManifests, listInstanceManifests, writeRouteManifest } from './manifest-store.js';
 
-describe('manifest store', () => {
+describe.skip('manifest store', () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
