@@ -11,7 +11,8 @@
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && yarn -s build",
         "start": "yarn build && node ./dist/index.js",
         "lint": "eslint",
-        "test": "vitest"
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
         "@types/node": "^22"

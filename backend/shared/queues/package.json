@@ -12,7 +12,8 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "test": "vitest",
-        "lint": "eslint"
+        "lint": "eslint",
+        "test:coverage": "vitest --coverage"
     },
     "publishConfig": {
         "access": "public"

@@ -18,7 +18,8 @@
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
         "lint": "eslint",
-        "test": "vitest"
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
         "@types/formidable": "3.4.5",

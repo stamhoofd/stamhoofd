@@ -25,7 +25,8 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/migrations/ && rsync -r --checksum ./src/assets/ ./dist/assets/",
         "test": "vitest",
-        "lint": "eslint"
+        "lint": "eslint",
+        "test:coverage": "vitest --coverage"
     },
     "peerDependencies": {
         "@simonbackx/simple-database": "1.37.1",

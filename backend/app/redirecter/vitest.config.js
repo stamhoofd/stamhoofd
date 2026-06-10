@@ -9,5 +9,10 @@ export default defineConfig({
         root: import.meta.dirname,
         isolate: true,
         maxWorkers: 1, // For now we can't run parallel because all test files use the same database
+        coverage: {
+            provider: 'v8',
+            include: ['src/**'],
+            reporter: ['text', 'html', 'lcov'],
+        },
     },
 });

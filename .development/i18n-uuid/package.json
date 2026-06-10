@@ -21,7 +21,8 @@
         "fix-double-translations": "yarn -s build && node --enable-source-maps ./dist/index.js fix-double-translations",
         "create-comparison": "yarn -s build && node --enable-source-maps ./dist/index.js create-comparison",
         "test": "vitest",
-        "lint": "eslint"
+        "lint": "eslint",
+        "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
         "@anthropic-ai/sdk": "^0.39.0",

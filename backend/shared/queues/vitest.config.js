@@ -6,5 +6,10 @@ export default defineConfig({
         globals: true,
         root: import.meta.dirname,
         isolate: true,
+        coverage: {
+            provider: 'v8',
+            include: ['src/**'],
+            reporter: ['text', 'html', 'lcov'],
+        },
     },
 });
