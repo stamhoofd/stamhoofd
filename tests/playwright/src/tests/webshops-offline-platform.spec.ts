@@ -2,23 +2,24 @@
 import { test } from '../test-fixtures/platform.js';
 
 // other imports
+import type { Locator, Page } from '@playwright/test';
 import { devices, expect } from '@playwright/test';
 import type {
     Organization,
     RegistrationPeriod,
     User,
-    Webshop
+    Webshop,
 } from '@stamhoofd/models';
 import {
     OrganizationFactory,
-    RegistrationPeriodFactory
+    RegistrationPeriodFactory,
 } from '@stamhoofd/models';
 import { PaymentMethod, PermissionLevel, Permissions, PropertyFilter, UserPermissions } from '@stamhoofd/structures';
 import {
     DashboardPage,
     DashboardTab,
     TableHelper,
-    WorkerData
+    WorkerData,
 } from '../helpers/index.js';
 import { WebshopOrdersView } from '../helpers/page/webshop/WebshopOrdersView.js';
 import { simulateNetworkOffline } from '../helpers/simulateNetworkOffline.js';
@@ -31,39 +32,39 @@ test.describe('Webshops offline', () => {
     let webshop: Webshop;
 
     test.beforeAll(async () => {
-            user = WorkerData.user;
-            user.permissions = UserPermissions.create({
-                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            });
-            await user.save();
-                    
-            organization = await new OrganizationFactory({
-                name: `Vereniging${WorkerData.id}`,
-            }).create();
-
-            organization.meta.recordsConfiguration.financialSupport = true;
-            organization.meta.recordsConfiguration.uitpasNumber
-                = new PropertyFilter(null, null);
-            await organization.save();
-
-            period = await new RegistrationPeriodFactory({
-                startDate: new Date('2000-01-01'),
-                endDate: new Date('2001-01-01'),
-                organization,
-            }).create();
-
-            organization.periodId = period.id;
-            await organization.save();
-    
-            // webshop
-            webshop = (await TestWebshops.webshopWithTicketsAndSeatingPlan({organization, seatCount: 35})).webshop;
+        user = WorkerData.user;
+        user.permissions = UserPermissions.create({
+            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
         });
+        await user.save();
+
+        organization = await new OrganizationFactory({
+            name: `Vereniging${WorkerData.id}`,
+        }).create();
+
+        organization.meta.recordsConfiguration.financialSupport = true;
+        organization.meta.recordsConfiguration.uitpasNumber
+                = new PropertyFilter(null, null);
+        await organization.save();
+
+        period = await new RegistrationPeriodFactory({
+            startDate: new Date('2000-01-01'),
+            endDate: new Date('2001-01-01'),
+            organization,
+        }).create();
+
+        organization.periodId = period.id;
+        await organization.save();
+
+        // webshop
+        webshop = (await TestWebshops.webshopWithTicketsAndSeatingPlan({ organization, seatCount: 35 })).webshop;
+    });
 
     test.afterAll(async () => {
         await WorkerData.resetDatabase();
     });
 
-    test('Should be able to manually scan order if no internet', async ({browser, storageState}) => {
+    test('Should be able to manually scan order if no internet', async ({ browser, storageState }) => {
         const context = await browser.newContext({
             storageState,
             ...devices['iPhone 13'],
@@ -76,9 +77,8 @@ test.describe('Webshops offline', () => {
         const dashboard = new DashboardPage(page);
 
         await test.step('place orders while online', async () => {
-            
-            await dashboard.goto();
-            await dashboard.openOrganizationDashboard({organizationUri: organization.uri});
+            // await dashboard.goto();
+            await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
             await dashboard.openTab(DashboardTab.Webshops);
 
             // open webshop overview
@@ -97,27 +97,26 @@ test.describe('Webshops offline', () => {
             const ordersCount = 1;
 
             for (let i = 0; i < ordersCount; i++) {
-
                 await ordersView.addOrder({
                     firstName: 'John',
-                    lastName: 'Doe-'+i,
+                    lastName: 'Doe-' + i,
                     email: `john.doe-${i}@test.be`,
                     product: webshop.products[0],
                     // point of sale to make sure tickets are added immediately
-                    paymentMethod: PaymentMethod.PointOfSale
+                    paymentMethod: PaymentMethod.PointOfSale,
                 });
             }
         });
 
         // go to start
-        await dashboard.openOrganizationDashboard({organizationUri: organization.uri});
+        await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
 
         // mock offline behaviour
         await simulateNetworkOffline(page);
 
         await test.step('open webshop orders', async () => {
             await dashboard.openTab(DashboardTab.Webshops);
-        
+
             await page.getByTestId(`webshop-menu-item`)
                 .filter({ hasText: webshop.meta.name })
                 .click();
@@ -179,17 +178,37 @@ test.describe('Webshops offline', () => {
             await page.getByTestId('table').waitFor();
             // close webshop orders view
             await page.locator('.button.navigation').first().click();
-        })
+        });
 
         await test.step('open ticket scanner', async () => {
             const scanTicketsButton = page.getByTestId('scan-tickets-button');
             await scanTicketsButton.click();
 
             const startScanTicketsButton = page.getByTestId('start-scan-tickets-button');
-            await startScanTicketsButton.click();
+            await clickEvenIfCoveredByToast(page, startScanTicketsButton);
 
             // should show message if offline
             await expect(page.getByTestId('ticket-scanner-view')).toContainText($t('%Vq'));
-        })
+        });
     });
 });
+
+async function clickEvenIfCoveredByToast(page: Page, element: Locator) {
+    await expect(element).toBeAttached();
+    try {
+        await element.click({ timeout: 3_000 });
+    } catch (e) {
+        // If toast is visible, dismiss it
+        const items = page.locator('.toast-view');
+
+        const count = await items.count();
+
+        for (let i = 0; i < count; i++) {
+            // Close toasts
+            await items.nth(i).click();
+        }
+
+        // Retry
+        await element.click();
+    }
+}
