@@ -40,6 +40,7 @@
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
         "test": "vitest",
+        "test:coverage": "vitest --coverage",
         "test:reset": "yarn -s build:full && yarn -s test",
         "migrations": "yarn -s build:full && node ./dist/migrations.js",
         "lint": "eslint"
