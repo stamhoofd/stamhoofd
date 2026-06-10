@@ -402,7 +402,6 @@ const allActions = computed(() => {
                 icon: 'success',
                 title: $t('Aan de slag'),
                 route: Routes.Settings,
-                rightText: '1 / 5',
                 hidden: hasFeature('disabled-members-onboarding'),
                 buttons: !hasFeature('disabled-members-onboarding')
                     ? [
