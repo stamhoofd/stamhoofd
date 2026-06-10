@@ -141,11 +141,11 @@ export const getAppDescription = (app: AppType | 'auto', organization: Organizat
     return organization.address.anonymousString();
 };
 
-export function getAppHost(app: AppType | null, organization: { i18n: { locale: string }; address: Address; registerDomain?: string | null; uri: string } | null, preferDashboard = false, i18n?: { language: Language; locale: string }): string {
+export function getAppHost(app: AppType | null, organization: { i18n: { locale: string; language: Language }; address: Address; registerDomain?: string | null; uri: string } | null, preferDashboard = false, i18n?: { language: Language; locale: string }): string {
     if (organization && organization.registerDomain && !preferDashboard && app !== 'admin' && STAMHOOFD.userMode === 'organization') {
-        let d = this.registerDomain;
+        let d = organization.registerDomain;
 
-        if (i18n && i18n.language !== this.i18n.language) {
+        if (i18n && i18n.language !== organization.i18n.language) {
             d += '/' + i18n.language;
         }
 
@@ -158,7 +158,7 @@ export function getAppHost(app: AppType | null, organization: { i18n: { locale: 
 
     if (!STAMHOOFD.domains.registration || preferDashboard || !organization) {
         if (!app) {
-            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale);
+            return STAMHOOFD.domains.dashboard + '/' + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '');
         }
 
         let includeUri = true;
