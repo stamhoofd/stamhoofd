@@ -46,6 +46,26 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
         }
 
+        if (organization) {
+            if (request.body.permissions === null || request.body.permissions.organizationPermissions.get(organization.id)?.isEmpty !== false) {
+                throw new SimpleError({
+                    code: 'empty_permissions',
+                    message: 'Cannot add an admin without permissions',
+                    human: $t('Kies minstens één beheerdersrol voor je een beheerder toevoegt'),
+                    statusCode: 400,
+                });
+            }
+        } else {
+            if (request.body.permissions === null || request.body.permissions.isEmpty !== false) {
+                throw new SimpleError({
+                    code: 'empty_permissions',
+                    message: 'Cannot add an admin without permissions',
+                    human: $t('Kies minstens één beheerdersrol voor je een beheerder toevoegt'),
+                    statusCode: 400,
+                });
+            }
+        }
+
         // First check if a user exists with this email?
         const existing = await User.getForRegister(organization?.id ?? null, request.body.email);
 

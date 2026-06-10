@@ -3,7 +3,7 @@
         <STList>
             <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                 <template #left>
-                    <Checkbox v-model="fullAccess" :disabled="lockedFullAccess" />
+                    <Checkbox v-model="fullAccess" :disabled="lockedFullAccess" data-testid="full-access-checkbox" />
                 </template>
                 {{ $t('%Yb') }}
 

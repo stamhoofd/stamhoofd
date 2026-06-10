@@ -3,7 +3,7 @@
     <h2 class="style-with-button">
         <div>{{ $t('%Yf') }}</div>
         <div>
-            <button type="button" class="button icon add" @click="createAdmin" />
+            <button type="button" class="button icon add" data-testid="add-admin-button" @click="createAdmin" />
         </div>
     </h2>
 
