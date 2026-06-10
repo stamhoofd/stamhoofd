@@ -123,15 +123,28 @@ export class PasswordToken extends QueryableModel {
     }
 
     static async getPasswordRecoveryUrl(user: User, organization: Organization | null, i18n: I18n, validUntil?: Date) {
-        if (user.organizationId !== null && ((user.organizationId ?? null) !== (organization?.id ?? null))) {
-            throw new Error('Unexpected mismatch in organization id for PasswordToken');
-        }
         // Send an e-mail to say you already have an account + follow password forgot flow
         const token = await PasswordToken.createToken(user, validUntil);
+        return token.getPasswordRecoveryUrl(organization, i18n, user);
+    }
 
-        const hasOrganizationPermissions = organization ? user.permissions?.forOrganization(organization, await Platform.getSharedStruct())?.isEmpty === false : false;
+    /**
+     * Build the password recovery url for this (already created) token.
+     * Pass the user to avoid an extra query when it is already loaded.
+     */
+    async getPasswordRecoveryUrl(organization: Organization | null, i18n: I18n, user?: User) {
+        const tokenUser = user ?? await User.getByID(this.userId);
+        if (!tokenUser) {
+            throw new Error('PasswordToken without a valid user');
+        }
+
+        if (tokenUser.organizationId !== null && ((tokenUser.organizationId ?? null) !== (organization?.id ?? null))) {
+            throw new Error('Unexpected mismatch in organization id for PasswordToken');
+        }
+
+        const hasOrganizationPermissions = organization ? tokenUser.permissions?.forOrganization(organization, await Platform.getSharedStruct())?.isEmpty === false : false;
         const host = 'https://' + getAppHost(hasOrganizationPermissions ? 'dashboard' : 'registration', organization, hasOrganizationPermissions, i18n);
-        return host + '/reset-password?token=' + encodeURIComponent(token.token);
+        return host + '/reset-password?token=' + encodeURIComponent(this.token);
     }
 
     static async clearFor(userId: string) {

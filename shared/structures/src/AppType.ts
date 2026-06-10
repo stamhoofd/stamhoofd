@@ -158,7 +158,7 @@ export function getAppHost(app: AppType | null, organization: { i18n: { locale: 
 
     if (!STAMHOOFD.domains.registration || preferDashboard || !organization) {
         if (!app) {
-            return STAMHOOFD.domains.dashboard + '/' + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '');
+            return STAMHOOFD.domains.dashboard + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '');
         }
 
         let includeUri = true;
@@ -176,12 +176,16 @@ export function getAppHost(app: AppType | null, organization: { i18n: { locale: 
             includeUri = false;
         }
 
+        if (STAMHOOFD.singleOrganization) {
+            includeUri = false;
+        }
+
         if (includeUri && !organization) {
             // App requires organization scope, but we don't have one
             return STAMHOOFD.domains.dashboard + (i18n ? '/' + (i18n.locale) : '');
         }
 
-        return STAMHOOFD.domains.dashboard + '/' + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '') + '/' + appToUri(app) + (includeUri && organization ? '/' + organization.uri : '');
+        return STAMHOOFD.domains.dashboard + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '') + '/' + appToUri(app) + (includeUri && organization ? '/' + organization.uri : '');
     }
 
     let defaultDomain = STAMHOOFD.domains.registration[organization.address.country] ?? STAMHOOFD.domains.registration[''];
