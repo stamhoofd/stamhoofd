@@ -310,7 +310,7 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
     };
 }
 
-export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | number)[]): StamhoofdFilter | null {
+export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | number)[]): StamhoofdFilter | null | undefined {
     if (keyPath.length === 0) {
         return filter;
     }
@@ -318,25 +318,25 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | n
 
     if (typeof first === 'number') {
         if (!Array.isArray(filter)) {
-            return null;
+            return undefined;
         }
         if (first >= filter.length) {
-            return null;
+            return undefined;
         }
         return unwrapFilterByPath((filter as any)[first] as StamhoofdFilter, keyPath.slice(1));
     }
 
     if (!(typeof filter === 'object')) {
-        return null;
+        return undefined;
     }
 
     if (filter === null) {
-        return null;
+        return undefined;
     }
 
     if (first in filter) {
         return unwrapFilterByPath((filter as any)[first] as StamhoofdFilter, keyPath.slice(1));
     }
 
-    return null;
+    return undefined;
 }
