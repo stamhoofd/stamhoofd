@@ -49,6 +49,7 @@ export default new Migration(async () => {
         city: 'Gent',
         country: STAMHOOFD.fixedCountry ?? Country.Belgium,
     });
+    organization.privateMeta.featureFlags = ['organization-receivable-balances'];
 
     // Setup Codawood credentials if running Stamhoofd
     if (STAMHOOFD.platformName === 'stamhoofd' && STAMHOOFD.userMode === 'organization') {
@@ -72,6 +73,7 @@ export default new Migration(async () => {
 
         organization.address = organization.meta.companies[0].address!;
         organization.meta.registrationPaymentConfiguration.enableMandates = true;
+        organization.meta.invoicesEnabled = true;
         organization.meta.registrationPaymentConfiguration.paymentMethods = [
             PaymentMethod.Bancontact,
             PaymentMethod.iDEAL,
