@@ -132,9 +132,7 @@ export class PaymentActionBuilder {
 
         ];
 
-        if (this.$feature('email-to-payments')) {
-            actions.push(this.getEmailAction());
-        }
+        actions.push(this.getEmailAction());
 
         return actions.filter(action => action !== null);
     }

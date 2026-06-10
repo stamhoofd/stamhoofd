@@ -128,15 +128,6 @@
                         {{ $t('%NW') }}
                     </h3>
                 </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox :model-value="getFeatureFlag('email-to-payments')" @update:model-value="setFeatureFlag('email-to-payments', !!$event)" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('%1Lu') }}
-                    </h3>
-                </STListItem>
             </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
@@ -233,7 +224,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
     set invoicesEnabled(invoicesEnabled: boolean) {
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
-                invoicesEnabled
+                invoicesEnabled,
             }),
         });
     }
@@ -278,8 +269,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
         if (errors.errors.length > 0) {
             this.errorBox = new ErrorBox(errors);
-        }
-        else {
+        } else {
             this.errorBox = null;
             valid = true;
         }
@@ -296,8 +286,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
             this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
             await this.dismiss({ force: true });
-        }
-        catch (e) {
+        } catch (e) {
             this.errorBox = new ErrorBox(e);
         }
 
@@ -373,12 +362,10 @@ export default class LabsView extends Mixins(NavigationMixin) {
                     try {
                         await this.doUploadSettings(parsed);
                         new Toast('De instellingen zijn geïmporteerd', 'success green').show();
-                    }
-                    catch (e) {
+                    } catch (e) {
                         Toast.fromError(e).show();
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(new SimpleError({
                         code: 'invalid_json',
                         message: 'Het bestand is geen geldig JSON-bestand',
@@ -397,8 +384,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         try {
             const decodedOrganization = new VersionBoxDecoder(Organization as Decoder<Organization>).decode(new ObjectData(blob, { version: 0 }));
             organization = decodedOrganization.data;
-        }
-        catch (e) {
+        } catch (e) {
             throw new SimpleError({
                 code: 'invalid_json',
                 message: 'Het bestand is geen geldige export: ' + (isSimpleError(e) ? e.getHuman() : e),
