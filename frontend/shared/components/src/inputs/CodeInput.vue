@@ -62,8 +62,7 @@ export default class CodeInput extends VueComponent {
             if (index < value.length) {
                 const letter = value[index];
                 element.value = letter;
-            }
-            else {
+            } else {
                 element.value = '';
             }
         }
@@ -83,7 +82,8 @@ export default class CodeInput extends VueComponent {
         const input = this.$refs.numberInput[index] as HTMLInputElement;
         input.value = this.numbersOnly ? (input.value as string).replace(/\D/g, '') : (input.value as string).toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
         if (input.value.length >= 1) {
-            this.selectNext(index + 1);
+            // Sometimes the input element might be delayed (on CI, so only focus the next if the current input is still focused)
+            this.selectNext(index + 1, document.activeElement === input);
         }
     }
 
@@ -103,8 +103,7 @@ export default class CodeInput extends VueComponent {
         if (select) {
             if (index > 0) {
                 this.selectNext(index - 1);
-            }
-            else {
+            } else {
                 // reselect
                 this.selectNext(index);
             }
@@ -112,7 +111,7 @@ export default class CodeInput extends VueComponent {
         }
     }
 
-    selectNext(index: number) {
+    selectNext(index: number, focus = true) {
         if (index < 0) {
             return;
         }
@@ -154,11 +153,13 @@ export default class CodeInput extends VueComponent {
             return;
         }
 
-        (this.$refs.numberInput[index] as HTMLInputElement).focus();
+        if (focus) {
+            (this.$refs.numberInput[index] as HTMLInputElement).focus();
 
-        if ((this.$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
+            if ((this.$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
             // iOS fix
-            (this.$refs.numberInput[index] as HTMLInputElement).select();
+                (this.$refs.numberInput[index] as HTMLInputElement).select();
+            }
         }
         this.updateValue();
     }

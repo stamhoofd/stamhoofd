@@ -11,8 +11,8 @@ import {
 } from '@stamhoofd/models';
 import { AcquisitionType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { WorkerData } from '../helpers/index.js';
 import { OnboardingScenario } from '../flows/OnboardingScenario.js';
+import { WorkerData } from '../helpers/index.js';
 
 /**
  * Onboarding a new organization
@@ -437,14 +437,7 @@ class ConfirmEmailPage {
     constructor(public readonly page: Page) {}
 
     async fillCode(code: string) {
-        const parts = code.split('');
-
         const input = this.page.getByTestId('code-input');
-
-        for (let i = 0; i < 6; i++) {
-            const part = parts[i];
-
-            await input.locator('input').nth(i).fill(part);
-        }
+        await input.locator('input').nth(0).fill(code);
     }
 }
