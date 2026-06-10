@@ -156,7 +156,7 @@ export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
             return null;
         }
 
-        const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']) ?? unwrapFilterByPath(unwrapped, [this.key]);
+        const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
 
         if (equals instanceof Date || (equals === null && this.nullable)) {
             return new DateUIFilter({
@@ -166,7 +166,7 @@ export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
             }, { isInverted });
         }
 
-        const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']) ?? unwrapFilterByPath(unwrapped, [this.key, '$neq']);
+        const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
 
         if (notEquals instanceof Date || (notEquals === null && this.nullable)) {
             return new DateUIFilter({
