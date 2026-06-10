@@ -2,7 +2,6 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Migration } from '@simonbackx/simple-database';
 import { Member } from '@stamhoofd/models';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
-import { PatchOrganizationMembersEndpoint } from '../endpoints/global/members/PatchOrganizationMembersEndpoint.js';
 import { mergeTwoMembers } from '../helpers/MemberMerger.js';
 
 type MergeType = {
@@ -142,7 +141,7 @@ export default new Migration(async () => {
             continue; // Names do not match, cannot merge
         }
 
-        if (!PatchOrganizationMembersEndpoint.shouldCheckIfMemberIsDuplicate(memberA)) {
+        if (!shouldCheckIfMemberIsDuplicate(memberA)) {
             console.log('Skipping merge because not eligible for duplicate check');
             continue;
         }
@@ -150,3 +149,17 @@ export default new Migration(async () => {
         await mergeTwoMembers(memberA, memberB);
     }
 });
+
+function shouldCheckIfMemberIsDuplicate(put: Member): boolean {
+    if (put.details.firstName === '???') {
+        return false;
+    }
+
+    if (put.details.name.length <= 3) {
+        return false;
+    }
+
+    const age = put.details.age;
+    // do not check if member is duplicate for historical members
+    return age !== null && age < 81;
+}
