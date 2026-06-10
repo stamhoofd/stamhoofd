@@ -11,7 +11,7 @@ export type RelationFilterOption<T extends string | number | Date | null | boole
     name: string;
     description?: string;
     value: T;
-}
+};
 
 export class RelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<RelationFilterBuilder<T>> {
     readonly relationFetcher: RelationFetcher<any, T>;
@@ -34,12 +34,12 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     }
 
     doBuild(): StamhoofdFilter {
-        const items: StamhoofdMagicRelationFilter[] = this.values.map(value => {
+        const items: StamhoofdMagicRelationFilter[] = this.values.map((value) => {
             const item: StamhoofdMagicRelationFilter = {
                 $: '$rel',
                 ...value,
-            }
-            
+            };
+
             return item;
         });
 
@@ -49,15 +49,15 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
 
         if (items.length === 1) {
             return {
-                [this.builder.key]: items[0]
-            }
+                [this.builder.key]: items[0],
+            };
         }
 
         return {
             [this.builder.key]: {
-                $in: items
-            }
-        }
+                $in: items,
+            },
+        };
     }
 
     getComponent(): ComponentWithProperties {
@@ -67,7 +67,7 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     }
 
     get valuesToString() {
-        return Formatter.joinLast(this.values.map(v => v.name), ', ', ` ${$t('of')} ` );
+        return Formatter.joinLast(this.values.map(v => v.name), ', ', ` ${$t('of')} `);
     }
 
     get styledDescription() {
@@ -99,7 +99,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     // The optional type of the magic relation filter.
     readonly type?: string;
 
-    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, relationFetcher: RelationFetcher<any, T> }) {
+    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean; relationFetcher: RelationFetcher<any, T> }) {
         this.key = data.key;
         this.type = data.type;
         this.wrapFilter = data.wrapFilter;
@@ -110,11 +110,11 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         this.relationFetcher = data.relationFetcher;
     }
 
-    create(options?: { isInverted?: boolean; }): RelationUIFilter<T> {
+    create(options?: { isInverted?: boolean }): RelationUIFilter<T> {
         return new RelationUIFilter({
             builder: this,
             relationFetcher: this.relationFetcher,
-            type: this.type
+            type: this.type,
         }, options);
     }
 
@@ -123,7 +123,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         if (!array || array.length === 0) {
             return null;
         }
-        
+
         const values: RelationFilterOption<T>[] = [];
 
         let type: string | null = null;
@@ -160,13 +160,16 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
 
         for (const subKey of ['$in', '$or']) {
             const filter = unwrapFilterByPath(unwrapped, [this.key, subKey]);
+            if (filter === undefined) {
+                continue;
+            }
             const options = this.getOptionsFromFilter(filter);
             if (options) {
                 return new RelationUIFilter({
                     builder: this,
                     relationFetcher: this.relationFetcher,
                     values: options,
-                    type: this.type
+                    type: this.type,
                 }, { isInverted });
             }
         }
@@ -175,13 +178,13 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     }
 }
 
-export type RelationFetcherSubFilterOption = {filter: StamhoofdFilter, name: string};
+export type RelationFetcherSubFilterOption = { filter: StamhoofdFilter; name: string };
 
 export class RelationFetcherSubFilter {
     private readonly getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[];
     private options: RelationFetcherSubFilterOption[] | null = null;
 
-    constructor({getOptions}: {getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[]}) {
+    constructor({ getOptions }: { getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[] }) {
         this.getOptions = getOptions;
     }
 
@@ -195,9 +198,9 @@ export class RelationFetcherSubFilter {
     }
 }
 
-export class RelationFetcher<OBJECT extends {id: string}, T extends string | number | Date | null | boolean> {
+export class RelationFetcher<OBJECT extends { id: string }, T extends string | number | Date | null | boolean> {
     readonly fetcher: ObjectFetcher<OBJECT>;
-    
+
     private readonly getName: (object: OBJECT) => string;
     private readonly getDescription?: (object: OBJECT) => string;
     private readonly getValue: (object: OBJECT) => T;
@@ -208,15 +211,15 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
 
     readonly subFilter?: RelationFetcherSubFilter;
 
-    constructor({fetcher, getName, getDescription, getValue, filter, limit, sort, subFilter}: {
-        fetcher: ObjectFetcher<OBJECT>,
-        getName: (object: OBJECT) => string,
-        getValue: (object: OBJECT) => T,
-        getDescription?: (object: OBJECT) => string,
-        filter?: StamhoofdFilter,
-        limit?: number,
-        sort?: SortList,
-        subFilter?: RelationFetcherSubFilter
+    constructor({ fetcher, getName, getDescription, getValue, filter, limit, sort, subFilter }: {
+        fetcher: ObjectFetcher<OBJECT>;
+        getName: (object: OBJECT) => string;
+        getValue: (object: OBJECT) => T;
+        getDescription?: (object: OBJECT) => string;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sort?: SortList;
+        subFilter?: RelationFetcherSubFilter;
     }) {
         this.fetcher = fetcher;
         this.getName = getName;
@@ -232,7 +235,7 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
         if (this.filter) {
             infiniteObjectFetcher.setFilter(this.filter);
         }
-        
+
         if (this.sort) {
             infiniteObjectFetcher.sort = this.sort;
         }
@@ -249,13 +252,13 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
             return results.map(object => ({
                 name: this.getName(object),
                 description: getDescription(object),
-                value: this.getValue(object)
+                value: this.getValue(object),
             }));
         }
-        
+
         return results.map(object => ({
             name: this.getName(object),
-            value: this.getValue(object)
+            value: this.getValue(object),
         }));
     }
 }
