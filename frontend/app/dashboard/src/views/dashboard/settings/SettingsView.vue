@@ -399,7 +399,7 @@ defineRoutes([
         url: Routes.EmailTemplates,
         present: 'popup',
         component: EditEmailTemplatesView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 types: [...Object.values(EmailTemplateType)].filter((t) => {
                     return EmailTemplate.allowOrganizationLevel(t, organization.value, platform.value);
@@ -458,7 +458,7 @@ defineRoutes([
                     url: Routes.PaymentSettings,
                     present: 'popup' as const,
                     component: BillingSettingsView,
-                    async paramsToProps() {
+                    async defaultProperties() {
                         const item = await loadPayableBalance();
 
                         return {
@@ -470,7 +470,7 @@ defineRoutes([
                     name: Routes.FinancialSupport,
                     url: 'financiele-ondersteuning',
                     component: FinancialSupportSettingsView,
-                    paramsToProps() {
+                    defaultProperties() {
                         return {
                             financialSupport: getFinancialSupportSettingsOrDefault(platform.value, organization.value),
                             saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
@@ -490,7 +490,7 @@ defineRoutes([
                     name: Routes.DataPermissions,
                     url: 'toestemming-gegevensverzameling',
                     component: DataPermissionSettingsView,
-                    paramsToProps() {
+                    defaultProperties() {
                         return {
                             dataPermission: getDataPermissionSettingsOrDefault(platform.value, organization.value),
                             saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {

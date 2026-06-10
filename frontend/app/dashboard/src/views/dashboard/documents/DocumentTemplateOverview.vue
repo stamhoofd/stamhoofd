@@ -210,7 +210,7 @@ defineRoutes([
     {
         url: Routes.Documents,
         component: DocumentsView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 template: props.template,
             };
@@ -220,7 +220,7 @@ defineRoutes([
         url: Routes.Settings,
         present: 'popup',
         component: EditDocumentTemplateView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 isNew: false,
                 document: props.template,

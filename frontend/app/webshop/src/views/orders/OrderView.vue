@@ -355,9 +355,9 @@ import Spinner from '@stamhoofd/components/Spinner.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import TransferPaymentView from '@stamhoofd/components/views/TransferPaymentView.vue';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import type { Payment} from '@stamhoofd/structures';
+import type { Payment } from '@stamhoofd/structures';
 import { Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -392,13 +392,13 @@ const isPaid = computed(() => order.value && (order.value.payment === null || or
 const isTransfer = computed(() => getDefaultTransferPayment() !== null);
 
 // Make sure the url is overriden
-setUrl('order/' + (order.value?.id ?? props.orderId), 'Bestelling ' + (order.value?.number ?? ''));
+setUrl('order/' + (order.value?.id ?? props.orderId), null, 'Bestelling ' + (order.value?.number ?? ''));
 
 const urlHelpers = useUrl();
 
 watch(() => order.value, () => {
     // Change if we loaded the order id or number
-    urlHelpers.overrideUrl('order/' + (order.value?.id ?? props.orderId), 'Bestelling ' + (order.value?.number ?? ''));
+    urlHelpers.overrideUrl('order/' + (order.value?.id ?? props.orderId), null, 'Bestelling ' + (order.value?.number ?? ''));
 });
 
 function isPaymentTransfer(payment: Payment) {
@@ -484,8 +484,7 @@ async function checkTickets() {
             decoder: new ArrayDecoder(TicketOrder as Decoder<TicketOrder>),
         });
         tickets.value = response.data.map(ticket => ticket.getPublic(order.value!)).sort(TicketPublic.sort);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 
@@ -522,8 +521,7 @@ onMounted(() => {
                 new CenteredMessage('Ongeldige bestelling', 'De bestelling die je opvraagt bestaat niet (meer)', 'error').addCloseButton().show();
                 pop({ force: true })?.catch(console.error);
             });
-    }
-    else {
+    } else {
         if (!props.paymentId) {
             throw new Error('Missing payment id or order id');
         }

@@ -65,8 +65,7 @@ function paramToPropsFactory(record: Record<string, unknown> = {}): () => Promis
         if (shouldUpdateOrganization) {
             try {
                 await forceUpdateOrganization();
-            }
-            catch (error) {
+            } catch (error) {
                 console.error(error);
             }
         }
@@ -89,37 +88,37 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView,
-        paramsToProps: paramToPropsFactory({ isReview: true }),
+        defaultProperties: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Companies,
         present: 'popup',
         component: GeneralSettingsView,
-        paramsToProps: paramToPropsFactory({ isReview: true }),
+        defaultProperties: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Payment,
         present: 'popup',
         component: RegistrationPaymentSettingsView,
-        paramsToProps: paramToPropsFactory({ isReview: true }),
+        defaultProperties: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview,
-        paramsToProps: paramToPropsFactory(),
+        defaultProperties: paramToPropsFactory(),
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
         component: FunctionsReview,
-        paramsToProps: paramToPropsFactory(),
+        defaultProperties: paramToPropsFactory(),
     },
     {
         url: Routes.Emails,
         present: 'popup',
         component: EmailSettingsView,
-        paramsToProps: paramToPropsFactory(),
+        defaultProperties: paramToPropsFactory(),
     },
 ]);
 

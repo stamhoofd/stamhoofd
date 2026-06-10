@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import ForgotPasswordResetView from '@stamhoofd/components/auth/ForgotPasswordResetView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -18,28 +18,25 @@ export function useGlobalRoutes() {
     const modalStackComponent = useModalStackComponent();
     const context = useContext();
 
-    defineRoutes([
-        {
-            url: 'reset-password',
-            component: () => ForgotPasswordResetView,
-            paramsToProps(_params, query?: URLSearchParams) {
-                return {
-                    token: query?.get('token') || '',
-                };
-            },
-            propsToParams(props: any) {
-                const query = new URLSearchParams();
-                if (props.token) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    query.set('token', (props as any).token);
-                }
-                return {
-                    params: {},
-                    query,
-                };
-            },
+    defineRoute({
+        url: 'reset-password',
+        component: () => ForgotPasswordResetView,
+        defaultProperties(query?: URLSearchParams | null) {
+            return {
+                token: query?.get('token') || '',
+            };
         },
-    ]);
+        propsToParams(props) {
+            const query = new URLSearchParams();
+            if (props.token) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                query.set('token', (props as any).token);
+            }
+            return {
+                query,
+            };
+        },
+    });
 
     const present = async (component: ComponentWithProperties) => {
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true });

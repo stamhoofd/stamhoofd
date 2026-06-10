@@ -219,7 +219,7 @@ const props = defineProps<{
     getNext: (current: Organization) => Organization | null;
     getPrevious: (current: Organization) => Organization | null;
 }>();
-const navigate = useNavigate()
+const navigate = useNavigate();
 
 enum Routes {
     Invoices = 'invoices',
@@ -229,13 +229,13 @@ defineRoutes([
     {
         url: Routes.Invoices,
         component: OrganizationPackagesView,
-        paramsToProps() {
+        defaultProperties() {
             return {
-                organization: props.organization
+                organization: props.organization,
             };
         },
-    }
-])
+    },
+]);
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
 
@@ -339,8 +339,7 @@ async function deleteMe() {
         GlobalEventBus.sendEvent('organizations-deleted', [props.organization]).catch(console.error);
         Toast.success($t('%1LO')).show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 

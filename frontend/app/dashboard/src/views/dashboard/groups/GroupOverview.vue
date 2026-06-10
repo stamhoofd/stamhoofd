@@ -307,7 +307,7 @@ defineRoutes([{
     url: 'inschrijvingen',
     name: Routes.Members,
     component: RegistrationsTableView,
-    paramsToProps: () => {
+    defaultProperties: () => {
         return {
             group: props.group,
             organization: organization.value,
@@ -318,7 +318,7 @@ defineRoutes([{
     url: 'uitnodigingen',
     name: Routes.Invitations,
     component: RegistrationInvitationsTableView,
-    paramsToProps: () => {
+    defaultProperties: () => {
         return {
             group: props.group,
             estimatedRows: invitationsCount.value,
@@ -334,7 +334,7 @@ defineRoutes([{
     url: 'wachtlijst',
     name: Routes.WaitingList,
     component: MembersTableView,
-    paramsToProps: () => {
+    defaultProperties: () => {
         if (!props.group.waitingList) {
             throw new Error('No waiting list');
         }

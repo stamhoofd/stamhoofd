@@ -216,33 +216,26 @@ defineRoutes([
             };
         },
     },
-
-    {
-        url: 'allemaal',
-        name: Routes.All,
-        show: 'detail',
-        component: MembersTableView,
-        paramsToProps: () => {
-            return {
-                periodId: period.value.period.id,
-            };
-        },
-        propsToParams() {
-            return {
-                params: {
-                    slug: Formatter.slug(tree.value.settings.name),
-                },
-            };
-        },
-        isDefault: showAll.value
-            ? {
-                    properties: {
-                        periodId: period.value.period.id,
-                    },
-                }
-            : undefined,
-    },
 ]);
+
+defineRoute({
+    url: 'allemaal',
+    name: Routes.All,
+    show: 'detail',
+    component: MembersTableView,
+    defaultProperties: () => {
+        return {
+            periodId: period.value.period.id,
+        };
+    },
+    isDefault: showAll.value
+        ? {
+                properties: {
+                    periodId: period.value.period.id,
+                },
+            }
+        : undefined,
+});
 
 const checkRoute = useCheckRoute();
 const fetchPeriods = useFetchOrganizationRegistrationPeriods();

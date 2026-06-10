@@ -34,7 +34,6 @@
                 <PayableBalanceMandatesBox :item="item" />
             </template>
 
-        
             <template v-if="item.organization.meta.invoicesEnabled">
                 <hr>
                 <h2>{{ $t('%1Ke') }}</h2>
@@ -168,9 +167,9 @@ const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
-const organization = useRequiredOrganization()
-const platform = usePlatform()
-const startOrganizationCheckout = useStartOrganizationCheckout()
+const organization = useRequiredOrganization();
+const platform = usePlatform();
+const startOrganizationCheckout = useStartOrganizationCheckout();
 const loadPayableBalance = useLoadPayableBalance();
 
 const showPackages = computed(() => {
@@ -179,28 +178,28 @@ const showPackages = computed(() => {
 });
 
 useGlobalEventListener('payment-succeeded', async () => {
-    reload().catch(console.error)
+    reload().catch(console.error);
 });
 
 useVisibilityChange(() => {
-    reload().catch(console.error)
-})
+    reload().catch(console.error);
+});
 
-const balanceTotal = computed(() => BalanceItem.getOutstandingBalance(props.item.balanceItems.filter(b => b.isDue)).priceOpen)
+const balanceTotal = computed(() => BalanceItem.getOutstandingBalance(props.item.balanceItems.filter(b => b.isDue)).priceOpen);
 
 async function reload() {
     try {
-        const payable = await loadPayableBalance(props.item.organization.id)
-        props.item.deepSet(payable)
+        const payable = await loadPayableBalance(props.item.organization.id);
+        props.item.deepSet(payable);
     } catch (e) {
         if (Request.isAbortError(e)) {
             return;
         }
-        Toast.fromError(e).show()
+        Toast.fromError(e).show();
     }
 }
 
-const title = props.item.organization.meta.invoicesEnabled ? $t('%1S7') : $t('%1QB')
+const title = props.item.organization.meta.invoicesEnabled ? $t('%1S7') : $t('%1QB');
 
 enum Routes {
     Payments = 'betalingen',
@@ -208,7 +207,7 @@ enum Routes {
     Invoices = 'facturen',
     Settings = 'instellingen',
     Items = 'items',
-    Packages = 'functionaliteiten'
+    Packages = 'functionaliteiten',
 }
 
 defineRoutes([
@@ -216,9 +215,9 @@ defineRoutes([
         url: Routes.Payments,
         component: PayableBalancePaymentsView,
         present: 'popup',
-        paramsToProps() {
+        defaultProperties() {
             return {
-                item: props.item
+                item: props.item,
             };
         },
     },
@@ -226,24 +225,24 @@ defineRoutes([
         url: Routes.Invoices,
         component: PayableInvoicesView,
         present: 'popup',
-        paramsToProps() {
+        defaultProperties() {
             return {
-                item: props.item
+                item: props.item,
             };
         },
     },
     {
         url: Routes.Settings,
         component: GeneralSettingsView,
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.Items,
         component: PayableBalanceItemsView,
         present: 'popup',
-        paramsToProps() {
+        defaultProperties() {
             return {
-                item: props.item
+                item: props.item,
             };
         },
     },
@@ -272,16 +271,15 @@ async function addCard() {
         payableBalance: props.item,
         checkout: OrganizationCheckout.create({
             createMandate: CreateMandateSettings.create({
-                saveAsDefault: true
-            })
+                saveAsDefault: true,
+            }),
         }),
         displayOptions: {
             action: 'present',
-            modalDisplayStyle: 'popup'
-        }
-    })
+            modalDisplayStyle: 'popup',
+        },
+    });
 }
-
 
 async function payBalance() {
     if (props.item.payableBalanceItems.filter(b => b.isDue).length === 0) {
@@ -294,10 +292,9 @@ async function payBalance() {
         checkout: OrganizationCheckout.create({}),
         displayOptions: {
             action: 'present',
-            modalDisplayStyle: 'popup'
-        }
-    })
+            modalDisplayStyle: 'popup',
+        },
+    });
 }
-
 
 </script>

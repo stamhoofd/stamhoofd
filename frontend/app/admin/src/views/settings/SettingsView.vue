@@ -363,7 +363,7 @@ defineRoutes([
         url: Routes.Records,
         present: 'popup',
         component: RecordsConfigurationView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 recordsConfiguration: platform.value.config.recordsConfiguration,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
@@ -381,7 +381,7 @@ defineRoutes([
         name: Routes.FinancialSupport,
         url: 'financiele-ondersteuning',
         component: FinancialSupportSettingsView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 financialSupport: platform.value.config.financialSupport ?? FinancialSupportSettings.create({}),
                 saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
@@ -401,7 +401,7 @@ defineRoutes([
         name: Routes.DataPermissions,
         url: 'toestemming-gegevensverzameling',
         component: DataPermissionSettingsView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 dataPermission: platform.value.config.dataPermission ?? DataPermissionsSettings.create({}),
                 saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {
@@ -481,7 +481,7 @@ defineRoutes([
         url: Routes.OrganizationRecordConfiguration,
         present: 'popup',
         component: OrganizationRecordConfigurationView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 recordsConfiguration: platform.value.config.organizationLevelRecordsConfiguration,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>) => {

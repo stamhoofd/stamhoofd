@@ -323,7 +323,7 @@ defineRoutes([
     {
         url: Routes.Members,
         component: MembersTableView,
-        paramsToProps: () => {
+        defaultProperties: () => {
             return {
                 customFilter: {
                     emails: {
@@ -340,7 +340,7 @@ defineRoutes([
     {
         url: Routes.Recipients,
         component: EmailRecipientsTableView,
-        paramsToProps: () => {
+        defaultProperties: () => {
             return {
                 email: props.email,
             };
@@ -349,7 +349,7 @@ defineRoutes([
     {
         url: Routes.Complaints,
         component: EmailRecipientsTableView,
-        paramsToProps: () => {
+        defaultProperties: () => {
             return {
                 email: props.email,
                 filterType: 'complaints',
@@ -364,7 +364,7 @@ defineRoutes([
     {
         url: Routes.HardBounces,
         component: EmailRecipientsTableView,
-        paramsToProps: () => {
+        defaultProperties: () => {
             return {
                 email: props.email,
                 filterType: 'hard-bounces',
@@ -379,7 +379,7 @@ defineRoutes([
     {
         url: Routes.SoftBounces,
         component: EmailRecipientsTableView,
-        paramsToProps: () => {
+        defaultProperties: () => {
             return {
                 email: props.email,
                 filterType: 'soft-bounces',
@@ -394,7 +394,7 @@ defineRoutes([
     {
         url: Routes.Failed,
         component: EmailRecipientsTableView,
-        paramsToProps: () => {
+        defaultProperties: () => {
             return {
                 email: props.email,
                 filterType: 'failed',
@@ -440,8 +440,7 @@ async function retrySending() {
             id: props.email.id,
             status: EmailStatus.Queued,
         }));
-    }
-    catch (e) {
+    } catch (e) {
         // Handled by the hook
         Toast.fromError(e).show();
     }
@@ -465,8 +464,7 @@ async function doDelete() {
             id: props.email.id,
             deletedAt: new Date(),
         }));
-    }
-    catch (e) {
+    } catch (e) {
         // Handled by the hook
         Toast.fromError(e).show();
     }

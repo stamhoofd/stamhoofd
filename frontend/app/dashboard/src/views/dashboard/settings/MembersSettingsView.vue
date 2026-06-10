@@ -270,7 +270,7 @@ defineRoutes([
         url: Routes.BundleDiscounts,
         present: 'popup',
         component: BundleDiscountSettingsView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 period: period.value,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
@@ -284,7 +284,7 @@ defineRoutes([
         url: Routes.RegistrationRecords,
         present: 'popup',
         component: RecordsConfigurationView,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({ platform: platform.value }),
                 recordsConfiguration: $organizationManager.value.organization.meta.recordsConfiguration,
@@ -321,7 +321,7 @@ defineRoutes([
                     name: Routes.FinancialSupport,
                     url: 'financiele-ondersteuning',
                     component: FinancialSupportSettingsView,
-                    paramsToProps() {
+                    defaultProperties() {
                         return {
                             financialSupport: getFinancialSupportSettingsOrDefault(platform.value, organization.value),
                             saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
@@ -341,7 +341,7 @@ defineRoutes([
                     name: Routes.DataPermissions,
                     url: 'toestemming-gegevensverzameling',
                     component: DataPermissionSettingsView,
-                    paramsToProps() {
+                    defaultProperties() {
                         return {
                             dataPermission: getDataPermissionSettingsOrDefault(platform.value, organization.value),
                             saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {

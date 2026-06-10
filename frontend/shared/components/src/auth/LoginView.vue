@@ -131,7 +131,7 @@ defineRoutes([
         name: Routes.ForgotPassword,
         url: 'wachtwoord-vergeten',
         component: ForgotPasswordView as any,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 initialEmail: email.value,
             };
@@ -141,7 +141,7 @@ defineRoutes([
         name: Routes.Signup,
         url: 'account-aanmaken',
         component: async () => (await import('./SignupView.vue')).default,
-        paramsToProps() {
+        defaultProperties() {
             return {
                 initialEmail: email.value,
             };
