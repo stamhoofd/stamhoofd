@@ -27,7 +27,7 @@
             </div>
 
             <div v-if="STAMHOOFD.environment === 'development' && (ComponentWithProperties.debug || HistoryManager.debug)" class="debug-overlay">
-                {{ url.getUrl() }} @ {{ historyIndex }}
+                {{ url.getUrl() }} {{ url.getQuery() }} @ {{ historyIndex }}
             </div>
         </div>
     </header>

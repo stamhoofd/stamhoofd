@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { BaseOrganization } from '@stamhoofd/structures';
+import { BaseOrganization, getAppHost } from '@stamhoofd/structures';
 import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -998,7 +998,7 @@ export class AuthenticatedStructures {
         const result: { balance: CachedBalance; object: ReceivableBalanceObject }[] = [];
 
         function getMemberContacts(member: Member, balance: CachedBalance) {
-            const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
+            const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, false) : '';
             return [
                 ...(member.details.getMemberEmails().length
                     ? [
@@ -1118,7 +1118,7 @@ export class AuthenticatedStructures {
             } else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
                 const user = users.find(m => m.id === balance.objectId) ?? null;
                 if (user) {
-                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
+                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, user.permissions?.forOrganization(Context.organization)?.isEmpty === false) : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: user.name || user.email,

@@ -31,6 +31,24 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
 
+        if (!request.body.token) {
+            throw new SimpleError({
+                statusCode: 400,
+                code: 'missing_field',
+                field: 'token',
+                message: 'Token field missing in request',
+            });
+        }
+
+        if (!request.body.code) {
+            throw new SimpleError({
+                statusCode: 400,
+                code: 'missing_field',
+                field: 'code',
+                message: 'Code field missing in request',
+            });
+        }
+
         const code = await EmailVerificationCode.verify(organization?.id ?? null, request.body.token, request.body.code);
 
         if (!code) {

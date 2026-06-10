@@ -37,6 +37,7 @@ export class Toast {
     progress: number | null = null;
     button: ToastButton | null = null;
     forceButtonClick = false;
+    testId: string | null = null;
 
     autohideAfter: number | null = 8_000;
 
@@ -50,6 +51,11 @@ export class Toast {
         // Constructor hack: we override Toast with a reactive toast
         // this fixes issues with editing the toast, because otherwise it would not get updated
         return reactive(this);
+    }
+
+    setTestId(id: string) {
+        this.testId = id;
+        return this;
     }
 
     static success(message: string): Toast {
@@ -72,11 +78,9 @@ export class Toast {
         let simpleErrors!: SimpleErrors;
         if (isSimpleError(errors)) {
             simpleErrors = new SimpleErrors(errors);
-        }
-        else if (isSimpleErrors(errors)) {
+        } else if (isSimpleErrors(errors)) {
             simpleErrors = errors;
-        }
-        else {
+        } else {
             simpleErrors = new SimpleErrors(new SimpleError({
                 code: 'unknown_error',
                 message: (errors as Error).message,
@@ -145,8 +149,7 @@ export class Toast {
             setTimeout(() => {
                 this.show();
             }, 1000);
-        }
-        else {
+        } else {
             Toast.callListeners(this);
         }
         return this;

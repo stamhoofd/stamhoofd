@@ -4,7 +4,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { Organization } from '@stamhoofd/models';
 import { Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, StartOpenIDFlowStruct } from '@stamhoofd/structures';
-import { LoginProviderType, OpenIDClientConfiguration, Token as TokenStruct } from '@stamhoofd/structures';
+import { getAppHost, LoginProviderType, OpenIDClientConfiguration, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
 import { Context } from '../helpers/Context.js';
@@ -127,7 +127,7 @@ export class SSOService {
         let redirectUri = 'https://' + STAMHOOFD.domains.dashboard;
 
         if (this.organization) {
-            redirectUri = 'https://' + this.organization.getHost();
+            redirectUri = 'https://' + getAppHost('registration', this.organization, true);
         }
         return redirectUri;
     }

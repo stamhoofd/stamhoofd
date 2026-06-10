@@ -2,7 +2,7 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { BalanceItem, Document, Group, Member, Organization, Registration, RegistrationInvitation, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getAppHost, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';
 import { GroupService } from './GroupService.js';
@@ -162,7 +162,7 @@ export const RegistrationService = {
                 }),
                 Replacement.create({
                     token: 'registerUrl',
-                    value: 'https://' + organization.getHost(),
+                    value: 'https://' + getAppHost('registration', organization, user.permissions?.forOrganization(organization)?.isEmpty === false),
                 }),
                 Replacement.create({
                     token: 'groupName',

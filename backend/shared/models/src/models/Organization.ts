@@ -6,8 +6,8 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { AccessRight, Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import type { AppType, OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
+import { AccessRight, Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, getAppHost, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -213,57 +213,12 @@ export class Organization extends QueryableModel {
         return organization;
     }
 
-    /**
-     * Potentially includes a path
-     */
-    getRegistrationHost(i18n?: { language: Language; locale: string }): string {
-        if (this.registerDomain) {
-            let d = this.registerDomain;
-
-            if (i18n && i18n.language !== this.i18n.language) {
-                d += '/' + i18n.language;
-            }
-
-            return d + '/' + appToUri('registration');
-        }
-        return this.getDefaultRegistrationHost(i18n);
-    }
-
-    getDefaultRegistrationHost(i18n?: { language: Language; locale: string }): string {
-        if (!STAMHOOFD.domains.registration) {
-            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('registration') + '/' + this.uri;
-        }
-        let defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[''];
-
-        if (i18n && i18n.language !== this.i18n.language) {
-            defaultDomain += '/' + i18n.language;
-        }
-
-        return this.uri + '.' + defaultDomain + '/' + appToUri('registration');
-    }
-
     getDashboardHost(i18n?: { language: Language; locale: string }): string {
-        return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('dashboard') + '/' + this.uri;
+        return getAppHost('dashboard', this, true, i18n);
     }
 
-    get registerUrl() {
-        return 'https://' + this.getRegistrationHost();
-    }
-
-    /**
-     * @deprecated
-     * use getRegistrationHost
-     */
-    getHost(i18n?: I18n): string {
-        return this.getRegistrationHost(i18n);
-    }
-
-    /**
-     * @deprecated
-     * Use getDefaultRegistrationHost
-     */
-    getDefaultHost(i18n?: I18n): string {
-        return this.getDefaultRegistrationHost(i18n);
+    get registerUrl(): string {
+        return 'https://' + getAppHost('registration', this, false);
     }
 
     get marketingDomain(): string {

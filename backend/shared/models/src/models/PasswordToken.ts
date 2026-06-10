@@ -1,13 +1,15 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column, Database } from '@simonbackx/simple-database';
-import type {I18n} from '@stamhoofd/backend-i18n';
+import type { I18n } from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
-import type {Organization} from './Organization.js';
+import type { Organization } from './Organization.js';
 import { User } from './User.js';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { getAppHost } from '@stamhoofd/structures';
+import { Platform } from './Platform.js';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
 
@@ -110,8 +112,7 @@ export class PasswordToken extends QueryableModel {
 
         if (validUntil) {
             token.validUntil = new Date(validUntil);
-        }
-        else {
+        } else {
             token.validUntil = new Date();
             token.validUntil.setTime(token.validUntil.getTime() + 3 * 3600 * 1000);
         }
@@ -128,23 +129,9 @@ export class PasswordToken extends QueryableModel {
         // Send an e-mail to say you already have an account + follow password forgot flow
         const token = await PasswordToken.createToken(user, validUntil);
 
-        let host: string;
-        if (user.permissions || !organization || STAMHOOFD.userMode === 'platform') {
-            host = 'https://' + (STAMHOOFD.domains.dashboard) + '/' + i18n.locale;
-            if (user.organizationId && organization) {
-                host += '/auto/' + encodeURIComponent(organization.uri);
-            }
-            return host + '/reset-password?token=' + encodeURIComponent(token.token);
-        }
-
-        host = 'https://' + organization.getHost(i18n);
+        const hasOrganizationPermissions = organization ? user.permissions?.forOrganization(organization, await Platform.getSharedStruct())?.isEmpty === false : false;
+        const host = 'https://' + getAppHost(hasOrganizationPermissions ? 'dashboard' : 'registration', organization, hasOrganizationPermissions, i18n);
         return host + '/reset-password?token=' + encodeURIComponent(token.token);
-    }
-
-    static async getMagicSignInUrl(user: User, organization: Organization) {
-        // For now we don't add a token yet for security. We might add some sort of email validation thing later on
-        const host = 'https://' + organization.getHost();
-        return Promise.resolve(host + '/login' + '?email=' + encodeURIComponent(user.email) + '&hasAccount=' + (user.hasAccount() ? 1 : 0));
     }
 
     static async clearFor(userId: string) {

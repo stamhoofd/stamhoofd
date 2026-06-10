@@ -101,6 +101,7 @@ onMounted(async () => {
                 }),
             ],
             modalDisplayStyle: 'overlay',
+            invalidHistory: true,
         });
     });
 

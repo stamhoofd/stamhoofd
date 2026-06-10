@@ -1,7 +1,7 @@
 import type { EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email, EmailAddress } from '@stamhoofd/email';
-import type { EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient} from '@stamhoofd/structures';
-import { BalanceItem as BalanceItemStruct, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
+import type { EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, getAppHost, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -13,7 +13,7 @@ import type { Group } from '../models/Group.js';
 import type { Organization } from '../models/Organization.js';
 import { Platform } from '../models/Platform.js';
 import { User } from '../models/User.js';
-import type {Webshop} from '../models/Webshop.js';
+import type { Webshop } from '../models/Webshop.js';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;
@@ -314,8 +314,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
             };
             cleaned.push(recipient);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -499,14 +498,14 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
     }
 
     // Add dummy unsubscribeUrl
-    const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/unsubscribe?token=example';
+    const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/unsubscribe?token=example';
     recipient.replacements.push(Replacement.create({
         token: 'unsubscribeUrl',
         value: dummyUnsubscribeUrl,
     }));
 
     // dummy signInUrl
-    const dummySignInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login';
+    const dummySignInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/login';
     recipient.replacements.push(Replacement.create({
         token: 'signInUrl',
         value: dummySignInUrl,
@@ -536,7 +535,7 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
     recipient.replacements = recipient.replacements.filter(r => r.token !== 'unsubscribeUrl' && r.token !== 'loginDetails' && r.token !== 'greeting');
 
     // Add dummy unsubscribeUrl
-    const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard);
+    const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard);
     recipient.replacements.push(Replacement.create({
         token: 'unsubscribeUrl',
         value: dummyUnsubscribeUrl,
@@ -575,7 +574,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
     }
 
     if (!recipient.email && !recipient.userId) {
-        const signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login';
+        const signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/login';
         recipient.replacements.push(Replacement.create({
             token: 'signInUrl',
             value: signInUrl,
@@ -587,8 +586,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                 value: '',
             }));
         }
-    }
-    else {
+    } else {
         // Default signInUrl
         recipientUser = recipient.userId ? await User.select().where('id', recipient.userId).first(false) : await User.getForAuthentication(organization?.id ?? null, recipient.email!, { allowWithoutAccount: true });
         if (STAMHOOFD.userMode !== 'platform' && recipientUser && recipientUser.organizationId && recipientUser.organizationId !== (organization?.id ?? null)) {
@@ -600,14 +598,12 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
         if (!recipientUser || !recipientUser.hasAccount()) {
             // We can create a special token
             if (recipientUser) {
-                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipientUser?.email);
+                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipientUser?.email);
+            } else {
+                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/account-aanmaken';
             }
-            else {
-                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken';
-            }
-        }
-        else {
-            signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipientUser.email);
+        } else {
+            signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipientUser.email);
         }
 
         recipient.replacements.push(Replacement.create({
@@ -638,8 +634,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                             }),
                         );
                     }
-                }
-                else {
+                } else {
                     console.log('No member found for user', recipientUser.id);
                 }
             }
@@ -653,8 +648,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                         : `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}${suffix}</em></p>`,
                 }),
             );
-        }
-        else {
+        } else {
             if (recipient.email) {
                 const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
                 console.log('No user found for email', recipient.email);
@@ -665,8 +659,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                         html: `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}</em></p>`,
                     }),
                 );
-            }
-            else {
+            } else {
                 recipient.replacements.push(
                     Replacement.create({
                         token: 'loginDetails',
@@ -702,8 +695,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                     html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
                 }),
             );
-        }
-        else {
+        } else {
             recipient.replacements.push(
                 Replacement.create({
                     token: 'outstandingBalance',
@@ -739,8 +731,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
 
     if (recipient instanceof EmailRecipient) {
         recipient.replacements.push(...recipient.getRecipient().getDefaultReplacements());
-    }
-    else {
+    } else {
         recipient.replacements.push(...recipient.getDefaultReplacements());
     }
 

@@ -1,5 +1,5 @@
 <template>
-    <form class="verify-email-view st-view small" @submit.prevent="submit">
+    <form class="verify-email-view st-view small" data-testid="verify-email-view" :data-token="token" @submit.prevent="submit">
         <STNavigationBar>
             <template #right>
                 <LoadingButton :loading="retrying">
@@ -96,7 +96,7 @@ onMounted(async () => {
         codeInput.value = props.code;
         await submit();
     }
-    pollTimer = setTimeout(() => void doPoll(), 10000);
+    pollTimer = setTimeout(() => void doPoll(), 10_000);
 });
 
 onUnmounted(() => {
@@ -130,6 +130,7 @@ async function submit() {
     errorBox.value = null;
     try {
         await LoginHelper.verifyEmail(context.value, codeInput.value, props.token);
+        Toast.success($t('Jouw e-mailadres is nu geverifieerd!')).setTestId('toast-email-verification-succeeded').show();
         await navigateAway();
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);

@@ -24,11 +24,11 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox :title="$t(`%WV`)">
-                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
+                        <input id="new-password" v-model="password" data-testid="new-password-input" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
                     </STInputBox>
 
                     <STInputBox :title="$t(`%WW`)">
-                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)" @input="(event: any) => passwordRepeat = event.target.value" @change="(event: any) => passwordRepeat = event.target.value">
+                        <input id="confirm-password" v-model="passwordRepeat" data-testid="confirm-password-input" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)" @input="(event: any) => passwordRepeat = event.target.value" @change="(event: any) => passwordRepeat = event.target.value">
                     </STInputBox>
                 </div>
                 <div>
@@ -38,7 +38,7 @@
 
             <SignupPoliciesBox :validator="errors.validator">
                 <LoadingButton :loading="loading" class="block input-spacing">
-                    <button id="submit" class="button primary" type="submit">
+                    <button id="submit" class="button primary" type="submit" data-testid="signup-account-button">
                         <span class="icon lock" />
                         <span>{{ $t('%ur') }}</span>
                     </button>

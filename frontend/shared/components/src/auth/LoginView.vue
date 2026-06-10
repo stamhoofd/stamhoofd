@@ -60,7 +60,7 @@
                             {{ $t('%Zl') }}
                         </p>
 
-                        <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
+                        <button class="button text selected" type="button" tabindex="-1" data-testid="signup-account-link" @click="openSignup">
                             <span>{{ $t('%ur') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>

@@ -272,7 +272,7 @@ defineRoutes([
         url: 'aansluiten',
         name: Routes.Join,
         component: async () => (await import('./SignupGeneralView.vue')).default as any,
-        paramsToProps(_, query) {
+        defaultProperties(query) {
             const code = query?.get('code');
             const organization = query?.get('org');
 
@@ -289,6 +289,20 @@ defineRoutes([
             return {
                 initialRegisterCode: null,
                 visitViaUrl: !!query,
+            };
+        },
+        propsToParams(props) {
+            if (!props.initialRegisterCode || !props.visitViaUrl) {
+                return {
+                    query: null,
+                };
+            }
+
+            return {
+                query: new URLSearchParams([
+                    ['code', props.initialRegisterCode.code],
+                    ['org', props.initialRegisterCode.organization],
+                ]),
             };
         },
     },

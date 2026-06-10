@@ -1,6 +1,6 @@
 <template>
     <div class="toast-view-container">
-        <component :is="!toast.button || !toast.forceButtonClick ? 'div' : (toast.button.href ? 'a' : 'button')" class="toast-view" :class="(toast.icon ?? '') + (toast.button && toast.forceButtonClick ? ' button' : '')" :href="toast.forceButtonClick ? (toast.button?.href ?? undefined) : undefined" :download="toast.forceButtonClick ? (toast.button?.download ?? undefined) : undefined" @click="clicked" @mousedown.prevent>
+        <component :is="!toast.button || !toast.forceButtonClick ? 'div' : (toast.button.href ? 'a' : 'button')" class="toast-view" :class="(toast.icon ?? '') + (toast.button && toast.forceButtonClick ? ' button' : '')" :href="toast.forceButtonClick ? (toast.button?.href ?? undefined) : undefined" :download="toast.forceButtonClick ? (toast.button?.download ?? undefined) : undefined" :data-testid="toast.testId" @click="clicked" @mousedown.prevent>
             <div v-if="toast.progress !== null" class="progress" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon === 'spinner'" />
             <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />

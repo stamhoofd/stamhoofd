@@ -3,14 +3,16 @@ import { AccountSwitcher, ContextNavigationBar, ContextProvider, CustomHooksCont
 import { MemberManager, OrganizationManager, PlatformManager, UrlHelper } from '@stamhoofd/networking';
 import type { AppType, Organization } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
+import type { Ref } from 'vue';
 import { sessionFromOrganization, sessionGlobal } from './sessionBuilders';
 import { useGlobalRoutes } from './useGlobalRoutes';
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
 }
+export type SharedOptions = { url: string | null | Ref<string | null>; query: URLSearchParams | null | Ref<URLSearchParams | null>; checkRoutes: boolean };
 
-export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: { url: string; checkRoutes: boolean }) {
+export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: SharedOptions) {
     const onOurDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
 
     if ((STAMHOOFD.singleOrganization || organization?.resolvedRegisterDomain) && !onOurDomain) {
@@ -44,6 +46,7 @@ export async function wrapAndReplace(organization: Organization | null = null, a
             },
             stamhoofd_app: app,
             reactive_navigation_url: options.url,
+            reactive_navigation_query: options.query,
         }),
         root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {
             root: component,

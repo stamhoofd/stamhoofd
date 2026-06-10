@@ -1,15 +1,15 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type {I18n} from '@stamhoofd/backend-i18n';
+import type { I18n } from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
-import { EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures';
+import { appToUri, EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { Platform } from './Platform.js';
-import type {User} from './User.js';
-import type {Organization} from './Organization.js';
+import type { User } from './User.js';
+import type { Organization } from './Organization.js';
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
@@ -121,20 +121,8 @@ export class EmailVerificationCode extends QueryableModel {
     }
 
     getEmailVerificationUrl(user: User, organization: Organization | null, i18n: I18n) {
-        let host: string;
-        if (user.permissions || !organization || STAMHOOFD.userMode === 'platform') {
-            host = 'https://' + (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') + '/' + i18n.locale;
-        }
-        else {
-            // Add language if different than default
-            host = 'https://' + organization.getHost();
-
-            if (i18n.language !== organization.i18n.language) {
-                host += '/' + i18n.language;
-            }
-        }
-
-        return host + '/verify-email' + (user.organizationPermissions && this.organizationId ? '/' + encodeURIComponent(this.organizationId) : '') + '?code=' + encodeURIComponent(this.code) + '&token=' + encodeURIComponent(this.token);
+        const host = getAppHost('verify-email', organization, !!user.permissions, i18n);
+        return 'https://' + host + '?code=' + encodeURIComponent(this.code) + '&token=' + encodeURIComponent(this.token);
     }
 
     /**
@@ -283,8 +271,7 @@ export class EmailVerificationCode extends QueryableModel {
                 },
                 type: 'transactional',
             });
-        }
-        else {
+        } else {
             await sendEmailTemplate(organization, {
                 recipients: [
                     Recipient.create({
@@ -359,8 +346,7 @@ export class EmailVerificationCode extends QueryableModel {
 
             // Expire in 3 hours
             verificationCode.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3);
-        }
-        else {
+        } else {
             verificationCode = verificationCodes[0];
 
             if (verificationCode.email !== email || verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) || verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {

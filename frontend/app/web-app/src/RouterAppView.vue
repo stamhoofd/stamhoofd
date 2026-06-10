@@ -7,10 +7,12 @@ import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@s
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 import { wrapAndReplace } from './wrapAndReplace';
+import type { SharedOptions } from './wrapAndReplace';
 import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { provideAppNavigate, ReplaceRootEventBus } from '@stamhoofd/components';
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
+import type { Ref } from 'vue';
 
 provideAppNavigate(useNavigate());
 
@@ -39,27 +41,30 @@ const orgInUriParams = {
         return { organization: org };
     },
     propsToParams: (props: { organization: Organization }) => ({
-        params: { organizationUri: props.organization.uri },
+        params: {
+            organizationUri: props.organization.uri,
+        },
+        query: null,
     }),
 };
 
-async function loadAdmin(options: { url: string; checkRoutes: boolean }) {
+async function loadAdmin(options: SharedOptions) {
     const admin = await import('@stamhoofd/admin-frontend');
     await wrapAndReplace(null, 'admin', new ComponentWithProperties(admin.App, {}), options);
 }
 
-async function loadDashboard(organization: Organization, options: { url: string; checkRoutes: boolean }) {
+async function loadDashboard(organization: Organization, options: SharedOptions) {
     const dashboard = await import('@stamhoofd/dashboard');
     console.error('Loading dashboard after', organization.clone());
     await wrapAndReplace(organization, 'dashboard', new ComponentWithProperties(dashboard.App, {}), options);
 }
 
-async function loadRegistration(organization: Organization | null, options: { url: string; checkRoutes: boolean }) {
+async function loadRegistration(organization: Organization | null, options: SharedOptions) {
     const registration = await import('@stamhoofd/registration');
     await wrapAndReplace(organization, 'registration', new ComponentWithProperties(registration.App, {}), options);
 }
 
-async function loadAuto(organization: Organization | null, options: { url: string; checkRoutes: boolean }) {
+async function loadAuto(organization: Organization | null, options: SharedOptions) {
     console.error('Loading auto after', organization?.clone());
     const auto = await import('@stamhoofd/auto');
     await wrapAndReplace(organization, 'auto', new ComponentWithProperties(auto.App, {}), options);
@@ -69,7 +74,7 @@ async function showSpinner() {
     await ReplaceRootEventBus.sendEvent('replace', new ComponentWithProperties(LoadingView, {}));
 }
 
-async function loadVerifyEmail(organization: Organization | null, options: { url: string; checkRoutes: boolean; componentProperties: { token: string; email: string; code?: string } }) {
+async function loadVerifyEmail(organization: Organization | null, options: SharedOptions & { componentProperties: { token: string; email: string; code?: string } }) {
     const auth = await import('@stamhoofd/verify-email');
     await wrapAndReplace(organization, 'verify-email', new ComponentWithProperties(auth.App, options.componentProperties), options);
 }
@@ -97,7 +102,7 @@ if (orgInDomain) {
         },
     });
 } else {
-    defineRoute<{ organization: Organization }>({
+    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.Dashboard,
         url: $t('beheerders') + '/@organizationUri',
         handler: async (options) => {
@@ -132,7 +137,7 @@ if (orgInDomain) {
             });
         }
     }
-    defineRoute<{ organization: Organization }>({
+    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.OrgScopedRegistration,
         url: $t('leden') + '/@organizationUri',
         handler: async (options) => {
@@ -167,6 +172,18 @@ if (orgInDomain) {
             await showSpinner();
             await loadVerifyEmail(await orgInDomain(), options);
         },
+        propsToParams: props => ({
+            query: props.code
+                ? new URLSearchParams([
+                    ['token', props.token],
+                    ['email', props.email],
+                    ['code', props.code],
+                ])
+                : new URLSearchParams([
+                    ['token', props.token],
+                    ['email', props.email],
+                ]),
+        }),
     });
 } else if (STAMHOOFD.userMode === 'platform') {
     defineRoute({
@@ -181,6 +198,18 @@ if (orgInDomain) {
             await showSpinner();
             await loadVerifyEmail(null, options);
         },
+        propsToParams: props => ({
+            query: props.code
+                ? new URLSearchParams([
+                    ['token', props.token],
+                    ['email', props.email],
+                    ['code', props.code],
+                ])
+                : new URLSearchParams([
+                    ['token', props.token],
+                    ['email', props.email],
+                ]),
+        }),
     });
 } else {
     defineRoute({
@@ -207,7 +236,19 @@ if (orgInDomain) {
             };
         },
         propsToParams: props => ({
-            params: { organizationUri: props.organization.uri },
+            params: {
+                organizationUri: props.organization.uri,
+            },
+            query: props.code
+                ? new URLSearchParams([
+                    ['token', props.token],
+                    ['email', props.email],
+                    ['code', props.code],
+                ])
+                : new URLSearchParams([
+                    ['token', props.token],
+                    ['email', props.email],
+                ]),
         }),
         handler: async (options) => {
             await showSpinner();
@@ -228,7 +269,7 @@ if (orgInDomain) {
         },
     });
 } else {
-    defineRoute<{ organization: Organization }>({
+    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.OrgScopedAuto,
         url: 'auto/@organizationUri',
         handler: async (options) => {
