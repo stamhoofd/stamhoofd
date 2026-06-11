@@ -1,5 +1,6 @@
 <template>
     <STErrorsDefault :error-box="ownErrors.errorBox" />
+
     <div class="split-inputs">
         <PriceInputBox v-model="price" :title="title" error-fields="price" :error-box="errorBox" :min="min" :placeholder="$t(`%1Mn`)" :validator="validator">
             <p v-if="defaultMembershipTypeId" class="style-description-small">
@@ -69,7 +70,7 @@ const { enabled, financialSupportSettings } = useFinancialSupportSettings({
     externalOrganization: organization,
 });
 
-const showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
+const showReducedPrice = computed(() => enabled.value || reducedPrice.value !== null);
 
 const now = computed(() => {
     const date = new Date();
