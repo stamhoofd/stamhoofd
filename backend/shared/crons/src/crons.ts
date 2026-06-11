@@ -123,7 +123,7 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
         });
 
         // Prevent starting too many jobs at once
-        if (STAMHOOFD.environment !== 'development') {
+        if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
             await sleep(10 * 1000);
 
             if (!options.allowReadOnly && await checkReadOnly()) {
