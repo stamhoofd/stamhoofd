@@ -646,6 +646,7 @@ test.describe('Routing on page load @routing', () => {
                 packages: [STPackageBundle.Webshops, STPackageBundle.Members],
             }).create();
             await STPackageService.updateOrganizationPackages(organization.id);
+            await organization.refresh();
             return organization;
         }
 
@@ -968,7 +969,7 @@ test.describe('Routing on page load @routing', () => {
                     url: domain + '/leden/' + organization.uri,
                     expectedUrl: domain + '/nl-BE/leden/' + organization.uri,
                     expectedScope: organization,
-                    expectedLocator: '[data-testid="login-view"]',
+                    expectedLocator: organization.meta.packages.useMembers ? '[data-testid="members-home-view"]' : '[data-testid="login-view"]',
                 });
             });
 
@@ -1010,6 +1011,7 @@ test.describe('Routing on page load @routing', () => {
                 organization.registerDomain = useRegisterDomain ? WorkerData.urls.registrationCustomDomain('scoutswetteren.be') : null; // not set
                 await organization.save();
                 await STPackageService.updateOrganizationPackages(organization.id);
+                await organization.refresh();
 
                 domain = useRegisterDomain ? 'https://' + organization.registerDomain : WorkerData.urls.registration(organization.uri);
 
@@ -1257,7 +1259,7 @@ test.describe('Routing on page load @routing', () => {
                         url: domain + '/leden',
                         expectedUrl: domain + '/nl-BE/leden',
                         expectedScope,
-                        expectedLocator: '[data-testid="login-view"]',
+                        expectedLocator: organization.meta.packages.useMembers ? '[data-testid="members-home-view"]' : '[data-testid="login-view"]',
                         expectedSwitcher: false, // Not allowed on custom domains if not signed in
                     });
                 });
@@ -1269,7 +1271,7 @@ test.describe('Routing on page load @routing', () => {
                         url: domain,
                         expectedUrl: domain + '/nl-BE',
                         expectedScope,
-                        expectedLocator: '[data-testid="login-view"]',
+                        expectedLocator: organization.meta.packages.useMembers ? '[data-testid="members-home-view"]' : '[data-testid="login-view"]',
                         expectedSwitcher: false, // Not allowed on custom domains if not signed in
                     });
                 });

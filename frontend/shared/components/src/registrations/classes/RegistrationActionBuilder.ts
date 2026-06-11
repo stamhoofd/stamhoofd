@@ -7,7 +7,7 @@ import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Gro
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogsView } from '../../audit-logs';
 import { CommunicationView } from '../../communication';
-import { LoadComponent } from '../../containers/AsyncComponent';
+import { LoadComponent } from '#containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '../../email';
 import { EmailView } from '../../email';
 import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';

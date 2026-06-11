@@ -14,7 +14,7 @@ import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultI
 import { GlobalEventBus } from '../../EventBus';
 import { AuditLogsView } from '../../audit-logs';
 import CommunicationView from '../../communication/CommunicationView.vue';
-import { LoadComponent } from '../../containers/AsyncComponent';
+import { LoadComponent } from '#containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import EmailView from '../../email/EmailView.vue';
 import MembersPdfExportView from '../../export/MembersPdfExportView.vue';

@@ -115,4 +115,8 @@ export class PaymentMethodHelper {
     static canCreateMandate(method: PaymentMethod) {
         return method === PaymentMethod.Bancontact || method === PaymentMethod.CreditCard || method === PaymentMethod.iDEAL;
     }
+
+    static isOnline(method: PaymentMethod) {
+        return method === PaymentMethod.Bancontact || method === PaymentMethod.CreditCard || method === PaymentMethod.iDEAL || method === PaymentMethod.Payconiq || method === PaymentMethod.DirectDebit;
+    }
 }

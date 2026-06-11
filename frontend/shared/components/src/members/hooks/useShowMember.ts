@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import { PromiseView } from '../../containers';
+import PromiseView from '#containers/PromiseView.vue';
 import { useMembersObjectFetcher } from '../../fetchers';
 import { Toast } from '../../overlays/Toast';
 import MemberSegmentedView from '../MemberSegmentedView.vue';

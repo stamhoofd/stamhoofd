@@ -37,6 +37,10 @@ export class DashboardPage {
             return;
         }
 
+        if (initialState === 'members-login') {
+            await this.page.getByTestId('open-login-button').click();
+        }
+
         const emailInput = this.page.getByTestId('email-input');
 
         await emailInput.click();
@@ -90,6 +94,11 @@ export class DashboardPage {
             const loginVisible = await this.page.getByTestId('email-input').isVisible().catch(() => false);
             if (loginVisible) {
                 return 'login' as const;
+            }
+
+            const membersLoginVisible = await this.page.getByTestId('members-home-view').isVisible().catch(() => false);
+            if (membersLoginVisible) {
+                return 'members-login' as const;
             }
 
             const loginHeadingVisible = await this.page.getByRole('heading', { name: 'Inloggen op Stamhoofd' }).isVisible().catch(() => false);

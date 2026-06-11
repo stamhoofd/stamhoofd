@@ -6,4 +6,3 @@ export { default as NoPermissionsView } from './NoPermissionsView.vue';
 export { default as PlatformFooter } from './PlatformFooter.vue';
 export { default as RedirectView } from './RedirectView.vue';
 export { default as SSOSettingsView } from './SSOSettingsView.vue';
-export { getLoginRoot } from './getLoginRoot';

@@ -153,6 +153,34 @@
     @media (max-width: 350px) {
         font-size: 24px;
     }
+
+    &.with-icons, &:has(.icon), &:has(.style-tag) {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding-bottom: 15px;
+
+        .block-icon {
+            margin-right: 8px;
+            display: block;
+            overflow: visible;
+        }
+
+        > span:not([class]) {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        > *:not(:first-child) {
+            flex-shrink: 0;
+        }
+
+        > .style-bubble {
+            margin-left: 5px;
+        }
+    }
 }
 
 // Use this style only for shorter titles

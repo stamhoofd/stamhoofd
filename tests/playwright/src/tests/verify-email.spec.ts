@@ -158,6 +158,14 @@ async function expectUserVerified(userId: string) {
 /**
  * Fill in the login form (the login view should already be visible) and submit.
  */
+async function openLoginOnMembersLogin(page: Page) {
+    await expect(page.getByTestId('members-home-view')).toBeVisible();
+    await page.getByTestId('open-login-button').click();
+}
+
+/**
+ * Fill in the login form (the login view should already be visible) and submit.
+ */
 async function loginViaUI(page: Page, { email, password }: { email: string; password: string }) {
     await expect(page.locator('[data-testid="login-view"]')).toBeVisible();
 
@@ -173,12 +181,17 @@ async function loginViaUI(page: Page, { email, password }: { email: string; pass
 }
 
 /**
+ * Fill in the login form (the login view should already be visible) and submit.
+ */
+async function openSignupOnMembersLogin(page: Page) {
+    await expect(page.getByTestId('members-home-view')).toBeVisible();
+    await page.getByTestId('open-signup-button').click();
+}
+
+/**
  * Open the "create account" form from a visible login view and sign up with a new account.
  */
 async function signupViaUI(page: Page, { email, password }: { email: string; password: string }) {
-    await expect(page.locator('[data-testid="login-view"]')).toBeVisible();
-    await page.getByTestId('signup-account-link').click();
-
     const form = page.locator('form.signup-view');
     await expect(form).toBeVisible();
 
@@ -236,6 +249,10 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         const { user, token, code } = await createUnverifiedUser({ organization: ctx.userOrganization, email });
 
         await page.goto(ctx.loginUrl);
+
+        if (ctx.scope && ctx.scope.meta.packages.useMembers && STAMHOOFD.userMode === 'organization') {
+            await openLoginOnMembersLogin(page);
+        }
         await loginViaUI(page, { email, password: PASSWORD });
 
         await expectVerifyEmailView(page);
@@ -253,6 +270,13 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         const email = randomEmail('verify-signup');
 
         await page.goto(ctx.loginUrl);
+
+        if (ctx.scope && ctx.scope.meta.packages.useMembers && STAMHOOFD.userMode === 'organization') {
+            await openSignupOnMembersLogin(page);
+        } else {
+            await expect(page.locator('[data-testid="login-view"]')).toBeVisible();
+            await page.getByTestId('signup-account-link').click();
+        }
         await signupViaUI(page, { email, password: PASSWORD });
 
         await expectVerifyEmailView(page);
@@ -314,6 +338,7 @@ test.describe('Verify email routing @verify-email', () => {
                 packages: [STPackageBundle.Webshops, STPackageBundle.Members],
             }).create();
             await STPackageService.updateOrganizationPackages(organization.id);
+            await organization.refresh();
         });
 
         test.afterAll(async () => {

@@ -531,6 +531,44 @@ export class GroupSettings extends AutoEncoder {
         return Math.max(0, this.maxMembers - this.getPendingStock(item) - this.getUsedStock(item.group));
     }
 
+    /**
+     * Maximum amount that can still be registered taking the stock of the individual prices into
+     * account. Returns null if no price imposes a limit (at least one selectable price has unlimited
+     * stock). Hidden prices are ignored since they cannot be selected for new registrations.
+     */
+    getRemainingPricesStock(item: RegisterItem | Group): number | null {
+        let max: number | null = null;
+        for (const price of this.prices) {
+            if (price.hidden) {
+                continue;
+            }
+            const remaining = price.getRemainingStock(item);
+            if (remaining === null) {
+                // This price has unlimited stock, so prices don't impose a limit
+                return null;
+            }
+            max = max === null ? remaining : Math.max(max, remaining);
+        }
+        return max;
+    }
+
+    /**
+     * Remaining stock taking both the group its own stock (maxMembers) and the stock of the
+     * individual prices into account. Returns the minimum of both, or null if neither imposes a limit.
+     */
+    getRemainingStockIncludingPrices(item: RegisterItem | Group): number | null {
+        const groupStock = this.getRemainingStock(item);
+        const pricesStock = this.getRemainingPricesStock(item);
+
+        if (groupStock === null) {
+            return pricesStock;
+        }
+        if (pricesStock === null) {
+            return groupStock;
+        }
+        return Math.min(groupStock, pricesStock);
+    }
+
     get isFull() {
         return this.maxMembers !== null && this.registeredMembers !== null && (this.registeredMembers + (this.reservedMembers ?? 0)) >= this.maxMembers;
     }

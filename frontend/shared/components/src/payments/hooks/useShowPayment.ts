@@ -1,9 +1,9 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import { PromiseView } from '../../containers';
 import { usePaymentsObjectFetcher } from '../../fetchers';
 import { Toast } from '../../overlays/Toast';
 import PaymentView from '../PaymentView.vue';
+import PromiseView from '#containers/PromiseView.vue';
 
 export function useShowPayment() {
     const present = usePresent();

@@ -3,30 +3,32 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, ComponentWithPropertiesInstance, ModalStackComponent, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useMemberManager, usePlatformManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
-
 import CartView from './views/cart/CartView.vue';
 import MemberCommunicationView from './views/communication/MemberCommunicationView.vue';
 import EventsOverview from './views/events/EventsOverview.vue';
 import StartView from './views/start/StartView.vue';
-import { usePlatformManager, useMemberManager } from '@stamhoofd/networking';
-import { AuthenticatedView, getLoginRoot, useContext } from '@stamhoofd/components';
 
 const context = useContext();
 const platformManager = usePlatformManager();
 const memberManager = useMemberManager();
+const getLoginRoot = useLoginRoot();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
 }
 
 const root = new ComponentWithProperties(AuthenticatedView, {
-    loginRoot: wrapWithModalStack(getLoginRoot()),
+    loginRoot: getLoginRoot(),
     root: wrapWithModalStack(getRoot()),
 });
 const component = useCurrentComponent();

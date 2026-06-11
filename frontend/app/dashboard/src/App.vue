@@ -3,25 +3,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, ComponentWithPropertiesInstance, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
+import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
+import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
+import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
-import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
-import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
-import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
+import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { computed, ref } from 'vue';
-
-import { WhatsNewCount } from './classes/WhatsNewCount';
-import { AccessRight, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { AuthenticatedView, useContext, getLoginRoot } from '@stamhoofd/components';
+import { AccessRight, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+import { WhatsNewCount } from './classes/WhatsNewCount';
 
 const context = useContext();
 const platformManager = usePlatformManager();
+const getLoginRoot = useLoginRoot();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });

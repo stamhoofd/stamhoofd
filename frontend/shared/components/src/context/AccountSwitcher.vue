@@ -12,8 +12,18 @@
             </span>
         </figure>
     </button>
-    <template v-else-if="!isNative">
-        <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
+    <div v-else-if="!isNative && STAMHOOFD.userMode === 'organization' && organization" class="account-swicher-buttons">
+        <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
+            <span class="icon privacy" />
+            <span>{{ $t('Privacy') }}</span>
+        </a>
+        <a v-if="customSiteUrl" class="button text only-icon-smartphone" :href="customSiteUrl" rel="noopener">
+            <span class="icon external" />
+            <span>{{ $t('%Xf') }}</span>
+        </a>
+    </div>
+    <div v-else-if="!isNative" class="account-swicher-buttons">
+        <a v-if="customSiteUrl" class="button text only-icon-smartphone" :href="customSiteUrl" rel="noopener">
             <span class="icon external" />
             <span>{{ $t('%Xf') }}</span>
         </a>
@@ -21,21 +31,23 @@
         <a v-if="!isPlatform" class="button primary" href="/aansluiten">
             {{ $t("%3t") }}
         </a>
-    </template>
+    </div>
 </template>
 
 <script setup lang="ts" name="AccountSwitcher">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-
-import { AppManager } from '@stamhoofd/networking/AppManager';
-import { useUser } from '../hooks';
+import { useOrganization } from '../hooks/useOrganization';
+import { useUser } from '../hooks/useUser';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 
 const $user = useUser();
 const $navigate = useNavigate();
 const isNative = AppManager.shared.isNative;
 const isPlatform = STAMHOOFD.userMode === 'platform';
+const organization = useOrganization();
 
 // todo: this isn't working yet on start
 defineRoutes([
@@ -54,11 +66,58 @@ const showContextMenu = async () => {
     await $navigate('account');
 };
 
+const privacyUrl = computed(() => {
+    if (!organization.value) {
+        return null;
+    }
+    if (organization.value.meta.privacyPolicyUrl) {
+        return organization.value.meta.privacyPolicyUrl;
+    }
+    if (organization.value.meta.privacyPolicyFile) {
+        return organization.value.meta.privacyPolicyFile.getPublicPath();
+    }
+    return null;
+});
+
+const customSiteUrl = computed(() => {
+    if (STAMHOOFD.userMode === 'platform') {
+        if (!STAMHOOFD.domains.marketing) {
+            return null;
+        }
+        return 'https://' + LocalizedDomains.marketing;
+    }
+
+    if (!organization.value) {
+        return null;
+    }
+
+    if (window.location.hostname === STAMHOOFD.domains.dashboard) {
+        // Not allowed - confusion with Stamhoofd possible
+        return null;
+    }
+
+    if (!organization.value.website || (!organization.value.website.startsWith('https://') && !organization.value.website.startsWith('http://'))) {
+        return null;
+    }
+
+    return organization.value.website;
+});
+
 </script>
 
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;
 @use '@stamhoofd/scss/base/text-styles' as *;
+
+.account-swicher-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+
+    @media (max-width: 600px) {
+        gap: 15px;
+    }
+}
 
 .account-switcher {
     --block-width: 35px;

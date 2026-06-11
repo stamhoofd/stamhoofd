@@ -204,22 +204,23 @@
 </template>
 
 <script setup lang="ts">
-import type { EmailPreview} from '@stamhoofd/structures';
-import { bounceErrorToHuman, EmailAddressSettings, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
-import { useAuth, useBackForward, useContext } from '../hooks';
-import EmailPreviewBox from './components/EmailPreviewBox.vue';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { LoadingViewTransition, PromiseView } from '../containers';
-import { MemberSegmentedView } from '../members';
-import { Toast } from '../overlays/Toast';
-import { useEmailRecipientsObjectFetcher, useMembersObjectFetcher } from '../fetchers';
-import type { Ref} from 'vue';
-import { computed, onMounted, ref } from 'vue';
 import type { Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { EmailPreview } from '@stamhoofd/structures';
+import { bounceErrorToHuman, EmailAddressSettings, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
+import PromiseView from '../containers/PromiseView.vue';
+import { useEmailRecipientsObjectFetcher, useMembersObjectFetcher } from '../fetchers';
+import { useAuth, useBackForward, useContext } from '../hooks';
 import IconContainer from '../icons/IconContainer.vue';
+import { MemberSegmentedView } from '../members';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { Toast } from '../overlays/Toast';
+import EmailPreviewBox from './components/EmailPreviewBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -276,18 +277,15 @@ async function retrySending() {
         toast.hide();
         if (response.data.sentAt) {
             Toast.success($t('%1Gp')).show();
-        }
-        else {
+        } else {
             Toast.warning($t('%1Gq')).show();
         }
 
         props.recipient.deepSet(response.data);
-    }
-    catch (e) {
+    } catch (e) {
         toast.hide();
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         isRetrying.value = false;
     }
 }
@@ -313,12 +311,10 @@ async function loadDuplicates() {
             { shouldRetry: true },
         );
         deduplicatedOf.value = result.results;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load duplicates', e);
         deduplicatedOf.value = [];
-    }
-    finally {
+    } finally {
         loadingDuplicates.value = false;
     }
 }
@@ -346,12 +342,10 @@ async function loadEmailAddresSettings() {
             decoder: EmailAddressSettings as Decoder<EmailAddressSettings>,
         });
         emailAddresSettings.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load email address settings', e);
         emailAddresSettings.value = null;
-    }
-    finally {
+    } finally {
         loadingEmailAddresSettings.value = false;
     }
 }
@@ -388,12 +382,10 @@ async function unblockEmailAddress() {
         Toast.success(
             $t('%1Gu', { email: props.recipient.email || '' }),
         ).setIcon('unlock green').show();
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to unblock email address', e);
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         isUnblockingEmailAddress.value = false;
     }
 }

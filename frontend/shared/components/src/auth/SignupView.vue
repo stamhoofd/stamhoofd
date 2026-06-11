@@ -50,18 +50,16 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { ref } from 'vue';
 
+import { AppRoute } from '@stamhoofd/structures/AppRoute.js';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useAppNavigate, useContext } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import PasswordStrength from '../inputs/PasswordStrength.vue';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
-import BoxedController from '../containers/BoxedController.vue';
-import { AppRoute } from '@stamhoofd/structures/AppRoute.js';
 
 const props = withDefaults(
     defineProps<{
@@ -75,7 +73,6 @@ const props = withDefaults(
 
 const errors = useErrors();
 const $context = useContext();
-const show = useShow();
 const appNavigate = useAppNavigate();
 const email = ref(props.initialEmail);
 const password = ref('');

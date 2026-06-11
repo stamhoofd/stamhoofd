@@ -4,11 +4,16 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, useCurrentComponent } from '@simonbackx/vue-app-navigation';
-import { AuthenticatedView, getLoginRoot, PromiseView, useAppNavigate, useContext } from '@stamhoofd/components';
+import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 import { getSelectorView } from './getSelectorView';
 
+const getLoginRoot = useLoginRoot();
 const context = useContext();
 const appNavigate = useAppNavigate();
 

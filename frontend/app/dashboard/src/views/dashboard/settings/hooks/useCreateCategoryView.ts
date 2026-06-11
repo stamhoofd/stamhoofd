@@ -1,11 +1,12 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { PromiseComponent, useRequiredOrganization } from '@stamhoofd/components';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import { GroupCategory, GroupCategorySettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
+import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 export function useCreateCategoryView(saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
     const present = usePresent();

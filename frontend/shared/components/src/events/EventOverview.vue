@@ -264,6 +264,8 @@
 </template>
 
 <script setup lang="ts">
+import { LoadComponent } from '#containers/AsyncComponent.ts';
+import PromiseView from '#containers/PromiseView.vue';
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
@@ -272,11 +274,10 @@ import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { AccessRight, appToUri, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { LoadComponent, PromiseView } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
 import { EditEmailTemplatesView } from '../email';

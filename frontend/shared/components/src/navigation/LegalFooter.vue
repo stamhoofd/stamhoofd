@@ -2,7 +2,7 @@
     <div class="legal-footer" :class="{customPlatform: STAMHOOFD.platformName !== 'stamhoofd'}">
         <hr class="style-hr"><div>
             <aside>
-                {{ company?.name || organization.name }}{{ company?.VATNumber || company?.companyNumber ? (", "+(company?.VATNumber || company?.companyNumber)) : "" }}
+                {{ company.name || organization.name }}{{ company.VATNumber || company.companyNumber ? (", "+(company.VATNumber || company.companyNumber)) : "" }}
                 <template v-if="organization.website">
                     -
                 </template>
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Company, Organization, Webshop, WebshopPreview} from '@stamhoofd/structures';
+import type { Company, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
@@ -68,7 +68,7 @@ const context = useContext();
 const platform = usePlatform();
 
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
-const company = computed(() => props.organization.meta.companies[0] as Company | undefined);
+const company = computed(() => props.organization.defaultCompanies[0] as Company);
 
 async function logout() {
     if (!(await CenteredMessage.confirm($t(`%10Q`), $t(`%10R`), $t(`%10S`)))) {
