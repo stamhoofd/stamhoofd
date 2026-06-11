@@ -94,6 +94,7 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         locked: true,
         organization,
         previousPeriodId: undefined,
+        customName: 'Gearchiveerde periodes',
     }, dryRun);
 
     const archiveOrganizationPeriod = await createOrganizationRegistrationPeriod({
@@ -762,6 +763,7 @@ async function createRegistrationPeriod(options: {
     previousPeriodId?: string;
     locked?: boolean;
     organization?: Organization;
+    customName?: string;
 }, dryRun: boolean) {
     const period = new RegistrationPeriod();
 
@@ -773,6 +775,10 @@ async function createRegistrationPeriod(options: {
     }
     period.settings = RegistrationPeriodSettings.create({});
     period.locked = options.locked ?? false;
+
+    if (options.customName) {
+        period.customName = options.customName;
+    }
 
     if (!dryRun) {
         await period.save();

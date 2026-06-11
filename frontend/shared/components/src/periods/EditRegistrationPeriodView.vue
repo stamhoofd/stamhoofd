@@ -42,17 +42,17 @@
 </template>
 
 <script setup lang="ts">
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import DateSelection from '#inputs/DateSelection.vue';
+import SaveView from '#navigation/SaveView.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import DateSelection from '#inputs/DateSelection.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import SaveView from '#navigation/SaveView.vue';
-import { useErrors } from '#errors/useErrors.ts';
-import { usePatch } from '#hooks/usePatch.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import { useValidation } from '#errors/useValidation.ts';
 import type { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -155,7 +155,9 @@ const endDate = computed({
 });
 
 const isValidCustomName = computed(() => {
-    if (!customName.value) {
+    if (!customName.value
+        // after the migration of v1 the oldest period is called "Gearchiveerde periodes" -> no warning should be shown
+        || customName.value === 'Gearchiveerde periodes') {
         return true;
     }
 
