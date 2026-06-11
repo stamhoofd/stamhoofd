@@ -95,8 +95,9 @@
         "tests/playwright/playwright.log": true
     },
     "search.useIgnoreFiles": false,
-    "typescript.enablePromptUseWorkspaceTsdk": true,
-    "typescript.preferGoToSourceDefinition": true,
-    "typescript.preferences.importModuleSpecifier": "project-relative",
+    "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+    "js/ts.preferGoToSourceDefinition": true,
+    "js/ts.preferences.importModuleSpecifier": "non-relative",
+    "js/ts.preferences.importModuleSpecifierEnding": "auto",
     "js/ts.tsdk.path": "node_modules/typescript/lib"
 }
