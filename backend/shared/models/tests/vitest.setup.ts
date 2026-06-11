@@ -25,13 +25,13 @@ afterAll(async () => {
     await Database.delete('DELETE FROM `email_recipients`');
     await Database.delete('DELETE FROM `emails`');
     await Database.delete('DELETE FROM `email_addresses`');
+
+    // Force reload Platform (membership organization id might be cleared)
+    await Platform.clearCache();
     await Database.end();
 
     // Override default $t handlers
     TestUtils.loadEnvironment();
-
-    // Force reload Platform (membership organization id might be cleared)
-    await Platform.clearCache();
 });
 
 TestUtils.setup();

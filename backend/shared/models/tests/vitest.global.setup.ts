@@ -1,6 +1,5 @@
 import { TestUtils } from '@stamhoofd/test-utils';
 import path from 'path';
-import { Platform } from '../src/models/Platform.js';
 
 const modelsPath = require.resolve('@stamhoofd/models');
 const emailPath = require.resolve('@stamhoofd/email');
@@ -38,7 +37,4 @@ export async function setup() {
 
     await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
     await Database.end();
-
-    // Force reload Platform (membership organization id might be cleared)
-    await Platform.clearCache();
 };
