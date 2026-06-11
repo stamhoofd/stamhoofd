@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import type { MemberPlatformMembership, PlatformMember} from '@stamhoofd/structures';
+import type { MemberPlatformMembership, PlatformMember } from '@stamhoofd/structures';
 import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -50,8 +50,7 @@ const autoCompletedAnswers = computed(() => {
         const answer = props.member.patchedMember.details.recordAnswers.get(record.id);
         if (!answer) {
             answerClone.set(record.id, RecordAnswer.createDefaultAnswer(record));
-        }
-        else {
+        } else {
             answerClone.set(record.id, answer);
         }
     }
@@ -94,15 +93,13 @@ const warnings = computed(() => {
                     text: TranslatedString.create($t('%1Hh')),
                     type: RecordWarningType.Info,
                 }));
-            }
-            else {
+            } else {
                 warnings.push(RecordWarning.create({
                     text: TranslatedString.create($t('%1Hi')),
                     type: RecordWarningType.Info,
                 }));
             }
-        }
-        else if (props.member.patchedMember.details.parentsHaveAccess?.value === false) {
+        } else if (props.member.patchedMember.details.parentsHaveAccess?.value === false) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
                     text: TranslatedString.create($t('%1Hj')),
@@ -112,36 +109,37 @@ const warnings = computed(() => {
         }
     }
 
-    if (props.member.membershipStatus === MembershipStatus.Trial) {
-        warnings.push(RecordWarning.create({
-            text: TranslatedString.create($t('%7z')),
-            type: RecordWarningType.Info,
-        }));
-    }
-
-    if (props.member.membershipStatus === MembershipStatus.Inactive) {
-        // todo: check when temporal membership
-        const nextMembership = getNextMembership();
-
-        if (nextMembership) {
+    if (STAMHOOFD.userMode === 'platform') {
+        if (props.member.membershipStatus === MembershipStatus.Trial) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%Bh', { date: Formatter.date(nextMembership.startDate) })),
+                text: TranslatedString.create($t('%7z')),
+                type: RecordWarningType.Info,
+            }));
+        }
+
+        if (props.member.membershipStatus === MembershipStatus.Inactive) {
+        // todo: check when temporal membership
+            const nextMembership = getNextMembership();
+
+            if (nextMembership) {
+                warnings.push(RecordWarning.create({
+                    text: TranslatedString.create($t('%Bh', { date: Formatter.date(nextMembership.startDate) })),
+                    type: RecordWarningType.Warning,
+                }));
+            } else {
+                warnings.push(RecordWarning.create({
+                    text: TranslatedString.create($t('%5C')),
+                    type: RecordWarningType.Error,
+                }));
+            }
+        }
+
+        if (props.member.membershipStatus === MembershipStatus.Expiring) {
+            warnings.push(RecordWarning.create({
+                text: TranslatedString.create($t('%5B')),
                 type: RecordWarningType.Warning,
             }));
         }
-        else {
-            warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%5C')),
-                type: RecordWarningType.Error,
-            }));
-        }
-    }
-
-    if (props.member.membershipStatus === MembershipStatus.Expiring) {
-        warnings.push(RecordWarning.create({
-            text: TranslatedString.create($t('%5B')),
-            type: RecordWarningType.Warning,
-        }));
     }
 
     return warnings;
