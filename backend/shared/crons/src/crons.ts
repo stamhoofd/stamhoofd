@@ -75,16 +75,17 @@ function stopCronScheduling() {
 }
 
 let schedulingJobs = false;
-function areCronsRunning(): boolean {
-    if (schedulingJobs && !doStopCrons) {
-        return true;
-    }
-
+function areCronsRunning(): string | false {
     for (const job of registeredCronJobs) {
         if (job.running) {
-            return true;
+            return job.name || 'unknown';
         }
     }
+
+    if (schedulingJobs && !doStopCrons) {
+        return 'scheduling';
+    }
+
     return false;
 }
 
@@ -158,9 +159,11 @@ export function stopCrons() {
 
 export async function waitForCrons() {
     try {
-        while (areCronsRunning()) {
-            console.log('Crons are still running. Waiting 2 seconds...');
+        let running = areCronsRunning();
+        while (running) {
+            console.log('Crons are still running (' + running + '). Waiting 2 seconds...');
             await sleep(2000);
+            running = areCronsRunning();
         }
     } catch (err) {
         console.error('Failed to wait for crons to finish:');
