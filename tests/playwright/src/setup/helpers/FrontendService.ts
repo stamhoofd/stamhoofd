@@ -13,7 +13,7 @@ export type FrontendProjectName = 'dashboard' | 'registration' | 'webshop';
 
 /**
  * The unified web-app now serves both the dashboard and registration apps.
- * Map caddy service names to the actual frontend project directory.
+ * Map caddy service names to the actual frontend project directory
  */
 const projectNameMap: Partial<Record<FrontendProjectName, string>> = {
     dashboard: 'web-app',

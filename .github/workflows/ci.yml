@@ -50,6 +50,8 @@ jobs:
               - 'shared/structures/**'
               - 'shared/utility/**'
               - 'backend/shared/sql/**'
+            playwright:
+              - 'tests/playwright/**'
 
       # On pushes, paths-filter only diffs against the previous commit. If the
       # previous run was red, an unrelated commit would skip the broken job and
@@ -97,7 +99,7 @@ jobs:
       changed_models: ${{ steps.changed.outputs.models == 'true' || steps.prev.outputs.models == 'true' }}
       changed_sql: ${{ steps.changed.outputs.sql == 'true' || steps.prev.outputs.sql == 'true' }}
       changed_frontend: ${{ steps.changed.outputs.frontend == 'true' || steps.prev.outputs.frontend == 'true' }}
-      rerun_playwright: ${{ steps.prev.outputs.playwright == 'true' }}
+      rerun_playwright: ${{ steps.changed.outputs.playwright == 'true' || steps.prev.outputs.playwright == 'true' }}
 
   # Build all shared TypeScript packages exactly once and share the compiled output
   # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
