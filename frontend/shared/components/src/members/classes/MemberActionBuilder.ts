@@ -597,10 +597,6 @@ export class MemberActionBuilder {
             return [];
         }
 
-        if (!manualFeatureFlag('registration-invites', this.context)) {
-            return [];
-        }
-
         let categoryTree: null | GroupCategoryTree = null;
 
         if (this.isWaitingList) {

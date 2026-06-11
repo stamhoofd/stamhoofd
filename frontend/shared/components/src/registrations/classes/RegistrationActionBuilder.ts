@@ -849,10 +849,6 @@ export class RegistrationActionBuilder {
             return [];
         }
 
-        if (!manualFeatureFlag('registration-invites', this.context)) {
-            return [];
-        }
-
         let categoryTree: null | GroupCategoryTree = null;
 
         if (this.isWaitingList) {

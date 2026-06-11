@@ -46,10 +46,6 @@
             <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
                 UiTPAS-kansentarief op webshops (onvolledig)
             </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('registration-invites')" @update:model-value="setFeatureFlag('registration-invites', !!$event)">
-                {{ $t('%1R9') }}
-            </Checkbox>
         </template>
 
         <hr><h2>{{ $t('%HJ') }}</h2>
