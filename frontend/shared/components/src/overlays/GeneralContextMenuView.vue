@@ -9,7 +9,7 @@
                     <span v-else-if="item.icon" :class="'icon tiny '+item.icon" />
                 </template>
 
-                <p>{{ item.name }}</p>
+                <p data-testid="context-menu-item-title">{{ item.name }}</p>
                 <p v-if="item.description" class="description">
                     {{ item.description }}
                 </p>

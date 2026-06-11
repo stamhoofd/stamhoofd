@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/platform.js';
+import { setup, test } from '../test-fixtures/platform.js';
+setup();
 
 // other imports
 import { StripeMocker, UitpasMocker } from '@stamhoofd/backend/tests/helpers';
@@ -67,9 +68,7 @@ test.describe('Registration', () => {
 
         test.beforeAll(async () => {
             user = WorkerData.user;
-            organization = await new OrganizationFactory({
-                name: `Vereniging${WorkerData.id}`,
-            }).create();
+            organization = await new OrganizationFactory({}).create();
             organizationName = organization.name;
 
             organization.meta.recordsConfiguration.financialSupport = true;
@@ -91,10 +90,6 @@ test.describe('Registration', () => {
                     period,
                     organization,
                 }).create();
-        });
-
-        test.afterAll(async () => {
-            await WorkerData.resetDatabase();
         });
 
         /**
@@ -480,9 +475,7 @@ test.describe('Registration', () => {
             let freeOrganizationPeriod: OrganizationRegistrationPeriod;
 
             test.beforeAll(async () => {
-                freeOrganization = await new OrganizationFactory({
-                    name: `FreeVer${WorkerData.id}`,
-                }).create();
+                freeOrganization = await new OrganizationFactory({}).create();
 
                 const freePeriod = await new RegistrationPeriodFactory({
                     startDate: new Date('2000-01-01'),
@@ -569,9 +562,7 @@ test.describe('Registration', () => {
             let creditOrganizationPeriod: OrganizationRegistrationPeriod;
 
             test.beforeAll(async () => {
-                creditOrganization = await new OrganizationFactory({
-                    name: `CreditVer${WorkerData.id}`,
-                }).create();
+                creditOrganization = await new OrganizationFactory({}).create();
 
                 const creditPeriod = await new RegistrationPeriodFactory({
                     startDate: new Date('2000-01-01'),
@@ -686,9 +677,7 @@ test.describe('Registration', () => {
                 //    await platform.save();
                 // }
 
-                stripeOrganization = await new OrganizationFactory({
-                    name: `BancontactVer${WorkerData.id}`,
-                }).create();
+                stripeOrganization = await new OrganizationFactory({}).create();
 
                 const stripePeriod = await new RegistrationPeriodFactory({
                     startDate: new Date('2000-01-01'),
@@ -821,9 +810,7 @@ test.describe('Registration', () => {
             let organization: Organization;
 
             test.beforeAll(async () => {
-                organization = await new OrganizationFactory({
-                    name: `Vereniging${WorkerData.id}`,
-                }).create();
+                organization = await new OrganizationFactory({}).create();
 
                 organizationContext
                     = await TestOrganizations.youthOrganization1(organization);
@@ -842,10 +829,6 @@ test.describe('Registration', () => {
                         organization,
                     )
                     .save();
-            });
-
-            test.afterAll(async () => {
-                await WorkerData.resetDatabase();
             });
 
             test.afterEach(async () => {
@@ -962,9 +945,7 @@ test.describe('Registration', () => {
             let organization: Organization;
 
             test.beforeAll(async () => {
-                organization = await new OrganizationFactory({
-                    name: `Bulk${WorkerData.id}`,
-                }).create();
+                organization = await new OrganizationFactory({}).create();
 
                 organizationContext
                     = await TestOrganizations.youthOrganization1(organization);
@@ -982,10 +963,6 @@ test.describe('Registration', () => {
                         organization,
                     )
                     .save();
-            });
-
-            test.afterAll(async () => {
-                await WorkerData.resetDatabase();
             });
 
             test.afterEach(async () => {

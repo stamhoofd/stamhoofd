@@ -37,9 +37,13 @@ export class DatabaseHelper {
             'DELETE FROM `registration_periods` where customName = ?',
             ['delete'],
         );
-
+        await Database.delete('DELETE FROM `events`');
         await Database.delete('DELETE FROM `payments`');
         await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
+
+        // Force reload Platform (membership organization id might be cleared)
+        const { Platform } = await import('@stamhoofd/models');
+        await Platform.clearCache();
 
         // Use random file keys in tests
         // const alg = "ES256";
@@ -71,11 +75,10 @@ export class DatabaseHelper {
             await Database.delete('DELETE FROM `users` where id != ?', [
                 userId,
             ]);
-        }
-        else {
+        } else {
             await Database.delete('DELETE FROM `users`');
         }
-
+        await Database.delete('DELETE FROM `users`');
         await this.clearRegistrations();
         await this.clearMembers();
 
@@ -96,9 +99,13 @@ export class DatabaseHelper {
             'DELETE FROM `registration_periods` where customName = ? and organizationId = null',
             ['delete'],
         );
-
+        await Database.delete('DELETE FROM `events`');
         await Database.delete('DELETE FROM `payments`');
         await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
+
+        // Force reload Platform (membership organization id might be cleared)
+        const { Platform } = await import('@stamhoofd/models');
+        await Platform.clearCache();
     }
 
     /**

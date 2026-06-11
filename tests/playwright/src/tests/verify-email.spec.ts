@@ -1,16 +1,16 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { setup, test } from '../test-fixtures/base.js';
+setup();
 
 // other imports
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { EmailVerificationCode, Organization, OrganizationFactory, User, UserFactory } from '@stamhoofd/models';
 import { AcquisitionType, STPackageBundle } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { OnboardingScenario } from '../flows/OnboardingScenario.js';
 import { WorkerData } from '../helpers/index.js';
-import { describe } from 'node:test';
 
 /**
  * These tests cover all the places that should end up on the VerifyEmail route:

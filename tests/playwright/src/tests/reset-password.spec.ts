@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { test, setup } from '../test-fixtures/base.js';
+setup();
 
 // other imports
 import type { Page } from '@playwright/test';

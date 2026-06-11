@@ -86,6 +86,10 @@ class TestInstance {
         this.loadEnvironment();
     }
 
+    clearPermanentOverrides() {
+        this.permanentEnvironmentOverrides = {};
+    }
+
     loadEnvironment() {
         // Clear env
         loadEnvironment();
@@ -123,7 +127,7 @@ class TestInstance {
             toMatchMap,
             toResolve,
             toIncludeAllMembers,
-            toReject
+            toReject,
         });
     }
 
@@ -149,7 +153,7 @@ export const STExpect = {
         code?: string;
         message?: string | RegExp;
         field?: string;
-        statusCode?: number
+        statusCode?: number;
     }) => {
         const d = {
             code: data.code ?? expect.any(String),

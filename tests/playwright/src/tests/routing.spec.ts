@@ -1,3 +1,7 @@
+// test should always be imported first
+import { test, setup } from '../test-fixtures/base.js';
+setup();
+
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { Organization, User } from '@stamhoofd/models';
@@ -6,7 +10,6 @@ import type { AppType } from '@stamhoofd/structures';
 import { PermissionLevel, Permissions, PlatformEventType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/worker/WorkerData.js';
-import { test } from '../test-fixtures/base.js';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 
 async function loginAs({ page, user }: { page: Page; user: User }) {

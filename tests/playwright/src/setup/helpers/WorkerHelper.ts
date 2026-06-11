@@ -86,8 +86,8 @@ class WorkerHelperInstance {
     /**
      * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
      */
-    loadEnvironment() {
-        if (this._isInitialized) {
+    loadEnvironment(options?: { force?: boolean }) {
+        if (this._isInitialized && !options?.force) {
             console.log('Environment already loaded');
             return;
         }
@@ -103,10 +103,13 @@ class WorkerHelperInstance {
         }
 
         console.log('Loading environment');
+        TestUtils.clearPermanentOverrides();
         TestUtils.loadEnvironment();
 
         const config: Partial<BackendEnvironment> = {
             PORT: CaddyConfigHelper.getPort('api', WorkerData.id),
+            singleOrganization: undefined,
+            userMode: 'organization',
             domains: {
                 dashboard: CaddyConfigHelper.getDomain('dashboard', WorkerData.id),
                 registration: {
@@ -148,6 +151,14 @@ class WorkerHelperInstance {
 
         for (const key in config) {
             TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment]);
+        }
+
+        if (STAMHOOFD.singleOrganization) {
+            throw new Error('Something went wrong while setting the environment: singleOrganization');
+        }
+
+        if (STAMHOOFD.userMode !== 'organization') {
+            throw new Error('Something went wrong while setting the environment: userMode');
         }
     }
 }

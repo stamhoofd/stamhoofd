@@ -1,28 +1,25 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { setup, test } from '../test-fixtures/base.js';
+setup();
 
-import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import type { Organization, User } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { EmailTemplateType, PermissionLevel, Permissions, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { WorkerData } from '../helpers/index.js';
 import type { Pages } from '../helpers/index.js';
 
 test.describe('Settings email templates', () => {
     let organization: Organization;
     let user: User;
-    const organizationName = 'Settings Email Templates Org';
     const email = 'email-templates-settings@gmail.com';
     const password = 'testAbc123456';
 
     test.beforeAll(async () => {
         TestUtils.setPermanentEnvironment('userMode', 'organization');
 
-        organization = await new OrganizationFactory({
-            name: organizationName,
-        }).create();
+        organization = await new OrganizationFactory({}).create();
 
         organization.meta.packages.packages.set(STPackageType.Members, STPackageStatus.create({
             startDate: new Date(),
@@ -44,10 +41,6 @@ test.describe('Settings email templates', () => {
         }).create();
 
         await Token.createToken(user);
-    });
-
-    test.afterAll(async () => {
-        await WorkerData.resetDatabase();
     });
 
     test.beforeEach(async () => {

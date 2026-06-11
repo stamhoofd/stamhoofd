@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { test, setup } from '../test-fixtures/base.js';
+setup();
 
 // other imports
 import { expect } from '@playwright/test';
@@ -13,7 +14,7 @@ import {
 } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { WorkerData } from '../helpers/index.js';
+import { Logger, WorkerData } from '../helpers/index.js';
 
 test.describe('Login', () => {
     let organization: Organization;
@@ -24,6 +25,7 @@ test.describe('Login', () => {
     const password = 'testAbc123456';
 
     test.beforeAll(async () => {
+        Logger.info('LOGIN BEFORE ALL');
         TestUtils.setPermanentEnvironment('userMode', 'organization');
         organization = await new OrganizationFactory({
             name: organizationName,
@@ -49,6 +51,10 @@ test.describe('Login', () => {
 
     test('happy path', async ({ page, pages }) => {
         await pages.dashboard.goto();
+
+        if (STAMHOOFD.singleOrganization) {
+            throw new Error('Unexpected test environment leaked');
+        }
 
         // click search input and fill in organization name
         const searchInput = page.getByTestId('organization-search-input');

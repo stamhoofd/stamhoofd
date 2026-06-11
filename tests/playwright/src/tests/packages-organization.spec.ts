@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/organization.js';
+import { test, setup } from '../test-fixtures/organization.js';
+setup();
 
 // other imports
 import { MollieMocker } from '@stamhoofd/backend/tests/helpers';

@@ -1,10 +1,11 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { test, setup } from '../test-fixtures/base.js';
+setup();
 
 // other imports
 import type {
     Organization,
-    User} from '@stamhoofd/models';
+    User } from '@stamhoofd/models';
 import {
     OrganizationFactory,
     Token,
@@ -48,6 +49,10 @@ test.describe('Login', () => {
 
     test('happy path', async ({ page, pages }) => {
         await pages.dashboard.goto();
+
+        if (STAMHOOFD.singleOrganization) {
+            throw new Error('Unexpected test environment leaked');
+        }
 
         // fill in email
         const emailInput = page.getByTestId('email-input');

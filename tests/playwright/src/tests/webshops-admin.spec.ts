@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/platform.js';
+import { test, setup } from '../test-fixtures/platform.js';
+setup();
 
 // other imports
 import { expect } from '@playwright/test';

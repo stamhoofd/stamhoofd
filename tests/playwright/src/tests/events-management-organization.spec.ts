@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { test, setup } from '../test-fixtures/base.js';
+setup();
 
 // other imports
 import { expect } from '@playwright/test';
@@ -18,7 +19,8 @@ import {
     Permissions,
 } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { type Pages, DashboardTab, WorkerData } from '../helpers/index.js';
+import { DashboardTab, WorkerData } from '../helpers/index.js';
+import type { Pages } from '../helpers/index.js';
 
 type Scenario = {
     organizationUri: string;

@@ -1,5 +1,6 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base.js';
+import { test, setup } from '../test-fixtures/base.js';
+setup();
 
 // other imports
 import type { Browser, Locator, Page } from '@playwright/test';
@@ -237,8 +238,6 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         await openInviteAndChoosePassword(browser, { userId: invited.id, organization: ctx.organization });
     });
 
-    // FIXME: the UI currently saves an admin without any role or access rights without
-    // complaining, creating a user with empty permissions. It should show an error instead.
     test('invite a new user without any role shows an error', async ({ page }) => {
         const ctx = getContext();
         const email = randomEmail('invite-new-none');

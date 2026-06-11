@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { OrganizationFactory } from '@stamhoofd/models';
+import { OrganizationFactory, Platform } from '@stamhoofd/models';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Database } from '@simonbackx/simple-database';
@@ -14,6 +14,9 @@ describe('Endpoint.SearchOrganization', () => {
         await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
         await Database.delete('DELETE FROM `organizations`');
         await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
+
+        // Force reload Platform (membership organization id might be cleared)
+        await Platform.clearCache();
     });
 
     test('Search for a given organization using exact search', async () => {

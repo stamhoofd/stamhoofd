@@ -7,7 +7,9 @@
                     <span :class="'icon tiny '+action.icon" />
                 </template>
 
-                <p>{{ action.name }}</p>
+                <p data-testid="context-menu-item-title">
+                    {{ action.name }}
+                </p>
                 <p v-if="action.description" class="description">
                     {{ action.description }}
                 </p>

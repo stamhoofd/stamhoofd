@@ -23,6 +23,7 @@ class WorkerDataInstance {
     private _user: User | null = null;
     private _initialUser: User | null = null;
     private _databaseHelper: DatabaseHelper | null = null;
+    private _lastFile: string | null = null;
 
     get urls() {
         return this._urls;
@@ -57,6 +58,14 @@ class WorkerDataInstance {
         return this._databaseHelper;
     }
 
+    get lastFile() {
+        return this._lastFile;
+    }
+
+    set lastFile(file: string | null) {
+        this._lastFile = file;
+    }
+
     get configureUser() {
         return new UserConfigurator(this.user);
     }
@@ -88,10 +97,7 @@ class WorkerDataInstance {
      * @param user
      * @param organization
      */
-    async _initLoginState({ user }: { user: User }) {
-        if (this._user !== null) {
-            throw new Error('User is already set');
-        }
+    async initLoginState({ user }: { user: User }) {
         this._user = user;
 
         const userCopy = await User.getByID(user.id);
@@ -101,13 +107,14 @@ class WorkerDataInstance {
         this._initialUser = userCopy;
     }
 
-    async resetUser() {
+    private async resetUser() {
         if (this._user) {
             // restore user
             const initialUser = this._initialUser;
             if (!initialUser) {
                 throw new Error('Initial user is not set');
             }
+            initialUser.markAllChanged();
             await initialUser.save();
             this._user = initialUser;
         }
@@ -120,17 +127,13 @@ class WorkerDataInstance {
      */
     async resetDatabase() {
         // reset the database, except for the user if one
-        await this.databaseHelper.reset(this._user ? this._user.id : null);
+        await this.databaseHelper.reset(this._user && this._user.organizationId === null ? this._user.id : null);
+        if (this._user?.organizationId) {
+            this._user = null;
+            this._initialUser = null;
+        }
         await this.resetUser();
         await initMembershipOrganization();
-    }
-
-    /**
-     * Clears everything in the database.
-     * Use this for example in the afterAll hook of a test file.
-     */
-    async clearDatabase() {
-        await this.databaseHelper.clear();
     }
 }
 

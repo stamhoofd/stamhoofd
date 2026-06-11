@@ -24,7 +24,7 @@ class Options {
 export class OrganizationFactory extends Factory<Options, Organization> {
     async create(): Promise<Organization> {
         const organization = new Organization();
-        organization.name = this.options.name ?? 'Organization ' + (new Date().getTime() + Math.floor(Math.random() * 999999));
+        organization.name = this.options.name ?? 'Organization ' + (new Date().getTime() + '-' + Math.floor(Math.random() * 999999) + '-' + Math.floor(Math.random() * 999999));
         organization.website = 'https://domain.com';
         organization.registerDomain = this.options.domain ?? null;
         organization.uri = this.options.uri ?? Formatter.slug(organization.name);

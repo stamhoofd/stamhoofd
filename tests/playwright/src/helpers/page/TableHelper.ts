@@ -1,4 +1,6 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
+import { Formatter } from '@stamhoofd/utility';
 
 type HasTextFilter = string | RegExp | undefined;
 
@@ -20,11 +22,13 @@ export class TableHelper {
         return this.locator.getByTestId('table-row').first().waitFor();
     }
 
-    getRow(hasText?: HasTextFilter) {
-        return this.locator.getByTestId('table-row').filter({ hasText });
+    getRow(hasText: string) {
+        return this.locator.getByTestId('table-row').filter({
+            hasText,
+        });
     }
 
-    async toggleSelectRow(hasText?: HasTextFilter) {
+    async toggleSelectRow(hasText: string) {
         await this.getRow(hasText).getByTestId('checkbox').click();
     }
 
@@ -35,11 +39,16 @@ export class TableHelper {
     async clickActions(actions: HasTextFilter[]) {
         await this.clickMoreButton();
 
-        for (const action of actions) {
-            await this.page
-                .getByTestId('context-menu-item')
-                .filter({ hasText: action })
+        for (const [index, action] of actions.entries()) {
+            const button = this.page
+                .getByTestId('context-menu-item-title')
+                .filter({ hasText: typeof action === 'string' ? new RegExp('^\\s*' + Formatter.escapeRegex(action) + '\\s*$') : action });
+            await button
                 .click();
+
+            if (index === actions.length - 1) {
+                await expect(button).not.toBeVisible();
+            }
         }
     }
 
