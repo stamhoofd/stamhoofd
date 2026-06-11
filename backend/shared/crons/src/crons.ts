@@ -142,6 +142,12 @@ export function startCrons(options: { allowReadOnly: boolean; allowBeforeSeeds: 
         throw new Error('No crons registered');
     }
 
+    if (STAMHOOFD.environment === 'test') {
+        // Don't run crons in test mode (Playwright) - for now
+        // Tests currently don't rely on them + in production these only run every 5 minutes
+        return;
+    }
+
     cronInterval = setInterval(() => {
         crons(options).catch(console.error);
     }, STAMHOOFD.environment === 'development' ? 10 * 1000 : 5 * 60 * 1000);
