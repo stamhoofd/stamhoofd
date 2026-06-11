@@ -9,18 +9,27 @@ export async function resolveWorkspaceName(rootDir: string): Promise<string> {
     return slug(process.env.STAMHOOFD_WORKSPACE_NAME ?? path.basename(rootDir)) || 'workspace';
 }
 
+export async function resolvePrimaryWorkspaceRoot(rootDir: string): Promise<string | null> {
+    const jjPrimaryRoot = await resolveJjPrimaryWorkspaceRoot(rootDir);
+    if (jjPrimaryRoot) {
+        return jjPrimaryRoot;
+    }
+
+    const gitPrimaryRoot = await resolveGitPrimaryWorktreeRoot(rootDir);
+    return gitPrimaryRoot;
+}
+
 export async function resolvePrimaryInstance(rootDir: string): Promise<boolean> {
     if (process.env.STAMHOOFD_PRIMARY_INSTANCE) {
         return process.env.STAMHOOFD_PRIMARY_INSTANCE === '1';
     }
 
-    const jjPrimaryRoot = await resolveJjPrimaryWorkspaceRoot(rootDir);
-    if (jjPrimaryRoot) {
-        return samePath(rootDir, jjPrimaryRoot);
+    const root = await resolvePrimaryWorkspaceRoot(rootDir);
+    if (root) {
+        return samePath(rootDir, root);
     }
 
-    const gitPrimaryRoot = await resolveGitPrimaryWorktreeRoot(rootDir);
-    return gitPrimaryRoot ? samePath(rootDir, gitPrimaryRoot) : false;
+    return false;
 }
 
 async function resolveJjPrimaryWorkspaceRoot(rootDir: string): Promise<string | null> {
