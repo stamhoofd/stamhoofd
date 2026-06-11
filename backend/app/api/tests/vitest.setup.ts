@@ -14,7 +14,6 @@ import { GlobalHelper } from '../src/helpers/GlobalHelper.js';
 import { BalanceItemService } from '../src/services/BalanceItemService.js';
 import { PayconiqMocker } from './helpers/PayconiqMocker.js';
 import { resetNock } from './helpers/resetNock.js';
-import { Platform } from '@stamhoofd/models';
 
 Error.stackTraceLimit = 100;
 
@@ -79,9 +78,6 @@ beforeAll(async () => {
 
     // Override default $t handlers
     TestUtils.loadEnvironment();
-
-    // Force reload Platform (membership organization id might be cleared)
-    await Platform.clearCache();
 });
 
 afterAll(async () => {

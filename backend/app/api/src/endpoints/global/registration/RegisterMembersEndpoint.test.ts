@@ -865,7 +865,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             expect(response.body).toBeDefined();
             expect(response.body.registrations.length).toBe(1);
-            expect(response.body.paymentUrl).toMatch(/payconiq\.com/);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
 
             expect(response.body.registrations[0]).toMatchObject({
                 registeredAt: null,

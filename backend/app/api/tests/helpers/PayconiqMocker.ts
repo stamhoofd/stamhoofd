@@ -4,9 +4,6 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import nock from 'nock';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ExchangePaymentEndpoint } from '../../src/endpoints/organization/shared/ExchangePaymentEndpoint.js';
-import { testServer } from './TestServer.js';
-
 /**
  * In-memory representation of a Payconiq payment.
  * Only the fields the backend (PayconiqPayment) actually reads are kept.
@@ -154,6 +151,12 @@ export class PayconiqMocker {
         if (!payment.internalPaymentId) {
             return;
         }
+
+        // For some reason the tests go crazy when we try to import this at the top even when we preload the environment it
+        // despearately imports the file before loading the STAMHOOFD environment...
+        const { ExchangePaymentEndpoint } = await import('../../src/endpoints/organization/shared/ExchangePaymentEndpoint.js');
+        const { testServer } = await import('./TestServer.js');
+
         const endpoint = new ExchangePaymentEndpoint();
         const request = Request.buildJson('POST', `/v${Version}/payments/${encodeURIComponent(payment.internalPaymentId)}?exchange=true`, undefined, undefined);
         await testServer.test(endpoint, request);
@@ -166,8 +169,7 @@ export class PayconiqMocker {
         if (typeof body === 'string') {
             try {
                 return JSON.parse(body);
-            }
-            catch {
+            } catch {
                 return {};
             }
         }
