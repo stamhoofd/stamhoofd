@@ -49,6 +49,20 @@ export class CaddyConfigHelper {
         return `inschrijven.${domain}.${this.getCustomDomainTld(workerId)}`;
     }
 
+    /**
+     * Custom domain for a webshop, grouped under the same custom domain TLD as registration domains.
+     * Webshops are every domain that ends with the custom TLD but does NOT start with 'inschrijven'.
+     */
+    static getWebshopCustomDomain(
+        prefix: string,
+        workerId: string,
+    ) {
+        if (prefix.startsWith('inschrijven')) {
+            throw new Error("Webshop custom domain prefix may not start with 'inschrijven'");
+        }
+        return `${prefix}.${this.getCustomDomainTld(workerId)}`;
+    }
+
     static cycledWorkerId(workerId: string) {
         const asNumber = parseInt(workerId);
         return asNumber % maximumRunners;
@@ -133,6 +147,35 @@ export class CaddyConfigHelper {
             });
         }
 
+        if (service === 'webshop') {
+            // Every custom domain ending with the custom TLD that is NOT a registration domain
+            // (which starts with 'inschrijven') is interpreted as a webshop. RE2 has no negative
+            // lookahead, so we rely on the registration route being registered first and terminal
+            // in createRouteOptions.
+            routes.push({
+                match: [
+                    {
+                        header_regexp: {
+                            Host: {
+                                pattern: '^.+\\.' + Formatter.escapeRegex(this.getCustomDomainTld(workerId)) + '$',
+                            },
+                        },
+                    },
+                ],
+                handle: [
+                    {
+                        handler: 'reverse_proxy',
+                        upstreams: [
+                            {
+                                dial: `${proxyHost}:${port}`,
+                            },
+                        ],
+                    },
+                ],
+                terminal: true,
+            });
+        }
+
         return routes;
     }
 
@@ -188,8 +231,10 @@ export class CaddyConfigHelper {
         for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
             routes.push(
                 ...this.createFrontendRoutes('dashboard', workerId.toString(), options.proxyHost),
-                ...this.createFrontendRoutes('webshop', workerId.toString(), options.proxyHost),
+                // registration must come before webshop: its terminal 'inschrijven.*' custom-domain
+                // route has to win over the webshop catch-all on the shared custom TLD.
                 ...this.createFrontendRoutes('registration', workerId.toString(), options.proxyHost),
+                ...this.createFrontendRoutes('webshop', workerId.toString(), options.proxyHost),
             );
 
             routes.push(

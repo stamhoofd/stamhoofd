@@ -16,7 +16,7 @@
                     <span>{{ $t('%kI') }}</span>
                 </button>
                 <LoadingButton :loading="payment && payment.status === 'Pending'">
-                    <a :href="paymentUrl" class="button primary open-app">
+                    <a :href="paymentUrl" class="button primary open-app" data-testid="payconiq-app-button">
                         <span class="icon external" /><span>{{ $t('%kJ') }}</span>
                     </a>
                 </LoadingButton>

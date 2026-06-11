@@ -1,5 +1,5 @@
 <template>
-    <STListItem class="ticket-list-item right-stack" :selectable="true" @click="openTicket">
+    <STListItem class="ticket-list-item right-stack" :selectable="true" data-testid="ticket-list-item" @click="openTicket">
         <h3>
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>

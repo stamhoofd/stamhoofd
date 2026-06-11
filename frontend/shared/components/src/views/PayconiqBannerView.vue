@@ -3,7 +3,7 @@
         <button class="payconiq-close button icon close white" type="button" @click="close" />
         <h1>{{ $t('%1P0') }}</h1>
 
-        <div class="qr-code" :class="{ scanned: payment.status === 'Pending'}">
+        <div class="qr-code" :class="{ scanned: payment.status === 'Pending'}" data-testid="payconiq-qr">
             <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc" draggable="false">
         </div>
         <img height="64" src="@stamhoofd/assets/images/partners/icons/bancontact-pay.png">

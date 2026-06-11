@@ -3,6 +3,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { Platform } from '../src/models/Platform.js';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -28,6 +29,9 @@ afterAll(async () => {
 
     // Override default $t handlers
     TestUtils.loadEnvironment();
+
+    // Force reload Platform (membership organization id might be cleared)
+    await Platform.clearCache();
 });
 
 TestUtils.setup();

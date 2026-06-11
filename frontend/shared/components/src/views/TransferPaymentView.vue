@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="transfer-payment-view">
         <STNavigationBar :disable-pop="true" :disable-dismiss="!isPopup" :title="$t(`%ko`)" />
 
         <main>
@@ -189,7 +189,7 @@
                     <span class="icon help" />
                     <span>{{ $t('%kI') }}</span>
                 </button>
-                <button class="button primary" type="button" @click="goNext">
+                <button class="button primary" type="button" data-testid="transfer-continue-button" @click="goNext">
                     <span>{{ $t('%16p') }}</span>
                     <span class="icon arrow-right" />
                 </button>

@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <div v-if="order" class="st-view order-view box-shade">
+        <div v-if="order" class="st-view order-view box-shade" data-testid="order-view">
             <STNavigationBar :large="true" :sticky="false" :left-logo="true">
                 <template #left>
                     <OrganizationLogo :organization="organization" :webshop="webshop" />
@@ -45,7 +45,7 @@
                             {{ $t('%W3') }}
                         </p>
 
-                        <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" id="tickets" class="container">
+                        <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" id="tickets" class="container" data-testid="tickets-section">
                             <hr><h2 class="style-with-button">
                                 <div v-if="singleTicket">
                                     {{ $t('%YC') }}
@@ -54,7 +54,7 @@
                                     {{ $t('%YD') }}
                                 </div>
                                 <div class="hover-show">
-                                    <button v-if="!loadingTickets" class="button text limit-space" type="button" @click="downloadAllTickets">
+                                    <button v-if="!loadingTickets" class="button text limit-space" type="button" data-testid="download-tickets-button" @click="downloadAllTickets">
                                         <span class="icon download" />
                                         <span>{{ $t('%1Op') }}</span>
                                     </button>
@@ -73,7 +73,7 @@
 
                             <Spinner v-if="loadingTickets" />
                             <template v-else>
-                                <button v-if="publicTickets.length === 1" class="button primary" type="button" @click="openTicket(publicTickets[0])">
+                                <button v-if="publicTickets.length === 1" class="button primary" type="button" data-testid="view-ticket-button" @click="openTicket(publicTickets[0])">
                                     <span class="icon qr-code" />
                                     <span>{{ $t('%YH') }}</span>
                                 </button>
@@ -139,7 +139,7 @@
                                     {{ $t('%xA') }}
                                 </h3>
 
-                                <p class="style-definition-text">
+                                <p class="style-definition-text" data-testid="order-number">
                                     {{ order.number }}
                                 </p>
                             </STListItem>

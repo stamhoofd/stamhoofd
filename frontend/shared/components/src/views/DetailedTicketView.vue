@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view detailed-ticket-view">
+    <div class="st-view detailed-ticket-view" data-testid="detailed-ticket-view">
         <STNavigationBar :title="name" :disable-dismiss="!allowDismiss" :sticky="false" :large="logo">
             <template #left>
                 <OrganizationLogo v-if="logo" :organization="organization" />
@@ -11,7 +11,7 @@
         <main>
             <figure class="qr-box">
                 <div>
-                    <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="370" height="370"><div class="placeholder" />
+                    <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="370" height="370" data-testid="qr-code"><div class="placeholder" />
                 </div>
             </figure>
 

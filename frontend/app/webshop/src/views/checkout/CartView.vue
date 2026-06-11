@@ -28,13 +28,13 @@
 
         <STToolbar>
             <template #right>
-                <button type="button" class="button secundary" @click="() => pop()">
+                <button type="button" class="button secundary" data-testid="cart-add-more-button" @click="() => pop()">
                     <span class="icon add" />
                     <span v-if="cart.items.length > 0">{{ $t('%Xq') }}</span>
                     <span v-else>{{ $t('%Xr') }}</span>
                 </button>
                 <LoadingButton v-if="cart.items.length > 0" :loading="loading">
-                    <button class="button primary" type="button" @click="goToCheckout">
+                    <button class="button primary" type="button" data-testid="cart-checkout-button" @click="goToCheckout">
                         <span class="icon flag" />
                         <span>{{ $t('%Xs') }}</span>
                     </button>

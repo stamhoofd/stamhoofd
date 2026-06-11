@@ -10,6 +10,10 @@ export type StamhoofdUrls = {
     readonly webshop: string;
     registration(uri: string): string;
     registrationCustomDomain(domain: string): string;
+    /** Default webshop domain with a uri suffix, e.g. https://shop.stamhoofd.be/my-shop */
+    webshopUri(uri: string): string;
+    /** Custom webshop domain, e.g. https://tickets.domain.com[/suffix] */
+    webshopCustomDomain(prefix: string, suffix?: string): string;
 };
 
 /**
@@ -80,6 +84,8 @@ class WorkerDataInstance {
                 webshop: '',
                 registration: () => '',
                 registrationCustomDomain: () => '',
+                webshopUri: () => '',
+                webshopCustomDomain: () => '',
             };
         }
 
@@ -89,6 +95,8 @@ class WorkerDataInstance {
             webshop: CaddyConfigHelper.getUrl('webshop', workerId),
             registration: (uri: string) => CaddyConfigHelper.getUrl('registration', workerId, uri + '.'),
             registrationCustomDomain: (domain: string) => CaddyConfigHelper.getRegistrationCustomDomain(domain, workerId),
+            webshopUri: (uri: string) => CaddyConfigHelper.getUrl('webshop', workerId) + '/' + uri,
+            webshopCustomDomain: (prefix: string, suffix?: string) => 'https://' + CaddyConfigHelper.getWebshopCustomDomain(prefix, workerId) + (suffix ? '/' + suffix : ''),
         };
     }
 

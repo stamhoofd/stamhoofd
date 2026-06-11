@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :title="$t(`%uE`)" @save="goNext">
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :title="$t(`%uE`)" data-testid="customer-step" @save="goNext">
         <h1>{{ $t('%uE') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />

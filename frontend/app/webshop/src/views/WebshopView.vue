@@ -14,7 +14,7 @@
                     <span class="icon external" />
                     <span>{{ $t('%Xf') }}</span>
                 </a>
-                <button v-if="cartEnabled" class="primary button" type="button" @click="openCart(true)">
+                <button v-if="cartEnabled" class="primary button" type="button" data-testid="cart-button" @click="openCart(true)">
                     <span class="icon basket" />
                     <span>{{ cartCount }}</span>
                 </button>

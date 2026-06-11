@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="$t('%Xv')" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :loading="loading" :save-text="$t('%Xv')" :prefer-large-button="true" data-testid="payment-step" @save="goNext">
         <template v-if="checkout.totalPrice > 0" #left>
             <span>{{ $t('%xL') }}: {{ formatPrice(checkout.totalPrice) }}</span>
         </template>
