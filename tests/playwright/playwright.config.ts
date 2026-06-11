@@ -20,7 +20,7 @@ export default defineConfig({
     reporter: 'line',
 
     // Suppress logs in tests
-    quiet: true,
+    quiet: process.env.CI ? false : true,
 
     build: {
         // Disable buggy transpilation we don't need
