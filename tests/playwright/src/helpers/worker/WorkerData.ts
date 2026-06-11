@@ -115,6 +115,11 @@ class WorkerDataInstance {
         this._initialUser = userCopy;
     }
 
+    clearLoginState() {
+        this._user = null;
+        this._initialUser = null;
+    }
+
     private async resetUser() {
         if (this._user) {
             // restore user

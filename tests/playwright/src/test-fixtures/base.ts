@@ -34,6 +34,9 @@ export function setup() {
             Logger.info('Worker moved to a new file: ' + testInfo.file);
             WorkerData.lastFile = testInfo.file;
 
+            // Make sure we also delete the current user
+            WorkerData.clearLoginState();
+
             // Resetting database
             await WorkerData.resetDatabase();
 
@@ -66,6 +69,9 @@ export const test = base.extend<
     setup: [
         // eslint-disable-next-line no-empty-pattern
         async ({}, use, workerInfo) => {
+            // Make sure we also delete the current user
+            WorkerData.clearLoginState();
+
             // Resetting database
             await WorkerData.resetDatabase();
 
