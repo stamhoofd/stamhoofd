@@ -140,11 +140,6 @@ async function migrateNumbersOfOrganization(organization: Organization, dryRun: 
         organization.meta.recordsConfiguration.nationalRegisterNumber = newPropertyFilter;
     }
 
-    if (doLog) {
-        console.log(`newPropertyFilter for org ${organization.id}: ${JSON.stringify(newPropertyFilter)}`);
-        console.log('original filters: ', JSON.stringify([...distinctCategories.values()].map(x => x.filter)));
-    }
-
     for await (const member of Member.select().where('organizationId', organization.id).all()) {
         const numbersThatCouldNotBeSet = new Map<string, { type: RrnTypes; record: RecordSettings }>();
 
@@ -224,10 +219,6 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
             });
 
             if (possibility) {
-                if (doLog) {
-                    console.log('Did set member rrn:', possibility[0], 'type:', possibility[1].type);
-                }
-
                 const number = possibility[0];
                 member.details.nationalRegisterNumber = number;
                 numbersThatCouldNotBeSet.delete(number);
@@ -254,11 +245,11 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
                 if (existing) {
                     if (existing.nationalRegisterNumber !== null) {
                         if (doLog) {
-                            console.log(`Debtor is existing parent, but parent already has rrn: ${existing.nationalRegisterNumber.toString()} (memberId: ${member.id})`);
+                            console.log(`Debtor is existing parent, but parent already has rrn (memberId: ${member.id})`);
                         }
                     } else {
                         if (doLog) {
-                            console.log(`Debtor is existing parent, but parent does not have rrn -> set: ${nr} (memberId: ${member.id})`);
+                            console.log(`Debtor is existing parent, but parent does not have rrn -> set (memberId: ${member.id})`);
                         }
                         existing.nationalRegisterNumber = nr;
                         numbersThatCouldNotBeSet.delete(nr);
@@ -266,14 +257,14 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
 
                     if (existing.address === null && debtor.address !== null) {
                         if (doLog) {
-                            console.log(`Debtor has address, but parent does not -> set address: ${debtor.address.shortString()} (memberId: ${member.id})`);
+                            console.log(`Debtor has address, but parent does not -> set address (memberId: ${member.id})`);
                         }
 
                         existing.address = debtor.address;
                     }
                 } else {
                     if (doLog) {
-                        console.log(`Added debtor as parent: ${debtor.name} (number: ${debtor.nationalRegisterNumber}, memberId: ${member.id})`);
+                        console.log(`Added debtor as parent, memberId: ${member.id})`);
                     }
                     member.details.parents.push(debtor);
                     numbersThatCouldNotBeSet.delete(nr);
@@ -358,7 +349,7 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
         }
 
         if (doLog) {
-            console.log('added parents:', JSON.stringify(newParents), `(memberId: ${member.id})`);
+            console.log('added parents', `(memberId: ${member.id})`);
         }
     }
 }
