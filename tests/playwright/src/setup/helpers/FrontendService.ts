@@ -7,6 +7,7 @@ import { extname, join, resolve } from 'node:path';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { NetworkHelper } from './NetworkHelper.js';
 import type { ServiceHelper, ServiceProcess } from './ServiceHelper.js';
+import type { Socket } from 'node:net';
 
 export type FrontendProjectName = 'dashboard' | 'registration' | 'webshop';
 
@@ -31,7 +32,7 @@ export class FrontendService implements ServiceHelper {
      */
     async start(): Promise<ServiceProcess> {
         await this.build();
-        const server = await this.startStaticServer();
+        const { server, sockets } = await this.startStaticServer();
 
         return {
             name: 'Static frontend server ' + this.name,
@@ -53,12 +54,18 @@ export class FrontendService implements ServiceHelper {
                         }
                         resolve();
                     });
+
+                    // Destroy all active sockets immediately
+                    for (const socket of sockets) {
+                        socket.destroy();
+                    }
+                    sockets.clear();
                 });
             },
         };
     }
 
-    private async startStaticServer(): Promise<Server> {
+    private async startStaticServer(): Promise<{ server: Server; sockets: Set<Socket> }> {
         const root = this.getDestinationDistPath(this.workerId);
         const port = CaddyConfigHelper.getFrontendPort(this.name, this.workerId);
         const server = createServer((request, response) => {
@@ -66,7 +73,16 @@ export class FrontendService implements ServiceHelper {
         });
 
         // Set a timeout for all requests to make sure nothing keeps hanging for too long
-        server.timeout = 10_000;
+        server.setTimeout(10_000);
+        const sockets = new Set<Socket>();
+
+        server.on('connection', (socket) => {
+            sockets.add(socket);
+
+            socket.on('close', () => {
+                sockets.delete(socket);
+            });
+        });
 
         await new Promise<void>((resolveListen, rejectListen) => {
             server.once('error', rejectListen);
@@ -76,7 +92,7 @@ export class FrontendService implements ServiceHelper {
             });
         });
 
-        return server;
+        return { server, sockets };
     }
 
     private async handleStaticRequest(root: string, request: IncomingMessage, response: ServerResponse) {
