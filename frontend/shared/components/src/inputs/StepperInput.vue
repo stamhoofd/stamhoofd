@@ -21,8 +21,7 @@ const props = withDefaults(defineProps<{
 const constrain = (value: number): number => {
     if (props.min !== null && value < props.min) {
         value = props.min;
-    }
-    else if (props.max !== null && value > props.max) {
+    } else if (props.max !== null && value > props.max) {
         value = props.max;
     }
     return value;
@@ -79,6 +78,7 @@ const step = (add: number) => {
 
     button {
         padding: 5px 14px;
+        line-height: 1;
         border-radius: $border-radius;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         transition: background-color 0.2s;
