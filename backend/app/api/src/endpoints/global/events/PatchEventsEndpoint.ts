@@ -356,10 +356,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         );
     }
 
-    static async validateEventType(typeId: string): Promise<string> {
-        return (await this.getEventType(typeId)).id;
-    }
-
     static async getEventType(typeId: string): Promise<OrganizationEventType | PlatformEventType> {
         let type: OrganizationEventType | PlatformEventType | undefined = undefined;
 
