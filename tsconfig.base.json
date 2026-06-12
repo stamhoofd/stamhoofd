@@ -17,8 +17,13 @@
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "noErrorTruncation": true,
+        // TS 6 defaults this to true; pin to keep the previous side-effect import behavior.
+        "noUncheckedSideEffectImports": false,
         "resolveJsonModule": true,
         "sourceMap": true,
+        // TS 6 enables `strict` by default. The backend has only ever opted into
+        // `strictNullChecks`, so keep `strict` off to avoid turning on noImplicitAny etc.
+        "strict": false,
         "strictNullChecks": true,
         "target": "es2023",
         "types": [

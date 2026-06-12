@@ -37,6 +37,8 @@
         // Added again here in case some users decide to disable `strict`.
         // This enables stricter inference for data properties on `this`.
         "noImplicitThis": true,
+        // TS 6 defaults this to true; pin to keep Vite-handled side-effect imports (css/scss/assets) working.
+        "noUncheckedSideEffectImports": false,
         "paths": {
             "@stamhoofd/components": [
                 "./shared/components/index.ts"
@@ -58,6 +60,13 @@
         "strict": true,
         "strictPropertyInitialization": false, // required for legacy component syntax
         "target": "ESNext",
+        // TS 6 defaults `types` to `[]` instead of auto-including every `@types/*` package.
+        // List the packages that contribute ambient/global declarations the frontend relies on
+        // (e.g. the global `PDFKit` namespace from `@types/pdfkit`, used without an explicit import).
+        "types": [
+            "node",
+            "pdfkit"
+        ],
         // For spec compliance.
         // `true` by default if the `target` is `ES2020` or higher.
         // Explicitly set it to `true` here in case some users want to overwrite the `target`.

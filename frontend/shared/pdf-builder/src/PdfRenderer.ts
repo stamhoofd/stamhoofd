@@ -90,7 +90,7 @@ export class DownloadablePdf {
      */
     async download(title: string) {
         const fileName = Formatter.slug(title) + '.pdf';
-        const blob = new Blob([this.buffer], { type: 'application/pdf' });
+        const blob = new Blob([new Uint8Array(this.buffer)], { type: 'application/pdf' });
 
         if (AppManager.shared.downloadFile) {
             await AppManager.shared.downloadFile(blob, fileName);

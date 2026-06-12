@@ -95,7 +95,7 @@ export class TicketBuilder {
 
         const fileName = ((this.tickets.length === 1 ? Formatter.slug(this.tickets[0].getTitle() + (this.tickets[0].getIndexText() ? ('-' + this.tickets[0].getIndexText()) : '')) : Formatter.slug('Tickets-' + this.webshop.meta.name)) + '.pdf');
 
-        const blob = new Blob([buffer], { type: 'application/pdf' });
+        const blob = new Blob([new Uint8Array(buffer)], { type: 'application/pdf' });
 
         if (AppManager.shared.downloadFile) {
             await AppManager.shared.downloadFile(blob, fileName);
