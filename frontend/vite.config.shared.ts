@@ -2,7 +2,7 @@ import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
 import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
-
+import { playwright } from '@vitest/browser-playwright';
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import type { ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
@@ -159,7 +159,9 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
             globals: true,
             setupFiles: ['vitest-browser-vue', import.meta.dirname + '/tests/vitest.setup.ts'],
             browser: {
-                provider: 'playwright', // or 'webdriverio'
+                provider: playwright({
+                    actionTimeout: 5_000,
+                }),
                 enabled: true,
                 headless: true,
                 // at least one instance is required
