@@ -97,7 +97,19 @@
     "search.useIgnoreFiles": false,
     "js/ts.tsdk.promptToUseWorkspaceVersion": true,
     "js/ts.preferGoToSourceDefinition": true,
-    "js/ts.preferences.importModuleSpecifier": "non-relative",
-    "js/ts.preferences.importModuleSpecifierEnding": "auto",
-    "js/ts.tsdk.path": "node_modules/typescript/lib"
+    "js/ts.preferences.importModuleSpecifier": "shortest",
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
+    "vue.hover.rich": true,
+    "js/ts.preferences.autoImportFileExcludePatterns": [
+        "frontend/shared/components/index.ts",
+        "@stamhoofd/components",
+        "@stamhoofd/structures",
+        "frontend/shared/components/*/index.ts",
+        "shared/structures/index.ts",
+        "shared/structures/index.ts"
+    ],
+    "js/ts.preferences.autoImportSpecifierExcludeRegexes": [
+        "\\.\\./\\.\\./\\.\\./\\.\\./",
+        "/dist/"
+    ]
 }

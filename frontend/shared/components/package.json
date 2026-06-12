@@ -11,14 +11,14 @@
     },
     "exports": {
         ".": "./index.ts",
-        "./*": "./src/*.ts",
         "./*.ts": "./src/*.ts",
-        "./*.vue": "./src/*.vue"
+        "./*.vue": "./src/*.vue",
+        "./*": "./src/*.ts"
     },
     "imports": {
-        "#*": "./src/*.ts",
         "#*.vue": "./src/*.vue",
-        "#*.ts": "./src/*.ts"
+        "#*.ts": "./src/*.ts",
+        "#*": "./src/*.ts"
     },
     "dependencies": {
         "@stamhoofd/structures": "*",
