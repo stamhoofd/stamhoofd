@@ -1032,12 +1032,12 @@ test.describe('Routing on page load @routing', () => {
                     await loginAs({ user, page });
                 });
 
-                test('/platform/instellingen redirects to /beheerders/leden', async ({ page }) => {
+                test('/platform/instellingen redirects to /beheerders/leden/instellingen', async ({ page }) => {
                     await testRoute({
                         page,
                         user,
                         url: domain + '/platform/instellingen',
-                        expectedUrl: domain + '/nl-BE/beheerders/leden',
+                        expectedUrl: domain + '/nl-BE/beheerders/leden/instellingen',
                         expectedScope,
                         expectedLocator: '[data-testid="members-menu"]',
                         expectedSwitcher: true,
@@ -1087,7 +1087,7 @@ test.describe('Routing on page load @routing', () => {
                         page,
                         user,
                         url: domain,
-                        expectedUrl: domain + '/nl-BE/beheerders/leden',
+                        expectedUrl: domain + '/nl-BE/beheerders/leden/instellingen',
                         expectedScope,
                         expectedLocator: '[data-testid="members-menu"]',
                         expectedSwitcher: true,
@@ -1152,7 +1152,7 @@ test.describe('Routing on page load @routing', () => {
                         page,
                         user,
                         url: domain,
-                        expectedUrl: domain + '/nl-BE/beheerders/leden',
+                        expectedUrl: domain + '/nl-BE/beheerders/leden/instellingen',
                         expectedScope,
                         expectedLocator: '[data-testid="members-menu"]',
                         expectedSwitcher: true,
