@@ -73,21 +73,13 @@
                 <span v-else>{{ $t('%LO') }}</span>
             </button>
         </p>
-
-        <div v-if="!$feature('new-members-tab') && isRoot && auth.hasFullAccess()" class="container">
-            <hr><h2>{{ $t('%LP') }}</h2>
-            <p>{{ $t('%LQ') }}</p>
-            <button type="button" class="button text" @click="openGroupTrash">
-                <span class="icon trash" /><span>{{ $t('%LR') }}</span>
-            </button>
-        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -107,7 +99,6 @@ import { useCreateCategoryView } from '../settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../settings/hooks/useCreateGroupView';
 import GroupCategoryRow from './GroupCategoryRow.vue';
 import GroupRow from './GroupRow.vue';
-import GroupTrashView from './GroupTrashView.vue';
 
 const props = defineProps<{
     organization: Organization;
@@ -268,15 +259,6 @@ const createCategoryView = useCreateCategoryView((patch: PatchableArrayAutoEncod
 
 async function createCategory() {
     await createCategoryView(props.period, props.category, props.periods);
-}
-
-async function openGroupTrash() {
-    await present({
-        components: [
-            new ComponentWithProperties(GroupTrashView, { period: patchedPeriod.value }).setDisplayStyle('popup'),
-        ],
-        modalDisplayStyle: 'popup',
-    });
 }
 
 async function deleteMe() {

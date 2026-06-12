@@ -35,10 +35,6 @@
             {{ $t('%15o') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('new-members-tab')" @update:model-value="setFeatureFlag('new-members-tab', !!$event)">
-            {{ $t('Vernieuwd layout leden tabblad') }}
-        </Checkbox>
-
         <template v-if="isRootAdmin">
             <hr>
             <h2>Stamhoofd flags</h2>

@@ -85,15 +85,6 @@ function getRoot() {
         id: 'members',
         icon: 'group',
         name: $t(`%1EH`),
-        component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {}),
-        }),
-    });
-
-    const membersTabNew = new TabBarItem({
-        id: 'members',
-        icon: 'group',
-        name: $t(`%1EH`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(SplitViewController, {
                 root: AsyncComponent(() => import('./views/members/MembersMenuModern.vue'), {}),
@@ -246,11 +237,7 @@ function getRoot() {
             }
 
             if (organization?.meta.packages.useMembers) {
-                if (manualFeatureFlag('new-members-tab', context.value)) {
-                    tabs.push(membersTabNew);
-                } else {
-                    tabs.push(membersTab);
-                }
+                tabs.push(membersTab);
 
                 if (!manualFeatureFlag('disable-events', context.value)) {
                     const eventTypes = getEventTypes({ platform: platformManager.value.$platform, organization });
