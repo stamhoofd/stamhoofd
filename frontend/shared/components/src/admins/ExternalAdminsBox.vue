@@ -1,14 +1,14 @@
 <template>
     <hr>
     <h2 class="style-with-button">
-        <div>{{ $t('%Yf') }}</div>
+        <div>{{ adminsTitle }}</div>
         <div>
             <button type="button" class="button icon add" data-testid="add-admin-button" @click="createAdmin" />
         </div>
     </h2>
 
-    <p>{{ $t('%Yg') }}</p>
-    <p class="info-box">
+    <p>{{ adminsDescription }}</p>
+    <p v-if="showInternalAdmins" class="info-box">
         {{ $t('%Bx') }}
     </p>
 
@@ -21,7 +21,7 @@
     </div>
 
     <p v-if="sortedAdmins.length === 0" class="info-box">
-        {{ $t('%Yh') }}
+        {{ adminsEmptyDescription }}
     </p>
     <p v-if="filteredAdmins.length === 0 && sortedAdmins.length > 0" class="info-box">
         {{ $t('%1AX') }}
@@ -79,11 +79,15 @@ import type { User } from '@stamhoofd/structures';
 import { PermissionLevel, Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditAdminView from './EditAdminView.vue';
+import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins } from './hooks/useAdmins';
+import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
 
 const me = useUser();
 const organization = useOrganization();
 const { sortedAdmins, sortedMembers, loadPromise, getPermissions, getUnloadedPermissions } = useAdmins();
+const { adminsTitle, adminsDescription, adminsEmptyDescription } = useAdminLabels();
+const showInternalAdmins = useShowInternalAdmins();
 const MAX_VISIBLE_DEFAULT = 5;
 const searchQuery = ref('');
 const showAll = ref(false);

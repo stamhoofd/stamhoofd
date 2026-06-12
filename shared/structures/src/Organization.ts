@@ -52,6 +52,14 @@ export class BaseOrganization extends AutoEncoder {
     createdAt = new Date();
 
     /**
+     * Whether internal administrators (members with responsibilities/functions) are relevant for this organization.
+     * In platform mode this is always the case. In organization mode it only makes sense when the members package is used.
+     */
+    get showInternalAdmins() {
+        return this.meta.packages.useMembers || STAMHOOFD.userMode === 'platform';
+    }
+
+    /**
      * Return default locale confiruation
      */
     get i18n() {

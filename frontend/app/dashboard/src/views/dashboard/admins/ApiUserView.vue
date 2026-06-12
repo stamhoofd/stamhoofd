@@ -10,8 +10,8 @@
         </STInputBox>
 
         <div class="container">
-            <hr><h2>{{ $t('%Jm') }}</h2>
-            <p>{{ $t('%Jn') }}</p>
+            <hr><h2>{{ adminRolesTitle }}</h2>
+            <p>{{ apiUserRolesDescription }}</p>
 
             <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
@@ -80,6 +80,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EditUserPermissionsBox from '@stamhoofd/components/admins/components/EditUserPermissionsBox.vue';
+import { useAdminLabels } from '@stamhoofd/components/admins/hooks/useAdminLabels';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -106,6 +107,7 @@ const props = defineProps<{
     callback: () => void;
 }>();
 const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
+const { adminRolesTitle, apiUserRolesDescription } = useAdminLabels();
 
 const title = computed(() => {
     if (props.isNew) {

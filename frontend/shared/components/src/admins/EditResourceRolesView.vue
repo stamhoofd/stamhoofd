@@ -15,8 +15,8 @@
             </STList>
         </div>
 
-        <hr><h2>{{ $t('%Jm') }}</h2>
-        <p>{{ $t('%Yw') }}</p>
+        <hr><h2>{{ adminRolesTitle }}</h2>
+        <p>{{ resourceAdminRolesDescription }}</p>
 
         <p v-if="roles.length === 0" class="info-box">
             {{ $t('%Yx') }}
@@ -37,6 +37,7 @@ import { computed } from 'vue';
 import { useOrganization } from '../hooks';
 import { Toast } from '../overlays/Toast';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
+import { useAdminLabels } from './hooks/useAdminLabels';
 import { usePatchRoles } from './hooks/useRoles';
 
 withDefaults(
@@ -54,6 +55,7 @@ withDefaults(
 const { errors, hasChanges, patchRoles, roles, inheritedResponsibilityRoles, inheritedResponsibilitiesWithGroup, applicableResponsibilities, responsibilities, patchResponsibilities, patchInheritedResponsibilityRoles, createRolePatchArray, createResponsibilityPatchArray, createInheritedResponsibilityRolePatchArray, saving, save: rawSave } = usePatchRoles();
 const pop = usePop();
 const organization = useOrganization();
+const { adminRolesTitle, resourceAdminRolesDescription } = useAdminLabels();
 
 const addPatch = (role: AutoEncoderPatchType<PermissionRoleDetailed>) => {
     const arr = createRolePatchArray();

@@ -8,7 +8,7 @@
                 <p>{{ $t('%30') }}</p>
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
+                    <STListItem v-if="showInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
@@ -22,9 +22,23 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+                    <STListItem v-else :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Beheerdersrollen beheren') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Maak rollen aan en stel de toegangsrechten voor elke rol in.') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
 
-                <InternalAdminsBox />
+                <InternalAdminsBox v-if="showInternalAdmins" />
                 <ExternalAdminsBox />
             </main>
         </div>
@@ -37,10 +51,12 @@ import EditResponsibilitiesView from '#responsibilities/EditResponsibilitiesView
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';
+import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
 import RolesView from './RolesView.vue';
 
 const { loading } = useAdmins({forceLoadOnMount: true});
+const showInternalAdmins = useShowInternalAdmins();
 
 enum Routes {
     Roles = 'rollen',

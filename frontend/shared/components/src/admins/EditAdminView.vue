@@ -10,10 +10,10 @@
         </template>
         <template v-else>
             <h1 v-if="isNew">
-                {{ $t('%Yk') }}
+                {{ addAdminTitle }}
             </h1>
             <h1 v-else-if="!user.memberId">
-                {{ $t('%Yl') }}
+                {{ editAdminTitle }}
             </h1>
             <h1 v-else>
                 {{ $t('%Ym') }}
@@ -50,8 +50,8 @@
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
-                <hr><h2>{{ $t('%Jm') }}</h2>
-                <p>{{ $t('%Yq') }}</p>
+                <hr><h2>{{ adminRolesTitle }}</h2>
+                <p>{{ adminRolesPersonDescription }}</p>
 
                 <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
             </div>
@@ -104,6 +104,7 @@ import { User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
+import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins, usePermissionsCache } from './hooks/useAdmins';
 
 const $errors = useErrors();
@@ -122,6 +123,7 @@ const props = defineProps<{
 const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
 const { pushInMemory, dropFromMemory, getPermissionsPatch } = useAdmins();
 const { clearPermissionCache, getPermissions, getUnloadedPermissions } = usePermissionsCache();
+const { addAdminTitle, editAdminTitle, adminRolesTitle, adminRolesPersonDescription } = useAdminLabels();
 
 const permissions = useUninheritedPermissions({ patchedUser: patched });
 const resources = computed(() => {

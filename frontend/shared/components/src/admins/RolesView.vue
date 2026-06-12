@@ -4,8 +4,8 @@
             <button class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
 
-        <h1>{{ $t('%Jm') }}</h1>
-        <p>{{ $t('%3I') }}</p>
+        <h1>{{ adminRolesTitle }}</h1>
+        <p>{{ adminRolesDescription }}</p>
 
         <p class="info-box">
             {{ $t('%ZG') }}
@@ -78,6 +78,7 @@ import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import STList from '../layout/STList.vue';
 import EditRoleView from './EditRoleView.vue';
+import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
 
@@ -146,6 +147,7 @@ const $navigate = useNavigate();
 
 const { getPermissions, getUnloadedPermissions, loading, admins } = useAdmins();
 const { createRolePatchArray, errors, hasChanges, patchRoles, roles, saving, save: rawSave } = usePatchRoles();
+const { adminRolesTitle, adminRolesDescription } = useAdminLabels();
 
 const pop = usePop();
 
