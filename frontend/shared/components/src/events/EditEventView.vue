@@ -14,9 +14,9 @@
                 <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%1Os')" autocomplete="off" enterkeyhint="next">
             </STInputBox>
 
-            <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
+            <STInputBox v-if="eventTypes.length > 1" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="typeId">
-                    <option v-for="t of platform.config.eventTypes" :key="t.id" :value="t.id">
+                    <option v-for="t of eventTypes" :key="t.id" :value="t.id">
                         {{ t.name }}
                     </option>
                 </Dropdown>
@@ -282,7 +282,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useContext, useOrganization, usePatch, usePlatform } from '../hooks';
+import { useAuth, useContext, useOrganization, usePatch } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import DeleteView from '../views/DeleteView.vue';
@@ -310,7 +310,6 @@ const context = useContext();
 const pop = usePop();
 const organization = useOrganization();
 const present = usePresent();
-const platform = usePlatform();
 const eventPermissions = useEventPermissions();
 const eventTypes = useEventTypes();
 
