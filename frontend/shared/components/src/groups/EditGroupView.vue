@@ -434,7 +434,7 @@
                 </p>
             </div>
 
-            <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership)">
+            <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership) || waitingList">
                 <hr><h2>{{ $t('%cl') }}</h2>
                 <p>{{ $t('%cm') }}</p>
 

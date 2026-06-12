@@ -1,14 +1,16 @@
 <template>
     <div class="group-tree">
         <component :is="'h'+level" v-if="level > 0 && category.settings.name.length > 0">
-            {{ category.settings.name }}
+            <span>{{ category.settings.name }}</span>
+            <span v-if="level > 1" type="button" class="icon button triangle-down rot tiny" :class="{rot90: collapsed.isCollapsed(category.id)}" @click.stop="collapsed.toggle(category.id)" />
         </component>
 
-        <div v-if="category.groups.length > 0" class="group-grid">
-            <GroupBox v-for="group in category.groups" :key="group.id" :group="group" />
+        <div v-if="level === 1 || !collapsed.isCollapsed(category.id)">
+            <div v-if="category.groups.length > 0" class="group-grid">
+                <GroupBox v-for="group in category.groups" :key="group.id" :group="group" />
+            </div>
+            <GroupTree v-for="(c, index) in category.categories" v-else :key="c.id" :category="c" :parent-level="level" :is-last="index >= category.categories.length - 1" />
         </div>
-        <GroupTree v-for="(c, index) in category.categories" v-else :key="c.id" :category="c" :parent-level="level" :is-last="index >= category.categories.length - 1" />
-        <hr v-if="category.groups.length > 0 && !isLast">
     </div>
 </template>
 
@@ -17,6 +19,7 @@ import type { GroupCategoryTree } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import GroupBox from './GroupBox.vue';
+import { useCollapsed } from '#menu/useCollapsed.ts';
 
 defineOptions({ name: 'GroupTree' }); // required for recursive component + minification of vue
 
@@ -30,6 +33,8 @@ const props = withDefaults(defineProps<{
 });
 
 const level = computed(() => Math.min(props.parentLevel + 1, 2));
+const collapsed = useCollapsed('group-tree');
+
 </script>
 
 <style lang="scss">
@@ -41,12 +46,17 @@ const level = computed(() => Math.min(props.parentLevel + 1, 2));
 
     > h1 {
         padding-bottom: 15px;
-        @extend %style-title-1;
+        font-size: 18px;
+        color: $color-dark;
+        font-weight: 600;
     }
 
     > h2 {
-        padding-bottom: 15px;
-        @extend %style-title-2;
+        padding-bottom: 9px;
+        font-size: 12px;
+        font-weight: 600;
+        color: $color-dark-light;
+        line-height: 1;
     }
 
     > p:not([class]) {
@@ -61,11 +71,12 @@ const level = computed(() => Math.min(props.parentLevel + 1, 2));
 }
 .group-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat( auto-fill, minmax(290px, 1fr) );
     gap: 15px;
     padding-bottom: 20px;
+    grid-auto-rows: minmax(80px, auto);
 
-    @media (max-width: 800px) {
+    @media (max-width: 600px) {
         gap: 0;
         grid-template-columns: 1fr;
 

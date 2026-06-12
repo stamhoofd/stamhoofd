@@ -209,7 +209,7 @@
         gap: 5px;
         padding-bottom: 15px;
 
-        %block-icon {
+        .block-icon {
             margin-right: 8px;
             display: block;
             overflow: visible;
@@ -222,11 +222,11 @@
             min-width: 0;
         }
 
-        > *:not(:first-child) {
-            flex-shrink: 0;
-        }
+        //> *:not(:first-child) {
+        //    flex-shrink: 0;
+        //}
 
-        > %style-bubble {
+        > .style-bubble {
             margin-left: 5px;
         }
     }
@@ -494,6 +494,14 @@
     &.inline-first {
         margin-left: 5px;
     }
+
+    .tags-without-background & {
+        padding: 0;
+        background: transparent;
+        border-radius: 0px;
+        overflow: visible;
+        color: $color-gray-text;
+    }
 }
 
 %style-price-base {
@@ -601,21 +609,25 @@
 }
 
 %style-definition-label {
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.5;
     font-weight: $font-weight-semibold;
     color: $color-primary;
     text-transform: uppercase;
-    padding-bottom: 3px;
+    padding-bottom: 2px;
 
-    + %details-grid {
+    &.gray {
+        color: $color-gray-text;
+    }
+
+    + .details-grid {
         padding-top: 5px;
     }
 }
 
 %style-definition-text {
-    font-size: 18px;
-    line-height: 1.5;
+    font-size: 17px;
+    line-height: 1.4;
     font-weight: $font-weight-default;
     color: $color-dark;
 
@@ -727,7 +739,7 @@
     /**
         Small optimizations for modern browsers only
     */
-    &.flex, &:has(> .icon), &:has(> svg), &:has(> %style-tag) {
+    &.flex, &:has(> .icon), &:has(> svg), &:has(> .style-tag) {
         display: flex;
         align-items: center;
         gap: 7px;
@@ -1288,6 +1300,18 @@
     figure {
         background: $color-primary-background;
         color: $color-primary-dark;
+
+        > img {
+            width: var(--block-width, 40px);
+            height: var(--block-width, 40px);
+            object-fit: contain;
+
+            &.small {
+                width: 24px;
+                height: 24px;
+                object-fit: contain;
+            }
+        }
     }
 
     > aside {

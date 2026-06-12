@@ -3,7 +3,7 @@
         v-color="group.id"
         v-tooltip="tooltip"
         :class="logoSrc ? 'white transparent' : ''"
-        :aside-icon="asideIcon"
+        :aside-icon="withAside ? asideIcon : undefined"
     >
         <figure class="group-avatar">
             <div v-if="logoSrc" class="logo">
@@ -28,7 +28,9 @@ import { useOrganization } from './hooks/useOrganization.ts';
 const props = withDefaults(defineProps<{
     group: Group;
     allowEmpty?: boolean;
+    withAside?: boolean;
 }>(), {
+    withAside: true,
     allowEmpty: false,
 });
 const organization = useOrganization();
@@ -45,7 +47,15 @@ const asideIcon = computed(() => {
         return 'lock tiny stroke';
     }
 
-    if (props.group.closed) {
+    if (props.group.notYetOpen) {
+        return 'dot yellow stroke';
+    }
+
+    if (props.group.notYetOpen) {
+        return 'dot yellow stroke';
+    }
+
+    if (props.group.closed || ((!props.group.waitingList || props.group.waitingList.closed) && props.group.settings.getRemainingStockIncludingPrices(props.group) === 0)) {
         return 'dot red stroke';
     }
 

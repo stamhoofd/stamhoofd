@@ -77,7 +77,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     }
 
     get publicCategoryTree(): GroupCategoryTree {
-        return this.getCategoryTree({ smartCombine: true });
+        return this.getCategoryTree({ smartCombine: true, maxDepth: 2 });
     }
 
     get adminCategoryTree(): GroupCategoryTree {

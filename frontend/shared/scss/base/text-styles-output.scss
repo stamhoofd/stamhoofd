@@ -92,6 +92,17 @@ ul.style-list { @extend %style-list; }
 .style-dark { @extend %style-dark; }
 .style-onboarding-checklist { @extend %style-onboarding-checklist; }
 
+.tags-without-background {
+    padding-top: 4px;
+    display: flex;
+    gap: 6px 10px;
+    flex-wrap: wrap;
+
+    &:empty {
+        display: none;
+    }
+}
+
 .theme-warning {
     --color-primary: #{$color-warning};
     --color-primary-background: #{$color-warning-background};

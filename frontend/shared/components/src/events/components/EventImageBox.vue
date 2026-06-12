@@ -14,7 +14,7 @@ import { Formatter } from '@stamhoofd/utility';
 import ImageComponent from '#views/ImageComponent.vue';
 
 defineProps<{
-    event: Event
+    event: Event;
 }>();
 </script>
 <style lang="scss">
@@ -22,34 +22,59 @@ defineProps<{
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .event-image-box {
-    width: 200px;
+    width: 150px;
     border-radius: $border-radius;
     position: relative;
-    padding: 40px 0;
+    padding: 0;
+    aspect-ratio: 150 / 116;
     border-radius: 5px;
     overflow: hidden;
     background: $color-background-shade;
     margin-right: 15px;
     border: 1px solid $color-border;
 
-    @media (max-width: 450px) {
+    @media (max-width: 600px) {
+        width: 25vw;
+        margin-right: 0;
+    }
+
+    @media (max-width: 350px) {
         width: 100%;
         margin-right: 0;
     }
 
     .overlay {
         text-align: center;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
 
         .day {
             display: block;
-            font-size: 35px;
+            font-size: 28px;
             font-weight: bold;
+            line-height: 1.1;
+            padding-bottom: 5px;
+
+            @media (max-width: 500px) {
+                font-size: 5vw;
+            }
         }
 
         .month {
             display: block;
             font-size: 15px;
             color: $color-gray-1;
+            padding-bottom: 5px; // visual correction;
+            line-height: 1;
+            font-weight: 600;
+            text-transform: uppercase;
+
+            @media (max-width: 500px) {
+                font-size: 3vw;
+            }
         }
     }
 

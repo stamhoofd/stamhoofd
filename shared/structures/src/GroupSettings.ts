@@ -471,6 +471,10 @@ export class GroupSettings extends AutoEncoder {
             // Start date is in the past: registrations are open
             return null;
         }
+        if (this.preRegistrationsDate && this.registrationStartDate < this.preRegistrationsDate) {
+            // Invalid configuration
+            return null;
+        }
         return this.preRegistrationsDate;
     }
 
@@ -840,6 +844,42 @@ export class GroupSettings extends AutoEncoder {
             return null;
         }
         return who;
+    }
+
+    get whoShort() {
+        const who: string[] = [];
+        const includeGender = true;
+
+        if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
+            if (this.forAdults) {
+                who.push($t('Mannen'));
+            } else {
+                who.push($t('Jongens'));
+            }
+        } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+            if (this.forAdults) {
+                who.push($t('Vrouwen'));
+            } else {
+                who.push($t('Meisjes'));
+            }
+        }
+
+        if (this.minAge && this.maxAge) {
+            if (this.minAge === this.maxAge) {
+                who.push($t('{x} jaar', { x: this.minAge.toString() }));
+            } else {
+                who.push($t('{x} tot {y} jaar', { x: this.minAge.toString(), y: this.maxAge.toString() }));
+            }
+        } else if (this.minAge) {
+            who.push($t('Vanaf {x} jaar', { x: this.minAge.toString() }));
+        } else if (this.maxAge) {
+            who.push($t('Tot {x} jaar', { x: this.maxAge.toString() }));
+        }
+
+        if (!who.length) {
+            return null;
+        }
+        return who.join(' • ');
     }
 
     getMemberCount({ waitingList }: { waitingList?: boolean }) {

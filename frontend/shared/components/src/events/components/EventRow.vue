@@ -1,5 +1,5 @@
 <template>
-    <STListItem class="right-stack smartphone-wrap-left" :selectable="true">
+    <STListItem class="right-stack smartphone-wrap-left" :selectable="true" style="--st-list-padding: 7px;">
         <template #left>
             <EventImageBox :event="event" />
         </template>
@@ -66,16 +66,13 @@ const levelPrefix = computed(() => {
         if (props.event.meta.organizationTagIds !== null) {
             const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
             prefixes.push(...tagNames);
-        }
-        else {
+        } else {
             prefixes.push($t(`%XF`));
         }
-    }
-    else {
+    } else {
         if (props.event.organizationId === organization.value?.id) {
             // skip
-        }
-        else {
+        } else {
             // Name of the organization
             if (props.event.meta.organizationCache?.name) {
                 prefixes.push(props.event.meta.organizationCache?.name);

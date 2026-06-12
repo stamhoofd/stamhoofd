@@ -1,34 +1,33 @@
 <template>
-    <article class="group-box" @click="navigate(ViewRoute)">
-        <div class="left" />
-        <div class="content">
-            <div>
-                <h3>
-                    {{ group.settings.name }}
-                </h3>
-                <p v-if="group.settings.description" class="description" v-text="group.settings.description" />
-                <span><GroupTag class="price" :group="group" /></span>
-            </div>
-            <hr>
+    <button type="button" class="group-box" @click="navigate(ViewRoute)">
+        <div class="left">
+            <GroupAvatar :group="group" />
         </div>
-        <ImageComponent v-if="image" class="image" :image="image" />
-    </article>
+        <div class="middle">
+            <h3>
+                {{ group.settings.name }}
+            </h3>
+            <p v-if="group.settings.whoShort">
+                {{ group.settings.whoShort }}
+            </p>
+            <p class="tags-without-background">
+                <GroupTag :group="group" />
+            </p>
+        </div>
+    </button>
 </template>
 
 <script lang="ts" setup>
-import ImageComponent from '#views/ImageComponent.vue';
+import GroupAvatar from '#GroupAvatar.vue';
 import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
 import GroupTag from './GroupTag.vue';
 import GroupView from './GroupView.vue';
 
 const props = defineProps<{
     group: Group;
 }>();
-
-const image = computed(() => props.group.settings.squarePhoto ?? props.group.settings.coverPhoto ?? null);
 
 const navigate = useNavigate();
 
@@ -49,179 +48,44 @@ const ViewRoute = defineRoute({
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .group-box {
-
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 15px;
     align-items: center;
-    overflow: hidden;
-
+    background: $color-background;
+    border-radius: $border-radius;
+    border: $border-width-thin solid $color-border;
+    @include style-side-view-shadow();
+    padding: 9px;
     cursor: pointer;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    user-select: none;
-    transition: background-color 0.2s 0.1s;
 
-    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    --color-current-background: #{$color-background};
+    --color-current-background-shade: #{$color-background-shade};
+    --color-current-background-shade-darker: #{$color-background-shade-darker};
 
-    > .content > hr {
-        border: 0;
-        outline: 0;
-        height: $border-width;
-        width: 100%;
-        background: $color-border;
-        border-radius: calc($border-width / 2);
-        margin: 0;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-    }
-
-    &:last-child {
-        > .content > hr {
-            display: none;
-        }
-    }
-
-    //@media (min-width: 801px) {
-        background: $color-background;
-        border-radius: $border-radius;
-        margin: 0;
-        @include style-side-view-shadow();
-
-        > .content > hr {
-            display: none;
-        }
-    //}
-
-    &:active {
-        transition: none;
+    &:hover {
         background: $color-background-shade;
-        background: var(--color-current-background-shade, $color-background-shade);
+
+        --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
+        --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
     }
 
-    > .left {
-        overflow: hidden;
-        width: 4px;
-        flex-shrink: 0;
-        background: $color-primary;
-        align-self: stretch;
-        border-radius: $border-radius;
-        opacity: 0;
-        transform: translateX(-4px);
-        transition: opacity 0.2s, transform 0.2s;
+    &:active, &.active, &.focused {
+        background: $color-background-shade-darker;
+        --color-current-background: #{$color-background-shade-darker};
+        --color-current-background-shade: #{$color-background-shade-darker-darker};
+        --color-current-background-shade-darker: #{$color-background-shade-4};
     }
 
-    &.selected {
-        > .left {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    > .content {
-        flex-grow: 1;
-        min-width: 0;
-        align-self: stretch;
-        display: flex;
-        align-items: center;
-        position: relative;
-
-        > div {
-            padding: 15px;
-            padding-left: var(--st-horizontal-padding, 15px);
-            padding-right: var(--st-horizontal-padding, 15px);
-
-            @media (min-width: 801px) {
-                padding: 15px;
-            }
-
-            flex-grow: 1;
-            min-width: 0;
-
-            > h3 {
-                padding-top: 5px;
-                @extend %style-title-3;
-                padding-right: 30px;
-                position: relative;
-                transition: transform 0.2s;
-
-                > .counter {
-                    position: absolute;
-                    left: 0;
-                    opacity: 0;
-                    width: 30px;
-
-                    font-size: 14px;
-                    line-height: 1.4;
-                    font-weight: 600;
-                    color: $color-primary;
-
-                    transform: translateX(-30px);
-                    transition: opacity 0.2s;
-                }
-            }
-
-            > .description {
-                @extend %style-description-small;
-                padding-top: 5px;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                display: -webkit-box;
-                white-space: pre-wrap;
-                line-clamp: 2; /* number of lines to show */
-                -webkit-line-clamp: 2; /* number of lines to show */
-                -webkit-box-orient: vertical;
-            }
-
-            > .price {
-                font-size: 14px;
-                line-height: 1.4;
-                font-weight: 600;
-                padding-top: 10px;
-                color: $color-primary;
-                display: flex;
-                flex-direction: row;
-
-                .style-tag {
-                    margin-right: 5px;
-
-                    &:first-child {
-                        margin-left: 0;
-                    }
-                }
-            }
+    .middle {
+        padding: 7px 0;
+        h3 {
+            @extend %style-title-list;
         }
 
-    }
-
-    &.selected {
-        > .content > div {
-            > h3 {
-                transform: translateX(30px);
-
-                >.counter {
-                    opacity: 1;
-                }
-            }
-        }
-    }
-
-    > .image {
-        flex-shrink: 0;
-        padding: 15px 15px 15px 0;
-        width: 70px;
-        height: 70px;
-        border-radius: $border-radius;
-
-        @media (min-width: 340px) {
-            width: 80px;
-            height: 80px;
-        }
-
-        @media (min-width: 801px) {
-            width: 100px;
-            height: 100px;
+        p {
+            @extend %style-description-small;
         }
     }
 }

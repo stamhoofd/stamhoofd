@@ -1,33 +1,23 @@
 <template>
-    <span v-if="group.closed && !group.notYetOpen" class="style-tag error">{{ $t('Gesloten') }}</span>
-    <template v-else>
-        <span v-if="group.notYetOpen" class="style-tag error">{{ $t('Nog niet geopend') }}</span>
-        <template v-if="remainingStock !== null">
-            <span v-if="remainingStock > 0" class="style-tag warn">
-                {{ remainingStock !== 1 ? $t('Nog {count} plaatsen', { count: remainingStock }) : $t('Nog één plaats') }}
-            </span>
-            <span v-else-if="group.waitingList !== null" class="style-tag error">
-                {{ $t('Wachtlijst (volzet)') }}
-            </span>
-            <span v-else class="style-tag error">
-                {{ $t('Volzet') }}
-            </span>
-            <span v-if="preRegistrations && remainingStock > 0" class="style-tag warn">{{ $t('Voorinschrijvingen') }}</span>
-        </template>
-        <span v-else-if="preRegistrations" class="style-tag warn">{{ $t('Voorinschrijvingen') }}</span>
-        <span v-else-if="allWaitingList" class="style-tag error">{{ $t('Wachtlijst') }}</span>
+    <template v-for="tag in tags" :key="tag.title">
+        <span :class="['style-tag', tag.style]">
+            <span v-if="tag.icon" :class="['icon', tag.icon, 'text-size']" />
+            <span>{{ tag.title }}</span>
+        </span>
     </template>
 </template>
 
 <script setup lang="ts">
-import { Group, WaitingListType } from '@stamhoofd/structures';
+import { useAppContext } from '#context/appContext.ts';
+import { useNow } from '#hooks/useNow.ts';
+import type { Group } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    group: Group
+    group: Group;
 }>();
 
-const remainingStock = computed(() => props.group.settings.getRemainingStockIncludingPrices(props.group));
-const preRegistrations = computed(() => props.group.activePreRegistrationDate !== null);
-const allWaitingList = computed(() => props.group.settings.waitingListType === WaitingListType.All);
+const now = useNow();
+const app = useAppContext();
+const tags = computed(() => props.group.getTags({ now: now.value, app }));
 </script>

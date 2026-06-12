@@ -297,7 +297,7 @@ button.st-list-item {
     }
 
     &.smartphone-wrap-left {
-        @media (max-width: 450px) {
+        @media (max-width: 350px) {
             display: block !important;
 
             > .left {

@@ -53,5 +53,14 @@ module.exports = {
                 ctx.circle_icons[icon.substr(0, icon.length - ('-in-circle'.length))] = ctx.codepoints[icon];
             }
         }
+
+        // Custom Apple icons
+        ctx.bold_icons = {};
+        for (const icon in ctx.codepoints) {
+            if (icon.endsWith('-bold')) {
+                // Remove android suffix
+                ctx.bold_icons[icon.substr(0, icon.length - ('-bold'.length))] = ctx.codepoints[icon];
+            }
+        }
     },
 };

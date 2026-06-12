@@ -52,3 +52,10 @@ body.native-android .st-navigation-bar .button.icon.{{@key}}.highlight:before, b
 content: "\\{{this}}";
 }
 {{/each}}
+
+{{#each bold_icons}}
+.icon.tiny.{{@key}}:before,.icon.text-size.{{@key}}:before,
+.icon-base.tiny.{{@key}}:before,.icon-base.text-size.{{@key}}:before  {
+content: "\\{{this}}";
+}
+{{/each}}

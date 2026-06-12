@@ -6,19 +6,25 @@
             <main class="center">
                 <h1 class="style-navigation-title with-icons">
                     <span class="block-icon">
-                        <GroupAvatar :group="group" class="inline" />
+                        <GroupAvatar :group="group" class="inline" :with-aside="false" />
                     </span>
 
-                    <span>
-                        {{ title }}
-                    </span>
+                    <div>
+                        <span>
+                            <span>{{ title }}</span>
+                            <span v-if="group.settings.period" class="title-suffix">
+                                {{ group.settings.period.nameShort }}
+                            </span>
+                        </span>
+
+                        <p class="tags-without-background">
+                            <GroupTag :group="group" />
+                        </p>
+                    </div>
 
                     <span v-if="!isPublic" v-tooltip="$t('%LU')" :class="'icon eye-off tiny gray'" />
-
-                    <span v-if="group.settings.period" class="title-suffix">
-                        {{ group.settings.period.nameShort }}
-                    </span>
                 </h1>
+
                 <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
                 <p v-if="canCreateEvent" class="info-box">
@@ -33,15 +39,30 @@
                 </p>
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
+                    <STListItem v-if="group.type !== GroupType.WaitingList" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('%LX') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%LY') }}
+                        </p>
+                        <template #right>
+                            <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                    <STListItem v-else :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/clock.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Leden op deze wachtlijst') }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ $t('Bekijk, beheer, exporteer of e-mail leden op deze wachtlijst') }}
                         </p>
                         <template #right>
                             <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
@@ -55,12 +76,15 @@
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('%1IQ') }}
-                            <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('%1PH') }}</span>
-                            <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('%1EN') }}</span>
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%LZ') }}
                         </p>
+
+                        <p class="tags-without-background">
+                            <GroupTag :group="group.waitingList" />
+                        </p>
+
                         <template #right>
                             <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
                             <span class="icon arrow-right-small gray" />
@@ -101,6 +125,40 @@
                     </STListItem>
                 </STList>
 
+                <template v-if="false && (group.getTags({app: 'dashboard'}).length || group.settings.whoShort)">
+                    <hr>
+                    <h2>{{ $t('Status ledenportaal') }}</h2>
+                    <STList>
+                        <STListItem v-if="group.settings.whoShort">
+                            <template #left>
+                                <span class="icon tiny help" />
+                            </template>
+
+                            <h3 class="style-definition-label gray">
+                                {{ $t('Wie kan inschrijven') }}
+                            </h3>
+
+                            <h2 class="style-definition-text">
+                                {{ group.settings.whoShort }}
+                            </h2>
+                        </STListItem>
+
+                        <STListItem v-for="tag in group.getTags({app: 'dashboard'})" :key="tag.title">
+                            <template v-if="tag.icon" #left>
+                                <span :class="['icon', tag.icon, 'tiny']" />
+                            </template>
+
+                            <h3 class="style-definition-label gray">
+                                {{ tag.label }}
+                            </h3>
+
+                            <h2 class="style-definition-text">
+                                {{ tag.title }}
+                            </h2>
+                        </STListItem>
+                    </STList>
+                </template>
+
                 <template v-if="hasFullPermissions">
                     <hr><h2>{{ $t('%xU') }}</h2>
 
@@ -112,7 +170,7 @@
                             <h2 class="style-title-list">
                                 {{ $t('%Lb') }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%Lc') }}
                             </p>
                             <template #right>
@@ -127,7 +185,7 @@
                             <h2 class="style-title-list">
                                 {{ $t('%Ld') }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%Le') }}
                             </p>
                             <template #right>
@@ -142,7 +200,7 @@
                             <h2 class="style-title-list">
                                 {{ $t("%Ln") }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%Lf') }}
                             </p>
                             <template #right>
@@ -157,7 +215,7 @@
                             <h2 class="style-title-list">
                                 {{ $t('%1DD') }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%Lg') }}
                             </p>
                             <template #right>
@@ -166,7 +224,8 @@
                         </STListItem>
                     </STList>
 
-                    <hr><h2>{{ $t('%16X') }}</h2>
+                    <hr>
+                    <h2>{{ $t('%16X') }}</h2>
 
                     <STList>
                         <template v-if="!isDifferentPeriod">
@@ -252,7 +311,7 @@ import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
-import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { countAll, RegistrationInvitationsTableView, useRegistrationInvitationEventListener } from '@stamhoofd/components';
@@ -265,6 +324,7 @@ import { computed, ref } from 'vue';
 import { useGroupActions } from '../../members/useGroupActions';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
+import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 
 const props = defineProps<{
     group: Group;
@@ -333,13 +393,14 @@ defineRoutes([{
 {
     url: 'wachtlijst',
     name: Routes.WaitingList,
-    component: MembersTableView,
+    component: 'self',
     defaultProperties: () => {
         if (!props.group.waitingList) {
             throw new Error('No waiting list');
         }
         return {
             group: props.group.waitingList,
+            period: props.period,
         };
     },
 },

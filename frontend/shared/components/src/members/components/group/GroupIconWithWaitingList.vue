@@ -1,10 +1,6 @@
 <template>
-    <IconContainer>
+    <IconContainer :aside-icon="icon || (waitingList ? 'clock' : undefined)">
         <GroupIcon :group="group" :organization="organization" />
-        <template #aside>
-            <span v-if="icon" class="icon stroke small" :class="icon" />
-            <span v-else-if="waitingList" class="icon clock small stroke" />
-        </template>
     </IconContainer>
 </template>
 

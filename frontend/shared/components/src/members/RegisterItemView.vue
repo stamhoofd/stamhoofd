@@ -1,6 +1,6 @@
 <template>
     <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('%e5') : (willStartCheckoutFlow ? $t('%X9') : $t('%SN'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
-        <p class="style-title-prefix">
+        <p v-if="STAMHOOFD.userMode === 'platform'" class="style-title-prefix">
             {{ item.organization.name }}
         </p>
 
@@ -222,8 +222,7 @@ function updateErrorAndWarning() {
     errors.errorBox = null;
     try {
         validate();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -250,8 +249,7 @@ async function addToCart() {
         }
         props.item.validate({ final: true });
         await props.saveHandler(props.item, navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -283,8 +281,7 @@ function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: num
     if (!menu.multipleChoice && amount !== null && amount > 0) {
         // Clear all options from this menu
         filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id);
-    }
-    else {
+    } else {
         // Remove self
         filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id || o.option.id !== option.id);
     }
@@ -319,8 +316,7 @@ watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () =>
     if (props.willStartCheckoutFlow) {
         // Show the cart breakdown instead of only the item breakdown
         cachedPriceBreakdown.value = clonedCheckout.priceBreakown;
-    }
-    else {
+    } else {
         cachedPriceBreakdown.value = clone.getPriceBreakown(clonedCheckout.cart);
     }
     cachedTotalPrice.value = clone.totalPrice;

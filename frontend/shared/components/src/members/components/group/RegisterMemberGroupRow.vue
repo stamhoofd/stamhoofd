@@ -8,6 +8,14 @@
             {{ group.settings.name }}
         </h4>
 
+        <p class="tags-without-background">
+            <GroupTag :group="group" />
+        </p>
+
+        <p v-if="group.settings.whoShort" class="style-description-small">
+            {{ group.settings.whoShort }}
+        </p>
+
         <p v-if="group.settings.description" class="style-description-small style-limit-lines">
             {{ group.settings.description.trim() }}
         </p>
@@ -20,10 +28,11 @@
 </template>
 
 <script setup lang="ts">
-import type { Group, Organization, PlatformMember} from '@stamhoofd/structures';
+import type { Group, Organization, PlatformMember } from '@stamhoofd/structures';
 import { RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
+import GroupTag from '#auth/components/GroupTag.vue';
 
 const props = defineProps<{
     group: Group;

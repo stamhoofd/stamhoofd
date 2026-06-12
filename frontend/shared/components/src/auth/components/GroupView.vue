@@ -5,8 +5,8 @@
         <main>
             <h1>
                 <span>{{ group.settings.name }}</span>
-                <GroupTag :group="group" />
             </h1>
+            <p><GroupTag :group="group" /></p>
 
             <ImageComponent v-if="group.settings.coverPhoto" :image="group.settings.coverPhoto" :auto-height="true" class="style-cover-photo" />
 
@@ -73,7 +73,6 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import ImageComponent from '#views/ImageComponent.vue';
-import { useCanDismiss, useCanPop } from '@simonbackx/vue-app-navigation';
 import type { Group } from '@stamhoofd/structures';
 import { WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -84,8 +83,6 @@ const props = defineProps<{
     group: Group;
 }>();
 
-const canDismiss = useCanDismiss();
-const canPop = useCanPop();
 const organization = useOrganization();
 
 function formatDateTime(date: Date) {
@@ -130,13 +127,13 @@ const infoBox = computed(() => {
         if (props.group.activePreRegistrationDate) {
             if (settings.priorityForFamily) {
                 return $t('De inschrijvingen gaan open op {date}. Bestaande leden en broers/zussen kunnen al inschrijven vanaf {preDate}.', {
-                    date: Formatter.dateTime(settings.registrationStartDate, true),
-                    preDate: Formatter.dateTime(settings.preRegistrationsDate!, true),
+                    date: Formatter.startDate(settings.registrationStartDate, true),
+                    preDate: Formatter.startDate(settings.preRegistrationsDate!, true),
                 });
             }
             return $t('De inschrijvingen gaan open op {date}. Bestaande leden kunnen al inschrijven vanaf {preDate}.', {
-                date: Formatter.dateTime(settings.registrationStartDate, true),
-                preDate: Formatter.dateTime(settings.preRegistrationsDate!, true),
+                date: Formatter.startDate(settings.registrationStartDate, true),
+                preDate: Formatter.startDate(settings.preRegistrationsDate!, true),
             });
         }
         return $t('De inschrijvingen gaan open op {date}', { date: Formatter.dateTime(settings.registrationStartDate, true) });
@@ -175,15 +172,8 @@ const errorBox = computed(() => {
         return $t('De inschrijvingen zijn afgelopen');
     }
 
-    if (props.group.closed) {
+    if (props.group.closed && !props.group.notYetOpen) {
         return $t('De inschrijvingen zijn gesloten');
-    }
-
-    if (settings.isFull) {
-        if (settings.waitingListIfFull) {
-            return $t('Helaas al volzet! Je kan enkel nog op de wachtlijst inschrijven.');
-        }
-        return $t('Helaas al volzet!');
     }
 
     return null;
