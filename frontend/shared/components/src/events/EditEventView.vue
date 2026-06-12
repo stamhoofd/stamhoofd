@@ -259,6 +259,7 @@ import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { GlobalEventBus } from '#EventBus.ts';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useEventTypes } from '#hooks/useEventTypes.ts';
 import AddressInput from '#inputs/AddressInput.vue';
 import AgeInput from '#inputs/AgeInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
@@ -311,7 +312,7 @@ const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
 const eventPermissions = useEventPermissions();
-const patchedPeriod = computed(() => organization.value?.period.period ?? platform.value.period);
+const eventTypes = useEventTypes();
 
 const { externalOrganization, choose: chooseOrganizer } = useExternalOrganization(
     computed({
@@ -333,10 +334,7 @@ async function viewAudit() {
     });
 }
 
-const type = computed(() => {
-    const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId);
-    return type ?? null;
-});
+const type = computed(() => eventTypes.value.find(e => e.id === patched.value.typeId) ?? null);
 
 const isLocationRequired = computed(() => type.value?.isLocationRequired ?? false);
 
@@ -362,13 +360,23 @@ const multipleDays = computed({
     },
 });
 
+function getDefaultTypeId() {
+    if (eventTypes.value.length) {
+        return eventTypes.value[0].id;
+    }
+
+    return null;
+}
+
 // Auto correct invalid types
 watchEffect(() => {
     const t = type.value;
     if (!t) {
-        if (platform.value.config.eventTypes.length) {
-            addPatch({ typeId: platform.value.config.eventTypes[0].id });
+        const defaultTypeId = getDefaultTypeId();
+        if (defaultTypeId) {
+            addPatch({ typeId: defaultTypeId });
         }
+
         return;
     }
 

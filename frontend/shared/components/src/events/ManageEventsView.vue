@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
@@ -86,6 +87,7 @@ const years = computed(() => {
 const user = useUser();
 const organization = useOrganization();
 const platform = usePlatform();
+const eventTypes = useEventTypes();
 const $navigate = useNavigate();
 const { presentPositionableSheet } = usePositionableSheet();
 const auth = useAuth();
@@ -244,7 +246,7 @@ function blurFocus() {
 }
 
 async function addEvent(template?: Event) {
-    if (platform.value.config.eventTypes.length === 0) {
+    if (eventTypes.value.length === 0) {
         if (auth.hasFullPlatformAccess()) {
             Toast.error($t('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.')).show();
         } else {

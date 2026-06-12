@@ -10,6 +10,7 @@ import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { useEventTypes } from '@stamhoofd/components/hooks/useEventTypes.ts';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMemberManager, usePlatformManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
@@ -22,6 +23,7 @@ const context = useContext();
 const platformManager = usePlatformManager();
 const memberManager = useMemberManager();
 const getLoginRoot = useLoginRoot();
+const eventTypes = useEventTypes();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
@@ -34,6 +36,10 @@ const root = new ComponentWithProperties(AuthenticatedView, {
 const component = useCurrentComponent();
 if (component?.checkRoutes) {
     root.setCheckRoutes();
+}
+
+function areEventsEnabled(): boolean {
+    return eventTypes.value.length > 0 && !manualFeatureFlag('disable-events', context.value);
 }
 
 function getRoot() {
@@ -69,8 +75,6 @@ function getRoot() {
             await memberManager.loadCheckout();
             await memberManager.loadDocuments();
 
-            const enableEvents = platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value);
-
             return new ComponentWithProperties(TabBarController, {
                 tabs: [
                     new TabBarItem({
@@ -79,7 +83,7 @@ function getRoot() {
                         name: $t(`%I`),
                         component: startView,
                     }),
-                    ...(enableEvents ? [calendarTab] : []),
+                    ...(areEventsEnabled() ? [calendarTab] : []),
                     communicationTab,
                     new TabBarItem({
                         id: 'cart',

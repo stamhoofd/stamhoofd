@@ -251,20 +251,20 @@ import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
 import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, PlatformEventType, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
 import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { countAll, RegistrationInvitationsTableView, useRegistrationInvitationEventListener } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useGroupActions } from '../../members/useGroupActions';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
-import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 
 const props = defineProps<{
     group: Group;
@@ -632,13 +632,11 @@ async function saveEvent(event: Event): Promise<Event> {
 }
 
 function getAllowedEventTypes() {
-    return platform.value.config.eventTypes.filter((type) => {
-        // ignore event types with limits for now
-        if (type.maximum !== null || type.minimumDays !== null || type.maximumDays !== null || type.isLocationRequired) {
-            return false;
-        }
-        return true;
-    });
+    if (!organization.value) {
+        return [];
+    }
+
+    return organization.value.meta.eventTypes;
 }
 
 async function createEventFromGroup(group: Group, organization: Organization) {
@@ -714,25 +712,15 @@ async function createEventFromGroup(group: Group, organization: Organization) {
 
         const formattedGroupName = groupName.toLowerCase();
 
-        let typeOther: PlatformEventType | null = null;
-
         for (const eventType of eventTypes) {
             const formattedEventName = eventType.name.toLowerCase();
             if (formattedGroupName.includes(formattedEventName)) {
                 return eventType.id;
             }
-
-            // hardcoded for now
-            if (formattedEventName === 'andere') {
-                typeOther = eventType;
-            }
         }
 
-        if (typeOther) {
-            return typeOther.id;
-        }
-
-        return eventTypes[0].id;
+        const eventType = eventTypes.find(e => e.isDefault) ?? eventTypes[0];
+        return eventType.id;
     }
 
     const groupNamedObjects = await requireGroupIdsToNamedObjects(group.settings.requireGroupIds);

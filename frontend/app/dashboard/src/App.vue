@@ -17,7 +17,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { AccessRight, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight, getEventTypes, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 
@@ -252,8 +252,11 @@ function getRoot() {
                     tabs.push(membersTab);
                 }
 
-                if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value)) {
-                    tabs.push(calendarTab);
+                if (!manualFeatureFlag('disable-events', context.value)) {
+                    const eventTypes = getEventTypes({ platform: platformManager.value.$platform, organization });
+                    if (eventTypes.length > 0) {
+                        tabs.push(calendarTab);
+                    }
                 }
             }
 

@@ -160,6 +160,8 @@ function getRoot() {
 
     return new ComponentWithProperties(TabBarController, {
         tabs: computed(() => {
+            const isPlatform = STAMHOOFD.userMode === 'platform';
+
             const tabs: (TabBarItem | TabBarItemGroup)[] = [
                 startTab,
                 membersTab,
@@ -169,8 +171,10 @@ function getRoot() {
                 tabs.push(groupsTab);
             }
 
-            if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value)) {
-                tabs.push(calendarTab);
+            if (isPlatform) {
+                if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value)) {
+                    tabs.push(calendarTab);
+                }
             }
 
             const moreTab = new TabBarItemGroup({

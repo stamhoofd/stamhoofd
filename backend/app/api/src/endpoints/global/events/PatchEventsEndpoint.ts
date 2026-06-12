@@ -3,7 +3,7 @@ import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/s
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, OrganizationEventType, PermissionLevel, PlatformEventType } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -356,13 +356,20 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         );
     }
 
-    static async validateEventType(typeId: string) {
+    static async validateEventType(typeId: string): Promise<string> {
         return (await this.getEventType(typeId)).id;
     }
 
-    static async getEventType(typeId: string) {
-        const platform = await Platform.getSharedStruct();
-        const type = platform.config.eventTypes.find(t => t.id == typeId);
+    static async getEventType(typeId: string): Promise<OrganizationEventType | PlatformEventType> {
+        let type: OrganizationEventType | PlatformEventType | undefined = undefined;
+
+        if (STAMHOOFD.userMode === 'platform') {
+            const platform = await Platform.getSharedStruct();
+            type = platform.config.eventTypes.find(t => t.id === typeId);
+        } else if (typeId === OrganizationEventType.DEFAULT_ID) {
+            type = OrganizationEventType.createDefault();
+        }
+
         if (!type) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -376,21 +383,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     static async checkEventLimits(event: Event) {
         const type = await this.getEventType(event.typeId);
-
-        if (type.isLocationRequired) {
-            const address = event.meta.location?.address;
-
-            if (!address) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Empty number',
-                    human: $t(`%vQ`),
-                    field: 'event_required',
-                });
-            }
-
-            address.throwIfIncomplete();
-        }
 
         if (event.name.length < 2) {
             throw new SimpleError({
@@ -410,68 +402,85 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        if (type.maximumDays !== null || type.minimumDays !== null) {
-            const start = Formatter.luxon(event.startDate).startOf('day');
-            const end = Formatter.luxon(event.endDate).startOf('day');
+        if (type instanceof PlatformEventType) {
+            if (type.isLocationRequired) {
+                const address = event.meta.location?.address;
 
-            const days = end.diff(start, 'days').days + 1;
-
-            console.log('Detected days:', days);
-
-            if (type.minimumDays !== null && days < type.minimumDays) {
-                throw new SimpleError({
-                    code: 'minimum_days',
-                    message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
-                    human: $t(`%14D`, {
-                        name: type.name,
-                        days: Formatter.pluralText(type.minimumDays, $t(`%1N7`), $t(`%1N6`)),
-                    }),
-                    field: 'startDate',
-                });
-            }
-
-            if (type.maximumDays !== null && days > type.maximumDays) {
-                throw new SimpleError({
-                    code: 'maximum_days',
-                    message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
-                    human: $t(`%14E`, {
-                        name: type.name,
-                        days: Formatter.pluralText(type.maximumDays, $t(`%1N7`), $t(`%1N6`)),
-                    }),
-                    field: 'startDate',
-                });
-            }
-        }
-
-        if (type.maximum && (!event.existsInDatabase || ('typeId' in (event.getChangedDatabaseProperties()).fields))) {
-            const currentPeriod = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
-            console.log('event.startDate', event.startDate);
-            if (currentPeriod) {
-                const count = await SQL.select().from(
-                    SQL.table(Event.table),
-                )
-                    .where(SQL.column('organizationId'), event.organizationId)
-                    .where(SQL.column('typeId'), event.typeId)
-                    .where(SQL.column('id'), SQLWhereSign.NotEqual, event.id)
-                    .where(SQL.column('startDate'), SQLWhereSign.GreaterEqual, currentPeriod.startDate)
-                    .where(SQL.column('endDate'), SQLWhereSign.LessEqual, currentPeriod.endDate)
-                    .count();
-
-                if (count >= type.maximum) {
+                if (!address) {
                     throw new SimpleError({
-                        code: 'type_maximum_reached',
-                        message: 'Maximum number of events with this type reached',
-                        human: $t(`%Dd`) + ' ' + type.name + ' ' + $t(`%De`) + type.maximum + ')',
-                        field: 'typeId',
+                        code: 'invalid_field',
+                        message: 'Empty number',
+                        human: $t(`%vQ`),
+                        field: 'event_required',
                     });
                 }
-            } else {
-                throw new SimpleError({
-                    code: 'invalid_period',
-                    message: 'No period found for this start date',
-                    human: $t(`%Df`),
-                    field: 'startDate',
-                });
+
+                address.throwIfIncomplete();
+            }
+
+            if (type.maximumDays !== null || type.minimumDays !== null) {
+                const start = Formatter.luxon(event.startDate).startOf('day');
+                const end = Formatter.luxon(event.endDate).startOf('day');
+
+                const days = end.diff(start, 'days').days + 1;
+
+                console.log('Detected days:', days);
+
+                if (type.minimumDays !== null && days < type.minimumDays) {
+                    throw new SimpleError({
+                        code: 'minimum_days',
+                        message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
+                        human: $t(`%14D`, {
+                            name: type.name,
+                            days: Formatter.pluralText(type.minimumDays, $t(`%1N7`), $t(`%1N6`)),
+                        }),
+                        field: 'startDate',
+                    });
+                }
+
+                if (type.maximumDays !== null && days > type.maximumDays) {
+                    throw new SimpleError({
+                        code: 'maximum_days',
+                        message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
+                        human: $t(`%14E`, {
+                            name: type.name,
+                            days: Formatter.pluralText(type.maximumDays, $t(`%1N7`), $t(`%1N6`)),
+                        }),
+                        field: 'startDate',
+                    });
+                }
+            }
+
+            if (type.maximum && (!event.existsInDatabase || ('typeId' in (event.getChangedDatabaseProperties()).fields))) {
+                const currentPeriod = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
+                console.log('event.startDate', event.startDate);
+                if (currentPeriod) {
+                    const count = await SQL.select().from(
+                        SQL.table(Event.table),
+                    )
+                        .where(SQL.column('organizationId'), event.organizationId)
+                        .where(SQL.column('typeId'), event.typeId)
+                        .where(SQL.column('id'), SQLWhereSign.NotEqual, event.id)
+                        .where(SQL.column('startDate'), SQLWhereSign.GreaterEqual, currentPeriod.startDate)
+                        .where(SQL.column('endDate'), SQLWhereSign.LessEqual, currentPeriod.endDate)
+                        .count();
+
+                    if (count >= type.maximum) {
+                        throw new SimpleError({
+                            code: 'type_maximum_reached',
+                            message: 'Maximum number of events with this type reached',
+                            human: $t(`%Dd`) + ' ' + type.name + ' ' + $t(`%De`) + type.maximum + ')',
+                            field: 'typeId',
+                        });
+                    }
+                } else {
+                    throw new SimpleError({
+                        code: 'invalid_period',
+                        message: 'No period found for this start date',
+                        human: $t(`%Df`),
+                        field: 'startDate',
+                    });
+                }
             }
         }
     }

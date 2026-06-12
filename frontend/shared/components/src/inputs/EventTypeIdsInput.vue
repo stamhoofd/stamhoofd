@@ -8,8 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePlatform } from '#hooks/usePlatform.ts';
-import { computed } from 'vue';
+import { useEventTypes } from '#hooks/useEventTypes.ts';
 import MultipleChoiceInput from './MultipleChoiceInput.vue';
 
 withDefaults(
@@ -21,6 +20,6 @@ withDefaults(
 );
 
 const model = defineModel<string[] | null>({ required: true });
-const platform = usePlatform();
-const eventTypes = computed(() => platform.value.config.eventTypes);
+
+const eventTypes = useEventTypes();
 </script>

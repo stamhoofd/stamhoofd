@@ -1,5 +1,6 @@
+import { useEventTypes } from '#hooks/useEventTypes.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
-import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName } from '@stamhoofd/structures';
+import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
@@ -489,10 +490,14 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     all.push(groupFilter);
 
     if (app !== 'registration') {
+        const organization = organizations[0] ?? null;
+        const eventTypes = getEventTypes({ platform, organization });
+
         const typeFilter = new MultipleChoiceFilterBuilder({
             name: $t(`%1B`),
+            allowCreation: eventTypes.length > 1,
             options: [
-                ...platform.config.eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
+                ...eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
             ],
             wrapper: {
                 typeId: {
@@ -606,6 +611,7 @@ export function getDocumentsUIFilterBuilders() {
  */
 export function useEventNotificationBackendFilterBuilders() {
     const platform = usePlatform();
+    const eventTypes = useEventTypes();
 
     return () => {
         const all: UIFilterBuilders = [
@@ -620,7 +626,7 @@ export function useEventNotificationBackendFilterBuilders() {
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),
                 options: [
-                    ...platform.value.config.eventTypes.map((eventType) => {
+                    ...eventTypes.value.map((eventType) => {
                         return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
                     }),
                 ],
@@ -702,7 +708,7 @@ export function useEventNotificationBackendFilterBuilders() {
  * These filters are compatible with the SQLFilter in the backend
  */
 export function useEventNotificationInMemoryFilterBuilders() {
-    const platform = usePlatform();
+    const eventTypes = useEventTypes();
 
     return (type: EventNotificationType) => {
         const all: UIFilterBuilders = [
@@ -717,7 +723,7 @@ export function useEventNotificationInMemoryFilterBuilders() {
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),
                 options: [
-                    ...platform.value.config.eventTypes.map((eventType) => {
+                    ...eventTypes.value.map((eventType) => {
                         return new MultipleChoiceUIFilterOption(eventType.name, eventType.id);
                     }),
                 ],

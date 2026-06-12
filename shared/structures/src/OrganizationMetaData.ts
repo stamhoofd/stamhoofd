@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Colors } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from './addresses/Address.js';
 import { STPackageStatus, STPackageType } from './billing/STPackage.js';
@@ -169,6 +170,33 @@ export class OrganizationModules extends AutoEncoder {
 
     get useActivities(): boolean {
         return this.useMembers && !this.disableActivities;
+    }
+}
+
+export class OrganizationEventType extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = '';
+
+    @field({ decoder: StringDecoder })
+    description = '';
+
+    /**
+     * Temporary default id for every organization default event type. The event types should later be replaced by types that are created by the organization.
+     */
+    static readonly DEFAULT_ID: string = 'default';
+
+    static createDefault() {
+        return OrganizationEventType.create({
+            id: OrganizationEventType.DEFAULT_ID,
+            name: 'Standaard activiteit',
+        });
+    }
+
+    get isDefault(): boolean {
+        return this.id === OrganizationEventType.DEFAULT_ID;
     }
 }
 
@@ -452,6 +480,11 @@ export class OrganizationMetaData extends AutoEncoder {
      */
     @field({ decoder: DataPermissionsSettings, version: 398, nullable: true })
     dataPermission: DataPermissionsSettings | null = null;
+
+    @field({ decoder: new ArrayDecoder(OrganizationEventType), ...NextVersion })
+    eventTypes: OrganizationEventType[] = STAMHOOFD.userMode === 'organization'
+        ? [OrganizationEventType.createDefault()]
+        : [];
 
     /**
      * @deprecated

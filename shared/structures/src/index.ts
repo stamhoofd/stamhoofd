@@ -243,6 +243,7 @@ export * from './filters/SearchFilterFactory.js';
 export * from './helpers/index.js';
 export * from './helpers/FinancialSupportHelper.js';
 export * from './helpers/DataPermissionHelper.js';
+export * from './helpers/getEventTypes.js';
 
 // Last
 export * from './AuditLog.js';
