@@ -89,7 +89,7 @@
     "sortablejs-vue3": "^1.2.11",
     "tslib": "^2.8.1",
     "uuid": "11.1.1",
-    "vue": "3.5.17",
+    "vue": "3.5.38",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
@@ -125,7 +125,7 @@
     "wait-on": "^8.0.3"
   },
   "resolutions": {
-    "vue": "3.5.17",
+    "vue": "3.5.38",
     "axios": "1.16.0",
     "elliptic": "^6.5.4",
     "fast-xml-parser": "^5.8.0",
