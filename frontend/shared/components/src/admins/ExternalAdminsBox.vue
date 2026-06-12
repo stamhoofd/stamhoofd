@@ -8,7 +8,7 @@
     </h2>
 
     <p>{{ adminsDescription }}</p>
-    <p v-if="showInternalAdmins" class="info-box">
+    <p v-if="showInternalAdmins && isPlatform" class="info-box">
         {{ $t('%Bx') }}
     </p>
 
@@ -88,6 +88,7 @@ const organization = useOrganization();
 const { sortedAdmins, sortedMembers, loadPromise, getPermissions, getUnloadedPermissions } = useAdmins();
 const { adminsTitle, adminsDescription, adminsEmptyDescription } = useAdminLabels();
 const showInternalAdmins = useShowInternalAdmins();
+const isPlatform = STAMHOOFD.userMode === 'platform';
 const MAX_VISIBLE_DEFAULT = 5;
 const searchQuery = ref('');
 const showAll = ref(false);

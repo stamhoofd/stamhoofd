@@ -11,7 +11,7 @@ export function useShowInternalAdmins() {
     const organization = useOrganization();
 
     return computed(() => {
-        // No organization means we're in a platform-wide context, where internal admins are always relevant.
-        return organization.value ? organization.value.showInternalAdmins : true;
+        // Without an organization, internal admins are only relevant in platform mode.
+        return organization.value ? organization.value.showInternalAdmins : STAMHOOFD.userMode === 'platform';
     });
 }
