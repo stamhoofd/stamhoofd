@@ -16,6 +16,7 @@ import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
 export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGroups }: { multipleGroups: boolean }) {
     const $platform = usePlatform();
+    const isPlatform = STAMHOOFD.userMode === 'platform';
     const $user = useUser();
     const auth = useAuth();
     const app = useAppContext();
@@ -49,8 +50,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
                     },
                 ],
             }));
-        }
-        else {
+        } else {
             all.push(new NumberFilterBuilder({
                 key: 'memberCachedBalance.amountOpen',
                 name: $t(`%76`),
@@ -135,7 +135,10 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
                         },
                     },
                 }),
-                new MultipleChoiceFilterBuilder({
+            ];
+
+            if (isPlatform) {
+                groupFilters.push(new MultipleChoiceFilterBuilder({
                     name: $t(`%wI`),
                     options: [
                         ...$platform.value.config.defaultAgeGroups.filter(defaultAgeGroup => organization.value !== null ? defaultAgeGroup.isEnabledForTags(allTags) : true).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
@@ -146,9 +149,8 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
                             $in: FilterWrapperMarker,
                         },
                     },
-                }),
-
-            ];
+                }));
+            }
 
             groupFilters.unshift(new GroupUIFilterBuilder({
                 builders: groupFilters,

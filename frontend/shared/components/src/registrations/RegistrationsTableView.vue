@@ -98,6 +98,7 @@ const organizationScope = useOrganization();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const auth = useAuth();
 const platform = usePlatform();
+const isPlatform = STAMHOOFD.userMode === 'platform';
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
 
 const defaultFilter: StamhoofdFilter = getDefaultFilter();
@@ -106,28 +107,30 @@ function getDefaultFilter(): StamhoofdFilter {
     if (app === 'admin') {
         if (props.group) {
             return null;
-        }
-        else {
-            let filter: StamhoofdFilter = {
-                group: {
-                    $elemMatch: {
-                        $not: {
-                            defaultAgeGroupId: {
-                                $in: [null],
+        } else {
+            let filter: StamhoofdFilter = isPlatform
+                ? {
+                        group: {
+                            $elemMatch: {
+                                $not: {
+                                    defaultAgeGroupId: {
+                                        $in: [null],
+                                    },
+                                },
                             },
                         },
-                    },
-                },
 
-            };
+                    }
+                : null;
 
             if (!props.periodId && !props.group) {
-                filter = mergeFilters([
-                    filter,
-                    { periodId: filterPeriodId },
-                ]);
-            }
-            else {
+                if (isPlatform) {
+                    filter = mergeFilters([
+                        filter,
+                        { periodId: filterPeriodId },
+                    ]);
+                }
+            } else if (isPlatform) {
                 filter = mergeFilters([
                     filter,
                     { member: {
@@ -349,20 +352,20 @@ async function createActions(): Promise<void> {
 
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
-                name: $t(`%zh`),
-                icon: 'add',
-                priority: 0,
-                groupIndex: 1,
-                needsSelection: false,
-                enabled: () => canAdd,
-                handler: async () => {
-                    await chooseOrganizationMembersForGroup({
-                        members: [],
-                        group: props.group!,
-                    });
-                },
-            }),
-            ...registrationActions,
+            name: $t(`%zh`),
+            icon: 'add',
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            enabled: () => canAdd,
+            handler: async () => {
+                await chooseOrganizationMembersForGroup({
+                    members: [],
+                    group: props.group!,
+                });
+            },
+        }),
+        ...registrationActions,
     ];
 
     if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
@@ -386,6 +389,6 @@ if (waitingList.value) {
         if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
             tableObjectFetcher.reset(true, true);
         }
-    })
+    });
 }
 </script>

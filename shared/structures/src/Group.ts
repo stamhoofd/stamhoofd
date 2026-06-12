@@ -360,7 +360,7 @@ export class Group extends AutoEncoder {
                         },
                     ],
                 });
-            } else if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
+            } else if (this.settings.requirePlatformMembershipOnRegistrationDate) {
                 filter.push({
                     platformMemberships: {
                         $elemMatch: {
