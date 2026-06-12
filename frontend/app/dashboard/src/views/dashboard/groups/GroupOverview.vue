@@ -124,41 +124,7 @@
                         </template>
                     </STListItem>
                 </STList>
-
-                <template v-if="false && (group.getTags({app: 'dashboard'}).length || group.settings.whoShort)">
-                    <hr>
-                    <h2>{{ $t('Status ledenportaal') }}</h2>
-                    <STList>
-                        <STListItem v-if="group.settings.whoShort">
-                            <template #left>
-                                <span class="icon tiny help" />
-                            </template>
-
-                            <h3 class="style-definition-label gray">
-                                {{ $t('Wie kan inschrijven') }}
-                            </h3>
-
-                            <h2 class="style-definition-text">
-                                {{ group.settings.whoShort }}
-                            </h2>
-                        </STListItem>
-
-                        <STListItem v-for="tag in group.getTags({app: 'dashboard'})" :key="tag.title">
-                            <template v-if="tag.icon" #left>
-                                <span :class="['icon', tag.icon, 'tiny']" />
-                            </template>
-
-                            <h3 class="style-definition-label gray">
-                                {{ tag.label }}
-                            </h3>
-
-                            <h2 class="style-definition-text">
-                                {{ tag.title }}
-                            </h2>
-                        </STListItem>
-                    </STList>
-                </template>
-
+                
                 <template v-if="hasFullPermissions">
                     <hr><h2>{{ $t('%xU') }}</h2>
 
