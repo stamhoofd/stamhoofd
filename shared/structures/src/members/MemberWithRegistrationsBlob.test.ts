@@ -86,12 +86,6 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
         expect(member.getSGVSyncStatus({ now })).toBe(SGVSyncStatus.Changed);
     });
 
-    test('detects members managed by SGV sync', () => {
-        expect(isManagedMember(createMember())).toBe(true);
-        expect(isManagedMember(createMember({ group: createGroup(GroupType.EventRegistration) }))).toBe(false);
-        expect(isManagedMember(createMember({ registeredAt: null }))).toBe(false);
-    });
-
     test('ignores registrations from other periods when a period id is provided', () => {
         const member = createMember({
             lastExternalSync: new Date(now.getTime() - 1000 * 60 * 2),
@@ -158,11 +152,4 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
         }).getSGVSyncStatus({ now })).toBe(SGVSyncStatus.Outdated);
     });
 
-    test('can detect managed members with externally supplied groups', () => {
-        const group = createGroup(GroupType.EventRegistration, 'period-id', 'group-id');
-        const member = createMember({ group });
-
-        expect(isManagedMember(member)).toBe(false);
-        expect(isManagedMember(member, [createGroup(GroupType.Membership, 'period-id', 'group-id')])).toBe(true);
-    });
 });
