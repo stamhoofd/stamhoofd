@@ -51,7 +51,6 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
     let servicesState: PrerequisiteState = PrerequisiteState.Ready;
     let servicesCheckInterval: NodeJS.Timeout | undefined;
     let servicesCheckPromise: Promise<void> | undefined;
-    console.error('Start run dev', options);
 
     const setStatus = () => {
         output.setStatus(buildStatusItems(domains, context.env, setupState, servicesState));
