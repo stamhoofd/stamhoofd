@@ -3,10 +3,11 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order, Ticket } from '@stamhoofd/models';
+import { Order, Ticket, Webshop } from '@stamhoofd/models';
 import { TicketOrder, TicketPublic } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
+import { WebshopAuthHelper } from './WebshopAuthHelper.js';
 type Params = { id: string };
 
 class Query extends AutoEncoder {
@@ -45,6 +46,14 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope({ willAuthenticate: false });
+        const webshop = await Webshop.getByID(request.params.id);
+        if (!webshop || webshop.organizationId !== organization.id) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Webshop not found',
+                human: $t(`%FX`),
+            });
+        }
 
         if (request.query.secret) {
             const [ticket] = await Ticket.where({
@@ -61,17 +70,20 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 });
             }
 
+            const order = await Order.getByID(ticket.orderId);
+            if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
+                console.error('Error: missing order ' + ticket.orderId + ' for ticket ' + ticket.id);
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Ticket not found',
+                    human: $t(`%FZ`),
+                });
+            }
+
+            await WebshopAuthHelper.checkOrderAccess(webshop, order);
+
             if (!request.query.orderId) {
                 // Include item data
-                const order = await Order.getByID(ticket.orderId);
-                if (!order || order.webshopId !== request.params.id) {
-                    console.error('Error: missing order ' + ticket.orderId + ' for ticket ' + ticket.id);
-                    throw new SimpleError({
-                        code: 'not_found',
-                        message: 'Ticket not found',
-                        human: $t(`%FZ`),
-                    });
-                }
 
                 if (ticket.itemId) {
                     const item = order.data.cart.items.find(i => i.id === ticket.itemId);
@@ -117,6 +129,17 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 organizationId: organization.id,
                 deletedAt: null,
             });
+
+            const order = await Order.getByID(request.query.orderId);
+            if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Ticket not found',
+                    human: $t(`%FZ`),
+                });
+            }
+
+            await WebshopAuthHelper.checkOrderAccess(webshop, order);
             return new Response(
                 tickets.map(ticket => TicketOrder.create(ticket)),
             );

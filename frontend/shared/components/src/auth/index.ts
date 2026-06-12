@@ -1,6 +1,8 @@
 export { default as ForgotPasswordResetView } from './ForgotPasswordResetView.vue';
 export { default as ForgotPasswordView } from './ForgotPasswordView.vue';
 export { default as LoginMethodConfigView } from './LoginMethodConfigView.vue';
+export { default as LoginMethodButton } from './LoginMethodButton.vue';
+export { default as LoginMethodSettingsView } from './LoginMethodSettingsView.vue';
 export { default as LoginView } from './LoginView.vue';
 export { default as NoPermissionsView } from './NoPermissionsView.vue';
 export { default as PlatformFooter } from './PlatformFooter.vue';

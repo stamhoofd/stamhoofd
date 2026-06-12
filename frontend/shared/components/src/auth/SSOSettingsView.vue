@@ -106,7 +106,7 @@ async function loadConfiguration() {
             method: 'GET',
             path: '/sso',
             query: {
-                provider: props.provider,
+                provider: props.provider ?? "SSO",
             },
             decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,
             owner,

@@ -1,12 +1,12 @@
-import { PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order } from '@stamhoofd/models';
+import { Order, Webshop } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import type { Order as OrderStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
+import { WebshopAuthHelper } from './WebshopAuthHelper.js';
 type Params = { id: string; paymentId: string };
 type Query = undefined;
 type Body = undefined;
@@ -45,6 +45,17 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                 human: $t(`%FY`),
             });
         }
+
+        const webshop = await Webshop.getByID(request.params.id);
+        if (!webshop || webshop.organizationId !== organization.id) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Webshop not found',
+                human: $t(`%FX`),
+            });
+        }
+
+        await WebshopAuthHelper.checkOrderAccess(webshop, order);
 
         order.setRelation(Order.payment, payment);
         return new Response(await order.getStructure());

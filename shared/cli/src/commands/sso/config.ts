@@ -1,7 +1,7 @@
 import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { buildDomains } from '../../config/build-config.js';
-import { ssoAdminPassword, ssoAdminUser, ssoClientId, ssoClientSecret, ssoRealm, ssoUserEmail, ssoUserName, ssoUserPassword } from '../../services/sso-config.js';
+import { buildSsoConfigOutput } from '../../services/sso-config.js';
 
 export default class SsoConfig extends BaseCommand {
     static summary = 'Print local SSO settings';
@@ -17,29 +17,6 @@ export default class SsoConfig extends BaseCommand {
         const { args, flags } = await this.parse(SsoConfig);
         const context = await this.createContext(flags);
         const domains = buildDomains(context);
-        const issuer = `https://${domains.sso}/dex/realms/${ssoRealm}`;
-        this.log(`Local SSO settings:
-
-  Issuer:        ${issuer}
-  Discovery:     ${issuer}/.well-known/openid-configuration
-  Client ID:     ${ssoClientId}
-  Client secret: ${ssoClientSecret}
-  Redirect URI:  ${args.redirectUri ?? `https://<organization-id>.${domains.api}/openid/callback`}
-
-Test user:
-
-  Email:         ${ssoUserEmail}
-  Password:      ${ssoUserPassword}
-  Name:          ${ssoUserName}
-
-Admin console:
-
-  URL:           https://${domains.sso}/dex/admin
-  Username:      ${ssoAdminUser}
-  Password:      ${ssoAdminPassword}
-
-Commands:
-
-  stam sso start "${args.redirectUri ?? `https://<organization-id>.${domains.api}/openid/callback`}"`);
+        this.log(buildSsoConfigOutput(domains, args.redirectUri));
     }
 }

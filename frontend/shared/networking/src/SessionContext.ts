@@ -1,11 +1,11 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import type { SimpleErrors } from '@simonbackx/simple-errors';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import type { LoginProviderType} from '@stamhoofd/structures';
+import type { LoginProviderType } from '@stamhoofd/structures';
 import { OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
 import { ContextPermissions } from './ContextPermissions';
@@ -235,8 +235,8 @@ export class SessionContext implements RequestMiddleware {
                 const suffix = (this.user
                     ? (this.user.organizationId ? this.user.organizationId : 'platform')
                     : (
-                            this.usedPlatformStorage ? 'platform' : (this.organization!.id)
-                        ));
+                        this.usedPlatformStorage ? 'platform' : (this.organization!.id)
+                    ));
 
                 if (suffix === 'platform' && this.organization) {
                     await Storage.secure.removeItem('token-' + this.organization.id);
@@ -443,7 +443,7 @@ export class SessionContext implements RequestMiddleware {
         // const codeChallenge = await this.generateCodeChallenge(codeVerifier);
         // code_challenge_method = S256
 
-        const url = new URL((STAMHOOFD.environment === 'development' ? 'http://localhost:9091' : this.identityServer.host) + '/openid/start');
+        const url = new URL(this.identityServer.host + '/openid/start');
         url.searchParams.set('spaState', spaState);
         url.searchParams.set('provider', data.providerType);
         if (data.webshopId) {

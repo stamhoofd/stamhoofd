@@ -8,6 +8,7 @@ import { Replacement } from './endpoints/EmailRequest.js';
 import { File } from './files/File.js';
 import { Image } from './files/Image.js';
 import { GroupCategory } from './GroupCategory.js';
+import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { OrganizationGenderType } from './OrganizationGenderType.js';
@@ -189,6 +190,12 @@ export class OrganizationMetaData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type = OrganizationType.Other;
+
+    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), ...NextVersion })
+    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[
+        LoginMethod.Password,
+        LoginMethodConfig.create({}),
+    ]]);
 
     /**
      * Contains the ids of the tags

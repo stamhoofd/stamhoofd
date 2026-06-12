@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
@@ -17,6 +17,7 @@ import { AuditLogService } from '../../../services/AuditLogService.js';
 import { MollieService } from '../../../services/MollieService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { UitpasService } from '../../../services/uitpas/UitpasService.js';
+import { WebshopAuthHelper } from './WebshopAuthHelper.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -59,7 +60,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.optionalAuthenticate();
 
         // Read + validate + update stock in one go, to prevent race conditions
         const { webshop, order } = await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
@@ -74,15 +74,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             // const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
             const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization);
-
-            if (webshop.meta.authType === WebshopAuthType.Required && !Context.user) {
-                throw new SimpleError({
-                    code: 'not_authenticated',
-                    message: 'Not authenticated',
-                    human: $t(`%w5`),
-                    statusCode: 401,
-                });
-            }
+            await WebshopAuthHelper.optionalAuthenticateForWebshop(webshop);
 
             // For non paid organizations, the limit is 10
             if (!organization.meta.packages.isPaid && STAMHOOFD.environment !== 'test') {
