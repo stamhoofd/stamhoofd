@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDeco
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter } from '@stamhoofd/utility';
+import type { AppType } from './AppType.js';
 import type { Event } from './Event.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { getActivePeriodIds } from './getActivePeriods.js';
@@ -15,11 +16,9 @@ import type { Organization } from './Organization.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
-import type { AppType } from './AppType.js';
 
 export type GroupTagItem = {
     icon?: string;
-    label: string;
     title: string;
     style?: 'error' | 'warn' | 'success';
 };
@@ -447,14 +446,12 @@ export class Group extends AutoEncoder {
         if (activePreRegistrationDate !== null && (remainingStock === null || remainingStock > 0) && activePreRegistrationDate > now) {
             tags.push({
                 icon: 'calendar',
-                label: $t('Bestaande leden'),
                 title: $t('Voorinschrijvingen vanaf {date}', { date: Formatter.startDate(activePreRegistrationDate) }),
                 style: 'warn',
             });
         } else if (preRegistrations && (remainingStock === null || remainingStock > 0)) {
             tags.push({
                 icon: 'calendar',
-                label: $t('Bestaande leden'),
                 title: $t('Voorinschrijvingen tot {date}', { date: Formatter.endDate(this.settings.registrationStartDate ?? new Date()) }),
                 style: 'warn',
             });
@@ -462,7 +459,6 @@ export class Group extends AutoEncoder {
         if (this.notYetOpen) {
             tags.push({
                 icon: 'calendar',
-                label: preRegistrations ? $t('Nieuwe leden') : $t('Start'),
                 title: $t('Open vanaf {date}', { date: Formatter.startDate(this.settings.registrationStartDate ?? new Date()) }),
                 style: 'warn',
             });
@@ -472,14 +468,12 @@ export class Group extends AutoEncoder {
             if (this.status === GroupStatus.Closed) {
                 tags.push({
                     icon: 'lock',
-                    label: $t('Online inschrijvingen'),
                     title: $t('Manueel gesloten'),
                     style: 'error',
                 });
             } else if (this.settings.registrationEndDate) {
                 tags.push({
                     icon: 'lock',
-                    label: $t('Online inschrijvingen'),
                     title: $t('Gesloten sinds {date}', { date: Formatter.endDate(this.settings.registrationEndDate) }),
                     style: 'error',
                 });
@@ -489,7 +483,6 @@ export class Group extends AutoEncoder {
         if ((!this.closed || (this.status !== GroupStatus.Closed && options.app === 'dashboard')) && this.settings.registrationEndDate && (options.app === 'dashboard' || this.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
             tags.push({
                 icon: 'lock',
-                label: $t('Online inschrijvingen'),
                 title: $t('Sluit op {date}', { date: Formatter.endDate(this.settings.registrationEndDate) }),
                 style: 'warn',
             });
@@ -498,7 +491,6 @@ export class Group extends AutoEncoder {
         if (tags.length === 0 && !this.closed && options.app === 'dashboard') {
             tags.push({
                 icon: 'earth',
-                label: $t('Online inschrijvingen'),
                 title: $t('Geopend'),
                 style: 'success',
             });
@@ -508,21 +500,18 @@ export class Group extends AutoEncoder {
             if (remainingStock > 0) {
                 tags.push({
                     icon: 'user',
-                    label: $t('Plaatsen'),
                     title: remainingStock !== 1 ? $t('Nog {count} plaatsen', { count: remainingStock }) : $t('Nog één plaats'),
                     style: 'warn',
                 });
             } else if (this.waitingList !== null && !this.waitingList.closed) {
                 tags.push({
                     icon: 'clock',
-                    label: $t('Plaatsen'),
                     title: $t('Wachtlijst (volzet)'),
                     style: 'error',
                 });
             } else {
                 tags.push({
                     icon: 'disabled',
-                    label: $t('Plaatsen'),
                     title: $t('Volzet'),
                     style: 'error',
                 });
@@ -530,7 +519,6 @@ export class Group extends AutoEncoder {
         } else if ((allWaitingList || this.closed) && this.waitingList !== null && !this.waitingList.closed) {
             tags.push({
                 icon: 'clock',
-                label: $t('Inschrijven'),
                 title: $t('Wachtlijst geopend'),
                 style: 'error',
             });
