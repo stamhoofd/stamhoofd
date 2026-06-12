@@ -15,6 +15,15 @@ Yarn monorepo (Lerna + workspaces). Node.js + TypeScript backend · Vue 3 + Vite
 
 Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: each endpoint is a class in `backend/app/api/src/endpoints/**` with typed input decoders, returning structures. Errors use `@simonbackx/simple-errors`. Endpoints translate between database models and structures.
 
+### Translations
+
+- All user-facing strings use `$t(...)`, written in **Dutch**: `$t('Welkom {firstName},', { firstName: user.firstName })`
+- The build system replaces `$t('Iets in het Nederlands')` with `$t('%XYZ')` on release. So you can find both patterns in the codebase. You can look `%XYZ` keys up in `shared/locales/src/nl.json`.
+- Write new text by wrapping it with $t(...) (keep it in Dutch). e.g. $t('Opslaan'). Keep it like that in your commits. The build script will replace this later in separate commits on release with % prefixed keys.
+- Do not alter `shared/locales/src/nl.json`. If text needs changes, replace the existing $t with a new one with the new Dutch text. Our scripts will deduplicate and merge as required on release.
+- `SimpleError.message` should not use $t. It should be plain text in English. `SimpleError.human` on the other hand should use `$t` and is translated automatically.
+- Test names, methods, properties and code comments should be in English.
+
 ## Rules
 
 - **Never modify `@stamhoofd/structures` without first reading the versioning documentation in Notion.** Structures are versioned so old clients keep working; a change ripples across the whole codebase.
@@ -61,10 +70,3 @@ import MyView from '@stamhoofd/package-name/views/MyView.vue';
 
 // 🚫 Never create, extend, or reference barrel files (legacy pattern)
 ```
-
-### Localization
-
-- All user-facing strings use `$t(...)`, written in **Dutch**: `$t('Welkom {firstName},', { firstName: user.firstName })`
-- The build system replaces `$t('...')` with `$t('%XYZ')` — never do this manually; look up `%XYZ` keys in `shared/locales/src/nl.json`.
-- `SimpleError.message` → English, not translated. `SimpleError.human` → Dutch, via `$t`.
-- Test names and code comments → English.
