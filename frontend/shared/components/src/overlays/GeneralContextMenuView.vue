@@ -3,7 +3,7 @@
         <template v-for="(items, groupIndex) of menu.items" :key="groupIndex+'-group'">
             <ContextMenuLine v-if="groupIndex > 0" />
 
-            <ContextMenuItemView v-for="(item, index) of items" :key="index" v-tooltip="item.disabled" :context-menu-view="$refs.contextMenuView" :class="{'disabled': !!item.disabled, 'with-description': !!item.description, destructive: item.destructive}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item)">
+            <ContextMenuItemView v-for="(item, index) of items" :key="index" v-tooltip="item.disabled" :context-menu-view="(contextMenuView as any)" :class="{'disabled': !!item.disabled, 'with-description': !!item.description, destructive: item.destructive}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item)">
                 <template v-if="item.selected !== null || item.icon !== null" #left>
                     <Checkbox v-if="item.selected !== null" :model-value="item.selected" :only-line="true" />
                     <span v-else-if="item.icon" :class="'icon tiny '+item.icon" />

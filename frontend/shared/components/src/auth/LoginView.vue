@@ -159,7 +159,7 @@ const loading = ref(false);
 const email = ref(props.initialEmail);
 const password = ref('');
 const animating = ref(true);
-const emailInput = ref<EmailInput | null>(null);
+const emailInput = ref<InstanceType<typeof EmailInput> | null>(null);
 const showVersionFooter = computed(() => {
     return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev';
 });

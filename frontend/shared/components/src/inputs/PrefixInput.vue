@@ -17,53 +17,42 @@
     </label>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { ref } from 'vue';
 
-@Component({
-    emits: {
-        'update:modelValue': (_value: string) => true,
-    },
-})
-export default class PrefixInput extends VueComponent {
-    valid = true;
+const model = defineModel<string>({ default: '' });
 
-    /** Price in cents */
-    @Prop({ default: '' })
-    modelValue!: string;
+withDefaults(defineProps<{
+    prefix?: string;
+    placeholder?: string;
+    fadePrefix?: boolean;
+    focusPrefix?: string | null;
+}>(), {
+    prefix: '',
+    placeholder: '',
+    fadePrefix: true,
+    focusPrefix: null,
+});
 
-    @Prop({ default: '' })
-    prefix!: string;
+const emit = defineEmits<{
+    (e: 'focus', event: Event): void;
+    (e: 'blur', event: Event): void;
+}>();
 
-    @Prop({ default: '' })
-    placeholder!: string;
+const valid = ref(true);
+const focussed = ref(false);
 
-    @Prop({ default: true })
-    fadePrefix!: boolean;
-
-    @Prop({ default: null })
-    focusPrefix!: string | null;
-
-    focussed = false;
-
-    onFocus(event: Event) {
-        this.focussed = true;
-        this.$emit('focus', event);
-    }
-
-    onBlur(event: Event) {
-        this.focussed = false;
-        this.$emit('blur', event);
-    }
-
-    get internalValue() {
-        return this.modelValue;
-    }
-
-    set internalValue(val: string) {
-        this.$emit('update:modelValue', val);
-    }
+function onFocus(event: Event) {
+    focussed.value = true;
+    emit('focus', event);
 }
+
+function onBlur(event: Event) {
+    focussed.value = false;
+    emit('blur', event);
+}
+
+const internalValue = model;
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

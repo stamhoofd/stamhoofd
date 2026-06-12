@@ -10,50 +10,43 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { computed, nextTick, useSlots, useTemplateRef } from 'vue';
 
-@Component({
-    emits: ["update:modelValue"]
-})
-export default class Radio extends VueComponent {
-    @Prop({ default: "", type: String })
-    name!: string;
+const model = defineModel<any>();
 
-    @Prop({ default: "", type: String })
-    autocomplete!: string;
+const props = withDefaults(defineProps<{
+    name?: string;
+    autocomplete?: string;
+    value?: any;
+    id?: any;
+    disabled?: boolean;
+}>(), {
+    name: '',
+    autocomplete: '',
+    value: '',
+    id: undefined,
+    disabled: false,
+});
 
-    @Prop({ default: "" })
-    value!: any;
+const slots = useSlots();
+const radio = useTemplateRef<HTMLInputElement>('radio');
 
-    @Prop({ default: undefined })
-    id!: any;
+const hasDefaultSlot = computed(() => !!slots.default);
 
-    @Prop({})
-    modelValue!: any;
-
-    @Prop({ default: false })
-    disabled!: boolean;
-
-    get hasDefaultSlot() {
-        return !!this.$slots.default
-    }
-
-    get radioButtonValue() {
-        return this.modelValue;
-    }
-
-    set radioButtonValue(value) {
-        this.$emit("update:modelValue", value)
+const radioButtonValue = computed({
+    get: () => model.value,
+    set: (value: any) => {
+        model.value = value;
 
         // Add support for a model that doesn't change
-        this.$nextTick(() => {
-            if (this.radioButtonValue !== value) {
-                if (this.$refs.radio) {
-                    (this.$refs.radio as any).checked = (this.radioButtonValue === this.value);
+        nextTick(() => {
+            if (model.value !== value) {
+                if (radio.value) {
+                    radio.value.checked = (model.value === props.value);
                 }
             }
-        })
-    }
-}
+        }).catch(console.error);
+    },
+});
 </script>

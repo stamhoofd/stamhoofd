@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';

@@ -26,121 +26,106 @@
     </label>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { computed, onMounted, ref, watch } from 'vue';
 
-@Component({
-    emits: ['update:modelValue'],
-})
-export default class AgeInput extends VueComponent {
-    @Prop({ default: 0 })
-    min!: number;
+const model = defineModel<number | null>({ default: null });
 
-    @Prop({ default: false })
-    nullable!: boolean;
+const props = withDefaults(defineProps<{
+    min?: number;
+    nullable?: boolean;
+    max?: number | null;
+    year?: number | null;
+    placeholder?: string;
+}>(), {
+    min: 0,
+    nullable: false,
+    max: 99,
+    year: null,
+    placeholder: '',
+});
 
-    @Prop({ default: 99 })
-    max!: number | null;
+const valueString = ref('');
+const valid = ref(true);
 
-    @Prop({ default: null })
-    year!: number | null;
+const internalValue = model;
 
-    valueString = '';
-    valid = true;
-
-    /** Price in cents */
-    @Prop({ default: null })
-    modelValue!: number | null;
-
-    @Prop({ default: '' })
-    placeholder!: string;
-
-    get internalValue() {
-        return this.modelValue;
+const descriptionText = computed(() => {
+    if (!model.value) {
+        return '';
     }
+    return $t(`%yp`) + ' ' + ((props.year ?? new Date().getFullYear()) - model.value) + ')';
+});
 
-    set internalValue(val: number | null) {
-        this.$emit('update:modelValue', val);
-    }
+onMounted(() => {
+    clean();
+});
 
-    get descriptionText() {
-        if (!this.modelValue) {
-            return '';
+watch(valueString, (value: string) => {
+    // We need the value string here! Vue does some converting to numbers automatically
+    // but for our placeholder system we need exactly the same string
+    if (value === '') {
+        valid.value = true;
+        if (props.nullable) {
+            internalValue.value = null;
         }
-        return $t(`%yp`) + ' ' + ((this.year ?? new Date().getFullYear()) - this.modelValue) + ')';
+        else {
+            internalValue.value = Math.max(0, props.min);
+        }
     }
+    else {
+        const v = parseInt(value);
+        if (isNaN(v)) {
+            valid.value = false;
 
-    mounted() {
-        this.clean();
-    }
-
-    @Watch('valueString')
-    onValueChanged(value: string, _oldValue: string) {
-        // We need the value string here! Vue does some converting to numbers automatically
-        // but for our placeholder system we need exactly the same string
-        if (value === '') {
-            this.valid = true;
-            if (this.nullable) {
-                this.internalValue = null;
+            if (props.nullable) {
+                internalValue.value = null;
             }
             else {
-                this.internalValue = Math.max(0, this.min);
+                internalValue.value = props.min;
             }
         }
         else {
-            const v = parseInt(value);
-            if (isNaN(v)) {
-                this.valid = false;
+            valid.value = true;
 
-                if (this.nullable) {
-                    this.internalValue = null;
-                }
-                else {
-                    this.internalValue = this.min;
-                }
-            }
-            else {
-                this.valid = true;
-
-                // Remove extra decimals
-                this.internalValue = this.constrain(v);
-            }
+            // Remove extra decimals
+            internalValue.value = constrain(v);
         }
     }
+});
 
-    // Restore invalid input, make the input value again
-    // And set valueString
-    clean() {
-        if (!this.valid) {
-            return;
-        }
-        if (this.internalValue === null) {
-            this.valueString = '';
-            return;
-        }
-        // Check if has decimals
-        this.valueString = Math.floor(this.internalValue) + '';
+// Restore invalid input, make the input value again
+// And set valueString
+function clean() {
+    if (!valid.value) {
+        return;
     }
+    if (internalValue.value === null) {
+        valueString.value = '';
+        return;
+    }
+    // Check if has decimals
+    valueString.value = Math.floor(internalValue.value) + '';
+}
 
-    // Limit value to bounds
-    constrain(value: number): number {
-        value = Math.max(this.min, value);
-        if (this.max !== null && value > this.max) {
-            value = this.max;
-        }
-        return value;
+// Limit value to bounds
+function constrain(value: number): number {
+    value = Math.max(props.min, value);
+    if (props.max !== null && value > props.max) {
+        value = props.max;
     }
+    return value;
+}
 
-    step(add: number) {
-        if (!this.valid) {
-            return;
-        }
-        if (this.internalValue === null) {
-            return;
-        }
-        const val = this.constrain(this.internalValue + add);
-        this.valueString = Math.floor(val) + '';
+function step(add: number) {
+    if (!valid.value) {
+        return;
     }
+    if (internalValue.value === null) {
+        return;
+    }
+    const val = constrain(internalValue.value + add);
+    valueString.value = Math.floor(val) + '';
 }
 </script>
 

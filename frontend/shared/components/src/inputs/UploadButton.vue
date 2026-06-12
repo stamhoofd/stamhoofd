@@ -12,105 +12,93 @@
     </component>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ref } from 'vue';
 
 import type { Validator } from '../errors/Validator';
+import { useContext } from '../hooks/useContext.ts';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import { Toast } from '../overlays/Toast';
-import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        LoadingButton,
-    },
-})
-export default class UploadButton extends Mixins(NavigationMixin) {
-    @Prop({ default: 'label' })
-    elementName!: string;
+const model = defineModel<Image | null>({ default: null });
 
-    @Prop({ default: '' })
-    text: string;
+const props = withDefaults(defineProps<{
+    elementName?: string;
+    text?: string;
+    validator?: Validator | null;
+    resolutions?: ResolutionRequest[] | null;
+}>(), {
+    elementName: 'label',
+    text: '',
+    validator: null,
+    resolutions: null,
+});
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const context = useContext();
+const owner = useRequestOwner();
 
-    @Prop({ default: null })
-    resolutions: ResolutionRequest[] | null;
+const uploading = ref(false);
 
-    @Prop({ default: null })
-    modelValue: Image | null;
+function changedFile(event: Event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+        return;
+    }
+    const target = event.target;
+    if (!target.files || target.files.length !== 1) {
+        return;
+    }
+    if (uploading.value) {
+        return;
+    }
+    Request.cancelAll(owner);
 
-    uploading = false;
+    const file = target.files[0];
 
-    beforeUnmount() {
-        Request.cancelAll(this);
+    if (file.size > 5 * 1024 * 1024) {
+        const error = new SimpleError({
+            code: 'file_too_large',
+            message: $t(`%z3`),
+        });
+        Toast.fromError(error).setHide(null).show();
+        return;
     }
 
-    changedFile(event: Event) {
-        if (!(event.target instanceof HTMLInputElement)) {
-            return;
-        }
-        const target = event.target
-        if (!target.files || target.files.length !== 1) {
-            return;
-        }
-        if (this.uploading) {
-            return;
-        }
-        Request.cancelAll(this);
+    const resolutions = props.resolutions ?? [ResolutionRequest.create({ height: 720 })];
 
-        const file = target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('resolutions', JSON.stringify(resolutions.map(r => r.encode({ version: Version }))));
 
-        if (file.size > 5 * 1024 * 1024) {
-            const error = new SimpleError({
-                code: 'file_too_large',
-                message: $t(`%z3`),
-            });
-            Toast.fromError(error).setHide(null).show();
-            return;
-        }
+    uploading.value = true;
 
-        const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })];
+    context.value.authenticatedServer
+        .request({
+            method: 'POST',
+            path: '/upload-image',
+            body: formData,
+            decoder: Image as Decoder<Image>,
+            timeout: 60 * 1000,
+            shouldRetry: false,
+            owner,
+        })
+        .then((response) => {
+            model.value = response.data;
+        })
+        .catch((e) => {
+            console.error(e);
+            Toast.fromError(e).setHide(null).show();
+        })
+        .finally(() => {
+            uploading.value = false;
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('resolutions', JSON.stringify(resolutions.map(r => r.encode({ version: Version }))));
-
-        this.uploading = true;
-        // this.errorBox = null;
-
-        this.$context.authenticatedServer
-            .request({
-                method: 'POST',
-                path: '/upload-image',
-                body: formData,
-                decoder: Image,
-                timeout: 60 * 1000,
-                shouldRetry: false,
-                owner: this,
-            })
-            .then((response) => {
-                this.$emit('update:modelValue', response.data);
-            })
-            .catch((e) => {
-                console.error(e);
-                Toast.fromError(e).setHide(null).show();
-                // this.errorBox = new ErrorBox(e)
-                // TODO!
-            })
-            .finally(() => {
-                this.uploading = false;
-
-                // Clear selection
-                target.value = '';
-            });
-    }
+            // Clear selection
+            target.value = '';
+        });
 }
 </script>
 

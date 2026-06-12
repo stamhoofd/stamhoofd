@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { userEvent } from '@vitest/browser/context';
 import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
@@ -416,75 +415,74 @@ describe('NumberInputBox', () => {
     });
 
     test('Should correctly update model on repeated changes', async () => {
-                const wrapper = await createWrapperWithDefaultProps(null);
+        const wrapper = await createWrapperWithDefaultProps(null);
 
-                const inputEl = wrapper.find('input').element;
+        const inputEl = wrapper.find('input').element;
 
-                // Click the input;
-                await userEvent.click(inputEl);
+        // Click the input;
+        await userEvent.click(inputEl);
 
-                // Clear the input
-                await userEvent.clear(inputEl);
+        // Clear the input
+        await userEvent.clear(inputEl);
 
-                const inputValues: {
-                    text: string,
-                    expected: {
-                        modelValue: number | null,
-                        inputValue: string
-                    }
-                } [] = [
-                {
-                    text: '5',
-                    expected: {
-                        modelValue: 5,
-                        inputValue: '5',
-                    },
+        const inputValues: {
+            text: string;
+            expected: {
+                modelValue: number | null;
+                inputValue: string;
+            };
+        } [] = [
+            {
+                text: '5',
+                expected: {
+                    modelValue: 5,
+                    inputValue: '5',
                 },
-                {
-                    text: '6',
-                    expected: {
-                        modelValue: 6,
-                        inputValue: '6',
-                    }
+            },
+            {
+                text: '6',
+                expected: {
+                    modelValue: 6,
+                    inputValue: '6',
                 },
-                {
-                    text: 'abc',
-                    expected: {
-                        modelValue: NaN,
-                        inputValue: 'abc',
-                    }
+            },
+            {
+                text: 'abc',
+                expected: {
+                    modelValue: NaN,
+                    inputValue: 'abc',
                 },
-                {
-                    text: '1',
-                    expected: {
-                        modelValue: 1,
-                        inputValue: '1',
-                    }
+            },
+            {
+                text: '1',
+                expected: {
+                    modelValue: 1,
+                    inputValue: '1',
                 },
-            ];
+            },
+        ];
 
-            for (const {text, expected} of inputValues) {
-                // clear input
-                await userEvent.clear(inputEl);
+        for (const { text, expected } of inputValues) {
+            // clear input
+            await userEvent.clear(inputEl);
 
-                // Type the value
-                await userEvent.keyboard(text);
+            // Type the value
+            await userEvent.keyboard(text);
 
-                // blur
-                await userEvent.click(document.body);
+            // blur
+            await userEvent.click(document.body);
 
-                // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(expected.modelValue);
-                // Check input value after change
-                expect(inputEl).toHaveValue(expected.inputValue);
-            }
-
+            // Check model value after change
+            expect(wrapper.props('modelValue')).toBe(expected.modelValue);
+            // Check input value after change
+            expect(inputEl).toHaveValue(expected.inputValue);
+        }
     });
 
     test('Should not immediately show an error on mounted', async () => {
-        const wrapper = await createWrapperWithDefaultProps(6, {max: 3});
+        const wrapper = await createWrapperWithDefaultProps(6, { max: 3 });
 
-        const inputError = wrapper.find('[data-testid="input-error"]')
+        const inputError = wrapper.find('[data-testid="input-error"]');
 
         // Should not exist before change
         expect(inputError.exists()).toBe(false);
@@ -492,36 +490,36 @@ describe('NumberInputBox', () => {
 
     describe('Should only update error on change', () => {
         test('not a number', async () => {
-               const wrapper = await createWrapperWithDefaultProps(null);
+            const wrapper = await createWrapperWithDefaultProps(null);
 
-                const inputEl = wrapper.find('input').element;
+            const inputEl = wrapper.find('input').element;
 
-                // Click the input;
-                await userEvent.click(inputEl);
+            // Click the input;
+            await userEvent.click(inputEl);
 
-                // Clear the input
-                await userEvent.clear(inputEl);
+            // Clear the input
+            await userEvent.clear(inputEl);
 
-                // Type the value
-                await userEvent.keyboard('abc');
+            // Type the value
+            await userEvent.keyboard('abc');
 
-                let inputError = wrapper.find('[data-testid="input-error"]')
-    
-                // Should not exist before change
-                expect(inputError.exists()).toBe(false);
+            let inputError = wrapper.find('[data-testid="input-error"]');
 
-                // blur
-                await userEvent.click(document.body);
+            // Should not exist before change
+            expect(inputError.exists()).toBe(false);
 
-                inputError = wrapper.find('[data-testid="input-error"]');
+            // blur
+            await userEvent.click(document.body);
 
-                // should exist after change and contain the correct error message
-                expect(inputError.exists()).toBe(true);
-                expect(inputError.element).toHaveTextContent('Vul een geldig getal in');
+            inputError = wrapper.find('[data-testid="input-error"]');
+
+            // should exist after change and contain the correct error message
+            expect(inputError.exists()).toBe(true);
+            expect(inputError.element).toHaveTextContent('Vul een geldig getal in');
         });
 
         test('min', async () => {
-            const wrapper = await createWrapperWithDefaultProps(null, {min: 5});
+            const wrapper = await createWrapperWithDefaultProps(null, { min: 5 });
 
             const inputEl = wrapper.find('input').element;
 
@@ -534,7 +532,7 @@ describe('NumberInputBox', () => {
             // Type the value
             await userEvent.keyboard('3');
 
-            let inputError = wrapper.find('[data-testid="input-error"]')
+            let inputError = wrapper.find('[data-testid="input-error"]');
 
             // Should not exist before change
             expect(inputError.exists()).toBe(false);
@@ -550,7 +548,7 @@ describe('NumberInputBox', () => {
         });
 
         test('max', async () => {
-            const wrapper = await createWrapperWithDefaultProps(null, {max: 5});
+            const wrapper = await createWrapperWithDefaultProps(null, { max: 5 });
 
             const inputEl = wrapper.find('input').element;
 
@@ -563,7 +561,7 @@ describe('NumberInputBox', () => {
             // Type the value
             await userEvent.keyboard('6');
 
-            let inputError = wrapper.find('[data-testid="input-error"]')
+            let inputError = wrapper.find('[data-testid="input-error"]');
 
             // Should not exist before change
             expect(inputError.exists()).toBe(false);
@@ -581,63 +579,63 @@ describe('NumberInputBox', () => {
 
     describe('Should correctly round value', () => {
         test('floor', async () => {
-                const wrapper = await createWrapperWithDefaultProps(null, {
-                    floatingPoint: false
-                });
+            const wrapper = await createWrapperWithDefaultProps(null, {
+                floatingPoint: false,
+            });
 
-                const inputEl = wrapper.find('input').element;
+            const inputEl = wrapper.find('input').element;
 
-                // Click the input;
-                await userEvent.click(inputEl);
+            // Click the input;
+            await userEvent.click(inputEl);
 
-                // Clear the input
-                await userEvent.clear(inputEl);
+            // Clear the input
+            await userEvent.clear(inputEl);
 
-                // Type the value
-                await userEvent.keyboard('1,45');
+            // Type the value
+            await userEvent.keyboard('1,45');
 
-                // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(1);
-                // Check input value after input
-                expect(inputEl).toHaveValue('1,45');
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(1);
+            // Check input value after input
+            expect(inputEl).toHaveValue('1,45');
 
-                // blur
-                await userEvent.click(document.body);
+            // blur
+            await userEvent.click(document.body);
 
-                // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(1);
-                // Check input value after change
-                expect(inputEl).toHaveValue('1');
+            // Check model value after change
+            expect(wrapper.props('modelValue')).toBe(1);
+            // Check input value after change
+            expect(inputEl).toHaveValue('1');
         });
 
         test('ceil', async () => {
-                const wrapper = await createWrapperWithDefaultProps(null, {
-                    floatingPoint: false
-                });
+            const wrapper = await createWrapperWithDefaultProps(null, {
+                floatingPoint: false,
+            });
 
-                const inputEl = wrapper.find('input').element;
+            const inputEl = wrapper.find('input').element;
 
-                // Click the input;
-                await userEvent.click(inputEl);
+            // Click the input;
+            await userEvent.click(inputEl);
 
-                // Clear the input
-                await userEvent.clear(inputEl);
+            // Clear the input
+            await userEvent.clear(inputEl);
 
-                // Type the value
-                await userEvent.keyboard('1,55');
+            // Type the value
+            await userEvent.keyboard('1,55');
 
-                // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(2);
-                // Check input value after input
-                expect(inputEl).toHaveValue('1,55');
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(2);
+            // Check input value after input
+            expect(inputEl).toHaveValue('1,55');
 
-                // blur
-                await userEvent.click(document.body);
+            // blur
+            await userEvent.click(document.body);
 
-                // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(2);
-                // Check input value after change
-                expect(inputEl).toHaveValue('2');
+            // Check model value after change
+            expect(wrapper.props('modelValue')).toBe(2);
+            // Check input value after change
+            expect(inputEl).toHaveValue('2');
         });
     });
 });
@@ -695,7 +693,7 @@ async function createWrapper(value: number | null, props: NumberInputBoxProps) {
         attachTo: document.body,
         props: {
             ...props,
-            validator: null,
+            'validator': null,
             'modelValue': value,
             'onUpdate:modelValue': async (e: number | null) => {
                 // make sure the wrapper is initialized

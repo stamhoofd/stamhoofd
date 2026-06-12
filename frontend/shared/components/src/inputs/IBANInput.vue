@@ -4,120 +4,90 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-})
-export default class IBANInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+const model = defineModel<string | null>({ default: null });
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const props = withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    required?: boolean;
+    placeholder?: string | null;
+    autocomplete?: string;
+}>(), {
+    title: '',
+    validator: null,
+    required: true,
+    placeholder: null,
+    autocomplete: () => $t(`%16`),
+});
 
-    ibanRaw = '';
-    valid = true;
+const ibanRaw = ref(model.value ?? '');
+const valid = ref(true);
+const errorBox = ref<ErrorBox | null>(null);
 
-    @Prop({ default: null })
-    modelValue!: string | null;
+if (props.validator) {
+    useValidation(props.validator, () => validate());
+}
 
-    @Prop({ default: true })
-    required!: boolean;
+watch(model, (val) => {
+    if (val === null) {
+        return;
+    }
+    ibanRaw.value = val;
+});
 
-    @Prop({ default: null })
-    placeholder!: string | null;
+async function validate() {
+    ibanRaw.value = ibanRaw.value.trim().toUpperCase().replace(/\s/g, ' '); // replacement is needed because some apps use non breaking spaces when copying
 
-    @Prop({ default: $t(`%16`) })
-    autocomplete!: string;
-
-    errorBox: ErrorBox | null = null;
-
-    /**
-     * For some crazy reason $t is not found in the template by typescript checking
-     * Will get fixed when we switch this component to Setup syntax
-     */
-    get $t() {
-        return $t;
+    if (!props.required && ibanRaw.value.length === 0) {
+        errorBox.value = null;
+        model.value = null;
+        return true;
     }
 
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null) {
-            return;
-        }
-        this.ibanRaw = val;
-    }
+    const ibantools = await import(/* webpackChunkName: "ibantools" */ 'ibantools');
+    const iban = ibantools.electronicFormatIBAN(ibanRaw.value); // 'NL91ABNA0517164300'
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate();
-            });
-        }
-
-        this.ibanRaw = this.modelValue ?? '';
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    async validate() {
-        this.ibanRaw = this.ibanRaw.trim().toUpperCase().replace(/\s/g, ' '); // replacement is needed because some apps use non breaking spaces when copying
-
-        if (!this.required && this.ibanRaw.length === 0) {
-            this.errorBox = null;
-            this.$emit('update:modelValue', null);
-            return true;
-        }
-
-        const ibantools = await import(/* webpackChunkName: "ibantools" */ 'ibantools');
-        const iban = ibantools.electronicFormatIBAN(this.ibanRaw); // 'NL91ABNA0517164300'
-
-        if (iban === null || !ibantools.isValidIBAN(iban)) {
-            if (this.ibanRaw.length === 0) {
-                if (STAMHOOFD.environment === 'development') {
-                    this.ibanRaw = 'BE42631299159354';
-                    this.errorBox = new ErrorBox(new SimpleError({
-                        code: 'invalid_field',
-                        message: $t(`%z0`),
-                        field: 'iban',
-                    }));
-                    return false;
-                }
-                this.errorBox = new ErrorBox(new SimpleError({
+    if (iban === null || !ibantools.isValidIBAN(iban)) {
+        if (ibanRaw.value.length === 0) {
+            if (STAMHOOFD.environment === 'development') {
+                ibanRaw.value = 'BE42631299159354';
+                errorBox.value = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%z1`),
+                    message: $t(`%z0`),
                     field: 'iban',
                 }));
+                return false;
             }
-            else {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: $t(`%z2`) + ' ' + this.ibanRaw,
-                    field: 'iban',
-                }));
-            }
-
-            return false;
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`%z1`),
+                field: 'iban',
+            }));
         }
         else {
-            this.ibanRaw = ibantools.friendlyFormatIBAN(iban) ?? iban;
-            this.$emit('update:modelValue', this.ibanRaw);
-            this.errorBox = null;
-            return true;
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`%z2`) + ' ' + ibanRaw.value,
+                field: 'iban',
+            }));
         }
+
+        return false;
+    }
+    else {
+        ibanRaw.value = ibantools.friendlyFormatIBAN(iban) ?? iban;
+        model.value = ibanRaw.value;
+        errorBox.value = null;
+        return true;
     }
 }
 </script>

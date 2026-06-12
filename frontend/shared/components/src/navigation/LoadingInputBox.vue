@@ -16,32 +16,30 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { ref, watch } from 'vue';
+
 import Spinner from '../Spinner.vue';
 
-@Component({
-    components: { Spinner },
-})
-export default class LoadingInputWrapper extends VueComponent {
-    @Prop({ default: false, type: Boolean })
-    loading!: boolean;
+const props = withDefaults(defineProps<{
+    loading?: boolean;
+}>(), {
+    loading: false,
+});
 
-    delayLoading = false;
+const delayLoading = ref(false);
 
-    @Watch('loading')
-    onLoadingChanged(val: boolean, oldVal: boolean) {
-        if (!val && oldVal) {
-            this.delayLoading = true;
-            setTimeout(() => {
-                this.delayLoading = false;
-            }, 500);
-        }
-        else if (val) {
-            this.delayLoading = true;
-        }
+watch(() => props.loading, (val, oldVal) => {
+    if (!val && oldVal) {
+        delayLoading.value = true;
+        setTimeout(() => {
+            delayLoading.value = false;
+        }, 500);
     }
-}
+    else if (val) {
+        delayLoading.value = true;
+    }
+});
 </script>
 
 <style lang="scss">

@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { File as StructFile, Image, Resolution, ResolutionRequest } from '@stamhoofd/structures';
 import { userEvent } from '@vitest/browser/context';
 import { expect, test, vi } from 'vitest';

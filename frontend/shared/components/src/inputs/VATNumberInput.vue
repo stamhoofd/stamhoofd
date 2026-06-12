@@ -4,111 +4,87 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { Country } from '@stamhoofd/types/Country';
+import { ref, watch } from 'vue';
 
 import { ErrorBox } from "../errors/ErrorBox";
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 
-@Component({
-    components: {
-        STInputBox
+const model = defineModel<string | null>({ default: null });
+
+const props = withDefaults(defineProps<{
+    country: Country;
+    title?: string;
+    validator?: Validator | null;
+    required?: boolean;
+    placeholder?: string;
+    autocomplete?: string;
+}>(), {
+    title: '',
+    validator: null,
+    required: true,
+    placeholder: () => $t(`%zG`),
+    autocomplete: () => $t(`%yv`),
+});
+
+const VATNumberRaw = ref(model.value ?? '');
+const valid = ref(true);
+const errorBox = ref<ErrorBox | null>(null);
+
+if (props.validator) {
+    useValidation(props.validator, () => validate());
+}
+
+watch(model, (val) => {
+    if (val === null) {
+        return;
     }
-})
-export default class VATNumberInput extends VueComponent {
-    @Prop({ required: true }) 
-        country!: Country;
-    
-    @Prop({ default: "" }) 
-        title: string;
+    VATNumberRaw.value = val;
+});
 
-    @Prop({ default: null }) 
-        validator: Validator | null
-    
-    VATNumberRaw = "";
-    valid = true;
+async function validate() {
+    VATNumberRaw.value = VATNumberRaw.value.trim().toUpperCase().replace(/\s/g, " "); // replacement is needed because some apps use non breaking spaces when copying
 
-    @Prop({ default: null })
-        modelValue!: string | null
-
-    @Prop({ default: true })
-        required!: boolean
-
-    @Prop({ default: $t(`%zG`) })
-        placeholder!: string
-
-    @Prop({ default: $t(`%yv`) })
-        autocomplete!: string
-
-    errorBox: ErrorBox | null = null
-
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null) {
-            return
-        }
-        this.VATNumberRaw = val
-    }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate()
-            })
-        }
-
-        this.VATNumberRaw = this.modelValue ?? ""
+    if (!props.required && VATNumberRaw.value.length === 0) {
+        errorBox.value = null;
+        model.value = null;
+        return true;
     }
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this)
-        }
+    if (props.required && VATNumberRaw.value.length === 0) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            "code": "invalid_field",
+            "message": $t(`%zH`),
+            "field": "VATNumber",
+        }));
+        return false;
     }
 
-    async validate() {
-        this.VATNumberRaw = this.VATNumberRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
+    if (VATNumberRaw.value.length > 2 && VATNumberRaw.value.substr(0, 2) !== props.country.toString()) {
+        // Add required country in VAT number
+        VATNumberRaw.value = props.country + VATNumberRaw.value;
+    }
 
-        if (!this.required && this.VATNumberRaw.length === 0) {
-            this.errorBox = null
-            this.$emit('update:modelValue', null)
-            return true
-        }
+    const jsvat = await import(/* webpackChunkName: "jsvat-next" */ 'jsvat-next');
+    const result = jsvat.checkVAT(VATNumberRaw.value, props.country === Country.Belgium ? [jsvat.belgium] : [jsvat.netherlands]);
 
-        if (this.required && this.VATNumberRaw.length === 0) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": $t(`%zH`),
-                "field": "VATNumber"
-            }))
-            return false
-        }
-
-        if (this.VATNumberRaw.length > 2 && this.VATNumberRaw.substr(0, 2) !== this.country.toString()) {
-            // Add required country in VAT number
-            this.VATNumberRaw = this.country+this.VATNumberRaw
-        }
-
-        const jsvat = await import(/* webpackChunkName: "jsvat-next" */ 'jsvat-next');
-        const result = jsvat.checkVAT(this.VATNumberRaw, this.country === Country.Belgium ? [jsvat.belgium] : [jsvat.netherlands]);
-        
-        if (!result.isValid) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": $t(`%zI`) + ' '+ this.VATNumberRaw,
-                "field": "VATNumber"
-            }))
-            return false
-
-        } else {
-            this.VATNumberRaw = result.value ?? this.VATNumberRaw
-            this.$emit('update:modelValue', this.VATNumberRaw)
-            this.errorBox = null
-            return true
-        }
+    if (!result.isValid) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            "code": "invalid_field",
+            "message": $t(`%zI`) + ' ' + VATNumberRaw.value,
+            "field": "VATNumber",
+        }));
+        return false;
+    }
+    else {
+        VATNumberRaw.value = result.value ?? VATNumberRaw.value;
+        model.value = VATNumberRaw.value;
+        errorBox.value = null;
+        return true;
     }
 }
 </script>

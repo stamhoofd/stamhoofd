@@ -1,6 +1,6 @@
 <template>
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
-        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" :context-menu-view="$refs.contextMenuView" @click="setSortByColumn(column)">
+        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" :context-menu-view="(contextMenuView as any)" @click="setSortByColumn(column)">
             <template v-if="getSortByColumn(column)" #left>
                 <span :class="'icon '+getSortDirectionIcon()" />
             </template>
@@ -12,57 +12,39 @@
     </ContextMenuView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import Checkbox from '#inputs/Checkbox.vue';
+<script lang="ts" setup>
 import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
-import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
-
 import { SortItemDirection } from "@stamhoofd/structures";
+import { computed, useTemplateRef } from 'vue';
+
 import type { Column } from "./classes";
 
-@Component({
-    components: {
-        ContextMenuView,
-        ContextMenuItemView,
-        ContextMenuLine,
-        Checkbox
-    },
-})
-export default class ColumnSortingContextMenu extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-        columns: Column<any, any>[];
+const props = defineProps<{
+    columns: Column<any, any>[];
+    setSort: (column: Column<any, any>, direction: SortItemDirection) => void;
+    sortBy: Column<any, any>;
+    sortDirection: SortItemDirection;
+}>();
 
-    @Prop({ required: true })
-        setSort: (column: Column<any, any>, direction: SortItemDirection) => void
-    
-    @Prop({ required: true })
-        sortBy: Column<any, any>;
+const contextMenuView = useTemplateRef('contextMenuView');
 
-    @Prop({ required: true })
-        sortDirection: SortItemDirection
-
-    setSortByColumn(column: Column<any, any>) {
-        if (this.sortBy.id === column.id) {
-            this.setSort(column, this.sortDirection === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC)
-        } else {
-            this.setSort(column, this.sortDirection)
-        }
+function setSortByColumn(column: Column<any, any>) {
+    if (props.sortBy.id === column.id) {
+        props.setSort(column, props.sortDirection === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC);
     }
-
-    getSortByColumn(column: Column<any, any>) {
-        return this.sortBy.id === column.id ? true : false
+    else {
+        props.setSort(column, props.sortDirection);
     }
-
-    getSortDirectionIcon() {
-        return this.sortDirection === SortItemDirection.ASC ? "arrow-up-small" : "arrow-down-small"
-    }
-
-    get sortedColumns() {
-        return this.columns.filter(c => c.allowSorting).sort((a, b) => a.index - b.index)
-    }
-
 }
+
+function getSortByColumn(column: Column<any, any>) {
+    return props.sortBy.id === column.id ? true : false;
+}
+
+function getSortDirectionIcon() {
+    return props.sortDirection === SortItemDirection.ASC ? "arrow-up-small" : "arrow-down-small";
+}
+
+const sortedColumns = computed(() => props.columns.filter(c => c.allowSorting).sort((a, b) => a.index - b.index));
 </script>

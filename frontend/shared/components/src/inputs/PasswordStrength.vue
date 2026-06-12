@@ -3,7 +3,7 @@
         <div class="password-strength">
             <div :style="{ width: strength+'%' }" :class="type" />
         </div>
-        <p v-if="!modelValue" class="style-description-small">
+        <p v-if="!model" class="style-description-small">
             {{ $t('%dV') }}
         </p>
         <p v-else-if="warning.length > 0" class="style-description-small">
@@ -26,115 +26,98 @@
         </p>
 
         <template #right>
-            <span v-if="modelValue" :class="type" class="password-strength-description">{{ description }}</span>
+            <span v-if="model" :class="type" class="password-strength-description">{{ description }}</span>
         </template>
     </STInputBox>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { computed, ref, watch } from 'vue';
 
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-})
-export default class PasswordStrength extends VueComponent {
-    @Prop({ default: null })
-    modelValue!: string | null;
+const model = defineModel<string | null>({ default: null });
 
-    strength = 0;
-    duration = 0;
-    warning = '';
+const strength = ref(0);
+const duration = ref(0);
+const warning = ref('');
 
-    calculateCounter = 0;
-    loading = false;
+let calculateCounter = 0;
+const loading = ref(false);
 
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null || val.length === 0) {
-            this.calculateCounter++;
-            this.strength = 0;
-            this.duration = 0;
-            this.loading = false;
+watch(model, (val) => {
+    if (val === null || val.length === 0) {
+        calculateCounter++;
+        strength.value = 0;
+        duration.value = 0;
+        loading.value = false;
+        return;
+    }
+    calculateStrength(val).catch((e) => {
+        console.error(e);
+    });
+});
+
+async function calculateStrength(password: string) {
+    calculateCounter++;
+    const saved = calculateCounter;
+    loading.value = true;
+
+    try {
+        const calculator = await import(/* webpackChunkName: "PasswordStrengthCalculator" */ './PasswordStrengthCalculator');
+        if (saved !== calculateCounter) {
+            // skip
             return;
         }
-        this.calculateStrength(val).catch((e) => {
-            console.error(e);
-        });
+        const result = calculator.checkPassword(password);
+        if (saved !== calculateCounter) {
+            // skip
+            return;
+        }
+        warning.value = result.feedback.warning ?? '';
+        strength.value = result.score * 25;
+        duration.value = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond;
+    }
+    catch (e) {
+        // ignore
     }
 
-    async calculateStrength(password: string) {
-        this.calculateCounter++;
-        const saved = this.calculateCounter;
-        this.loading = true;
-
-        try {
-            const calculator = await import(/* webpackChunkName: "PasswordStrengthCalculator" */ './PasswordStrengthCalculator');
-            if (saved !== this.calculateCounter) {
-                // skip
-                return;
-            }
-            const result = calculator.checkPassword(password);
-            if (saved !== this.calculateCounter) {
-                // skip
-                return;
-            }
-            this.warning = result.feedback.warning ?? '';
-            this.strength = result.score * 25;
-            this.duration = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond;
-        }
-        catch (e) {
-            // ignore
-        }
-
-        if (saved === this.calculateCounter) {
-            this.loading = false;
-        }
-    }
-
-    get type() {
-        const strength = this.strength;
-        if (strength === 0) {
-            return 'none';
-        }
-
-        if (strength < 50) {
-            return 'error';
-        }
-
-        if (strength < 100) {
-            return 'warning';
-        }
-
-        return 'success';
-    }
-
-    get description() {
-        const strength = this.strength;
-        if (strength < 50) {
-            return $t(`%z7`);
-        }
-
-        if (strength < 75) {
-            return $t(`%z8`);
-        }
-
-        if (strength < 100) {
-            return $t(`%z9`);
-        }
-
-        return $t(`%zA`);
-    }
-
-    get detailDescription() {
-        if (this.warning.length > 0) {
-            return this.warning;
-        }
+    if (saved === calculateCounter) {
+        loading.value = false;
     }
 }
+
+const type = computed(() => {
+    if (strength.value === 0) {
+        return 'none';
+    }
+
+    if (strength.value < 50) {
+        return 'error';
+    }
+
+    if (strength.value < 100) {
+        return 'warning';
+    }
+
+    return 'success';
+});
+
+const description = computed(() => {
+    if (strength.value < 50) {
+        return $t(`%z7`);
+    }
+
+    if (strength.value < 75) {
+        return $t(`%z8`);
+    }
+
+    if (strength.value < 100) {
+        return $t(`%z9`);
+    }
+
+    return $t(`%zA`);
+});
 </script>
 
 <style lang="scss">

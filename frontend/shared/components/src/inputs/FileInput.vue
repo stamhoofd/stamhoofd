@@ -1,154 +1,143 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="file-input-box" :class="{ center: !modelValue }">
+        <label class="file-input-box" :class="{ center: !model }">
 
             <Spinner v-if="uploading" />
-            <span v-else-if="modelValue === null" class="icon center upload" />
+            <span v-else-if="model === null" class="icon center upload" />
 
-            <span v-if="modelValue" :class="'icon '+getFileIcon(modelValue)" />
-            <span v-if="modelValue" class="text">{{ modelValue.name }}</span>
+            <span v-if="model" :class="'icon '+getFileIcon(model)" />
+            <span v-if="model" class="text">{{ model.name }}</span>
 
             <input type="file" class="file-upload" :accept="accept" @change="changedFile">
-            <button v-if="!required && modelValue" class="button icon trash" type="button" @click="deleteMe" @click.prevent="openFile" />
-            <span v-if="required && modelValue" class="button icon sync" />
+            <button v-if="!required && model" class="button icon trash" type="button" @click="deleteMe" @click.prevent="openFile" />
+            <span v-if="required && model" class="button icon sync" />
 
-            <button v-if="modelValue" class="button icon external" type="button" @click.prevent="openFile" />
+            <button v-if="model" class="button icon external" type="button" @click.prevent="openFile" />
         </label>
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { File } from '@stamhoofd/structures';
+import { ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
+import { useContext } from '../hooks/useContext.ts';
 import Spinner from '../Spinner.vue';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        Spinner,
-        STInputBox,
-    },
-})
-export default class FileInput extends Mixins(NavigationMixin) {
-    @Prop({ default: '' })
-    title: string;
+const model = defineModel<File | null>({ default: null });
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const props = withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    required?: boolean;
+    isPrivate?: boolean;
+    accept?: string;
+}>(), {
+    title: '',
+    validator: null,
+    required: true,
+    isPrivate: false,
+    accept: 'application/pdf',
+});
 
-    @Prop({ default: null })
-    modelValue: File | null;
+const context = useContext();
+const owner = useRequestOwner();
 
-    @Prop({ default: true })
-    required!: boolean;
+const errorBox = ref<ErrorBox | null>(null);
+const uploading = ref(false);
 
-    @Prop({ default: false })
-    isPrivate: boolean;
+function deleteMe() {
+    model.value = null;
+}
 
-    @Prop({ default: 'application/pdf' })
-    accept: string;
+function openFile(event: MouseEvent) {
+    if (model.value) {
+        window.open(model.value.getPublicPath(), '_blank');
+        event.preventDefault();
+    }
+}
 
-    errorBox: ErrorBox | null = null;
+function getFileIcon(file: File) {
+    if (file.path.endsWith('.png') || file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.gif')) {
+        return 'file-image';
+    }
+    if (file.path.endsWith('.pdf')) {
+        return 'file-pdf color-pdf';
+    }
+    if (file.path.endsWith('.xlsx') || file.path.endsWith('.xls')) {
+        return 'file-excel color-excel';
+    }
+    if (file.path.endsWith('.docx') || file.path.endsWith('.doc')) {
+        return 'file-word color-word';
+    }
+    return 'file';
+}
 
-    uploading = false;
-
-    deleteMe() {
-        this.$emit('update:modelValue', null);
+function changedFile(event: Event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+        return;
+    }
+    const target = event.target;
+    if (!target.files || target.files.length !== 1) {
+        return;
+    }
+    if (uploading.value) {
+        return;
     }
 
-    openFile(event: MouseEvent) {
-        if (this.modelValue) {
-            window.open(this.modelValue.getPublicPath(), '_blank');
-            event.preventDefault();
-        }
+    const file = target.files[0];
+
+    if (file.size > 20 * 1024 * 1024) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: 'file_too_large',
+            message: $t(`%yz`),
+        }));
+        return;
     }
 
-    getFileIcon(file: File) {
-        if (file.path.endsWith('.png') || file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.gif')) {
-            return 'file-image';
-        }
-        if (file.path.endsWith('.pdf')) {
-            return 'file-pdf color-pdf';
-        }
-        if (file.path.endsWith('.xlsx') || file.path.endsWith('.xls')) {
-            return 'file-excel color-excel';
-        }
-        if (file.path.endsWith('.docx') || file.path.endsWith('.doc')) {
-            return 'file-word color-word';
-        }
-        return 'file';
-    }
+    const formData = new FormData();
+    formData.append('file', file);
 
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
+    uploading.value = true;
+    errorBox.value = null;
 
-    changedFile(event: Event) {
-        if (!(event.target instanceof HTMLInputElement)) {
-            return;
-        }
-        const target = event.target
-        if (!target.files || target.files.length !== 1) {
-            return;
-        }
-        if (this.uploading) {
-            return;
-        }
-
-        const file = target.files[0];
-
-        if (file.size > 20 * 1024 * 1024) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'file_too_large',
-                message: $t(`%yz`),
-            }));
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        this.uploading = true;
-        this.errorBox = null;
-
-        this.$context.authenticatedServer
-            .request({
-                method: 'POST',
-                path: '/upload-file',
-                body: formData,
-                decoder: File,
-                timeout: 5 * 60 * 1000,
-                shouldRetry: false,
-                owner: this,
-                query: {
-                    private: this.isPrivate ? true : undefined,
-                },
-            })
-            .then((response) => {
-                this.$emit('update:modelValue', response.data);
-            })
-            .catch((e) => {
-                console.error(e);
-                if (Request.isNetworkError(e)) {
-                    e = new SimpleError({
-                        code: 'network_error',
-                        message: $t(`%16m`),
-                    });
-                }
-                this.errorBox = new ErrorBox(e);
-            })
-            .finally(() => {
-                this.uploading = false;
-                // Clear selection
-                target.value = '';
-            });
-    }
+    context.value.authenticatedServer
+        .request({
+            method: 'POST',
+            path: '/upload-file',
+            body: formData,
+            decoder: File,
+            timeout: 5 * 60 * 1000,
+            shouldRetry: false,
+            owner,
+            query: {
+                private: props.isPrivate ? true : undefined,
+            },
+        })
+        .then((response) => {
+            model.value = response.data;
+        })
+        .catch((e) => {
+            console.error(e);
+            if (Request.isNetworkError(e)) {
+                e = new SimpleError({
+                    code: 'network_error',
+                    message: $t(`%16m`),
+                });
+            }
+            errorBox.value = new ErrorBox(e);
+        })
+        .finally(() => {
+            uploading.value = false;
+            // Clear selection
+            target.value = '';
+        });
 }
 </script>
 

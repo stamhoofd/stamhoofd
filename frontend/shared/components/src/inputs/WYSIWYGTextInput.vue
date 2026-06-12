@@ -1,5 +1,5 @@
 <template>
-    <div v-if="editor" class="wysiwyg-text-input">
+    <div v-if="editor" ref="rootEl" class="wysiwyg-text-input">
         <editor-content :editor="editor" class="editor-content" />
 
         <div class="tools">
@@ -34,21 +34,19 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
 import { RichText } from '@stamhoofd/structures';
+import { DataValidator } from '@stamhoofd/utility';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
+import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
 
-import { DataValidator } from '@stamhoofd/utility';
 import { ColorHelper } from '../ColorHelper';
-import TooltipDirective from '../directives/Tooltip';
 import { WarningBox } from '../editor/EditorWarningBox';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import STButtonToolbar from '../navigation/STButtonToolbar.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 
@@ -61,265 +59,252 @@ function escapeHtml(unsafe: string): string {
         .replace(/'/g, '&#039;');
 }
 
-@Component({
-    components: {
-        EditorContent,
-        STButtonToolbar,
-        STList,
-        STListItem,
-    },
-    directives: {
-        Tooltip: TooltipDirective,
-    },
-    emits: ['update:modelValue'],
-})
-export default class WYSIWYGTextInput extends VueComponent {
-    @Prop({ required: true })
-    modelValue!: RichText;
+const model = defineModel<RichText>({ required: true });
 
-    @Prop({ default: '' })
-    placeholder!: string;
+const props = withDefaults(defineProps<{
+    placeholder?: string;
+    headingStartLevel?: number;
+    color?: string | null;
+    editorClass?: string;
+}>(), {
+    placeholder: '',
+    headingStartLevel: 2,
+    color: null,
+    editorClass: '',
+});
 
-    @Prop({ default: 2 })
-    headingStartLevel!: number;
+const showLinkEditor = ref(false);
+const editLink = ref('');
+const editor = shallowRef<Editor>(null as any);
 
-    @Prop({ required: false, default: null })
-    color!: string | null;
+const rootEl = useTemplateRef<HTMLElement>('rootEl');
+const linkInput = useTemplateRef<HTMLInputElement>('linkInput');
 
-    @Prop({ default: '' })
-    editorClass!: string;
+onBeforeMount(() => {
+    editor.value = buildEditor();
+});
 
-    showLinkEditor = false;
-    editLink = '';
-    editor: Editor = null as any;
-    showTextStyles = false;
-
-    beforeMount() {
-        this.editor = this.buildEditor();
-    }
-
-    mounted() {
-        if (this.color) {
-            const el = this.$el.querySelector('.editor-content') as HTMLElement;
-            if (el) {
-                ColorHelper.setColor(this.color, el);
-            }
+onMounted(() => {
+    if (props.color) {
+        const el = rootEl.value?.querySelector('.editor-content') as HTMLElement | null;
+        if (el) {
+            ColorHelper.setColor(props.color, el);
         }
     }
+});
 
-    @Watch('color')
-    onColorChanged() {
-        if (this.color) {
-            const el = this.$el.querySelector('.editor-content') as HTMLElement;
-            if (el) {
-                ColorHelper.setColor(this.color, el);
-            }
+watch(() => props.color, () => {
+    if (props.color) {
+        const el = rootEl.value?.querySelector('.editor-content') as HTMLElement | null;
+        if (el) {
+            ColorHelper.setColor(props.color, el);
         }
     }
+});
 
-    beforeUnmount() {
-        // This fixes a glitch that the editor content is wiped before the transition is finished
-        const content = this.$el.innerHTML;
-        this.$el.innerHTML = content;
-        this.editor?.destroy();
+onBeforeUnmount(() => {
+    // This fixes a glitch that the editor content is wiped before the transition is finished
+    if (rootEl.value) {
+        const content = rootEl.value.innerHTML;
+        rootEl.value.innerHTML = content;
     }
+    editor.value?.destroy();
+});
 
-    buildEditor() {
-        let content = this.modelValue.html;
+function buildEditor() {
+    let content = model.value.html;
 
-        if (!content && this.modelValue.text) {
-            // Special conversion operation
-            const splitted = this.modelValue.text.split('\n');
-            for (const split of splitted) (
-                content += `<p>${escapeHtml(split)}</p>`
-            );
-        }
-        return new Editor({
-            content,
-            extensions: [
-                StarterKit.configure({
-                    heading: {
-                        levels: [this.headingStartLevel as any, this.headingStartLevel + 1 as any],
-                    },
-                    link: {
-                        openOnClick: false,
-                        protocols: ['mailto'],
-                    },
-                }),
-                Placeholder.configure({
-                    placeholder: this.placeholder,
-                }),
-                WarningBox.configure({}),
-                Typography.configure({}),
-            ],
-            onSelectionUpdate: ({ editor }) => {
-                if (this.showLinkEditor) {
-                    if (editor.isActive('link')) {
-                        this.editLink = editor.getAttributes('link')?.href ?? '';
-                    }
-                    else {
-                        if (editor.state.selection.empty) {
-                            this.showLinkEditor = false;
-                        }
+    if (!content && model.value.text) {
+        // Special conversion operation
+        const splitted = model.value.text.split('\n');
+        for (const split of splitted) (
+            content += `<p>${escapeHtml(split)}</p>`
+        );
+    }
+    return new Editor({
+        content,
+        extensions: [
+            StarterKit.configure({
+                heading: {
+                    levels: [props.headingStartLevel as any, props.headingStartLevel + 1 as any],
+                },
+                link: {
+                    openOnClick: false,
+                    protocols: ['mailto'],
+                },
+            }),
+            Placeholder.configure({
+                placeholder: props.placeholder,
+            }),
+            WarningBox.configure({}),
+            Typography.configure({}),
+        ],
+        onSelectionUpdate: ({ editor: e }) => {
+            if (showLinkEditor.value) {
+                if (e.isActive('link')) {
+                    editLink.value = e.getAttributes('link')?.href ?? '';
+                }
+                else {
+                    if (e.state.selection.empty) {
+                        showLinkEditor.value = false;
                     }
                 }
+            }
+        },
+        onUpdate: ({ editor: e }) => {
+            model.value = RichText.create({ html: e.getHTML(), text: e.getText() });
+        },
+        editorProps: {
+            attributes: {
+                class: props.editorClass,
             },
-            onUpdate: ({ editor }) => {
-                this.$emit('update:modelValue', RichText.create({ html: editor.getHTML(), text: editor.getText() }));
-            },
-            editorProps: {
-                attributes: {
-                    class: this.editorClass,
+        },
+    });
+}
+
+function openLinkEditor() {
+    if (showLinkEditor.value) {
+        editor.value!.chain().focus().run();
+        nextTick(() => {
+            showLinkEditor.value = false;
+        }).catch(console.error);
+        return;
+    }
+    if (!editor.value!.isActive('link') && editor.value!.state.selection.empty) {
+        new Toast($t(`%v8`), 'info').show();
+        return;
+    }
+    editLink.value = editor.value!.getAttributes('link')?.href ?? '';
+    showLinkEditor.value = true;
+    nextTick(() => {
+        linkInput.value?.focus();
+    }).catch(console.error);
+}
+
+function openTextStyles(event: Event) {
+    if (!(event.currentTarget instanceof HTMLElement)) {
+        return;
+    }
+
+    // Get initial selection
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: $t(`%vC`),
+                icon: 'h1',
+                selected: editor.value.isActive('heading', { level: props.headingStartLevel }),
+                action: () => {
+                    editor.value.chain().focus().toggleHeading({ level: props.headingStartLevel as any }).run();
+                    return true;
                 },
-            },
-        });
+            }),
+            new ContextMenuItem({
+                name: $t(`%aJ`),
+                icon: 'h2',
+                selected: editor.value.isActive('heading', { level: props.headingStartLevel + 1 }),
+                action: () => {
+                    editor.value.chain().focus().toggleHeading({ level: props.headingStartLevel + 1 as any }).run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: $t(`%zJ`),
+                icon: 'warning',
+                selected: editor.value.isActive('warningBox', { type: 'warning' }),
+                action: () => {
+                    editor.value.chain().focus().toggleBox('warning').run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: $t(`%J`),
+                icon: 'info',
+                selected: editor.value.isActive('warningBox', { type: 'info' }),
+                action: () => {
+                    editor.value.chain().focus().toggleBox('info').run();
+                    return true;
+                },
+            }),
+        ],
+        [
+            new ContextMenuItem({
+                name: $t(`%aL`),
+                icon: 'ul',
+                selected: editor.value.isActive('bulletList'),
+                action: () => {
+                    editor.value.chain().focus().toggleBulletList().run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: $t(`%vF`),
+                icon: 'ol',
+                selected: editor.value.isActive('orderedList'),
+                action: () => {
+                    editor.value.chain().focus().toggleOrderedList().run();
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ button: event.currentTarget, yPlacement: 'top' }).catch(console.error);
+}
+
+function isValidHttpUrl(string: string) {
+    if (string.startsWith('mailto:')) {
+        // Strip mailto and validate email address
+        string = string.substring(7);
+        if (DataValidator.isEmailValid(string)) {
+            return true;
+        }
+        return false;
     }
 
-    openLinkEditor() {
-        if (this.showLinkEditor) {
-            this.editor!.chain().focus().run();
-            this.$nextTick(() => {
-                this.showLinkEditor = false;
-            });
-            return;
-        }
-        if (!this.editor!.isActive('link') && this.editor!.state.selection.empty) {
-            new Toast($t(`%v8`), 'info').show();
-            return;
-        }
-        this.editLink = this.editor!.getAttributes('link')?.href ?? '';
-        this.showLinkEditor = true;
-        this.$nextTick(() => {
-            (this.$refs.linkInput as HTMLInputElement).focus();
-        });
+    let url;
+
+    try {
+        url = new URL(string);
+    }
+    catch (_) {
+        return false;
     }
 
-    openTextStyles(event: Event) {
-        if (!(event.currentTarget instanceof HTMLElement)) {
-            return;
-        }
-        
-        // Get initial selection
-        const m = this;
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: $t(`%vC`),
-                    icon: 'h1',
-                    selected: this.editor.isActive('heading', { level: this.headingStartLevel }),
-                    action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: this.headingStartLevel as any }).run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: $t(`%aJ`),
-                    icon: 'h2',
-                    selected: this.editor.isActive('heading', { level: this.headingStartLevel + 1 }),
-                    action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: this.headingStartLevel + 1 as any }).run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: $t(`%zJ`),
-                    icon: 'warning',
-                    selected: this.editor.isActive('warningBox', { type: 'warning' }),
-                    action: () => {
-                        m.editor.chain().focus().toggleBox('warning').run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: $t(`%J`),
-                    icon: 'info',
-                    selected: this.editor.isActive('warningBox', { type: 'info' }),
-                    action: () => {
-                        m.editor.chain().focus().toggleBox('info').run();
-                        return true;
-                    },
-                }),
-            ],
-            [
-                new ContextMenuItem({
-                    name: $t(`%aL`),
-                    icon: 'ul',
-                    selected: this.editor.isActive('bulletList'),
-                    action: () => {
-                        m.editor.chain().focus().toggleBulletList().run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: $t(`%vF`),
-                    icon: 'ol',
-                    selected: this.editor.isActive('orderedList'),
-                    action: () => {
-                        m.editor.chain().focus().toggleOrderedList().run();
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ button: event.currentTarget, yPlacement: 'top' }).catch(console.error);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
+function saveLink() {
+    let cleanedUrl = editLink.value.trim();
+
+    if (cleanedUrl.length === 0) {
+        clearLink();
+        return;
     }
 
-    isValidHttpUrl(string: string) {
-        if (string.startsWith('mailto:')) {
-            // Strip mailto and validate email address
-            string = string.substring(7);
-            if (DataValidator.isEmailValid(string)) {
-                return true;
-            }
-            return false;
+    if (!isValidHttpUrl(cleanedUrl)) {
+        if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
+            cleanedUrl = 'mailto:' + cleanedUrl;
         }
-
-        let url;
-
-        try {
-            url = new URL(string);
+        else if (isValidHttpUrl('http://' + cleanedUrl)) {
+            cleanedUrl = 'http://' + cleanedUrl;
         }
-        catch (_) {
-            return false;
-        }
-
-        return url.protocol === 'http:' || url.protocol === 'https:';
     }
 
-    saveLink() {
-        let cleanedUrl = this.editLink.trim();
-
-        if (cleanedUrl.length === 0) {
-            this.clearLink();
-            return;
-        }
-
-        if (!this.isValidHttpUrl(cleanedUrl)) {
-            if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
-                cleanedUrl = 'mailto:' + cleanedUrl;
-            }
-            else if (this.isValidHttpUrl('http://' + cleanedUrl)) {
-                cleanedUrl = 'http://' + cleanedUrl;
-            }
-        }
-
-        if (!this.isValidHttpUrl(cleanedUrl)) {
-            new Toast($t(`%zK`), 'error red').show();
-            return;
-        }
-
-        this.editor.chain().focus().extendMarkRange('link').setLink({ href: cleanedUrl }).focus().run();
-        this.$nextTick(() => {
-            this.showLinkEditor = false;
-        });
+    if (!isValidHttpUrl(cleanedUrl)) {
+        new Toast($t(`%zK`), 'error red').show();
+        return;
     }
 
-    clearLink() {
-        this.editor.chain().focus().unsetLink().focus().run();
-        this.$nextTick(() => {
-            this.showLinkEditor = false;
-        });
-    }
+    editor.value.chain().focus().extendMarkRange('link').setLink({ href: cleanedUrl }).focus().run();
+    nextTick(() => {
+        showLinkEditor.value = false;
+    }).catch(console.error);
+}
+
+function clearLink() {
+    editor.value.chain().focus().unsetLink().focus().run();
+    nextTick(() => {
+        showLinkEditor.value = false;
+    }).catch(console.error);
 }
 </script>
 

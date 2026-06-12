@@ -26,212 +26,213 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { onMounted, ref, useTemplateRef } from 'vue';
 
-@Component
-export default class Slider extends VueComponent {
-    @Prop({ type: Number, default: 0 })
-    min!: number
+const model = defineModel<number>({ default: 0 });
 
-    @Prop({ type: Number, default: 500 })
-    max!: number
+const props = withDefaults(defineProps<{
+    min?: number;
+    max?: number;
+}>(), {
+    min: 0,
+    max: 500,
+});
 
-    /// Offset from the center of the handle during drag.
-    startOffset = 0;
-    handlePercentage = 50;
-    round?: number = 10;
+// if softBounds = true, maximum and minimum is overrideable by the user
+// when he manually enters a number. This is usefull if the maximum and
+// minimum is just a convenience.
+const softBounds = true;
+const round: number | undefined = 10;
 
-    // if softBounds = true, maximum and minimum is overrideable by the user
-    // when he manually enters a number. This is usefull if the maximum and
-    // minimum is just a convenience.
-    softBounds = true;
-    animate = false;
+const min = ref(props.min);
+const max = ref(props.max);
 
-    @Prop({ type: Number, default: 0 })
-    modelValue!: number;
+/// Offset from the center of the handle during drag.
+let startOffset = 0;
+const handlePercentage = ref(50);
+const animate = ref(false);
+let dragging = false;
 
-    dragging = false;
+const slider = useTemplateRef<HTMLElement>('slider');
+const handle = useTemplateRef<HTMLElement>('handle');
 
-    get internalValue() {
-        return this.modelValue
+const internalValue = model;
+
+onMounted(() => {
+    updateSlider();
+});
+
+function attach() {
+    document.addEventListener("mousemove", mouseMove, {
+        passive: false,
+    });
+    document.addEventListener("touchmove", mouseMove, {
+        passive: false,
+    });
+
+    document.addEventListener("mouseup", mouseUp, { passive: false });
+    document.addEventListener("touchend", mouseUp, { passive: false });
+}
+
+function detach() {
+    document.removeEventListener("mousemove", mouseMove);
+    document.removeEventListener("touchmove", mouseMove);
+
+    document.removeEventListener("mouseup", mouseUp);
+    document.removeEventListener("touchend", mouseUp);
+}
+
+function delayedSelect(event: Event) {
+    // Prevent default seems to be required because else it wont work 100% of the time
+    event.preventDefault();
+
+    if (event.target instanceof HTMLInputElement) {
+        // Select all the text
+        event.target.select();
     }
 
-    set internalValue(val: number) {
-        this.$emit('update:modelValue', val)
-    }
-
-    mounted() {
-        this.updateSlider()
-    }
-
-    attach() {
-        document.addEventListener("mousemove", this.mouseMove, {
-            passive: false,
-        });
-        document.addEventListener("touchmove", this.mouseMove, {
-            passive: false,
-        });
-
-        document.addEventListener("mouseup", this.mouseUp, { passive: false });
-        document.addEventListener("touchend", this.mouseUp, { passive: false });
-    }
-
-    detach() {
-        document.removeEventListener("mousemove", this.mouseMove);
-        document.removeEventListener("touchmove", this.mouseMove);
-
-        document.removeEventListener("mouseup", this.mouseUp);
-        document.removeEventListener("touchend", this.mouseUp);
-    }
-
-    delayedSelect(event: Event) {
-        // Prevent default seems to be required because else it wont work 100% of the time
+    const handler = (event: Event) => {
+        // Safari deselects the text on mouse up, we need to prevent this
         event.preventDefault();
-
-        if (event.target instanceof HTMLInputElement) {
-            // Select all the text
-            event.target.select();
-        }
-
-        const handler = (event: Event) => {
-            // Safari deselects the text on mouse up, we need to prevent this
-            event.preventDefault();
-            document.removeEventListener("mouseup", handler);
-            return false;
-        };
-
-        // Safari fix
-        document.addEventListener("mouseup", handler);
-    }
-
-    getEventX(event: any) {
-        let x = 0;
-        if (event.changedTouches) {
-            const touches = event.changedTouches;
-            for (const touch of touches) {
-                x = touch.pageX;
-            }
-        } else {
-            x = event.pageX;
-        }
-        return x;
-    }
-
-    getXOffset() {
-        return (this.$refs.slider as HTMLElement).getBoundingClientRect().left;
-    }
-
-    getWidth() {
-        return (this.$refs.slider as HTMLElement).offsetWidth;
-    }
-
-    getHandleWidth() {
-        // We add a little overlap over here
-        return (this.$refs.handle as HTMLElement).offsetWidth - 2;
-    }
-
-    getHandleX() {
-        const handleWidth = this.getHandleWidth();
-        return ((this.internalValue - this.min) / (this.max - this.min)) * (this.getWidth() - handleWidth) + handleWidth / 2;
-    }
-
-    getHandleOffset(event: Event) {
-        return this.getEventX(event) - this.getXOffset() - this.getHandleX();
-    }
-
-    dragStart(event: Event) {
-        if (this.dragging) {
-            return;
-        }
-        // startOffset = the distance between the center of the handle during dragging
-        this.startOffset = this.getHandleOffset(event);
-        this.dragging = true;
-
-        if (Math.abs(this.startOffset) > this.getHandleWidth() / 2) {
-            this.startOffset = 0;
-            // immediately update!
-
-            this.animate = true;
-            this.mouseMove(event);
-        }
-        // Prevent scrolling (on mobile) and other stuff
-        event.preventDefault();
-
-        this.attach();
+        document.removeEventListener("mouseup", handler);
         return false;
+    };
+
+    // Safari fix
+    document.addEventListener("mouseup", handler);
+}
+
+function getEventX(event: any) {
+    let x = 0;
+    if (event.changedTouches) {
+        const touches = event.changedTouches;
+        for (const touch of touches) {
+            x = touch.pageX;
+        }
+    }
+    else {
+        x = event.pageX;
+    }
+    return x;
+}
+
+function getXOffset() {
+    return slider.value!.getBoundingClientRect().left;
+}
+
+function getWidth() {
+    return slider.value!.offsetWidth;
+}
+
+function getHandleWidth() {
+    // We add a little overlap over here
+    return handle.value!.offsetWidth - 2;
+}
+
+function getHandleX() {
+    const handleWidth = getHandleWidth();
+    return ((internalValue.value - min.value) / (max.value - min.value)) * (getWidth() - handleWidth) + handleWidth / 2;
+}
+
+function getHandleOffset(event: Event) {
+    return getEventX(event) - getXOffset() - getHandleX();
+}
+
+function dragStart(event: Event) {
+    if (dragging) {
+        return;
+    }
+    // startOffset = the distance between the center of the handle during dragging
+    startOffset = getHandleOffset(event);
+    dragging = true;
+
+    if (Math.abs(startOffset) > getHandleWidth() / 2) {
+        startOffset = 0;
+        // immediately update!
+
+        animate.value = true;
+        mouseMove(event);
+    }
+    // Prevent scrolling (on mobile) and other stuff
+    event.preventDefault();
+
+    attach();
+    return false;
+}
+
+// Set the percentage and value based on a manual entered value
+function updateSlider() {
+    let _value = Math.round(model.value);
+    if (_value > max.value) {
+        if (softBounds) {
+            max.value = _value;
+        }
+        else {
+            _value = max.value;
+        }
     }
 
-    // Set the percentage and value based on a manual entered value
-    updateSlider() {
-        let _value = Math.round(this.modelValue);
-        if (_value > this.max) {
-            if (this.softBounds) {
-                this.max = _value;
-            } else {
-                _value = this.max;
-            }
+    if (_value < min.value) {
+        if (softBounds) {
+            model.value = Math.max(0, _value);
+            min.value = _value;
         }
-
-        if (_value < this.min) {
-            if (this.softBounds) {
-                this.modelValue = Math.max(0, _value);
-                this.min = _value;
-            } else {
-                _value = this.min;
-            }
+        else {
+            _value = min.value;
         }
-
-        if (_value !== this.modelValue) {
-            this.internalValue = _value
-        }
-
-        const handleWidth = this.getHandleWidth();
-        const width = this.getWidth();
-        const percentage = (this.modelValue - this.min) / (this.max - this.min);
-        const relativeWidth = width - handleWidth;
-        const percentageOffset = handleWidth / 2 / width;
-
-        // Convert the percentage to the handle percentage
-        this.animate = true;
-        this.handlePercentage = ((percentage / width) * relativeWidth + percentageOffset) * 100;
     }
 
-    mouseMove(event: Event) {
-        const handleWidth = this.getHandleWidth();
-        const width = this.getWidth();
-        const x = this.getEventX(event) - this.getXOffset() - this.startOffset - handleWidth / 2;
-
-        const relativeWidth = width - handleWidth;
-        const percentageOffset = handleWidth / 2 / width;
-
-        const percentage = Math.min(Math.max(0, x / relativeWidth), 1);
-
-        // Convert the percentage to the handle percentage
-        this.handlePercentage = ((percentage / width) * relativeWidth + percentageOffset) * 100;
-
-        const oldValue = this.modelValue;
-        const newValue = Math.round(percentage * (this.max - this.min)) + this.min;
-        if (this.round) {
-            this.internalValue = Math.round(newValue / this.round) * this.round;
-        } else {
-            this.internalValue = newValue
-        }
-
-        if (oldValue === newValue) {
-            this.animate = false;
-        }
-
-        // Prevent scrolling (on mobile) and other stuff
-        event.preventDefault();
-        return false;
+    if (_value !== model.value) {
+        internalValue.value = _value;
     }
 
-    mouseUp() {
-        if (this.dragging) {
-            this.detach();
-            this.dragging = false;
-        }
+    const handleWidth = getHandleWidth();
+    const width = getWidth();
+    const percentage = (model.value - min.value) / (max.value - min.value);
+    const relativeWidth = width - handleWidth;
+    const percentageOffset = handleWidth / 2 / width;
+
+    // Convert the percentage to the handle percentage
+    animate.value = true;
+    handlePercentage.value = ((percentage / width) * relativeWidth + percentageOffset) * 100;
+}
+
+function mouseMove(event: Event) {
+    const handleWidth = getHandleWidth();
+    const width = getWidth();
+    const x = getEventX(event) - getXOffset() - startOffset - handleWidth / 2;
+
+    const relativeWidth = width - handleWidth;
+    const percentageOffset = handleWidth / 2 / width;
+
+    const percentage = Math.min(Math.max(0, x / relativeWidth), 1);
+
+    // Convert the percentage to the handle percentage
+    handlePercentage.value = ((percentage / width) * relativeWidth + percentageOffset) * 100;
+
+    const oldValue = model.value;
+    const newValue = Math.round(percentage * (max.value - min.value)) + min.value;
+    if (round) {
+        internalValue.value = Math.round(newValue / round) * round;
+    }
+    else {
+        internalValue.value = newValue;
+    }
+
+    if (oldValue === newValue) {
+        animate.value = false;
+    }
+
+    // Prevent scrolling (on mobile) and other stuff
+    event.preventDefault();
+    return false;
+}
+
+function mouseUp() {
+    if (dragging) {
+        detach();
+        dragging = false;
     }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <div class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop()" @contextmenu.prevent>
+    <div ref="containerEl" class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop()" @contextmenu.prevent>
         <div
             ref="context"
             class="context-menu"
@@ -12,14 +12,22 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { injectHooks, usePop } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
 
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { ViewportHelper } from '../ViewportHelper';
-import type ContextMenuItemView from './ContextMenuItemView.vue';
-import type { ComponentPublicInstance } from 'vue';
+import type { ContextMenuItemApi } from './ContextMenuItemView.vue';
+
+/**
+ * The public surface a parent ContextMenuView exposes to its child menus.
+ */
+interface ParentMenuApi {
+    pop: (popParents?: boolean) => void;
+    isPopped: boolean;
+    el: HTMLElement | null;
+}
 
 function triangleContains(ax: number, ay: number, bx: number, by: number, cx: number, cy: number, x: number, y: number) {
     const det = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
@@ -29,663 +37,665 @@ function triangleContains(ax: number, ay: number, bx: number, by: number, cx: nu
         && det * ((ax - cx) * (y - cy) - (ay - cy) * (x - cx)) >= 0;
 }
 
-@Component({
+defineOptions({
     inheritAttrs: false,
-})
-export default class ContextMenuView extends VueComponent {
-    @Prop({
-        default: 0,
-    })
-    x!: number;
+});
 
-    @Prop({
-        default: null,
-    })
-    preferredWidth!: number | null;
-
-    usedPreferredHeight: number | null = null;
-    usedPreferredWidth: number | null = this.preferredWidth;
-    hide = false;
-
-    @Prop({
-        default: 0,
-    })
-    y!: number;
-
-    top: number | null = null;
-    left: number | null = null;
-    right: number | null = null;
-    bottom: number | null = null;
-
-    transformOrigin = '0 0';
-
-    @Prop({
-        default: 'right',
-    })
-    xPlacement!: 'right' | 'left';
-
-    usedXPlacement: 'right' | 'left' = this.xPlacement;
-
-    @Prop({
-        default: 'bottom',
-    })
-    yPlacement!: 'bottom' | 'top';
-
-    usedYPlacement: 'bottom' | 'top' = this.yPlacement;
-
-    @Prop({
-        default: null,
-    })
-    parentMenu!: ContextMenuView | null;
-
+const props = withDefaults(defineProps<{
+    x?: number;
+    preferredWidth?: number | null;
+    y?: number;
+    xPlacement?: 'right' | 'left';
+    yPlacement?: 'bottom' | 'top';
+    parentMenu?: ParentMenuApi | null;
     /**
      * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
      */
-    @Prop({
-        default: null,
-    })
-    wrapWidth!: number | null;
-
+    wrapWidth?: number | null;
     /**
-     * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
+     * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapHeight (needed for e.g. context menu's)
      */
-    @Prop({
-        default: null,
-    })
-    wrapHeight!: number | null;
+    wrapHeight?: number | null;
+    autoDismiss?: boolean;
+}>(), {
+    x: 0,
+    preferredWidth: null,
+    y: 0,
+    xPlacement: 'right',
+    yPlacement: 'bottom',
+    parentMenu: null,
+    wrapWidth: null,
+    wrapHeight: null,
+    autoDismiss: true,
+});
 
-    @Prop({
-        default: true,
-    })
-    autoDismiss!: boolean;
+const parentPop = usePop();
 
-    isPopped = false;
+const containerEl = useTemplateRef<HTMLElement>('containerEl');
+const context = useTemplateRef<HTMLElement>('context');
 
-    disableHoverChildMenus = false;
+const usedPreferredHeight = ref<number | null>(null);
+const usedPreferredWidth = ref<number | null>(props.preferredWidth);
+const hide = ref(false);
 
-    created(this: ComponentPublicInstance) {
-        // we cannot use setup in mixins, but we want to avoid having to duplicate the 'use' hooks logic.
-        // so this is a workaround
-        const definitions = {
-            parentPop: usePop(),
-        };
+const top = ref<number | null>(null);
+const left = ref<number | null>(null);
+const right = ref<number | null>(null);
+const bottom = ref<number | null>(null);
 
-        injectHooks(this, definitions);
+const transformOrigin = ref('0 0');
+
+const usedXPlacement = ref<'right' | 'left'>(props.xPlacement);
+const usedYPlacement = ref<'bottom' | 'top'>(props.yPlacement);
+
+const isPopped = ref(false);
+const childMenu = ref<ComponentWithProperties | null>(null);
+
+let disableHoverChildMenus = false;
+let currentlyHoveredItem: ContextMenuItemApi | null = null;
+
+// When we hover an item that has a child menu, we need to cancel other hovers if the mouse moves to the child menu
+let ignoreHover = false;
+let ignoreHoverItem: ContextMenuItemApi | null = null;
+let ignoreHoverTimeout: NodeJS.Timeout | null = null;
+let ignoreHoverTriangle: { p1: { x: number; y: number }; p2: { x: number; y: number }; p3: { x: number; y: number } } | null = null;
+let hoverTimeout: NodeJS.Timeout | null = null;
+
+onMounted(() => {
+    // Calculate position
+    let width = context.value!.offsetWidth;
+    let height = context.value!.offsetHeight;
+
+    const win = window,
+        doc = document,
+        docElem = doc.documentElement,
+        body = doc.getElementsByTagName('body')[0],
+        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
+        clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
+
+    const viewPadding = 15;
+    const viewPaddingBottom = Math.max(clientHeight < 900 ? 5 : 15, ViewportHelper.getBottomPadding());
+    const viewPaddingTop = clientHeight < 900 ? 5 : 15;
+
+    if (width > clientWidth - viewPadding * 2) {
+        usedPreferredWidth.value = clientWidth - viewPadding * 2;
+        width = usedPreferredWidth.value;
     }
 
-    mounted() {
-        // Calculate position
-        let width = (this.$refs.context as HTMLElement).offsetWidth;
-        let height = (this.$refs.context as HTMLElement).offsetHeight;
+    if (height > clientHeight - viewPaddingTop - viewPaddingBottom) {
+        usedPreferredHeight.value = clientHeight - viewPaddingTop - viewPaddingBottom;
+        height = usedPreferredHeight.value;
+    }
 
-        const win = window,
-            doc = document,
-            docElem = doc.documentElement,
-            body = doc.getElementsByTagName('body')[0],
-            clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
-            clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
+    if (width > clientWidth / 2) {
+        // Screen is too small to fit multiple context menus
+        disableHoverChildMenus = true;
+    }
 
-        const viewPadding = 15;
-        const viewPaddingBottom = Math.max(clientHeight < 900 ? 5 : 15, ViewportHelper.getBottomPadding());
-        const viewPaddingTop = clientHeight < 900 ? 5 : 15;
+    let usedX = props.x;
 
-        if (width > clientWidth - viewPadding * 2) {
-            this.usedPreferredWidth = clientWidth - viewPadding * 2;
-            width = this.usedPreferredWidth;
-        }
+    if (props.xPlacement === 'right') {
+        left.value = props.x;
 
-        if (height > clientHeight - viewPaddingTop - viewPaddingBottom) {
-            this.usedPreferredHeight = clientHeight - viewPaddingTop - viewPaddingBottom;
-            height = this.usedPreferredHeight;
-        }
+        // If the remaining space is too small, we need to wrap
+        if (width > clientWidth - viewPadding - props.x) {
+            left.value = null;
+            usedXPlacement.value = 'left';
 
-        if (width > clientWidth / 2) {
-            // Screen is too small to fit multiple context menus
-            this.disableHoverChildMenus = true;
-        }
+            if (props.wrapWidth !== null) {
+                // Wrap instead of sticking to right
+                usedX = usedX - props.wrapWidth;
+                right.value = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
 
-        let usedX = this.x;
-
-        if (this.xPlacement === 'right') {
-            this.left = this.x;
-
-            // If the remaining space is too small, we need to wrap
-            if (width > clientWidth - viewPadding - this.x) {
-                this.left = null;
-                this.usedXPlacement = 'left';
-
-                if (this.wrapWidth !== null) {
-                    // Wrap instead of sticking to right
-                    usedX = usedX - this.wrapWidth;
-                    this.right = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
-
-                    if (this.right < viewPadding) {
-                        this.right = viewPadding;
-                    }
-                } else {
-                    this.right = viewPadding;
-                }
-            } else {
-                if (this.left < viewPadding) {
-                    this.left = viewPadding;
+                if (right.value < viewPadding) {
+                    right.value = viewPadding;
                 }
             }
-            // - Math.max(0, width - (clientWidth - viewPadding - usedX);
-        } else {
-            this.right = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
-
-            if (this.right < viewPadding) {
-                this.right = viewPadding;
+            else {
+                right.value = viewPadding;
             }
         }
-
-        let usedY = this.y;
-
-        if (this.yPlacement === 'bottom') {
-            this.top = this.y;// - Math.max(0, height - (clientHeight - viewPadding - this.y)); // remove border
-
-            // If the remaining space is too small, we need to wrap
-            if (height > clientHeight - viewPaddingBottom - this.y) {
-                this.top = null;
-                this.usedYPlacement = 'top';
-
-                if (this.wrapHeight !== null && height <= usedY - this.wrapHeight - viewPaddingTop) {
-                    // Wrap instead of sticking to bottom
-                    usedY = usedY - this.wrapHeight;
-                    this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height);
-
-                    if (this.bottom < viewPaddingBottom) {
-                        this.bottom = viewPaddingBottom;
-                    }
-                } else {
-                    this.bottom = viewPaddingBottom;
-                }
-            } else {
-                if (this.top < viewPaddingTop) {
-                    this.top = viewPaddingTop;
-                }
-            }
-        } else {
-            this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height); // remove border
-
-            if (this.bottom < viewPaddingBottom) {
-                this.bottom = viewPaddingBottom;
+        else {
+            if (left.value < viewPadding) {
+                left.value = viewPadding;
             }
         }
+        // - Math.max(0, width - (clientWidth - viewPadding - usedX);
+    }
+    else {
+        right.value = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
 
-        const objLeft = this.left ? this.left : (clientWidth - this.right! - width);
-        const xTransform = ((usedX - objLeft) / width * 100).toFixed(2);
-
-        const objTop = this.top ? this.top : (clientHeight - this.bottom! - height);
-        const yTransform = ((usedY - objTop) / height * 100).toFixed(2);
-
-        this.transformOrigin = xTransform + '% ' + yTransform + '%';
-
-        if (!this.usedPreferredHeight) {
-            // Only assign drag selectors if we actually  have context items
-            if (this.$refs.context.querySelector('.context-menu-item')) {
-                // Allow scrolling if height is restricted, else add touch listeners to allow selection by dragging
-                window.addEventListener('touchstart', this.onTouchStart, { passive: false });
-                window.addEventListener('touchmove', this.onTouchMove, { passive: false });
-                window.addEventListener('touchend', this.onTouchUp, { passive: false });
-            }
-        }
-
-        if (this.isPopped || this.parentMenu?.isPopped || (this.parentMenu && (!this.parentMenu.$el || !this.parentMenu.$el.isConnected))) {
-            // Pop was dismissed before we could mount this context menu
-            console.error('Context menu lost its parent menu during mounting');
-            this.pop(false);
+        if (right.value < viewPadding) {
+            right.value = viewPadding;
         }
     }
 
-    beforeUnmount() {
-        this.popChildMenu();
-        window.removeEventListener('touchstart', this.onTouchStart);
-        window.removeEventListener('touchmove', this.onTouchMove);
-        window.removeEventListener('touchend', this.onTouchUp);
-    }
+    let usedY = props.y;
 
-    childMenu: ComponentWithProperties | null = null;
+    if (props.yPlacement === 'bottom') {
+        top.value = props.y;// - Math.max(0, height - (clientHeight - viewPadding - props.y)); // remove border
 
-    popChildMenu() {
-        if (this.childMenu) {
-            const instance = this.childMenu.componentInstance() as any;
+        // If the remaining space is too small, we need to wrap
+        if (height > clientHeight - viewPaddingBottom - props.y) {
+            top.value = null;
+            usedYPlacement.value = 'top';
 
-            if (instance) {
-                console.log('Pop child menu');
-                instance.pop(false);
-            } else (
-                console.warn('Missing instance for childMenu')
-            );
+            if (props.wrapHeight !== null && height <= usedY - props.wrapHeight - viewPaddingTop) {
+                // Wrap instead of sticking to bottom
+                usedY = usedY - props.wrapHeight;
+                bottom.value = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height);
+
+                if (bottom.value < viewPaddingBottom) {
+                    bottom.value = viewPaddingBottom;
+                }
+            }
+            else {
+                bottom.value = viewPaddingBottom;
+            }
         }
-        this.childMenu = null;
+        else {
+            if (top.value < viewPaddingTop) {
+                top.value = viewPaddingTop;
+            }
+        }
+    }
+    else {
+        bottom.value = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height); // remove border
+
+        if (bottom.value < viewPaddingBottom) {
+            bottom.value = viewPaddingBottom;
+        }
     }
 
-    currentlyHoveredItem: ContextMenuItemView | null = null;
+    const objLeft = left.value ? left.value : (clientWidth - right.value! - width);
+    const xTransform = ((usedX - objLeft) / width * 100).toFixed(2);
 
-    // When we hover an item that has a child menu, we need to cancel other hovers if the mouse moves to the child menu
+    const objTop = top.value ? top.value : (clientHeight - bottom.value! - height);
+    const yTransform = ((usedY - objTop) / height * 100).toFixed(2);
+
+    transformOrigin.value = xTransform + '% ' + yTransform + '%';
+
+    if (!usedPreferredHeight.value) {
+        // Only assign drag selectors if we actually  have context items
+        if (context.value!.querySelector('.context-menu-item')) {
+            // Allow scrolling if height is restricted, else add touch listeners to allow selection by dragging
+            window.addEventListener('touchstart', onTouchStart, { passive: false });
+            window.addEventListener('touchmove', onTouchMove, { passive: false });
+            window.addEventListener('touchend', onTouchUp, { passive: false });
+        }
+    }
+
+    if (isPopped.value || props.parentMenu?.isPopped || (props.parentMenu && (!props.parentMenu.el || !props.parentMenu.el.isConnected))) {
+        // Pop was dismissed before we could mount this context menu
+        console.error('Context menu lost its parent menu during mounting');
+        pop(false);
+    }
+});
+
+onBeforeUnmount(() => {
+    popChildMenu();
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchUp);
+});
+
+function popChildMenu() {
+    if (childMenu.value) {
+        const instance = childMenu.value.componentInstance() as any;
+
+        if (instance) {
+            console.log('Pop child menu');
+            instance.pop(false);
+        }
+        else (
+            console.warn('Missing instance for childMenu')
+        );
+    }
+    childMenu.value = null;
+}
+
+function delayHover(ms: number) {
+    ignoreHover = true;
+    if (ignoreHoverTimeout) {
+        clearTimeout(ignoreHoverTimeout);
+    }
+
+    if (ms <= 0) {
+        if (currentlyHoveredItem && ignoreHoverItem === currentlyHoveredItem) {
+            // Ignore, and wait for next timer
+            return;
+        }
+        endIgnoreHover();
+        return;
+    }
+    ignoreHoverTimeout = setTimeout(() => {
+        if (currentlyHoveredItem && ignoreHoverItem === currentlyHoveredItem) {
+            // Ignore, and wait for next timer
+            return;
+        }
+        endIgnoreHover();
+    }, ms);
+}
+
+function endIgnoreHover() {
     ignoreHover = false;
-    ignoreHoverItem: ContextMenuItemView | null = null;
-    ignoreHoverTimeout: NodeJS.Timeout | null = null;
-    ignoreHoverTriangle: { p1: { x: number; y: number }; p2: { x: number; y: number }; p3: { x: number; y: number } } | null = null;
 
-    delayHover(ms: number) {
-        this.ignoreHover = true;
-        if (this.ignoreHoverTimeout) {
-            clearTimeout(this.ignoreHoverTimeout);
-        }
+    // Remove listener
+    window.removeEventListener('mousemove', onMouseMove);
 
-        if (ms <= 0) {
-            if (this.currentlyHoveredItem && this.ignoreHoverItem === this.currentlyHoveredItem) {
-                // Ignore, and wait for next timer
-                return;
-            }
-            this.endIgnoreHover();
-            return;
-        }
-        this.ignoreHoverTimeout = setTimeout(() => {
-            if (this.currentlyHoveredItem && this.ignoreHoverItem === this.currentlyHoveredItem) {
-                // Ignore, and wait for next timer
-                return;
-            }
-            this.endIgnoreHover();
-        }, ms);
+    ignoreHoverTriangle = null;
+
+    const item = ignoreHoverItem;
+    ignoreHoverItem = null;
+
+    if (isPopped.value) {
+        return;
     }
 
-    endIgnoreHover() {
-        this.ignoreHover = false;
+    // Execute mouseover again: if we are above a different context menu item: close the popup and/or open a new one
+    if (currentlyHoveredItem && currentlyHoveredItem !== item) {
+        onHoverItem(currentlyHoveredItem);
+    }
+}
 
-        // Remove listener
-        window.removeEventListener('mousemove', this.onMouseMove);
+function onHoverItem(item: ContextMenuItemApi) {
+    currentlyHoveredItem = item;
 
-        this.ignoreHoverTriangle = null;
-
-        const item = this.ignoreHoverItem;
-        this.ignoreHoverItem = null;
-
-        if (this.isPopped) {
-            return;
-        }
-
-        // Execute mouseover again: if we are above a different context menu item: close the popup and/or open a new one
-        if (this.currentlyHoveredItem && this.currentlyHoveredItem !== item) {
-            this.onHoverItem(this.currentlyHoveredItem);
-        }
+    if (shouldIgnoreHover()) {
+        return;
     }
 
-    hoverTimeout: NodeJS.Timeout | null = null;
+    // Update hover style
+    const wasHovered = item.isHovered;
+    item.isHovered = true;
 
-    onHoverItem(item: ContextMenuItemView) {
-        this.currentlyHoveredItem = item;
+    if (disableHoverChildMenus) {
+        // Never automatically show a child menu
+        return;
+    }
 
-        if (this.shouldIgnoreHover()) {
-            return;
-        }
+    if (!wasHovered && hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+    }
 
-        // Update hover style
-        const wasHovered = item.isHovered;
-        item.isHovered = true;
+    if (item.childContextMenu) {
+        if (!wasHovered) {
+            setChildMenu(null);
+            hoverTimeout = setTimeout(() => {
+                if (item.isHovered && currentlyHoveredItem === item && !shouldIgnoreHover() && item.childContextMenu && !item.childContextMenu.componentInstance()) {
+                    // TODO: Wait x ms hover delay, and check is the cursor is still hovered
 
-        if (this.disableHoverChildMenus) {
-            // Never automatically show a child menu
-            return;
-        }
-
-        if (!wasHovered && this.hoverTimeout) {
-            clearTimeout(this.hoverTimeout);
-            this.hoverTimeout = null;
-        }
-
-        if (item.childContextMenu) {
-            if (!wasHovered) {
-                this.setChildMenu(null);
-                this.hoverTimeout = setTimeout(() => {
-                    if (item.isHovered && this.currentlyHoveredItem === item && !this.shouldIgnoreHover() && item.childContextMenu && !item.childContextMenu.componentInstance()) {
-                        // TODO: Wait x ms hover delay, and check is the cursor is still hovered
-
-                        if (this.isPopped) {
-                            return;
-                        }
-                        // Present child context menu + send close event to parent
-                        const el = item.$el as HTMLElement;
-
-                        if (el.classList.contains('disabled')) {
-                            return;
-                        }
-                        const bounds = el.getBoundingClientRect();
-
-                        item.childContextMenu.properties.x = bounds.right;
-                        item.childContextMenu.properties.y = bounds.top;
-                        item.childContextMenu.properties.xPlacement = 'right';
-                        item.childContextMenu.properties.yPlacement = 'bottom';
-                        item.childContextMenu.properties.parentMenu = this;
-                        item.childContextMenu.properties.wrapWidth = el.clientWidth;
-
-                        this.setChildMenu(item.childContextMenu as ComponentWithProperties);
-                        item.present(item.childContextMenu.setDisplayStyle('overlay'));
+                    if (isPopped.value) {
+                        return;
                     }
-                }, 150);
-            }
-        } else {
-            this.setChildMenu(null);
-        }
-    }
-
-    onMouseLeaveItem(item: ContextMenuItemView) {
-        if (this.currentlyHoveredItem === item) {
-            this.currentlyHoveredItem = null;
-
-            if (item === this.ignoreHoverItem) {
-                this.delayHover(50);
-            }
-        }
-
-        // Update hover style if changed
-        item.isHovered = false;
-    }
-
-    onClickItem(item: ContextMenuItemView, event: Event) {
-        if (item.clicked) {
-            return;
-        }
-        item.clicked = true;
-
-        if (item.childContextMenu) {
-            // No click actions
-            if (this.disableHoverChildMenus || (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0))) {
-                // Show child menu and replace self
-
-                if (!item.childContextMenu.componentInstance() && !this.shouldIgnoreHover()) {
-                    this.pop(true);
-
                     // Present child context menu + send close event to parent
-                    const el = item.$el as HTMLElement;
+                    const el = item.el as HTMLElement;
+
+                    if (el.classList.contains('disabled')) {
+                        return;
+                    }
                     const bounds = el.getBoundingClientRect();
 
-                    // TODO: calculate better position
-                    item.childContextMenu.properties.x = bounds.left;
+                    item.childContextMenu.properties.x = bounds.right;
                     item.childContextMenu.properties.y = bounds.top;
                     item.childContextMenu.properties.xPlacement = 'right';
                     item.childContextMenu.properties.yPlacement = 'bottom';
-                    item.childContextMenu.properties.parentMenu = null;
+                    item.childContextMenu.properties.parentMenu = selfApi;
+                    item.childContextMenu.properties.wrapWidth = el.clientWidth;
+
+                    setChildMenu(item.childContextMenu as ComponentWithProperties);
                     item.present(item.childContextMenu.setDisplayStyle('overlay'));
                 }
+            }, 150);
+        }
+    }
+    else {
+        setChildMenu(null);
+    }
+}
+
+function onMouseLeaveItem(item: ContextMenuItemApi) {
+    if (currentlyHoveredItem === item) {
+        currentlyHoveredItem = null;
+
+        if (item === ignoreHoverItem) {
+            delayHover(50);
+        }
+    }
+
+    // Update hover style if changed
+    item.isHovered = false;
+}
+
+function onClickItem(item: ContextMenuItemApi, event: Event) {
+    if (item.clicked) {
+        return;
+    }
+    item.clicked = true;
+
+    if (item.childContextMenu) {
+        // No click actions
+        if (disableHoverChildMenus || (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0))) {
+            // Show child menu and replace self
+
+            if (!item.childContextMenu.componentInstance() && !shouldIgnoreHover()) {
+                pop(true);
+
+                // Present child context menu + send close event to parent
+                const el = item.el as HTMLElement;
+                const bounds = el.getBoundingClientRect();
+
+                // TODO: calculate better position
+                item.childContextMenu.properties.x = bounds.left;
+                item.childContextMenu.properties.y = bounds.top;
+                item.childContextMenu.properties.xPlacement = 'right';
+                item.childContextMenu.properties.yPlacement = 'bottom';
+                item.childContextMenu.properties.parentMenu = null;
+                item.present(item.childContextMenu.setDisplayStyle('overlay'));
             }
-            return;
         }
-
-        // We need to delay click events because otherwise for some unknown reason, it would trigger again on a 'popup' and close it immediately
-        setTimeout(() => {
-            item.$emit('click', event);
-        }, 10);
-
-        // Wait to pop to let the browser handle events (e.g. label > checkbox)
-        this.delayPop(true);
+        return;
     }
 
-    setChildMenu(component: ComponentWithProperties | null) {
-        if (this.childMenu === component) {
-            return;
-        }
+    // We need to delay click events because otherwise for some unknown reason, it would trigger again on a 'popup' and close it immediately
+    setTimeout(() => {
+        item.emitClick(event);
+    }, 10);
 
-        this.popChildMenu();
-        this.childMenu = component;
+    // Wait to pop to let the browser handle events (e.g. label > checkbox)
+    delayPop(true);
+}
 
-        // Capture initial mouse X + Y Position,
-        // calculate the triangle in which region we shouldn't hover
-        // keep adjusting the triangle as the mouse moves, but if the mouse stops too long, stop
-
-        if (component && this.currentlyHoveredItem && !this.ignoreHoverItem) {
-            // If the cursor now moves to the newly created context menu, we'll add a delay and prevent any other context menu hovering
-            this.ignoreHoverItem = this.currentlyHoveredItem;
-
-            // We cant calculate the triangle yet, because the child menu is not yet mounted
-            this.ignoreHoverTriangle = null;
-            this.delayHover(50);
-            window.addEventListener('mousemove', this.onMouseMove, { passive: true });
-        }
+function setChildMenu(component: ComponentWithProperties | null) {
+    if (childMenu.value === component) {
+        return;
     }
 
-    calculateHoverTriangle(mouseX: number, mouseY: number) {
-        if (!this.childMenu) {
-            return;
-        }
-        const instance = this.childMenu.componentInstance();
-        if (!instance) {
-            return;
-        }
+    popChildMenu();
+    childMenu.value = component;
 
-        // Get the child element, since the main element covers the whole window
-        const element = instance.$el.childNodes[0] as HTMLElement;
+    // Capture initial mouse X + Y Position,
+    // calculate the triangle in which region we shouldn't hover
+    // keep adjusting the triangle as the mouse moves, but if the mouse stops too long, stop
 
-        if (!element) {
-            return;
-        }
+    if (component && currentlyHoveredItem && !ignoreHoverItem) {
+        // If the cursor now moves to the newly created context menu, we'll add a delay and prevent any other context menu hovering
+        ignoreHoverItem = currentlyHoveredItem;
 
-        const bounds = element.getBoundingClientRect();
+        // We cant calculate the triangle yet, because the child menu is not yet mounted
+        ignoreHoverTriangle = null;
+        delayHover(50);
+        window.addEventListener('mousemove', onMouseMove, { passive: true });
+    }
+}
 
-        const contextX = bounds.left;
-        const contextY = bounds.top;
-        const contextY2 = bounds.bottom;
-        const contextX2 = bounds.right;
-
-        if (contextX < mouseX) {
-            // Menu is on the left side
-
-            return {
-                p1: { x: mouseX + 5, y: mouseY },
-                p2: { x: contextX2, y: contextY },
-                p3: { x: contextX2, y: contextY2 },
-            };
-        } else {
-            return {
-                p1: { x: mouseX - 5, y: mouseY },
-                p2: { x: contextX, y: contextY },
-                p3: { x: contextX, y: contextY2 },
-            };
-        }
+function calculateHoverTriangle(mouseX: number, mouseY: number) {
+    if (!childMenu.value) {
+        return;
+    }
+    const instance = childMenu.value.componentInstance();
+    if (!instance) {
+        return;
     }
 
-    updateHoverTriangle(mouseX: number, mouseY: number) {
-        const triangle = this.calculateHoverTriangle(mouseX, mouseY);
-        if (triangle) {
-            this.ignoreHoverTriangle = triangle;
-        }
+    // Get the child element, since the main element covers the whole window
+    const element = instance.$el.childNodes[0] as HTMLElement;
+
+    if (!element) {
+        return;
     }
 
-    shouldIgnoreHover() {
-        return this.isPopped || (
-            this.childMenu && (
-                this.ignoreHover
-            )
-        );
+    const bounds = element.getBoundingClientRect();
+
+    const contextX = bounds.left;
+    const contextY = bounds.top;
+    const contextY2 = bounds.bottom;
+    const contextX2 = bounds.right;
+
+    if (contextX < mouseX) {
+        // Menu is on the left side
+
+        return {
+            p1: { x: mouseX + 5, y: mouseY },
+            p2: { x: contextX2, y: contextY },
+            p3: { x: contextX2, y: contextY2 },
+        };
+    }
+    else {
+        return {
+            p1: { x: mouseX - 5, y: mouseY },
+            p2: { x: contextX, y: contextY },
+            p3: { x: contextX, y: contextY2 },
+        };
+    }
+}
+
+function updateHoverTriangle(mouseX: number, mouseY: number) {
+    const triangle = calculateHoverTriangle(mouseX, mouseY);
+    if (triangle) {
+        ignoreHoverTriangle = triangle;
+    }
+}
+
+function shouldIgnoreHover() {
+    return isPopped.value || (
+        childMenu.value && (
+            ignoreHover
+        )
+    );
+}
+
+function onMouseMove(event: MouseEvent) {
+    if (!childMenu.value) {
+        // Wait for timer to end
+        return;
     }
 
-    onMouseMove(event: MouseEvent) {
-        if (!this.childMenu) {
-            // Wait for timer to end
-            return;
-        }
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
 
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
+    const isStillHovered = currentlyHoveredItem && currentlyHoveredItem === ignoreHoverItem;
 
-        const isStillHovered = this.currentlyHoveredItem && this.currentlyHoveredItem === this.ignoreHoverItem;
+    if (ignoreHoverTriangle === null || isStillHovered) {
+        // We don't have triangle yet, probably because we didn't yet have the position
+        // of the mouse and the context menu
 
-        if (this.ignoreHoverTriangle === null || isStillHovered) {
-            // We don't have triangle yet, probably because we didn't yet have the position
-            // of the mouse and the context menu
+        // Just update the triangle for now, but don't expand the delay
 
-            // Just update the triangle for now, but don't expand the delay
-
-            this.updateHoverTriangle(mouseX, mouseY);
-
-            return;
-        }
-
-        // Check if mouse position is inside the triangle
-
-        const p1 = this.ignoreHoverTriangle.p1;
-        const p2 = this.ignoreHoverTriangle.p2;
-        const p3 = this.ignoreHoverTriangle.p3;
-
-        if (!triangleContains(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, mouseX, mouseY)) {
-            // Outside triangle:
-            // stop delay if we aren't hovering any longer
-            this.delayHover(0);
-            return;
-        }
-
-        // Mouse is inside the triangle
-        // Expand
-
-        this.delayHover(50);
-
-        // TODO: adjust triangle
-
-        // if X position got closer, then we'll adjust the triangle again
-        const triangle = this.calculateHoverTriangle(mouseX, mouseY);
-        if (triangle && Math.abs(p1.x - p2.x) > Math.abs(triangle.p1.x - triangle.p2.x)) {
-            this.ignoreHoverTriangle = triangle;
-        }
+        updateHoverTriangle(mouseX, mouseY);
 
         return;
     }
 
-    getSelectedElementAt(x: number, y: number): HTMLElement | null {
-        // Check which one is hovered, and manually add a hover state to it
-        let selectedElement = document.elementFromPoint(x, y);
+    // Check if mouse position is inside the triangle
 
-        // Get parent until class is context-menu-item or stop when parent is document, or context-menu-container class
-        while (selectedElement && !selectedElement.classList.contains('context-menu-item') && !selectedElement.classList.contains('context-menu-container')) {
-            selectedElement = selectedElement.parentElement;
-        }
-        if (selectedElement && selectedElement.classList.contains('context-menu-item')) {
-            return selectedElement as HTMLElement;
-        }
-        return null;
+    const p1 = ignoreHoverTriangle.p1;
+    const p2 = ignoreHoverTriangle.p2;
+    const p3 = ignoreHoverTriangle.p3;
+
+    if (!triangleContains(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, mouseX, mouseY)) {
+        // Outside triangle:
+        // stop delay if we aren't hovering any longer
+        delayHover(0);
+        return;
     }
 
-    getSelectedElement(event: TouchEvent): HTMLElement | null {
-        // Check which one is hovered, and manually add a hover state to it
-        return this.getSelectedElementAt(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
-    }
+    // Mouse is inside the triangle
+    // Expand
 
-    isInsideMenu(x: number, y: number): boolean {
-        // Check which one is hovered, and manually add a hover state to it
-        const selectedElement = document.elementFromPoint(x, y);
+    delayHover(50);
 
-        if (selectedElement && selectedElement.closest('.context-menu')) {
-            return true;
-        }
+    // TODO: adjust triangle
 
-        return false;
-    }
-
-    isEventInsideMenu(event: TouchEvent): boolean {
-        // Check which one is hovered, and manually add a hover state to it
-        return this.isInsideMenu(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
-    }
-
-    onTouchMove(event: TouchEvent) {
-        // Check which one is hovered, and manually add a hover state to it
-        const selectedElement = this.getSelectedElement(event);
-
-        this.$el.querySelectorAll('.context-menu-item').forEach((item) => {
-            item.classList.remove('hover');
-            item.classList.add('disable-active');
-        });
-
-        if (selectedElement) {
-            selectedElement.classList.add('hover');
-        }
-
-        event.preventDefault();
-    }
-
-    onTouchStart(event: TouchEvent) {
-        if (!this.isEventInsideMenu(event)) {
-            // Allow to trigger 'click' to close the context menu
-            return;
-        }
-        event.preventDefault();
-    }
-
-    onTouchUp(event: TouchEvent) {
-        if (this.isPopped) {
-            // We're already popped, so we don't need to do anything
-            return;
-        }
-
-        const selectedElement = this.getSelectedElement(event);
-        if (selectedElement) {
-            // Prevent the touch up event from triggering a click event later
-            event.preventDefault();
-
-            // Add a delay because the browser otherwise will trigger a click event on possible child menus
-            setTimeout(() => {
-                selectedElement.click();
-            }, 50);
-        }
-    }
-
-    delayPop(popParents = false) {
-        if (this.isPopped) {
-            // Ignore
-            return;
-        }
-
-        this.isPopped = true;
-
-        // Allow some time to let the browser handle some events (e.g. label > update checkbox)
-        setTimeout(() => {
-            // set isPopped to false again, to force pop
-            this.isPopped = false;
-            this.pop(popParents);
-        }, 80);
-    }
-
-    pop(popParents = false) {
-        if (this.isPopped || this.hide) {
-            // Ignore
-            return;
-        }
-        console.log('Popping ContextMenuView');
-        this.isPopped = true;
-        this.popChildMenu();
-
-        // Trigger hide animation
-        this.hide = true;
-        // setTimeout(() => {
-        (this as any).parentPop({ force: true });
-        // }, 200);
-
-        if (popParents && this.parentMenu) {
-            this.parentMenu.pop(true);
-        }
-    }
-
-    activated() {
-        document.addEventListener('keydown', this.onKey);
-    }
-
-    deactivated() {
-        document.removeEventListener('keydown', this.onKey);
-    }
-
-    onKey(event: KeyboardEvent) {
-        if (event.defaultPrevented || event.repeat) {
-            return;
-        }
-
-        const key = event.key || event.keyCode;
-
-        if (key === 'Escape' || key === 'Esc' || key === 27) {
-            this.pop(true);
-            event.preventDefault();
-        }
+    // if X position got closer, then we'll adjust the triangle again
+    const triangle = calculateHoverTriangle(mouseX, mouseY);
+    if (triangle && Math.abs(p1.x - p2.x) > Math.abs(triangle.p1.x - triangle.p2.x)) {
+        ignoreHoverTriangle = triangle;
     }
 }
+
+function getSelectedElementAt(x: number, y: number): HTMLElement | null {
+    // Check which one is hovered, and manually add a hover state to it
+    let selectedElement = document.elementFromPoint(x, y);
+
+    // Get parent until class is context-menu-item or stop when parent is document, or context-menu-container class
+    while (selectedElement && !selectedElement.classList.contains('context-menu-item') && !selectedElement.classList.contains('context-menu-container')) {
+        selectedElement = selectedElement.parentElement;
+    }
+    if (selectedElement && selectedElement.classList.contains('context-menu-item')) {
+        return selectedElement as HTMLElement;
+    }
+    return null;
+}
+
+function getSelectedElement(event: TouchEvent): HTMLElement | null {
+    // Check which one is hovered, and manually add a hover state to it
+    return getSelectedElementAt(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+}
+
+function isInsideMenu(x: number, y: number): boolean {
+    // Check which one is hovered, and manually add a hover state to it
+    const selectedElement = document.elementFromPoint(x, y);
+
+    if (selectedElement && selectedElement.closest('.context-menu')) {
+        return true;
+    }
+
+    return false;
+}
+
+function isEventInsideMenu(event: TouchEvent): boolean {
+    // Check which one is hovered, and manually add a hover state to it
+    return isInsideMenu(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+}
+
+function onTouchMove(event: TouchEvent) {
+    // Check which one is hovered, and manually add a hover state to it
+    const selectedElement = getSelectedElement(event);
+
+    containerEl.value!.querySelectorAll('.context-menu-item').forEach((item) => {
+        item.classList.remove('hover');
+        item.classList.add('disable-active');
+    });
+
+    if (selectedElement) {
+        selectedElement.classList.add('hover');
+    }
+
+    event.preventDefault();
+}
+
+function onTouchStart(event: TouchEvent) {
+    if (!isEventInsideMenu(event)) {
+        // Allow to trigger 'click' to close the context menu
+        return;
+    }
+    event.preventDefault();
+}
+
+function onTouchUp(event: TouchEvent) {
+    if (isPopped.value) {
+        // We're already popped, so we don't need to do anything
+        return;
+    }
+
+    const selectedElement = getSelectedElement(event);
+    if (selectedElement) {
+        // Prevent the touch up event from triggering a click event later
+        event.preventDefault();
+
+        // Add a delay because the browser otherwise will trigger a click event on possible child menus
+        setTimeout(() => {
+            selectedElement.click();
+        }, 50);
+    }
+}
+
+function delayPop(popParents = false) {
+    if (isPopped.value) {
+        // Ignore
+        return;
+    }
+
+    isPopped.value = true;
+
+    // Allow some time to let the browser handle some events (e.g. label > update checkbox)
+    setTimeout(() => {
+        // set isPopped to false again, to force pop
+        isPopped.value = false;
+        pop(popParents);
+    }, 80);
+}
+
+function pop(popParents = false) {
+    if (isPopped.value || hide.value) {
+        // Ignore
+        return;
+    }
+    console.log('Popping ContextMenuView');
+    isPopped.value = true;
+    popChildMenu();
+
+    // Trigger hide animation
+    hide.value = true;
+    // setTimeout(() => {
+    parentPop({ force: true });
+    // }, 200);
+
+    if (popParents && props.parentMenu) {
+        props.parentMenu.pop(true);
+    }
+}
+
+function onKey(event: KeyboardEvent) {
+    if (event.defaultPrevented || event.repeat) {
+        return;
+    }
+
+    const key = event.key || event.keyCode;
+
+    if (key === 'Escape' || key === 'Esc' || key === 27) {
+        pop(true);
+        event.preventDefault();
+    }
+}
+
+onActivated(() => {
+    document.addEventListener('keydown', onKey);
+});
+
+onDeactivated(() => {
+    document.removeEventListener('keydown', onKey);
+});
+
+// The public surface exposed to child menus (as parentMenu) and to consumers
+// holding a ref to this component.
+const selfApi: ParentMenuApi = {
+    pop,
+    get isPopped() {
+        return isPopped.value;
+    },
+    get el() {
+        return containerEl.value;
+    },
+};
+
+defineExpose({
+    pop,
+    onHoverItem,
+    onMouseLeaveItem,
+    onClickItem,
+    get childMenu() {
+        return childMenu.value;
+    },
+    get isPopped() {
+        return isPopped.value;
+    },
+    get el() {
+        return containerEl.value;
+    },
+});
 </script>
 
 <style lang="scss">

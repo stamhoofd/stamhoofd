@@ -7,35 +7,33 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { ref, watch } from 'vue';
 
 import Spinner from '../Spinner.vue';
 
-@Component({
-    components: { Spinner },
-})
-export default class LoadingButton extends VueComponent {
-    @Prop({ default: false, type: Boolean })
-    loading!: boolean;
+const props = withDefaults(defineProps<{
+    loading?: boolean | null;
+}>(), {
+    loading: false,
+});
 
-    // Remove the spinner animation from the dom to save some resources of the browser
-    delayLoading = false;
+// Remove the spinner animation from the dom to save some resources of the browser
+const delayLoading = ref(false);
 
-    @Watch('loading')
-    onValueChanged(val: boolean, old: boolean) {
-        if (!val && old) {
-            this.delayLoading = true;
-            setTimeout(() => {
-                this.delayLoading = false;
-            }, 500);
-        } else {
-            if (val) {
-                this.delayLoading = true;
-            }
+watch(() => props.loading, (val, old) => {
+    if (!val && old) {
+        delayLoading.value = true;
+        setTimeout(() => {
+            delayLoading.value = false;
+        }, 500);
+    }
+    else {
+        if (val) {
+            delayLoading.value = true;
         }
     }
-}
+});
 </script>
 
 <style lang="scss">

@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { userEvent } from '@vitest/browser/context';
 import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
@@ -462,11 +461,11 @@ describe('NumberInput', () => {
 
     describe('key up', () => {
         test('should add 1', async () => {
-          const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
-                    modelValue: null,
-                });
+            const wrapper = await createWrapper({
+                min: 2,
+                max: 4,
+                modelValue: null,
+            });
 
             const inputEl = wrapper.find('input').element;
 
@@ -488,14 +487,14 @@ describe('NumberInput', () => {
             expect(wrapper.props('modelValue')).toBe(4);
             // Check input value after input
             expect(inputEl).toHaveValue('4');
-        })
+        });
 
         test('should not add 1 if max reached', async () => {
-          const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
-                    modelValue: 4,
-                });
+            const wrapper = await createWrapper({
+                min: 2,
+                max: 4,
+                modelValue: 4,
+            });
 
             const inputEl = wrapper.find('input').element;
 
@@ -509,14 +508,14 @@ describe('NumberInput', () => {
             expect(wrapper.props('modelValue')).toBe(4);
             // Check input value after input
             expect(inputEl).toHaveValue('4');
-        })
+        });
 
         test('should work if model value NaN', async () => {
-          const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
-                    modelValue: NaN,
-                });
+            const wrapper = await createWrapper({
+                min: 2,
+                max: 4,
+                modelValue: NaN,
+            });
 
             const inputEl = wrapper.find('input').element;
 
@@ -530,16 +529,16 @@ describe('NumberInput', () => {
             expect(wrapper.props('modelValue')).toBe(3);
             // Check input value after input
             expect(inputEl).toHaveValue('3');
-        })
-    })
+        });
+    });
 
     describe('key down', () => {
         test('should deduct 1', async () => {
-          const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
-                    modelValue: 4,
-                });
+            const wrapper = await createWrapper({
+                min: 2,
+                max: 4,
+                modelValue: 4,
+            });
 
             const inputEl = wrapper.find('input').element;
 
@@ -561,14 +560,14 @@ describe('NumberInput', () => {
             expect(wrapper.props('modelValue')).toBe(2);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
-        })
+        });
 
         test('should not deduct 1 if min reached', async () => {
-          const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
-                    modelValue: 2,
-                });
+            const wrapper = await createWrapper({
+                min: 2,
+                max: 4,
+                modelValue: 2,
+            });
 
             const inputEl = wrapper.find('input').element;
 
@@ -582,14 +581,14 @@ describe('NumberInput', () => {
             expect(wrapper.props('modelValue')).toBe(2);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
-        })
+        });
 
         test('should set model value to min if model value is NaN', async () => {
-          const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
-                    modelValue: NaN,
-                });
+            const wrapper = await createWrapper({
+                min: 2,
+                max: 4,
+                modelValue: NaN,
+            });
 
             const inputEl = wrapper.find('input').element;
 
@@ -603,8 +602,8 @@ describe('NumberInput', () => {
             expect(wrapper.props('modelValue')).toBe(2);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
-        })
-    })
+        });
+    });
 });
 
 /**

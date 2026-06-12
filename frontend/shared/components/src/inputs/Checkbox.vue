@@ -20,61 +20,52 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { computed, nextTick, useSlots, useTemplateRef } from 'vue';
 
-@Component({
-    emits: ['update:modelValue'],
-})
-export default class Checkbox extends VueComponent {
-    @Prop({ default: '', type: String })
-    name!: string;
+const model = defineModel<boolean>({ default: false });
 
-    @Prop({ default: false })
-    modelValue!: boolean;
-
-    @Prop({ default: false })
-    onlyLine!: boolean;
-
-    @Prop({ default: false })
-    disabled!: boolean;
-
+withDefaults(defineProps<{
+    name?: string;
+    onlyLine?: boolean;
+    disabled?: boolean;
     // Set to true to only allow external changes
-    @Prop({ default: false })
-    manual!: boolean;
-
-    @Prop({ default: false })
-    indeterminate!: boolean;
-
-    @Prop({ default: 'checkbox' })
+    manual?: boolean;
+    indeterminate?: boolean;
     dataTestid?: string;
+}>(), {
+    name: '',
+    onlyLine: false,
+    disabled: false,
+    manual: false,
+    indeterminate: false,
+    dataTestid: 'checkbox',
+});
 
-    get hasDefaultSlot() {
-        return !!this.$slots.default;
-    }
+const slots = useSlots();
+const checkbox = useTemplateRef<HTMLInputElement>('checkbox');
 
-    get checkboxValue() {
-        return this.modelValue;
-    }
+const hasDefaultSlot = computed(() => !!slots.default);
 
-    set checkboxValue(value) {
-        this.$emit('update:modelValue', value);
+const checkboxValue = computed({
+    get: () => model.value,
+    set: (value: boolean) => {
+        model.value = value;
 
         // Add support for a model that doesn't change
-        this.$nextTick(() => {
-            if (this.checkboxValue !== value) {
-                if (this.$refs.checkbox) {
-                    (this.$refs.checkbox as any).checked = this.checkboxValue;
+        nextTick(() => {
+            if (model.value !== value) {
+                if (checkbox.value) {
+                    checkbox.value.checked = model.value;
                 }
             }
-        });
-    }
+        }).catch(console.error);
+    },
+});
 
-    handleClick(e: MouseEvent) {
-        if (e.shiftKey || e.ctrlKey || e.metaKey) {
-            e.preventDefault(); // prevent text-selection behavior
-            // this.checkboxValue = !this.checkboxValue;
-        }
+function handleClick(e: MouseEvent) {
+    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+        e.preventDefault(); // prevent text-selection behavior
     }
 }
 </script>

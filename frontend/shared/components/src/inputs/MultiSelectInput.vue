@@ -1,16 +1,16 @@
 <template>
     <STInputBox v-bind="$attrs">
         <template #right>
-            <button v-if="modelValue.length" class="button text icon add" type="button" @click="openContextMenu" />
+            <button v-if="model.length" class="button text icon add" type="button" @click="openContextMenu" />
         </template>
-        <div v-if="modelValue.length === 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
+        <div v-if="model.length === 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
             <div class="input selectable placeholder" @click="openContextMenu">
                 {{ placeholder }}
             </div>
         </div>
         <div v-else class="multi-select-container">
             <div class="input">
-                <STList v-model="draggableValues" :draggable="true" :item-key="(v: T) => v">
+                <STList v-model="draggableValues" :draggable="true" :item-key="(v: T) => (v as any)">
                     <template #item="{item: value}">
                         <STListItem :selectable="true" @click="openContextMenu($event, value)">
                             <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />
@@ -28,111 +28,96 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { Sorter } from '@stamhoofd/utility';
-import { Formatter } from '@stamhoofd/utility';
+<script lang="ts" setup generic="T">
+import { Formatter, Sorter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        STInputBox,
-    },
-    emits: ['update:modelValue'],
-})
-export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
-    @Prop({})
-    modelValue: T[];
+const model = defineModel<T[]>({ required: true });
 
-    @Prop({})
+const props = withDefaults(defineProps<{
     choices: { value: T; label: string; categories?: string[] }[];
+    placeholder?: string;
+}>(), {
+    placeholder: () => $t(`%1Fq`),
+});
 
-    @Prop({ default: $t(`%1Fq`) })
-    placeholder!: string;
-
-    get draggableValues() {
-        return this.modelValue;
-    }
-
-    set draggableValues(arr: T[]) {
-        if (arr.length !== this.modelValue.length) {
+const draggableValues = computed({
+    get: () => model.value,
+    set: (arr: T[]) => {
+        if (arr.length !== model.value.length) {
             return;
         }
-        this.$emit('update:modelValue', arr);
-    }
+        model.value = arr;
+    },
+});
 
-    getValueLabels(value: T) {
-        const choice = this.choices.find(c => c.value === value);
-        if (!choice) {
-            return ['?'];
+function getValueLabels(value: T) {
+    const choice = props.choices.find(c => c.value === value);
+    if (!choice) {
+        return ['?'];
+    }
+    return [
+        ...(choice.categories ?? []),
+        choice.label,
+    ];
+}
+
+function openContextMenu(event: TouchEvent | MouseEvent, replace?: T) {
+    const menu = generateMenu(props.choices, replace);
+    menu.show({
+        clickEvent: event,
+    }).catch(console.error);
+}
+
+function addValue(value: T, replace?: T) {
+    if (replace) {
+        const index = model.value.findIndex(v => v === replace);
+        if (index !== -1) {
+            const arr = [...model.value];
+            arr[index] = value;
+            model.value = arr;
+            return;
         }
-        return [
-            ...(choice.categories ?? []),
-            choice.label,
-        ];
     }
+    model.value = [...model.value, value];
+}
 
-    openContextMenu(event: TouchEvent | MouseEvent, replace?: T) {
-        const menu = this.generateMenu(this.choices, replace);
-        menu.show({
-            clickEvent: event,
-        }).catch(console.error);
-    }
+function deleteValue(value: T) {
+    model.value = model.value.filter(v => v !== value);
+}
 
-    addValue(value: T, replace?: T) {
-        if (replace) {
-            const index = this.modelValue.findIndex(v => v === replace);
-            if (index !== -1) {
-                const arr = [...this.modelValue];
-                arr[index] = value;
-                this.$emit('update:modelValue', arr);
-                return;
-            }
-        }
-        const arr = [...this.modelValue, value];
-        this.$emit('update:modelValue', arr);
-    }
+function generateMenu(choices: { value: T; label: string; categories?: string[] }[], replace?: T): ContextMenu {
+    const rootCategories = Formatter.uniqueArray(choices.map(c => c.categories?.[0]).filter(c => !!c)).sort(Sorter.byStringValue);
 
-    deleteValue(value: T) {
-        const arr = this.modelValue.filter(v => v !== value);
-        this.$emit('update:modelValue', arr);
-    }
-
-    generateMenu(choices: { value: T; label: string; categories?: string[] }[], replace?: T): ContextMenu {
-        const rootCategories = Formatter.uniqueArray(choices.map(c => c.categories?.[0]).filter(c => !!c)).sort(Sorter.byStringValue);
-
-        return new ContextMenu([
-            choices.filter(c => !c.categories?.[0]).map((choice) => {
-                return new ContextMenuItem({
-                    name: choice.label,
-                    action: () => {
-                        // Add a new value
-                        this.addValue(choice.value, replace);
-                        return true;
-                    },
-                });
-            }),
-            rootCategories.map((category) => {
-                const subChoices = choices.filter(c => c.categories?.[0] === category).map((c) => {
-                    return {
-                        ...c,
-                        categories: c.categories?.slice(1),
-                    };
-                });
-                return new ContextMenuItem({
-                    name: category,
-                    childMenu: this.generateMenu(subChoices, replace),
-                });
-            }),
-        ]);
-    }
+    return new ContextMenu([
+        choices.filter(c => !c.categories?.[0]).map((choice) => {
+            return new ContextMenuItem({
+                name: choice.label,
+                action: () => {
+                    // Add a new value
+                    addValue(choice.value, replace);
+                    return true;
+                },
+            });
+        }),
+        rootCategories.map((category) => {
+            const subChoices = choices.filter(c => c.categories?.[0] === category).map((c) => {
+                return {
+                    ...c,
+                    categories: c.categories?.slice(1),
+                };
+            });
+            return new ContextMenuItem({
+                name: category,
+                childMenu: generateMenu(subChoices, replace),
+            });
+        }),
+    ]);
 }
 </script>
 

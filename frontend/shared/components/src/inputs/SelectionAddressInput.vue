@@ -25,13 +25,14 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import type { Address, ValidatedAddress } from '@stamhoofd/structures';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import { useValidation } from '../errors/useValidation';
 import { Validator } from '../errors/Validator';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -39,185 +40,163 @@ import AddressInput from './AddressInput.vue';
 import Radio from './Radio.vue';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        STListItem,
-        STErrorsDefault,
-        Radio,
-        AddressInput,
-        STList,
-    },
-    emits: ['update:modelValue', 'modify'],
-})
-export default class SelectionAddressInput extends VueComponent {
-    @Prop({ default: null })
-    title: string | null;
+const model = defineModel<Address | ValidatedAddress | null>({ default: null });
 
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
+    title?: string | null;
     addresses: Address[];
-
-    @Prop({ default: true })
-    required: boolean;
-
+    required?: boolean;
     /**
      * Assign a validator if you want to offload the validation to components
      */
-    @Prop({ default: null })
-    validator: Validator | null;
+    validator?: Validator | null;
+}>(), {
+    title: null,
+    required: true,
+    validator: null,
+});
 
-    errorBox: ErrorBox | null = null;
+const emit = defineEmits<{
+    (e: 'modify', value: { from: Address; to: Address }): void;
+}>();
 
-    internalValidator = new Validator();
+const instance = getCurrentInstance();
 
-    @Prop({ default: null })
-    modelValue: Address | ValidatedAddress | null;
+const errorBox = ref<ErrorBox | null>(null);
+const internalValidator = new Validator();
 
-    selectedAddress: Address | null = null;
-    customAddress: Address | null = null;
-    editingAddress = false;
+const selectedAddress = ref<Address | null>(null);
+const customAddress = ref<Address | null>(null);
+const editingAddress = ref(false);
 
-    @Watch('modelValue')
-    onValueChanged(val: Address | null) {
-        if (val === (this.selectedAddress ?? this.customAddress ?? null)) {
-            // Not changed
-            return;
+const hasModifyListener = computed(() => !!instance?.vnode.props?.onModify);
+
+watch(model, (val) => {
+    if (val === (selectedAddress.value ?? customAddress.value ?? null)) {
+        // Not changed
+        return;
+    }
+
+    if (!val) {
+        if (!props.required) {
+            selectedAddress.value = null;
+            editingAddress.value = false;
+            customAddress.value = null;
         }
+        return;
+    }
 
-        if (!val) {
-            if (!this.required) {
-                this.selectedAddress = null;
-                this.editingAddress = false;
-                this.customAddress = null;
-            }
-            return;
+    const a = props.addresses.find(aa => aa.toString() === val.toString());
+    if (a) {
+        selectedAddress.value = a;
+        editingAddress.value = false;
+        customAddress.value = null;
+    }
+    else {
+        selectedAddress.value = null;
+        editingAddress.value = false;
+        customAddress.value = val;
+    }
+});
+
+{
+    const a = props.addresses.find(aa => aa.toString() === model.value?.toString());
+    if (a) {
+        selectedAddress.value = a;
+        editingAddress.value = false;
+        customAddress.value = null;
+    }
+    else {
+        selectedAddress.value = null;
+        editingAddress.value = false;
+        customAddress.value = model.value;
+
+        if (props.required && !model.value && props.addresses.length > 0) {
+            model.value = props.addresses[0];
         }
+    }
+}
 
-        const a = this.addresses.find(aa => aa.toString() === val.toString());
-        if (a) {
-            this.selectedAddress = a;
-            this.editingAddress = false;
-            this.customAddress = null;
+if (props.validator) {
+    useValidation(props.validator, () => isValid());
+}
+
+const editAddress = computed<Address | null>({
+    get: () => customAddress.value,
+    set: (address: Address | null) => {
+        if (editingAddress.value && selectedAddress.value && address) {
+            emit('modify', { from: selectedAddress.value, to: address });
+            selectedAddress.value = address;
+            model.value = address;
+            editingAddress.value = true;
         }
         else {
-            this.selectedAddress = null;
-            this.editingAddress = false;
-            this.customAddress = val;
+            model.value = address;
+        }
+        customAddress.value = address;
+    },
+});
+
+function changeSelected() {
+    if (editingAddress.value) {
+        customAddress.value = null;
+    }
+    editingAddress.value = false;
+
+    const a = selectedAddress.value ?? customAddress.value;
+    if (a) {
+        model.value = a;
+    }
+    else {
+        if (!props.required) {
+            model.value = null;
         }
     }
+}
 
-    get hasModifyListener() {
-        return !!this.$.vnode.props?.onModify;
+function doEditAddress(address: Address) {
+    if (hasModifyListener.value) {
+        model.value = address;
+        editingAddress.value = true;
+        selectedAddress.value = address;
+        customAddress.value = address;
+    }
+    else {
+        editingAddress.value = false;
+        selectedAddress.value = null;
+        customAddress.value = address;
+    }
+}
+
+async function isValid(): Promise<boolean> {
+    const valid = await internalValidator.validate();
+    if (!valid) {
+        errorBox.value = null;
+        return false;
     }
 
-    mounted() {
-        const a = this.addresses.find(aa => aa.toString() === this.modelValue?.toString());
-        if (a) {
-            this.selectedAddress = a;
-            this.editingAddress = false;
-            this.customAddress = null;
+    if (selectedAddress.value) {
+        if (selectedAddress.value.toString() !== model.value?.toString()) {
+            model.value = selectedAddress.value;
         }
-        else {
-            this.selectedAddress = null;
-            this.editingAddress = false;
-            this.customAddress = this.modelValue;
-
-            if (this.required && !this.modelValue && this.addresses.length > 0) {
-                this.$emit('update:modelValue', this.addresses[0]);
-            }
-        }
-
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.isValid();
-            });
-        }
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    changeSelected() {
-        if (this.editingAddress) {
-            this.customAddress = null;
-        }
-        this.editingAddress = false;
-
-        const a = this.selectedAddress ?? this.customAddress;
-        if (a) {
-            this.$emit('update:modelValue', a);
-        }
-        else {
-            if (!this.required) {
-                this.$emit('update:modelValue', null);
-            }
-        }
-    }
-
-    doEditAddress(address: Address) {
-        if (this.hasModifyListener) {
-            this.$emit('update:modelValue', address);
-            this.editingAddress = true;
-            this.selectedAddress = address;
-            this.customAddress = address;
-        }
-        else {
-            this.editingAddress = false;
-            this.selectedAddress = null;
-            this.customAddress = address;
-        }
-    }
-
-    get editAddress() {
-        return this.customAddress;
-    }
-
-    set editAddress(address: Address | null) {
-        if (this.editingAddress && this.selectedAddress && address) {
-            this.$emit('modify', { from: this.selectedAddress, to: address });
-            this.selectedAddress = address;
-            this.$emit('update:modelValue', address);
-            this.editingAddress = true;
-        }
-        else {
-            this.$emit('update:modelValue', address);
-        }
-        this.customAddress = address;
-    }
-
-    async isValid(): Promise<boolean> {
-        const isValid = await this.internalValidator.validate();
-        if (!isValid) {
-            this.errorBox = null;
-            return false;
-        }
-
-        if (this.selectedAddress) {
-            if (this.selectedAddress.toString() !== this.modelValue?.toString()) {
-                this.$emit('update:modelValue', this.selectedAddress);
-            }
-            this.errorBox = null;
-            return true;
-        }
-
-        if (this.required && !this.customAddress) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: $t(`%zC`),
-                field: 'address',
-            }));
-            return false;
-        }
-
-        this.errorBox = null;
-
-        if (this.customAddress?.toString() !== this.modelValue?.toString()) {
-            this.$emit('update:modelValue', this.customAddress);
-        }
+        errorBox.value = null;
         return true;
     }
+
+    if (props.required && !customAddress.value) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: $t(`%zC`),
+            field: 'address',
+        }));
+        return false;
+    }
+
+    errorBox.value = null;
+
+    if (customAddress.value?.toString() !== model.value?.toString()) {
+        model.value = customAddress.value;
+    }
+    return true;
 }
 </script>

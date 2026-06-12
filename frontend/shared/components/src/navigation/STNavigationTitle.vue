@@ -4,12 +4,7 @@
     </h1>
 </template>
 
-<script lang="ts">
-import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
-
-@Component
-export default class STNavigationTitle extends VueComponent {}
-</script>
+<script lang="ts" setup></script>
 
 <style lang="scss">
 @use '@stamhoofd/scss/base/text-styles.scss';

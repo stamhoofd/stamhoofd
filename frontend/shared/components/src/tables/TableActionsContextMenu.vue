@@ -2,7 +2,7 @@
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action), destructive: action.destructive}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
+            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="(contextMenuView as any)" :class="{'disabled': isDisabled(action), destructive: action.destructive}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
                 <template v-if="action.icon" #left>
                     <span :class="'icon tiny '+action.icon" />
                 </template>
@@ -22,118 +22,110 @@
     </ContextMenuView>
 </template>
 
-<script lang="ts">
-import Checkbox from '#inputs/Checkbox.vue';
+<script lang="ts" setup>
 import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
 import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { computed, getCurrentInstance, onUnmounted, useTemplateRef } from 'vue';
 
+import { useIsMobile } from '../hooks/useIsMobile';
 import type { TableAction, TableActionSelection } from './classes';
 
-@Component({
-    components: {
-        ContextMenuView,
-        ContextMenuItemView,
-        ContextMenuLine,
-        Checkbox,
-    },
-})
-export default class TableActionsContextMenu extends VueComponent {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     actions: TableAction<any>[];
-
-    @Prop({ default: () => {
-        // Required to return a default method
-        return () => {};
-    } })
-    onDismiss!: (() => void);
-
+    onDismiss?: (() => void);
     /**
      * Act only on selection given here
      */
-    @Prop({ default: () => [] })
-    selection!: TableActionSelection<any>;
+    selection?: TableActionSelection<any>;
+}>(), {
+    onDismiss: () => {
+        // Required to return a default method
+        return () => {};
+    },
+    selection: () => [] as any,
+});
 
-    isDisabled(action: TableAction<any>) {
-        return action.isDisabled(this.hasSelection, this.selection);
-    }
+const isMobile = useIsMobile();
+const Self = getCurrentInstance()!.type;
+const contextMenuView = useTemplateRef<InstanceType<typeof ContextMenuView>>('contextMenuView');
 
-    unmounted() {
-        this.onDismiss();
-    }
+const hasSelection = computed(() => props.selection.markedRows.size > 0 || props.selection.markedRowsAreSelected === false);
+const isSingleSelection = computed(() => props.selection.markedRows.size === 1 && props.selection.markedRowsAreSelected === true);
 
-    get hasSelection() {
-        return this.selection.markedRows.size > 0 || this.selection.markedRowsAreSelected === false;
-    }
+onUnmounted(() => {
+    props.onDismiss();
+});
 
-    get isSingleSelection() {
-        return this.selection.markedRows.size === 1 && this.selection.markedRowsAreSelected === true;
-    }
-
-    handleAction(action: TableAction<any>) {
-        if (this.isDisabled(action)) {
-            return;
-        }
-        action.handle(this.selection)?.catch((e) => {
-            console.error(e);
-            Toast.fromError(e).show();
-        });
-    }
-
-    get groupedActions() {
-        // Group all actions based on their groupIndex property, sorted by groupIndex
-        return this.actions
-            .filter((action) => {
-                if (!action.enabled()) {
-                    return false;
-                }
-                if (action.singleSelection && !this.isSingleSelection) {
-                    return false;
-                }
-
-                if ((this as any).$isMobile && this.isDisabled(action)) {
-                    // On mobile, hide disabled actions, because we don't have enough room
-                    return false;
-                }
-                return true;
-            })
-            .sort((a, b) => {
-                if (a.groupIndex !== b.groupIndex) {
-                    return a.groupIndex - b.groupIndex;
-                }
-                return b.priority - a.priority;
-            })
-            .reduce((acc, action) => {
-                const group = acc[acc.length - 1];
-                if (group && group[0].groupIndex === action.groupIndex) {
-                    group.push(action);
-                } else {
-                    acc.push([action]);
-                }
-                return acc;
-            }, [] as TableAction<any>[][]);
-    }
-
-    getChildContextMenu(action: TableAction<any>) {
-        if (action.childMenu) {
-            return action.childMenu;
-        }
-
-        if (!action.hasChildActions) {
-            return;
-        }
-
-        return new ComponentWithProperties(TableActionsContextMenu, {
-            actions: action.getChildActions(),
-            selection: this.selection,
-        });
-    }
-
-    pop(popParents = false) {
-        this.$refs.contextMenuView?.pop(popParents);
-    }
+function isDisabled(action: TableAction<any>) {
+    return action.isDisabled(hasSelection.value, props.selection);
 }
+
+function handleAction(action: TableAction<any>) {
+    if (isDisabled(action)) {
+        return;
+    }
+    action.handle(props.selection)?.catch((e) => {
+        console.error(e);
+        Toast.fromError(e).show();
+    });
+}
+
+const groupedActions = computed(() => {
+    // Group all actions based on their groupIndex property, sorted by groupIndex
+    return props.actions
+        .filter((action) => {
+            if (!action.enabled()) {
+                return false;
+            }
+            if (action.singleSelection && !isSingleSelection.value) {
+                return false;
+            }
+
+            if (isMobile && isDisabled(action)) {
+                // On mobile, hide disabled actions, because we don't have enough room
+                return false;
+            }
+            return true;
+        })
+        .sort((a, b) => {
+            if (a.groupIndex !== b.groupIndex) {
+                return a.groupIndex - b.groupIndex;
+            }
+            return b.priority - a.priority;
+        })
+        .reduce((acc, action) => {
+            const group = acc[acc.length - 1];
+            if (group && group[0].groupIndex === action.groupIndex) {
+                group.push(action);
+            }
+            else {
+                acc.push([action]);
+            }
+            return acc;
+        }, [] as TableAction<any>[][]);
+});
+
+function getChildContextMenu(action: TableAction<any>) {
+    if (action.childMenu) {
+        return action.childMenu;
+    }
+
+    if (!action.hasChildActions) {
+        return;
+    }
+
+    return new ComponentWithProperties(Self, {
+        actions: action.getChildActions(),
+        selection: props.selection,
+    });
+}
+
+function pop(popParents = false) {
+    contextMenuView.value?.pop(popParents);
+}
+
+defineExpose({ pop });
 </script>

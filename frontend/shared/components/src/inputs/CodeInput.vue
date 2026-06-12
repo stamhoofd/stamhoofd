@@ -24,166 +24,170 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { onMounted, ref, watch } from 'vue';
 
-@Component({
-    emits: ['update:modelValue', 'complete'],
-})
-export default class CodeInput extends VueComponent {
-    valid = true;
+const model = defineModel<string>({ default: '' });
 
-    @Prop({ default: '' })
-    modelValue!: string;
+const props = withDefaults(defineProps<{
+    codeLength?: number;
+    spaceLength?: number;
+    numbersOnly?: boolean;
+}>(), {
+    codeLength: 6,
+    spaceLength: 3,
+    numbersOnly: true,
+});
 
-    @Prop({ default: 6 })
-    codeLength!: number;
+const emit = defineEmits<{
+    (e: 'complete'): void;
+}>();
 
-    @Prop({ default: 3 })
-    spaceLength!: number;
+const numberInput = ref<HTMLInputElement[]>([]);
 
-    @Prop({ default: true })
-    numbersOnly!: boolean;
+function hasInputs() {
+    return Array.isArray(numberInput.value) && numberInput.value.length > 0;
+}
 
-    @Watch('modelValue')
-    onValueChanged(value: string, _oldValue: string) {
-        if (value === _oldValue) {
-            return;
+watch(model, (value, oldValue) => {
+    if (value === oldValue) {
+        return;
+    }
+    if (value === getInternalValue()) {
+        return;
+    }
+    if (!hasInputs()) {
+        return;
+    }
+    for (let index = 0; index < props.codeLength; index++) {
+        const element = numberInput.value[index];
+
+        if (index < value.length) {
+            const letter = value[index];
+            element.value = letter;
         }
-        if (value === this.getInternalValue()) {
-            return;
-        }
-        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
-            return;
-        }
-        for (let index = 0; index < this.codeLength; index++) {
-            const element = this.$refs.numberInput[index] as HTMLInputElement;
-
-            if (index < value.length) {
-                const letter = value[index];
-                element.value = letter;
-            } else {
-                element.value = '';
-            }
+        else {
+            element.value = '';
         }
     }
+});
 
-    mounted() {
-        setTimeout(() => {
-            this.selectNext(0);
-        }, 300);
+onMounted(() => {
+    setTimeout(() => {
+        selectNext(0);
+    }, 300);
+});
+
+function onInput(index: number) {
+    if (!hasInputs()) {
+        return;
     }
 
-    onInput(index: number) {
-        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
-            return;
-        }
+    const input = numberInput.value[index];
+    input.value = props.numbersOnly ? input.value.replace(/\D/g, '') : input.value.toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
+    if (input.value.length >= 1) {
+        // Sometimes the input element might be delayed (on CI, so only focus the next if the current input is still focused)
+        selectNext(index + 1, document.activeElement === input);
+    }
+}
 
-        const input = this.$refs.numberInput[index] as HTMLInputElement;
-        input.value = this.numbersOnly ? (input.value as string).replace(/\D/g, '') : (input.value as string).toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
-        if (input.value.length >= 1) {
-            // Sometimes the input element might be delayed (on CI, so only focus the next if the current input is still focused)
-            this.selectNext(index + 1, document.activeElement === input);
-        }
+function clearInput(index: number, select = true) {
+    if (!hasInputs()) {
+        return;
     }
 
-    clearInput(index: number, select = true) {
-        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
-            return;
-        }
-
-        // Move everything one to the left
-        const input = this.$refs.numberInput[index] as HTMLInputElement;
-        if (input.value.length === 0 && index < this.codeLength - 1) {
-            input.value = (this.$refs.numberInput[index + 1] as HTMLInputElement).value;
-            (this.$refs.numberInput[index + 1] as HTMLInputElement).value = '';
-            this.clearInput(index + 1, false);
-        }
-
-        if (select) {
-            if (index > 0) {
-                this.selectNext(index - 1);
-            } else {
-                // reselect
-                this.selectNext(index);
-            }
-            this.updateValue();
-        }
+    // Move everything one to the left
+    const input = numberInput.value[index];
+    if (input.value.length === 0 && index < props.codeLength - 1) {
+        input.value = numberInput.value[index + 1].value;
+        numberInput.value[index + 1].value = '';
+        clearInput(index + 1, false);
     }
 
-    selectNext(index: number, focus = true) {
-        if (index < 0) {
+    if (select) {
+        if (index > 0) {
+            selectNext(index - 1);
+        }
+        else {
+            // reselect
+            selectNext(index);
+        }
+        updateValue();
+    }
+}
+
+function selectNext(index: number, focus = true) {
+    if (index < 0) {
+        return;
+    }
+
+    if (!hasInputs()) {
+        return;
+    }
+
+    console.log('select next ', index);
+    if (index >= props.codeLength) {
+        const prev = numberInput.value[index - 1];
+        const val = prev.value;
+        if (val.length > 1) {
+            prev.value = val.substr(0, 1);
+        }
+        for (let i = 0; i < props.codeLength; i++) {
+            const element = numberInput.value[i];
+            element.blur();
+        }
+        updateValue();
+
+        if (getInternalValue().length === props.codeLength) {
+            emit('complete');
+        }
+        return;
+    }
+    if (index >= 1) {
+        const prev = numberInput.value[index - 1];
+        const val = prev.value;
+        if (val.length > 1) {
+            prev.value = val.substr(0, 1);
+            numberInput.value[index].value = val.substr(1);
+            selectNext(index + 1);
             return;
         }
+    }
+    if (!numberInput.value[index]) {
+        console.warn('CodeInput: No input found for index', index);
+        return;
+    }
 
-        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
-            return;
-        }
+    if (focus) {
+        numberInput.value[index].focus();
 
-        console.log('select next ', index);
-        if (index >= this.codeLength) {
-            const prev = this.$refs.numberInput[index - 1] as HTMLInputElement;
-            const val = prev.value;
-            if (val.length > 1) {
-                prev.value = val.substr(0, 1);
-            }
-            for (let index = 0; index < this.codeLength; index++) {
-                const element = this.$refs.numberInput[index] as HTMLInputElement;
-                element.blur();
-            }
-            this.updateValue();
-
-            if (this.getInternalValue().length === this.codeLength) {
-                this.$emit('complete');
-            }
-            return;
-        }
-        if (index >= 1) {
-            const prev = this.$refs.numberInput[index - 1] as HTMLInputElement;
-            const val = prev.value;
-            if (val.length > 1) {
-                prev.value = val.substr(0, 1);
-                (this.$refs.numberInput[index] as HTMLInputElement).value = val.substr(1);
-                this.selectNext(index + 1);
-                return;
-            }
-        }
-        if (!this.$refs || !this.$refs.numberInput || !this.$refs.numberInput[index]) {
-            console.warn('CodeInput: No input found for index', index);
-            return;
-        }
-
-        if (focus) {
-            (this.$refs.numberInput[index] as HTMLInputElement).focus();
-
-            if ((this.$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
+        if (numberInput.value[index].value.length > 0) {
             // iOS fix
-                (this.$refs.numberInput[index] as HTMLInputElement).select();
-            }
+            numberInput.value[index].select();
         }
-        this.updateValue();
+    }
+    updateValue();
+}
+
+function getInternalValue() {
+    if (!hasInputs()) {
+        return '';
     }
 
-    getInternalValue() {
-        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
-            return '';
+    let val = '';
+    for (let index = 0; index < props.codeLength; index++) {
+        const element = numberInput.value[index];
+        const letter = element.value.substr(0, 1).toUpperCase();
+        val += letter;
+        if (letter.length === 0) {
+            break;
         }
-
-        let val = '';
-        for (let index = 0; index < this.codeLength; index++) {
-            const element = this.$refs.numberInput[index] as HTMLInputElement;
-            const letter = element.value.substr(0, 1).toUpperCase();
-            val += letter;
-            if (letter.length === 0) {
-                break;
-            }
-        }
-        return val;
     }
+    return val;
+}
 
-    updateValue() {
-        this.$emit('update:modelValue', this.getInternalValue());
-    }
+function updateValue() {
+    model.value = getInternalValue();
 }
 </script>
 

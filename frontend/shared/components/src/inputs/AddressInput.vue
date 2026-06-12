@@ -1,10 +1,10 @@
 <template>
     <STInputBox :title="title" error-fields="address" :error-box="errorBox">
         <div v-if="cityOnly" class="input-group">
-            <input v-model="city" :enterkeyhint="enterkeyhint" class="input" type="text" :placeholder="$t('%1PP')" name="city" autocomplete="address-level2" data-testid="city-only-input" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+            <input v-model="city" :enterkeyhint="(enterkeyhint as any)" class="input" type="text" :placeholder="$t('%1PP')" name="city" autocomplete="address-level2" data-testid="city-only-input" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
             <Dropdown v-model="country" autocomplete="country" name="country" data-skip-enter-focus data-testid="country-select" @change="updateAddress" @focus="onFocus" @blur="onBlur">
-                <option v-for="country in countries" :key="country.value" :value="country.value">
-                    {{ country.text }}
+                <option v-for="c in countries" :key="c.value" :value="c.value">
+                    {{ c.text }}
                 </option>
             </Dropdown>
         </div>
@@ -16,298 +16,263 @@
                     <input v-model="postalCode" enterkeyhint="next" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
                 </div>
                 <div>
-                    <input v-model="city" :enterkeyhint="enterkeyhint" class="input" type="text" :placeholder="$t('%1PP')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+                    <input v-model="city" :enterkeyhint="(enterkeyhint as any)" class="input" type="text" :placeholder="$t('%1PP')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
                 </div>
             </div>
             <Dropdown v-model="country" autocomplete="country" name="country" data-skip-enter-focus @change="updateAddress" @focus="onFocus" @blur="onBlur">
-                <option v-for="country in countries" :key="country.value" :value="country.value">
-                    {{ country.text }}
+                <option v-for="c in countries" :key="c.value" :value="c.value">
+                    {{ c.text }}
                 </option>
             </Dropdown>
         </template>
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { Server } from '@simonbackx/simple-networking';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
+import { computed, ref, watch } from 'vue';
+
 import { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import Dropdown from './Dropdown.vue';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        Dropdown,
-    },
-    emits: ['update:modelValue'],
-})
-export default class AddressInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+const model = defineModel<Address | ValidatedAddress | null>({ default: null });
 
-    @Prop({ default: false })
-    cityOnly: boolean;
-
-    @Prop({ default: false })
-    optionalExceptCity: boolean;
-
+const props = withDefaults(defineProps<{
+    title?: string;
+    cityOnly?: boolean;
+    optionalExceptCity?: boolean;
     /**
      * Assign a validator if you want to offload the validation to components
      */
-    @Prop({ default: null })
-    validator: Validator | null;
-
-    errorBox: ErrorBox | null = null;
-    pendingErrorBox: ErrorBox | null = null;
-
-    @Prop({ default: null })
-    modelValue: Address | ValidatedAddress | null;
-
+    validator?: Validator | null;
     /**
      * Validate on the server or not? -> will return a ValidatedAddress if this is true
      */
-    @Prop({ default: null })
-    validateServer: Server | null;
-
-    @Prop({ default: true })
-    required: boolean;
-
+    validateServer?: Server | null;
+    required?: boolean;
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
-    @Prop({ default: false })
-    nullable!: boolean;
+    nullable?: boolean;
+    linkCountryToLocale?: boolean;
+    enterkeyhint?: string | null;
+}>(), {
+    title: '',
+    cityOnly: false,
+    optionalExceptCity: false,
+    validator: null,
+    validateServer: null,
+    required: true,
+    nullable: false,
+    linkCountryToLocale: false,
+    enterkeyhint: null,
+});
 
-    addressLine1 = '';
-    city = '';
-    postalCode = '';
-    country: Country = this.getDefaultCountry();
+function getDefaultCountry() {
+    return I18nController.shared?.countryCode ?? Country.Belgium;
+}
 
-    @Prop({ default: false })
-    linkCountryToLocale: boolean;
+const errorBox = ref<ErrorBox | null>(null);
+const pendingErrorBox = ref<ErrorBox | null>(null);
 
-    @Prop({ default: null })
-    enterkeyhint: string | null;
+const addressLine1 = ref('');
+const city = ref('');
+const postalCode = ref('');
+const country = ref<Country>(getDefaultCountry());
 
-    getDefaultCountry() {
-        return I18nController.shared?.countryCode ?? Country.Belgium;
+const hasFocus = ref(false);
+
+const countries = computed(() => CountryHelper.getList());
+
+if (props.validator) {
+    useValidation(props.validator, () => isValid(true, false));
+}
+
+if (model.value) {
+    addressLine1.value = model.value.street.length > 0 ? (model.value.street + ' ' + model.value.number) : (model.value.number + '');
+    city.value = model.value.city;
+    postalCode.value = model.value.postalCode;
+    country.value = model.value.country;
+}
+
+watch(model, (val) => {
+    if (hasFocus.value) {
+        // don't change while typing
+        return;
     }
 
-    hasFocus = false;
-
-    get countries() {
-        return CountryHelper.getList();
+    if (!val) {
+        if (!props.required && !pendingErrorBox.value && !errorBox.value) {
+            addressLine1.value = '';
+            city.value = '';
+            postalCode.value = '';
+        }
+        return;
     }
+    addressLine1.value = val.street.length > 0 ? (val.street + ' ' + val.number) : (val.number + '');
+    city.value = val.city;
+    postalCode.value = val.postalCode;
+    country.value = val.country;
+}, { deep: true });
 
-    /**
-     * For some crazy reason $t is not found in the template by typescript checking
-     * Will get fixed when we switch this component to Setup syntax
-     */
-    get $t() {
-        return $t;
+watch(() => props.required, () => {
+    // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
+    isValid(false, true).catch(console.error);
+});
+
+function updateValues(val: Address | null) {
+    if (!val) {
+        if (!props.required && !pendingErrorBox.value && !errorBox.value) {
+            addressLine1.value = '';
+            city.value = '';
+            postalCode.value = '';
+        }
+        return;
     }
+    addressLine1.value = val.street.length > 0 ? (val.street + ' ' + val.number) : (val.number + '');
+    city.value = val.city;
+    postalCode.value = val.postalCode;
+    country.value = val.country;
+}
 
-    @Watch('modelValue', { deep: true })
-    onValueChanged(val: Address | null) {
-        if (this.hasFocus) {
-            // don't change while typing
-            return;
+function onBlur() {
+    hasFocus.value = false;
+
+    // Sometimes the blur happens without a onChange event, so we always need to update the address after a blur
+    // it will only make the errors visible if hasFocus is still false after 200ms
+    updateAddress();
+}
+
+function onFocus() {
+    hasFocus.value = true;
+}
+
+async function isValid(isFinal: boolean, silent = false): Promise<boolean> {
+    if (!props.required && addressLine1.value.length === 0 && postalCode.value.length === 0 && city.value.length === 0) {
+        if (!silent) {
+            errorBox.value = null;
         }
 
-        if (!val) {
-            if (!this.required && !this.pendingErrorBox && !this.errorBox) {
-                this.addressLine1 = '';
-                this.city = '';
-                this.postalCode = '';
-            }
-            return;
+        if (model.value !== null) {
+            model.value = null;
         }
-        this.addressLine1 = val.street.length > 0 ? (val.street + ' ' + val.number) : (val.number + '');
-        this.city = val.city;
-        this.postalCode = val.postalCode;
-        this.country = val.country;
+        return true;
     }
 
-    @Watch('required', { deep: true })
-    onChangeRequired() {
-        // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
-        this.isValid(false, true).catch(console.error);
-    }
-
-    updateValues(val: Address | null) {
-        if (!val) {
-            if (!this.required && !this.pendingErrorBox && !this.errorBox) {
-                this.addressLine1 = '';
-                this.city = '';
-                this.postalCode = '';
-            }
-            return;
-        }
-        this.addressLine1 = val.street.length > 0 ? (val.street + ' ' + val.number) : (val.number + '');
-        this.city = val.city;
-        this.postalCode = val.postalCode;
-        this.country = val.country;
-    }
-
-    onBlur() {
-        this.hasFocus = false;
-
-        // Sometimes the blur happens without a onChange event, so we always need to update the address after a blur
-        // it will only make the errors visible if hasFocus is still false after 200ms
-        this.updateAddress();
-    }
-
-    onFocus() {
-        this.hasFocus = true;
-    }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.isValid(true, false);
-            });
-        }
-
-        if (this.modelValue) {
-            this.addressLine1 = this.modelValue.street.length > 0 ? (this.modelValue.street + ' ' + this.modelValue.number) : (this.modelValue.number + '');
-            this.city = this.modelValue.city;
-            this.postalCode = this.modelValue.postalCode;
-            this.country = this.modelValue.country;
-        }
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    async isValid(isFinal: boolean, silent = false): Promise<boolean> {
-        if (!this.required && this.addressLine1.length === 0 && this.postalCode.length === 0 && this.city.length === 0) {
+    if (props.required && addressLine1.value.length === 0 && postalCode.value.length === 0 && city.value.length === 0) {
+        if (!isFinal) {
             if (!silent) {
-                this.errorBox = null;
+                errorBox.value = null;
             }
 
-            if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
-            }
-            return true;
-        }
-
-        if (this.required && this.addressLine1.length === 0 && this.postalCode.length === 0 && this.city.length === 0) {
-            if (!isFinal) {
-                if (!silent) {
-                    this.errorBox = null;
-                }
-
-                if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null);
-                }
-                return false;
-            }
-        }
-
-        let address: Address;
-
-        try {
-            if (!this.addressLine1 && (this.optionalExceptCity || this.cityOnly)) {
-                address = Address.create({
-                    street: '',
-                    number: '',
-                    postalCode: this.postalCode ?? '',
-                    city: this.city,
-                    country: this.country,
-                });
-                address.cleanData();
-            }
-            else {
-                address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country);
-            }
-
-            if (!this.modelValue || (this.validateServer && !(this.modelValue instanceof ValidatedAddress) && !silent && isFinal) || address.toString() !== this.modelValue.toString()) {
-                // Do we need to validate on the server?
-                if (this.validateServer && !silent && isFinal) {
-                    const response = await this.validateServer.request({
-                        method: 'POST',
-                        path: '/address/validate',
-                        body: address,
-                        decoder: ValidatedAddress as Decoder<ValidatedAddress>,
-                        shouldRetry: false,
-                    });
-                    if (!this.hasFocus) {
-                        this.updateValues(response.data);
-                    }
-                    this.$emit('update:modelValue', response.data);
-                }
-                else {
-                    if (!this.hasFocus) {
-                        this.updateValues(address);
-                    }
-                    this.$emit('update:modelValue', address);
-                }
-            }
-            else {
-                if (!this.hasFocus) {
-                    this.updateValues(address);
-                }
-            }
-
-            if (!silent) {
-                this.errorBox = null;
-                this.pendingErrorBox = null;
-            }
-            return true;
-        }
-        catch (e) {
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                e.addNamespace('address');
-
-                if (!silent) {
-                    if (isFinal) {
-                        this.errorBox = new ErrorBox(e);
-                    }
-                    else {
-                        this.pendingErrorBox = new ErrorBox(e);
-
-                        setTimeout(() => {
-                            if (!this.hasFocus) {
-                                this.errorBox = this.pendingErrorBox;
-                            }
-                        }, 200);
-                    }
-                }
-            }
-
-            if (!this.required && !silent) {
-                this.$emit('update:modelValue', null);
+            if (props.nullable && model.value !== null) {
+                model.value = null;
             }
             return false;
         }
     }
 
-    updateAddress() {
-        if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
-            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error);
-        }
-        this.isValid(false).catch(console.error);
-    }
+    let address: Address;
 
-    /**
-     * Send real time input updates, but don't update error messages
-     */
-    updateAddressRealTime() {
-        if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
-            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error);
+    try {
+        if (!addressLine1.value && (props.optionalExceptCity || props.cityOnly)) {
+            address = Address.create({
+                street: '',
+                number: '',
+                postalCode: postalCode.value ?? '',
+                city: city.value,
+                country: country.value,
+            });
+            address.cleanData();
         }
-        this.isValid(false, true).catch(console.error);
+        else {
+            address = Address.createFromFields(addressLine1.value, postalCode.value, city.value, country.value);
+        }
+
+        if (!model.value || (props.validateServer && !(model.value instanceof ValidatedAddress) && !silent && isFinal) || address.toString() !== model.value.toString()) {
+            // Do we need to validate on the server?
+            if (props.validateServer && !silent && isFinal) {
+                const response = await props.validateServer.request({
+                    method: 'POST',
+                    path: '/address/validate',
+                    body: address,
+                    decoder: ValidatedAddress as Decoder<ValidatedAddress>,
+                    shouldRetry: false,
+                });
+                if (!hasFocus.value) {
+                    updateValues(response.data);
+                }
+                model.value = response.data;
+            }
+            else {
+                if (!hasFocus.value) {
+                    updateValues(address);
+                }
+                model.value = address;
+            }
+        }
+        else {
+            if (!hasFocus.value) {
+                updateValues(address);
+            }
+        }
+
+        if (!silent) {
+            errorBox.value = null;
+            pendingErrorBox.value = null;
+        }
+        return true;
     }
+    catch (e) {
+        if (isSimpleError(e) || isSimpleErrors(e)) {
+            e.addNamespace('address');
+
+            if (!silent) {
+                if (isFinal) {
+                    errorBox.value = new ErrorBox(e);
+                }
+                else {
+                    pendingErrorBox.value = new ErrorBox(e);
+
+                    setTimeout(() => {
+                        if (!hasFocus.value) {
+                            errorBox.value = pendingErrorBox.value;
+                        }
+                    }, 200);
+                }
+            }
+        }
+
+        if (!props.required && !silent) {
+            model.value = null;
+        }
+        return false;
+    }
+}
+
+function updateAddress() {
+    if (country.value && props.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(country.value)) {
+        I18nController.shared.switchToLocale({ country: country.value }).catch(console.error);
+    }
+    isValid(false).catch(console.error);
+}
+
+/**
+ * Send real time input updates, but don't update error messages
+ */
+function updateAddressRealTime() {
+    if (country.value && props.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(country.value)) {
+        I18nController.shared.switchToLocale({ country: country.value }).catch(console.error);
+    }
+    isValid(false, true).catch(console.error);
 }
 </script>

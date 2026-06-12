@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
@@ -51,9 +50,9 @@ describe('TimeInput', async () => {
 
         const inputWrapper = wrapper.find('input');
 
-        await wrapper.setProps({modelValue: 120})
-        expect(inputWrapper.element).toHaveValue('02:00')
-    })
+        await wrapper.setProps({ modelValue: 120 });
+        expect(inputWrapper.element).toHaveValue('02:00');
+    });
 
     test('Model should not update if invalid input', async () => {
         const invalidInputs = ['invalid input', '24:00', '12:60'];
@@ -114,7 +113,7 @@ describe('TimeInput', async () => {
                 input: '20:30',
                 expected: 1230,
             },
-            { 
+            {
                 input: '05:00',
                 expected: 300,
             },
@@ -137,7 +136,6 @@ describe('TimeInput', async () => {
         ];
 
         for (const { input, expected } of testCases) {
-
             const wrapper = mount(TimeMinutesInput, {
                 props: {
                     'modelValue': 100,
@@ -164,7 +162,7 @@ describe('TimeInput', async () => {
                 expected: '20:30',
                 input: 1230,
             },
-            { 
+            {
                 expected: '05:00',
                 input: 300,
             },
@@ -187,7 +185,6 @@ describe('TimeInput', async () => {
         ];
 
         for (const { input, expected } of testCases) {
-
             const wrapper = mount(TimeMinutesInput, {
                 props: {
                     'modelValue': input,

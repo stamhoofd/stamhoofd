@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -78,28 +77,28 @@ test('Automatically formats the phone number as you type', async () => {
 
     expect(input).toHaveValue('+32 4794455551');
 
-    await userEvent.keyboard('{backspace}')
+    await userEvent.keyboard('{backspace}');
 
     expect(input).toHaveValue('+32 479 44 55 55');
 
-    await userEvent.keyboard('{backspace}')
-    await userEvent.keyboard('{backspace}')
+    await userEvent.keyboard('{backspace}');
+    await userEvent.keyboard('{backspace}');
 
     expect(input).toHaveValue('+32 479 44 55');
 
-    await userEvent.keyboard('{arrowLeft}')
-    await userEvent.keyboard('{arrowLeft}')
+    await userEvent.keyboard('{arrowLeft}');
+    await userEvent.keyboard('{arrowLeft}');
 
     await userEvent.keyboard('1');
-    
+
     expect(input).toHaveValue('+32 479 44 15 5');
 });
 
 test('Automatically formats phone numbers using configured locale on blur', async () => {
     TestUtils.setEnvironment('fixedCountry', Country.Netherlands);
     await I18nController.loadDefault(null, Country.Netherlands, Language.Dutch, Country.Netherlands);
-    expect(STAMHOOFD.fixedCountry).toEqual(Country.Netherlands)
-    expect(I18nController.shared?.countryCode).toEqual(Country.Netherlands)
+    expect(STAMHOOFD.fixedCountry).toEqual(Country.Netherlands);
+    expect(I18nController.shared?.countryCode).toEqual(Country.Netherlands);
 
     renderPhoneInput();
 

@@ -4,7 +4,7 @@
             v-for="(item, index) in items"
             :key="index"
             class="item"
-            :class="{ selected: item === modelValue }"
+            :class="{ selected: item === model }"
             @click="selectItem(index)"
         >
             <div :data-text="labels ? labels[index] : item" />
@@ -24,38 +24,27 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { computed } from 'vue';
 
-@Component({
-    props: {
-        items: Array,
-        value: String,
-    },
-    emits: ['update:modelValue'],
-})
-export default class SegmentedControl extends VueComponent {
-    @Prop({ type: Array })
-    public items!: any[];
+const model = defineModel<any>();
 
-    @Prop({ default: null })
-    public labels!: string[] | null;
+const props = withDefaults(defineProps<{
+    items: any[];
+    labels?: string[] | null;
+}>(), {
+    labels: null,
+});
 
-    @Prop()
-    public modelValue!: any;
+const selectedIndex = computed(() => props.items.indexOf(model.value));
 
-    get selectedIndex() {
-        return this.items.indexOf(this.modelValue);
-    }
+const pointerTransform = computed(() => {
+    const percentage = (selectedIndex.value / props.items.length) * 100;
+    return 'translateX(' + percentage.toFixed(2) + '%)';
+});
 
-    get pointerTransform() {
-        const percentage = (this.selectedIndex / this.items.length) * 100;
-        return 'translateX(' + percentage.toFixed(2) + '%)';
-    }
-
-    selectItem(index: number) {
-        this.$emit('update:modelValue', this.items[index]);
-    }
+function selectItem(index: number) {
+    model.value = props.items[index];
 }
 </script>
 

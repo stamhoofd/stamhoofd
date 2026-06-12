@@ -9,154 +9,128 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { computed, ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-    emits: ['update:modelValue'],
-})
-export default class ColorInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+const model = defineModel<string | null>({ default: null });
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const props = withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    disallowed?: string[];
+    required?: boolean;
+    placeholder?: string;
+    autocomplete?: string;
+}>(), {
+    title: '',
+    validator: null,
+    disallowed: () => [],
+    required: true,
+    placeholder: '',
+    autocomplete: 'color',
+});
 
-    @Prop({ default: () => [] })
-    disallowed: string[];
+const colorRaw = ref(model.value ?? '');
+const hasColor = ref(model.value ?? '');
+const errorBox = ref<ErrorBox | null>(null);
 
-    colorRaw = '';
-    hasColor = '';
-
-    @Prop({ default: null })
-    modelValue!: string | null;
-
-    @Prop({ default: true })
-    required!: boolean;
-
-    @Prop({ default: '' })
-    placeholder!: string;
-
-    @Prop({ default: 'color' })
-    autocomplete!: string;
-
-    errorBox: ErrorBox | null = null;
-
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null) {
-            return;
-        }
-        this.colorRaw = val;
+watch(model, (val) => {
+    if (val === null) {
+        return;
     }
+    colorRaw.value = val;
+});
 
-    get pickerColor() {
-        if (!this.hasColor) {
+const pickerColor = computed({
+    get: () => {
+        if (!hasColor.value) {
             // Hacky solution to make black colors work from emtpy -> black
             return '#000001';
         }
-        return this.hasColor || '#000000';
-    }
+        return hasColor.value || '#000000';
+    },
+    set: (val: string) => {
+        colorRaw.value = val || '#000000';
+        validate(false, true);
+    },
+});
 
-    set pickerColor(val: string) {
-        this.colorRaw = val || '#000000';
-        this.validate(false, true);
-    }
+if (props.validator) {
+    useValidation(props.validator, () => validate(true, false));
+}
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate(true, false);
-            });
-        }
+const myColor = computed(() => hasColor.value ?? 'black');
 
-        this.colorRaw = this.modelValue ?? '';
-        this.hasColor = this.colorRaw;
-    }
+function validate(final = true, silent = false) {
+    colorRaw.value = colorRaw.value.trim().toUpperCase();
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    get myColor() {
-        return this.hasColor ?? 'black';
-    }
-
-    validate(final = true, silent = false) {
-        this.colorRaw = this.colorRaw.trim().toUpperCase();
-
-        if (!this.required && this.colorRaw.length === 0) {
-            if (!silent) {
-                this.errorBox = null;
-            }
-            this.hasColor = '';
-
-            if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
-            }
-            return true;
-        }
-
-        if (this.colorRaw.length === 6 && !this.colorRaw.startsWith('#')) {
-            this.colorRaw = '#' + this.colorRaw;
-        }
-
-        const regex = /^#[0-9A-F]{6}$/;
-
-        if (!regex.test(this.colorRaw)) {
-            this.hasColor = '';
-
-            if (!silent) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: $t(`%yr`),
-                    field: 'color',
-                }));
-            }
-            if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
-            }
-            return false;
-        }
-
-        if (this.disallowed.includes(this.colorRaw)) {
-            this.hasColor = '';
-
-            if (!silent) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: $t(`%ys`),
-                    field: 'color',
-                }));
-            }
-
-            if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
-            }
-
-            return false;
-        }
-
-        this.hasColor = this.colorRaw;
-
-        if (this.colorRaw !== this.modelValue) {
-            this.$emit('update:modelValue', this.colorRaw);
-        }
+    if (!props.required && colorRaw.value.length === 0) {
         if (!silent) {
-            this.errorBox = null;
+            errorBox.value = null;
+        }
+        hasColor.value = '';
+
+        if (model.value !== null) {
+            model.value = null;
         }
         return true;
     }
+
+    if (colorRaw.value.length === 6 && !colorRaw.value.startsWith('#')) {
+        colorRaw.value = '#' + colorRaw.value;
+    }
+
+    const regex = /^#[0-9A-F]{6}$/;
+
+    if (!regex.test(colorRaw.value)) {
+        hasColor.value = '';
+
+        if (!silent) {
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`%yr`),
+                field: 'color',
+            }));
+        }
+        if (model.value !== null) {
+            model.value = null;
+        }
+        return false;
+    }
+
+    if (props.disallowed.includes(colorRaw.value)) {
+        hasColor.value = '';
+
+        if (!silent) {
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: $t(`%ys`),
+                field: 'color',
+            }));
+        }
+
+        if (model.value !== null) {
+            model.value = null;
+        }
+
+        return false;
+    }
+
+    hasColor.value = colorRaw.value;
+
+    if (colorRaw.value !== model.value) {
+        model.value = colorRaw.value;
+    }
+    if (!silent) {
+        errorBox.value = null;
+    }
+    return true;
 }
 </script>
 

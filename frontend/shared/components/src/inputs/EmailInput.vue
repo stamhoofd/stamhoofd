@@ -1,5 +1,5 @@
 <template>
-    <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="this.class">
+    <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="props.class">
         <input ref="input" v-model="emailRaw" v-autofocus="autofocus" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" data-testid="email-input" @change="validate(false)" @input="(event: any) => {emailRaw = event.currentTarget.value; onTyping();}">
         <template #right>
             <slot name="right" />
@@ -7,140 +7,123 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { DataValidator } from '@stamhoofd/utility';
+import { ref, useTemplateRef, watch } from 'vue';
 
-import { AutofocusDirective } from '../directives/AutofocusDirective';
 import { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-    emits: ['update:modelValue'],
-
-    // All attributes that we don't recognize should be passed to the input, and not to the root (except style and class)
+// All attributes that we don't recognize should be passed to the input, and not to the root (except style and class)
+defineOptions({
     inheritAttrs: false,
-})
-export default class EmailInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+});
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const model = defineModel<string | null>({ required: true });
 
-    emailRaw = '';
-    valid = true;
-
-    @Prop({ required: true })
-    modelValue!: string | null;
-
-    @Prop({ default: null })
-    class!: string | null;
-
-    @Prop({ default: true })
-    required!: boolean;
-
+const props = withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    class?: string | null;
+    required?: boolean;
     /**
      * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
-    @Prop({ default: false })
-    nullable!: boolean;
+    nullable?: boolean;
+    disabled?: boolean;
+    autofocus?: boolean;
+}>(), {
+    title: '',
+    validator: null,
+    class: null,
+    required: true,
+    nullable: false,
+    disabled: false,
+    autofocus: false,
+});
 
-    @Prop({ default: false })
-    disabled!: boolean;
+const emailRaw = ref(model.value ?? '');
+const valid = ref(true);
+const errorBox = ref<ErrorBox | null>(null);
+const inputElement = useTemplateRef<HTMLInputElement>('input');
 
-    @Prop({ default: false })
-    autofocus!: boolean;
+if (props.validator) {
+    useValidation(props.validator, () => validate(true));
+}
 
-    errorBox: ErrorBox | null = null;
+watch(model, (val) => {
+    if (val === null) {
+        return;
+    }
+    emailRaw.value = val;
+});
 
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null) {
-            return;
+function onTyping() {
+    // Silently send modelValue to parents, but don't show visible errors yet
+    validate(false, true);
+}
+
+function validate(final = true, silent = false) {
+    emailRaw.value = emailRaw.value.trim().toLowerCase();
+
+    if (!props.required && emailRaw.value.length === 0) {
+        if (!silent) {
+            errorBox.value = null;
         }
-        this.emailRaw = val;
+
+        if (model.value !== null) {
+            model.value = null;
+        }
+        return true;
     }
 
-    onTyping() {
-        // Silently send modelValue to parents, but don't show visible errors yet
-        this.validate(false, true);
+    if (props.required && emailRaw.value.length === 0 && !final) {
+        // Ignore empty email if not final
+        if (!silent) {
+            errorBox.value = null;
+        }
+
+        if (props.nullable && model.value !== null) {
+            model.value = null;
+        }
+        else if (model.value !== '') {
+            model.value = '';
+        }
+        return false;
     }
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate(true);
-            });
+    if (!DataValidator.isEmailValid(emailRaw.value)) {
+        if (!silent) {
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: emailRaw.value.length === 0 ? $t(`%yy`) : $t(`%1Mi`) + ' ' + emailRaw.value,
+                field: 'email',
+            }));
         }
-
-        this.emailRaw = this.modelValue ?? '';
+        return false;
     }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
+    else {
+        if (emailRaw.value !== model.value) {
+            model.value = emailRaw.value;
         }
-    }
-
-    validate(final = true, silent = false) {
-        this.emailRaw = this.emailRaw.trim().toLowerCase();
-
-        if (!this.required && this.emailRaw.length === 0) {
-            if (!silent) {
-                this.errorBox = null;
-            }
-
-            if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
-            }
-            return true;
+        if (!silent) {
+            errorBox.value = null;
         }
-
-        if (this.required && this.emailRaw.length === 0 && !final) {
-            // Ignore empty email if not final
-            if (!silent) {
-                this.errorBox = null;
-            }
-
-            if (this.nullable && this.modelValue !== null) {
-                this.$emit('update:modelValue', null);
-            } else if (this.modelValue !== '') {
-                this.$emit('update:modelValue', '');
-            }
-            return false;
-        }
-
-        if (!DataValidator.isEmailValid(this.emailRaw)) {
-            if (!silent) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: this.emailRaw.length === 0 ? $t(`%yy`) : $t(`%1Mi`) + ' ' + this.emailRaw,
-                    field: 'email',
-                }));
-            }
-            return false;
-        } else {
-            if (this.emailRaw !== this.modelValue) {
-                this.$emit('update:modelValue', this.emailRaw);
-            }
-            if (!silent) {
-                this.errorBox = null;
-            }
-            return true;
-        }
-    }
-
-    focus() {
-        (this.$refs.input as any)?.focus();
+        return true;
     }
 }
+
+function focus() {
+    inputElement.value?.focus();
+}
+
+defineExpose({
+    focus,
+});
 </script>
 
 <style lang="scss">

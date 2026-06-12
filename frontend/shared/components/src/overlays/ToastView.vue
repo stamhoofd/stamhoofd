@@ -16,9 +16,9 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { computed, onMounted, ref } from 'vue';
 
 import Spinner from '../Spinner.vue';
 import type { Toast } from './Toast';
@@ -26,59 +26,53 @@ import type { Toast } from './Toast';
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view
 */
-@Component({
-    components: {
-        Spinner,
-    },
-})
-export default class ToastView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+
+const props = withDefaults(defineProps<{
     toast: Toast;
+    onClose?: (() => void) | null;
+}>(), {
+    onClose: null,
+});
 
-    get message() {
-        return this.toast.message;
+const pop = usePop();
+
+const message = computed(() => props.toast.message);
+const isClosing = ref(false);
+
+onMounted(() => {
+    if (props.toast.autohideAfter) {
+        window.setTimeout(() => {
+            close().catch(console.error);
+        }, props.toast.autohideAfter);
+    }
+    props.toast.doHide = () => {
+        close().catch(console.error);
+    };
+});
+
+async function clicked() {
+    if (props.toast.forceButtonClick) {
+        return clickedButton();
     }
 
-    isClosing = false;
+    await close();
 
-    @Prop({ default: null })
-    onClose: (() => void) | null;
-
-    mounted() {
-        if (this.toast.autohideAfter) {
-            window.setTimeout(() => {
-                this.close().catch(console.error);
-            }, this.toast.autohideAfter);
-        }
-        this.toast.doHide = () => {
-            this.close().catch(console.error);
-        };
+    if (props.toast.action) {
+        props.toast.action();
     }
+}
 
-    async clicked() {
-        if (this.toast.forceButtonClick) {
-            return this.clickedButton();
-        }
-
-        await this.close();
-
-        if (this.toast.action) {
-            this.toast.action();
-        }
+async function close() {
+    if (props.onClose && !isClosing.value) {
+        props.onClose();
     }
+    isClosing.value = true;
+    await pop();
+}
 
-    async close() {
-        if (this.onClose && !this.isClosing) {
-            this.onClose();
-        }
-        this.isClosing = true;
-        await this.pop();
-    }
-
-    async clickedButton() {
-        this.toast.button!.action();
-        await this.close();
-    }
+async function clickedButton() {
+    props.toast.button!.action();
+    await close();
 }
 </script>
 

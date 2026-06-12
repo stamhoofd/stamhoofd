@@ -12,103 +12,96 @@
     </component>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { File } from '@stamhoofd/structures';
+import { ref } from 'vue';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
+import { useContext } from '../hooks/useContext.ts';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import { Toast } from '../overlays/Toast';
-import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        LoadingButton,
-    },
-})
-export default class UploadFileButton extends Mixins(NavigationMixin) {
-    @Prop({ default: 'label' })
-    elementName!: string;
+const props = withDefaults(defineProps<{
+    elementName?: string;
+    text?: string;
+    accept?: string;
+    isPrivate?: boolean;
+    maxSize?: number;
+}>(), {
+    elementName: 'label',
+    text: '',
+    accept: '',
+    isPrivate: false,
+    maxSize: 20 * 1024 * 1024,
+});
 
-    @Prop({ default: '' })
-    text: string;
+const emit = defineEmits<{
+    (e: 'change', file: File): void;
+}>();
 
-    @Prop({ default: '' })
-    accept: string;
+const context = useContext();
+const owner = useRequestOwner();
 
-    @Prop({ default: false })
-    isPrivate: boolean;
+const uploading = ref(false);
 
-    @Prop({ default: 20 * 1024 * 1024 })
-    maxSize: number;
+function changedFile(event: Event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+        return;
+    }
+    const target = event.target;
+    if (!target.files || target.files.length !== 1) {
+        return;
+    }
+    if (uploading.value) {
+        return;
+    }
+    Request.cancelAll(owner);
 
-    uploading = false;
+    const file = target.files[0];
 
-    beforeUnmount() {
-        Request.cancelAll(this);
+    if (file.size > props.maxSize) {
+        const error = new SimpleError({
+            code: 'file_too_large',
+            message: $t(`%yz`),
+        });
+        Toast.fromError(error).setHide(null).show();
+        return;
     }
 
-    changedFile(event: Event) {
-        if (!(event.target instanceof HTMLInputElement)) {
-            return;
-        }
-        const target = event.target
-        if (!target.files || target.files.length !== 1) {
-            return;
-        }
-        if (this.uploading) {
-            return;
-        }
-        Request.cancelAll(this);
+    const formData = new FormData();
+    formData.append('file', file);
 
-        const file = target.files[0];
+    uploading.value = true;
 
-        if (file.size > this.maxSize) {
-            const error = new SimpleError({
-                code: 'file_too_large',
-                message: $t(`%yz`),
-            });
-            Toast.fromError(error).setHide(null).show();
-            return;
-        }
+    context.value.authenticatedServer
+        .request({
+            method: 'POST',
+            path: '/upload-file',
+            body: formData,
+            decoder: File as Decoder<File>,
+            timeout: 5 * 60 * 1000,
+            shouldRetry: false,
+            owner,
+            query: {
+                private: props.isPrivate ? true : undefined,
+            },
+        })
+        .then((response) => {
+            emit('change', response.data);
+        })
+        .catch((e) => {
+            console.error(e);
+            Toast.fromError(e).setHide(null).show();
+        })
+        .finally(() => {
+            uploading.value = false;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        this.uploading = true;
-        // this.errorBox = null;
-
-        this.$context.authenticatedServer
-            .request({
-                method: 'POST',
-                path: '/upload-file',
-                body: formData,
-                decoder: File as Decoder<File>,
-                timeout: 5 * 60 * 1000,
-                shouldRetry: false,
-                owner: this,
-                query: {
-                    private: this.isPrivate ? true : undefined,
-                },
-            })
-            .then((response) => {
-                this.$emit('change', response.data);
-            })
-            .catch((e) => {
-                console.error(e);
-                Toast.fromError(e).setHide(null).show();
-            })
-            .finally(() => {
-                this.uploading = false;
-
-                // Clear selection
-                target.value = '';
-            });
-    }
+            // Clear selection
+            target.value = '';
+        });
 }
 </script>
 

@@ -1,40 +1,30 @@
 <template>
     <div class="input-icon-container right icon arrow-down-small gray">
-        <select v-model="mappedValue" class="input" :autocomplete="autocomplete" :name="name" :disabled="disabled" :data-testid="dataTestid" @blur="$emit('blur', $event)" @focus="$emit('focus', $event)">
+        <select v-model="mappedValue" class="input" :autocomplete="autocomplete" :name="name" :disabled="disabled" :data-testid="dataTestid" @blur="emit('blur', $event)" @focus="emit('focus', $event)">
             <slot />
         </select>
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+const model = defineModel<any>();
 
-@Component({
-    emits: ['update:modelValue'],
-})
-export default class Dropdown extends Mixins(NavigationMixin) {
-    @Prop({})
-    modelValue: any;
-
-    @Prop({ default: undefined })
+withDefaults(defineProps<{
     autocomplete?: string;
-
-    @Prop({ default: undefined })
     name?: string;
-
-    @Prop({ default: false })
     disabled?: boolean;
-
-    @Prop({ default: undefined })
     dataTestid?: string;
+}>(), {
+    autocomplete: undefined,
+    name: undefined,
+    disabled: false,
+    dataTestid: undefined,
+});
 
-    get mappedValue() {
-        return this.modelValue;
-    }
+const emit = defineEmits<{
+    (e: 'blur', event: Event): void;
+    (e: 'focus', event: Event): void;
+}>();
 
-    set mappedValue(val: any) {
-        this.$emit('update:modelValue', val);
-    }
-}
+const mappedValue = model;
 </script>

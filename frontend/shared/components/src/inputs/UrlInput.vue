@@ -4,151 +4,129 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-})
-export default class UrlInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+const model = defineModel<string | null>({ default: null });
 
-    @Prop({ default: null })
-    validator: Validator | null;
-
-    urlRaw = '';
-    valid = true;
-
-    @Prop({ default: null })
-    modelValue!: string | null;
-
-    @Prop({ default: true })
-    required!: boolean;
-
+const props = withDefaults(defineProps<{
+    title?: string;
+    validator?: Validator | null;
+    required?: boolean;
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
-    @Prop({ default: false })
-    nullable!: boolean;
+    nullable?: boolean;
+    placeholder?: string;
+}>(), {
+    title: '',
+    validator: null,
+    required: true,
+    nullable: false,
+    placeholder: '',
+});
 
-    @Prop({ default: '' })
-    placeholder!: string;
+const urlRaw = ref(model.value ?? '');
+const valid = ref(true);
+const errorBox = ref<ErrorBox | null>(null);
 
-    errorBox: ErrorBox | null = null;
+if (props.validator) {
+    useValidation(props.validator, () => validate(true));
+}
 
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null) {
-            this.urlRaw = '';
-            return;
-        }
-        this.urlRaw = val;
+watch(model, (val) => {
+    if (val === null) {
+        urlRaw.value = '';
+        return;
     }
+    urlRaw.value = val;
+});
 
-    onTyping() {
-        // Silently send value to parents, but don't show visible errors yet
-        this.validate(false, true);
-    }
+function onTyping() {
+    // Silently send value to parents, but don't show visible errors yet
+    validate(false, true);
+}
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate(true);
-            });
-        }
-
-        this.urlRaw = this.modelValue ?? '';
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    validate(final: boolean, silent = false) {
-        if (this.urlRaw.length === 0) {
-            if (!this.required) {
-                if (!silent) {
-                    this.errorBox = null;
-                }
-
-                if (this.modelValue !== null) {
-                    this.$emit('update:modelValue', null);
-                }
-                return true;
-            }
-
-            if (!final) {
-                if (!silent) {
-                    this.errorBox = null;
-                }
-
-                if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null);
-                }
-                return false;
-            }
-        }
-        try {
-            let autoCorrected = this.urlRaw;
-
-            if (!autoCorrected.startsWith('http://') && !autoCorrected.startsWith('https://')) {
-                autoCorrected = 'https://' + autoCorrected;
-            }
-
-            try {
-                const u = new URL(autoCorrected);
-                autoCorrected = u.href;
-                if (u.pathname === '/' && autoCorrected[autoCorrected.length - 1] === '/') {
-                    // Remove trailing slash on root domains (because ugly)
-                    autoCorrected = autoCorrected.substring(0, autoCorrected.length - 1);
-                }
-            }
-            catch (e) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    field: 'url',
-                    message: 'Invalid url',
-                    human: this.$t('%5A').toString(),
-                });
-            }
-
-            const v = silent ? this.urlRaw : autoCorrected;
-            this.urlRaw = v;
-
-            if (this.modelValue !== v) {
-                this.$emit('update:modelValue', v);
-            }
+function validate(final: boolean, silent = false) {
+    if (urlRaw.value.length === 0) {
+        if (!props.required) {
             if (!silent) {
-                this.errorBox = null;
+                errorBox.value = null;
+            }
+
+            if (model.value !== null) {
+                model.value = null;
             }
             return true;
         }
-        catch (e) {
-            console.error(e);
+
+        if (!final) {
             if (!silent) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    this.errorBox = new ErrorBox(e);
-                    return false;
-                }
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: this.$t('%5A').toString(),
-                    field: 'url',
-                }));
+                errorBox.value = null;
+            }
+
+            if (props.nullable && model.value !== null) {
+                model.value = null;
             }
             return false;
         }
+    }
+    try {
+        let autoCorrected = urlRaw.value;
+
+        if (!autoCorrected.startsWith('http://') && !autoCorrected.startsWith('https://')) {
+            autoCorrected = 'https://' + autoCorrected;
+        }
+
+        try {
+            const u = new URL(autoCorrected);
+            autoCorrected = u.href;
+            if (u.pathname === '/' && autoCorrected[autoCorrected.length - 1] === '/') {
+                // Remove trailing slash on root domains (because ugly)
+                autoCorrected = autoCorrected.substring(0, autoCorrected.length - 1);
+            }
+        }
+        catch (e) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'url',
+                message: 'Invalid url',
+                human: $t('%5A').toString(),
+            });
+        }
+
+        const v = silent ? urlRaw.value : autoCorrected;
+        urlRaw.value = v;
+
+        if (model.value !== v) {
+            model.value = v;
+        }
+        if (!silent) {
+            errorBox.value = null;
+        }
+        return true;
+    }
+    catch (e) {
+        console.error(e);
+        if (!silent) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                errorBox.value = new ErrorBox(e);
+                return false;
+            }
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: $t('%5A').toString(),
+                field: 'url',
+            }));
+        }
+        return false;
     }
 }
 </script>

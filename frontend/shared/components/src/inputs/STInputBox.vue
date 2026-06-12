@@ -12,27 +12,21 @@
     </STErrorsInput>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-
+<script lang="ts" setup>
 import type { ErrorBox } from '../errors/ErrorBox';
 import STErrorsInput from '../errors/STErrorsInput.vue';
 
-@Component({
-    components: {
-        STErrorsInput,
-    },
-})
-export default class STInputBox extends VueComponent {
-    @Prop({ default: '' }) errorFields: string;
-    @Prop({ default: null }) errorBox: ErrorBox | ErrorBox[] | null;
-
-    @Prop({ default: false })
-    indent!: boolean;
-
-    @Prop({ default: '' })
-    title!: string;
-}
+withDefaults(defineProps<{
+    errorFields?: string;
+    errorBox?: ErrorBox | ErrorBox[] | null;
+    indent?: boolean;
+    title?: string;
+}>(), {
+    errorFields: '',
+    errorBox: null,
+    indent: false,
+    title: '',
+});
 </script>
 
 <style lang="scss">

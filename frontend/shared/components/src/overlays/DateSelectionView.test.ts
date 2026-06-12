@@ -1,4 +1,3 @@
-/// <reference types="@vitest/browser/providers/playwright" />
 import { Formatter } from '@stamhoofd/utility';
 import type { VueWrapper } from '@vue/test-utils';
 import { mount } from '@vue/test-utils';

@@ -1,6 +1,6 @@
 <template>
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
-        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" :context-menu-view="$refs.contextMenuView" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
+        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" :context-menu-view="(contextMenuView as any)" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
             <template #left>
                 <Checkbox :model-value="column.enabled" :only-line="true" />
             </template>
@@ -12,40 +12,29 @@
     </ContextMenuView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+<script lang="ts" setup>
 import Checkbox from '#inputs/Checkbox.vue';
 import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
-import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed, useTemplateRef } from 'vue';
 
 import type { Column } from './classes';
 
-@Component({
-    components: {
-        ContextMenuView,
-        ContextMenuItemView,
-        ContextMenuLine,
-        Checkbox,
-    },
-})
-export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = defineProps<{
     columns: Column<any, any>[];
+}>();
 
-    setColumnEnabled(column: Column<any, any>, enabled: boolean) {
-        if (enabled === false && !this.columns.find(c => c.enabled && c.id !== column.id)) {
-            // Can't disable last
-            return;
-        }
-        column.width = null;
-        column.renderWidth = null;
-        column.enabled = enabled;
-    }
+const contextMenuView = useTemplateRef('contextMenuView');
 
-    get sortedColumns() {
-        return this.columns.slice().sort((a, b) => a.index - b.index);
+function setColumnEnabled(column: Column<any, any>, enabled: boolean) {
+    if (enabled === false && !props.columns.find(c => c.enabled && c.id !== column.id)) {
+        // Can't disable last
+        return;
     }
+    column.width = null;
+    column.renderWidth = null;
+    column.enabled = enabled;
 }
+
+const sortedColumns = computed(() => props.columns.slice().sort((a, b) => a.index - b.index));
 </script>

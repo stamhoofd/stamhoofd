@@ -4,103 +4,79 @@
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { Country } from '@stamhoofd/types/Country';
+import { computed, ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
+import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-})
-export default class CompanyNumberInput extends VueComponent {
-    @Prop({ required: true })
-    country!: Country;
+const model = defineModel<string | null>({ default: null });
 
-    @Prop({ default: '' })
-    title: string;
+const props = withDefaults(defineProps<{
+    country: Country;
+    title?: string;
+    validator?: Validator | null;
+    required?: boolean;
+    placeholder?: string;
+    autocomplete?: string;
+}>(), {
+    title: '',
+    validator: null,
+    required: true,
+    placeholder: () => $t(`%yu`),
+    autocomplete: () => $t(`%yv`),
+});
 
-    get calculatedTitle() {
-        if (this.title) {
-            return this.title;
-        }
-        if (this.country === Country.Netherlands) {
-            return $t(`%yt`);
-        }
-        return $t(`%wa`);
+const companyNumberRaw = ref(model.value ?? '');
+const valid = ref(true);
+const errorBox = ref<ErrorBox | null>(null);
+
+const calculatedTitle = computed(() => {
+    if (props.title) {
+        return props.title;
+    }
+    if (props.country === Country.Netherlands) {
+        return $t(`%yt`);
+    }
+    return $t(`%wa`);
+});
+
+if (props.validator) {
+    useValidation(props.validator, () => validate());
+}
+
+watch(model, (val) => {
+    if (val === null) {
+        return;
+    }
+    companyNumberRaw.value = val;
+});
+
+function validate() {
+    companyNumberRaw.value = companyNumberRaw.value.trim().toUpperCase().replace(/\s/g, ' '); // replacement is needed because some apps use non breaking spaces when copying
+
+    if (!props.required && companyNumberRaw.value.length === 0) {
+        errorBox.value = null;
+        model.value = null;
+        return true;
     }
 
-    @Prop({ default: null })
-    validator: Validator | null;
-
-    companyNumberRaw = '';
-    valid = true;
-
-    @Prop({ default: null })
-    modelValue!: string | null;
-
-    @Prop({ default: true })
-    required!: boolean;
-
-    @Prop({ default: $t(`%yu`) })
-    placeholder!: string;
-
-    @Prop({ default: $t(`%yv`) })
-    autocomplete!: string;
-
-    errorBox: ErrorBox | null = null;
-
-    @Watch('modelValue')
-    onValueChanged(val: string | null) {
-        if (val === null) {
-            return;
-        }
-        this.companyNumberRaw = val;
+    if (companyNumberRaw.value.length === 0) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: $t(`%yw`),
+            field: 'companyNumber',
+        }));
+        return false;
     }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate();
-            });
-        }
-
-        this.companyNumberRaw = this.modelValue ?? '';
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    validate() {
-        this.companyNumberRaw = this.companyNumberRaw.trim().toUpperCase().replace(/\s/g, ' '); // replacement is needed because some apps use non breaking spaces when copying
-
-        if (!this.required && this.companyNumberRaw.length === 0) {
-            this.errorBox = null;
-            this.$emit('update:modelValue', null);
-            return true;
-        }
-
-        if (this.companyNumberRaw.length === 0) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: $t(`%yw`),
-                field: 'companyNumber',
-            }));
-            return false;
-        }
-        else {
-            this.$emit('update:modelValue', this.companyNumberRaw);
-            this.errorBox = null;
-            return true;
-        }
+    else {
+        model.value = companyNumberRaw.value;
+        errorBox.value = null;
+        return true;
     }
 }
 </script>

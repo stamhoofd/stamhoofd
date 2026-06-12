@@ -4,11 +4,7 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
-
-@Component
-export default class RadioGroup extends VueComponent {}
+<script lang="ts" setup>
 </script>
 
 <style lang="scss">
