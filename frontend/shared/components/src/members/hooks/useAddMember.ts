@@ -3,12 +3,14 @@ import type { PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
 import { EditMemberGeneralBox, MemberStepView } from '..';
 import { useAppContext } from '../../context';
-import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
+import { useOrganization } from '#hooks/useOrganization.ts';
 
 export function useAddMember() {
     const navigate = useNavigationActions();
     const app = useAppContext();
+    const organization = useOrganization();
 
     return async (family: PlatformFamily, options: {
         displayOptions: DisplayOptions;
@@ -17,6 +19,13 @@ export function useAddMember() {
         // We clone the family, so we can cancel the new member that was added to the family
         const clonedFamily = family.clone();
         const member = reactive(clonedFamily.newMember() as any) as PlatformMember;
+
+        if (STAMHOOFD.userMode === 'organization') {
+            if (!organization.value) {
+                throw new Error('Missing organization context');
+            }
+            member.member.organizationId = organization.value.id;
+        }
 
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberStepView, {

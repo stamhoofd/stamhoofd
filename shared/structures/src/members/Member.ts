@@ -32,6 +32,9 @@ export class Member extends AutoEncoder {
     @field({ decoder: MemberDetails, version: 165 })
     details: MemberDetails;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    organizationId: string | null;
+
     /**
      * @deprecated
      */

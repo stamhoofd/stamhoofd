@@ -755,6 +755,10 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
+    get platformRecordsConfiguration() {
+        return this.patchedMember.organizationId ? this.family.getOrganization(this.patchedMember.organizationId)?.meta.recordsConfiguration : this.platform.config.recordsConfiguration;
+    }
+
     isPropertyEnabledForPlatform(property: MemberProperty) {
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && this.patchedMember.details.dataPermissions?.value === false) {
@@ -762,7 +766,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         if (property === 'dataPermission' || property === 'financialSupport') {
-            if (this.platform.config.recordsConfiguration[property]) {
+            if (this.platformRecordsConfiguration?.[property]) {
                 return true;
             }
             return false;
@@ -775,8 +779,8 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
 
-        const def = this.platform.config.recordsConfiguration[property];
-        if (def === null) {
+        const def = this.platformRecordsConfiguration?.[property];
+        if (def === null || def === undefined) {
             return false;
         }
         return def.isEnabled(this);
@@ -874,13 +878,13 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
         }
 
-        const def = this.platform.config.recordsConfiguration[property];
+        const def = this.platformRecordsConfiguration?.[property];
 
         if (typeof def === 'boolean') {
             return def;
         }
 
-        if (def === null) {
+        if (def === null || def === undefined) {
             return false;
         }
         return def.isRequired(this);
@@ -1117,6 +1121,15 @@ export class PlatformMember implements ObjectWithRecords {
         const groups = this.filterGroups({ ...filters, includePending: true });
         const configurations: OrganizationRecordsConfiguration[] = [];
 
+        if (this.patchedMember.organizationId) {
+            configurations.push(
+                OrganizationRecordsConfiguration.build({
+                    platform: this.platform,
+                    organization: this.family.getOrganization(this.patchedMember.organizationId),
+                }),
+            );
+        }
+
         for (const group of groups) {
             const organization = this.family.getOrganization(group.organizationId);
             if (!organization) {
@@ -1279,7 +1292,7 @@ export class PlatformMember implements ObjectWithRecords {
     getAllRecordCategories(options?: { scopeOrganization?: Organization | null }): RecordCategory[] {
         // From organization
         const categories: RecordCategory[] = [];
-        categories.push(...this.platform.config.recordsConfiguration.recordCategories);
+        categories.push(...this.platformRecordsConfiguration?.recordCategories ?? []);
 
         if (options?.scopeOrganization) {
             categories.push(...options.scopeOrganization.meta.recordsConfiguration.recordCategories);
