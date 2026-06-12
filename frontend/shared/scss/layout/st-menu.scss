@@ -41,7 +41,7 @@
     .menu-button {
         display: flex;
         flex-direction: row;
-        @extend .style-button;
+        @extend %style-button;
         font-weight: $font-weight-semibold;
         font-size: 15px;
         letter-spacing: 0.1px;
@@ -153,7 +153,7 @@
         }
 
         .bubble {
-            @extend .style-bubble;
+            @extend %style-bubble;
             
             margin-left: auto;
             flex-shrink: 0;

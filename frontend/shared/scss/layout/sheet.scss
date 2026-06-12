@@ -120,7 +120,7 @@
 
         border-radius: $border-radius-modals;
         border: $border-width-thin solid $color-border;
-        @extend .style-overlay-shadow;
+        @extend %style-overlay-shadow;
 
         position: absolute;
 

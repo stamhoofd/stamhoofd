@@ -17,7 +17,7 @@ $checkbox-size: 18px;
     }
 
     > div {
-        @extend .style-input;
+        @extend %style-input;
 
         display: flex;
         flex-direction: row;
@@ -71,7 +71,7 @@ $checkbox-size: 18px;
     }
 
     > div {
-        @extend .style-input;
+        @extend %style-input;
 
         display: flex;
         flex-direction: row;
@@ -104,7 +104,7 @@ $checkbox-size: 18px;
             ~ div {
                 margin-left: 15px;
                 
-                @extend .style-title-list;
+                @extend %style-title-list;
 
                 &:empty {
                     margin: 0;

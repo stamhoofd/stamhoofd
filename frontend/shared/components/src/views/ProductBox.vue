@@ -277,7 +277,7 @@ function formatDateRange(dateRange: ProductDateRange) {
 
             > h3 {
                 padding-top: 5px;
-                @extend .style-title-2;
+                @extend %style-title-2;
                 padding-right: 30px;
                 position: relative;
                 transition: transform 0.2s;
@@ -300,7 +300,7 @@ function formatDateRange(dateRange: ProductDateRange) {
             }
 
             > .description {
-                @extend .style-description-small;
+                @extend %style-description-small;
                 padding-top: 5px;
                 text-overflow: ellipsis;
                 overflow: hidden;

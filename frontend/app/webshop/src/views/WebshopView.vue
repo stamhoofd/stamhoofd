@@ -575,19 +575,19 @@ onActivated(() => {
         padding-bottom: 30px;
 
         h1 {
-            @extend .style-title-semihuge;
+            @extend %style-title-semihuge;
             padding-bottom: 10px;
         }
 
         .description {
-            @extend .style-description;
+            @extend %style-description;
             white-space: pre-wrap;
         }
     }
 
     .stamhoofd-footer {
         padding-top: 15px;
-        @extend .style-description-small;
+        @extend %style-description-small;
 
         a {
             white-space: normal;

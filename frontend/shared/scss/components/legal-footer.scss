@@ -2,7 +2,7 @@
 @use '../base/text-styles';
 
 .legal-footer {
-    @extend .style-description-small;
+    @extend %style-description-small;
     margin-top: auto;
     line-height: 1.6;
     padding: 15px 20px;

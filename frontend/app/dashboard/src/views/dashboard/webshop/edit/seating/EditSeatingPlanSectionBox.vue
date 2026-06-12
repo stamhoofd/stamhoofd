@@ -1490,7 +1490,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
 
         text-align: right;
         box-sizing: border-box;
-        @extend .style-description;
+        @extend %style-description;
         contain: layout size;
         border-bottom: 2px solid transparent;
 
@@ -1576,7 +1576,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
         width: var(--w);
         height: var(--h);
         box-sizing: border-box;
-        @extend .style-input-box;
+        @extend %style-input-box;
         background: white;
         border-radius: 5px;
         contain: strict;
@@ -1629,7 +1629,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
         height: calc(var(--h) - 2px);
         left: 0;
         top: 0;
-        @extend .style-input;
+        @extend %style-input;
         text-align: center;
         line-height: calc(var(--h) - 2px);
         box-sizing: border-box;

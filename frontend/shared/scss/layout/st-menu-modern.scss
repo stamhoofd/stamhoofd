@@ -18,7 +18,7 @@
         overflow-x: clip; // Same as above, but prevent scrolling
 
         > h1 {
-            @extend .style-title-2-larger;
+            @extend %style-title-2-larger;
         }
 
         .footer {
@@ -47,7 +47,7 @@
                 color: inherit;
             }
 
-            .style-image-with-icon aside {
+            %style-image-with-icon aside {
                 //display: none;
             }
 
@@ -62,10 +62,10 @@
             }
 
             h3 {
-                @extend .style-title-3;
+                @extend %style-title-3;
 
                 + p {
-                    @extend .style-description-small;
+                    @extend %style-description-small;
                     padding-top: 2px;
                 }
             }

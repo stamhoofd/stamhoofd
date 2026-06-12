@@ -475,7 +475,7 @@ onDeactivated(() => {
             white-space: nowrap;
             opacity: 0;
             transition: opacity 0.2s;
-            @extend .style-navigation-bar-title;
+            @extend %style-navigation-bar-title;
 
             text-align: center;
         }

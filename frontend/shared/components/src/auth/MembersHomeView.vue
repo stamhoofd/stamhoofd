@@ -124,7 +124,7 @@ async function openSignup() {
 
 .members-home-view {
     .stamhoofd-footer {
-        @extend .style-description;
+        @extend %style-description;
         padding: 15px 0;
         padding-top: 30px;
 
@@ -162,7 +162,7 @@ async function openSignup() {
         ol {
             list-style: none;
             counter-reset: li;
-            @extend .style-normal;
+            @extend %style-normal;
             padding-left: 30px;
 
             li {
@@ -172,7 +172,7 @@ async function openSignup() {
 
             li::before {
                 content: counter(li)".";
-                @extend .style-normal;
+                @extend %style-normal;
                 color: $color-primary;
                 display: inline-block;
                 width: 30px;
@@ -181,19 +181,19 @@ async function openSignup() {
         }
 
         aside > h1 {
-            @extend .style-title-2;
+            @extend %style-title-2;
             padding-bottom: 20px;;
         }
     }
 
     .login-view {
         > h1 {
-            @extend .style-title-1;
+            @extend %style-title-1;
             padding-bottom: 20px;
         }
 
         > h1 + p {
-            @extend .style-description;
+            @extend %style-description;
         }
 
         > .button-box {

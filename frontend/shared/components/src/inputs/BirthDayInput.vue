@@ -147,7 +147,7 @@ function validate() {
         align-items: stretch;
 
         > select {
-            @extend .style-input;
+            @extend %style-input;
             color: $color-dark;
         }
 

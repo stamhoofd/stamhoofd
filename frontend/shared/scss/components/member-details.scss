@@ -3,12 +3,12 @@
 
 .member-view-details {
     .accounts-description {
-        @extend .style-definition-description;
+        @extend %style-definition-description;
         margin-top: 15px;
     }
 
     .account {
-        @extend .style-definition-description;
+        @extend %style-definition-description;
         margin-bottom: 5px;
     }
 }

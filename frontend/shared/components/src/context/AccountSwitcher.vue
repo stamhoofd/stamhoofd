@@ -151,7 +151,7 @@ const customSiteUrl = computed(() => {
         }
 
         > span > span {
-            @extend .style-interactive-small;
+            @extend %style-interactive-small;
             display: inline-block;
             vertical-align: middle;
             max-width: 200px;

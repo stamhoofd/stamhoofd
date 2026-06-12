@@ -328,8 +328,8 @@ export default class WYSIWYGTextInput extends VueComponent {
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .wysiwyg-text-input {
-    @extend .style-input;
-    @extend .style-input-box;
+    @extend %style-input;
+    @extend %style-input-box;
 
     .ProseMirror {
         max-width: none;
@@ -340,7 +340,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         outline: none;
         min-height: 100px;
 
-        @extend .style-wysiwyg;
+        @extend %style-wysiwyg;
     }
 
     .tiptap p.is-editor-empty:first-child::before {

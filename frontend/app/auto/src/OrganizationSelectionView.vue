@@ -24,7 +24,7 @@
                     {{ $t('%5N') }}
                 </h1>
 
-                <p class="style-description-block style-description-large">
+                <p class="style-description-block">
                     {{ $t('%6') }}
                 </p>
 
@@ -345,7 +345,7 @@ defineRoutes([
     }
 
     > .search-result {
-        @extend .style-input-shadow;
+        @extend %style-input-shadow;
         background: $color-background;
         border: $border-width solid $color-border;
         padding: 15px 15px;
@@ -376,7 +376,7 @@ defineRoutes([
             padding-right: 40px;
 
             > h1 {
-                @extend .style-title-list;
+                @extend %style-title-list;
             }
 
             > .floating {
@@ -388,7 +388,7 @@ defineRoutes([
             }
 
             > p {
-                @extend .style-description-small;
+                @extend %style-description-small;
             }
         }
 

@@ -317,12 +317,12 @@ defineExpose({
             flex-direction: row;
 
             flex-grow: 1;
-            @extend .style-title-2;
+            @extend %style-title-2;
             line-height: 1;
         }
 
         .input-icon-container {
-            @extend .style-title-2;
+            @extend %style-title-2;
             line-height: 1;
 
             select {
@@ -367,7 +367,7 @@ defineExpose({
                 margin: 0;
                 padding: 5px 0;
                 text-align: center;
-                @extend .style-interactive-small;
+                @extend %style-interactive-small;
             }
         }
 
@@ -393,7 +393,7 @@ defineExpose({
                 user-select: none;
                 transition: color 0.2s;
 
-                @extend .style-interactive-small;
+                @extend %style-interactive-small;
 
                 &::after {
                     position: absolute;

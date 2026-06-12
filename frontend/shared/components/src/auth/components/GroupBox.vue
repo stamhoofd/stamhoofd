@@ -141,7 +141,7 @@ const ViewRoute = defineRoute({
 
             > h3 {
                 padding-top: 5px;
-                @extend .style-title-3;
+                @extend %style-title-3;
                 padding-right: 30px;
                 position: relative;
                 transition: transform 0.2s;
@@ -163,7 +163,7 @@ const ViewRoute = defineRoute({
             }
 
             > .description {
-                @extend .style-description-small;
+                @extend %style-description-small;
                 padding-top: 5px;
                 text-overflow: ellipsis;
                 overflow: hidden;

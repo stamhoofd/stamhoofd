@@ -157,8 +157,8 @@ function changedFile(event: Event) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .image-input-box {
-    @extend .style-input;
-    @extend .style-input-shadow;
+    @extend %style-input;
+    @extend %style-input-shadow;
     border: $border-width solid $color-gray-2;
     color: $color-gray-5;
     background: $color-background-shade;

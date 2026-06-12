@@ -98,7 +98,7 @@ export default class STInputBox extends VueComponent {
 
     > h4 {
         margin: 0;
-        @extend .style-label;
+        @extend %style-label;
         display: flex;
         flex-direction: row;
         align-items: center;

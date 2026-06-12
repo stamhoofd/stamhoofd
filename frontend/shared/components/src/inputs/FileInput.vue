@@ -157,8 +157,8 @@ export default class FileInput extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .file-input-box {
-    @extend .style-input;
-    @extend .style-input-shadow;
+    @extend %style-input;
+    @extend %style-input-shadow;
     border: $border-width solid $color-border;
     color: $color-gray-5;
     background: $color-background;

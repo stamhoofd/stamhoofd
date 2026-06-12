@@ -68,21 +68,21 @@ function openTicket() {
 
     .middle {
         > .event-name {
-            @extend .style-definition-label;
+            @extend %style-definition-label;
         }
 
         .ticket-index {
-            @extend .style-definition-label;
+            @extend %style-definition-label;
             display: inline-block;
         }
 
         > h3 {
             padding-top: 5px;
-            @extend .style-title-2;
+            @extend %style-title-2;
         }
 
         > .description {
-            @extend .style-description-small;
+            @extend %style-description-small;
             padding-top: 10px;
             text-overflow: ellipsis;
             overflow: hidden;

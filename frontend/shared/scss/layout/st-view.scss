@@ -3,7 +3,7 @@
 
 .view > main ,
 .st-view > main > .box > main {
-    @extend .main-text-container;
+    @extend %main-text-container;
 }
 
 html.modern {

@@ -443,7 +443,7 @@ defineExpose({
             box-sizing: border-box;
             line-height: 1.4;
 
-            @extend .style-interactive-small;
+            @extend %style-interactive-small;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -460,7 +460,7 @@ defineExpose({
             padding: 0 15px;
             box-sizing: border-box;
 
-            @extend .style-interactive-small;
+            @extend %style-interactive-small;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -497,7 +497,7 @@ defineExpose({
         }
     }
     td:first-child {
-        @extend .style-title-3;
+        @extend %style-title-3;
         padding: 7px 15px 7px 0;
         white-space: nowrap;
 
@@ -507,7 +507,7 @@ defineExpose({
     }
 
     td:last-child {
-        @extend .style-description;
+        @extend %style-description;
 
         @media (max-width: 400px) {
             font-size: 12px;

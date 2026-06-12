@@ -16,7 +16,7 @@
                 </div>
             </STListItem>
         </STList>
-        <p v-if="!$searchResult.length" class="style-description-large">
+        <p v-if="!$searchResult.length" class="style-description">
             {{ $t('%gF') }}
         </p>
 
@@ -116,8 +116,7 @@ function toggleSelect(tag: OrganizationTag) {
 function select(value: boolean, tag: OrganizationTag) {
     if (value) {
         $selectedTags.value.set(tag.id, tag);
-    }
-    else {
+    } else {
         if (isSelected(tag)) {
             $selectedTags.value.delete(tag.id);
         }
@@ -143,8 +142,7 @@ async function save() {
 
             if (deletedTagsString.length > 100) {
                 confirmText = `${selectionText} Ben je zeker dat je ${deleteCount} tags wilt verwijderen?`;
-            }
-            else {
+            } else {
                 confirmText = `${selectionText} Ben je zeker dat je de volgende tag(s) wilt verwijderen: ${deletedTagsString}`;
             }
         }

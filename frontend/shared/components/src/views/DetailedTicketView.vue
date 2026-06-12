@@ -235,21 +235,21 @@ defineExpose({
         }
 
         > .event-name {
-            @extend .style-definition-label;
+            @extend %style-definition-label;
             padding-top: var(--st-horizontal-padding, 30px);
         }
 
         .ticket-index {
-            @extend .style-definition-label;
+            @extend %style-definition-label;
             display: inline-block;
         }
 
         > h1 {
-            @extend .style-title-1;
+            @extend %style-title-1;
         }
 
         > .description {
-            @extend .style-description-small;
+            @extend %style-description-small;
             padding-top: 10px;
             text-overflow: ellipsis;
             overflow: hidden;

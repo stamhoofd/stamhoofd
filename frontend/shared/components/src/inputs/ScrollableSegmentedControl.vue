@@ -169,7 +169,7 @@ $segmented-control-height: var(--segmented-control-height, 50px);
         min-width: 0;
         flex-shrink: 0;
         max-width: max(200px, 30vw);
-        @extend .style-interactive-small;
+        @extend %style-interactive-small;
         border-bottom: 3px solid transparent;
         line-height: $segmented-control-height;
         transition: color 0.2s, opacity 0.2s;

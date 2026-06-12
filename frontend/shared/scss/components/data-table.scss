@@ -30,7 +30,7 @@
             position: sticky;
             top: 0;
             border-bottom: $border-width solid $color-border;
-            @extend .style-table-head;
+            @extend %style-table-head;
             margin-top: 0px;
             padding: 10px;
             padding-top: calc(var(--current-view-safe-area-top, 0px) + 10px);
@@ -83,10 +83,10 @@
                     border-top: 0;
                 }
 
-                @extend .style-normal;
+                @extend %style-normal;
 
                 &.minor {
-                    @extend .style-description;
+                    @extend %style-description;
                 }
 
                 &.nowrap {

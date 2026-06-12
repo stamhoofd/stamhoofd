@@ -52,7 +52,7 @@ defineProps<{
         }
 
         > p {
-            @extend .style-description-small;
+            @extend %style-description-small;
             padding-top: 3px;
         }
 
@@ -73,7 +73,7 @@ defineProps<{
         padding: 12px 0;
         text-align: right;
 
-        @extend .style-price-base;
+        @extend %style-price-base;
 
         &:last-child {
             font-size: 18px;

@@ -789,7 +789,7 @@ export default class ContextMenuView extends VueComponent {
     border: $border-width-thin solid $color-border;
     padding: 8px 15px 8px 15px;
 
-    @extend .style-overlay-shadow;
+    @extend %style-overlay-shadow;
     border-radius: $border-radius-modals;
     box-sizing: border-box;
     min-width: 230px;
@@ -807,7 +807,7 @@ export default class ContextMenuView extends VueComponent {
     transform: translate3d(0, 0, 0);
 
     .context-menu-item {
-        @extend .style-context-menu-item;
+        @extend %style-context-menu-item;
         cursor: pointer;
         user-select: none;
         touch-action: manipulation;
@@ -840,7 +840,7 @@ export default class ContextMenuView extends VueComponent {
         }
 
         .description {
-            @extend .style-context-menu-item-description;
+            @extend %style-context-menu-item-description;
             padding-top: 6px;
         }
 
