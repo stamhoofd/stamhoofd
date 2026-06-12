@@ -1,4 +1,5 @@
 import { column, ManyToManyRelation } from '@simonbackx/simple-database';
+import { EnumDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { RecordAnswer } from '@stamhoofd/structures';
 import { EventNotificationStatus, RecordAnswerMapDecoder } from '@stamhoofd/structures';
@@ -25,7 +26,7 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'datetime' })
     endDate: Date;
 
-    @column({ type: 'string' })
+    @column({ type: 'string', decoder: new EnumDecoder(EventNotificationStatus) })
     status = EventNotificationStatus.Draft;
 
     /**

@@ -1,15 +1,21 @@
-import type { usePresent } from '@simonbackx/vue-app-navigation';
-import { AuditLogReplacement, AuditLogReplacementType } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';
 import { useAppContext } from '../../context';
+import { PromiseView } from '../../containers';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
+import EventNotificationView from '../../event-notifications/EventNotificationView.vue';
+import { EventNotificationViewModel } from '../../event-notifications/classes/EventNotificationViewModel';
 import { useShowEvent } from '../../events';
+import { useEventNotificationsObjectFetcher } from '../../fetchers';
 import type { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
+import { usePlatform } from '../../hooks';
 import { useShowMember } from '../../members';
 import { useShowOrganization } from '../../organizations';
 import { useShowPayment } from '../../payments';
+import { Toast } from '../../overlays/Toast';
 import { useShowHtml } from '../hooks';
 
 export interface Renderable {
@@ -69,6 +75,48 @@ export function renderAny(obj: unknown): () => (string | ReturnType<typeof h> | 
             return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showEvent(obj.id!),
+                type: 'button',
+            }, obj.value);
+        }
+
+        if (obj.type === AuditLogReplacementType.EventNotification && obj.id) {
+            const present = usePresent();
+            const platform = usePlatform();
+            const fetcher = useEventNotificationsObjectFetcher();
+
+            return () => h('button', {
+                class: 'style-inline-resource button simple',
+                onClick: async () => {
+                    await present({
+                        components: [
+                            new ComponentWithProperties(NavigationController, {
+                                root: new ComponentWithProperties(PromiseView, {
+                                    promise: async () => {
+                                        const notifications = await fetcher.fetch(new LimitedFilteredRequest({
+                                            filter: {
+                                                id: obj.id!,
+                                            },
+                                            limit: 1,
+                                        }));
+
+                                        if (notifications.results.length === 0) {
+                                            Toast.error($t('%AN')).show();
+                                            throw new Error('Event notification not found');
+                                        }
+
+                                        return new ComponentWithProperties(EventNotificationView, {
+                                            viewModel: EventNotificationViewModel.edit({
+                                                eventNotification: notifications.results[0],
+                                                platform: platform.value,
+                                            }),
+                                        });
+                                    },
+                                }),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
                 type: 'button',
             }, obj.value);
         }

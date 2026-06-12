@@ -2,14 +2,138 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field, NumberDecoder, StringDec
 import { DataValidator } from '@stamhoofd/utility';
 import wordDictionary from './data/audit-log-words.js';
 
+type AuditLogEnumObject<T extends string = string> = Record<string, T>;
+type AuditLogEnumRegistration<T extends string = string> = {
+    type: string;
+    enumObject: AuditLogEnumObject<T>;
+    getName: (key: T) => string;
+};
+
 /**
  * The audit log dependes on a lot of other structures. To avoid creating circular dependencies
  * We inject them afterwards since these dependencies are only used at runtime
  */
 export const AuditLogReplacementDependencies = {
+    /**
+     * @deprecated Only used for old audit log data that stored enum values as Key replacements.
+     * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+     * has been rolled out everywhere.
+     */
     enumHelpers: [] as ((key: string) => string)[],
+    enumHelpersByType: new Map<string, (key: string) => string>(),
+    enumTypes: new Map<object, string>(),
+    legacyEnums: [] as AuditLogEnumRegistration[],
     uuidToName: (() => null) as (uuid: string) => string | null,
 };
+
+export function registerAuditLogEnum<T extends string>(type: string, enumObject: AuditLogEnumObject<T>, getName: (key: T) => string, options?: { legacy?: boolean }) {
+    if (AuditLogReplacementDependencies.enumHelpersByType.has(type)) {
+        throw new Error(`Audit log enum type is already registered: ${type}`);
+    }
+
+    if (AuditLogReplacementDependencies.enumTypes.has(enumObject)) {
+        throw new Error(`Audit log enum object is already registered: ${AuditLogReplacementDependencies.enumTypes.get(enumObject)}`);
+    }
+
+    const stringGetName = (key: string) => {
+        if (!isAuditLogEnumValue(enumObject, key)) {
+            return key;
+        }
+
+        return getName(key);
+    };
+
+    AuditLogReplacementDependencies.enumHelpersByType.set(type, stringGetName);
+    AuditLogReplacementDependencies.enumTypes.set(enumObject, type);
+
+    if (options?.legacy) {
+        AuditLogReplacementDependencies.enumHelpers.push(stringGetName);
+        AuditLogReplacementDependencies.legacyEnums.push({ type, enumObject, getName });
+    }
+}
+
+function isAuditLogEnumValue<T extends string>(enumObject: AuditLogEnumObject<T>, key: string): key is T {
+    return Object.values(enumObject).some(value => value === key);
+}
+
+export function getAuditLogEnumType(enumObject: object): string | undefined {
+    return AuditLogReplacementDependencies.enumTypes.get(enumObject);
+}
+
+export function getAuditLogEnumDecoderObject(decoder: EnumDecoder<any>): object {
+    const enumObject: unknown = decoder.enum;
+    if (typeof enumObject === 'object' && enumObject !== null) {
+        return enumObject;
+    }
+
+    throw new Error('Expected enum decoder to contain an enum object');
+}
+
+export function getRegisteredAuditLogEnums(): { type: string; enumObject: object }[] {
+    return Array.from(AuditLogReplacementDependencies.enumTypes.entries()).map(([enumObject, type]) => ({ type, enumObject }));
+}
+
+/**
+ * @deprecated Only used to migrate old audit log data that stored enum values as Key replacements.
+ * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+ * has been rolled out everywhere.
+ */
+export function getLegacyAuditLogEnumRegistrations(): { type: string; enumObject: AuditLogEnumObject; getName: (key: string) => string }[] {
+    return AuditLogReplacementDependencies.legacyEnums.slice();
+}
+
+/**
+ * @deprecated Only used to migrate old audit log data that stored enum values as Key replacements.
+ * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+ * has been rolled out everywhere.
+ */
+export function getLegacyAuditLogEnumReplacement(key: string): AuditLogReplacement | null {
+    if (wordDictionary[key]) {
+        return null;
+    }
+
+    const legacyName = getLegacyAuditLogEnumName(key);
+    if (!legacyName) {
+        return null;
+    }
+
+    for (const { type, enumObject, getName } of AuditLogReplacementDependencies.legacyEnums) {
+        if (!Object.values(enumObject).includes(key)) {
+            continue;
+        }
+
+        try {
+            const result = getName(key);
+            if (result === legacyName) {
+                return AuditLogReplacement.enum(type, key) ?? null;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    return null;
+}
+
+/**
+ * @deprecated Only used for old audit log data that stored enum values as Key replacements.
+ * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+ * has been rolled out everywhere.
+ */
+function getLegacyAuditLogEnumName(key: string): string | null {
+    for (const helper of AuditLogReplacementDependencies.enumHelpers) {
+        try {
+            const result = helper(key);
+            if (result && result !== key) {
+                return result;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    return null;
+}
 
 export enum AuditLogReplacementType {
     // Base
@@ -21,6 +145,7 @@ export enum AuditLogReplacementType {
     File = 'File', // id is the source url
     Html = 'Html',
     LongText = 'LongText', // Expandable text
+    Enum = 'Enum', // id is the enum type, value is the enum value
 
     // Objects
     Member = 'Member',
@@ -39,6 +164,7 @@ export enum AuditLogReplacementType {
     Email = 'Email',
     EmailAddress = 'EmailAddress',
     EmailTemplate = 'EmailTemplate',
+    EventNotification = 'EventNotification',
 }
 
 export class AuditLogReplacement extends AutoEncoder {
@@ -123,6 +249,14 @@ export class AuditLogReplacement extends AutoEncoder {
         return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.Key });
     }
 
+    static enum(type: string, value: string | number | undefined | null) {
+        if (value === undefined || value === null) {
+            return undefined;
+        }
+
+        return AuditLogReplacement.create({ id: type, value: String(value), type: AuditLogReplacementType.Enum });
+    }
+
     static empty() {
         return AuditLogReplacement.array([]);
     }
@@ -149,6 +283,18 @@ export class AuditLogReplacement extends AutoEncoder {
 
     toString(): string {
         if (this.type === AuditLogReplacementType.Key || this.type === AuditLogReplacementType.EmailTemplate) {
+            return getAuditLogPatchKeyName(this.value);
+        }
+
+        if (this.type === AuditLogReplacementType.Enum) {
+            const helper = this.id ? AuditLogReplacementDependencies.enumHelpersByType.get(this.id) : undefined;
+            if (helper) {
+                const result = helper(this.value);
+                if (result && result !== this.value) {
+                    return result;
+                }
+            }
+
             return getAuditLogPatchKeyName(this.value);
         }
 
@@ -217,15 +363,9 @@ export function getAuditLogPatchKeyName(key: string) {
 
     // Check first letter is a capital letter
     if (key.length > 1 && key[0] === key[0].toUpperCase()) {
-        for (const helper of AuditLogReplacementDependencies.enumHelpers) {
-            try {
-                const result = helper(key);
-                if (result && result !== key) {
-                    return result;
-                }
-            } catch (e) {
-                console.error(e);
-            }
+        const legacyEnumName = getLegacyAuditLogEnumName(key);
+        if (legacyEnumName) {
+            return legacyEnumName;
         }
     }
 
