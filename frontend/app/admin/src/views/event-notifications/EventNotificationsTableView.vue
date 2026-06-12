@@ -83,12 +83,19 @@ function getRequiredFilter(): StamhoofdFilter | null {
     return null;
 }
 
-const defaultFilter = {
-    $not: {
-        status: {
-            $in: [EventNotificationStatus.Draft, EventNotificationStatus.Accepted],
+const defaultFilter: StamhoofdFilter = {
+    $and: [
+        {
+            $not: {
+                status: {
+                    $in: [EventNotificationStatus.Draft, EventNotificationStatus.Accepted],
+                },
+            },
         },
-    },
+        {
+            periodId: platform.value.period.id,
+        },
+    ],
 };
 
 const objectFetcher = useEventNotificationsObjectFetcher({

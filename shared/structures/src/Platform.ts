@@ -541,7 +541,9 @@ export class Platform extends AutoEncoder {
 
     /**
      * @deprecated
-     * This way of caching is discouraged and unstable because it gets overriden easily using deepSet
+     * This way of caching is discouraged and unstable because it gets overridden easily using deepSet.
+     * Use Platform.period for the current registration period.
+     * Use PlatformManager.loadPeriods() and keep the returned periods in local state when you need multiple registration periods.
      */
     periods?: RegistrationPeriod[];
 

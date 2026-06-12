@@ -252,7 +252,9 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
     /**
      * @deprecated
-     * This way of caching is discouraged and unstable because it gets overriden easily using deepSet
+     * This way of caching is discouraged and unstable because it gets overridden easily using deepSet.
+     * Use Organization.period for the current organization registration period.
+     * Use OrganizationManager.loadPeriods() and keep the returned RegistrationPeriodList in local state when you need multiple organization registration periods.
      */
     periods?: RegistrationPeriodList;
 

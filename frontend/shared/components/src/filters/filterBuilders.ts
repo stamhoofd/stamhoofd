@@ -1,7 +1,8 @@
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
 import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
@@ -606,6 +607,19 @@ export function getDocumentsUIFilterBuilders() {
  */
 export function useEventNotificationBackendFilterBuilders() {
     const platform = usePlatform();
+    const platformManager = usePlatformManager();
+    const owner = useRequestOwner();
+    const periodOptions = reactive<MultipleChoiceUIFilterOption[]>([
+        new MultipleChoiceUIFilterOption(platform.value.period.name, platform.value.period.id),
+    ]);
+
+    platformManager.value.loadPeriods(false, true, owner).then((loadedPeriods) => {
+        periodOptions.splice(0, periodOptions.length, ...loadedPeriods.map((period) => {
+            return new MultipleChoiceUIFilterOption(period.name, period.id);
+        }));
+    }).catch((e) => {
+        console.error('Failed to load periods in useEventNotificationBackendFilterBuilders', e);
+    });
 
     return () => {
         const all: UIFilterBuilders = [
@@ -616,6 +630,20 @@ export function useEventNotificationBackendFilterBuilders() {
             new DateFilterBuilder({
                 name: $t('%1P8'),
                 key: 'endDate',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('%7Z'),
+                options: periodOptions,
+                wrapper: {
+                    periodId: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+                additionalUnwrappers: [
+                    {
+                        periodId: FilterWrapperMarker,
+                    },
+                ],
             }),
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),
