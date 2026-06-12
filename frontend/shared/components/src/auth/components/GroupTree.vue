@@ -41,21 +41,21 @@ const level = computed(() => Math.min(props.parentLevel + 1, 2));
 
     > h1 {
         padding-bottom: 15px;
-        @extend .style-title-1;
+        @extend %style-title-1;
     }
 
     > h2 {
         padding-bottom: 15px;
-        @extend .style-title-2;
+        @extend %style-title-2;
     }
 
     > p:not([class]) {
-        @extend .style-description;
+        @extend %style-description;
         padding-bottom: 40px;
     }
 
     > hr {
-        @extend .style-hr;
+        @extend %style-hr;
     }
 
 }

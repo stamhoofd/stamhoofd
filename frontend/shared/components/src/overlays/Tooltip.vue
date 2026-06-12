@@ -173,9 +173,9 @@ defineExpose({
 .tooltip {
     position: fixed;
     z-index: 10000;
-    @extend .style-context-menu-item;
+    @extend %style-context-menu-item;
     line-height: 1.5;
-    @extend .style-overlay-shadow;
+    @extend %style-overlay-shadow;
     box-sizing: border-box;
     max-width: 350px;
 

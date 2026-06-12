@@ -21,6 +21,14 @@
         --st-grid-horizontal-gap: 8px;
     }
 
+    @media (max-width: 550px) {
+        --input-height: 43px;
+    }
+
+    @media (max-width: 400px) {
+        --navigation-bar-margin: 0px;
+    }
+
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};
     --color-current-background-shade-darker: #{$color-background-shade-darker};

@@ -424,7 +424,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         height: var(--rh);
         line-height: var(--rh);
         font-size: 12px;
-        @extend .style-description;
+        @extend %style-description;
 
         &.left {
             left: -45px;
@@ -459,7 +459,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         height: var(--h);
         box-sizing: border-box;
         border-radius: 5px;
-        @extend .style-interactive-small;
+        @extend %style-interactive-small;
         line-height: var(--h);
         color: $color-dark;
         color: var(--color, $color-dark);

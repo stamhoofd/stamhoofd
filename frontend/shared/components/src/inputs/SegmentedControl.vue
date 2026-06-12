@@ -86,7 +86,7 @@ $border-radius: 11px;
     position: relative;
     z-index: 0;
     overflow: hidden;
-    @extend .style-button;
+    @extend %style-button;
     font-weight: normal;
     height: $segmented-control-height;
     contain: strict;

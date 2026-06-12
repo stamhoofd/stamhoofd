@@ -635,7 +635,7 @@ defineExpose({
                 }
 
                 > hr {
-                    @extend .style-hr;
+                    @extend %style-hr;
                 }
 
                 .button-description {
@@ -652,7 +652,7 @@ defineExpose({
             }
 
             > hr {
-                @extend .style-hr;
+                @extend %style-hr;
                 margin-bottom: 10px;
             }
         }

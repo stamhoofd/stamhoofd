@@ -102,7 +102,7 @@ button.st-list-item {
     position: relative;
     z-index: 1;
 
-    @extend .style-normal;
+    @extend %style-normal;
 
     &.selected {
         color: $color-primary;
@@ -131,7 +131,7 @@ button.st-list-item {
 
     &.right-small {
         > .main > div > .right {
-            @extend .style-description-small;
+            @extend %style-description-small;
             text-align: right;
             padding-left: 10px;
         }
@@ -145,7 +145,7 @@ button.st-list-item {
 
     &.right-description {
         > .main > div > .right {
-            @extend .style-description;
+            @extend %style-description;
             text-align: right;
             flex-shrink: 10;
             padding-left: 15px;
@@ -154,7 +154,7 @@ button.st-list-item {
 
     &.right-price {
         > .main > div > .right {
-            @extend .style-description;
+            @extend %style-description;
             text-align: right;
             flex-shrink: 0;
             padding-left: 15px;

@@ -586,7 +586,7 @@ defineExpose({
     }
 
     .description {
-        @extend .style-description;
+        @extend %style-description;
         padding-top: 15px;
         white-space: pre-wrap;
     }

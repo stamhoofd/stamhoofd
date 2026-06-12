@@ -16,6 +16,6 @@ export default class STNavigationTitle extends VueComponent {}
 
 .st-navigation-title {
     margin-bottom: 20px;
-    @extend .style-title-1;
+    @extend %style-title-1;
 }
 </style>

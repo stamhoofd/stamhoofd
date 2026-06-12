@@ -10,7 +10,7 @@
     &.hint {
         display: block;
         padding: 10px 15px;
-        @extend .style-description;
+        @extend %style-description;
     }
 
     &.link {

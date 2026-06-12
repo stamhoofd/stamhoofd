@@ -105,7 +105,7 @@ function updateSize() {
         grid-template-columns: 1fr auto;
 
         > div:first-child {
-            @extend .style-description;
+            @extend %style-description;
             min-width: 0;
 
             // Align this item vertically centered in the grid container

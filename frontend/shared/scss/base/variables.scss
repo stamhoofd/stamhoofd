@@ -3,12 +3,6 @@
 $input-height-original: 38px;
 $input-height: var(--input-height, $input-height-original);
 
-@media (max-width: 550px) {
-    :root {
-        --input-height: 43px;
-    }
-}
-
 $font-weight-default: var(--font-weight-default, 500);
 
 // On desktop, medium is same as default
@@ -16,16 +10,9 @@ $font-weight-medium: var(--font-weight-medium, 500);
 $font-weight-semibold: var(--font-weight-semibold, 600);
 $font-weight-bold: var(--font-weight-bold, 700);
 
-@media (max-width: 400px) {
-    :root {
-        --navigation-bar-margin: 0px;
-    }
-}
-
 // Other
 $border-width: 1px;
 $border-width-thin: var(--border-width-thin, 1px);
-
 
 $border-radius: 9px;
 $border-radius-modals: 16px;
@@ -356,37 +343,6 @@ $dark-theme-color-box-shadow: rgba(255, 255, 255, 0.05);
 
 $color-current-background: var(--color-current-background, #{$color-background});
 $color-current-background-shade: var(--color-current-background-shade, #{$color-background-shade});
-
-.theme-warning {
-    --color-primary: #{$color-warning};
-    --color-primary-background: #{$color-warning-background};
-    --color-primary-dark: #{$color-warning-dark};
-}
-
-.theme-secundary {
-    --color-primary: #{$color-secundary};
-    --color-primary-background: #{$color-secundary-background};
-    --color-primary-dark: #{$color-secundary-dark};
-}
-
-.theme-tertiary {
-    --color-primary: #{$color-tertiary};
-    --color-primary-background: #{$color-tertiary-background};
-    --color-primary-dark: #{$color-tertiary-dark};
-}
-
-.theme-success {
-    --color-primary: #{$color-success};
-    --color-primary-background: #{$color-success-background};
-    --color-primary-dark: #{$color-success-dark};
-}
-
-.theme-error {
-    --color-primary: #{$color-error};
-    --color-primary-background: #{$color-error-background};
-    --color-primary-dark: #{$color-error-dark};
-}
-
 
 @mixin dark-modus {
     color-scheme: dark;

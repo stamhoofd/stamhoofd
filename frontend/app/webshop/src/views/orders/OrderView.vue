@@ -578,7 +578,7 @@ function openTicket(ticket: TicketPublic) {
 .order-view {
     .stamhoofd-header {
         --color-primary: #{$color-primary-original};
-        @extend .style-description-small;
+        @extend %style-description-small;
         max-width: var(--box-width, 800px);
         margin: 0 auto;
         padding-bottom: 20px;
@@ -638,7 +638,7 @@ function openTicket(ticket: TicketPublic) {
     }
 
     .pre-wrap {
-        @extend .style-description;
+        @extend %style-description;
         white-space: pre-wrap;
     }
 }

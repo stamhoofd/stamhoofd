@@ -718,7 +718,7 @@ function onFocus(index: number) {
                 width: 100%;
                 height: 100%;
                 position: absolute;
-                @extend .style-input;
+                @extend %style-input;
                 line-height: 1;
                 box-sizing: border-box;
                 opacity: 0;

@@ -108,7 +108,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     }
 
     box-sizing: border-box;
-    @extend .style-input-shadow;
+    @extend %style-input-shadow;
     background: $color-primary-background;
     border-radius: $border-radius-modals;
     pointer-events:all;

@@ -97,7 +97,7 @@ button.st-grid-item {
 }
 
 .st-grid-item {
-    @extend .style-normal;
+    @extend %style-normal;
     display: grid;
     grid-column: start / end;
     grid-template-columns: subgrid;

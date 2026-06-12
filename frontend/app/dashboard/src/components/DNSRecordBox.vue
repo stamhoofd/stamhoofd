@@ -72,11 +72,11 @@ defineProps<{
     }
 
     dt {
-        @extend .style-definition-term;
+        @extend %style-definition-term;
     }
 
     dd {
-        @extend .style-definition-description;
+        @extend %style-definition-description;
         font-family: monospace;
         word-wrap: break-word;
         outline: 0;

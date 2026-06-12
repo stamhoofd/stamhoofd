@@ -2296,7 +2296,7 @@ defineExpose({
         padding-top: 0px;
 
         .columns > div {
-            @extend .style-table-head;
+            @extend %style-table-head;
 
             user-select: none;
 
@@ -2447,7 +2447,7 @@ defineExpose({
         }
 
         .placeholder-skeleton {
-            @extend .style-placeholder-skeleton;
+            @extend %style-placeholder-skeleton;
             width: 10px;
         }
 

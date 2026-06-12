@@ -58,7 +58,7 @@
     }
 
     &.primary, &.secundary, &.destructive {
-        @extend .style-button;
+        @extend %style-button;
 
         border-radius: $border-radius;
         
@@ -145,7 +145,7 @@
         }
 
         > .bubble {
-            @extend .style-bubble;
+            @extend %style-bubble;
             background: $color-background;
             color: $color-primary;
         }
@@ -240,7 +240,7 @@
     }
 
     &.icons {
-        @extend .style-button-small;
+        @extend %style-button-small;
         color: $color-gray-4;
         
         // Multiple icons stacked after each other
@@ -360,7 +360,7 @@
     }
 
     &.text, &.navigation {
-        @extend .style-button-small;
+        @extend %style-button-small;
         color: $color-gray-4;
         text-overflow: ellipsis;
         
@@ -500,7 +500,7 @@
         }
 
         > .bubble {
-            @extend .style-bubble;
+            @extend %style-bubble;
 
             &:last-child {
                 margin-left: 8px;
@@ -521,7 +521,7 @@
                 margin-bottom: 7px;
             }
 
-            > .bubble, > .style-bubble {
+            > .bubble, > %style-bubble {
                 background: $color-error;
                 position: absolute;
                 left: 50%;

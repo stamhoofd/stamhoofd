@@ -68,7 +68,7 @@ const replacedHtml = computed(() => {
     }
 
     .email-attachments-spacer {
-        @extend .style-hr;
+        @extend %style-hr;
         margin: 40px -30px 20px -30px;
     }
 

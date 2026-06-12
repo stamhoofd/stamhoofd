@@ -19,15 +19,15 @@
         pointer-events: none;
         user-select: none;
         white-space: nowrap;
-        @extend .style-input;
+        @extend %style-input;
         color: $color-dark;
         opacity: 0.5;
     }
 }
 
 .input {
-    @extend .style-input;
-    @extend .style-input-box;
+    @extend %style-input;
+    @extend %style-input-box;
     color: $color-dark;
 
     padding: 6px 15px;
@@ -308,7 +308,7 @@ select.input {
 }
 
 .list-input {
-    @extend .style-input;
+    @extend %style-input;
     color: $color-dark;
     padding: 15px;
     width: 100%;
@@ -425,7 +425,7 @@ select.input {
     border: $border-width solid $color-border-shade;
     background: $color-background;
     border-radius: 8px;
-    @extend .style-input-shadow;
+    @extend %style-input-shadow;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -451,12 +451,12 @@ select.input {
     }
 
     >h3 {
-        @extend .style-label;
+        @extend %style-label;
         padding: 0 10px;
     }
 
     >p {
-        @extend .style-description-small;
+        @extend %style-description-small;
         padding: 0 7px;
     }
 
@@ -519,7 +519,7 @@ select.input {
     cursor: pointer;
     transition: background-color 0.2s;
     border: $border-width solid $color-border;
-    @extend .style-input-shadow;
+    @extend %style-input-shadow;
 
     &:hover {
         background: $color-background-shade;
@@ -539,7 +539,7 @@ select.input {
     }
 
     h2 {
-        @extend .style-title-2;
+        @extend %style-title-2;
         padding-bottom: 5px;
     }
 

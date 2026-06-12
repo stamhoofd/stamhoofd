@@ -661,7 +661,7 @@ function createPayment() {
     }
 
     .pre-wrap {
-        @extend .style-description;
+        @extend %style-description;
         white-space: pre-wrap;
     }
 }

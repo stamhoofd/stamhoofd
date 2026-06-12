@@ -1,0 +1,123 @@
+@use "text-styles" as *;
+@use "variables" as *;
+
+.style-side-view-shadow { @extend %style-side-view-shadow; }
+.style-input-shadow { @extend %style-input-shadow; }
+.style-input-box { @extend %style-input-box; }
+.style-overlay-shadow { @extend %style-overlay-shadow; }
+.style-nowrap { @extend %style-nowrap; }
+.style-hr { @extend %style-hr; }
+.style-title-huge { @extend %style-title-huge; }
+.style-placeholder-skeleton { @extend %style-placeholder-skeleton; }
+.style-title-semihuge { @extend %style-title-semihuge; }
+.style-text-gradient { @extend %style-text-gradient; }
+.style-title-1 { @extend %style-title-1; }
+.style-navigation-title { @extend %style-navigation-title; }
+.style-title-2 { @extend %style-title-2; }
+.style-title-2-larger { @extend %style-title-2-larger; }
+.style-title-3 { @extend %style-title-3; }
+.style-navigation-bar-title { @extend %style-navigation-bar-title; }
+.style-icon-prefix { @extend %style-icon-prefix; }
+.style-title-prefix { @extend %style-title-prefix; }
+.style-title-prefix-list { @extend %style-title-prefix-list; }
+.style-capitalize-first-letter { @extend %style-capitalize-first-letter; }
+.style-title-list { @extend %style-title-list; }
+.style-text-large { @extend %style-text-large; }
+.style-tag { @extend %style-tag; }
+.style-price-base { @extend %style-price-base; }
+.style-amount { @extend %style-amount; }
+.style-price { @extend %style-price; }
+.style-price-big { @extend %style-price-big; }
+.style-value-old { @extend %style-value-old; }
+.style-value-new { @extend %style-value-new; }
+.style-discount-old-price { @extend %style-discount-old-price; }
+.style-discount-price { @extend %style-discount-price; }
+.style-normal { @extend %style-normal; }
+.style-definition-label { @extend %style-definition-label; }
+.style-definition-text { @extend %style-definition-text; }
+.font-size-description { @extend %font-size-description; }
+.font-size-description-large { @extend %font-size-description-large; }
+.style-description { @extend %style-description; }
+.style-description-large { @extend %style-description-large; }
+.inline-size { @extend %inline-size; }
+.pre-wrap { @extend %pre-wrap; }
+.style-limit-lines { @extend %style-limit-lines; }
+.style-description-block { @extend %style-description-block; }
+.style-description-block-large { @extend %style-description-block-large; }
+.style-description-small { @extend %style-description-small; }
+.style-description-smaller { @extend %style-description-smaller; }
+.style-statistic { @extend %style-statistic; }
+.style-interactive-small { @extend %style-interactive-small; }
+.style-input { @extend %style-input; }
+.style-input-list { @extend %style-input-list; }
+.style-button { @extend %style-button; }
+.style-button-small { @extend %style-button-small; }
+.style-button-smaller { @extend %style-button-smaller; }
+.style-label { @extend %style-label; }
+.style-table-head { @extend %style-table-head; }
+.style-context-menu-item { @extend %style-context-menu-item; }
+.style-context-menu-item-description { @extend %style-context-menu-item-description; }
+.style-definition-term { @extend %style-definition-term; }
+.style-definition-description { @extend %style-definition-description; }
+.style-cover-photo { @extend %style-cover-photo; }
+.style-button-bar { @extend %style-button-bar; }
+.style-form-buttons { @extend %style-form-buttons; }
+.style-with-button { @extend %style-with-button; }
+.radio-description { @extend %radio-description; }
+.style-hover-area { @extend %style-hover-area; }
+.style-copyable { @extend %style-copyable; }
+.style-tooltip { @extend %style-tooltip; }
+.details-grid { @extend %details-grid; }
+.main-text-container { @extend %main-text-container; }
+.style-illustration-img { @extend %style-illustration-img; }
+.illustration-list { @extend %illustration-list; }
+.style-image-with-icon { @extend %style-image-with-icon; }
+.style-bubble { @extend %style-bubble; }
+.style-strong { @extend %style-strong; }
+.style-pricing-box { @extend %style-pricing-box; }
+.style-wysiwyg { @extend %style-wysiwyg; }
+.style-em { @extend %style-em; }
+.style-underline { @extend %style-underline; }
+.style-color-box { @extend %style-color-box; }
+.style-inline-resource { @extend %style-inline-resource; }
+.style-subtle-link { @extend %style-subtle-link; }
+.style-code { @extend %style-code; }
+.style-inline-code { @extend %style-inline-code; }
+.style-discount-code { @extend %style-discount-code; }
+.title-suffix { @extend %title-suffix; }
+.split-info { @extend %split-info; }
+.styled-description { @extend %styled-description; }
+ul.style-list { @extend %style-list; }
+.style-stats-grid { @extend %style-stats-grid; }
+.style-dark { @extend %style-dark; }
+.style-onboarding-checklist { @extend %style-onboarding-checklist; }
+
+.theme-warning {
+    --color-primary: #{$color-warning};
+    --color-primary-background: #{$color-warning-background};
+    --color-primary-dark: #{$color-warning-dark};
+}
+
+.theme-secundary {
+    --color-primary: #{$color-secundary};
+    --color-primary-background: #{$color-secundary-background};
+    --color-primary-dark: #{$color-secundary-dark};
+}
+
+.theme-tertiary {
+    --color-primary: #{$color-tertiary};
+    --color-primary-background: #{$color-tertiary-background};
+    --color-primary-dark: #{$color-tertiary-dark};
+}
+
+.theme-success {
+    --color-primary: #{$color-success};
+    --color-primary-background: #{$color-success-background};
+    --color-primary-dark: #{$color-success-dark};
+}
+
+.theme-error {
+    --color-primary: #{$color-error};
+    --color-primary-background: #{$color-error-background};
+    --color-primary-dark: #{$color-error-dark};
+}

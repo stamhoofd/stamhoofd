@@ -238,7 +238,7 @@ function onKey(event: KeyboardEvent) {
     top: 50%;
     transform: translate(-50%, -50%);
     transform: translate(calc(-50% + (var(--st-safe-area-left, 0px) - var(--st-safe-area-right, 0px)) / 2), calc(-50% + (var(--st-safe-area-top, 0px) - var(--st-safe-area-bottom, 0px)) / 2));
-    @extend .style-overlay-shadow;
+    @extend %style-overlay-shadow;
     border-radius: $border-radius-modals;
     background: $color-background;
     max-width: calc(100vw - 30px);
@@ -324,10 +324,10 @@ function onKey(event: KeyboardEvent) {
     > h1 {
         padding-bottom: 10px;
         text-align: left;
-        @extend .style-title-2;
+        @extend %style-title-2;
 
         + p {
-            @extend .style-description-small;
+            @extend %style-description-small;
             white-space: pre-wrap;
         }
     }

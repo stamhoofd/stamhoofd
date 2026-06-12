@@ -199,7 +199,7 @@ async function goNext() {
     padding: 0 10px;
     height: 50px;
     line-height: 50px;
-    @extend .style-input;
+    @extend %style-input;
     width: 100%;
     box-sizing: border-box;
     margin-left: -10px;
@@ -217,7 +217,7 @@ async function goNext() {
 
     &:focus {
         background-color: $color-background;
-        @extend .style-input-box;
+        @extend %style-input-box;
     }
 }
 </style>

@@ -181,7 +181,7 @@ async function download() {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .ticket-index {
-    @extend .style-definition-label;
+    @extend %style-definition-label;
     display: inline-block;
 }
 </style>
