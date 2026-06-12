@@ -4,7 +4,7 @@ import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
-import type {ViteUserConfig} from 'vitest/config';
+import type { ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
@@ -26,8 +26,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
             const builder = await import('@stamhoofd/test-utils');
             builder.TestUtils.loadEnvironment();
             loadedEnv = STAMHOOFD;
-        }
-        else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+        } else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Building env for development...', process.env.NODE_ENV);
             const builder = await import('@stamhoofd/cli');
             const builtEnv = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
@@ -36,15 +35,13 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
             console.log('Built env for development.', process.env.NODE_ENV);
 
             loadedEnv = builtEnv;
-        }
-        else if (process.env.LOAD_ENV) {
+        } else if (process.env.LOAD_ENV) {
         // Load this in the environment
             const decode = JSON.parse(process.env.LOAD_ENV);
 
             // We restringify to make sure encoding is minified
             loadedEnv = decode;
-        }
-        else if (process.env.ENV_FILE) {
+        } else if (process.env.ENV_FILE) {
         // Reading environment from a JSON env file (JSON is needed)
             const file = path.resolve(process.env.ENV_FILE);
 
@@ -114,8 +111,8 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                     warmup: {
                         clientFiles: [
                             ...(options?.clientFiles ?? []),
+                            './main.ts',
                             resolve(import.meta.dirname, './shared') + '/*/index.ts',
-                            resolve(import.meta.dirname, './shared') + '/*/src/**/*.vue',
                         ],
                     },
                 }
@@ -132,10 +129,10 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
             ? {
                     sourcemap: 'inline',
                     rollupOptions: {
-                        treeshake: true, // Increases performance
+                        treeshake: true,
                         output: {
-                            manualChunks: undefined, // disable any auto chunk splitting
-                            inlineDynamicImports: true, // This is needed to make sure that the dynamic imports are inlined
+                            manualChunks: undefined,
+                            inlineDynamicImports: true,
                         },
                     },
                     cssCodeSplit: false,
@@ -148,8 +145,8 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                                 entry: './src/index.ts',
                             },
                             rollupOptions: {
-                                treeshake: 'smallest', // Increases performance
-                            }
+                                treeshake: true,
+                            },
                         }
                     : {
                             sourcemap: true,

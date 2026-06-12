@@ -18,7 +18,9 @@
         "./src/circular-dependencies/*.ts",
         "./src/index.ts",
         "./dist/circular-dependencies/*.js",
-        "./dist/index.js"
+        "./dist/index.js",
+        "./src/Version.ts",
+        "./dist/Version.js"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",

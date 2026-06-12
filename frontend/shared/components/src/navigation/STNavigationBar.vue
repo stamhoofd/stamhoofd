@@ -334,11 +334,6 @@ onDeactivated(() => {
         pointer-events: none;
         border-bottom-color: $color-border-shade;
 
-        &.large {
-            box-shadow: 0px 2px 5px $color-shadow;
-            border-bottom-color: transparent;
-        }
-
         body.native-android &, body.web-android & {
             //box-shadow: 0px 2px 5px $color-shadow;
             border-bottom: none;
@@ -354,6 +349,11 @@ onDeactivated(() => {
             border-bottom: none;
             bottom: -120px;
         }
+    }
+
+    &.large::before {
+        box-shadow: 0px 2px 5px $color-shadow;
+        border-bottom-color: transparent;
     }
 
     &.negative {

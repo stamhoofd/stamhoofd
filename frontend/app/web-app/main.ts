@@ -11,6 +11,9 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { createApp } from 'vue';
 
+// Load ...NextVersion
+import '@stamhoofd/structures/Version.js';
+
 import App from './src/App.vue';
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
@@ -38,8 +41,7 @@ if (!isPrerender && STAMHOOFD.PLAUSIBLE_DOMAIN && STAMHOOFD.environment === 'pro
     document.head.appendChild(script); // or something of the likes
     const w = window as any;
     w.plausible = w.plausible || function (...args: unknown[]) { (w.plausible.q = w.plausible.q || []).push(args); };
-}
-else {
+} else {
     (window as any).plausible = function (...args: unknown[]) {
         console.log('Debug plausible with args ', args);
     };
