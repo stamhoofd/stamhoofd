@@ -149,7 +149,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
 
         // Shared services
         route([domains.mail], ports.maildevHttp, proxyHost),
-        route([domains.files], ports.rustfs, proxyHost),
+        route([domains.files, `*.${domains.files}`], ports.rustfs, proxyHost),
         route([domains.filesConsole], ports.rustfsConsole, proxyHost),
         route([domains.sso], ports.sso, proxyHost),
     ];

@@ -20,21 +20,26 @@ export class RustfsService extends SharedDockerService {
         return link(`https://files.${domain}`, `https://files.${domain}`);
     }
 
+    get domain(): string {
+        const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
+        return `files.${domain}`;
+    }
+
     getLogin(): string {
         return `${localFilesAccessKey} / ${localFilesSecretKey}`;
     }
 
     getDockerArgs(context: CliContext): string[] {
         const ports = buildPorts(context);
-        return RustfsService.dockerArgs(ports.rustfs, ports.rustfsConsole);
+        return RustfsService.dockerArgs(ports.rustfs, ports.rustfsConsole, this.domain);
     }
 
     async beforeRun(context: CliContext): Promise<void> {
         await docker.createVolume(rustfsDataVolume, context.verbose);
     }
 
-    static dockerArgs(apiPort: number, consolePort: number): string[] {
-        return ['run', '-d', '--name', RustfsService.container, '-p', localhostPortMapping(apiPort, rustfsInternalApiPort), '-p', localhostPortMapping(consolePort, rustfsInternalConsolePort), '-v', `${rustfsDataVolume}:/data`, '-e', `RUSTFS_ACCESS_KEY=${localFilesAccessKey}`, '-e', `RUSTFS_SECRET_KEY=${localFilesSecretKey}`, '-e', 'RUSTFS_CONSOLE_ENABLE=true', rustfsImage, '/data'];
+    static dockerArgs(apiPort: number, consolePort: number, domain?: string): string[] {
+        return ['run', '-d', '--name', RustfsService.container, '-p', localhostPortMapping(apiPort, rustfsInternalApiPort), '-p', localhostPortMapping(consolePort, rustfsInternalConsolePort), '-v', `${rustfsDataVolume}:/data`, '-e', `RUSTFS_ACCESS_KEY=${localFilesAccessKey}`, '-e', `RUSTFS_SECRET_KEY=${localFilesSecretKey}`, '-e', 'RUSTFS_CONSOLE_ENABLE=true', ...(domain ? ['-e', 'RUSTFS_SERVER_DOMAINS=' + domain] : []), rustfsImage, '/data'];
     }
 }
 
