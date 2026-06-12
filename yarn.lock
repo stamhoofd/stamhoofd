@@ -2512,6 +2512,11 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
+"@oxc-project/runtime@0.133.0":
+  version "0.133.0"
+  resolved "https://registry.yarnpkg.com/@oxc-project/runtime/-/runtime-0.133.0.tgz#2ff6df1303c815db1d8aad048ff5a915c6e945ad"
+  integrity sha512-PkvjA1Lq5++V5S1E6Patr92ZVcieE6EalDr1VJTqv4BnjZdOUC4W3p8k1wMXSd5/2aFP4b/A6N5sg2Bkzcr9vQ==
+
 "@oxc-project/types@=0.133.0":
   version "0.133.0"
   resolved "https://registry.yarnpkg.com/@oxc-project/types/-/types-0.133.0.tgz#2e282ef9e1d26e06b68ccd14b73f310a3b2cf7f8"
