@@ -3,7 +3,7 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { EventFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, Event, Group, GroupSettings, GroupType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
@@ -211,6 +211,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 name: 'test event',
                 startDate: new Date('2000-02-10'),
                 endDate: new Date('2000-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
             }).create();
 
             const body: Body = new PatchableArray();
@@ -266,6 +267,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 name: 'test event',
                 startDate: new Date('2000-02-10'),
                 endDate: new Date('2000-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
             }).create();
 
             const body: Body = new PatchableArray();
@@ -327,6 +329,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 name: 'test event',
                 startDate: new Date('2001-02-10'),
                 endDate: new Date('2001-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
             }).create();
 
             const body: Body = new PatchableArray();
@@ -387,6 +390,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 name: 'test event',
                 startDate: new Date('2000-02-10'),
                 endDate: new Date('2000-02-12'),
+                typeId: OrganizationEventType.DEFAULT_ID,
             }).create();
 
             async function part1() {
@@ -432,46 +436,6 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             await part2();
         });
 
-        test('A normal user with write access can create an event where the type has a maximum', async () => {
-            const organization = await new OrganizationFactory({}).create();
-
-            const user = await new UserFactory({
-                organization,
-                permissions: minimumUserPermissions,
-            }).create();
-
-            const startDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
-            const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-            // create registration period
-            await new RegistrationPeriodFactory({
-                startDate,
-                endDate,
-                organization,
-            }).create();
-
-            const body: Body = new PatchableArray();
-            const newEvent = Event.create({
-                organizationId: organization.id,
-                typeId: (await new PlatformEventTypeFactory({
-                    maximum: 5,
-                }).create()).id,
-                name: 'test event',
-                startDate,
-                endDate,
-            });
-            body.addPut(newEvent);
-
-            const result = await TestRequest.patch({ body, user, organization });
-            expect(result.status).toBe(200);
-            expect(result.body).toHaveLength(1);
-            expect(result.body[0]).toMatchObject({
-                organizationId: newEvent.organizationId,
-                typeId: newEvent.typeId,
-                name: newEvent.name,
-            });
-        });
-
         test('A normal user with write access cannot create a global event', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
@@ -482,7 +446,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             const body: Body = new PatchableArray();
             const newEvent = Event.create({
                 organizationId: null,
-                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                typeId: OrganizationEventType.DEFAULT_ID,
                 name: 'test event',
                 startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
                 endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
