@@ -22,6 +22,10 @@ import { Group } from './Group.js';
 import { Registration } from './Registration.js';
 import { Token } from './Token.js';
 import { PasswordToken } from './PasswordToken.js';
+import { City } from './addresses/City.js';
+import { Province } from './addresses/Province.js';
+import { PostalCode } from './addresses/PostalCode.js';
+import { Street } from './addresses/Street.js';
 
 if (User === undefined) {
     throw new Error('Unexpected missing User');
@@ -131,3 +135,28 @@ if (!PasswordToken.relations) {
 PasswordToken.user = new ManyToOneRelation(User, 'user');
 PasswordToken.user.foreignKey = 'userId';
 PasswordToken.relations.push(PasswordToken.user);
+
+if (!City.relations) {
+    City.relations = [];
+}
+City.parentCity = new ManyToOneRelation(City, 'parentCity');
+City.parentCity.foreignKey = 'parentCityId';
+City.relations.push(City.parentCity);
+
+City.province = new ManyToOneRelation(Province, 'province');
+City.province.foreignKey = 'provinceId';
+City.relations.push(City.province);
+
+if (!PostalCode.relations) {
+    PostalCode.relations = [];
+}
+PostalCode.city = new ManyToOneRelation(City, 'city');
+PostalCode.city.foreignKey = 'cityId';
+PostalCode.relations.push(PostalCode.city);
+
+if (!Street.relations) {
+    Street.relations = [];
+}
+Street.city = new ManyToOneRelation(City, 'city');
+Street.city.foreignKey = 'cityId';
+Street.relations.push(Street.city);

@@ -3,6 +3,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { City } from './City.js';
 import { PostalCode } from './PostalCode.js';
 import { Province } from './Province.js';
+import '../_relations.js';
 
 describe('Model.PostalCode', () => {
     let oostVlaanderen!: Province;

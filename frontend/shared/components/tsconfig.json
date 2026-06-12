@@ -1,5 +1,15 @@
 {
     "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        // This package typechecks its *.test.ts files alongside its source, so it needs the
+        // Vitest test globals (describe/it/afterEach/...). TS 6 no longer auto-includes every
+        // @types package, so the runner globals must be listed explicitly.
+        "types": [
+            "node",
+            "pdfkit",
+            "vitest/globals"
+        ]
+    },
     "include": [
         "../../*.d.ts",
         "*.ts",

@@ -1,4 +1,5 @@
-import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/types/Country';
@@ -20,13 +21,14 @@ export class PostalCode extends QueryableModel {
     @column({ type: 'string' })
     postalCode: string;
 
-    @column({ type: 'string', foreignKey: PostalCode.city })
+    @column({ type: 'string' })
     cityId: string;
 
     @column({ type: 'string' })
     country: Country;
 
-    static city = new ManyToOneRelation(City, 'city');
+    // Relation is wired up in _relations.ts (after the classes are defined) to avoid circular references.
+    static city: ManyToOneRelation<'city', City>;
 
     /**
      * Search for a given city via it's postal code and country, collecting information about the city (id), parentCity (id) and province (id)

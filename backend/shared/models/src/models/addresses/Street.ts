@@ -1,8 +1,9 @@
-import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 
-import { City } from './City.js';
+import type { City } from './City.js';
 
 export class Street extends QueryableModel {
     static table = 'streets';
@@ -17,8 +18,9 @@ export class Street extends QueryableModel {
     @column({ type: 'string' })
     name: string;
 
-    @column({ type: 'string', foreignKey: Street.city })
+    @column({ type: 'string' })
     cityId: string;
 
-    static city = new ManyToOneRelation(City, 'city');
+    // Relation is wired up in _relations.ts (after the classes are defined) to avoid circular references.
+    static city: ManyToOneRelation<'city', City>;
 }

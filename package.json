@@ -114,12 +114,12 @@
     "postcss-discard-duplicates": "^7.0.2",
     "sass": "^1.45.1",
     "terser": "^5.43.1",
-    "typescript": "5.8.3",
     "vite": "^8.0.0",
     "vite-svg-2-webfont": "^8.0.0",
     "vitest": "^4.1.8",
     "vitest-browser-vue": "^2.1.0",
-    "vue-tsc": "2.2.10",
+    "typescript": "6.0.3",
+    "vue-tsc": "2.2.12",
     "wait-on": "^8.0.3"
   },
   "resolutions": {
