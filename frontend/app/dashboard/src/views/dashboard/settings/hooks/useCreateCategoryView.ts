@@ -5,7 +5,6 @@ import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganiza
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import { GroupCategory, GroupCategorySettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
-import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 export function useCreateCategoryView(saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
@@ -61,6 +60,11 @@ export function useCreateCategoryView(saveHandler?: (patch: PatchableArrayAutoEn
                             console.error('periods', loadedPeriods);
                             throw new Error('Uneexpected missing period in periods list');
                         }
+
+                        // Imported dynamically to break the recursive dependency between
+                        // EditCategoryGroupsView and this hook (the view presents this same view
+                        // again for subcategories).
+                        const { default: EditCategoryGroupsView } = await import('../../groups/EditCategoryGroupsView.vue');
 
                         return new ComponentWithProperties(EditCategoryGroupsView, {
                             category: category,

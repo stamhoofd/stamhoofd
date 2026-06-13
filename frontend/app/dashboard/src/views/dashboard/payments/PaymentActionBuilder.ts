@@ -12,7 +12,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Organization, Platform } from '@stamhoofd/structures';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';

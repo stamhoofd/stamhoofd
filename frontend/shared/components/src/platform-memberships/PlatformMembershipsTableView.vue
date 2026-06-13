@@ -19,7 +19,7 @@ import { SortItemDirection } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { usePlatformMemberhipsObjectFetcher } from '../fetchers/usePlatformMembershipsObjectFetcher';
 import { useGetPlatformMembershipsUIFilterBuilders } from '../filters/filter-builders/platform-memberships';
-import { usePlatform } from '../hooks';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { usePlatformMembershipActions } from './classes/PlatformMembershipActionBuilder';
 import { useGetPlatformMembershipColumns } from './classes/PlatformMembershipColumns';
 import PlatformMembershipView from './PlatformMembershipView.vue';

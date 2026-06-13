@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import type { STPackage } from '@stamhoofd/structures';
 import IconContainer from '#icons/IconContainer.vue';
-import { useNow } from '../hooks';
+import { useNow } from '#hooks/useNow.ts';
 
 const props = withDefaults(
     defineProps<{

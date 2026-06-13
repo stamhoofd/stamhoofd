@@ -87,7 +87,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
-import { useOrganization, usePlatform } from '../../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '../../../inputs/DateSelection.vue';
 
 const props = defineProps<{

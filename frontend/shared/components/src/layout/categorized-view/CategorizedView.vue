@@ -71,14 +71,15 @@ import { Sorter } from '@stamhoofd/utility';
 import type { Ref} from 'vue';
 import { computed, defineComponent, getCurrentInstance, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
-import { useDeviceWidth, useScrollListener } from '../../hooks';
+import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
+import { useScrollListener } from '#hooks/useScrollListener.ts';
 import SaveView from '../../navigation/SaveView.vue';
 import type { SaveViewProps } from '../../navigation/SaveViewProps';
 import { SaveViewDefaults } from '../../navigation/SaveViewProps';
 import STList from '../STList.vue';
 import STListItem from '../STListItem.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';
-import { ScrollableSegmentedControl } from '../../inputs';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 
 const attrs = withDefaults(
     defineProps<SaveViewProps>(),

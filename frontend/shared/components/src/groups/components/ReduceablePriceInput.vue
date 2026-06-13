@@ -35,7 +35,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import PriceInputBox from '../../inputs/PriceInputBox.vue';
-import { useFinancialSupportSettings } from '../hooks';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 
 const props = withDefaults(
     defineProps<{

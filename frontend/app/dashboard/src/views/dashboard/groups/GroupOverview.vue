@@ -280,7 +280,9 @@ import type { Group, MemberResponsibility, Organization, OrganizationRegistratio
 import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { countAll, RegistrationInvitationsTableView, useRegistrationInvitationEventListener } from '@stamhoofd/components';
+import RegistrationInvitationsTableView from '@stamhoofd/components/registrations/RegistrationInvitationsTableView.vue';
+import { countAll } from '@stamhoofd/components/tables/classes/ObjectFetcher';
+import { useRegistrationInvitationEventListener } from '@stamhoofd/components/registrations/classes/useRegistrationInvitationEventListener';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';

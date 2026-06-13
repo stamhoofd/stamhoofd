@@ -2,8 +2,8 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformMembership } from '@stamhoofd/structures';
-import { useContext } from '../hooks';
-import type { ObjectFetcher } from '../tables';
+import { useContext } from '#hooks/useContext.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 
 type ObjectType = PlatformMembership;
 

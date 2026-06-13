@@ -55,7 +55,7 @@ import { computed, onActivated, onMounted, ref } from 'vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import BalanceItemCartItemDiscountsSheet from '@stamhoofd/components/members/components/group/BalanceItemCartItemDiscountsSheet.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 const memberManager = useMemberManager();
 const checkout = computed(() => memberManager.family.checkout);

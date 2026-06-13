@@ -65,7 +65,7 @@
 import type { RegisterItem } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCheckoutRegisterItem } from '../../checkout';
+import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
 import MemberIcon from '../MemberIcon.vue';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 

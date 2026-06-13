@@ -16,7 +16,7 @@ import { getExposeProxy } from '@simonbackx/vue-app-navigation';
 import type { Ref} from 'vue';
 import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, ref, unref, useSlots, useTemplateRef } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
-import { useGlobalEventListener } from '../../hooks';
+import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import IconContainer from '../../icons/IconContainer.vue';
 import CategorizedView from './CategorizedView.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';

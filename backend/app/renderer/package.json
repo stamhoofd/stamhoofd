@@ -42,6 +42,7 @@
         "@stamhoofd/logging": "*",
         "@stamhoofd/queues": "*",
         "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "formidable": "3.5.4",
         "luxon": "3.7.2",

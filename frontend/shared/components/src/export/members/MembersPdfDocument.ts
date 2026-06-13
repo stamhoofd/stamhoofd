@@ -1,5 +1,14 @@
-import type { PdfItem, PdfTextOptions } from '@stamhoofd/frontend-pdf-builder';
-import { colorGray, DefaultText, drawPageNumbers, H1, metropolisMedium, mmToPoints, PdfDocWrapper, PdfRenderer, Spacing } from '@stamhoofd/frontend-pdf-builder';
+import type { PdfTextOptions } from '@stamhoofd/frontend-pdf-builder/pdf-items/PdfText';
+import type { PdfItem } from '@stamhoofd/frontend-pdf-builder/PdfItem';
+import { colorGray } from '@stamhoofd/frontend-pdf-builder/colors';
+import { drawPageNumbers } from '@stamhoofd/frontend-pdf-builder/drawPageNumbers';
+import { metropolisMedium } from '@stamhoofd/frontend-pdf-builder/fonts';
+import { mmToPoints } from '@stamhoofd/frontend-pdf-builder/pdf-helpers';
+import { DefaultText } from '@stamhoofd/frontend-pdf-builder/pdf-items/DefaultText';
+import { H1 } from '@stamhoofd/frontend-pdf-builder/pdf-items/H1';
+import { Spacing } from '@stamhoofd/frontend-pdf-builder/pdf-items/Spacing';
+import { PdfDocWrapper } from '@stamhoofd/frontend-pdf-builder/PdfDocWrapper';
+import { PdfRenderer } from '@stamhoofd/frontend-pdf-builder/PdfRenderer';
 import type { Image } from '@stamhoofd/structures';
 import { PlatformMember } from '@stamhoofd/structures';
 import { imageToDocumentLogo } from '../imageToDocumentLogo';

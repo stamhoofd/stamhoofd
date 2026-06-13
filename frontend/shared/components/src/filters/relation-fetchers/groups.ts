@@ -1,4 +1,5 @@
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupType, StamhoofdFilter } from '@stamhoofd/structures';
 import { SortItemDirection } from '@stamhoofd/structures';
 import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';

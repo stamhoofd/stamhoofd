@@ -12,7 +12,7 @@
 import type { PlatformMember, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { useOrganization } from '../../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import ViewRecordCategoryAnswersBox from '../../../records/components/ViewRecordCategoryAnswersBox.vue';
 
 const props = defineProps<{

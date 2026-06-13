@@ -40,6 +40,7 @@
         "vue": "3.5.38"
     },
     "devDependencies": {
+        "@stamhoofd/vite-config": "*",
         "eslint-plugin-stamhoofd": "*",
         "vite": "^8.0.0"
     }

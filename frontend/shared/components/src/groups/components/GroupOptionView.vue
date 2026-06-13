@@ -75,7 +75,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Group, GroupOption, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
-import { usePatch } from '../../hooks';
+import { usePatch } from '#hooks/usePatch.ts';
 import NumberInputBox from '../../inputs/NumberInputBox.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';

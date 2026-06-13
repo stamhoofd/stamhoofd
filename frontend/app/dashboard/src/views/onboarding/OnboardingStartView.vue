@@ -43,7 +43,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { GlobalEventBus, Toast, useRequiredOrganization, useUser } from '@stamhoofd/components';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { useUser } from '@stamhoofd/components/hooks/useUser';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { OrganizationCheckout, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';

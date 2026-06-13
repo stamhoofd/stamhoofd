@@ -5,8 +5,9 @@ import { Organization } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, unref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
-import { useContext, useOrganization } from '../../hooks';
-import { SearchOrganizationView } from '../../members';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import SearchOrganizationView from '#members/SearchOrganizationView.vue';
 import type { NavigationActions } from '../../types/NavigationActions';
 
 export function useLoadOrganization() {

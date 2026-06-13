@@ -1,5 +1,6 @@
 import type { WorkerInfo } from '@playwright/test';
 import { TestUtils } from '@stamhoofd/test-utils';
+import type { BackendEnvironment } from '@stamhoofd/types/Environment';
 import { WorkerData } from '../../helpers/worker/WorkerData.js';
 import { ApiService } from './ApiService.js';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';

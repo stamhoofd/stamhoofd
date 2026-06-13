@@ -2,11 +2,9 @@
     "name": "@stamhoofd/frontend-i18n",
     "version": "1.0.0",
     "private": true,
-    "main": "index.ts",
     "sideEffects": false,
     "type": "module",
     "exports": {
-        ".": "./index.ts",
         "./*": "./*.ts",
         "./*.ts": "./*.ts",
         "./*.vue": "./*.vue"

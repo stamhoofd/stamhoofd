@@ -1,9 +1,9 @@
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
 import type { LimitedFilteredRequest } from '@stamhoofd/structures';
-import type { FetchAllOptions, FetchLimitSettings, ObjectFetcher } from '.';
-import { fetchAll } from '.';
-import { Toast } from '../../..';
+import type { FetchAllOptions, FetchLimitSettings, ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
+import { fetchAll } from '#tables/classes/ObjectFetcher.ts';
+import { Toast } from '#overlays/Toast.ts';
 
 type ObjectWithId = { id: string };
 

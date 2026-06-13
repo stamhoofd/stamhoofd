@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import { usePaymentsObjectFetcher } from '../../fetchers';
+import { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetcher.ts';
 import { Toast } from '../../overlays/Toast';
 import PaymentView from '../PaymentView.vue';
 import PromiseView from '#containers/PromiseView.vue';

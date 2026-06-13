@@ -4,10 +4,11 @@ import { DateFilterBuilder } from '../DateUIFilter';
 import { getCustomerUIFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
+import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
-import { useOrganization } from '../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 
 export class PaymentFilterBuilders {
     static get method() {

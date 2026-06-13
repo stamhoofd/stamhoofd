@@ -1,4 +1,5 @@
-/// <reference path="../environment.d.ts" />
+import '@stamhoofd/types/global';
+import type { SharedEnvironment } from '@stamhoofd/types/Environment';
 
 export {};
 

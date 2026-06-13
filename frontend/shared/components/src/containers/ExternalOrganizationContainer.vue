@@ -8,7 +8,7 @@
 <script setup lang="ts" generic="Nullable extends string|null">
 import type { Organization } from '@stamhoofd/structures';
 import { computed, watchEffect } from 'vue';
-import { useExternalOrganization } from '../groups';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import LoadingViewTransition from './LoadingViewTransition.vue';
 
 const props = withDefaults(

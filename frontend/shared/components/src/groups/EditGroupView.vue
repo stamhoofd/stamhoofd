@@ -608,7 +608,12 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePatchableArray } from '#hooks/usePatchableArray.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import TInput from '../inputs/TInput.vue';
 import TTextarea from '../inputs/TTextarea.vue';
@@ -619,7 +624,8 @@ import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import EditGroupView from './EditGroupView.vue';
-import { useExternalOrganization, useFinancialSupportSettings } from './hooks';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 
 const props = withDefaults(
     defineProps<{

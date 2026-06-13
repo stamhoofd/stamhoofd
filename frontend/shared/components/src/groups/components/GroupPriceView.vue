@@ -17,7 +17,7 @@ import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Group, GroupPrice, GroupSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
-import { usePatch } from '../../hooks';
+import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 

@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useOrganization } from '../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
 
 const organization = useOrganization();
 </script>

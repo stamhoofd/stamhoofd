@@ -20,7 +20,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { usePermissionsCache } from '../../../admins/hooks/useAdmins';
 import { useAppContext } from '../../../context/appContext';
-import { useAuth } from '../../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
 import STGrid from '../../../layout/STGrid.vue';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';

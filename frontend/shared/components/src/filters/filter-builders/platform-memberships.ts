@@ -1,14 +1,16 @@
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { ref } from 'vue';
-import { usePlatform } from '../../hooks';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
+import { NumberFilterBuilder } from '../NumberUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getMemberBaseFilters } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 
 export function useGetPlatformMembershipsUIFilterBuilders() {
     const platform = usePlatform();

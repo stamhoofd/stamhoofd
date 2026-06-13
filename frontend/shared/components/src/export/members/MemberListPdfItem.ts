@@ -1,5 +1,15 @@
-import type { PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions} from '@stamhoofd/frontend-pdf-builder';
-import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import type { PdfDocWrapper } from '@stamhoofd/frontend-pdf-builder/PdfDocWrapper';
+import type { PdfFont } from '@stamhoofd/frontend-pdf-builder/PdfFont';
+import type { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '@stamhoofd/frontend-pdf-builder/PdfItem';
+import { colorDark } from '@stamhoofd/frontend-pdf-builder/colors';
+import { metropolisBold, metropolisMedium } from '@stamhoofd/frontend-pdf-builder/fonts';
+import { mmToPoints } from '@stamhoofd/frontend-pdf-builder/pdf-helpers';
+import { H3 } from '@stamhoofd/frontend-pdf-builder/pdf-items/H3';
+import { HorizontalGrid } from '@stamhoofd/frontend-pdf-builder/pdf-items/HorizontalGrid';
+import { LabelWithValue } from '@stamhoofd/frontend-pdf-builder/pdf-items/LabelWithValue';
+import { PdfText } from '@stamhoofd/frontend-pdf-builder/pdf-items/PdfText';
+import { Spacing } from '@stamhoofd/frontend-pdf-builder/pdf-items/Spacing';
+import { VerticalStack } from '@stamhoofd/frontend-pdf-builder/pdf-items/VerticalStack';
 import type { PlatformMember } from '@stamhoofd/structures';
 import type { SelectablePdfData } from '../SelectablePdfData';
 

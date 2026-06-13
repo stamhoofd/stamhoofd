@@ -26,7 +26,8 @@ import { ErrorBox } from '../../errors/ErrorBox';
 import type { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
-import { useOrganization, usePlatform } from '../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 
 const props = defineProps<{
     validator: Validator;

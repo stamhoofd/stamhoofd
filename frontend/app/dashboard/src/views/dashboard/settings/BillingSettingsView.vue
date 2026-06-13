@@ -141,7 +141,9 @@
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { Toast, useGlobalEventListener, useVisibilityChange } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';

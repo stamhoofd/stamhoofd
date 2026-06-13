@@ -3,7 +3,8 @@ import { PermissionLevel } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { useAppContext } from '../../context/appContext';
-import { useAuth, useContext } from '../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useContext } from '#hooks/useContext.ts';
 
 export function useIsPropertyRequired(member: Ref<PlatformMember | PlatformMember[]>) {
     const isAllOptional = useIsAllOptional(member);

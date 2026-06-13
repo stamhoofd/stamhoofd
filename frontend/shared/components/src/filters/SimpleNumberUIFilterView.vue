@@ -8,7 +8,7 @@ import NumberInput from '../inputs/NumberInput.vue';
 import PriceInput from '../inputs/PriceInput.vue';
 import TimeMinutesInput from '../inputs/TimeMinutesInput.vue';
 import type { NumberUIFilter } from './NumberUIFilter';
-import { NumberFilterFormat } from './NumberUIFilter';
+import { NumberFilterFormat } from './NumberFilterFormat';
 
 const props = defineProps<{
     filter: NumberUIFilter;

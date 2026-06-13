@@ -12,7 +12,7 @@ import FillRecordCategoryBox from '../../../records/components/FillRecordCategor
 import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
 import { useAppContext } from '../../../context/appContext';
 import type { ErrorBox } from '../../../errors/ErrorBox';
-import { useOrganization } from '../../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
 
 const props = withDefaults(defineProps<{
     member: PlatformMember;

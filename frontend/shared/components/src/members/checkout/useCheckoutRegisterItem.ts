@@ -4,18 +4,18 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
-import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
+import ChooseGroupForMemberView from '#members/ChooseGroupForMemberView.vue';
+import { loadFamilyIfNeeded } from '#members/hooks/useLoadFamily.ts';
 import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
-import { useContext } from '../../hooks';
+import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '../../overlays/Toast';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 import ChooseFamilyMembersForGroupView from '../ChooseFamilyMembersForGroupView.vue';
-import ChooseOrganizationMembersForGroupView from '../ChooseOrganizationMembersForGroupView.vue';
 import type { EditMemberStep } from '../classes/MemberStepManager';
 import { MemberStepManager } from '../classes/MemberStepManager';
-import { getAllMemberSteps } from '../classes/steps';
+import { getAllMemberSteps } from '#members/classes/steps/getAllMemberSteps.ts';
 import { RegisterItemStep } from '../classes/steps/RegisterItemStep';
 import { startCheckout } from './startCheckout';
 
@@ -312,6 +312,7 @@ export async function openOrganizationCart({ organization, checkout, context, na
     group?: Group; // Optional: add a button to search for members to register in this group
     members?: PlatformMember[]; // Automatically add default items for these members to the checkout if group is also provided
 }) {
+    const { default: ChooseOrganizationMembersForGroupView } = await import('../ChooseOrganizationMembersForGroupView.vue');
     const groupOrganization = organization;
 
     // Create a new shared checkout for these members

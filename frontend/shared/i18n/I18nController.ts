@@ -8,6 +8,7 @@ import { countryToCode } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
+import type { LocalizedDomain } from '@stamhoofd/types/Localized';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {

@@ -47,8 +47,9 @@
 import type { Event } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useAppContext } from '../../context';
-import { useOrganization, usePlatform } from '../../hooks';
+import { useAppContext } from '#context/appContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import EventImageBox from './EventImageBox.vue';
 
 const props = defineProps<{

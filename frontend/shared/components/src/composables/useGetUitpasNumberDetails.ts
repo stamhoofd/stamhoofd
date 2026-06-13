@@ -5,7 +5,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useContext } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
 
 export function useGetUitpasNumberDetails() {
     const context = useContext();

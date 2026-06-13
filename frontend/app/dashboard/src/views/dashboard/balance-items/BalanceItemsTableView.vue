@@ -17,7 +17,7 @@ import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import type { BalanceItem, BalanceItemType, StamhoofdFilter } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemStatus, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

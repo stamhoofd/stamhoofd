@@ -16,7 +16,9 @@ import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
-import { OrganizationManager, PlatformManager, SessionContext } from '@stamhoofd/networking';
+import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Ref } from 'vue';
 import { markRaw, onMounted, ref } from 'vue';
 import { Platform } from '@stamhoofd/structures';

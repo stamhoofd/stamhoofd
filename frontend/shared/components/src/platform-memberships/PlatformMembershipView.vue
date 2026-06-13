@@ -33,8 +33,8 @@
 
 <script setup lang="ts">
 import type { PlatformMembership } from '@stamhoofd/structures';
-import { LoadingViewTransition } from '../containers';
-import { useBackForward } from '../hooks';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
+import { useBackForward } from '#hooks/useBackForward.ts';
 import PlatformMembershipBox from './PlatformMembershipBox.vue';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';

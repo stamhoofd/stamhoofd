@@ -1,5 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { useGlobalEventListener, useRequiredOrganization } from '@stamhoofd/components';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';

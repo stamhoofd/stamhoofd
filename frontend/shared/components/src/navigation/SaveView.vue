@@ -66,7 +66,7 @@
 import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import { computed, getCurrentInstance } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
-import { useKeyDown } from '../hooks';
+import { useKeyDown } from '#hooks/useKeyDown.ts';
 import { defineEditorContext } from '../inputs/hooks/useEditorContext';
 import BackButton from './BackButton.vue';
 import LoadingButton from './LoadingButton.vue';

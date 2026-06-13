@@ -43,7 +43,8 @@ import type { Company } from '@stamhoofd/structures';
 import { Country } from "@stamhoofd/types/Country";
 import { computed } from 'vue';
 import { useErrors } from '../../errors/useErrors';
-import { useCountry, useEmitPatch } from '../../hooks';
+import { useCountry } from '#hooks/useCountry.ts';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 
 const props = defineProps<{
     company: Company;

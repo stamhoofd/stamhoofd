@@ -32,7 +32,7 @@ import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue
 import type { BalanceItem, PaymentGeneral } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { EditBalanceItemView } from '.';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 

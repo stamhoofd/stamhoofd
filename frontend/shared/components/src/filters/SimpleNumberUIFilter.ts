@@ -2,7 +2,7 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
-import { NumberFilterFormat } from './NumberUIFilter';
+import { NumberFilterFormat } from './NumberFilterFormat';
 import SimpleNumberUIFilterView from './SimpleNumberUIFilterView.vue';
 import type { UIFilterBuilder} from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';

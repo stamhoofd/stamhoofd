@@ -1,4 +1,5 @@
-import { SessionContext, SessionManager } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { Organization } from '@stamhoofd/structures';
 
 export async function sessionFromOrganization(organization: Organization) {

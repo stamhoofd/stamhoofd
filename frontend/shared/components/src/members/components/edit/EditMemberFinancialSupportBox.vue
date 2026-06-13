@@ -58,7 +58,7 @@ import type { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
-import { useFinancialSupportSettings } from '../../../groups';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import Title from './Title.vue';
 
 defineOptions({

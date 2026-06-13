@@ -4,8 +4,8 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, Invoice, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { useContext } from '../hooks';
-import type { ObjectFetcher } from '../tables';
+import { useContext } from '#hooks/useContext.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 
 type ObjectType = Invoice;
 

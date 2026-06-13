@@ -104,7 +104,7 @@ import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
-import { usePatch } from '../../../hooks';
+import { usePatch } from '#hooks/usePatch.ts';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import NRNInput from '../../../inputs/NRNInput.vue';
@@ -113,7 +113,7 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import type { NavigationActions} from '../../../types/NavigationActions';
 import { useNavigationActions } from '../../../types/NavigationActions';
-import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks';
+import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(defineProps<{

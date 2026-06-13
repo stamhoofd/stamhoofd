@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers';
+import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 

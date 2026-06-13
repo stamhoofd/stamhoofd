@@ -2,12 +2,11 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Organization, Webshop } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { userEvent } from 'vitest/browser';
-import { defineComponent, ref } from 'vue';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
-import TestAppWithModalStackComponent from '../../../tests/helpers/TestAppWithModalStackComponent.vue';
-
+import { userEvent } from 'vitest/browser';
+import { defineComponent, ref } from 'vue';
+import TestAppWithModalStackComponent from '../tests/helpers/TestAppWithModalStackComponent.vue';
 import LoginView from './auth/LoginView.vue';
 import OrganizationLogo from './context/OrganizationLogo.vue';
 import STErrorsDefault from './errors/STErrorsDefault.vue';

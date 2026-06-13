@@ -1,3 +1,4 @@
+import type { SharedEnvironment } from '@stamhoofd/types/Environment';
 import type {ConcurrentlyCommandInput} from 'concurrently';
 import type { Service } from './Service.js';
 

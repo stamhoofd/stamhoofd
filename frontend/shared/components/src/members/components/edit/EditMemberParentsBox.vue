@@ -95,7 +95,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';
-import { useAppContext } from '../../../context';
+import { useAppContext } from '#context/appContext.ts';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
@@ -104,7 +104,7 @@ import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
 import Title from './Title.vue';
-import { useAuth } from '../../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 defineOptions({

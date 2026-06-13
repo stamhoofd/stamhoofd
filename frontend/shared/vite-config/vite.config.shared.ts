@@ -1,3 +1,4 @@
+import type { FrontendEnvironment } from '@stamhoofd/types/Environment';
 import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
 import path, { resolve } from 'path';
@@ -5,11 +6,11 @@ import viteSvgToWebfont from 'vite-svg-2-webfont';
 import { playwright } from '@vitest/browser-playwright';
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import type { ViteUserConfig } from 'vitest/config';
-import iconConfig from './shared/assets/images/icons/icons.font';
-import svgNamespacePlugin from './svgNamespacePlugin';
+import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
+import svgNamespacePlugin from '@stamhoofd/vite-config/svgNamespacePlugin';
 
 // https://vitejs.dev/config/
-export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
+export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
     if (process.env.NODE_ENV === 'production') {
         console.log('Building for production...');
     }
@@ -68,6 +69,8 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
         use_env['process.env.NODE_ENV'] = JSON.stringify(loadedEnv.environment);
     }
 
+    const frontendDir = options.frontendDir;
+
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
         logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
@@ -82,8 +85,8 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
         plugins: [
             viteSvgToWebfont({
                 ...iconConfig,
-                context: resolve(import.meta.dirname, './shared/assets/images/icons/'),
-                cssTemplate: resolve(import.meta.dirname, './shared/assets/images/icons/iconCss.hbs'),
+                context: resolve(frontendDir, './shared/assets/images/icons/'),
+                cssTemplate: resolve(frontendDir, './shared/assets/images/icons/iconCss.hbs'),
                 moduleId: options.name === 'calculator' ? 'vite-svg-2-webfont.css?inline' : 'vite-svg-2-webfont.css',
             }),
             svgNamespacePlugin({
@@ -112,7 +115,6 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                         clientFiles: [
                             ...(options?.clientFiles ?? []),
                             './main.ts',
-                            resolve(import.meta.dirname, './shared') + '/*/index.ts',
                         ],
                     },
                 }
@@ -153,11 +155,11 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                             cssCodeSplit: false,
                             outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                         }),
-        publicDir: resolve(import.meta.dirname, './public'),
+        publicDir: resolve(frontendDir, './public'),
         test: {
             watch: false,
             globals: true,
-            setupFiles: ['vitest-browser-vue', import.meta.dirname + '/tests/vitest.setup.ts'],
+            setupFiles: ['vitest-browser-vue', resolve(frontendDir, './tests/vitest.setup.ts')],
             browser: {
                 provider: playwright({
                     actionTimeout: 5_000,

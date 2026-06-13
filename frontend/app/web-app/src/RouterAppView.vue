@@ -10,7 +10,8 @@ import { wrapAndReplace } from './wrapAndReplace';
 import type { SharedOptions } from './wrapAndReplace';
 import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { provideAppNavigate, ReplaceRootEventBus } from '@stamhoofd/components';
+import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
+import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import type { Ref } from 'vue';
 

@@ -2,7 +2,6 @@
     "name": "@stamhoofd/components",
     "version": "1.0.0",
     "private": true,
-    "main": "index.ts",
     "type": "module",
     "sideEffects": false,
     "scripts": {
@@ -10,7 +9,6 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "exports": {
-        ".": "./index.ts",
         "./*.ts": "./src/*.ts",
         "./*.vue": "./src/*.vue",
         "./*": "./src/*.ts"
@@ -58,6 +56,7 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "*",
+        "@stamhoofd/vite-config": "*",
         "@types/luxon": "3.7.1",
         "@types/qrcode": "^1.5.3",
         "@types/uuid": "^8.3.0",

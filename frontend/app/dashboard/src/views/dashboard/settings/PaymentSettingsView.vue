@@ -350,7 +350,7 @@ import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Storage } from '@stamhoofd/networking/Storage';

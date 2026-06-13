@@ -1,5 +1,5 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { CoverImageContainer } from '@stamhoofd/components';
+import CoverImageContainer from '@stamhoofd/components/containers/CoverImageContainer.vue';
 import OrganizationSelectionView from './OrganizationSelectionView.vue';
 
 export async function getSelectorView() {

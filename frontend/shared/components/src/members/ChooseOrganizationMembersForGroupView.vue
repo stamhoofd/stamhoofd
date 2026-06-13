@@ -77,8 +77,13 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { PlatformFamily } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
-import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';
-import { useContext, useOrganization, usePlatform } from '../hooks';
+import { startCheckout } from '#members/checkout/startCheckout.ts';
+import { useCheckoutRegisterItem, useChooseGroupForMember, useGetDefaultItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useAddMember } from '#members/hooks/useAddMember.ts';
+import { useEditMember } from '#members/hooks/useEditMember.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import PermyriadInputBox from '../inputs/PermyriadInputBox.vue';
 import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';

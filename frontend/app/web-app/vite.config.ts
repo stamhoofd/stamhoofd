@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
-
-import { buildConfig } from '../../vite.config.shared.js';
+import { resolve } from 'path';
+import { buildConfig } from '@stamhoofd/vite-config';
 
 // Set timezone!
 process.env.TZ = 'UTC';
@@ -11,6 +11,7 @@ export default defineConfig({
     ...await buildConfig({
         name: 'web-app',
         port: 8080,
+        frontendDir: resolve(import.meta.dirname, '../..'),
         clientFiles: [
             './main.ts',
             './src/App.vue',

@@ -32,9 +32,9 @@ import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
-import { useRegistrationInvitationEventListener } from '../registrations';
+import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
-import { getMemberColumns } from './helpers';
+import { getMemberColumns } from '#members/helpers/getMemberColumns.ts';
 import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;

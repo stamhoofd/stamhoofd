@@ -50,7 +50,8 @@ import type { Company, Organization, Webshop, WebshopPreview } from '@stamhoofd/
 import { WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import { useContext, usePlatform } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import Logo from '../icons/Logo.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 

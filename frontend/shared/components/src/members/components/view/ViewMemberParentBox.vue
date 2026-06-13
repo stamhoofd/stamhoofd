@@ -58,7 +58,7 @@
 import type { Parent, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import EmailAddress from '../../../email/EmailAddress.vue';
-import { useCountry } from '../../../hooks';
+import { useCountry } from '#hooks/useCountry.ts';
 
 defineOptions({
     inheritAttrs: false,

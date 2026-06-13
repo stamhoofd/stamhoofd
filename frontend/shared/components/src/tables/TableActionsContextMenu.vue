@@ -31,7 +31,7 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { computed, getCurrentInstance, onUnmounted, useTemplateRef } from 'vue';
 
 import { useIsMobile } from '../hooks/useIsMobile';
-import type { TableAction, TableActionSelection } from './classes';
+import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 
 const props = withDefaults(defineProps<{
     actions: TableAction<any>[];

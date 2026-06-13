@@ -16,7 +16,8 @@
 
 <script setup lang="ts">
 import type { BalanceItemCartItem } from '@stamhoofd/structures';
-import { BalanceItemIcon, BalanceItemTitleBox } from '../../../payments';
+import BalanceItemIcon from '#payments/BalanceItemIcon.vue';
+import BalanceItemTitleBox from '#payments/BalanceItemTitleBox.vue';
 
 const props = withDefaults(
     defineProps<{

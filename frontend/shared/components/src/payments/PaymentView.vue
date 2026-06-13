@@ -443,7 +443,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
-import { useInvoicesObjectFetcher } from '../fetchers';
+import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 import EditInvoiceView from './EditInvoiceView.vue';
 import EditPaymentView from './EditPaymentView.vue';
 import InvoiceView from './InvoiceView.vue';

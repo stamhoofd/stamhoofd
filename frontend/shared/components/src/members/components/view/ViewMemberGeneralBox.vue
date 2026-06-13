@@ -90,7 +90,7 @@
 <script setup lang="ts">
 import type { PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
-import { useCountry } from '../../../hooks';
+import { useCountry } from '#hooks/useCountry.ts';
 import EmailAddress from '../../../email/EmailAddress.vue';
 
 defineOptions({

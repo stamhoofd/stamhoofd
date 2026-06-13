@@ -8,7 +8,7 @@ import { Request } from '@simonbackx/simple-networking';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
-import { useMembersObjectFetcher } from '../../fetchers';
+import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 
 const props = defineProps<{
     filter: StamhoofdFilter;

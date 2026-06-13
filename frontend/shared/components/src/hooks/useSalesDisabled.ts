@@ -1,7 +1,7 @@
 import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { useOrganization } from './useOrganization';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 
 export function useSalesDisabled(): Ref<boolean> {
     const organization = useOrganization();

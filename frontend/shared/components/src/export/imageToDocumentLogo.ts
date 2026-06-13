@@ -1,5 +1,6 @@
 import stamhoofdLogoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
-import { Logo, mmToPoints, pxToPoints } from '@stamhoofd/frontend-pdf-builder';
+import { mmToPoints, pxToPoints } from '@stamhoofd/frontend-pdf-builder/pdf-helpers';
+import { Logo } from '@stamhoofd/frontend-pdf-builder/pdf-items/Logo';
 import type { Image } from '@stamhoofd/structures';
 
 function mmToPx(mm: number): number {

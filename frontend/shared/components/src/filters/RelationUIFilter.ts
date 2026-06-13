@@ -1,8 +1,9 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { SortList, StamhoofdFilter, StamhoofdMagicRelationFilter, WrapperFilter } from '@stamhoofd/structures';
 import { isMagicRelationFilter, unwrapFilterByPath } from '@stamhoofd/structures';
-import { Formatter } from '../../../../../shared/utility/dist/Formatter';
-import type { InfiniteObjectFetcher, ObjectFetcher } from '../tables';
+import { Formatter } from '@stamhoofd/utility';
+import type { InfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 import RelationUIFilterView from './RelationUIFilterView.vue';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';

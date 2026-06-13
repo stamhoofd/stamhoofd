@@ -5,7 +5,7 @@ import { page, userEvent } from 'vitest/browser';
 import { defineComponent, nextTick, ref } from 'vue';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
-import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
+import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 import { Column } from '../tables/classes/Column';
 import { AsyncTableAction } from '../tables/classes/TableAction';

@@ -135,9 +135,9 @@ import type { BundleDiscount, Group, GroupPriceDiscount, Organization, Organizat
 import { BundleDiscountGroupPriceSettings, GroupPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { ReduceablePriceInput } from '..';
+import ReduceablePriceInput from '#groups/components/ReduceablePriceInput.vue';
 import { useErrors } from '../../errors/useErrors';
-import { useEmitPatch } from '../../hooks';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import NumberInputBox from '../../inputs/NumberInputBox.vue';
 
 const props = withDefaults(defineProps<{

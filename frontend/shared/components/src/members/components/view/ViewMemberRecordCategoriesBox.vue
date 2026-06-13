@@ -8,7 +8,8 @@
 import type { PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useAuth, useOrganization } from '../../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import ViewMemberRecordCategoryBox from './ViewMemberRecordCategoryBox.vue';
 
 defineOptions({

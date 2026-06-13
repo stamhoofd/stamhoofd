@@ -20,9 +20,10 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { RecordCategory } from '@stamhoofd/structures';
-import type { RecordEditorSettings } from '..';
-import { EditRecordCategoryView } from '..';
-import { useDraggableArray, useEmitPatchArray } from '../../hooks';
+import type { RecordEditorSettings } from '#records/RecordEditorSettings.ts';
+import EditRecordCategoryView from '#records/EditRecordCategoryView.vue';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useEmitPatchArray } from '#hooks/useEmitPatchArray.ts';
 import RecordCategoryRow from './RecordCategoryRow.vue';
 
 const props = withDefaults(

@@ -24,7 +24,7 @@ import type { Organization, RegisterCheckout } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType, Group, GroupPrivateSettings, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { onMounted, ref } from 'vue';
-import { useContext } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
 import CheckboxListItem from '../inputs/CheckboxListItem.vue';
 
 const props = defineProps<{

@@ -1,8 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformRegistration, RegistrationsBlob, SortItemDirection } from '@stamhoofd/structures';
-import { useContext, usePlatform } from '../hooks';
-import type { ObjectFetcher } from '../tables';
+import { useContext } from '#hooks/useContext.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 
 type ObjectType = PlatformRegistration;
 

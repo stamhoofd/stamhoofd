@@ -43,11 +43,11 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import type { MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
-import { DeleteView } from '../../../..';
+import DeleteView from '#views/DeleteView.vue';
 import { GlobalEventBus } from '../../../EventBus';
 import { Toast } from '../../../overlays/Toast';
-import { useChooseGroupForMember } from '../../checkout';
-import { useEditMember } from '../../hooks';
+import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useEditMember } from '#members/hooks/useEditMember.ts';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
 
 defineOptions({

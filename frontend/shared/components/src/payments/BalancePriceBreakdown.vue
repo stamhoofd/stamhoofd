@@ -8,7 +8,7 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import type { DetailedReceivableBalance } from '@stamhoofd/structures';
 import { BalanceItem, DetailedPayableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { usePositionableSheet } from '../tables';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import DiscountsSheet from './components/DiscountsSheet.vue';
 
 const props = defineProps<{

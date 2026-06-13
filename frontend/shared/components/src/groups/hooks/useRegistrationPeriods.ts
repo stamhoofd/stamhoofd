@@ -1,4 +1,5 @@
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Ref} from 'vue';
 import { computed, onMounted, unref } from 'vue';
 import { Toast } from '../../overlays/Toast';

@@ -32,7 +32,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { MemberSegmentedView } from '../..';
+import MemberSegmentedView from '#members/MemberSegmentedView.vue';
 
 defineOptions({
     inheritAttrs: false,

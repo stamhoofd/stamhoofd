@@ -1,6 +1,14 @@
 import { ComponentWithProperties, ModalStackComponent } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, ContextNavigationBar, ContextProvider, CustomHooksContainer, OrganizationSwitcher, ReplaceRootEventBus } from '@stamhoofd/components';
-import { MemberManager, OrganizationManager, PlatformManager, UrlHelper } from '@stamhoofd/networking';
+import AccountSwitcher from '@stamhoofd/components/context/AccountSwitcher.vue';
+import ContextNavigationBar from '@stamhoofd/components/context/ContextNavigationBar.vue';
+import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
+import CustomHooksContainer from '@stamhoofd/components/containers/CustomHooksContainer.vue';
+import OrganizationSwitcher from '@stamhoofd/components/context/OrganizationSwitcher.vue';
+import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
+import { MemberManager } from '@stamhoofd/networking/MemberManager';
+import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { AppType, Organization } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import type { Ref } from 'vue';

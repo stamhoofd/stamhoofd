@@ -31,7 +31,7 @@ import { ComponentWithProperties, defineRoute, useNavigate, usePresent } from '@
 import type { Event, EventNotificationType, Organization } from '@stamhoofd/structures';
 import { EventNotificationStatus, EventNotificationStatusHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { usePlatform } from '../../hooks';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { Toast } from '../../overlays/Toast';
 import { useNavigationActions } from '../../types/NavigationActions';
 import { EventNotificationViewModel } from '../classes/EventNotificationViewModel';

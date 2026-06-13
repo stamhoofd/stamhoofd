@@ -71,7 +71,9 @@ import { GroupType, RecordFileAnswer, RecordImageAnswer } from '@stamhoofd/struc
 import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { useNow, useOrganization, usePlatform } from '../../../hooks';
+import { useNow } from '#hooks/useNow.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import GroupIconWithWaitingList from '../group/GroupIconWithWaitingList.vue';
 
 const props = defineProps<{

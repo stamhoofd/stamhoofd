@@ -110,7 +110,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import { usePlatform } from '../hooks';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import EditEmailTemplateView from './EditEmailTemplateView.vue';
 
 const props = withDefaults(

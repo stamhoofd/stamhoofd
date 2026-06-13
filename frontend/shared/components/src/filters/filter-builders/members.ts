@@ -4,18 +4,22 @@ import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompa
 import { FilterWrapperMarker, Gender, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
-import { useFinancialSupportSettings } from '../../groups';
-import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
+import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { BaseUIFilterBuilder, UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from './helpers';
 import { getFilterBuildersForRecordCategories } from './record-categories';
 import type { RegistrationFilterBuilderFactory } from './registrations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();

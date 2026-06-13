@@ -28,7 +28,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Address, PlatformMember } from '@stamhoofd/structures';
 import { CountryHelper, MemberDetails, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCountry } from '../../../hooks';
+import { useCountry } from '#hooks/useCountry.ts';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';

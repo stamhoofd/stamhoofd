@@ -1,4 +1,5 @@
-import '../../../environment.d.ts';
+import '@stamhoofd/types/global';
+import type { RedirecterEnvironment } from '@stamhoofd/types/Environment';
 
 export {};
 

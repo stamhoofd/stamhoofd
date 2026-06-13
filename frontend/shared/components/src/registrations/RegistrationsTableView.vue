@@ -37,7 +37,7 @@ import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjec
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
-import { useRegistrationInvitationEventListener } from './classes';
+import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;

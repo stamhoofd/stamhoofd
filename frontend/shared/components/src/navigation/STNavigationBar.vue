@@ -39,7 +39,8 @@ import type { Ref } from 'vue';
 import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots } from 'vue';
 
 import InheritComponent from '../containers/InheritComponent.vue';
-import { useIsAndroid, useIsIOS } from '../hooks';
+import { useIsAndroid } from '#hooks/useIsAndroid.ts';
+import { useIsIOS } from '#hooks/useIsIOS.ts';
 import BackButton from './BackButton.vue';
 
 const slots = useSlots();

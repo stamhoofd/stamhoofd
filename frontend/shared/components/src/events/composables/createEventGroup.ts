@@ -1,8 +1,8 @@
 import type { Event, Organization} from '@stamhoofd/structures';
 import { Group, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
-import { useOrganization } from '../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { SearchOrganizationView } from '../../members';
+import SearchOrganizationView from '#members/SearchOrganizationView.vue';
 import type { NavigationActions } from '../../types/NavigationActions';
 
 export function useCreateEventGroup() {

@@ -86,7 +86,7 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';

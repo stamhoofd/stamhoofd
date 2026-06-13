@@ -52,7 +52,7 @@ import PaymentMandatesBox from '@stamhoofd/components/mandates/PaymentMandatesBo
 import { useOrganizationPaymentMandates } from '@stamhoofd/components/mandates/useOrganizationPaymentMandates';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, STPackage } from '@stamhoofd/structures';
 import { OrganizationPackagesStatus, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';

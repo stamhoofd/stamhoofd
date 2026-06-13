@@ -2,6 +2,7 @@ import type { Data, Decoder, Encodeable, EncodeContext, Patchable, PatchType } f
 import { EnumDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StringLikeObject } from '@stamhoofd/types/StringLikeObject';
+import type { LanguageMap } from '@stamhoofd/types/LanguageMap';
 import { Language } from '@stamhoofd/types/Language';
 
 type LanguageMapPatch = {

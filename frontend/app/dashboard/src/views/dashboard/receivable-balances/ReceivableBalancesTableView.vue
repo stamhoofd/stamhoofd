@@ -23,7 +23,7 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
@@ -33,7 +33,7 @@ import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useChargeReceivableBalances } from '@stamhoofd/components/payments/hooks/useChargeReceivableBalances';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 type ObjectType = ReceivableBalance;
 

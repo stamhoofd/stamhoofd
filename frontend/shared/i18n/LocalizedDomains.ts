@@ -1,4 +1,5 @@
 import { appToUri } from '@stamhoofd/structures';
+import type { LocalizedDomain } from '@stamhoofd/types/Localized';
 import { I18nController } from './I18nController';
 
 export class LocalizedDomains {
