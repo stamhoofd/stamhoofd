@@ -21,7 +21,7 @@
     "@capacitor/app-launcher": "^7.0.0",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/core": "^7.0.0",
-    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/filesystem": "^8.1.2",
     "@capacitor/haptics": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
     "@capacitor/keyboard": "^7.0.0",
