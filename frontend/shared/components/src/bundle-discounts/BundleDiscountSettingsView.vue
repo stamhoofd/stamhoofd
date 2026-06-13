@@ -113,7 +113,7 @@ defineRoute({
 defineRoute({
     name: Routes.BundleDiscount,
     url: '@id',
-    component: async () => (await import('./EditBundleDiscountView.vue')).default as any,
+    component: async () => (await import('./EditBundleDiscountView.vue')).default,
     present: 'popup',
     params: {
         id: String,
