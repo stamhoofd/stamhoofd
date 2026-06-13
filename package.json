@@ -110,7 +110,7 @@
     "lerna": "^9.0.4",
     "maildev": "^2.2.1",
     "nodemon": "^3.1.0",
-    "postcss-discard-duplicates": "^7.0.2",
+    "postcss-discard-duplicates": "^8.0.1",
     "sass": "^1.45.1",
     "terser": "^5.43.1",
     "typescript": "6.0.3",
