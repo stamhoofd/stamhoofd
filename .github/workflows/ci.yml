@@ -8,7 +8,7 @@ permissions:
 
 on:
   push:
-    branches: [ main, ci-test ]
+    branches: [ main, ci-test, 'renovate/**' ]
   pull_request:
     branches: [ main ]
 
