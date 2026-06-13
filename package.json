@@ -119,7 +119,7 @@
     "vitest": "^4.1.8",
     "vitest-browser-vue": "^2.1.0",
     "typescript": "6.0.3",
-    "vue-tsc": "2.2.12",
+    "vue-tsc": "3.3.4",
     "wait-on": "^8.0.3"
   },
   "resolutions": {

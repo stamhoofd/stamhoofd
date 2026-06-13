@@ -32,30 +32,6 @@ async function tapVersion() {
         ],
     });
 }
-
-/*
-@Component({})
-export default class VersionFooter extends Mixins(NavigationMixin) {
-    get environment() {
-        return STAMHOOFD.environment
-    }
-
-    get nativeVersion() {
-        return AppManager.shared.nativeVersion ? ('App ' + AppManager.shared.nativeVersion) : "web"
-    }
-
-    get version() {
-        return STAMHOOFD.VERSION || '0.0.0'
-    }
-
-    tapVersion() {
-        this.openDevPanel(true)
-    }
-
-    openDevPanel(animated = true) {
-
-    }
-} */
 </script>
 
 <style lang="scss">
