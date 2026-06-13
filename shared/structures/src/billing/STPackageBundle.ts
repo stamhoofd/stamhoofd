@@ -1,4 +1,4 @@
-import { Formatter } from '../../../utility/dist/Formatter.js';
+import { Formatter } from '@stamhoofd/utility';
 import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage.js';
 
 /**
