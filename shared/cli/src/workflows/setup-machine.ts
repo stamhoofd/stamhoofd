@@ -5,12 +5,14 @@ import os from 'node:os';
 import path from 'node:path';
 import { writeSetupCaddyConfig } from '../config/caddy-config.js';
 import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
-import { buildSharedServiceProfile, SharedServiceDnsSetupKind, type SharedServiceProfile } from '../config/shared-service-profile.js';
+import { buildSharedServiceProfile, SharedServiceDnsSetupKind } from '../config/shared-service-profile.js';
+import type { SharedServiceProfile } from '../config/shared-service-profile.js';
 import type { CliContext } from '../context/create-context.js';
 import { run } from '../runtime/command-runner.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
-import { command, confirm, statusCell, success, table, Table, type TableCellInput, type TableRow, warning } from '../runtime/ux.js';
+import { command, confirm, statusCell, success, table, Table, warning } from '../runtime/ux.js';
+import type { TableCellInput, TableRow } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
@@ -431,7 +433,7 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile): Promi
         return { ok: false, details: 'Privileged port redirects require Linux with iptables', manualFix: 'Configure privileged port redirects' };
     }
 
-    let caddyRunning = false;
+    let caddyRunning: boolean;
     try {
         caddyRunning = await docker.containerIsRunning(caddyContainer);
     } catch {
@@ -557,8 +559,7 @@ async function runSetupCheck(row: TableRow, label: string, check: Promise<CheckR
         const result = await check;
         row.update(setupRow(label, result));
         return result;
-    }
-    catch (error) {
+    } catch (error) {
         row.update([
             label,
             statusCell(CliStatus.Failed),

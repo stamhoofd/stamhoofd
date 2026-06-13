@@ -897,7 +897,7 @@ export class BalanceItem extends AutoEncoder {
             let prefixClass = '';
             const title = item.itemTitle;
             let description = Formatter.escapeHtml(item.itemDescription ?? '');
-            let price = '';
+            let price: string;
 
             if (item.dueAt) {
                 prefix = `Te betalen tegen ${Formatter.date(item.dueAt)}`;

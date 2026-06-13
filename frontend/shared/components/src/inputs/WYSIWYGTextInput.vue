@@ -41,7 +41,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
-import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import type { Ref } from 'vue';
 
 import { ColorHelper } from '../ColorHelper';
 import { WarningBox } from '../editor/EditorWarningBox';
@@ -75,14 +76,10 @@ const props = withDefaults(defineProps<{
 
 const showLinkEditor = ref(false);
 const editLink = ref('');
-const editor = shallowRef<Editor>(null as any);
+const editor = ref<Editor>(buildEditor()) as Ref<Editor>;
 
 const rootEl = useTemplateRef<HTMLElement>('rootEl');
 const linkInput = useTemplateRef<HTMLInputElement>('linkInput');
-
-onBeforeMount(() => {
-    editor.value = buildEditor();
-});
 
 onMounted(() => {
     if (props.color) {
@@ -143,8 +140,7 @@ function buildEditor() {
             if (showLinkEditor.value) {
                 if (e.isActive('link')) {
                     editLink.value = e.getAttributes('link')?.href ?? '';
-                }
-                else {
+                } else {
                     if (e.state.selection.empty) {
                         showLinkEditor.value = false;
                     }
@@ -264,8 +260,7 @@ function isValidHttpUrl(string: string) {
 
     try {
         url = new URL(string);
-    }
-    catch (_) {
+    } catch (_) {
         return false;
     }
 
@@ -283,8 +278,7 @@ function saveLink() {
     if (!isValidHttpUrl(cleanedUrl)) {
         if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
             cleanedUrl = 'mailto:' + cleanedUrl;
-        }
-        else if (isValidHttpUrl('http://' + cleanedUrl)) {
+        } else if (isValidHttpUrl('http://' + cleanedUrl)) {
             cleanedUrl = 'http://' + cleanedUrl;
         }
     }

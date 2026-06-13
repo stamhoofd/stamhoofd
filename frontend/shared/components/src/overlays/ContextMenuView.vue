@@ -24,7 +24,7 @@ import type { ContextMenuItemApi } from './ContextMenuItemView.vue';
  * The public surface a parent ContextMenuView exposes to its child menus.
  */
 interface ParentMenuApi {
-    pop: (popParents?: boolean) => void;
+    pop: (popParents?: boolean) => Promise<void>;
     isPopped: boolean;
     el: HTMLElement | null;
 }
@@ -150,19 +150,16 @@ onMounted(() => {
                 if (right.value < viewPadding) {
                     right.value = viewPadding;
                 }
-            }
-            else {
+            } else {
                 right.value = viewPadding;
             }
-        }
-        else {
+        } else {
             if (left.value < viewPadding) {
                 left.value = viewPadding;
             }
         }
         // - Math.max(0, width - (clientWidth - viewPadding - usedX);
-    }
-    else {
+    } else {
         right.value = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
 
         if (right.value < viewPadding) {
@@ -188,18 +185,15 @@ onMounted(() => {
                 if (bottom.value < viewPaddingBottom) {
                     bottom.value = viewPaddingBottom;
                 }
-            }
-            else {
+            } else {
                 bottom.value = viewPaddingBottom;
             }
-        }
-        else {
+        } else {
             if (top.value < viewPaddingTop) {
                 top.value = viewPaddingTop;
             }
         }
-    }
-    else {
+    } else {
         bottom.value = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height); // remove border
 
         if (bottom.value < viewPaddingBottom) {
@@ -228,26 +222,25 @@ onMounted(() => {
     if (isPopped.value || props.parentMenu?.isPopped || (props.parentMenu && (!props.parentMenu.el || !props.parentMenu.el.isConnected))) {
         // Pop was dismissed before we could mount this context menu
         console.error('Context menu lost its parent menu during mounting');
-        pop(false);
+        pop(false).catch(console.error);
     }
 });
 
 onBeforeUnmount(() => {
-    popChildMenu();
+    popChildMenu().catch(console.error);
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('touchend', onTouchUp);
 });
 
-function popChildMenu() {
+async function popChildMenu() {
     if (childMenu.value) {
         const instance = childMenu.value.componentInstance() as any;
 
         if (instance) {
             console.log('Pop child menu');
-            instance.pop(false);
-        }
-        else (
+            await instance.pop(false);
+        } else (
             console.warn('Missing instance for childMenu')
         );
     }
@@ -321,7 +314,7 @@ function onHoverItem(item: ContextMenuItemApi) {
 
     if (item.childContextMenu) {
         if (!wasHovered) {
-            setChildMenu(null);
+            setChildMenu(null).catch(console.error);
             hoverTimeout = setTimeout(() => {
                 if (item.isHovered && currentlyHoveredItem === item && !shouldIgnoreHover() && item.childContextMenu && !item.childContextMenu.componentInstance()) {
                     // TODO: Wait x ms hover delay, and check is the cursor is still hovered
@@ -344,14 +337,13 @@ function onHoverItem(item: ContextMenuItemApi) {
                     item.childContextMenu.properties.parentMenu = selfApi;
                     item.childContextMenu.properties.wrapWidth = el.clientWidth;
 
-                    setChildMenu(item.childContextMenu as ComponentWithProperties);
+                    setChildMenu(item.childContextMenu as ComponentWithProperties).catch(console.error);
                     item.present(item.childContextMenu.setDisplayStyle('overlay'));
                 }
             }, 150);
         }
-    }
-    else {
-        setChildMenu(null);
+    } else {
+        setChildMenu(null).catch(console.error);
     }
 }
 
@@ -380,7 +372,7 @@ function onClickItem(item: ContextMenuItemApi, event: Event) {
             // Show child menu and replace self
 
             if (!item.childContextMenu.componentInstance() && !shouldIgnoreHover()) {
-                pop(true);
+                pop(true).catch(console.error);
 
                 // Present child context menu + send close event to parent
                 const el = item.el as HTMLElement;
@@ -407,12 +399,12 @@ function onClickItem(item: ContextMenuItemApi, event: Event) {
     delayPop(true);
 }
 
-function setChildMenu(component: ComponentWithProperties | null) {
+async function setChildMenu(component: ComponentWithProperties | null) {
     if (childMenu.value === component) {
         return;
     }
 
-    popChildMenu();
+    await popChildMenu();
     childMenu.value = component;
 
     // Capture initial mouse X + Y Position,
@@ -461,8 +453,7 @@ function calculateHoverTriangle(mouseX: number, mouseY: number) {
             p2: { x: contextX2, y: contextY },
             p3: { x: contextX2, y: contextY2 },
         };
-    }
-    else {
+    } else {
         return {
             p1: { x: mouseX - 5, y: mouseY },
             p2: { x: contextX, y: contextY },
@@ -624,27 +615,27 @@ function delayPop(popParents = false) {
     setTimeout(() => {
         // set isPopped to false again, to force pop
         isPopped.value = false;
-        pop(popParents);
+        pop(popParents).catch(console.error);
     }, 80);
 }
 
-function pop(popParents = false) {
+async function pop(popParents = false) {
     if (isPopped.value || hide.value) {
         // Ignore
         return;
     }
     console.log('Popping ContextMenuView');
     isPopped.value = true;
-    popChildMenu();
+    await popChildMenu();
 
     // Trigger hide animation
     hide.value = true;
     // setTimeout(() => {
-    parentPop({ force: true });
+    await parentPop({ force: true });
     // }, 200);
 
     if (popParents && props.parentMenu) {
-        props.parentMenu.pop(true);
+        await props.parentMenu.pop(true);
     }
 }
 
@@ -656,7 +647,7 @@ function onKey(event: KeyboardEvent) {
     const key = event.key || event.keyCode;
 
     if (key === 'Escape' || key === 'Esc' || key === 27) {
-        pop(true);
+        pop(true).catch(console.error);
         event.preventDefault();
     }
 }

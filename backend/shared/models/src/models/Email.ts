@@ -23,11 +23,9 @@ type Attachment = { filename: string; path?: string; href?: string; content?: st
 function errorToSimpleErrors(e: unknown) {
     if (isSimpleErrors(e)) {
         return e;
-    }
-    else if (isSimpleError(e)) {
+    } else if (isSimpleError(e)) {
         return new SimpleErrors(e);
-    }
-    else {
+    } else {
         return new SimpleErrors(
             new SimpleError({
                 code: 'unknown_error',
@@ -471,22 +469,22 @@ export class Email extends QueryableModel {
             case 'hard-bounce': {
                 base.set('hardBouncesCount',
                     SQL.calculation(SQL.column('hardBouncesCount'))
-                        .add(readDynamicSQLExpression(1))
-                    );
+                        .add(readDynamicSQLExpression(1)),
+                );
                 break;
             }
             case 'soft-bounce': {
                 base.set('softBouncesCount',
                     SQL.calculation(SQL.column('softBouncesCount'))
-                        .add(readDynamicSQLExpression(1))
-                    );
+                        .add(readDynamicSQLExpression(1)),
+                );
                 break;
             }
             case 'complaint': {
                 base.set('spamComplaintsCount',
                     SQL.calculation(SQL.column('spamComplaintsCount'))
-                        .add(readDynamicSQLExpression(1))
-                    );
+                        .add(readDynamicSQLExpression(1)),
+                );
                 break;
             }
         }
@@ -604,8 +602,7 @@ export class Email extends QueryableModel {
         });
         if (waitForSending) {
             return await this.resumeSending();
-        }
-        else {
+        } else {
             this.resumeSending().catch(console.error);
         }
         return this;
@@ -642,8 +639,7 @@ export class Email extends QueryableModel {
                     contentType: attachment.contentType ?? undefined,
                     encoding: 'base64',
                 });
-            }
-            else {
+            } else {
                 // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
                 const withSigned = await attachment.file!.withSignedUrl();
                 if (!withSigned || !withSigned.signedUrl) {
@@ -655,12 +651,11 @@ export class Email extends QueryableModel {
                 }
 
                 const filePath = withSigned.signedUrl;
-                let fileBuffer: Buffer | null = null;
+                let fileBuffer: Buffer | null;
                 try {
                     const response = await fetch(filePath);
                     fileBuffer = Buffer.from(await response.arrayBuffer());
-                }
-                catch (e) {
+                } catch (e) {
                     throw new SimpleError({
                         code: 'attachment_not_found',
                         message: 'Attachment not found',
@@ -707,8 +702,7 @@ export class Email extends QueryableModel {
                     // Update repacements that have been generated
                     recipient.replacements = virtualRecipient.replacements;
                     await recipient.save();
-                }
-                else {
+                } else {
                     recipient.failCount += 1;
                     recipient.failErrorMessage = error.message;
                     if (recipient.failError) {
@@ -719,8 +713,7 @@ export class Email extends QueryableModel {
                     recipient.lastFailedAt = new Date();
                     await recipient.save();
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
             promiseResolve();
@@ -761,8 +754,7 @@ export class Email extends QueryableModel {
                         console.log('Email already sent, skipping...', upToDate.id);
                         return upToDate;
                     }
-                }
-                else {
+                } else {
                     if (singleRecipientId) {
                         // Not possible
                         throw new SimpleError({
@@ -786,8 +778,7 @@ export class Email extends QueryableModel {
                             await upToDate.save();
                             return upToDate;
                         }
-                    }
-                    else if (upToDate.status !== EmailStatus.Queued) {
+                    } else if (upToDate.status !== EmailStatus.Queued) {
                         console.error('Email is not queued or sending, cannot send', upToDate.id, upToDate.status);
                         return upToDate;
                     }
@@ -888,8 +879,7 @@ export class Email extends QueryableModel {
 
                             try {
                                 await upToDate.save();
-                            }
-                            finally {
+                            } finally {
                                 isSavingStatus = false;
                             }
                         }
@@ -938,8 +928,7 @@ export class Email extends QueryableModel {
                                         // Failed or soft-failed
                                         if (recipient.failError && isSoftEmailRecipientError(recipient.failError)) {
                                             softFailedCount += 1;
-                                        }
-                                        else {
+                                        } else {
                                             failedCount += 1;
                                         }
                                         skipped++;
@@ -957,13 +946,11 @@ export class Email extends QueryableModel {
                                     if (recipient.sentAt) {
                                         succeededCount += 1;
                                         await saveStatus();
-                                    }
-                                    else {
+                                    } else {
                                         // Failed or soft-failed
                                         if (recipient.failError && isSoftEmailRecipientError(recipient.failError)) {
                                             softFailedCount += 1;
-                                        }
-                                        else {
+                                        } else {
                                             failedCount += 1;
                                         }
                                         await saveStatus();
@@ -973,14 +960,12 @@ export class Email extends QueryableModel {
 
                             if (sendingPromises.length > 0 || skipped > 0) {
                                 await Promise.all(sendingPromises);
-                            }
-                            else {
+                            } else {
                                 break;
                             }
                         }
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     if (!upToDate) {
                         throw e;
                     }
@@ -1023,8 +1008,7 @@ export class Email extends QueryableModel {
                                 human: $t(`%1EG`),
                             }),
                         );
-                    }
-                    else {
+                    } else {
                         upToDate.status = EmailStatus.Sent;
                         upToDate.emailErrors = null;
                     }
@@ -1115,8 +1099,7 @@ export class Email extends QueryableModel {
                 await upToDate.save();
 
                 console.log('Updated recipient count for email', id, 'to', count);
-            }
-            catch (e) {
+            } catch (e) {
                 if (isAbortedError(e)) {
                     return;
                 }
@@ -1263,8 +1246,7 @@ export class Email extends QueryableModel {
                                         recipient.replacements = merged;
 
                                         break;
-                                    }
-                                    else {
+                                    } else {
                                         console.log('Could not merge duplicate email recipient', item.email, other.id, 'keeping both', other.replacements, item.replacements);
                                     }
                                 }
@@ -1283,8 +1265,7 @@ export class Email extends QueryableModel {
 
                             if (!recipient.email || duplicateOfRecipientId) {
                                 countWithoutEmail += 1;
-                            }
-                            else {
+                            } else {
                                 count += 1;
                             }
                         }
@@ -1299,8 +1280,7 @@ export class Email extends QueryableModel {
                 upToDate.recipientsErrors = null;
                 upToDate.membersCount = membersSet.size;
                 await upToDate.save();
-            }
-            catch (e: unknown) {
+            } catch (e: unknown) {
                 console.error('Failed to build recipients for email', id);
                 console.error(e);
                 upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
@@ -1381,8 +1361,7 @@ export class Email extends QueryableModel {
                 }
 
                 console.warn('No example recipient found for email', id);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to build example recipient for email', id);
                 console.error(e);
             }

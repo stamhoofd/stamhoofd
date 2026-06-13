@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import type { Permissions} from '@stamhoofd/structures';
+import type { Permissions } from '@stamhoofd/structures';
 import { NewUser, UserPermissions } from '@stamhoofd/structures';
 
 import type { Organization } from '../models/Organization.js';
@@ -22,13 +22,12 @@ class Options {
 
 export class UserFactory extends Factory<Options, User> {
     async create(): Promise<User> {
-        let organization: Organization | null = null;
+        let organization: Organization | null;
 
         if (!this.options.organization && STAMHOOFD.userMode !== 'platform' && !this.options.globalPermissions) {
             const organizationFactory = new OrganizationFactory({});
             organization = await organizationFactory.create();
-        }
-        else {
+        } else {
             organization = this.options.organization ?? null;
         }
 
@@ -40,7 +39,7 @@ export class UserFactory extends Factory<Options, User> {
             organizationId: organization?.id ?? null,
             password,
         }), {
-            allowPlatform: !!this.options.globalPermissions
+            allowPlatform: !!this.options.globalPermissions,
         });
         if (!user) {
             throw new Error('Unexpected failure when creating user in factory');

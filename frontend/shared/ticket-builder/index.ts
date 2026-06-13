@@ -1,9 +1,8 @@
- 
 import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2';
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopPreview} from '@stamhoofd/structures';
+import type { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
@@ -87,8 +86,7 @@ export class TicketBuilder {
                 }).catch((e) => {
                     reject(e);
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 reject(e);
             }
         });
@@ -99,8 +97,7 @@ export class TicketBuilder {
 
         if (AppManager.shared.downloadFile) {
             await AppManager.shared.downloadFile(blob, fileName);
-        }
-        else {
+        } else {
             const link = document.createElement('a');
             const href = window.URL.createObjectURL(blob);
             link.href = href;
@@ -222,8 +219,7 @@ export class TicketBuilder {
 
             height += calculatedHeight;
             height += 7.5 * MM;
-        }
-        else {
+        } else {
             height += 5 * MM; // Initial margin
         }
 
@@ -262,7 +258,7 @@ export class TicketBuilder {
 
         // Save height
         const initialColumnHeight = height;
-        let MAX_COLUMN_HEIGHT = 0;
+        let MAX_COLUMN_HEIGHT: number;
 
         // START LEFT COLUMN
         // Draw left text
@@ -288,8 +284,7 @@ export class TicketBuilder {
                     height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
                 }
             }
-        }
-        else {
+        } else {
             if (!dryRun) {
                 this.document.text($t(`%x3`) + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
             }

@@ -537,10 +537,9 @@ export class RegisterItem implements ObjectWithRecords {
         const remainingMenus = this.group.settings.optionMenus.slice();
 
         for (const o of this.options) {
-            let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
+            const index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
             if (index === -1) {
                 // Check if it has a multiple choice one
-                index = this.group.settings.optionMenus.findIndex(m => m.id === o.optionMenu.id);
                 errors.addError(new SimpleError({
                     code: 'option_menu_unavailable',
                     message: 'Option menu unavailable',

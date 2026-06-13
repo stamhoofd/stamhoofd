@@ -286,8 +286,7 @@ export class Order extends QueryableModel {
             if (webshop) {
                 await this.setRelation(Order.webshop, webshop).updateTickets();
             }
-        }
-        else {
+        } else {
             this.markUpdated();
             await this.save();
         }
@@ -427,8 +426,7 @@ export class Order extends QueryableModel {
                 // Remove any reserved stock
                 const updated = Order.updateTimeSlotStock(timeSlot, this.data, false);
                 changed = changed || updated;
-            }
-            else {
+            } else {
                 this.data.reservedOrder = false;
                 this.data.reservedPersons = 0;
                 changed = true;
@@ -442,8 +440,7 @@ export class Order extends QueryableModel {
             if (timeSlot) {
                 const updated = Order.updateTimeSlotStock(timeSlot, this.data, add);
                 changed = changed || updated;
-            }
-            else {
+            } else {
                 console.error('Missing timeslot ' + s.id + ' in webshop ' + this.webshopId);
             }
         }
@@ -456,6 +453,7 @@ export class Order extends QueryableModel {
                     if (previousData !== null) {
                         // Already removed
                         item.reservedSeats = [];
+                        // eslint-disable-next-line no-useless-assignment
                         changed = true;
                     }
 
@@ -491,8 +489,7 @@ export class Order extends QueryableModel {
                 code.reserved = false;
                 discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) - 1);
                 changed = true;
-            }
-            else if (!code.reserved && add) {
+            } else if (!code.reserved && add) {
                 code.reserved = true;
                 discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) + 1);
                 changed = true;
@@ -599,8 +596,7 @@ export class Order extends QueryableModel {
                     ticketMap.set(item.product.id, offset + item.amount);
                 }
             }
-        }
-        else {
+        } else {
             // Create a shared ticket for the whole order
             const ticket = new Ticket();
             ticket.orderId = this.id;
@@ -752,8 +748,7 @@ export class Order extends QueryableModel {
         // Needs to happen before validation, because we can include the tickets in the validation that way
         if (this.validAt === null) {
             await this.setRelation(Order.webshop, webshop).markValid(payment, tickets);
-        }
-        else {
+        } else {
             this.markUpdated();
             await this.save();
 
@@ -764,8 +759,7 @@ export class Order extends QueryableModel {
             if (this.data.customer.email.length > 0) {
                 if (didCreateTickets) {
                     await this.setRelation(Order.webshop, webshop).sendTickets();
-                }
-                else {
+                } else {
                     if (payment && payment.method === PaymentMethod.Transfer) {
                         await this.setRelation(Order.webshop, webshop).sendPaidMail();
                     }
@@ -976,40 +970,34 @@ export class Order extends QueryableModel {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationPOS,
                     });
-                }
-                else {
+                } else {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmation,
                     });
                 }
-            }
-            else {
+            } else {
                 if (this.webshop.meta.ticketType === WebshopTicketType.None) {
                     if (payment && payment.method === PaymentMethod.Transfer) {
                         // Also send a copy
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationTransfer,
                         });
-                    }
-                    else if (payment && payment.method === PaymentMethod.PointOfSale) {
+                    } else if (payment && payment.method === PaymentMethod.PointOfSale) {
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationPOS,
                         });
-                    }
-                    else {
+                    } else {
                         // Also send a copy
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationOnline,
                         });
                     }
-                }
-                else {
+                } else {
                     if (payment && payment.method === PaymentMethod.Transfer) {
                         await this.sendEmailTemplate({
                             type: EmailTemplateType.TicketsConfirmationTransfer,
                         });
-                    }
-                    else {
+                    } else {
                         console.error('Unexpected missing tickets for order where tickets are expected');
                     }
                 }

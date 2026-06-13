@@ -28,6 +28,12 @@ const baseRules = [
         },
     },
     eslint.configs.recommended,
+    {
+        rules: {
+            'preserve-caught-error': 'warn',
+            'no-useless-assignment': 'warn',
+        },
+    },
     ...tseslint.configs.recommendedTypeChecked.map(config => ({
         ...config,
         files: ['*.ts', '**/*.ts', '*.vue', '**/*.vue'], // We use TS config only for TS files
