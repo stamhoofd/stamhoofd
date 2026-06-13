@@ -292,10 +292,7 @@
 </template>
 
 <script lang="ts" setup>
-import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
-import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
-import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
-import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
+
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
@@ -305,33 +302,20 @@ import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.t
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
 
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
-import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
+
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, StripeAccount } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
-import BillingSettingsView from './BillingSettingsView.vue';
-import InvoiceSettingsView from './InvoiceSettingsView.vue';
-import LabsView from './LabsView.vue';
-import MembersSettingsView from './MembersSettingsView.vue';
-import PaymentSettingsView from './PaymentSettingsView.vue';
-import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
-import PremisesView from './PremisesView.vue';
-import PrivacySettingsView from './PrivacySettingsView.vue';
-import ReferralView from './ReferralView.vue';
-import UitpasSettingsView from './UitpasSettingsView.vue';
+
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import PackageSettingsView from './packages/PackageSettingsView.vue';
 
 enum Routes {
     General = 'algemeen',
@@ -365,41 +349,41 @@ const uitpasFeature = useFeatureFlag()('uitpas');
 defineRoutes([
     {
         url: Routes.General,
-        component: GeneralSettingsView,
+        component: async () => (await import('@stamhoofd/components/organizations/GeneralSettingsView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.Members,
-        component: MembersSettingsView,
+        component: async () => (await import('./MembersSettingsView.vue')).default,
     },
     {
         url: Routes.Personalization,
-        component: () => PersonalizeSettingsView,
+        component: async () => (await import('./PersonalizeSettingsView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.Privacy,
-        component: () => PrivacySettingsView,
+        component: async () => (await import('./PrivacySettingsView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.PaymentAccounts,
-        component: PaymentSettingsView,
+        component: async () => (await import('./PaymentSettingsView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.Invoices,
-        component: InvoiceSettingsView,
+        component: async () => (await import('./InvoiceSettingsView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.Admins,
-        component: AdminsView,
+        component: async () => (await import('@stamhoofd/components/admins/AdminsView.vue')).default,
     },
     {
         url: Routes.EmailTemplates,
         present: 'popup',
-        component: EditEmailTemplatesView,
+        component: async () => (await import('@stamhoofd/components/email/EditEmailTemplatesView.vue')).default,
         defaultProperties() {
             return {
                 types: [...Object.values(EmailTemplateType)].filter((t) => {
@@ -411,54 +395,54 @@ defineRoutes([
     {
         url: Routes.EmailSettings,
         present: 'popup',
-        component: EmailSettingsView,
+        component: async () => (await import('@stamhoofd/components/email/EmailSettingsView.vue')).default,
     },
     {
         url: Routes.SingleSignOn,
         present: 'popup',
-        component: SSOSettingsView,
+        component: async () => (await import('@stamhoofd/components/auth/SSOSettingsView.vue')).default,
     },
     {
         url: Routes.Labs,
         present: 'popup',
-        component: () => LabsView,
+        component: async () => (await import('./LabsView.vue')).default,
     },
     {
         url: Routes.Premises,
         present: 'popup',
-        component: PremisesView,
+        component: async () => (await import('./PremisesView.vue')).default,
     },
     {
         url: Routes.BalanceNotifications,
         present: 'popup',
-        component: BalanceNotificationSettingsView,
+        component: async () => (await import('./BalanceNotificationSettingsView.vue')).default,
     },
     {
         url: Routes.Uitpas,
         present: 'popup',
-        component: UitpasSettingsView,
+        component: async () => (await import('./UitpasSettingsView.vue')).default,
     },
     {
         url: Routes.OrganizationRegistrationPeriods,
         present: 'popup',
-        component: EditRegistrationPeriodsView,
+        component: async () => (await import('@stamhoofd/components/periods/EditRegistrationPeriodsView.vue')).default,
     },
     ...(!isPlatform
         ? [
                 {
                     url: Routes.Packages,
                     present: 'popup' as const,
-                    component: PackageSettingsView,
+                    component: async () => (await import('./packages/PackageSettingsView.vue')).default,
                 },
                 {
                     url: Routes.Referrals,
                     present: 'popup' as const,
-                    component: ReferralView,
+                    component: async () => (await import('./ReferralView.vue')).default,
                 },
                 {
                     url: Routes.PaymentSettings,
                     present: 'popup' as const,
-                    component: BillingSettingsView,
+                    component: async () => (await import('./BillingSettingsView.vue')).default,
                     async defaultProperties() {
                         const item = await loadPayableBalance();
 
@@ -470,7 +454,7 @@ defineRoutes([
                 {
                     name: Routes.FinancialSupport,
                     url: 'financiele-ondersteuning',
-                    component: FinancialSupportSettingsView,
+                    component: async () => (await import('@stamhoofd/components/records/FinancialSupportSettingsView.vue')).default,
                     defaultProperties() {
                         return {
                             financialSupport: getFinancialSupportSettingsOrDefault(platform.value, organization.value),
@@ -490,7 +474,7 @@ defineRoutes([
                 {
                     name: Routes.DataPermissions,
                     url: 'toestemming-gegevensverzameling',
-                    component: DataPermissionSettingsView,
+                    component: async () => (await import('@stamhoofd/components/records/DataPermissionSettingsView.vue')).default,
                     defaultProperties() {
                         return {
                             dataPermission: getDataPermissionSettingsOrDefault(platform.value, organization.value),

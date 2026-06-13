@@ -7,7 +7,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
-        :Route="Route"
+        :route
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-sort-direction="SortItemDirection.DESC"
     >
@@ -18,27 +18,26 @@
 </template>
 
 <script lang="ts" setup>
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { getDocumentsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import type { Document, DocumentTemplatePrivate, RecordWarning} from '@stamhoofd/structures';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import type { Document, DocumentTemplatePrivate, RecordWarning } from '@stamhoofd/structures';
 import { DocumentStatus, DocumentStatusHelper, RecordWarningType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import { useDocumentsObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentsObjectFetcher.ts';
 import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
-import DocumentView from './DocumentView.vue';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;
 }>();
 
-const title = $t('%tw')
+const title = $t('%tw');
 const configurationId = 'documents';
 
 const objectFetcher = useDocumentsObjectFetcher({
@@ -112,10 +111,10 @@ const allColumns: Column<Document, any>[] = [
         },
         format: (warnings) => {
             if (warnings.length === 1) {
-                return $t('%zJ')
+                return $t('%zJ');
             }
             if (warnings.length > 1) {
-                return $t('%1RQ', {count: warnings.length})
+                return $t('%1RQ', { count: warnings.length });
             }
             return $t('%1FW');
         },
@@ -174,8 +173,8 @@ const actions = computed(() => {
     return builder.getActions();
 });
 
-const Route = {
-    Component: DocumentView,
+const route = {
+    component: async () => (await import('./DocumentView.vue')).default,
     objectKey: 'document',
     getProperties: () => ({
         template: props.template,

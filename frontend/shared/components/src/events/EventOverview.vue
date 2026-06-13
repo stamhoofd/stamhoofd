@@ -280,10 +280,10 @@ import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
-import EditEmailTemplatesView from '#email/EditEmailTemplatesView.vue';
+
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useRegistrationInvitationsObjectFetcher } from '../fetchers/useRegistrationInvitationsObjectFetcher';
-import EditGroupView from '../groups/EditGroupView.vue';
+
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
@@ -293,14 +293,14 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import IconContainer from '../icons/IconContainer.vue';
 import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import RegistrationCountSpan from '#members/components/RegistrationCountSpan.vue';
-import MembersTableView from '#members/MembersTableView.vue';
+
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
 import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
-import RegistrationInvitationsTableView from '#registrations/RegistrationInvitationsTableView.vue';
-import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
+
+
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { countAll } from '#tables/classes/ObjectFetcher.ts';
 import ImageComponent from '../views/ImageComponent.vue';
@@ -465,7 +465,7 @@ function getCountFilter(g: Group) {
 
 defineRoute({
     url: Routes.Registrations,
-    component: RegistrationsTableView,
+    component: async () => (await import('../registrations/RegistrationsTableView.vue')).default,
     defaultProperties: () => {
         if (!props.event.group) {
             throw new Error('No group found');
@@ -485,7 +485,7 @@ defineRoute({
 defineRoute({
     url: 'uitnodigingen',
     name: Routes.Invitations,
-    component: RegistrationInvitationsTableView,
+    component: async () => (await import('#registrations/RegistrationInvitationsTableView.vue')).default,
     defaultProperties: () => {
         if (!props.event.group) {
             throw new Error('No group found');
@@ -505,7 +505,7 @@ defineRoute({
 
 defineRoute({
     url: Routes.WaitingList,
-    component: MembersTableView,
+    component: async () => (await import('#members/MembersTableView.vue')).default,
     defaultProperties: () => {
         if (!props.event.group || !props.event.group.waitingList) {
             throw new Error('No waiting list found');
@@ -530,7 +530,7 @@ defineRoute({
 
 defineRoute({
     url: Routes.EditGroup,
-    component: EditGroupView,
+    component: async () => (await import('../groups/EditGroupView.vue')).default,
     present: 'popup',
     defaultProperties: async () => {
         if (!props.event.group) {
@@ -570,7 +570,7 @@ defineRoute({
 
 defineRoute({
     url: Routes.EditEmails,
-    component: EditEmailTemplatesView,
+    component: async () => (await import('#email/EditEmailTemplatesView.vue')).default,
     present: 'popup',
     defaultProperties: () => {
         if (!props.event.group) {

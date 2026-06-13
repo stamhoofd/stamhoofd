@@ -194,15 +194,8 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, BalanceItem, DetailedPayableBalance, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
-import BalanceItemsTableView from '../balance-items/BalanceItemsTableView.vue';
-import InvoicesTableView from '../invoices/InvoicesTableView.vue';
-import PaymentsTableView from '../payments/PaymentsTableView.vue';
-import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
-import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import BillingSettingsView from './BillingSettingsView.vue';
+
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import PackageSettingsView from './packages/PackageSettingsView.vue';
-import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
@@ -221,7 +214,7 @@ const isPlatform = STAMHOOFD.userMode === 'platform';
 defineRoute({
     name: Routes.Transfers,
     url: 'overschrijvingen',
-    component: PaymentsTableView,
+    component: async () => (await import('../payments/PaymentsTableView.vue')).default,
     defaultProperties() {
         return {
             methods: [PaymentMethod.Transfer],
@@ -240,13 +233,13 @@ defineRoute({
 defineRoute({
     name: Routes.ReceivableBalance,
     url: 'openstaande-bedragen',
-    component: ReceivableBalancesTableView,
+    component: async () => (await import('../receivable-balances/ReceivableBalancesTableView.vue')).default,
 });
 
 defineRoute({
     name: Routes.Payments,
     url: 'betalingen',
-    component: PaymentsTableView,
+    component: async () => (await import('../payments/PaymentsTableView.vue')).default,
     defaultProperties() {
         return {
             defaultFilter: [
@@ -266,20 +259,20 @@ defineRoute({
 defineRoute({
     name: Routes.BalanceItems,
     url: 'balance-items',
-    component: BalanceItemsTableView,
+    component: async () => (await import('../balance-items/BalanceItemsTableView.vue')).default,
 });
 
 defineRoute({
     name: Routes.Invoices,
     url: 'facturen',
-    component: InvoicesTableView,
+    component: async () => (await import('../invoices/InvoicesTableView.vue')).default,
 });
 
 defineRoute({
     name: Routes.Export,
     url: 'exporteren',
     present: 'popup',
-    component: () => ConfigurePaymentExportView,
+    component: async () => (await import('./administration/ConfigurePaymentExportView.vue')).default,
 });
 
 defineRoute({
@@ -289,7 +282,7 @@ defineRoute({
     params: {
         uri: String,
     },
-    component: PayableBalanceItemsView,
+    component: async () => (await import('./PayableBalanceItemsView.vue')).default,
     async paramsToProps(params) {
         await balancePromise;
         const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
@@ -326,7 +319,7 @@ defineRoute({
     params: {
         uri: String,
     },
-    component: BillingSettingsView,
+    component: async () => (await import('./BillingSettingsView.vue')).default,
     async paramsToProps(params) {
         await balancePromise;
         const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
@@ -360,7 +353,7 @@ if (!isPlatform) {
     defineRoute({
         url: Routes.Packages,
         present: 'popup' as const,
-        component: PackageSettingsView,
+        component: async () => (await import('./packages/PackageSettingsView.vue')).default,
     });
 }
 

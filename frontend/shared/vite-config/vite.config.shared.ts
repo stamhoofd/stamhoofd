@@ -154,6 +154,18 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                             sourcemap: true,
                             cssCodeSplit: false,
                             outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
+                            rollupOptions: {
+                                output: {
+                                    // One chunk per npm package > ~3 KB. Cache invalidation
+                                    // becomes per-library instead of per-app-revision.
+                                    manualChunks(id) {
+                                        if (id.includes('node_modules')) {
+                                            const pkg = id.match(/node_modules\/([^/]+)/)?.[1];
+                                            if (pkg) return `vendor-${pkg}`;
+                                        }
+                                    },
+                                },
+                            },
                         }),
         publicDir: resolve(frontendDir, './public'),
         test: {

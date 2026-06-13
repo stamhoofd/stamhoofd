@@ -212,7 +212,7 @@ import { appToUri, Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
-import OrganizationPackagesView from './OrganizationPackagesView.vue';
+
 
 const props = defineProps<{
     organization: Organization;
@@ -228,7 +228,7 @@ enum Routes {
 defineRoutes([
     {
         url: Routes.Invoices,
-        component: OrganizationPackagesView,
+        component: async () => (await import('./OrganizationPackagesView.vue')).default,
         defaultProperties() {
             return {
                 organization: props.organization,

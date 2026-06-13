@@ -241,8 +241,8 @@ const props = withDefaults(
         defaultSortColumn?: Column<Value, any> | null;
         defaultSortDirection?: SortItemDirection | null;
         defaultFilter?: StamhoofdFilter | null;
-        Route?: {
-            Component: unknown;
+        route?: {
+            component: () => Promise<Component>;
             objectKey: string;
             getProperties?: (object: Value) => Record<string, any>;
         } | null;
@@ -255,7 +255,7 @@ const props = withDefaults(
         defaultSortDirection: null,
         actions: () => [],
         defaultFilter: null,
-        Route: null,
+        route: null,
     },
 );
 
@@ -265,18 +265,18 @@ enum Routes {
 
 function getPropertiesForRoute(object: Value) {
     return {
-        ...(props.Route!.getProperties?.(object) ?? {}),
-        [props.Route!.objectKey]: object,
+        ...(props.route!.getProperties?.(object) ?? {}),
+        [props.route!.objectKey]: object,
         getNext,
         getPrevious,
     };
 }
 
-if (props.Route) {
+if (props.route) {
     defineRoute({
         name: Routes.Object,
         url: '@id',
-        component: () => props.Route!.Component as Component,
+        component: async () => await props.route!.component(),
         params: {
             id: String,
         },
@@ -301,10 +301,10 @@ if (props.Route) {
         },
 
         propsToParams(routeProps) {
-            if (!(props.Route!.objectKey in routeProps) || typeof routeProps[props.Route!.objectKey] !== 'object' || routeProps[props.Route!.objectKey] === null) {
+            if (!(props.route!.objectKey in routeProps) || typeof routeProps[props.route!.objectKey] !== 'object' || routeProps[props.route!.objectKey] === null) {
                 throw new Error('Missing object');
             }
-            const object = routeProps[props.Route!.objectKey];
+            const object = routeProps[props.route!.objectKey];
 
             return {
                 params: {
@@ -350,7 +350,7 @@ const titleSuffix = computed(() => {
 });
 
 const instance = getCurrentInstance();
-const hasClickListener = computed(() => !!instance?.vnode.props?.onClick || props.Route !== null);
+const hasClickListener = computed(() => !!instance?.vnode.props?.onClick || props.route !== null);
 const canLeaveSelectionMode = computed(() => wrapColumns.value || !hasClickListener.value);
 
 const sortBy = ref(props.defaultSortColumn ?? columns.value.find(c => c.allowSorting)) as Ref<Column<Value, any>>;
@@ -868,7 +868,7 @@ async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
         return;
     }
 
-    if (props.Route && row.value) {
+    if (props.route && row.value) {
         await $navigate(Routes.Object, {
             properties: getPropertiesForRoute(row.value),
         });

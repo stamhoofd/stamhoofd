@@ -53,9 +53,6 @@ import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
 import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import OrganizationsTableView from './OrganizationsTableView.vue';
-import OrganizationTagView from './OrganizationTagView.vue';
-import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
 
 enum Routes {
     All = 'all',
@@ -71,7 +68,7 @@ defineRoute({
     url: 'tag/@slug/groepen',
     name: Routes.Organizations,
     show: 'detail',
-    component: OrganizationsTableView,
+    component: async () => (await import('./OrganizationsTableView.vue')).default,
     params: {
         slug: String,
     },
@@ -98,7 +95,7 @@ defineRoute({
     url: 'tag/@slug',
     name: Routes.Tag,
     show: 'detail',
-    component: OrganizationTagView,
+    component: async () => (await import('./OrganizationTagView.vue')).default,
     params: {
         slug: String,
     },
@@ -125,7 +122,7 @@ defineRoute({
     url: 'allemaal',
     name: Routes.All,
     show: 'detail',
-    component: OrganizationsTableView,
+    component: async () => (await import('./OrganizationsTableView.vue')).default,
     isDefault: {},
 });
 
@@ -134,7 +131,7 @@ if (hasFullAccess) {
         url: 'tags',
         name: Routes.Tags,
         present: 'popup',
-        component: EditOrganizationTagsView,
+        component: async () => (await import('./tags/EditOrganizationTagsView.vue')).default,
     });
 }
 

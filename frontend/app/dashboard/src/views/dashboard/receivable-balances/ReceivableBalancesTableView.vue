@@ -1,5 +1,16 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :default-filter="defaultFilter" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="null" :Route="Route">
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :filter-builders="filterBuilders"
+        :title="title"
+        :default-filter="defaultFilter"
+        :column-configuration-id="configurationId"
+        :actions="actions"
+        :all-columns="allColumns"
+        :prefix-column="null"
+        :route
+    >
         <template #empty>
             {{ $t('%77') }}
         </template>
@@ -8,21 +19,23 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
 import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
-import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import ReceivableBalanceView from '@stamhoofd/components/payments/ReceivableBalanceView.vue';
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
+import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useChargeReceivableBalances } from '@stamhoofd/components/payments/hooks/useChargeReceivableBalances';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
@@ -31,9 +44,6 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
-import { useChargeReceivableBalances } from '@stamhoofd/components/payments/hooks/useChargeReceivableBalances';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 type ObjectType = ReceivableBalance;
 
@@ -211,8 +221,8 @@ const actions: TableAction<ObjectType>[] = [
     }),
 ];
 
-const Route = {
-    Component: ReceivableBalanceView,
+const route = {
+    component: async () => (await import('@stamhoofd/components/payments/ReceivableBalanceView.vue')).default,
     objectKey: 'item',
 };
 

@@ -10,7 +10,7 @@
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
-        :Route="Route"
+        :route
     >
         <template #empty>
             {{ $t('%1J9') }}
@@ -51,8 +51,8 @@ const configurationId = computed(() => {
     return 'invoices';
 });
 
-const organization = useOrganization()
-const platform = usePlatform()
+const organization = useOrganization();
+const platform = usePlatform();
 const filterBuilders = usePaymentsUIFilterBuilders();
 const title = computed(() => {
     return $t('%1JA');
@@ -165,57 +165,59 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: object => object.didSendPeppol,
         getStyle: (value) => {
             if (!value) {
-                return "gray"
+                return 'gray';
             }
-            return ""
+            return '';
         },
-        format: value => value ? $t("Ja") : $t("Nee"),
+        format: value => value ? $t('Ja') : $t('Nee'),
         minimumWidth: 50,
         recommendedWidth: 400,
         enabled: false,
-        allowSorting: false
+        allowSorting: false,
     }),
 
-    ...(STAMHOOFD.userMode === 'organization' && organization.value && organization.value.id === platform.value.membershipOrganizationId ? [
-        new Column<ObjectType, string | null>({
-            id: 'reference',
-            name: $t('Referentie'),
-            getValue: object => object.reference,
-            getStyle: (value) => {
-                if (!value) {
-                    return "gray"
-                }
-                return ""
-            },
-            format: value => value || $t("Geen"),
-            minimumWidth: 200,
-            recommendedWidth: 300,
-            enabled: false,
-            allowSorting: false
-        }),
+    ...(STAMHOOFD.userMode === 'organization' && organization.value && organization.value.id === platform.value.membershipOrganizationId
+        ? [
+                new Column<ObjectType, string | null>({
+                    id: 'reference',
+                    name: $t('Referentie'),
+                    getValue: object => object.reference,
+                    getStyle: (value) => {
+                        if (!value) {
+                            return 'gray';
+                        }
+                        return '';
+                    },
+                    format: value => value || $t('Geen'),
+                    minimumWidth: 200,
+                    recommendedWidth: 300,
+                    enabled: false,
+                    allowSorting: false,
+                }),
 
-        new Column<ObjectType, string | null>({
-            id: 'stripeAccountId',
-            name: 'Stripe account ID',
-            getValue: object => object.stripeAccountId,
-            getStyle: (value) => {
-                if (!value) {
-                    return "gray"
-                }
-                return ""
-            },
-            format: value => value || $t("Geen"),
-            minimumWidth: 200,
-            recommendedWidth: 300,
-            enabled: false,
-            allowSorting: false
-        }),
-    ] : [])
+                new Column<ObjectType, string | null>({
+                    id: 'stripeAccountId',
+                    name: 'Stripe account ID',
+                    getValue: object => object.stripeAccountId,
+                    getStyle: (value) => {
+                        if (!value) {
+                            return 'gray';
+                        }
+                        return '';
+                    },
+                    format: value => value || $t('Geen'),
+                    minimumWidth: 200,
+                    recommendedWidth: 300,
+                    enabled: false,
+                    allowSorting: false,
+                }),
+            ]
+        : []),
 
 ];
 
-const Route = {
-    Component: InvoiceView,
+const route = {
+    component: async () => (await import('@stamhoofd/components/payments/InvoiceView.vue')).default,
     objectKey: 'invoice',
 };
 
@@ -229,9 +231,9 @@ const actions: TableAction<ObjectType>[] = [
         allowAutoSelectAll: true,
         handler: async (invoices: ObjectType[]) => {
             if (invoices.length === 1) {
-                showInvoice(invoices[0])
+                showInvoice(invoices[0]);
             } else {
-                await downloadInvoices(invoices)
+                await downloadInvoices(invoices);
             }
         },
     }),
@@ -264,18 +266,17 @@ const actions: TableAction<ObjectType>[] = [
 
 function showInvoice(invoice: Invoice) {
     if (invoice.pdf === null) {
-        new CenteredMessage($t("%1Qt"), $t("%1Rp"), "error").addCloseButton().show()
-        return
+        new CenteredMessage($t('%1Qt'), $t('%1Rp'), 'error').addCloseButton().show();
+        return;
     }
     if (invoice.xml) {
         AppManager.shared.downloadFile(new URL(invoice.xml.getPublicPath()), invoice.number + '.xml').catch(console.error);
     } else {
-        window.open(invoice.pdf.getPublicPath(), "_blank")
+        window.open(invoice.pdf.getPublicPath(), '_blank');
     }
 }
 
-
-    const downloading = ref(false);
+const downloading = ref(false);
 async function downloadInvoices(invoices: Invoice[], onlyVAT?: boolean) {
     if (downloading.value) {
         return;
@@ -294,94 +295,92 @@ async function downloadInvoices(invoices: Invoice[], onlyVAT?: boolean) {
                 {
                     text: $t('%1Qy'),
                     type: 'secundary',
-                    value: false
+                    value: false,
                 },
                 {
                     text: $t('%1Lh'),
                     type: 'secundary',
-                    value: null
-                }
-            ]
+                    value: null,
+                },
+            ],
         });
         if (v === null) {
             return;
         }
         onlyVAT = v;
     }
-    downloading.value = true
+    downloading.value = true;
 
     try {
-
         const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
         const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
         const zip = new JSZip();
 
-        const groups = new Map<string, InvoiceStruct[]>()
+        const groups = new Map<string, InvoiceStruct[]>();
 
         // Group per month
         for (const invoice of invoices) {
-            const date = invoice.invoicedAt //meta.date ?? invoice.paidAt ?? invoice.createdAt
+            const date = invoice.invoicedAt; // meta.date ?? invoice.paidAt ?? invoice.createdAt
 
             if (!date) {
-                throw new Error("Missing invoicedAt date")
+                throw new Error('Missing invoicedAt date');
             }
 
-            const year = date.getFullYear()
-            const monthString = year+"-"+((date.getMonth() + 1)+"").padStart(2, "0")+" "+Formatter.capitalizeFirstLetter(Formatter.month(date.getMonth() + 1))
+            const year = date.getFullYear();
+            const monthString = year + '-' + ((date.getMonth() + 1) + '').padStart(2, '0') + ' ' + Formatter.capitalizeFirstLetter(Formatter.month(date.getMonth() + 1));
 
-            const group = groups.get(monthString) ?? []
-            group.push(invoice)
-            groups.set(monthString, group)
+            const group = groups.get(monthString) ?? [];
+            group.push(invoice);
+            groups.set(monthString, group);
         }
 
         for (const [month, group] of groups) {
             // Create an Excel file
-            const folder = zip.folder(month)
+            const folder = zip.folder(month);
             if (!folder) {
-                throw new Error("Failed to create folder")
+                throw new Error('Failed to create folder');
             }
 
             // Sort group based on number here
-            group.sort((a,b) => Sorter.byStringValue(b.number ?? '0', a.number ?? '0'))
+            group.sort((a, b) => Sorter.byStringValue(b.number ?? '0', a.number ?? '0'));
 
-            const excel = await InvoicesExcelExport.export(group)
-            folder.file("0000-overzicht-"+month+".xlsx", excel)
+            const excel = await InvoicesExcelExport.export(group);
+            folder.file('0000-overzicht-' + month + '.xlsx', excel);
 
             for (const invoice of group) {
                 if (!invoice.pdf) {
-                    throw new Error("PDF ontbreekt voor factuur "+(invoice.number ?? invoice.id));
+                    throw new Error('PDF ontbreekt voor factuur ' + (invoice.number ?? invoice.id));
                 }
 
                 if (onlyVAT) {
                     if (!invoice.customer.company?.VATNumber) {
-                        continue
+                        continue;
                     }
                 }
-                const data = await fetch(invoice.pdf!.getPublicPath())
-                const blob = await data.blob()
+                const data = await fetch(invoice.pdf!.getPublicPath());
+                const blob = await data.blob();
                 folder.file(
-                    (invoice.number+"").padStart(4, "0")+" - "+Formatter.dateIso(invoice.invoicedAt!)+" - "+Formatter.fileSlug(invoice.customer.dynamicName)+".pdf", 
-                    blob
+                    (invoice.number + '').padStart(4, '0') + ' - ' + Formatter.dateIso(invoice.invoicedAt!) + ' - ' + Formatter.fileSlug(invoice.customer.dynamicName) + '.pdf',
+                    blob,
                 );
 
                 if (invoice.xml) {
-                    const data = await fetch(invoice.xml!.getPublicPath())
-                    const blob = await data.blob()
+                    const data = await fetch(invoice.xml!.getPublicPath());
+                    const blob = await data.blob();
                     folder.file(
-                        (invoice.number+"").padStart(4, "0")+" - "+Formatter.dateIso(invoice.invoicedAt!)+" - "+Formatter.fileSlug(invoice.customer.dynamicName)+".xml", 
-                        blob
+                        (invoice.number + '').padStart(4, '0') + ' - ' + Formatter.dateIso(invoice.invoicedAt!) + ' - ' + Formatter.fileSlug(invoice.customer.dynamicName) + '.xml',
+                        blob,
                     );
                 }
             }
         }
-        
-        const blob = await zip.generateAsync({type:"blob"})
-        saveAs(blob, "Facturen.zip");
+
+        const blob = await zip.generateAsync({ type: 'blob' });
+        saveAs(blob, 'Facturen.zip');
     } catch (e) {
-        Toast.fromError(e).show()
+        Toast.fromError(e).show();
     }
     downloading.value = false;
 }
-
 
 </script>

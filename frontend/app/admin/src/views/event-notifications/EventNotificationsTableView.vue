@@ -9,7 +9,7 @@
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
         :estimated-rows="estimatedRows"
-        :Route="Route"
+        :route
         :default-filter="defaultFilter"
     >
         <template #empty>
@@ -23,7 +23,6 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EmailView from '@stamhoofd/components/email/EmailView.vue';
 import { EventNotificationViewModel } from '@stamhoofd/components/event-notifications/classes/EventNotificationViewModel.ts';
-import EventNotificationView from '@stamhoofd/components/event-notifications/EventNotificationView.vue';
 import { useEventNotificationsObjectFetcher } from '@stamhoofd/components/fetchers/useEventNotificationsObjectFetcher.ts';
 import { useEventNotificationBackendFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -37,7 +36,7 @@ import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vu
 import type { EventNotification, EventNotificationType, StamhoofdFilter } from '@stamhoofd/structures';
 import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
@@ -178,8 +177,8 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const Route = {
-    Component: EventNotificationView,
+const route = {
+    component: async () => (await import('@stamhoofd/components/event-notifications/EventNotificationView.vue')).default,
     objectKey: 'event-notification',
     getProperties: (object: ObjectType) => {
         return {

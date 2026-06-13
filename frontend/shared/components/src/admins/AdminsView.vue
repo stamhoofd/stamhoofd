@@ -47,13 +47,13 @@
 
 <script setup lang="ts">
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import EditResponsibilitiesView from '#responsibilities/EditResponsibilitiesView.vue';
+
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
-import RolesView from './RolesView.vue';
+
 
 const { loading } = useAdmins({forceLoadOnMount: true});
 const showInternalAdmins = useShowInternalAdmins();
@@ -67,13 +67,13 @@ defineRoutes([
     {
         url: Routes.Roles,
         name: 'roles',
-        component: RolesView,
+        component: async () => (await import('./RolesView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditResponsibilitiesView,
+        component: async () => (await import('#responsibilities/EditResponsibilitiesView.vue')).default,
     },
 ]);
 

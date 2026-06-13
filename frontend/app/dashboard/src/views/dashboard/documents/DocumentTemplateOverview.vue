@@ -185,8 +185,8 @@ import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import DocumentsView from './DocumentsView.vue';
-import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
+
+
 import { fiscal } from './definitions/fiscal';
 
 const props = defineProps<{
@@ -209,7 +209,7 @@ enum Routes {
 defineRoutes([
     {
         url: Routes.Documents,
-        component: DocumentsView,
+        component: async () => (await import('./DocumentsView.vue')).default,
         defaultProperties() {
             return {
                 template: props.template,
@@ -219,7 +219,7 @@ defineRoutes([
     {
         url: Routes.Settings,
         present: 'popup',
-        component: EditDocumentTemplateView,
+        component: async () => (await import('./EditDocumentTemplateView.vue')).default,
         defaultProperties() {
             return {
                 isNew: false,

@@ -11,6 +11,16 @@ import defaultRules from './configs/default.js';
 import frontend from './configs/frontend.js';
 import node from './configs/node.js';
 import typescript from './configs/typescript.js';
+import asyncComponentWithProperties from './rules/async-component-with-properties.js';
+import asyncRouteComponents from './rules/async-route-components.js';
+
+const rules = {
+    'async-component-with-properties': asyncComponentWithProperties,
+    'async-route-components': asyncRouteComponents,
+};
+const stamhoofdPlugin = {
+    rules,
+};
 
 const baseRules = [
     ...defaultRules,
@@ -112,13 +122,19 @@ const baseRules = [
 ];
 
 export default {
+    rules,
     configs: {
         base: baseRules,
         frontend: [
             ...baseRules,
             ...frontend,
             {
+                plugins: {
+                    stamhoofd: stamhoofdPlugin,
+                },
                 rules: {
+                    'stamhoofd/async-component-with-properties': 'warn',
+                    'stamhoofd/async-route-components': 'error',
                     'import/no-cycle': ['error', { maxDepth: 100, ignoreExternal: false, allowUnsafeDynamicCyclicDependency: true }],
                     // Disallow importing from barrel files (index files that only re-export).
                     // Import directly from the source module instead, e.g. '#components/Foo.js'

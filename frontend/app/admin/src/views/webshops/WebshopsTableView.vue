@@ -10,7 +10,7 @@
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
         :estimated-rows="estimatedRows"
-        :Route="Route"
+        :route
     >
         <template #empty>
             {{ $t('%1OP') }}
@@ -27,12 +27,11 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import type { StamhoofdFilter, WebshopType, WebshopWithOrganization} from '@stamhoofd/structures';
+import type { StamhoofdFilter, WebshopType, WebshopWithOrganization } from '@stamhoofd/structures';
 import { WebshopStatus, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import WebshopView from './WebshopView.vue';
 
 type ObjectType = WebshopWithOrganization;
 
@@ -80,7 +79,7 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 200,
         grow: false,
-        allowSorting: false
+        allowSorting: false,
     }),
 
     new Column<ObjectType, Date>({
@@ -114,8 +113,8 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const Route = {
-    Component: WebshopView,
+const route = {
+    component: async () => (await import('./WebshopView.vue')).default,
     objectKey: 'webshopWithOrganization',
 };
 

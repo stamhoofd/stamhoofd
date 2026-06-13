@@ -1,8 +1,18 @@
+import { LoadComponent } from '#containers/AsyncComponent';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
+import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
+import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
+import { fetchAll } from '#tables/classes/ObjectFetcher.ts';
+import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -10,31 +20,12 @@ import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPe
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
-import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
-import MemberSegmentedView from '#members/MemberSegmentedView.vue';
-import MemberStepView from '#members/MemberStepView.vue';
 import { GlobalEventBus } from '../../EventBus';
-import AuditLogsView from '#audit-logs/AuditLogsView.vue';
-import CommunicationView from '../../communication/CommunicationView.vue';
-import { LoadComponent } from '#containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
-import EmailView from '../../email/EmailView.vue';
-import MembersPdfExportView from '../../export/MembersPdfExportView.vue';
 import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
-import { useContext } from '#hooks/useContext.ts';
-import { manualFeatureFlag } from '#hooks/useFeatureFlag.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import ChargeMembersView from '../../members/ChargeMembersView.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
-import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
-import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
-import { fetchAll } from '#tables/classes/ObjectFetcher.ts';
-import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { NavigationActions } from '../../types/NavigationActions';
-import DeleteView from '../../views/DeleteView.vue';
 import type { PlatformFamilyManager } from '../PlatformFamilyManager';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
@@ -402,7 +393,7 @@ export class MemberActionBuilder {
                     }
                     await this.present({
                         components: [
-                            new ComponentWithProperties(AuditLogsView, {
+                            AsyncComponent(() => import('#audit-logs/AuditLogsView.vue'), {
                                 objectIds: members.map(m => m.id),
                             }),
                         ],
@@ -434,7 +425,7 @@ export class MemberActionBuilder {
                     await this.present({
                         components: [
                             new ComponentWithProperties(NavigationController, {
-                                root: new ComponentWithProperties(CommunicationView, {
+                                root: AsyncComponent(() => import('../../communication/CommunicationView.vue'), {
                                     members,
                                 }),
                             }),
@@ -497,7 +488,7 @@ export class MemberActionBuilder {
                 await this.present({
                     modalDisplayStyle: 'popup',
                     components: [
-                        new ComponentWithProperties(ChargeMembersView, {
+                        AsyncComponent(() => import('../../members/ChargeMembersView.vue'), {
                             filter: selection.filter.filter,
                         }),
                     ],
@@ -874,7 +865,7 @@ export class MemberActionBuilder {
         });
 
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EmailView, {
+            root: AsyncComponent(() => import('../../email/EmailView.vue'), {
                 recipientFilterOptions: options,
                 defaultSenderId: this.groups.length === 1 ? this.groups[0].privateSettings?.defaultEmailId : null,
             }),
@@ -889,7 +880,7 @@ export class MemberActionBuilder {
 
     async showMember(member: PlatformMember) {
         const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberSegmentedView, {
+            root: AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
                 member,
             }),
         });
@@ -929,7 +920,7 @@ export class MemberActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ExcelExportView, {
+                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                         type: ExcelExportType.Members,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
@@ -1116,7 +1107,7 @@ export function getActionsForCategory<T extends { id: string }>(
 export async function presentEditMember({ member, present, context }: { member: PlatformMember; present: ReturnType<typeof usePresent>; context: SessionContext }) {
     await present({
         components: [
-            new ComponentWithProperties(MemberStepView, {
+            AsyncComponent(() => import('#members/MemberStepView.vue'), {
                 member,
                 title: $t(`%15E`, { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
@@ -1135,7 +1126,7 @@ export async function presentEditMember({ member, present, context }: { member: 
 export async function presentEditResponsibilities({ member, present }: { member: PlatformMember; present: ReturnType<typeof usePresent> }) {
     await present({
         components: [
-            new ComponentWithProperties(MemberStepView, {
+            AsyncComponent(() => import('#members/MemberStepView.vue'), {
                 member,
                 title: $t(`%et`) + ' ' + member.member.firstName,
                 component: markRaw(EditMemberResponsibilitiesBox),
@@ -1162,7 +1153,7 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
 
     await present({
         components: [
-            new ComponentWithProperties(DeleteView, {
+            AsyncComponent(() => import('../../views/DeleteView.vue'), {
                 title: $t('%15Y', { name }),
                 description: $t(`%15X`, { name }),
                 confirmationTitle: $t(`%eu`),
@@ -1193,7 +1184,7 @@ export async function presentExportMembersToPdf({ members, platform, organizatio
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MembersPdfExportView, {
+                root: AsyncComponent(() => import('../../export/MembersPdfExportView.vue'), {
                     platform,
                     organization: organizations.length === 1 ? organizations[0] : null,
                     groups,

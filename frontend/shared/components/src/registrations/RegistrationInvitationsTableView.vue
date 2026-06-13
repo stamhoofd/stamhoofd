@@ -1,5 +1,16 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :title="title" :column-configuration-id="'registration-invitations'" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :estimated-rows="estimatedRows" :Route="Route">
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :title="title"
+        :column-configuration-id="'registration-invitations'"
+        :actions="actions"
+        :all-columns="allColumns"
+        :default-sort-column="defaultSortColumn"
+        :default-sort-direction="defaultSortDirection"
+        :estimated-rows="estimatedRows"
+        :route
+    >
         <p class="style-description-block">
             {{ description }}
         </p>
@@ -19,7 +30,6 @@ import { GroupGenderType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, watch } from 'vue';
 import { useRegistrationInvitationsObjectFetcher } from '../fetchers/useRegistrationInvitationsObjectFetcher';
-import AsyncMemberSegmentedView from '../members/AsyncMemberSegmentedView.vue';
 import { useRegistrationInvitationActionBuilder } from './classes/RegistrationInvitationActionBuilder';
 import { useRegistrationInvitationEventListener } from './classes/useRegistrationInvitationEventListener';
 
@@ -31,7 +41,7 @@ const props = withDefaults(defineProps<{
     updateTotal?: (total: number | null) => void;
 }>(), {
     estimatedRows: null,
-    updateTotal: undefined
+    updateTotal: undefined,
 });
 
 const description = computed(() => {
@@ -44,7 +54,7 @@ const description = computed(() => {
     // if group has waiting list
     if (props.group.waitingList !== null) {
         const groupName = props.group.settings.name.toString();
-        base += ' ' + $t('%1QG', {group: groupName});
+        base += ' ' + $t('%1QG', { group: groupName });
     }
 
     return base;
@@ -61,7 +71,7 @@ function hasRestrictions(group: Group) {
 }
 
 const getActionBuilder = useRegistrationInvitationActionBuilder();
-const actions = getActionBuilder({group: props.group, eventOrigin: 'invitations-table'}).getActions();
+const actions = getActionBuilder({ group: props.group, eventOrigin: 'invitations-table' }).getActions();
 
 const title = $t('%1TY');
 
@@ -83,8 +93,8 @@ useGlobalEventListener('members-registered', async () => {
 
 function getRequiredFilter(): StamhoofdFilter | null {
     return {
-        groupId: props.group.id
-    }
+        groupId: props.group.id,
+    };
 }
 
 const objectFetcher = useRegistrationInvitationsObjectFetcher({
@@ -96,7 +106,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 if (props.updateTotal) {
     watch(() => tableObjectFetcher.totalCount, (value) => {
         props.updateTotal?.(value);
-    })
+    });
 }
 
 const allColumns: Column<ObjectType, any>[] = [
@@ -108,7 +118,7 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 200,
         grow: true,
         enabled: true,
-        allowSorting: false
+        allowSorting: false,
     }),
     new Column<ObjectType, Date | null>({
         id: 'birthDay',
@@ -129,7 +139,7 @@ const allColumns: Column<ObjectType, any>[] = [
                 return Formatter.dateNumber(value);
             }
             if (width < 250) {
-                return Formatter.date(value, true)
+                return Formatter.date(value, true);
             }
 
             // show time because enough space in table
@@ -138,18 +148,18 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 170,
         allowSorting: true,
         grow: true,
-        enabled: true
-    })
-]
+        enabled: true,
+    }),
+];
 
 const defaultSortColumn = allColumns.find(c => c.id === 'createdAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
 
-const Route = {
-    Component: AsyncMemberSegmentedView,
+const route = {
+    component: async () => (await import('../members/AsyncMemberSegmentedView.vue')).default,
     objectKey: 'registration',
     getProperties: (invitation: RegistrationInvitation) => ({
-        memberId: invitation.member.id
+        memberId: invitation.member.id,
     }),
 };
 </script>

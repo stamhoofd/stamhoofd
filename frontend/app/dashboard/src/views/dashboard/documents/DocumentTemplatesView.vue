@@ -79,7 +79,7 @@ import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/document-templates.ts';
 import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
-import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
+
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
 type ObjectType = DocumentTemplatePrivate;
@@ -103,7 +103,7 @@ const { presentPositionableSheet } = usePositionableSheet();
 defineRoute({
     name: Routes.DocumentTemplate,
     url: '@id',
-    component: DocumentTemplateOverview,
+    component: async () => (await import('./DocumentTemplateOverview.vue')).default,
     params: {
         id: String,
     },

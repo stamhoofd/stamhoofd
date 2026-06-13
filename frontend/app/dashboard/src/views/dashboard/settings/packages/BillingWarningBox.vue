@@ -60,16 +60,14 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AccessRight, STPackageType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import BillingSettingsView from '../BillingSettingsView.vue';
 import { useLoadPayableBalance } from '../hooks/useLoadPayableBalance';
-import PackageSettingsView from './PackageSettingsView.vue';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 
 const props = withDefaults(
@@ -195,10 +193,6 @@ function hasExpired(date: Date | null) {
     return date <= new Date();
 }
 
-function formatDateTime(date: Date) {
-    return Formatter.dateTime(date);
-}
-
 async function openPackages() {
     if (!auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
         new CenteredMessage(
@@ -210,7 +204,7 @@ async function openPackages() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(PackageSettingsView),
+                root: AsyncComponent(() => import('./PackageSettingsView.vue'), {}),
             }),
         ],
         modalDisplayStyle: 'popup',
@@ -234,7 +228,7 @@ async function openBilling() {
         await present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(BillingSettingsView, { item }),
+                    root: AsyncComponent(() => import('../BillingSettingsView.vue'), { item }),
                 }),
             ],
             modalDisplayStyle: 'popup',

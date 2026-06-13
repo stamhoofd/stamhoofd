@@ -31,9 +31,9 @@
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
-import PlatformMembershipsTableView from '@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue';
-import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+
+
+
 import { computed } from 'vue';
 
 enum Routes {
@@ -47,7 +47,7 @@ defineRoutes([
         url: 'leden',
         name: Routes.Members,
         show: 'detail',
-        component: MembersTableView,
+        component: async () => (await import('@stamhoofd/components/members/MembersTableView.vue')).default,
         isDefault: {
             properties: {},
         },
@@ -56,13 +56,13 @@ defineRoutes([
         url: 'inschrijvingen',
         name: Routes.Registrations,
         show: 'detail',
-        component: RegistrationsTableView,
+        component: async () => (await import('@stamhoofd/components/registrations/RegistrationsTableView.vue')).default,
     },
     {
         url: 'aansluitingen',
         name: Routes.PlatformMemberships,
         show: 'detail',
-        component: PlatformMembershipsTableView,
+        component: async () => (await import('@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue')).default,
     },
 ]);
 

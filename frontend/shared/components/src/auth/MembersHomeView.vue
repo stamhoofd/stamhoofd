@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import GroupTreeVue from './components/GroupTree.vue';
 import { defineRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
-import LoginView from '#auth/LoginView.vue';
+
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
 import { PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
@@ -78,7 +78,7 @@ defineRoutes([
     {
         name: Routes.Login,
         url: 'login',
-        component: LoginView as any,
+        component: async () => (await import('#auth/LoginView.vue')).default,
         present: 'sheet',
         paramsToProps() {
             return {

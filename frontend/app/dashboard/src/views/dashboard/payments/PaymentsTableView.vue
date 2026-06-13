@@ -1,5 +1,17 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-sort-direction="SortItemDirection.DESC" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :filter-builders="filterBuilders"
+        :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
+        :default-sort-direction="SortItemDirection.DESC"
+        :default-filter="defaultFilter"
+        :title="title"
+        :column-configuration-id="configurationId"
+        :actions="actions"
+        :all-columns="allColumns"
+        :route
+    >
         <template #empty>
             {{ $t('%Lu') }}
         </template>
@@ -11,7 +23,6 @@ import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts'
 import { usePaymentsObjectFetcher } from '@stamhoofd/components/fetchers/usePaymentsObjectFetcher.ts';
 import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import PaymentView from '@stamhoofd/components/payments/PaymentView.vue';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
@@ -249,8 +260,8 @@ const allColumns: Column<ObjectType, any>[] = [
 
 ];
 
-const Route = {
-    Component: PaymentView,
+const route = {
+    component: async () => (await import('@stamhoofd/components/payments/PaymentView.vue')).default,
     objectKey: 'payment',
 };
 

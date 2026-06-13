@@ -284,9 +284,9 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus, PermissionLevel } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import MembersTableView from '../members/MembersTableView.vue';
+
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
-import EmailRecipientsTableView from './EmailRecipientsTableView.vue';
+
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { usePatchEmail } from './hooks/usePatchEmail';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
@@ -322,7 +322,7 @@ enum Routes {
 defineRoutes([
     {
         url: Routes.Members,
-        component: MembersTableView,
+        component: async () => (await import('../members/MembersTableView.vue')).default,
         defaultProperties: () => {
             return {
                 customFilter: {
@@ -339,7 +339,7 @@ defineRoutes([
     },
     {
         url: Routes.Recipients,
-        component: EmailRecipientsTableView,
+        component: async () => (await import('./EmailRecipientsTableView.vue')).default,
         defaultProperties: () => {
             return {
                 email: props.email,
@@ -348,7 +348,7 @@ defineRoutes([
     },
     {
         url: Routes.Complaints,
-        component: EmailRecipientsTableView,
+        component: async () => (await import('./EmailRecipientsTableView.vue')).default,
         defaultProperties: () => {
             return {
                 email: props.email,
@@ -363,7 +363,7 @@ defineRoutes([
     },
     {
         url: Routes.HardBounces,
-        component: EmailRecipientsTableView,
+        component: async () => (await import('./EmailRecipientsTableView.vue')).default,
         defaultProperties: () => {
             return {
                 email: props.email,
@@ -378,7 +378,7 @@ defineRoutes([
     },
     {
         url: Routes.SoftBounces,
-        component: EmailRecipientsTableView,
+        component: async () => (await import('./EmailRecipientsTableView.vue')).default,
         defaultProperties: () => {
             return {
                 email: props.email,
@@ -393,7 +393,7 @@ defineRoutes([
     },
     {
         url: Routes.Failed,
-        component: EmailRecipientsTableView,
+        component: async () => (await import('./EmailRecipientsTableView.vue')).default,
         defaultProperties: () => {
             return {
                 email: props.email,
