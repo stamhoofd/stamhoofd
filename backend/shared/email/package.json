@@ -19,10 +19,11 @@
         "@simonbackx/simple-errors": "^1.5"
     },
     "devDependencies": {
+        "@types/html-to-text": "^9.0.4",
         "@types/nodemailer": "^8"
     },
     "dependencies": {
-        "html-to-text": "^8.1.0",
+        "html-to-text": "^10.0.0",
         "nodemailer": "^8"
     },
     "publishConfig": {

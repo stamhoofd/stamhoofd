@@ -3,9 +3,9 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { DataValidator, Formatter, sleep } from '@stamhoofd/utility';
-import htmlToText from 'html-to-text';
+import { convert } from 'html-to-text';
 import nodemailer from 'nodemailer';
-import type {Transporter} from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import { EmailAddress } from '../models/EmailAddress.js';
 
 export type EmailInterfaceRecipient = {
@@ -116,8 +116,7 @@ class EmailStatic {
         this.transporter.verify((error) => {
             if (error) {
                 console.error('SMTP server not working', error);
-            }
-            else {
+            } else {
                 console.log('SMTP server is ready to take our messages');
             }
         });
@@ -126,8 +125,7 @@ class EmailStatic {
         this.transactionalTransporter.verify((error) => {
             if (error) {
                 console.error('Transactional SMTP server not working', error);
-            }
-            else {
+            } else {
                 console.log('Transactional SMTP server is ready to take our messages');
             }
         });
@@ -189,8 +187,7 @@ class EmailStatic {
             let m: string;
             if (didFindAddr) {
                 m = email.trim();
-            }
-            else {
+            } else {
                 m = cleanedStr.trim();
             }
             if (DataValidator.isEmailValid(m)) {
@@ -308,8 +305,7 @@ class EmailStatic {
                         human: $t(`%1Mi`),
                     }),
                 );
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error in email callback', e);
             }
             return;
@@ -330,8 +326,7 @@ class EmailStatic {
                         human: data.to.length > 1 ? $t(`%G4`) : $t('%1E7'),
                     }),
                 );
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error in email callback', e);
             }
             return;
@@ -355,8 +350,7 @@ class EmailStatic {
                         human: data.to.length > 1 ? $t(`%G5`) : $t('%1E8'),
                     }),
                 );
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error in email callback', e);
             }
             return;
@@ -398,9 +392,9 @@ class EmailStatic {
             mail.html = data.html;
 
             if (!data.text) {
-                mail.text = htmlToText.fromString(data.html, {
+                mail.text = convert(data.html, {
                     wordwrap: null,
-                    unorderedListItemPrefix: ' - ',
+                    selectors: [{ selector: 'ul', options: { itemPrefix: ' - ' } }],
                 });
             }
         }
@@ -425,8 +419,7 @@ class EmailStatic {
                     ...data.headers,
                     ...STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS,
                 };
-            }
-            else {
+            } else {
                 mail.headers = {
                     ...data.headers,
                     ...STAMHOOFD.SMTP_HEADERS,
@@ -443,12 +436,10 @@ class EmailStatic {
 
             try {
                 data.callback?.(null);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error in email callback', e);
             }
-        }
-        catch (e: unknown) {
+        } catch (e: unknown) {
             if (STAMHOOFD.environment !== 'test') {
                 console.error('Failed to send e-mail:');
                 console.error(e);
@@ -466,14 +457,12 @@ class EmailStatic {
                     data.type = 'broadcast';
                 }
                 this.send(data);
-            }
-            else {
+            } else {
                 try {
                     if (data.callback) {
                         data.callback(e);
                     }
-                }
-                catch (e2) {
+                } catch (e2) {
                     console.error('Error in email failure callback', e2, 'for original error', e);
                 }
 
