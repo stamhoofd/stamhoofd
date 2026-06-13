@@ -9,7 +9,13 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/assets": "*",
+        "@stamhoofd/components": "*",
+        "@stamhoofd/networking": "*",
         "@stamhoofd/structures": "*",
-        "@stamhoofd/components": "*"
+        "@stamhoofd/utility": "*"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "*"
     }
 }

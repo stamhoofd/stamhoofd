@@ -15,5 +15,14 @@
     },
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "chalk": "^4.1.2"
+    },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "*"
+    },
+    "peerDependencies": {
+        "@stamhoofd/cli": "*"
     }
 }

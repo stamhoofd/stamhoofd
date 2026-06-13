@@ -25,5 +25,13 @@
     },
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "chalk": "^4.1.2"
+    },
+    "devDependencies": {
+        "concurrently": "^10.0.3"
     }
 }

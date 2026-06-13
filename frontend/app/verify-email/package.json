@@ -12,10 +12,15 @@
         "dist"
     ],
     "dependencies": {
+        "@simonbackx/vue-app-navigation": "2.20.1",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
-        "@stamhoofd/structures": "*"
+        "@stamhoofd/structures": "*",
+        "vue": "3.5.38"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "*"
     }
 }

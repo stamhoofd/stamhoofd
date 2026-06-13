@@ -23,12 +23,18 @@
         "lint": "eslint"
     },
     "devDependencies": {
-        "@types/archiver": "^6.0.2"
+        "@types/archiver": "^6.0.2",
+        "@types/luxon": "3.7.1",
+        "@types/uuid": "^8.3.0"
     },
     "peerDependencies": {
+        "@stamhoofd/utility": "*",
         "archiver": "^7.0.1"
     },
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "@simonbackx/simple-errors": "^1.5"
     }
 }

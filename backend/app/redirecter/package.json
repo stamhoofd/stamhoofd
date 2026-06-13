@@ -15,11 +15,19 @@
         "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
-        "@types/node": "^22"
+        "@stamhoofd/test-utils": "*",
+        "@types/node": "^22",
+        "nock": "^14.0.10",
+        "vitest": "^4.1.8"
     },
     "dependencies": {
+        "@simonbackx/simple-database": "1.37.1",
         "@simonbackx/simple-endpoints": "1.21.1",
-        "@simonbackx/simple-logging": "^1.0.1"
+        "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/backend-env": "*",
+        "@stamhoofd/backend-middleware": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*"
     },
     "publishConfig": {
         "access": "public"

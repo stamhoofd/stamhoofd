@@ -19,5 +19,17 @@
     "scripts": {
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@simonbackx/vue-app-navigation": "2.20.1",
+        "@stamhoofd/locales": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "vue": "3.5.38"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "*"
     }
 }

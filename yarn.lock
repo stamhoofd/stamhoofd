@@ -2431,7 +2431,7 @@
     picocolors "1.1.1"
     pretty-format "^27.0.2"
 
-"@tiptap/core@^3.26.1":
+"@tiptap/core@^3.26.1", "@tiptap/core@^3.4.2":
   version "3.26.1"
   resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-3.26.1.tgz#a4d3222248af7af01aede146806a5757465cc654"
   integrity sha512-TX9PyPqBoix0qDLjtok/bddtdSy54QhzLVha405C07V+WySOpH3s/pWYkywehZQY0SQtcrcY4MNSCeQjCbA28A==
@@ -2570,7 +2570,7 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-underline/-/extension-underline-3.26.1.tgz#bf83cdc3119422d1401416438497ecfb1f0bc3e3"
   integrity sha512-HUHtQ+DRWDM0opW7Nk3YQwrLzw876hMU7cr1X/ZTG+8Bp+AKHihlwU+bqrPgG5St0mqASyUEhHQ/vK5PlnUYOQ==
 
-"@tiptap/extensions@^3.26.1":
+"@tiptap/extensions@^3.26.1", "@tiptap/extensions@^3.4.2":
   version "3.26.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extensions/-/extensions-3.26.1.tgz#9f5d9ea5eb64d5888b35d4ea91907610e1d51844"
   integrity sha512-PmRaoe6bebTgz/ZQrjmzwZMST1d9js9ZTiKnUXeXl3Fm+V5U/c3TbbKDfqmL63qPQdjtShDMHi9tYuv+c77OFQ==
@@ -3183,7 +3183,7 @@
     "@vitest/mocker" "4.1.8"
     tinyrainbow "^3.1.0"
 
-"@vitest/browser@4.1.8":
+"@vitest/browser@4.1.8", "@vitest/browser@^4.1.8":
   version "4.1.8"
   resolved "https://registry.yarnpkg.com/@vitest/browser/-/browser-4.1.8.tgz#8e187770f37bdae8729a0ef85bbcda2b5e29e1d1"
   integrity sha512-u21VzX07HzlJYpFgkxmjEXar/tG2UqWGgyGG/46SrrPc7rSdCTPw5vuowopO9CIqF8UCUQzDFdbVnNpw6N0BfQ==

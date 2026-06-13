@@ -15,15 +15,24 @@
         "dist"
     ],
     "dependencies": {
+        "@simonbackx/simple-errors": "^1.5",
+        "@simonbackx/vue-app-navigation": "2.20.1",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/document-helper": "*",
         "@stamhoofd/frontend-excel-export": "*",
         "@stamhoofd/frontend-i18n": "*",
         "@stamhoofd/frontend-pdf-builder": "*",
-        "@stamhoofd/ticket-builder": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
-        "@stamhoofd/structures": "*"
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/ticket-builder": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "vue": "3.5.38"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "*",
+        "vite": "^8.0.0"
     }
 }

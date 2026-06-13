@@ -16,13 +16,22 @@
         "lint": "eslint"
     },
     "peerDependencies": {
-        "@simonbackx/simple-errors": "^1.5"
+        "@simonbackx/simple-errors": "^1.5",
+        "@stamhoofd/backend-i18n": "*",
+        "@stamhoofd/queues": "*",
+        "@stamhoofd/sql": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
     },
     "devDependencies": {
+        "@stamhoofd/test-utils": "*",
         "@types/html-to-text": "^9.0.4",
-        "@types/nodemailer": "^8"
+        "@types/nodemailer": "^8",
+        "@types/uuid": "^8.3.0",
+        "sinon": "^18.0.0"
     },
     "dependencies": {
+        "@simonbackx/simple-database": "1.37.1",
         "html-to-text": "^10.0.0",
         "nodemailer": "^8"
     },

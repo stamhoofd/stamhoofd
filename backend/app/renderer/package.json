@@ -22,14 +22,27 @@
         "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
+        "@stamhoofd/test-utils": "*",
         "@types/formidable": "3.5.1",
         "@types/luxon": "3.7.1",
         "@types/mysql": "^2.15.20",
-        "@types/node": "^22"
+        "@types/node": "^22",
+        "nock": "^14.0.10",
+        "vitest": "^4.1.8"
     },
     "dependencies": {
+        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-encoding": "2.26.8",
         "@simonbackx/simple-endpoints": "1.21.1",
+        "@simonbackx/simple-errors": "^1.5",
         "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/backend-env": "*",
+        "@stamhoofd/backend-i18n": "*",
+        "@stamhoofd/backend-middleware": "*",
+        "@stamhoofd/logging": "*",
+        "@stamhoofd/queues": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/utility": "*",
         "formidable": "3.5.4",
         "luxon": "3.7.2",
         "mockdate": "^3.0.2",

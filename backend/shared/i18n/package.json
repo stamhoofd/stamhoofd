@@ -26,9 +26,15 @@
         "lint": "eslint"
     },
     "peerDependencies": {
-        "@simonbackx/simple-endpoints": "1.21.1"
+        "@simonbackx/simple-endpoints": "1.21.1",
+        "@stamhoofd/locales": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*"
     },
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "@simonbackx/simple-logging": "^1.0.1"
     }
 }

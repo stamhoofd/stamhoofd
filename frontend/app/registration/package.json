@@ -15,10 +15,19 @@
         "dist"
     ],
     "dependencies": {
-        "@stamhoofd/assets": "1.0.0",
-        "@stamhoofd/components": "1.0.0",
-        "@stamhoofd/scss": "1.0.0",
+        "@simonbackx/simple-errors": "^1.5",
+        "@simonbackx/vue-app-navigation": "2.20.1",
+        "@stamhoofd/assets": "*",
+        "@stamhoofd/components": "*",
+        "@stamhoofd/document-helper": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/scss": "*",
         "@stamhoofd/structures": "*",
-        "@stamhoofd/utility": "*"
+        "@stamhoofd/utility": "*",
+        "vue": "3.5.38"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "*"
     }
 }

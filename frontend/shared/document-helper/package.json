@@ -3,11 +3,20 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-        "@stamhoofd/assets": "1.0.0"
+        "@simonbackx/simple-errors": "^1.5",
+        "@simonbackx/simple-networking": "1.23.0",
+        "@stamhoofd/assets": "*",
+        "@stamhoofd/components": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/utility": "*",
+        "jszip": "^3.7.1"
     },
     "type": "module",
     "scripts": {
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "*"
     }
 }

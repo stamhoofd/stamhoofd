@@ -55,6 +55,7 @@ const baseRules = [
         },
         rules: {
             'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false }],
+            'import/no-extraneous-dependencies': ['error'],
         },
     },
 

@@ -19,5 +19,21 @@
         "#*.vue": "./src/*.vue",
         "#*.ts": "./src/*.ts",
         "#*": "./src/*.ts"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.8",
+        "@simonbackx/simple-errors": "^1.5",
+        "@simonbackx/simple-networking": "1.23.0",
+        "@simonbackx/vue-app-navigation": "2.20.1",
+        "@stamhoofd/components": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "vue": "3.5.38"
+    },
+    "devDependencies": {
+        "@types/file-saver": "^2.0.5",
+        "eslint-plugin-stamhoofd": "*"
     }
 }

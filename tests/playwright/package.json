@@ -13,9 +13,16 @@
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
         "@stamhoofd/backend": "*",
+        "@stamhoofd/backend-i18n": "*",
+        "@stamhoofd/cli": "*",
+        "@stamhoofd/models": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/utility": "*",
         "pino": "^10.1.1"
     },
     "devDependencies": {
-        "@playwright/test": "^1.58.2"
+        "@playwright/test": "^1.58.2",
+        "@stamhoofd/test-utils": "*",
+        "eslint-plugin-stamhoofd": "*"
     }
 }

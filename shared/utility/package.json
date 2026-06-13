@@ -26,5 +26,12 @@
     },
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "ibantools": "^4.5.4"
+    },
+    "devDependencies": {
+        "@types/luxon": "3.7.1",
+        "vitest": "^4.1.8"
     }
 }

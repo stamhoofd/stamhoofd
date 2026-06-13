@@ -17,5 +17,11 @@
     },
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "@simonbackx/simple-errors": "^1.5"
+    },
+    "devDependencies": {
+        "vitest": "^4.1.8"
     }
 }

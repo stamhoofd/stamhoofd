@@ -7,7 +7,17 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@stamhoofd/assets": "1.0.0"
+        "@stamhoofd/assets": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "pdfkit": "^0.19.1"
     },
-    "type": "module"
+    "type": "module",
+    "devDependencies": {
+        "@types/qrcode": "^1.5.3",
+        "eslint-plugin-stamhoofd": "*"
+    }
 }
