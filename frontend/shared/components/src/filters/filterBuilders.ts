@@ -425,23 +425,38 @@ export function useEventUIFilterBuilders({ platform, organizations, app }: { pla
 
 function getEventUIFilterBuilders({ platform, organizations, app, permissions }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto'; permissions: LoadedPermissions | null | undefined }) {
     const all: UIFilterBuilder<UIFilter>[] = [];
+    const isPlatform = STAMHOOFD.userMode === 'platform';
+
+    const organizationOptions: { name: string; value: string | null } [] = [];
+
+    if (isPlatform) {
+        organizationOptions.push({
+            name: $t(`%c8`),
+            value: null,
+        });
+    }
+
+    organizationOptions.push(...organizations.map(org => ({
+        name: org.name,
+        value: org.id,
+    })));
 
     const organizationFilter = new MultipleChoiceFilterBuilder({
         name: $t(`%c7`),
-        options: [
-            new MultipleChoiceUIFilterOption($t(`%c8`), null),
-            ...organizations.map(org => new MultipleChoiceUIFilterOption(org.name, org.id)),
-        ],
+        allowCreation: organizationOptions.length > 1,
+        options: organizationOptions.map(x => new MultipleChoiceUIFilterOption(x.name, x.value)),
         wrapper: {
             organizationId: {
                 $in: FilterWrapperMarker,
             },
         },
     });
+
     all.push(organizationFilter);
 
     const tagsFilter = new MultipleChoiceFilterBuilder({
         name: $t(`%ae`),
+        allowCreation: (isPlatform || app === 'admin' || app === 'dashboard') && platform.config.tags.length > 1,
         options: [
             new MultipleChoiceUIFilterOption($t(`%c9`), null),
             ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
@@ -457,19 +472,22 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 
     const allTags = organizations.flatMap(organization => organization.meta.tags);
 
-    const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`%wI`),
-        options: [
-            new MultipleChoiceUIFilterOption($t(`%cA`), null),
-            ...platform.config.defaultAgeGroups.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(allTags)).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
-        ],
-        wrapper: {
-            defaultAgeGroupIds: {
-                $in: FilterWrapperMarker,
+    if (isPlatform) {
+        const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
+            name: $t(`%wI`),
+            allowCreation: platform.config.defaultAgeGroups.length > 0,
+            options: [
+                new MultipleChoiceUIFilterOption($t(`%cA`), null),
+                ...platform.config.defaultAgeGroups.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(allTags)).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
+            ],
+            wrapper: {
+                defaultAgeGroupIds: {
+                    $in: FilterWrapperMarker,
+                },
             },
-        },
-    });
-    all.push(defaultAgeGroupFilter);
+        });
+        all.push(defaultAgeGroupFilter);
+    }
 
     const groupFilter = new MultipleChoiceFilterBuilder({
         name: $t(`%1IL`),
