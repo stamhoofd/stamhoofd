@@ -18,7 +18,7 @@
         "lint": "eslint"
     },
     "devDependencies": {
-        "@types/formidable": "3.4.5",
+        "@types/formidable": "3.5.1",
         "@types/luxon": "3.7.1",
         "@types/mysql": "^2.15.20",
         "@types/node": "^22"
