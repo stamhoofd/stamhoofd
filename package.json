@@ -88,7 +88,7 @@
     "sharp": "^0.34.2",
     "sortablejs-vue3": "^1.2.11",
     "tslib": "^2.8.1",
-    "uuid": "11.1.1",
+    "uuid": "14.0.0",
     "vue": "3.5.38",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
