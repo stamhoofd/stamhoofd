@@ -183,12 +183,8 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
             },
             preprocessorOptions: {
                 scss: {
-                    // Scss will change in a future version to resolve &'s in the same order as native CSS.
-                    // This is a pretty big change in the code base, and probably won't really affect us.
-                    // We'll need to fix this when SCSS changes the resolution order in the next version.
-                    // More info at https://sass-lang.com/d/mixed-decls
                     // color-functions: deprecated some aliasses. Easy to fix later.
-                    silenceDeprecations: ['mixed-decls', 'color-functions', 'slash-div'],
+                    silenceDeprecations: ['color-functions', 'slash-div'],
                 },
             },
         },
