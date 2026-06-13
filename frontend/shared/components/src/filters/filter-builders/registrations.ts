@@ -14,7 +14,7 @@ import { useEventGroupsRelationFetcher } from '../relation-fetchers/event-groups
 import { useGroupsRelationFetcher } from '../relation-fetchers/groups';
 import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
 
-export type RegistrationFilterBuilderFactoryOptions = {periodId?: string};
+export type RegistrationFilterBuilderFactoryOptions = { periodId?: string };
 export type RegistrationFilterBuilderFactory = (options?: RegistrationFilterBuilderFactoryOptions) => ComputedRef<UIFilterBuilder[]>;
 
 export function useAdvancedRegistrationsUIFilterBuilders() {
@@ -38,9 +38,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
         console.error('Failed to load periods in useAdvancedRegistrationsUIFilterBuilders', e);
     });
 
-    const getRegistrationFilters: RegistrationFilterBuilderFactory = ({periodId}: RegistrationFilterBuilderFactoryOptions = {}) => computed(() =>{
-
-
+    const getRegistrationFilters: RegistrationFilterBuilderFactory = ({ periodId }: RegistrationFilterBuilderFactoryOptions = {}) => computed(() => {
         const platform = $platform.value;
         const user = $user.value;
         const hasPlatformPermissions = (user?.permissions?.platform !== null);
@@ -52,7 +50,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             key: 'organizationId',
             allowCreation: hasPlatformPermissions,
             wrapper: FilterWrapperMarker,
-            relationFetcher: organizationRelationsFetcher
+            relationFetcher: organizationRelationsFetcher,
         }));
 
         if (periodId !== undefined) {
@@ -131,7 +129,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                 key: 'groupId',
                 allowCreation: true,
                 wrapper: FilterWrapperMarker,
-                relationFetcher: groupsRelationFetcher({periodId, type: GroupType.Membership})
+                relationFetcher: groupsRelationFetcher({ periodId, type: GroupType.Membership }),
             }));
 
             all.push(new RelationFilterBuilder({
@@ -140,7 +138,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                 key: 'groupId',
                 allowCreation: true,
                 wrapper: FilterWrapperMarker,
-                relationFetcher: groupsRelationFetcher({periodId, type: GroupType.WaitingList})
+                relationFetcher: groupsRelationFetcher({ periodId, type: GroupType.WaitingList }),
             }));
         }
 
@@ -150,7 +148,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             key: 'groupId',
             allowCreation: true,
             wrapper: FilterWrapperMarker,
-            relationFetcher: eventGroupsRelationFetcher({periodId})
+            relationFetcher: eventGroupsRelationFetcher({ periodId }),
         }));
 
         all.unshift(

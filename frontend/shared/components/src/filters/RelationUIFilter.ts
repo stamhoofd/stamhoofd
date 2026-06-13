@@ -183,9 +183,20 @@ export type RelationFetcherSubFilterOption = { filter: StamhoofdFilter; name: st
 export class RelationFetcherSubFilter {
     private readonly getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[];
     private options: RelationFetcherSubFilterOption[] | null = null;
+    readonly isRequired: boolean;
+    readonly findDefaultFilter?: (option: RelationFetcherSubFilterOption) => boolean;
 
-    constructor({ getOptions }: { getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[] }) {
+    constructor({ getOptions, isRequired, findDefaultFilter }: {
+        getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[];
+        isRequired?: boolean;
+        findDefaultFilter?: (option: RelationFetcherSubFilterOption) => boolean; }) {
         this.getOptions = getOptions;
+        this.findDefaultFilter = findDefaultFilter;
+        this.isRequired = isRequired ?? false;
+    }
+
+    get shouldHaveDefaultFilter(): boolean {
+        return this.isRequired || this.findDefaultFilter !== undefined;
     }
 
     async loadOptions(): Promise<RelationFetcherSubFilterOption[]> {
@@ -195,6 +206,35 @@ export class RelationFetcherSubFilter {
 
         this.options = await this.getOptions();
         return this.options;
+    }
+
+    getDefaultOption(options: RelationFetcherSubFilterOption[]): RelationFetcherSubFilterOption {
+        if (this.findDefaultFilter) {
+            return options.find(this.findDefaultFilter) ?? RelationFetcherSubFilter.emptyOption;
+        }
+
+        if (this.isRequired) {
+            return options[0] ?? RelationFetcherSubFilter.emptyOption;
+        }
+
+        return RelationFetcherSubFilter.emptyOption;
+    }
+
+    async getAllOptions() {
+        const options = await this.loadOptions();
+
+        if (this.isRequired) {
+            return options;
+        }
+
+        return [RelationFetcherSubFilter.emptyOption, ...options];
+    }
+
+    static get emptyOption(): RelationFetcherSubFilterOption {
+        return {
+            name: $t('Geen filter'),
+            filter: null,
+        };
     }
 }
 
@@ -233,7 +273,7 @@ export class RelationFetcher<OBJECT extends { id: string }, T extends string | n
 
     configureInfiniteObjectFetcher(infiniteObjectFetcher: InfiniteObjectFetcher<OBJECT>) {
         if (this.filter) {
-            infiniteObjectFetcher.setFilter(this.filter);
+            infiniteObjectFetcher.baseFilter = this.filter;
         }
 
         if (this.sort) {
