@@ -1,10 +1,22 @@
 version: 2
 updates:
+  # JavaScript/TypeScript dependencies (Yarn classic workspaces monorepo).
+  # The root lockfile covers every workspace under frontend/*, backend/*, shared/*, etc.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 0 # in case you don't want to enable version updates
-    allow:
-      # Allow updates for production dependencies only
-      - dependency-type: "production"
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      # Bundle dev tooling/type bumps into a single PR to cut noise.
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      production-minor-patch:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+
