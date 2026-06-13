@@ -6678,10 +6678,10 @@ husky@^9.1.7:
   resolved "https://registry.yarnpkg.com/husky/-/husky-9.1.7.tgz#d46a38035d101b46a70456a850ff4201344c0b2d"
   integrity sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==
 
-ibantools@^3.1.0:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/ibantools/-/ibantools-3.3.1.tgz#bd00c8eb92a60737399b4a2f38167fa69ed50a0c"
-  integrity sha512-khNflO+KBfheUGOGqVt9e+rdW6174FY+/llpLs+skQ2epF74Gdp9LG1T+Y7j/q5wcq1JPzJGvmsVHEyNtYGdfQ==
+ibantools@^4.5.4:
+  version "4.5.4"
+  resolved "https://registry.yarnpkg.com/ibantools/-/ibantools-4.5.4.tgz#d9aaf7d8d3790b8701af380c72cec7db41ac66a3"
+  integrity sha512-6jX1gh4aH6XH+o0ey+wtkMTzkcvsEta7DakIOZSng9voZYpMw3U+gK1+tZChk3aRcPcloEt0NOzksjaRZiqXbw==
 
 iconv-lite@0.5.0:
   version "0.5.0"
