@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multiline-html-element-content-newline -->
 <template>
     <p v-for="(item, index) of items" :key="index" class="style-description-small style-capitalize-first-letter">
-        <RenderTextComponent :text="getRenderText(item)" />
+        <RenderTextComponent :text="getRenderText(item)" :custom-renderers="customRenderers" />
     </p>
 </template>
 
@@ -9,24 +9,27 @@
 import type { AuditLogPatchItem} from '@stamhoofd/structures';
 import { AuditLogPatchItemType, AuditLogReplacementType } from '@stamhoofd/structures';
 import { h } from 'vue';
-import type { Renderable} from './RenderTextComponent';
+import type { AuditLogCustomRenderers, Renderable} from './RenderTextComponent';
 import { renderAny, RenderTextComponent } from './RenderTextComponent';
 
-defineProps<{
+const props = defineProps<{
     items: AuditLogPatchItem[];
+    customRenderers?: AuditLogCustomRenderers;
 }>();
 
 class TextWithClass implements Renderable {
     children: unknown;
     className: string;
+    customRenderers?: AuditLogCustomRenderers;
 
-    constructor(children: unknown, className: string) {
+    constructor(children: unknown, className: string, customRenderers?: AuditLogCustomRenderers) {
         this.children = children;
         this.className = className;
+        this.customRenderers = customRenderers;
     }
 
     setup() {
-        const renderChildren = renderAny(this.children);
+        const renderChildren = renderAny(this.children, this.customRenderers);
         return () => h('span', {
             class: this.className,
         }, renderChildren());
@@ -61,7 +64,7 @@ function getRenderText(item: AuditLogPatchItem): any[] {
         const hasValue = item.value && (item.value.type || item.value.value);
 
         if (hasOld) {
-            text.push(new TextWithClass(item.oldValue, 'style-value-old'));
+            text.push(new TextWithClass(item.oldValue, 'style-value-old', props.customRenderers));
         }
 
         if (hasOld && hasValue) {
@@ -69,7 +72,7 @@ function getRenderText(item: AuditLogPatchItem): any[] {
         }
 
         if (hasValue) {
-            text.push(new TextWithClass(item.value, 'style-value-new'));
+            text.push(new TextWithClass(item.value, 'style-value-new', props.customRenderers));
         }
     }
     else {

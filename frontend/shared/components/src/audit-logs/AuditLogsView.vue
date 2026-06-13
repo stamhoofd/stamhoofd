@@ -41,7 +41,7 @@
                 <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <AuditLogRow v-for="log of group.logs" :key="log.id" :log="log" />
+                    <AuditLogRow v-for="log of group.logs" :key="log.id" :log="log" :custom-renderers="customRenderers" />
                 </STList>
             </div>
 
@@ -67,14 +67,17 @@ import type { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
 import AuditLogRow from './components/AuditLogRow.vue';
+import type { AuditLogCustomRenderers } from './components/RenderTextComponent';
 
 type ObjectType = AuditLog;
 
 const props = withDefaults(
     defineProps<{
         objectIds?: string[] | null;
+        customRenderers?: AuditLogCustomRenderers;
     }>(), {
         objectIds: null,
+        customRenderers: undefined,
     });
 
 const { presentPositionableSheet } = usePositionableSheet();
