@@ -8,29 +8,16 @@
         <div v-if="relationFetcher.subFilter">
             <button type="button" class="button text" @click="showSubFilters">
                 <span class="icon filter" />
-                <span v-if="selectedSubFilterOption.filter" class="icon dot primary" />
+                <span v-if="selectedSubFilterOption?.filter" class="icon dot primary" />
             </button>
         </div>
     </div>
 
-    <div class="results">
-        <STErrorsDefault :error-box="errorBox" />
-        <STList v-if="invisibleSelectedOptions.length">
-            <STListItem v-for="option of invisibleSelectedOptions" :key="option.value" :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ option.name }}
-                </h3>
-                <p v-if="option.description" class="style-description-small">
-                    {{ option.description }}
-                </p>
-            </STListItem>
-        </STList>
-        <template v-if="infiniteObjectFetcher.errorState === null">
-            <STList>
-                <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
+    <LoadingBoxTransition>
+        <div v-if="infiniteObjectFetcher" class="results">
+            <STErrorsDefault :error-box="errorBox" />
+            <STList v-if="firstOptions.length">
+                <STListItem v-for="option of firstOptions" :key="option.value" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
                     </template>
@@ -42,18 +29,35 @@
                     </p>
                 </STListItem>
             </STList>
-            <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`Geen resultaten`)" />
-        </template>
-    </div>
+            <template v-if="infiniteObjectFetcher.errorState === null">
+                <STList>
+                    <STListItem v-for="option of lastOptions" :key="option.value" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ option.name }}
+                        </h3>
+                        <p v-if="option.description" class="style-description-small">
+                            {{ option.description }}
+                        </p>
+                    </STListItem>
+                </STList>
+                <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`Geen resultaten`)" />
+            </template>
+        </div>
+    </LoadingBoxTransition>
 </template>
 
 <script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
+import { LoadingBoxTransition } from '#containers/index.ts';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { mergeFilters } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
+import type { InfiniteObjectFetcher, ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '../tables/InfiniteObjectFetcherEnd.vue';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
@@ -64,11 +68,31 @@ const props = defineProps<{
 
 const relationFetcher = props.filter.relationFetcher;
 const objectFetcher: ObjectFetcher<ObjectType> = relationFetcher.fetcher;
-const infiniteObjectFetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
-relationFetcher.configureInfiniteObjectFetcher(infiniteObjectFetcher);
+const infiniteObjectFetcher = ref<InfiniteObjectFetcher<ObjectType> | null>(null) as Ref<InfiniteObjectFetcher<ObjectType> | null>;
+
+function initInfiniteObjectFetcher(subFilter?: StamhoofdFilter) {
+    if (infiniteObjectFetcher.value) {
+        return;
+    }
+
+    const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
+    relationFetcher.configureInfiniteObjectFetcher(fetcher);
+
+    if (subFilter) {
+        setInfiniteObjectFetcherFilter(fetcher, subFilter);
+    }
+
+    infiniteObjectFetcher.value = fetcher;
+}
+
+function setInfiniteObjectFetcherFilter(fetcher: InfiniteObjectFetcher<ObjectType>, filter: StamhoofdFilter) {
+    const newFilter = mergeFilters([filter, relationFetcher.filter ?? null]);
+    fetcher.setFilter(newFilter);
+}
+
 const errorBox = computed(() => {
-    if (infiniteObjectFetcher.errorState) {
-        return new ErrorBox(infiniteObjectFetcher.errorState);
+    if (infiniteObjectFetcher.value && infiniteObjectFetcher.value.errorState) {
+        return new ErrorBox(infiniteObjectFetcher.value.errorState);
     }
     return null;
 });
@@ -76,28 +100,61 @@ const errorBox = computed(() => {
 const searchQuery = ref('');
 
 watchEffect(() => {
-    infiniteObjectFetcher.setSearchQuery(searchQuery.value);
+    if (!infiniteObjectFetcher.value) {
+        return;
+    }
+    infiniteObjectFetcher.value.setSearchQuery(searchQuery.value);
 });
 
-const options = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.objects));
+const asyncOptions = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.value?.objects ?? []));
 
-const invisibleSelectedOptions = computed(() => {
-    const visibleOptions = options.value;
-    if (!visibleOptions) {
-        return props.filter.values;
+const firstOptions = computed(() => {
+    const defaultOptions = props.filter.defaultOptions;
+    return defaultOptions.concat(filterDistinctOptions(defaultOptions, props.filter.values));
+});
+
+const lastOptions = computed(() => filterDistinctOptions(firstOptions.value, asyncOptions.value));
+
+/**
+ * Returns the options that are not in the sourceOptions but are in the optionsToFilter.
+ * @param sourceOptions
+ * @param optionsToFilter
+ */
+function filterDistinctOptions(sourceOptions: RelationFilterOption<T>[], optionsToFilter: RelationFilterOption<T>[]) {
+    return optionsToFilter.filter(option => !sourceOptions.some(o => o.value === option.value && o.name === option.name));
+}
+
+const selectedSubFilterOption = ref(null) as any as Ref<RelationFetcherSubFilterOption | null>;
+
+const subFilterOptions = ref<null | RelationFetcherSubFilterOption[]>(null);
+
+// the sub filter options are async -> we should first load the options if a default option should be selected
+if (props.filter.relationFetcher.subFilter && props.filter.relationFetcher.subFilter.shouldHaveDefaultFilter) {
+    props.filter.relationFetcher.subFilter.loadOptions().then((options) => {
+        // will also init the infinite object fetcher
+        setSubFilterOptions(options);
+    }).catch(console.error);
+} else {
+    // else we can just init the infinite object fetcher
+    initInfiniteObjectFetcher();
+}
+
+function setSubFilterOption(option: RelationFetcherSubFilterOption) {
+    if (infiniteObjectFetcher.value === null) {
+        initInfiniteObjectFetcher(option.filter);
+    } else {
+        setInfiniteObjectFetcherFilter(infiniteObjectFetcher.value, option.filter);
     }
 
-    return props.filter.values.filter((option) => {
-        return !visibleOptions.some(vo => vo.value === option.value && vo.name === option.name);
-    });
-});
+    selectedSubFilterOption.value = option;
+}
 
-const defaultOption: RelationFetcherSubFilterOption = {
-    name: $t('Geen filter'),
-    filter: null,
-};
-
-const selectedSubFilterOption = ref(defaultOption) as any as Ref<RelationFetcherSubFilterOption>;
+function setSubFilterOptions(options: RelationFetcherSubFilterOption[]) {
+    subFilterOptions.value = options;
+    if (selectedSubFilterOption.value === null && props.filter.relationFetcher.subFilter) {
+        setSubFilterOption(props.filter.relationFetcher.subFilter.getDefaultOption(options));
+    }
+}
 
 async function showSubFilters(event: MouseEvent) {
     const subFilter = relationFetcher.subFilter;
@@ -107,16 +164,17 @@ async function showSubFilters(event: MouseEvent) {
 
     const button = event.currentTarget as HTMLElement;
 
-    const options = await subFilter.loadOptions();
+    const allOptions = await subFilter.getAllOptions();
+    setSubFilterOptions(allOptions);
 
     const menu = new ContextMenu([
-        [defaultOption, ...options].map((option) => {
+        allOptions.map((option) => {
             return new ContextMenuItem({
                 name: option.name,
-                selected: selectedSubFilterOption.value.name === option.name,
+                selected: selectedSubFilterOption.value && selectedSubFilterOption.value.name === option.name,
                 action: () => {
                     selectedSubFilterOption.value = option;
-                    infiniteObjectFetcher.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]));
+                    infiniteObjectFetcher.value?.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]));
                 },
             });
         }),

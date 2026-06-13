@@ -8,13 +8,13 @@ import { RelationFetcher, RelationFetcherSubFilter } from '../RelationUIFilter';
 type ObjectType = Group;
 
 export function useGroupsRelationFetcher() {
-    const fetcher = useGroupsObjectFetcher({requiredFilter: {
-        deletedAt: null
-    }});
+    const fetcher = useGroupsObjectFetcher({ requiredFilter: {
+        deletedAt: null,
+    } });
     const organizationManager = useOrganizationManager();
     const owner = useRequestOwner();
 
-    return ({periodId, type}: {periodId?: string, type?: GroupType | GroupType[]} = {}) => {
+    return ({ periodId, type, defaultPeriodId, isPeriodRequired }: { periodId?: string; type?: GroupType | GroupType[]; defaultPeriodId?: string; isPeriodRequired?: boolean } = {}) => {
         const filter: StamhoofdFilter = {};
 
         if (type) {
@@ -31,33 +31,45 @@ export function useGroupsRelationFetcher() {
 
         if (periodId === undefined) {
             getName = (group) => {
-                return `${group.settings.name.toString()} (${group.settings.period?.nameShort})`;
-            }
+                const groupName = group.settings.name.toString();
+                const periodName = group.settings.period?.nameShort;
+                if (periodName) {
+                    return `${groupName} (${periodName})`;
+                }
+                return groupName;
+            };
 
             subFilter = new RelationFetcherSubFilter({
                 getOptions: async () => {
                     const list = await organizationManager.value.loadPeriods(false, false, owner);
 
-                    return (list.periods.slice(0, 10) ?? []).map(p => {
+                    return (list.periods.slice(0, 10) ?? []).map((p) => {
                         return {
                             name: p.name,
-                            filter: { periodId: p.id }
-                        }
-                    })
-                }
-            })
+                            filter: { periodId: p.id },
+                        };
+                    });
+                },
+                isRequired: isPeriodRequired,
+                findDefaultOption: (option) => {
+                    if (option?.filter) {
+                        return (option.filter as { periodId: string }).periodId === defaultPeriodId;
+                    }
+                    return false;
+                },
+            });
         } else {
-            getName = (group) => group.settings.name.toString();
+            getName = group => group.settings.name.toString();
         }
 
         return new RelationFetcher({
             fetcher,
             getName,
-            getValue: (group) => group.id,
+            getValue: group => group.id,
             getDescription,
             filter,
             subFilter,
-            sort: [{ key: 'name', order: SortItemDirection.ASC }, {key: 'periodId', order: SortItemDirection.ASC}],
+            sort: [{ key: 'name', order: SortItemDirection.ASC }, { key: 'periodId', order: SortItemDirection.ASC }],
         });
-    }
+    };
 }

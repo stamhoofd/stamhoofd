@@ -1,6 +1,6 @@
 import type { StringLike } from '@stamhoofd/types/StringLike';
-import { DateTime } from 'luxon';
 import { friendlyFormatIBAN } from 'ibantools';
+import { DateTime } from 'luxon';
 import { Sorter } from './Sorter.js';
 
 export class Formatter {
@@ -553,6 +553,36 @@ export class Formatter {
             return last + '';
         }
         return array.join(separator) + lastSeparator + last;
+    }
+
+    /**
+     * Helper method to prevent long joined texts.
+     * If the maxLength is exceeded the last item will be replaced by the textIfOverflow callback.
+     * @param array
+     * @param options
+     * @returns
+     */
+    static joinLastLimited<T extends string | number>(array: T[], options: { separator?: string; lastSeparator?: string; maxLength?: number; textIfOverflow?: (notIncludedCount: number) => string }): string {
+        if (!options.maxLength) {
+            return Formatter.joinLast(array, options.separator, options.lastSeparator);
+        }
+
+        let totalLength = 0;
+        const itemsToInclude: (string | number)[] = [];
+
+        for (const item of array) {
+            totalLength += item.toString().length;
+            if (totalLength > options.maxLength) {
+                const notIncludedCount = array.length - itemsToInclude.length;
+                const lastText = options.textIfOverflow ? options.textIfOverflow(notIncludedCount) : $t('{count} meer', { count: notIncludedCount });
+                itemsToInclude.push(lastText);
+                break;
+            }
+
+            itemsToInclude.push(item);
+        }
+
+        return Formatter.joinLast(itemsToInclude, options.separator, options.lastSeparator);
     }
 
     static ordinalNumber(number: number): string {
