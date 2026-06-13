@@ -1,8 +1,8 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import PromiseView from '#containers/PromiseView.vue';
-import { useOrganizationsObjectFetcher } from '../../fetchers';
-import { Toast } from '../../overlays/Toast';
 
 export function useShowOrganization() {
     const present = usePresent();
@@ -22,7 +22,7 @@ export function useShowOrganization() {
                         Toast.error($t(`%yZ`)).show();
                         throw new Error('Organization not found');
                     }
-                    const OrganizationView = (await import('@stamhoofd/admin-frontend/src/views/organizations/OrganizationView.vue')).default;
+                    const OrganizationView = (await import('./OrganizationView.vue')).default;
                     return new ComponentWithProperties(OrganizationView, {
                         organization: organizations.results[0],
                         getNext: () => null,

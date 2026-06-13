@@ -25,7 +25,6 @@
         "@simonbackx/simple-errors": "^1.5",
         "@simonbackx/simple-networking": "1.23.0",
         "@simonbackx/vue-app-navigation": "2.20.1",
-        "@stamhoofd/admin-frontend": "*",
         "@stamhoofd/assets": "*",
         "@stamhoofd/dashboard": "*",
         "@stamhoofd/frontend-excel-export": "*",

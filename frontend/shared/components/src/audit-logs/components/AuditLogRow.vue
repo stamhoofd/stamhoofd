@@ -13,19 +13,19 @@
 
         <h3 v-if="showDescriptionInTitle" v-text="log.description" />
         <h3 v-else class="style-title-list">
-            <RenderTextComponent :text="log.renderableTitle" />
+            <RenderTextComponent :text="log.renderableTitle" :custom-renderers="customRenderers" />
         </h3>
 
         <p v-if="userDescription.length" class="style-description pre-wrap">
-            <RenderTextComponent :text="userDescription" />
+            <RenderTextComponent :text="userDescription" :custom-renderers="customRenderers" />
         </p>
         <p v-if="log.renderableDescription.length" class="style-description pre-wrap">
-            <RenderTextComponent :text="log.renderableDescription" />
+            <RenderTextComponent :text="log.renderableDescription" :custom-renderers="customRenderers" />
         </p>
 
         <p v-if="log.description && !showDescriptionInTitle" class="style-description-small pre-wrap" v-text="log.description" />
 
-        <PatchListText v-if="log.patchList" :items="log.patchList" />
+        <PatchListText v-if="log.patchList" :items="log.patchList" :custom-renderers="customRenderers" />
     </STListItem>
 </template>
 
@@ -40,14 +40,17 @@ import ProgressIcon from '../../icons/ProgressIcon.vue';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import AuditLogsView from '../AuditLogsView.vue';
 import PatchListText from './PatchListText.vue';
+import type { AuditLogCustomRenderers } from './RenderTextComponent';
 import { RenderTextComponent } from './RenderTextComponent';
 
 const props = withDefaults(
     defineProps<{
         log: AuditLog;
         canFilter?: boolean;
+        customRenderers?: AuditLogCustomRenderers;
     }>(), {
         canFilter: true,
+        customRenderers: undefined,
     });
 
 const userDescription: unknown[] = [];
@@ -99,6 +102,7 @@ async function showContext(event: MouseEvent) {
                         components: [
                             new ComponentWithProperties(AuditLogsView, {
                                 objectIds: [props.log.objectId],
+                                customRenderers: props.customRenderers,
                             }),
                         ],
                         modalDisplayStyle: 'popup',

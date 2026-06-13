@@ -23,10 +23,12 @@ import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import MembersMenu from './views/members/MembersMenu.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 import WebshopsTableView from './views/webshops/WebshopsTableView.vue';
+import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
 
 const getLoginRoot = useLoginRoot();
 const context = useContext();
 const platformManager = usePlatformManager();
+const auditLogRenderers = useAdminAuditLogRenderers();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
@@ -129,7 +131,9 @@ function getRoot() {
         icon: 'history',
         name: $t(`%GY`),
         component: new ComponentWithProperties(SplitViewController, {
-            root: new ComponentWithProperties(AuditLogsView, {}),
+            root: new ComponentWithProperties(AuditLogsView, {
+                customRenderers: auditLogRenderers,
+            }),
         }),
     });
 
