@@ -52,19 +52,22 @@
 
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
-import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue';
-import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
+import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
+import { Organization } from '@stamhoofd/structures/Organization.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -381,6 +384,23 @@ const canSetDefaultPeriod = computed(() => {
     );
 });
 
+const patchOrganization = usePatchOrganization();
+const pop = usePop();
+async function setDefaultPeriod() {
+    // Patch organization period id
+    try {
+        await patchOrganization(Organization.patch({
+            period: period.value,
+        }));
+
+        // The period
+        Toast.success($t('%17o', { name: period.value.period.name })).show();
+        await pop({ force: true });
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
 const allActions = computed(() => {
     const list: Action[] = [];
 
@@ -388,7 +408,15 @@ const allActions = computed(() => {
         list.push({
             icon: 'flag',
             title: $t('%8R'),
-            action: () => {
+            action: async () => {
+                if (!await CenteredMessage.confirm({
+                    title: $t('Dit werkjaar instellen als huidige werkjaar?'),
+                    description: $t('Dit werkjaar wordt zichtbaar in het ledenportaal voor leden om in te schrijven. Inschrijven voor andere werkjaren is dan niet langer mogelijk.'),
+                    confirmText: $t('Overschakelen'),
+                })) {
+                    return;
+                }
+                await setDefaultPeriod();
                 // return startPeriod(newestPeriod.value);
             },
         });
