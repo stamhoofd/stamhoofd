@@ -444,20 +444,43 @@ export class PlatformFamily {
             }
         }
 
+        const inOrganizationIds: (string | null)[] = [];
+
+        if (STAMHOOFD.userMode === 'platform') {
+            inOrganizationIds.push(null);
+        }
+
+        inOrganizationIds.push(...organizationIds.values());
+
         filter.push({
             groupIds: {
                 $in: [null, ...groups.values()],
             },
-            defaultAgeGroupIds: {
-                $in: [null, ...defaultGroupIds.values()],
-            },
-            organizationId: {
-                $in: [null, ...organizationIds.values()],
-            },
-            organizationTagIds: {
-                $in: [null, ...organizationTags.values()],
-            },
         });
+
+        if (inOrganizationIds.length > 1) {
+            filter.push({
+                organizationId: {
+                    $in: inOrganizationIds,
+                },
+            });
+        }
+
+        if (defaultGroupIds.size) {
+            filter.push({
+                defaultAgeGroupIds: {
+                    $in: [null, ...defaultGroupIds.values()],
+                },
+            });
+        }
+
+        if (organizationTags.size) {
+            filter.push({
+                organizationTagIds: {
+                    $in: [null, ...organizationTags.values()],
+                },
+            });
+        }
 
         if (ages.size) {
             filter.push({

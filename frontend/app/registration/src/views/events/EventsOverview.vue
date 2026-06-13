@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
 import EventView from '@stamhoofd/components/events/EventView.vue';
@@ -67,7 +67,8 @@ const $navigate = useNavigate();
 const { presentPositionableSheet } = usePositionableSheet();
 const memberManager = useMemberManager();
 
-const filterBuilders = useEventUIFilterBuilders({ platform: platform.value, organizations: organization.value ? [organization.value] : (memberManager.family.organizations ?? []), app: useAppContext() });
+const organizations = computed(() => organization.value ? [organization.value] : (memberManager.family.organizations ?? []));
+const filterBuilders = useEventUIFilterBuilders({ platform: platform.value, organizations: organizations.value, app: useAppContext() });
 
 let recommendedFilter = filterBuilders.value[0].fromFilter(memberManager.family.getRecommendedEventsFilter());
 const selectedUIFilter = ref(recommendedFilter) as Ref<null | UIFilter>;
@@ -182,12 +183,19 @@ async function editFilter(event: MouseEvent) {
 }
 
 function getRequiredFilter(): StamhoofdFilter | null {
-    return {
+    const filter: StamhoofdFilter = {
         'startDate': {
             $gt: new Date(),
         },
         'meta.visible': true,
     };
+
+    // filter should not be shown if only 1 organization in userMode organization (will always be true in organization mode)
+    if (STAMHOOFD.userMode === 'organization' && organizations.value.length === 1) {
+        filter['organizationId'] = organizations.value[0].id;
+    }
+
+    return filter;
 }
 
 </script>
