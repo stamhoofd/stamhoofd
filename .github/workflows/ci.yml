@@ -36,21 +36,27 @@ jobs:
         with:
           filters: |
             backend:
+              - 'yarn.lock'
               - 'shared/**'
               - 'backend/**'
             frontend:
+              - 'yarn.lock'
               - 'shared/**'
               - 'frontend/**'
             structures:
+              - 'yarn.lock'
               - 'shared/**'
             models:
+              - 'yarn.lock'
               - 'shared/**'
               - 'backend/shared/models/**'
             sql:
+              - 'yarn.lock'
               - 'shared/structures/**'
               - 'shared/utility/**'
               - 'backend/shared/sql/**'
             playwright:
+              - 'yarn.lock'
               - 'tests/playwright/**'
 
       # On pushes, paths-filter only diffs against the previous commit. If the
