@@ -16,7 +16,7 @@ import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue'
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { AccessRight, getEventTypes, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';

@@ -56,6 +56,7 @@ const baseRules = [
         rules: {
             'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false }],
             'import/no-extraneous-dependencies': ['error'],
+            'import/no-relative-packages': 'error',
         },
     },
 
@@ -116,6 +117,34 @@ export default {
         frontend: [
             ...baseRules,
             ...frontend,
+            {
+                rules: {
+                    'import/no-cycle': ['error', { maxDepth: 100, ignoreExternal: false, allowUnsafeDynamicCyclicDependency: true }],
+                    // Disallow importing from barrel files (index files that only re-export).
+                    // Import directly from the source module instead, e.g. '#components/Foo.js'
+                    // or '@stamhoofd/package-name/components/Bar' rather than a barrel.
+                    'no-restricted-imports': ['error', {
+                        // Bare package-root imports that resolve to a barrel index.ts.
+                        // These packages expose subpath imports (e.g. '@stamhoofd/components/components/Foo'),
+                        // which should be used instead of the barrel root.
+                        paths: [
+                            '@stamhoofd/components',
+                            '@stamhoofd/frontend-excel-export',
+                            '@stamhoofd/frontend-i18n',
+                            '@stamhoofd/frontend-pdf-builder',
+                            '@stamhoofd/networking',
+                        ].map(name => ({
+                            name,
+                            message: 'Do not import from the barrel root. Import directly from the source module instead, e.g. \'' + name + '/organizations/Foo.vue\'.',
+                        })),
+                        // Explicit imports of an index file (e.g. '../models/index.js').
+                        patterns: [{
+                            regex: '(^|/)index(\\.(js|ts))?$',
+                            message: 'Do not import from barrel files (index files). Import directly from the source module instead.',
+                        }],
+                    }],
+                },
+            },
         ],
         backend: [
             ...baseRules,

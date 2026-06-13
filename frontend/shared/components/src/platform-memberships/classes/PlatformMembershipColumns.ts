@@ -1,9 +1,10 @@
 import { Column } from '#tables/classes/Column.ts';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMembership } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ref } from 'vue';
-import { usePlatform } from '../../hooks';
+import { usePlatform } from '#hooks/usePlatform.ts';
 
 type ObjectType = PlatformMembership;
 

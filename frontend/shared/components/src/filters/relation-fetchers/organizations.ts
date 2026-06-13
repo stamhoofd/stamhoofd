@@ -1,5 +1,5 @@
 import { SortItemDirection } from '@stamhoofd/structures';
-import { useOrganizationsObjectFetcher } from '../../fetchers';
+import { useOrganizationsObjectFetcher } from '#fetchers/useOrganizationsObjectFetcher.ts';
 import { RelationFetcher } from '../RelationUIFilter';
 
 export function useOrganizationsRelationFetcher() {

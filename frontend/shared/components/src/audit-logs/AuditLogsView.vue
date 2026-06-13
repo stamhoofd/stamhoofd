@@ -61,11 +61,13 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Ref} from 'vue';
 import { computed, onActivated, ref, watch } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuditLogsObjectFetcher } from '../fetchers';
+import { useAuditLogsObjectFetcher } from '#fetchers/useAuditLogsObjectFetcher.ts';
 import { useAuditLogUIFilterBuilders } from '../filters/filterBuilders';
 import type { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
-import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import AuditLogRow from './components/AuditLogRow.vue';
 import type { AuditLogCustomRenderers } from './components/RenderTextComponent';
 

@@ -1,0 +1,22 @@
+{
+    "name": "@stamhoofd/vite-config",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./vite.config.shared.ts",
+        "./svgNamespacePlugin": "./svgNamespacePlugin.ts"
+    },
+    "dependencies": {
+        "@stamhoofd/assets": "*",
+        "@stamhoofd/cli": "*",
+        "@stamhoofd/test-utils": "*",
+        "@stamhoofd/types": "*",
+        "@vitejs/plugin-vue": "^6.0.7",
+        "@vitest/browser-playwright": "^4.1.8",
+        "postcss-discard-duplicates": "^8.0.1",
+        "vite": "^8.0.0",
+        "vite-svg-2-webfont": "*",
+        "vitest": "^4.1.8"
+    }
+}

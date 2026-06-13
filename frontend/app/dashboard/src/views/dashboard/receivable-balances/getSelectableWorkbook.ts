@@ -1,5 +1,7 @@
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
-import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
+import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
+import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
+import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 import { type useTranslate } from '@stamhoofd/frontend-i18n/I18nController';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

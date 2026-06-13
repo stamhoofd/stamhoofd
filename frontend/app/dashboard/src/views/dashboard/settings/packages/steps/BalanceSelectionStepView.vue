@@ -58,8 +58,11 @@
 </template>
 
 <script setup lang="ts">
-import type { NavigationActions } from '@stamhoofd/components';
-import { ErrorBox, useErrors, useNavigationActions, usePositionableSheet } from '@stamhoofd/components';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';

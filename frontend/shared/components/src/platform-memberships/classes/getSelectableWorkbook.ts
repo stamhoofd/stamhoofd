@@ -1,4 +1,6 @@
-import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
+import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
+import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
+import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 
 export function getSelectableColumns() {
     const memberCategory = $t('%1PM');

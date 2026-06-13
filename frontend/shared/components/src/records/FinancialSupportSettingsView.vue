@@ -78,7 +78,7 @@ import { FinancialSupportSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { usePatch } from '../hooks';
+import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
 const props = withDefaults(

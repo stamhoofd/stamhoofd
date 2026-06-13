@@ -13,7 +13,8 @@ import BoxedController from '@stamhoofd/components/containers/BoxedController.vu
 import type { Organization } from '@stamhoofd/structures';
 import { OrganizationCheckout, OrganizationType, OrganizationTypeHelper, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
 import { useActivatePackages } from '../dashboard/settings/packages/hooks/useActivatePackages';
-import { GlobalEventBus, useUser } from '@stamhoofd/components';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus';
+import { useUser } from '@stamhoofd/components/hooks/useUser';
 
 /**
  * The ordered list of steps the user walks through to onboard their member administration.

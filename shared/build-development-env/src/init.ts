@@ -1,3 +1,4 @@
+import type { SharedEnvironment } from '@stamhoofd/types/Environment';
 import { concurrently  } from 'concurrently';
 import type {ConcurrentlyCommandInput} from 'concurrently';
 import { buildConfig } from './build.js';

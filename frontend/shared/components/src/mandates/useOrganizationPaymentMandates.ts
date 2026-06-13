@@ -3,7 +3,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '#overlays/Toast';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { reactive, ref } from 'vue';
 import { useGlobalEventListener } from '../hooks/useGlobalEventListener';

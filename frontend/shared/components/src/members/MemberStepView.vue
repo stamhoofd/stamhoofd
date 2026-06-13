@@ -52,7 +52,7 @@ import { computed, onActivated, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { useAppContext } from '../context';
+import { useAppContext } from '#context/appContext.ts';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import CodeInput from '../inputs/CodeInput.vue';

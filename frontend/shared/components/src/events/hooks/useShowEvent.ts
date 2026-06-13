@@ -1,7 +1,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import PromiseView from '#containers/PromiseView.vue';
-import { useEventsObjectFetcher } from '../../fetchers';
+import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { Toast } from '../../overlays/Toast';
 import EventOverview from '../EventOverview.vue';
 

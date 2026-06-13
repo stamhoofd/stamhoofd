@@ -1,5 +1,6 @@
 import type { Decoder } from "@simonbackx/simple-encoding";
-import { SessionContext, NetworkManager } from "@stamhoofd/networking";
+import { SessionContext } from "@stamhoofd/networking/SessionContext";
+import { NetworkManager } from "@stamhoofd/networking/NetworkManager";
 import { Organization } from "@stamhoofd/structures";
 
 export async function idToOrganization(orgId: string) {

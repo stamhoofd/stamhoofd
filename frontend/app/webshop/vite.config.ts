@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
-
-import { buildConfig } from '../../vite.config.shared';
+import { resolve } from 'path';
+import { buildConfig } from '@stamhoofd/vite-config';
 
 // Set timezone!
 process.env.TZ = 'UTC';
@@ -11,5 +11,6 @@ export default defineConfig({
     ...await buildConfig({
         name: 'webshop',
         port: 8082,
+        frontendDir: resolve(import.meta.dirname, '../..'),
     }),
 } as any);

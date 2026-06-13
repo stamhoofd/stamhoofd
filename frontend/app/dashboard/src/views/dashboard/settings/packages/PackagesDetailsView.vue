@@ -29,7 +29,7 @@
 
 <script lang="ts" setup>
 import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { STPackage } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';

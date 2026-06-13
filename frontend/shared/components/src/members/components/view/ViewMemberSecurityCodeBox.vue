@@ -21,7 +21,7 @@ import type { PlatformMember } from '@stamhoofd/structures';
 import { MemberDetails, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { useAuth } from '../../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';

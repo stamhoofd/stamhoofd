@@ -1,12 +1,12 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMembership } from '@stamhoofd/structures';
 import { ExcelExportType } from '@stamhoofd/structures';
-import { useContext } from '../../hooks';
-import type { TableAction, TableActionSelection } from '../../tables/classes';
-import { AsyncTableAction, MenuTableAction } from '../../tables/classes';
+import { useContext } from '#hooks/useContext.ts';
+import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
+import { AsyncTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function usePlatformMembershipActions() {

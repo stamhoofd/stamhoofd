@@ -4,7 +4,6 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PlatformMember, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { GroupType, PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
-import { Formatter } from '../../../../../../shared/utility/dist/Formatter';
 import { GlobalEventBus } from '../../EventBus';
 import { Toast } from '../../overlays/Toast';
 import PaymentSuccessView from '../../payments/PaymentSuccessView.vue';
@@ -14,6 +13,7 @@ import { updateContextFromMembersBlob } from '../helpers/updateContextFromMember
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
+import { Formatter } from '@stamhoofd/utility';
 
 export async function startCheckout({ checkout, context, displayOptions, admin, members }: { checkout: RegisterCheckout; context: SessionContext; displayOptions: DisplayOptions; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     checkout.validate({});

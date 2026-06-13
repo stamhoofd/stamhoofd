@@ -131,12 +131,12 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { RegisterCodeStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

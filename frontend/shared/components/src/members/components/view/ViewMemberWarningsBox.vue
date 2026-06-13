@@ -19,8 +19,10 @@ import type { MemberPlatformMembership, PlatformMember } from '@stamhoofd/struct
 import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
-import { useAuth, useOrganization } from '../../../hooks';
+import { useDataPermissionSettings } from '#groups/hooks/useDataPermissionSettings.ts';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({

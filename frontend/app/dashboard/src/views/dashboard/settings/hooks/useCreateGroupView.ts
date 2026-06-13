@@ -1,7 +1,8 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditGroupView, useRequiredOrganization } from '@stamhoofd/components';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { Group, GroupCategory, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 

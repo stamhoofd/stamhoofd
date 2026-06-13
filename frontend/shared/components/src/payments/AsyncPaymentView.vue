@@ -11,10 +11,10 @@ import type { Payment} from '@stamhoofd/structures';
 import { PaymentGeneral } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { ref } from 'vue';
-import { LoadingViewTransition } from '../containers';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useContext } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
 import PaymentView from './PaymentView.vue';
 
 const props = defineProps<{

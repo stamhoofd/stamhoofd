@@ -1,3 +1,5 @@
+import type { SharedEnvironment } from '@stamhoofd/types/Environment';
+import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import { Formatter } from '@stamhoofd/utility';
 import type { ConcurrentlyCommandInput } from 'concurrently';
 import fs from 'fs/promises';

@@ -102,7 +102,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { usePlatform } from '@stamhoofd/components';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

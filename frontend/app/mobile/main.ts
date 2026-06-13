@@ -11,6 +11,7 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
+import { App } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
@@ -19,10 +20,9 @@ import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { InAppReview } from '@capacitor-community/in-app-review';
 import { createApp } from 'vue';
 
-import App from '../dashboard/src/App.vue';
 import { CapacitorStorage } from './src/CapacitorStorage.js';
-import FileOpener from './src/FileOpenerPlugin/index.js';
-import QRScanner from './src/QRScannerPlugin/index.js';
+import FileOpener from './src/FileOpenerPlugin.js';
+import QRScanner from './src/QRScannerPlugin.js';
 import { UpdateStatus } from './src/UpdateStatus.js';
 import { WrapperHTTPRequest } from './src/WrapperHTTPRequest.js';
 

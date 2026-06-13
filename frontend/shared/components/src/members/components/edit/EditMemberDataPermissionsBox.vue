@@ -48,8 +48,9 @@ import type { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
-import { useDataPermissionSettings } from '../../../groups';
-import { useOrganization, usePlatform } from '../../../hooks';
+import { useDataPermissionSettings } from '#groups/hooks/useDataPermissionSettings.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import Title from './Title.vue';
 
 defineOptions({

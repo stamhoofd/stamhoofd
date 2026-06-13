@@ -22,7 +22,7 @@ import type { ErrorBox } from '../../errors/ErrorBox';
 import type { Validator } from '../../errors/Validator';
 import PermyriadInputBox from '../../inputs/PermyriadInputBox.vue';
 import PriceInputBox from '../../inputs/PriceInputBox.vue';
-import { useFinancialSupportSettings } from '../hooks';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 
 const props = withDefaults(
     defineProps<{

@@ -56,7 +56,10 @@ import { assertSort, isEmptyFilter, LimitedFilteredRequest, MembersBlob, Paginat
 import type { Ref} from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
-import { useAuth, useContext, useOrganization, usePlatform } from '../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { NavigationActions} from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';

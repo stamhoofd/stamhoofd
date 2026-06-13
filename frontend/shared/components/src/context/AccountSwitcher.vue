@@ -41,7 +41,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useOrganization } from '../hooks/useOrganization';
 import { useUser } from '../hooks/useUser';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const $user = useUser();
 const $navigate = useNavigate();

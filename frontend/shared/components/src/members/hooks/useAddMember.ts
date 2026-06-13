@@ -1,8 +1,9 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import type { PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
-import { EditMemberGeneralBox, MemberStepView } from '..';
-import { useAppContext } from '../../context';
+import EditMemberGeneralBox from '#members/components/edit/EditMemberGeneralBox.vue';
+import MemberStepView from '#members/MemberStepView.vue';
+import { useAppContext } from '#context/appContext.ts';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 import { useOrganization } from '#hooks/useOrganization.ts';

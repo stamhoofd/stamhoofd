@@ -39,7 +39,7 @@ import type { RecordSettings} from '@stamhoofd/structures';
 import { PermissionLevel, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
-import { usePatchMoveUpDownSingle } from '../../hooks';
+import { usePatchMoveUpDownSingle } from '#hooks/usePatchMoveUpDown.ts';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import type { RecordEditorSettings } from '../RecordEditorSettings';
 

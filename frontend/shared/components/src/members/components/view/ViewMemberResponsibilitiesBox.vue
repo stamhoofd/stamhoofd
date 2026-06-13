@@ -24,7 +24,9 @@
 <script setup lang="ts">
 import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useAuth, useOrganization, usePlatform } from '../../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useMemberActions } from '../../classes/MemberActionBuilder';
 import ViewMemberResponsibilityRow from './ViewMemberResponsibilityRow.vue';
 

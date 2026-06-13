@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { computed, ref, unref } from 'vue';
-import { LoadingBoxTransition } from '../containers';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import type { QuickActions } from './classes/QuickActions';
 
 const props = withDefaults(defineProps<{

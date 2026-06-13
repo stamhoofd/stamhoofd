@@ -3,15 +3,18 @@ import type { AppType, EventNotificationType, Group, LoadedPermissions, Organiza
 import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useContext, useOrganization, usePlatform } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
+import { NumberFilterBuilder } from './NumberUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
+import { NumberFilterFormat } from './NumberFilterFormat';
 
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [

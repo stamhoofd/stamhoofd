@@ -17,6 +17,7 @@
         "@stamhoofd/cli": "*",
         "@stamhoofd/models": "*",
         "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "pino": "^10.1.1"
     },

@@ -18,7 +18,7 @@
 import type { PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useAuth } from '../../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
 import { useEditMember } from '../../composables/useEditMember';
 
 defineOptions({

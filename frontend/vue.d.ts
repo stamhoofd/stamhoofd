@@ -1,7 +1,10 @@
 import type { FormatInputDirective } from '@stamhoofd/components/directives/FormatInputDirective';
-import type { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import type { MemberManager, OrganizationManager, SessionContext } from '@stamhoofd/networking';
+import type { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import type { MemberManager } from '@stamhoofd/networking/MemberManager';
+import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { CountryHelper, Organization, Platform, User } from '@stamhoofd/structures';
+import type { FrontendEnvironment } from '@stamhoofd/types/Environment';
 import type { Formatter } from '@stamhoofd/utility';
 
 export { };

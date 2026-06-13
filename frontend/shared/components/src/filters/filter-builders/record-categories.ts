@@ -1,8 +1,9 @@
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import type { RecordCategory } from '@stamhoofd/structures';
 import { FilterWrapperMarker, RecordType } from '@stamhoofd/structures';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
+import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 

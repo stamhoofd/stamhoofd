@@ -12,7 +12,7 @@ import { defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, use
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, markRaw, onBeforeUnmount, ref, toRaw, unref } from 'vue';
-import { SegmentedControl } from '../inputs';
+import SegmentedControl from '#inputs/SegmentedControl.vue';
 
 type Item = { name: string; component: ComponentWithProperties };
 

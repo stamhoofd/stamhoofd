@@ -1,7 +1,9 @@
 import { useAppContext } from '#context/appContext';
 import { useContext } from '#hooks/useContext.ts';
 import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import { CoverImageContainer, TabBarController, TabBarItem } from '../containers';
+import CoverImageContainer from '#containers/CoverImageContainer.vue';
+import TabBarController from '#containers/TabBarController.vue';
+import { TabBarItem } from '#containers/TabBarItem.ts';
 import LoginView from './LoginView.vue';
 import MembersHomeView from './MembersHomeView.vue';
 import RedirectView from './RedirectView.vue';

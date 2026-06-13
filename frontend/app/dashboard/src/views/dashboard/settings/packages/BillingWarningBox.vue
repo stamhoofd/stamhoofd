@@ -70,7 +70,7 @@ import { computed } from 'vue';
 import BillingSettingsView from '../BillingSettingsView.vue';
 import { useLoadPayableBalance } from '../hooks/useLoadPayableBalance';
 import PackageSettingsView from './PackageSettingsView.vue';
-import { usePlatform } from '@stamhoofd/components';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 
 const props = withDefaults(
     defineProps<{

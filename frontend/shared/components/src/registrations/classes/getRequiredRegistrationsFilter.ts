@@ -1,6 +1,7 @@
 import type { Group, StamhoofdFilter } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
-import { useOrganization, usePlatform } from '../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { Formatter } from '@stamhoofd/utility';
 
 export function useRequiredRegistrationsFilter() {

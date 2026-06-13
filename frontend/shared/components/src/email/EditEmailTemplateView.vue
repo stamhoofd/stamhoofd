@@ -38,7 +38,9 @@ import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useOrganization, usePatch, usePlatform } from '../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
 const props = withDefaults(

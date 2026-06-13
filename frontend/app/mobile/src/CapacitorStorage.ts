@@ -1,5 +1,5 @@
 import { Preferences as Storage } from '@capacitor/preferences';
-import { KeyValueContainer } from '@stamhoofd/networking'
+import { KeyValueContainer } from '@stamhoofd/networking/Storage'
 
 export class CapacitorStorage implements KeyValueContainer {
     async setItem(key: string, value: string): Promise<void> {

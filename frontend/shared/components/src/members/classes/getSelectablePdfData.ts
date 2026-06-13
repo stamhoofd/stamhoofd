@@ -1,4 +1,4 @@
-import type { SelectableColumn } from '@stamhoofd/frontend-excel-export';
+import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import type { Group, Organization, Parent, PlatformMember, RecordSettings } from '@stamhoofd/structures';
 import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, Platform, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';

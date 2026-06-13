@@ -174,7 +174,7 @@ export class CheckoutStepsManager {
                 url,
                 active: category.isEnabled(checkout),
                 getComponent: async () => {
-                    const { FillRecordCategoryView } = await import(/* webpackChunkName: "FillRecordCategoryView", webpackPrefetch: true */ '@stamhoofd/components');
+                    const { default: FillRecordCategoryView } = await import(/* webpackChunkName: "FillRecordCategoryView", webpackPrefetch: true */ '@stamhoofd/components/records/FillRecordCategoryView.vue');
                     return new ComponentWithProperties(FillRecordCategoryView, {
                         category,
                         url,

@@ -205,7 +205,8 @@ import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfi
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
+import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
+import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';

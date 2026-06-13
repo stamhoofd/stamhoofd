@@ -2,7 +2,7 @@ import { Formatter } from '@stamhoofd/utility';
 import type { VueWrapper } from '@vue/test-utils';
 import { mount } from '@vue/test-utils';
 import { describe, expect, test, vi } from 'vitest';
-import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
+import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { Locator } from '@vitest/browser/context';

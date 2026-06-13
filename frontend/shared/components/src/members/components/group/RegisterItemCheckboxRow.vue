@@ -37,8 +37,8 @@
 import type { Group, Organization, PlatformMember} from '@stamhoofd/structures';
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCheckoutRegisterItem } from '../../checkout';
-import { useAppContext } from '../../../context';
+import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useAppContext } from '#context/appContext.ts';
 
 const props = defineProps<{
     group: Group;

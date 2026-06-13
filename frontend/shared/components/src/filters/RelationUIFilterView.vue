@@ -53,8 +53,8 @@ import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import type { ObjectFetcher } from '../tables';
-import { useInfiniteObjectFetcher } from '../tables';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '../tables/InfiniteObjectFetcherEnd.vue';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
 

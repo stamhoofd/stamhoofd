@@ -38,11 +38,17 @@
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref } from 'vue';
-import { CodeInput, ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, useAppNavigate, useContext } from '@stamhoofd/components';
+import CodeInput from '@stamhoofd/components/inputs/CodeInput.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import { LoginHelper } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { AppRoute } from '@stamhoofd/structures';
 
 const props = defineProps<{

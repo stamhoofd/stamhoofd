@@ -1,6 +1,7 @@
 import type { NamedObject, Organization, OrganizationTag} from '@stamhoofd/structures';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
-import { useAuth, usePlatform } from '../../hooks';
+import { useAuth } from '#hooks/useAuth.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 
 export function useEventPermissions() {
     const auth = useAuth();

@@ -67,7 +67,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import { useAppContext } from '../context';
+import { useAppContext } from '#context/appContext.ts';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
 import RegistrationPeriodRow from './RegistrationPeriodRow.vue';
 

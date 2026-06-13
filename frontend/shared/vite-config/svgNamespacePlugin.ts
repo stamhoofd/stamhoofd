@@ -41,10 +41,10 @@ function replaceSource(id: string, source: string, options: {namespace: string, 
 }
 
 
-export default function svgNamespacePlugin(options: {namespace: string, colors?: Record<string, `#${string}`>}): import('vite').Plugin[] {  
-    const name = 'svg-namespace-plugin';    
+export default function svgNamespacePlugin(options: {namespace: string, colors?: Record<string, `#${string}`>}): import('vite').Plugin[] {
+    const name = 'svg-namespace-plugin';
     let base: Partial<import('vite').Plugin> = {}
-    
+
     if (options.namespace) {
         base = {
             async resolveId(source: string, importer: string|undefined, resolveOptions) {
@@ -52,10 +52,10 @@ export default function svgNamespacePlugin(options: {namespace: string, colors?:
                     return null;
                 }
 
-                if (source.startsWith('@stamhoofd/assets/images/illustrations/')) { 
+                if (source.startsWith('@stamhoofd/assets/images/illustrations/')) {
                     // Replace with namespace
                     const replaced = source.replace('@stamhoofd/assets/images/illustrations/', '@stamhoofd/assets/images/illustrations/'+options.namespace + '/')
-                    
+
                     const resolved = await this.resolve(
                         replaced,
                         importer,
@@ -79,10 +79,10 @@ export default function svgNamespacePlugin(options: {namespace: string, colors?:
             enforce: 'pre', // load before other plugins
             name,
             apply: 'build',
-    
+
             ...base,
             load(id) {
-                if (options.colors && id.endsWith('.svg') && id.includes('/assets/images/illustrations/')) {    
+                if (options.colors && id.endsWith('.svg') && id.includes('/assets/images/illustrations/')) {
                     const source = fs.readFileSync(id, 'utf-8');
 
                     const updatedSource = replaceSource(id, source, options)
@@ -101,7 +101,7 @@ export default function svgNamespacePlugin(options: {namespace: string, colors?:
             enforce: 'pre', // load before other plugins
             name,
             apply: 'serve',
-    
+
             ...base
             // todo: replace colors
         }

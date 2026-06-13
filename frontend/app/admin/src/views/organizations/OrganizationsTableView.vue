@@ -36,7 +36,7 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';

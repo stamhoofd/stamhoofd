@@ -33,7 +33,7 @@ import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableActi
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
 import type { EventNotification, EventNotificationType, StamhoofdFilter } from '@stamhoofd/structures';
 import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

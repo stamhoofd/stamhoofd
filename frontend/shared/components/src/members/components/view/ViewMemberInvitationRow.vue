@@ -34,7 +34,7 @@ import type { MemberRegistrationInvitation, PlatformMember } from '@stamhoofd/st
 import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { useOrganization } from '../../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import IconContainer from '../../../icons/IconContainer.vue';
 import RegistrationInvitationIcon from '../../../quick-actions/RegistrationInvitationIcon.vue';
 

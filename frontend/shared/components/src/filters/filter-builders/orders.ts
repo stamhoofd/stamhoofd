@@ -4,13 +4,14 @@ import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
+import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getCartFilterBuilder } from './checkout';
 import { simpleMultipleChoiceFilterFactory } from './helpers';
 import { PaymentFilterBuilders } from './payments';
 import { getFilterBuildersForRecordCategories } from './record-categories';
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 
 export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | WebshopPreview) {
     const builders: UIFilterBuilders = [

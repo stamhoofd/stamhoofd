@@ -31,7 +31,8 @@ import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/stru
 import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { useOrganization, usePlatform } from '../../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import ResponsibilityIcon from '../ResponsibilityIcon.vue';
 
 const props = defineProps<{

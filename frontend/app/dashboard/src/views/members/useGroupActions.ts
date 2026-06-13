@@ -1,7 +1,9 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditGroupView, Toast } from '@stamhoofd/components';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';

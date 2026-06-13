@@ -1,7 +1,7 @@
 import { useOrganization } from '#hooks/useOrganization';
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { GlobalEventBus } from '../EventBus';
 import { useContext } from '../hooks/useContext';

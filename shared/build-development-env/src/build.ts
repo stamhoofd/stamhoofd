@@ -1,3 +1,4 @@
+import type { BackendSpecificEnvironment, FrontendSpecificEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
 import type { InitFunction } from './buildPresets.js';
 import { buildPresets } from './buildPresets.js';
 import { getProjectPath } from './helpers/project-path.js';

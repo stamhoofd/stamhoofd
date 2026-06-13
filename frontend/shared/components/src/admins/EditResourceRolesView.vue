@@ -34,7 +34,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import type { AccessRight, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
 import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useOrganization } from '../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { Toast } from '../overlays/Toast';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdminLabels } from './hooks/useAdminLabels';

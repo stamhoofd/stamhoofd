@@ -39,7 +39,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { ref } from 'vue';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 

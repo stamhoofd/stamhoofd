@@ -21,6 +21,9 @@
     "publishConfig": {
         "access": "public"
     },
+    "dependencies": {
+        "jose": "^5.9.6"
+    },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"
     }

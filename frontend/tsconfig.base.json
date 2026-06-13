@@ -40,9 +40,6 @@
         // TS 6 defaults this to true; pin to keep Vite-handled side-effect imports (css/scss/assets) working.
         "noUncheckedSideEffectImports": false,
         "paths": {
-            "@stamhoofd/components": [
-                "./shared/components/index.ts"
-            ],
             "@stamhoofd/components/*": [
                 "./shared/components/src/*"
             ],

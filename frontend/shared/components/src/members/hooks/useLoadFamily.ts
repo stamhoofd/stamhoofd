@@ -4,7 +4,7 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { MembersBlob } from '@stamhoofd/structures';
-import { updateContextFromMembersBlob } from '../helpers';
+import { updateContextFromMembersBlob } from '#members/helpers/updateContextFromMembersBlob.ts';
 
 export function useLoadFamilyFromId() {
     const context = useContext();

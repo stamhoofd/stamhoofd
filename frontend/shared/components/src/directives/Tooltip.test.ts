@@ -4,8 +4,8 @@ import { mount } from '@vue/test-utils';
 import { page } from '@vitest/browser/context';
 import { defineComponent, h, withDirectives } from 'vue';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { TooltipDirective } from '@stamhoofd/components';
-import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
+import TooltipDirective from '#directives/Tooltip.ts';
+import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 // DO NOT COPY THIS PATTERN!
 // DO NOT COPY THIS PATTERN!
@@ -26,7 +26,7 @@ describe('TooltipDirective', () => {
             setup() {
                 return () => withDirectives(
                     h('button', {
-                        type: 'button',
+                        'type': 'button',
                         'data-testid': 'tooltip-target',
                     }, 'Hover me'),
                     [[TooltipDirective, 'Tooltip test']],

@@ -3,7 +3,9 @@ import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { AppType, Organization, User, UserWithMembers } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 
-import { useOrganization, usePlatform, useUser } from '../../hooks';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { useAppNavigate } from '../../hooks/useAppNavigate';
 import { useAppContext } from '../appContext';
 

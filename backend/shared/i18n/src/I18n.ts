@@ -6,6 +6,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
+import type { LocalizedDomain } from '@stamhoofd/types/Localized';
 import { createRequire } from 'node:module';
 
 // Polyfill require.resolve, since import.meta.resolve is not supported by vitest

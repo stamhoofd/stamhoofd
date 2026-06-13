@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import GroupTreeVue from './components/GroupTree.vue';
 import { defineRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
-import { LoginView } from '@stamhoofd/components';
+import LoginView from '#auth/LoginView.vue';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
 import { PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';

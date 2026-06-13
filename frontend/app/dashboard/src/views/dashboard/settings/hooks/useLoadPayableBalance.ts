@@ -1,6 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { DetailedPayableBalance } from '@stamhoofd/structures';
 
 export function useLoadPayableBalance() {

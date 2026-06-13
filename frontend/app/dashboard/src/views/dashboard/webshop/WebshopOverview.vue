@@ -476,7 +476,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView.vue';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { WebshopPreview } from '@stamhoofd/structures';
@@ -500,7 +500,7 @@ import WebshopSeatingView from './orders/WebshopSeatingView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
-import { usePlatform } from '@stamhoofd/components';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 
 const props = defineProps<{ preview: WebshopPreview }>();
 const context = useContext();

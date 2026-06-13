@@ -1,15 +1,18 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, Toast, useRequiredOrganization } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
-import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 /**
  * Actions for a single group category (edit, create, reorder, move, merge, delete).
@@ -83,7 +86,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             await present({
                 components: [
-                    new ComponentWithProperties(EditCategoryGroupsView, {
+                    AsyncComponent(() => import('../dashboard/groups/EditCategoryGroupsView.vue'), {
                         category: props.category,
                         organization: organization.value,
                         period: props.period,

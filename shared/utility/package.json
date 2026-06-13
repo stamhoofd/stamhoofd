@@ -28,6 +28,7 @@
         "access": "public"
     },
     "dependencies": {
+        "@stamhoofd/types": "*",
         "ibantools": "^4.5.4"
     },
     "devDependencies": {

@@ -94,11 +94,14 @@ import type { GroupOptionMenu } from '@stamhoofd/structures';
 import { Group, GroupOption, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import type { useErrors } from '../../errors/useErrors';
-import { useDraggableArray, useEmitPatch, usePatchableArray, usePatchMoveUpDownSingle } from '../../hooks';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
+import { usePatchableArray } from '#hooks/usePatchableArray.ts';
+import { usePatchMoveUpDownSingle } from '#hooks/usePatchMoveUpDown.ts';
 import StepperInput from '../../inputs/StepperInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import { useFinancialSupportSettings } from '../hooks';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import GroupOptionMenuView from './GroupOptionMenuView.vue';
 import GroupOptionView from './GroupOptionView.vue';
 

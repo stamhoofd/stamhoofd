@@ -22,14 +22,14 @@
 <script setup lang="ts">
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
 import { Invoice } from '@stamhoofd/structures';
 import { onMounted, ref  } from 'vue';
 import type {Ref} from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useContext } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
 import DownloadInvoiceRow from './DownloadInvoiceRow.vue';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 

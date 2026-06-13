@@ -1,15 +1,18 @@
+import { useShowHtml } from '#audit-logs/hooks/useShowHtml.ts';
+import type { useAppContext } from '#context/appContext.ts';
+import { useShowEvent } from '#events/hooks/useShowEvent.ts';
+import type { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
+import type { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
+import type { useOrganizationsObjectFetcher } from '#fetchers/useOrganizationsObjectFetcher.ts';
+import type { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetcher.ts';
+import { useShowMember } from '#members/hooks/useShowMember.ts';
+import { useShowPayment } from '#payments/hooks/useShowPayment.ts';
 import type { usePresent } from '@simonbackx/vue-app-navigation';
 import { AuditLogReplacement, AuditLogReplacementType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';
-import type { useAppContext } from '../../context';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
-import { useShowEvent } from '../../events';
-import type { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
-import { useShowMember } from '../../members';
-import { useShowPayment } from '../../payments';
-import { useShowHtml } from '../hooks';
 
 export type RenderResult = string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
 

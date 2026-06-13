@@ -18,7 +18,7 @@ import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { SortItemDirection } from "@stamhoofd/structures";
 import { computed, useTemplateRef } from 'vue';
 
-import type { Column } from "./classes";
+import type { Column } from '#tables/classes/Column.ts';
 
 const props = defineProps<{
     columns: Column<any, any>[];

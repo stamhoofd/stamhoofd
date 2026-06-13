@@ -6,7 +6,6 @@ import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponen
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
 
 // You can declare mixins as the same style as components.
 export function useEditGroupsView() {
@@ -34,6 +33,7 @@ export function useEditGroupsView() {
             });
 
             return PromiseComponent(async () => {
+                const { default: EditCategoryGroupsView } = await import('../../groups/EditCategoryGroupsView.vue');
                 const periods = (await getPeriods(period)).map((x) => {
                     if (x.id === period.id) {
                         return x.patch(p);
@@ -61,6 +61,7 @@ export function useEditGroupsView() {
 
         return PromiseComponent(
             async () => {
+                const { default: EditCategoryGroupsView } = await import('../../groups/EditCategoryGroupsView.vue');
                 const periods = (await getPeriods(period)).map((x) => {
                     if (x.id === period.id) {
                         return x.patch(p);

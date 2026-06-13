@@ -3,10 +3,11 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PlatformMember, Registration} from '@stamhoofd/structures';
 import { appToUri, PermissionLevel, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
-import { useContext, useOrganization } from '../../hooks';
-import type { TableAction } from '../../tables/classes';
-import { InMemoryTableAction, MenuTableAction } from '../../tables/classes';
+import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { PlatformFamilyManager} from '../PlatformFamilyManager';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 

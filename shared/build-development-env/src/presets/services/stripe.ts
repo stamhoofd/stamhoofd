@@ -1,3 +1,4 @@
+import type { BackendEnvironment } from '@stamhoofd/types/Environment';
 import type {ConcurrentlyCommandInput} from 'concurrently';
 import util from 'util';
 import { exec } from 'child_process';

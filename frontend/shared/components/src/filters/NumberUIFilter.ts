@@ -1,18 +1,12 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { unwrapFilterByPath } from '@stamhoofd/structures';
-
 import { Formatter } from '@stamhoofd/utility';
+import { NumberFilterFormat } from './NumberFilterFormat.ts';
 import NumberUIFilterView from './NumberUIFilterView.vue';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
-
-export enum UINumberFilterMode {
-    GreaterThan = 'GreaterThan',
-    LessThan = 'LessThan',
-    Equals = 'Equals',
-    NotEquals = 'NotEquals',
-}
+import { UINumberFilterMode } from './UINumberFilterMode.ts';
 
 export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
     value = 0;
@@ -97,11 +91,7 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
     }
 }
 
-export enum NumberFilterFormat {
-    Number,
-    Currency,
-    TimeMinutes,
-}
+
 
 export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     key = '';

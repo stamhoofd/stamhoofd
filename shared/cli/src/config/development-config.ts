@@ -1,3 +1,5 @@
+import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
+import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
 import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';

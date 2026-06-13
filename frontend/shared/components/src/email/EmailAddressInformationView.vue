@@ -124,7 +124,7 @@ import { computed, ref } from 'vue';
 import IconContainer from '../icons/IconContainer.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
-import { LoadingViewTransition } from '../containers';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { useAuth } from '../hooks/useAuth';
 import { useContext } from '../hooks/useContext';
 

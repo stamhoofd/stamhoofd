@@ -1,6 +1,7 @@
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, SetupStepType } from '@stamhoofd/structures';
-import { usePlatform, useUser } from '../../hooks';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';

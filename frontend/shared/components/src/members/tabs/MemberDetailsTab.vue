@@ -26,7 +26,17 @@ import { useIsMobile } from '#hooks/useIsMobile.ts';
 import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
-import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberSecurityCodeBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
+import ViewMemberAccountsBox from '#members/components/view/ViewMemberAccountsBox.vue';
+import ViewMemberEmergencyContactsBox from '#members/components/view/ViewMemberEmergencyContactsBox.vue';
+import ViewMemberFamilyBox from '#members/components/view/ViewMemberFamilyBox.vue';
+import ViewMemberGeneralBox from '#members/components/view/ViewMemberGeneralBox.vue';
+import ViewMemberNotesBox from '#members/components/view/ViewMemberNotesBox.vue';
+import ViewMemberParentsBox from '#members/components/view/ViewMemberParentsBox.vue';
+import ViewMemberRecordCategoriesBox from '#members/components/view/ViewMemberRecordCategoriesBox.vue';
+import ViewMemberRegistrationsBox from '#members/components/view/ViewMemberRegistrationsBox.vue';
+import ViewMemberSecurityCodeBox from '#members/components/view/ViewMemberSecurityCodeBox.vue';
+import ViewMemberUnverifiedBox from '#members/components/view/ViewMemberUnverifiedBox.vue';
+import ViewMemberWarningsBox from '#members/components/view/ViewMemberWarningsBox.vue';
 import ViewMemberResponsibilitiesBox from '../components/view/ViewMemberResponsibilitiesBox.vue';
 
 const isMobile = useIsMobile();

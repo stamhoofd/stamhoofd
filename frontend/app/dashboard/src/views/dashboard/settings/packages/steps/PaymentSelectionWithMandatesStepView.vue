@@ -147,7 +147,8 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Checkbox, Toast } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -173,7 +174,7 @@ import { useActivatePackages } from '../hooks/useActivatePackages';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { Request } from '@simonbackx/simple-networking';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import PaymentItemsBox from '@stamhoofd/components/payments/PaymentItemsBox.vue';
 import InvoiceItemsBox from '@stamhoofd/components/payments/InvoiceItemsBox.vue';
 

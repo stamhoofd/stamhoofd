@@ -1,4 +1,4 @@
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { Platform } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed } from 'vue';

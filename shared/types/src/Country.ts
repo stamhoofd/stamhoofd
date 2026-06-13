@@ -1,4 +1,3 @@
-// The Country enum is also defined in environment.d.ts - they should remain in sync to avoid compilation errors
 export enum Country {
     Belgium = 'BE',
     Netherlands = 'NL',

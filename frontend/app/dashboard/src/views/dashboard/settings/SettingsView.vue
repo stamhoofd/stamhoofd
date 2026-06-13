@@ -312,7 +312,8 @@ import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegis
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
+import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
+import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, StripeAccount } from '@stamhoofd/structures';

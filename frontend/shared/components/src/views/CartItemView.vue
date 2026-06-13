@@ -180,7 +180,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
-import { useContext } from '../hooks';
+import { useContext } from '#hooks/useContext.ts';
 import NumberInput from '../inputs/NumberInput.vue';
 import Radio from '../inputs/Radio.vue';
 import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';

@@ -15,7 +15,7 @@ import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/Ta
 import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';

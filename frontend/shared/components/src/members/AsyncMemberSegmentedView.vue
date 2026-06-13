@@ -10,8 +10,9 @@ import type { PlatformMember } from '@stamhoofd/structures';
 import { PlatformFamily } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
-import { useOrganization, usePlatform } from '../hooks';
-import { useLoadFamilyFromId } from '../members';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useLoadFamilyFromId } from '#members/hooks/useLoadFamily.ts';
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { Toast } from '../overlays/Toast';
 
