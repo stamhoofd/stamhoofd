@@ -34,199 +34,126 @@
     </form>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import Radio from '#inputs/Radio.vue';
-import StepperInput from '#inputs/StepperInput.vue';
-import STList from '#layout/STList.vue';
-import STListItem from '#layout/STListItem.vue';
-import BackButton from '#navigation/BackButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { useCanDismiss, useDismiss } from '@simonbackx/vue-app-navigation';
 import type { Cart, CartItem, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { CartReservedSeat } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { computed, ref } from 'vue';
 
-import type { ComponentOptions } from 'vue';
-import FieldBox from './FieldBox.vue';
-import OptionMenuBox from './OptionMenuBox.vue';
 import SeatSelectionBox from './SeatSelectionBox.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        OptionMenuBox,
-        StepperInput,
-        FieldBox,
-        STErrorsDefault,
-        BackButton,
-        SeatSelectionBox,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-        priceFree: (p: number) => {
-            if (p === 0) {
-                return $t(`%1Mn`);
-            }
-            return Formatter.price(p);
-        },
-    },
-})
-export default class ChooseSeatsView extends Mixins(NavigationMixin) {
-    @Prop({ default: false })
-    admin: boolean;
-
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
+    admin?: boolean;
     cartItem: CartItem;
-
-    @Prop({ default: null })
-    oldItem: CartItem | null;
-
-    @Prop({ required: true })
+    oldItem?: CartItem | null;
     webshop: Webshop;
-
-    @Prop({ required: true })
     cart: Cart;
+    saveHandler: (
+        newItem: CartItem,
+        oldItem: CartItem | null,
+        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean },
+    ) => void;
+}>(), {
+    admin: false,
+    oldItem: null,
+});
 
-    @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null, component: ComponentOptions) => void;
+const dismiss = useDismiss();
+const canDismiss = useCanDismiss();
+const errorBox = ref<ErrorBox | null>(null);
+const amount = computed(() => props.cartItem.amount);
+const selectedAmount = computed(() => props.cartItem.seats.length);
+const remainingAmount = computed(() => amount.value - selectedAmount.value);
+const seatingPlan = computed(() => props.webshop.meta.seatingPlans.find(p => p.id === props.cartItem.product.seatingPlanId));
+const cartEnabled = computed(() => props.webshop.shouldEnableCart);
 
-    errorBox: ErrorBox | null = null;
-
-    get amount() {
-        return this.cartItem.amount;
+const title = computed(() => {
+    if (remainingAmount.value === 0) {
+        return $t(`%12X`);
     }
 
-    get selectedAmount() {
-        return this.cartItem.seats.length;
+    if (remainingAmount.value === amount.value) {
+        return `Kies ${Formatter.pluralText(remainingAmount.value, $t(`%12Y`), $t(`%UL`))}`;
     }
+    return `Kies nog ${Formatter.pluralText(remainingAmount.value, $t(`%12Y`), $t(`%UL`))}`;
+});
 
-    get remainingAmount() {
-        return this.amount - this.selectedAmount;
-    }
+const description = computed(() => $t(`%12Z`) + ' ' + Formatter.pluralText(amount.value, $t(`%12Y`), $t(`%UL`)) + ' ' + $t(`%12a`));
 
-    get title() {
-        if (this.remainingAmount === 0) {
-            return $t(`%12X`);
+function setSeats(seats: ReservedSeat[]) {
+    props.cartItem.seats = seats.map(s => CartReservedSeat.create(s));
+}
+
+const reservedSeats = computed(() => {
+    const planId = props.cartItem.product.seatingPlanId;
+    return [
+        ...props.cartItem.product.reservedSeats,
+        ...props.cart.items.filter(i => i.product.seatingPlanId === planId && i.product.id === props.cartItem.product.id).flatMap(i => i.seats).filter(r => !props.oldItem?.seats.find(rr => rr.equals(r))),
+    ].filter(r => !props.cartItem.reservedSeats.find(rr => rr.equals(r)));
+});
+
+const highlighedSeats = computed(() => {
+    const planId = props.cartItem.product.seatingPlanId;
+    return props.cart.items.filter(i => i.product.seatingPlanId === planId && i.product.id === props.cartItem.product.id).flatMap(i => i.seats).filter(r => !props.oldItem?.seats.find(rr => rr.equals(r)));
+});
+
+function validate() {
+    try {
+        const clonedCart = props.cart.clone();
+        if (!cartEnabled.value) {
+            clonedCart.clear();
+        } else if (props.oldItem) {
+            clonedCart.removeItem(props.oldItem);
         }
-
-        if (this.remainingAmount === this.amount) {
-            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`%12Y`), $t(`%UL`))}`;
-        }
-
-        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`%12Y`), $t(`%UL`))}`;
+        props.cartItem.validate(props.webshop, clonedCart, {
+            refresh: true,
+            admin: props.admin,
+            validateSeats: true,
+        });
+    } catch (e) {
+        console.error(e);
+        errorBox.value = new ErrorBox(e);
+        return false;
     }
+    errorBox.value = null;
+    return true;
+}
 
-    get description() {
-        return $t(`%12Z`) + ' ' + Formatter.pluralText(this.amount, $t(`%12Y`), $t(`%UL`)) + ' ' + $t(`%12a`);
-    }
+function save() {
+    if (seatingPlan.value?.requireOptimalReservation && !props.admin) {
+        const adjusted = seatingPlan.value.adjustSeatsForBetterFit(props.cartItem.seats, reservedSeats.value);
 
-    get seatingPlanSection() {
-        const plan = this.seatingPlan;
-        if (!plan) {
-            return null;
-        }
-        const seat = this.cartItem.seats[0];
-        if (!seat) {
-            return plan.sections[0];
-        }
-        return plan.sections.find(s => s.id === seat.section) ?? null;
-    }
-
-    setSeats(seats: ReservedSeat[]) {
-        // todo: attach prices
-        this.cartItem.seats = seats.map(s => CartReservedSeat.create(s));
-    }
-
-    get reservedSeats() {
-        const planId = this.cartItem.product.seatingPlanId;
-
-        // All reserved seats, except the ones that are already reserved by this item
-        return [
-            ...this.cartItem.product.reservedSeats,
-            ...this.cart.items.filter(i => i.product.seatingPlanId === planId && i.product.id === this.cartItem.product.id).flatMap(i => i.seats).filter(r => !this.oldItem?.seats.find(rr => rr.equals(r))),
-        ].filter(r => !this.cartItem.reservedSeats.find(rr => rr.equals(r)));
-    }
-
-    get highlighedSeats() {
-        const planId = this.cartItem.product.seatingPlanId;
-        return this.cart.items.filter(i => i.product.seatingPlanId === planId && i.product.id === this.cartItem.product.id).flatMap(i => i.seats).filter(r => !this.oldItem?.seats.find(rr => rr.equals(r)));
-    }
-
-    get cartEnabled() {
-        return this.webshop.shouldEnableCart;
-    }
-
-    get seatingPlan() {
-        return this.webshop.meta.seatingPlans.find(p => p.id === this.cartItem.product.seatingPlanId);
-    }
-
-    validate() {
-        try {
-            const clonedCart = this.cart.clone();
-
-            if (!this.cartEnabled) {
-                clonedCart.clear();
-            }
-            else if (this.oldItem) {
-                clonedCart.removeItem(this.oldItem);
-            }
-
-            this.cartItem.validate(this.webshop, clonedCart, {
-                refresh: true,
-                admin: this.admin,
-                validateSeats: true,
-            });
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-            return false;
-        }
-        this.errorBox = null;
-        return true;
-    }
-
-    save() {
-        // Check seats are optimal
-        if (this.seatingPlan && this.seatingPlan.requireOptimalReservation && !this.admin) {
-            const adjusted = this.seatingPlan?.adjustSeatsForBetterFit(this.cartItem.seats, this.reservedSeats);
-
-            if (adjusted) {
-                this.setSeats(adjusted);
-
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'adjusted',
-                    message: $t(`%12b`),
-                }));
-                return;
-            }
-        }
-
-        if (!this.validate()) {
+        if (adjusted) {
+            setSeats(adjusted);
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'adjusted',
+                message: $t(`%12b`),
+            }));
             return;
         }
-
-        try {
-            this.saveHandler(this.cartItem, this.oldItem, this);
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-            return;
-        }
-        this.errorBox = null; // required if dismiss is disabled
-        // this.dismiss({ force: true })
     }
+
+    if (!validate()) {
+        return;
+    }
+
+    try {
+        props.saveHandler(props.cartItem, props.oldItem, {
+            dismiss,
+            canDismiss: canDismiss.value,
+        });
+    } catch (e) {
+        console.error(e);
+        errorBox.value = new ErrorBox(e);
+        return;
+    }
+    errorBox.value = null;
 }
 </script>
 

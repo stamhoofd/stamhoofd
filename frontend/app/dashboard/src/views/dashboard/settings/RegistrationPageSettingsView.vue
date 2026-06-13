@@ -44,61 +44,37 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+<script lang="ts" setup>
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import Tooltip from '@stamhoofd/components/overlays/Tooltip.vue';
-import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
-import { OrganizationType } from '@stamhoofd/structures';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        BackButton,
-        LoadingButton,
-        STList,
-        STListItem,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class RegistrationPageSettingsView extends Mixins(NavigationMixin) {
-    get organization() {
-        return this.$organization;
+const organization = useRequiredOrganization();
+const present = usePresent();
+
+async function copyElement(event: MouseEvent) {
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLElement)) {
+        return;
     }
 
-    get isYouth() {
-        return this.organization.meta.type === OrganizationType.Youth;
-    }
+    target.contentEditable = 'true';
+    document.execCommand('selectAll', false);
+    document.execCommand('copy');
+    target.contentEditable = 'false';
 
-    async copyElement(event: any) {
-        event.target.contentEditable = true;
+    const displayedComponent = new ComponentWithProperties(Tooltip, {
+        text: '📋 Gekopieerd!',
+        x: event.clientX,
+        y: event.clientY + 10,
+    });
+    await present(displayedComponent.setDisplayStyle('overlay'));
 
-        document.execCommand('selectAll', false);
-        document.execCommand('copy');
-
-        event.target.contentEditable = false;
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: '📋 Gekopieerd!',
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        await this.present(displayedComponent.setDisplayStyle('overlay'));
-
-        setTimeout(() => {
-            (displayedComponent.componentInstance() as any)?.hide?.();
-        }, 1000);
-    }
+    setTimeout(() => {
+        (displayedComponent.componentInstance() as { hide?: () => void } | null)?.hide?.();
+    }, 1000);
 }
 </script>

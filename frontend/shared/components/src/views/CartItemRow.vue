@@ -44,78 +44,57 @@
     </STListItem>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
 import type { Cart, CartItem, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 
 import StepperInput from '../inputs/StepperInput.vue';
-import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import ImageComponent from './ImageComponent.vue';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        StepperInput,
-        ImageComponent,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-    emits: ['edit', 'amount', 'delete'],
-})
-export default class CartItemRow extends VueComponent {
-    @Prop({ required: true })
-    cart!: Cart;
+const props = withDefaults(defineProps<{
+    cart: Cart;
+    webshop: Webshop;
+    admin?: boolean;
+    cartItem: CartItem;
+    editable?: boolean;
+}>(), {
+    admin: false,
+    editable: false,
+});
 
-    @Prop({ required: true })
-    webshop!: Webshop;
+const emit = defineEmits<{
+    edit: [];
+    amount: [amount: number];
+    delete: [];
+}>();
 
-    @Prop({ default: false })
-    admin!: boolean;
-
-    @Prop({ required: true })
-    cartItem!: CartItem;
-
-    @Prop({ required: false, default: false })
-    editable!: boolean;
-
-    editItem() {
-        if (!this.editable) {
-            return;
-        }
-        this.$emit('edit');
+function editItem() {
+    if (!props.editable) {
+        return;
     }
-
-    get amount() {
-        return this.cartItem.amount;
-    }
-
-    set amount(amount: number) {
-        if (!this.editable) {
-            return;
-        }
-        this.$emit('amount', amount);
-    }
-
-    deleteItem() {
-        if (!this.editable) {
-            return;
-        }
-        this.$emit('delete');
-    }
-
-    get labels() {
-        return this.cartItem.discounts.filter(d => !!d.cartLabel);
-    }
-
-    get maximumRemaining() {
-        const remaining = this.cartItem.getMaximumRemaining(this.cartItem, this.cart, this.webshop, this.admin);
-        return remaining;
-    }
+    emit('edit');
 }
+
+const amount = computed({
+    get: () => props.cartItem.amount,
+    set: (amount: number) => {
+        if (props.editable) {
+            emit('amount', amount);
+        }
+    },
+});
+
+function deleteItem() {
+    if (!props.editable) {
+        return;
+    }
+    emit('delete');
+}
+
+const labels = computed(() => props.cartItem.discounts.filter(d => !!d.cartLabel));
+
+const maximumRemaining = computed(() => props.cartItem.getMaximumRemaining(props.cartItem, props.cart, props.webshop, props.admin));
 </script>
 
 <style lang="scss">

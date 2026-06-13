@@ -25,83 +25,79 @@
     </div>
 </template>
 
-<script lang="ts">
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import EmailInput from '#inputs/EmailInput.vue';
+<script lang="ts" setup>
 import LoadingButton from '#navigation/LoadingButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import type { Server } from '@simonbackx/simple-networking';
+import type { Payment } from '@stamhoofd/structures';
 
-import PayconiqBannerView from './PayconiqBannerView.vue';
+import { usePayconiqPayment } from './usePayconiqPayment';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        EmailInput,
-        LoadingButton,
-        STErrorsDefault,
-    },
-})
-export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
-    getOS(): string {
-        const userAgent = navigator.userAgent || navigator.vendor;
+const props = withDefaults(defineProps<{
+    paymentUrl?: string;
+    initialPayment: Payment;
+    server: Server;
+    finishedHandler: (payment: Payment | null) => void;
+}>(), {
+    paymentUrl: '',
+});
 
-        if (/android/i.test(userAgent)) {
-            return 'android';
-        }
+const { payment, shouldNavigateAway } = usePayconiqPayment(props);
 
-        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
-            // Different sms protocol
-            return 'macOS-old';
-        }
+function getOS(): string {
+    const userAgent = navigator.userAgent || navigator.vendor;
 
-        // iOS detection from: http://stackoverflow.com/a/9039885/177710
-        if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-            return 'iOS';
-        }
-
-        // iPad on iOS 13 detection
-        if (navigator.userAgent.includes('Mac') && 'ontouchend' in document) {
-            return 'iOS';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
-            return 'macOS';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('WIN') >= 0) {
-            return 'windows';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('IPHONE') >= 0) {
-            return 'iOS';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('ANDROID') >= 0) {
-            return 'android';
-        }
-
-        return 'unknown';
+    if (/android/i.test(userAgent)) {
+        return 'android';
     }
 
-    get isIOS() {
-        return this.getOS() === 'iOS';
+    if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+        // Different sms protocol
+        return 'macOS-old';
     }
 
-    helpMe() {
-        if (this.getOS() === 'iOS') {
-            new CenteredMessage($t(`%kI`), $t(`%12g`))
-                .addCloseButton()
-                .show();
-        }
-        else {
-            new CenteredMessage($t(`%kI`), $t(`%12h`)).addCloseButton().show();
-        }
+    // iOS detection from: http://stackoverflow.com/a/9039885/177710
+    if (/iPad|iPhone|iPod/.test(userAgent) && !('MSStream' in window)) {
+        return 'iOS';
+    }
+
+    // iPad on iOS 13 detection
+    if (navigator.userAgent.includes('Mac') && 'ontouchend' in document) {
+        return 'iOS';
+    }
+
+    if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
+        return 'macOS';
+    }
+
+    if (navigator.platform.toUpperCase().indexOf('WIN') >= 0) {
+        return 'windows';
+    }
+
+    if (navigator.platform.toUpperCase().indexOf('IPHONE') >= 0) {
+        return 'iOS';
+    }
+
+    if (navigator.platform.toUpperCase().indexOf('ANDROID') >= 0) {
+        return 'android';
+    }
+
+    return 'unknown';
+}
+
+function helpMe() {
+    if (getOS() === 'iOS') {
+        new CenteredMessage($t(`%kI`), $t(`%12g`))
+            .addCloseButton()
+            .show();
+    } else {
+        new CenteredMessage($t(`%kI`), $t(`%12h`)).addCloseButton().show();
     }
 }
+
+defineExpose({ shouldNavigateAway });
 </script>
 
 <style lang="scss">

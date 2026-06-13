@@ -25,52 +25,28 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { encodeObject } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import RecordAnswerInput from '#inputs/RecordAnswerInput.vue';
-import Spinner from '#Spinner.vue';
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import STInputBox from '#inputs/STInputBox.vue';
-import STList from '#layout/STList.vue';
-import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { Validator } from '#errors/Validator.ts';
-import type { PatchAnswers, RecordAnswer, RecordSettings} from '@stamhoofd/structures';
+import type { PatchAnswers, RecordAnswer, RecordSettings } from '@stamhoofd/structures';
 import { Version } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Spinner,
-        STList,
-        STListItem,
-        RecordAnswerInput,
-    },
-})
-export default class PreviewRecordView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    record!: RecordSettings;
+defineProps<{
+    record: RecordSettings;
+}>();
 
-    validator = new Validator();
+const dismiss = useDismiss();
+const validator = new Validator();
+const recordAnswers = ref<Map<string, RecordAnswer>>(new Map());
+const encodedResult = computed(() => encodeObject(recordAnswers.value, { version: Version }));
+const isDevelopment = STAMHOOFD.environment === 'development';
 
-    recordAnswers: Map<string, RecordAnswer> = new Map();
-
-    get encodedResult() {
-        return encodeObject(this.recordAnswers, { version: Version });
-    }
-
-    get isDevelopment() {
-        return STAMHOOFD.environment === 'development';
-    }
-
-    addPatch(patch: PatchAnswers) {
-        this.recordAnswers = patch.applyTo(this.recordAnswers);
-    }
+function addPatch(patch: PatchAnswers) {
+    recordAnswers.value = patch.applyTo(recordAnswers.value);
 }
 </script>

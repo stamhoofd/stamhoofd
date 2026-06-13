@@ -39,141 +39,65 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
 import type { Image, OrganizationMetaData, PlatformConfig, WebshopMetaData } from '@stamhoofd/structures';
 import { DarkMode, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
 import type { Validator } from '../errors/Validator';
 import Checkbox from '../inputs/Checkbox.vue';
 import ImageInput from '../inputs/ImageInput.vue';
 
-@Component({
-    components: {
-        Checkbox,
-        ImageInput,
-    },
-})
-export default class LogoEditor extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     metaData: WebshopMetaData | OrganizationMetaData | PlatformConfig;
+    validator?: Validator | null;
+    darkMode?: DarkMode;
+}>(), {
+    validator: null,
+    darkMode: DarkMode.Off,
+});
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const emit = defineEmits(['patch']);
 
-    @Prop({ default: DarkMode.Off })
-    darkMode!: DarkMode;
+const patch = (value: object) => emit('patch', (props.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData | typeof PlatformConfig).patch(value));
 
-    get squareLogo() {
-        return this.metaData.squareLogo;
-    }
+const squareLogo = computed({
+    get: () => props.metaData.squareLogo,
+    set: (image: Image | null) => patch({ squareLogo: image }),
+});
+const squareLogoPlaceholder = computed(() => props.metaData.horizontalLogo ?? props.metaData.squareLogoDark ?? props.metaData.horizontalLogoDark);
+const expandLogo = computed({
+    get: () => props.metaData.expandLogo,
+    set: (enable: boolean) => patch({ expandLogo: enable }),
+});
+const horizontalLogo = computed({
+    get: () => props.metaData.horizontalLogo,
+    set: (image: Image | null) => patch({ horizontalLogo: image }),
+});
+const horizontalLogoPlaceholder = computed(() => props.metaData.squareLogo ?? props.metaData.horizontalLogoDark ?? props.metaData.squareLogoDark);
+const squareLogoDark = computed({
+    get: () => props.metaData.squareLogoDark,
+    set: (image: Image | null) => patch({ squareLogoDark: image }),
+});
+const squareLogoDarkPlaceholder = computed(() => props.metaData.horizontalLogoDark ?? props.metaData.squareLogo ?? props.metaData.horizontalLogo);
+const horizontalLogoDark = computed({
+    get: () => props.metaData.horizontalLogoDark,
+    set: (image: Image | null) => patch({ horizontalLogoDark: image }),
+});
+const horizontalLogoDarkPlaceholder = computed(() => props.metaData.squareLogoDark ?? props.metaData.horizontalLogo ?? props.metaData.squareLogo);
 
-    set squareLogo(image: Image | null) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData | typeof PlatformConfig).patch({ squareLogo: image }));
-    }
+const squareLogoResolutions = [
+    ResolutionRequest.create({ height: 50, width: 50, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 70, width: 70, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 50 * 3, width: 50 * 3, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 70 * 3, width: 70 * 3, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 70 * 3, width: 70 * 3, fit: ResolutionFit.Inside }),
+];
 
-    get squareLogoPlaceholder() {
-        return this.metaData.horizontalLogo ?? this.metaData.squareLogoDark ?? this.metaData.horizontalLogoDark;
-    }
-
-    get expandLogo() {
-        return this.metaData.expandLogo;
-    }
-
-    set expandLogo(enable: boolean) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData).patch({ expandLogo: enable }));
-    }
-
-    get horizontalLogo() {
-        return this.metaData.horizontalLogo;
-    }
-
-    set horizontalLogo(image: Image | null) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData).patch({ horizontalLogo: image }));
-    }
-
-    get horizontalLogoPlaceholder() {
-        return this.metaData.squareLogo ?? this.metaData.horizontalLogoDark ?? this.metaData.squareLogoDark;
-    }
-
-    get squareLogoDark() {
-        return this.metaData.squareLogoDark;
-    }
-
-    set squareLogoDark(image: Image | null) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData).patch({ squareLogoDark: image }));
-    }
-
-    get squareLogoDarkPlaceholder() {
-        return this.metaData.horizontalLogoDark ?? this.metaData.squareLogo ?? this.metaData.horizontalLogo;
-    }
-
-    get horizontalLogoDark() {
-        return this.metaData.horizontalLogoDark;
-    }
-
-    set horizontalLogoDark(image: Image | null) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData).patch({ horizontalLogoDark: image }));
-    }
-
-    get horizontalLogoDarkPlaceholder() {
-        return this.metaData.squareLogoDark ?? this.metaData.horizontalLogo ?? this.metaData.squareLogo;
-    }
-
-    get squareLogoResolutions() {
-        return [
-            ResolutionRequest.create({
-                height: 50,
-                width: 50,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70,
-                width: 70,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 50 * 3,
-                width: 50 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70 * 3,
-                width: 70 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70 * 3,
-                width: 70 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-        ];
-    }
-
-    get horizontalLogoResolutions() {
-        return [
-            ResolutionRequest.create({
-                height: 50,
-                width: 300,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70,
-                width: 300,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 50 * 3,
-                width: 300 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70 * 3,
-                width: 300 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-        ];
-    }
-}
+const horizontalLogoResolutions = [
+    ResolutionRequest.create({ height: 50, width: 300, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 70, width: 300, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 50 * 3, width: 300 * 3, fit: ResolutionFit.Inside }),
+    ResolutionRequest.create({ height: 70 * 3, width: 300 * 3, fit: ResolutionFit.Inside }),
+];
 </script>

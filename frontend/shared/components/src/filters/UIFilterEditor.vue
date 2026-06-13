@@ -24,94 +24,65 @@
     </form>
 </template>
 
-<script lang="ts">
-import { FramedComponent, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { FramedComponent, useCanPop, usePop, usePopup } from '@simonbackx/vue-app-navigation';
+import { Formatter } from '@stamhoofd/utility';
+import { nextTick } from 'vue';
 
-import Radio from '../inputs/Radio.vue';
-import STList from '../layout/STList.vue';
-import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import type { UIFilter } from './UIFilter';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        Radio,
-        STNavigationBar,
-        STToolbar,
-        FramedComponent,
-    },
-})
-export default class UIFilterEditor extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    filter!: UIFilter;
+const props = withDefaults(defineProps<{
+    filter: UIFilter;
+    saveHandler?: ((filter: UIFilter) => void) | null;
+    deleteHandler?: (() => void) | null;
+}>(), {
+    saveHandler: null,
+    deleteHandler: null,
+});
 
-    @Prop({ required: false })
-    saveHandler!: ((filter: UIFilter) => void) | null;
+const pop = usePop();
+const popup = usePopup();
+const canPop = useCanPop();
+const live = !props.saveHandler;
+const clonedFilter = live ? props.filter : props.filter.clone();
+const filterComponent = clonedFilter.getComponent();
+const canDelete = !!props.deleteHandler;
+const capitalizeFirstLetter = Formatter.capitalizeFirstLetter.bind(Formatter);
 
-    @Prop({ required: false, default: null })
-    deleteHandler!: (() => void) | null;
-
-    clonedFilter: UIFilter | null = null;
-    filterComponent: any = null;
-
-    get live() {
-        return !this.saveHandler;
+async function applyFilter() {
+    if (!props.saveHandler) {
+        await pop({ force: true });
+        return;
     }
 
-    created() {
-        if (this.live) {
-            this.clonedFilter = this.filter;
-        }
-        else {
-            this.clonedFilter = this.filter.clone();
-        }
-
-        this.filterComponent = this.clonedFilter.getComponent();
-    }
-
-    async applyFilter() {
-        if (!this.saveHandler) {
-            await this.pop({ force: true });
-            return;
-        }
-
-        this.saveHandler(this.clonedFilter!);
-
-        await this.$nextTick(async () => {
-            await this.pop({ force: true });
-        });
-    }
-
-    get canDelete() {
-        return !!this.deleteHandler;
-    }
-
-    async deleteFilter() {
-        if (!this.deleteHandler) {
-            return;
-        }
-        this.deleteHandler();
-
-        await this.$nextTick(async () => {
-            await this.pop({ force: true });
-        });
-    }
-
-    async shouldNavigateAway() {
-        if (this.live) {
-            return true;
-        }
-
-        const changed = JSON.stringify(this.filter.build()) !== JSON.stringify(this.clonedFilter!.build());
-        if (!changed) {
-            return true;
-        }
-        return await CenteredMessage.confirm($t(`%yf`), $t(`%4X`));
-    }
+    props.saveHandler(clonedFilter);
+    await nextTick();
+    await pop({ force: true });
 }
+
+async function deleteFilter() {
+    if (!props.deleteHandler) {
+        return;
+    }
+    props.deleteHandler();
+    await nextTick();
+    await pop({ force: true });
+}
+
+async function shouldNavigateAway() {
+    if (live) {
+        return true;
+    }
+
+    const changed = JSON.stringify(props.filter.build()) !== JSON.stringify(clonedFilter.build());
+    if (!changed) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t(`%yf`), $t(`%4X`));
+}
+
+defineExpose({ shouldNavigateAway });
 </script>

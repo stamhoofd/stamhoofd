@@ -37,7 +37,7 @@
                 <hr>
             </div>
 
-            <STList>
+            <STList v-if="webshop">
                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 

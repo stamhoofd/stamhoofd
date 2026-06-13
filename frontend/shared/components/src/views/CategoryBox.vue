@@ -10,66 +10,36 @@
     </div>
 </template>
 
-
-<script lang="ts">
-import LoadingView from '#containers/LoadingView.vue';
-import Checkbox from '#inputs/Checkbox.vue';
-import STList from '#layout/STList.vue';
-import STListItem from '#layout/STListItem.vue';
-import STNavigationBar from '#navigation/STNavigationBar.vue';
-import STToolbar from '#navigation/STToolbar.vue';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import type { useDismiss } from '@simonbackx/vue-app-navigation';
 import type { CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 
-import type { ComponentOptions } from "vue";
-import ProductGrid from "./ProductGrid.vue";
+import ProductGrid from './ProductGrid.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        LoadingView,
-        Checkbox,
-        ProductGrid
-    },
-    filters: {
-        price: Formatter.price
+const props = withDefaults(defineProps<{
+    admin?: boolean;
+    category: Category;
+    webshop: Webshop;
+    isLast?: boolean;
+    checkout: Checkout;
+    saveHandler: (
+        newItem: CartItem,
+        oldItem: CartItem | null,
+        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean },
+    ) => void;
+}>(), {
+    admin: false,
+    isLast: false,
+});
+
+const products = computed(() => props.category.productIds.flatMap((id) => {
+    const product = props.webshop.products.find(p => p.id === id);
+    if (product && (!product.hidden || props.admin)) {
+        return [product];
     }
-})
-export default class CategoryBox extends Mixins(NavigationMixin){
-    @Prop({ default: false })
-        admin: boolean
-
-    @Prop({ required: true })
-        category: Category
-
-    @Prop({ required: true })
-        webshop: Webshop
-
-    @Prop({ default: false })
-        isLast: boolean
-
-    @Prop({ required: true })
-        checkout: Checkout
-
-    @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component: ComponentOptions) => void
-
-    get products() {
-        return this.category.productIds.flatMap(id => {
-            const product = this.webshop.products.find(p => p.id === id)
-            if (product && (!product.hidden || this.admin)) {
-                return [product]
-            }
-            return []
-        })
-    }
-
-}
+    return [];
+}));
 </script>
 
 <style lang="scss">

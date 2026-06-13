@@ -3,7 +3,7 @@
         <div class="style-input-list">
             <SuffixInput
                 v-for="(language, index) of listedLanguages"
-                :key="language"
+                :key="language ?? ''"
                 type="text"
                 autocomplete="off"
                 data-1p-ignore

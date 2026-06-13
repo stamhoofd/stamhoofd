@@ -36,30 +36,27 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import type { ApiUserWithToken } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-@Component({
-    components: {
-        STToolbar,
-        STNavigationBar,
-        STInputBox,
-    },
-})
-export default class CopyApiTokenView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    user!: ApiUserWithToken;
+defineProps<{
+    user: ApiUserWithToken;
+}>();
 
-    async shouldNavigateAway() {
-        return await CenteredMessage.confirm('Heb je jouw key opgeslagen?', 'Ja, opgeslagen', 'Je kan jouw API-key hierna nooit meer bekijken.');
-    }
+const dismiss = useDismiss();
+const formatDate = Formatter.date.bind(Formatter);
+
+async function shouldNavigateAway() {
+    return await CenteredMessage.confirm('Heb je jouw key opgeslagen?', 'Ja, opgeslagen', 'Je kan jouw API-key hierna nooit meer bekijken.');
 }
+
+defineExpose({ shouldNavigateAway });
 </script>
 
 <style lang="scss">

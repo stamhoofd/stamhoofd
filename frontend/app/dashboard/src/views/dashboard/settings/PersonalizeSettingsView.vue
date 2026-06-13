@@ -94,235 +94,163 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods} from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import type { Image} from '@stamhoofd/structures';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import type { Image } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { computed, ref, shallowRef } from 'vue';
 
-import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STErrorsDefault,
-        Checkbox,
-        ImageInput,
-        ColorInput,
-    },
-    navigation: {
-        title: 'Personaliseren',
-    },
-})
-export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-    saving = false;
-    temp_organization = this.$organization;
-    showDomainSettings = true;
+const baseOrganization = useRequiredOrganization();
+const organizationManager = useOrganizationManager();
+const dismiss = useDismiss();
+const present = usePresent();
+const errorBox = ref<ErrorBox | null>(null);
+const validator = new Validator();
+const saving = ref(false);
+const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEncoder>(Organization.patch({ id: baseOrganization.value.id }));
+const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
+const enableMemberModule = computed(() => organization.value.meta.modules.useMembers);
+const squareLogoResolutions = [
+    ResolutionRequest.create({
+        height: 50,
+        width: 50,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70,
+        width: 70,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 50 * 3,
+        width: 50 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70 * 3,
+        width: 70 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70 * 3,
+        width: 70 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+];
+const horizontalLogoResolutions = [
+    ResolutionRequest.create({
+        height: 50,
+        width: 300,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70,
+        width: 300,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 50 * 3,
+        width: 300 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70 * 3,
+        width: 300 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+];
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
-
-    created() {
-        this.organizationPatch.id = this.$organization.id;
-    }
-
-    get organization() {
-        return this.$organization.patch(this.organizationPatch);
-    }
-
-    get enableMemberModule() {
-        return this.organization.meta.modules.useMembers;
-    }
-
-    get squareLogoResolutions() {
-        return [
-            ResolutionRequest.create({
-                height: 50,
-                width: 50,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70,
-                width: 70,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 50 * 3,
-                width: 50 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70 * 3,
-                width: 70 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70 * 3,
-                width: 70 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-        ];
-    }
-
-    get horizontalLogoResolutions() {
-        return [
-            ResolutionRequest.create({
-                height: 50,
-                width: 300,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70,
-                width: 300,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 50 * 3,
-                width: 300 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-            ResolutionRequest.create({
-                height: 70 * 3,
-                width: 300 * 3,
-                fit: ResolutionFit.Inside,
-            }),
-        ];
-    }
-
-    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Organization>>) {
-        this.organizationPatch = this.organizationPatch.patch(Organization.patch(patch));
-    }
-
-    get color() {
-        return this.organization.meta.color;
-    }
-
-    set color(color: string | null) {
-        this.addPatch({
-            meta: OrganizationMetaData.patch({
-                color: color,
-            }),
-        });
-    }
-
-    get squareLogo() {
-        return this.organization.meta.squareLogo;
-    }
-
-    set squareLogo(squareLogo: Image | null) {
-        this.addPatch({
-            meta: OrganizationMetaData.patch({
-                squareLogo,
-            }),
-        });
-    }
-
-    get expandLogo() {
-        return this.organization.meta.expandLogo;
-    }
-
-    set expandLogo(expandLogo: boolean) {
-        this.addPatch({
-            meta: OrganizationMetaData.patch({
-                expandLogo,
-            }),
-        });
-    }
-
-    get horizontalLogo() {
-        return this.organization.meta.horizontalLogo;
-    }
-
-    set horizontalLogo(horizontalLogo: Image | null) {
-        this.addPatch({
-            meta: OrganizationMetaData.patch({
-                horizontalLogo,
-            }),
-        });
-    }
-
-    get isMailOk() {
-        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.mailDomain !== null;
-    }
-
-    get isRegisterOk() {
-        return this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.registerDomain !== null;
-    }
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-
-        const errors = new SimpleErrors();
-
-        let valid = false;
-
-        if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors);
-        }
-        else {
-            this.errorBox = null;
-            valid = true;
-        }
-        valid = valid && await this.validator.validate();
-
-        if (!valid) {
-            return;
-        }
-
-        this.saving = true;
-
-        try {
-            await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = Organization.patch({ id: this.$organization.id });
-            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            await this.dismiss({ force: true });
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e);
-        }
-
-        this.saving = false;
-    }
-
-    async setupDomain() {
-        await this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(DomainSettingsView, {}),
-        }).setDisplayStyle('popup'));
-    }
-
-    async openRecords() {
-        await this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(DNSRecordsView, {}),
-        }).setDisplayStyle('popup'));
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+function addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Organization>>) {
+    organizationPatch.value = organizationPatch.value.patch(Organization.patch(patch));
 }
+
+const color = computed({
+    get: () => organization.value.meta.color,
+    set: (color: string | null) => addPatch({
+        meta: OrganizationMetaData.patch({
+            color,
+        }),
+    }),
+});
+const squareLogo = computed({
+    get: () => organization.value.meta.squareLogo,
+    set: (squareLogo: Image | null) => addPatch({
+        meta: OrganizationMetaData.patch({
+            squareLogo,
+        }),
+    }),
+});
+const expandLogo = computed({
+    get: () => organization.value.meta.expandLogo,
+    set: (expandLogo: boolean) => addPatch({
+        meta: OrganizationMetaData.patch({
+            expandLogo,
+        }),
+    }),
+});
+const horizontalLogo = computed({
+    get: () => organization.value.meta.horizontalLogo,
+    set: (horizontalLogo: Image | null) => addPatch({
+        meta: OrganizationMetaData.patch({
+            horizontalLogo,
+        }),
+    }),
+});
+const isMailOk = computed(() => organization.value.privateMeta?.pendingMailDomain === null && organization.value.privateMeta?.mailDomain !== null);
+const isRegisterOk = computed(() => organization.value.privateMeta?.pendingRegisterDomain === null && organization.value.registerDomain !== null);
+const hasChanges = computed(() => patchContainsChanges(organizationPatch.value, baseOrganization.value, { version: Version }));
+
+async function save() {
+    if (saving.value) {
+        return;
+    }
+    const errors = new SimpleErrors();
+    errorBox.value = errors.errors.length ? new ErrorBox(errors) : null;
+    if (errors.errors.length || !await validator.validate()) {
+        return;
+    }
+    saving.value = true;
+    try {
+        await organizationManager.value.patch(organizationPatch.value);
+        organizationPatch.value = Organization.patch({ id: baseOrganization.value.id });
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        await dismiss({ force: true });
+    } catch (e) {
+        errorBox.value = new ErrorBox(e);
+    }
+    saving.value = false;
+}
+
+async function setupDomain() {
+    await present(new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(DomainSettingsView, {}),
+    }).setDisplayStyle('popup'));
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({ shouldNavigateAway });
 </script>
 
 <style lang="scss">

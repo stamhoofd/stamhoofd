@@ -37,85 +37,58 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
 import { Organization, OrganizationDomains } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
 
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        BackButton,
-        LoadingButton,
-        DNSRecordBox,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class DNSRecordsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    saving = false;
+const context = useContext();
+const organization = useRequiredOrganization();
+const show = useShow();
+const errorBox = ref<ErrorBox | null>(null);
+const saving = ref(false);
+const records = computed(() => organization.value.privateMeta?.dnsRecords ?? []);
+const mailDomain = computed(() => organization.value.privateMeta?.pendingMailDomain ?? organization.value.privateMeta?.mailDomain ?? '?');
 
-    session = this.$context;
-
-    get records() {
-        return this.$organization.privateMeta?.dnsRecords ?? [];
+async function validate() {
+    if (saving.value) {
+        return;
     }
 
-    get mailDomain() {
-        return this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '?';
-    }
+    saving.value = true;
 
-    async validate() {
-        if (this.saving) {
-            return;
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/organization/domain',
+            body: OrganizationDomains.create({
+                mailDomain: mailDomain.value,
+                registerDomain: organization.value.privateMeta?.pendingRegisterDomain ?? organization.value.registerDomain,
+            }),
+            decoder: Organization as Decoder<Organization>,
+        });
+
+        context.value.updateOrganization(response.data);
+        saving.value = false;
+
+        if (response.data.privateMeta?.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {
+            await show(new ComponentWithProperties(DNSRecordsDoneView, {}));
         }
-
-        this.saving = true;
-
-        try {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'POST',
-                path: '/organization/domain',
-                body: OrganizationDomains.create({
-                    mailDomain: this.mailDomain,
-                    registerDomain: this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain,
-                }),
-                decoder: Organization as Decoder<Organization>,
-            });
-
-            this.$context.updateOrganization(response.data);
-            this.saving = false;
-
-            if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {
-                await this.show(new ComponentWithProperties(DNSRecordsDoneView, {}));
-            }
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-            this.saving = false;
-        }
-
-        // this.pop({ force: true })
+    } catch (e) {
+        console.error(e);
+        errorBox.value = new ErrorBox(e);
+        saving.value = false;
     }
 }
 </script>

@@ -35,74 +35,47 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Group } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
 import GroupOverview from './GroupOverview.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STList,
-        GroupAvatar,
-        STListItem,
-        Spinner,
-    },
-})
-export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
-    loadingGroups = true;
-    groups: Group[] = [];
+const organizationManager = useOrganizationManager();
+const show = useShow();
+const requestOwner = {};
+const loadingGroups = ref(true);
+const groups = shallowRef<Group[]>([]);
+const title = 'Leden archief';
 
-    get title() {
-        return 'Leden archief';
-    }
+onMounted(() => load().catch(console.error));
+onBeforeUnmount(() => Request.cancelAll(requestOwner));
 
-    mounted() {
-        // Load deleted groups
-        this.load().catch(console.error);
+async function load() {
+    try {
+        groups.value = await organizationManager.value.loadArchivedGroups({ owner: requestOwner });
+    } catch (e) {
+        Toast.fromError(e).show();
     }
+    loadingGroups.value = false;
+}
 
-    async load() {
-        try {
-            this.groups = await this.$organizationManager.loadArchivedGroups({ owner: this });
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-        this.loadingGroups = false;
-    }
-
-    beforeUnmount() {
-        // Cancel all requests
-        Request.cancelAll(this);
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get allCategories() {
-        return this.organization.getCategoryTree({ admin: true, permissions: this.$context.organizationPermissions }).getAllCategories().filter(c => c.categories.length === 0);
-    }
-
-    async openGroup(group: Group) {
-        await this.show({
-            components: [
-                new ComponentWithProperties(GroupOverview, {
-                    group,
-                }),
-            ],
-        });
-    }
+async function openGroup(group: Group) {
+    await show({
+        components: [
+            new ComponentWithProperties(GroupOverview, {
+                group,
+            }),
+        ],
+    });
 }
 </script>

@@ -46,197 +46,127 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import type { AutoEncoder, AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import type { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
+import { computed, ref, shallowRef } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        PriceInput,
+const baseOrganization = useRequiredOrganization();
+const organizationManager = useOrganizationManager();
+const dismiss = useDismiss();
+const errorBox = ref<ErrorBox | null>(null);
+const validator = new Validator();
+const saving = ref(false);
+const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEncoder>(Organization.patch({ id: baseOrganization.value.id }));
+const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
+const enableFinancialSupport = computed(() => organization.value.meta.recordsConfiguration.financialSupport !== null);
+const freeContribution = computed({
+    get: () => organization.value.meta.recordsConfiguration.freeContribution !== null,
+    set: (enable: boolean) => {
+        if (enable === freeContribution.value) {
+            return;
+        }
+        organizationPatch.value = organizationPatch.value.patch({
+            meta: OrganizationMetaData.patch({
+                recordsConfiguration: OrganizationRecordsConfiguration.patch({
+                    freeContribution: enable ? FreeContributionSettings.create({}) : null,
+                }),
+            }),
+        });
     },
-})
-export default class FreeContributionSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-    saving = false;
-    temp_organization = this.$organization;
-
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
-
-    created() {
-        this.organizationPatch.id = this.$organization.id;
-    }
-
-    get organization() {
-        return this.$organization.patch(this.organizationPatch);
-    }
-
-    get enableFinancialSupport() {
-        return this.organization.meta.recordsConfiguration.financialSupport !== null;
-    }
-
-    get freeContribution() {
-        return this.organization.meta.recordsConfiguration.freeContribution !== null;
-    }
-
-    set freeContribution(enable: boolean) {
-        if (enable === this.freeContribution) {
-            return;
-        }
-
-        if (enable) {
-            this.organizationPatch = this.organizationPatch.patch({
-                meta: OrganizationMetaData.patch({
-                    recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                        freeContribution: FreeContributionSettings.create({}),
-                    }),
-                }),
-            });
-        }
-        else {
-            this.organizationPatch = this.organizationPatch.patch({
-                meta: OrganizationMetaData.patch({
-                    recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                        freeContribution: null,
-                    }),
-                }),
-            });
-        }
-    }
-
-    get amountCount() {
-        return this.organization.meta.recordsConfiguration.freeContribution?.amounts?.length ?? 0;
-    }
-
-    getFreeContributionAmounts(index: number) {
-        return this.organization.meta.recordsConfiguration.freeContribution?.amounts[index] ?? 0;
-    }
-
-    setFreeContributionAmounts(index: number, amount: number) {
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
-        amounts[index] = amount;
-        this.organizationPatch = this.organizationPatch.patch({
+});
+const amountCount = computed(() => organization.value.meta.recordsConfiguration.freeContribution?.amounts?.length ?? 0);
+const freeContributionDescription = computed({
+    get: () => organization.value.meta.recordsConfiguration.freeContribution?.description ?? '',
+    set: (description: string) => {
+        organizationPatch.value = organizationPatch.value.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    freeContribution: FreeContributionSettings.create({
-                        description: this.freeContributionDescription,
-                        amounts,
-                    }),
+                    freeContribution: FreeContributionSettings.patch({ description }),
                 }),
             }),
         });
-    }
+    },
+});
+const hasChanges = computed(() => patchContainsChanges(organizationPatch.value, baseOrganization.value, { version: Version }));
 
-    deleteOption(index: number) {
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
-        amounts.splice(index, 1);
-        this.organizationPatch = this.organizationPatch.patch({
-            meta: OrganizationMetaData.patch({
-                recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    freeContribution: FreeContributionSettings.create({
-                        description: this.freeContributionDescription,
-                        amounts,
-                    }),
+function setAmounts(amounts: number[]) {
+    organizationPatch.value = organizationPatch.value.patch({
+        meta: OrganizationMetaData.patch({
+            recordsConfiguration: OrganizationRecordsConfiguration.patch({
+                freeContribution: FreeContributionSettings.create({
+                    description: freeContributionDescription.value,
+                    amounts,
                 }),
             }),
-        });
-    }
-
-    addOption() {
-        const last = this.organization.meta.recordsConfiguration.freeContribution?.amounts?.slice(-1)[0] ?? 0;
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
-        amounts.push(last + 10_0000);
-        this.organizationPatch = this.organizationPatch.patch({
-            meta: OrganizationMetaData.patch({
-                recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    freeContribution: FreeContributionSettings.create({
-                        description: this.freeContributionDescription,
-                        amounts,
-                    }),
-                }),
-            }),
-        });
-    }
-
-    get freeContributionDescription() {
-        return this.organization.meta.recordsConfiguration.freeContribution?.description ?? '';
-    }
-
-    set freeContributionDescription(description: string) {
-        this.organizationPatch = this.organizationPatch.patch({
-            meta: OrganizationMetaData.patch({
-                recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    freeContribution: FreeContributionSettings.patch({
-                        description,
-                    }),
-                }),
-            }),
-        });
-    }
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-
-        const errors = new SimpleErrors();
-
-        let valid = false;
-
-        if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors);
-        }
-        else {
-            this.errorBox = null;
-            valid = true;
-        }
-        valid = valid && await this.validator.validate();
-
-        if (!valid) {
-            return;
-        }
-
-        this.saving = true;
-
-        try {
-            await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = Organization.patch({ id: this.$organization.id });
-            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            await this.dismiss({ force: true });
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e);
-        }
-
-        this.saving = false;
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+        }),
+    });
 }
+
+function getFreeContributionAmounts(index: number) {
+    return organization.value.meta.recordsConfiguration.freeContribution?.amounts[index] ?? 0;
+}
+
+function setFreeContributionAmounts(index: number, amount: number) {
+    const amounts = (organization.value.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
+    amounts[index] = amount;
+    setAmounts(amounts);
+}
+
+function deleteOption(index: number) {
+    const amounts = (organization.value.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
+    amounts.splice(index, 1);
+    setAmounts(amounts);
+}
+
+function addOption() {
+    const amounts = (organization.value.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
+    amounts.push((amounts.at(-1) ?? 0) + 10_0000);
+    setAmounts(amounts);
+}
+
+async function save() {
+    if (saving.value) {
+        return;
+    }
+
+    const errors = new SimpleErrors();
+    errorBox.value = errors.errors.length > 0 ? new ErrorBox(errors) : null;
+    if (errors.errors.length > 0 || !await validator.validate()) {
+        return;
+    }
+
+    saving.value = true;
+    try {
+        await organizationManager.value.patch(organizationPatch.value);
+        organizationPatch.value = Organization.patch({ id: baseOrganization.value.id });
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        await dismiss({ force: true });
+    } catch (e) {
+        errorBox.value = new ErrorBox(e);
+    }
+    saving.value = false;
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({ shouldNavigateAway });
 </script>

@@ -137,18 +137,18 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
@@ -156,318 +156,261 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import InputSheet from '@stamhoofd/components/overlays/InputSheet.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
-import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
+import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
 import ApiUsersView from '../admins/ApiUsersView.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        STList,
-        STListItem,
-        Checkbox,
-        LoadingButton,
-    },
-})
-export default class LabsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-    saving = false;
-    downloadingSettings = false;
-    uploadingSettings = false;
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
+const context = useContext();
+const baseOrganization = useRequiredOrganization();
+const organizationManager = useOrganizationManager();
+const show = useShow();
+const present = usePresent();
+const dismiss = useDismiss();
+const requestOwner = {};
 
-    created() {
-        this.organizationPatch.id = this.$organization.id;
-    }
+const errorBox = ref<ErrorBox | null>(null);
+const validator = new Validator();
+const saving = ref(false);
+const downloadingSettings = ref(false);
+const uploadingSettings = ref(false);
+const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEncoder>(
+    Organization.patch({ id: baseOrganization.value.id }),
+);
 
-    get organization() {
-        return this.$organization.patch(this.organizationPatch);
-    }
-
-    async openApiUsers(animated = true) {
-        await this.show({
-            components: [
-                new ComponentWithProperties(ApiUsersView, {}),
-            ],
-            animated,
-        });
-    }
-
-    get isBelgium() {
-        return this.organization.address.country === Country.Belgium;
-    }
-
-    get isStamhoofd() {
-        return this.$organizationManager.user.email.endsWith('@stamhoofd.be') || this.$organizationManager.user.email.endsWith('@stamhoofd.nl');
-    }
-
-    get enableBuckaroo() {
-        return (this.organization.privateMeta?.buckarooSettings ?? null) !== null;
-    }
-
-    get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq');
-    }
-
-    set forcePayconiq(forcePayconiq: boolean) {
-        this.setFeatureFlag('forcePayconiq', forcePayconiq);
-    }
-
-    get invoicesEnabled() {
-        return this.organization.meta.invoicesEnabled ?? false;
-    }
-
-    set invoicesEnabled(invoicesEnabled: boolean) {
-        this.organizationPatch = this.organizationPatch.patch({
+const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
+const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
+const forcePayconiq = computed({
+    get: () => getFeatureFlag('forcePayconiq'),
+    set: value => setFeatureFlag('forcePayconiq', value),
+});
+const invoicesEnabled = computed({
+    get: () => organization.value.meta.invoicesEnabled ?? false,
+    set: (value: boolean) => {
+        organizationPatch.value = organizationPatch.value.patch({
             meta: OrganizationMetaData.patch({
-                invoicesEnabled,
+                invoicesEnabled: value,
             }),
         });
-    }
-
-    getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
-    }
-
-    setFeatureFlag(flag: string, value: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
-        if (value) {
-            featureFlags.push(flag);
-        }
-        this.organizationPatch = this.organizationPatch.patch({
+    },
+});
+const useTestPayments = computed({
+    get: () => organization.value.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production',
+    set: (value: boolean) => {
+        organizationPatch.value = organizationPatch.value.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
-                featureFlags: featureFlags as any,
+                useTestPayments: STAMHOOFD.environment !== 'production' === value ? null : value,
             }),
         });
+    },
+});
+const hasChanges = computed(() => patchContainsChanges(organizationPatch.value, baseOrganization.value, { version: Version }));
+
+onBeforeUnmount(() => Request.cancelAll(requestOwner));
+
+async function openApiUsers(animated = true) {
+    await show({
+        components: [
+            new ComponentWithProperties(ApiUsersView, {}),
+        ],
+        animated,
+    });
+}
+
+function getFeatureFlag(flag: string) {
+    return organization.value.privateMeta?.featureFlags.includes(flag) ?? false;
+}
+
+function setFeatureFlag(flag: string, value: boolean) {
+    const featureFlags = organization.value.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
+    if (value) {
+        featureFlags.push(flag);
+    }
+    organizationPatch.value = organizationPatch.value.patch({
+        privateMeta: OrganizationPrivateMetaData.patch({
+            featureFlags: featureFlags as any,
+        }),
+    });
+}
+
+async function save() {
+    if (saving.value) {
+        return;
     }
 
-    get useTestPayments() {
-        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production';
+    const errors = new SimpleErrors();
+    let valid = false;
+
+    if (errors.errors.length > 0) {
+        errorBox.value = new ErrorBox(errors);
+    } else {
+        errorBox.value = null;
+        valid = true;
+    }
+    valid = valid && await validator.validate();
+
+    if (!valid) {
+        return;
     }
 
-    set useTestPayments(useTestPayments: boolean) {
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                // Only save non default value
-                useTestPayments: STAMHOOFD.environment !== 'production' === useTestPayments ? null : useTestPayments,
-            }),
-        });
+    saving.value = true;
+    try {
+        await organizationManager.value.patch(organizationPatch.value);
+        organizationPatch.value = Organization.patch({ id: baseOrganization.value.id });
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        await dismiss({ force: true });
+    } catch (e) {
+        errorBox.value = new ErrorBox(e);
+    }
+    saving.value = false;
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+function downloadSettings() {
+    if (downloadingSettings.value) {
+        return;
     }
 
-    async save() {
-        if (this.saving) {
+    const exportedOrganization = Organization.create({
+        ...baseOrganization.value,
+        webshops: [],
+    });
+    exportedOrganization.privateMeta!.payconiqAccounts = [];
+    exportedOrganization.privateMeta!.buckarooSettings = null;
+    exportedOrganization.privateMeta!.mollieProfile = null;
+    exportedOrganization.privateMeta!.registrationPaymentConfiguration = PrivatePaymentConfiguration.create({});
+
+    const string = JSON.stringify(new VersionBox(exportedOrganization).encode({ version: Version }), null, 2);
+    const url = URL.createObjectURL(new Blob([string], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = Formatter.fileSlug(organization.value.name) + '.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function uploadSettings() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = () => {
+        const file = input.files?.[0];
+        if (!file) {
             return;
         }
 
-        const errors = new SimpleErrors();
-
-        let valid = false;
-
-        if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors);
-        } else {
-            this.errorBox = null;
-            valid = true;
-        }
-        valid = valid && await this.validator.validate();
-
-        if (!valid) {
-            return;
-        }
-
-        this.saving = true;
-
-        try {
-            await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = Organization.patch({ id: this.$organization.id });
-            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            await this.dismiss({ force: true });
-        } catch (e) {
-            this.errorBox = new ErrorBox(e);
-        }
-
-        this.saving = false;
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
-
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
-
-    downloadSettings() {
-        if (this.downloadingSettings) {
-            return;
-        }
-
-        // Remove private data
-        const organization = Organization.create({
-            ...this.$organization,
-            webshops: [],
-        });
-
-        // Delete private tokens
-        organization.privateMeta!.payconiqAccounts = [];
-        organization.privateMeta!.buckarooSettings = null;
-        organization.privateMeta!.mollieProfile = null;
-        organization.privateMeta!.registrationPaymentConfiguration = PrivatePaymentConfiguration.create({});
-
-        const versionBox = new VersionBox(organization);
-
-        // Create a clean JSON file
-        const string = JSON.stringify(versionBox.encode({ version: Version }), null, 2);
-
-        // Create a blob
-        const blob = new Blob([string], { type: 'application/json' });
-
-        // Trigger a download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = Formatter.fileSlug(this.organization.name) + '.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    uploadSettings() {
-        // Trigger a file input of a file with type .json
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = (event: any) => {
-            if (!event || !event.target || !event.target.files || event.target.files.length !== 1) {
+        const reader = new FileReader();
+        reader.onload = async () => {
+            if (typeof reader.result !== 'string') {
                 return;
             }
-            const file = event.target.files[0] as File;
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const data = event.target!.result as string;
+
+            try {
+                uploadingSettings.value = true;
+                const parsed: unknown = JSON.parse(reader.result);
                 try {
-                    this.uploadingSettings = true;
-                    const parsed = JSON.parse(data);
-
-                    try {
-                        await this.doUploadSettings(parsed);
-                        new Toast('De instellingen zijn geïmporteerd', 'success green').show();
-                    } catch (e) {
-                        Toast.fromError(e).show();
-                    }
+                    await doUploadSettings(parsed);
+                    new Toast('De instellingen zijn geïmporteerd', 'success green').show();
                 } catch (e) {
-                    Toast.fromError(new SimpleError({
-                        code: 'invalid_json',
-                        message: 'Het bestand is geen geldig JSON-bestand',
-                    })).show();
+                    Toast.fromError(e).show();
                 }
-                this.uploadingSettings = false;
-            };
-            reader.readAsText(file);
+            } catch {
+                Toast.fromError(new SimpleError({
+                    code: 'invalid_json',
+                    message: 'Het bestand is geen geldig JSON-bestand',
+                })).show();
+            }
+            uploadingSettings.value = false;
         };
-        input.click();
-    }
-
-    async doUploadSettings(blob: any) {
-        // Decode
-        let organization: Organization;
-        try {
-            const decodedOrganization = new VersionBoxDecoder(Organization as Decoder<Organization>).decode(new ObjectData(blob, { version: 0 }));
-            organization = decodedOrganization.data;
-        } catch (e) {
-            throw new SimpleError({
-                code: 'invalid_json',
-                message: 'Het bestand is geen geldige export: ' + (isSimpleError(e) ? e.getHuman() : e),
-            });
-        }
-
-        const existing = this.$organization;
-
-        const privatePatch = OrganizationPrivateMetaData.patch({});
-
-        // Add emails
-        for (const email of organization.privateMeta?.emails ?? []) {
-            if (!existing.privateMeta?.emails.find(e => e.email === email.email)) {
-                // Only add if it doesn't exist yet
-                privatePatch.emails.addPut(email);
-            }
-        }
-
-        // Add roles
-        for (const role of organization.privateMeta?.roles ?? []) {
-            if (!existing.privateMeta?.roles.find(r => r.id === role.id)) {
-                // Only add if it doesn't exist yet
-                privatePatch.roles.addPut(role);
-            }
-        }
-
-        // Add featureFlags
-        for (const featureFlag of organization.privateMeta?.featureFlags ?? []) {
-            if (!existing.privateMeta?.featureFlags.includes(featureFlag)) {
-                // Only add if it doesn't exist yet
-                privatePatch.featureFlags.addPut(featureFlag);
-            }
-        }
-
-        const meta = {
-            ...organization.meta,
-        } as any;
-        delete meta.registrationPaymentConfiguration;
-
-        const organizationPatch = Organization.patch({
-            id: existing.id,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            meta: OrganizationMetaData.patch(meta),
-            privateMeta: privatePatch,
-            name: organization.name,
-            address: organization.address,
-            website: organization.website,
-            uri: organization.uri,
-        });
-
-        // Copy over groups
-        for (const group of organization.groups) {
-            if (!existing.groups.find(g => g.id === group.id)) {
-                // Only add if it doesn't exist yet
-                organizationPatch.groups.addPut(group);
-            }
-        }
-
-        // Send to server
-        await this.$organizationManager.patch(organizationPatch);
-    }
-
-    async applyDiscountCode() {
-        await this.present({
-            components: [
-                new ComponentWithProperties(InputSheet, {
-                    title: 'Kortingscode toepassen',
-                    description: 'De kortingscode zal meteen worden toegepast op deze vereniging. De andere vereniging ontvangt een e-mail dat de kortingscode is gebruikt, en zal meteen tegoed ontvangen als de vereniging al een betalende klant is (in het andere geval pas later).',
-                    placeholder: 'Vul hier de code in',
-                    saveHandler: async (code: string) => {
-                        await this.$context.authenticatedServer.request({
-                            method: 'POST',
-                            path: '/organization/register-code',
-                            body: {
-                                registerCode: code,
-                            },
-                        });
-                        new Toast('De kortingscode is toegepast', 'success green').show();
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
+        reader.readAsText(file);
+    };
+    input.click();
 }
+
+async function doUploadSettings(blob: unknown) {
+    let importedOrganization: Organization;
+    try {
+        importedOrganization = new VersionBoxDecoder(Organization as Decoder<Organization>)
+            .decode(new ObjectData(blob, { version: 0 })).data;
+    } catch (e) {
+        throw new SimpleError({
+            code: 'invalid_json',
+            message: 'Het bestand is geen geldige export: ' + (isSimpleError(e) ? e.getHuman() : e),
+        });
+    }
+
+    const existing = baseOrganization.value;
+    const privatePatch = OrganizationPrivateMetaData.patch({});
+
+    for (const email of importedOrganization.privateMeta?.emails ?? []) {
+        if (!existing.privateMeta?.emails.find(e => e.email === email.email)) {
+            privatePatch.emails.addPut(email);
+        }
+    }
+    for (const role of importedOrganization.privateMeta?.roles ?? []) {
+        if (!existing.privateMeta?.roles.find(r => r.id === role.id)) {
+            privatePatch.roles.addPut(role);
+        }
+    }
+    for (const featureFlag of importedOrganization.privateMeta?.featureFlags ?? []) {
+        if (!existing.privateMeta?.featureFlags.includes(featureFlag)) {
+            privatePatch.featureFlags.addPut(featureFlag);
+        }
+    }
+
+    const meta = { ...importedOrganization.meta } as any;
+    delete meta.registrationPaymentConfiguration;
+
+    const patch = Organization.patch({
+        id: existing.id,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        meta: OrganizationMetaData.patch(meta),
+        privateMeta: privatePatch,
+        name: importedOrganization.name,
+        address: importedOrganization.address,
+        website: importedOrganization.website,
+        uri: importedOrganization.uri,
+    });
+    for (const group of importedOrganization.groups) {
+        if (!existing.groups.find(g => g.id === group.id)) {
+            patch.groups.addPut(group);
+        }
+    }
+    await organizationManager.value.patch(patch);
+}
+
+async function applyDiscountCode() {
+    await present({
+        components: [
+            new ComponentWithProperties(InputSheet, {
+                title: 'Kortingscode toepassen',
+                description: 'De kortingscode zal meteen worden toegepast op deze vereniging. De andere vereniging ontvangt een e-mail dat de kortingscode is gebruikt, en zal meteen tegoed ontvangen als de vereniging al een betalende klant is (in het andere geval pas later).',
+                placeholder: 'Vul hier de code in',
+                saveHandler: async (code: string) => {
+                    await context.value.authenticatedServer.request({
+                        method: 'POST',
+                        path: '/organization/register-code',
+                        body: {
+                            registerCode: code,
+                        },
+                        owner: requestOwner,
+                    });
+                    new Toast('De kortingscode is toegepast', 'success green').show();
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

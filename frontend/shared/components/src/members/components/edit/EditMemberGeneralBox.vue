@@ -54,7 +54,7 @@
                         <button :v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
-                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event)">
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event ?? '')">
                     <template #right>
                         <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>

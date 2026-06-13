@@ -3,17 +3,11 @@ import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, unwrapFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 
 import StringUIFilterView from './StringUIFilterView.vue';
-import type { StyledDescriptionChoice, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import { StringFilterMode } from './StringFilterMode';
+import type { StyledDescriptionChoice, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
-export enum StringFilterMode {
-    Contains = 'Contains',
-    Equals = 'Equals',
-    NotContains = 'NotContains',
-    NotEquals = 'NotEquals',
-    NotEmpty = 'NotEmpty',
-    Empty = 'Empty',
-}
+export { StringFilterMode } from './StringFilterMode';
 
 export class StringUIFilter extends UIFilter<StringFilterBuilder> {
     value = '';

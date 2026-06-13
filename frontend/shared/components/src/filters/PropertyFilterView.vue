@@ -20,70 +20,51 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import type { PropertyFilter} from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { useDismiss } from '@simonbackx/vue-app-navigation';
+import type { PropertyFilter } from '@stamhoofd/structures';
 import { Version } from '@stamhoofd/structures';
+import { shallowRef } from 'vue';
 
-import STNavigationBar from '../navigation/STNavigationBar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import PropertyFilterInput from './PropertyFilterInput.vue';
 import type { UIFilterBuilder } from './UIFilter';
 import { propertyFilterToString } from './UIFilter';
 
-@Component({
-    components: {
-        STNavigationBar,
-        PropertyFilterInput,
-    },
-})
-export default class PropertyFilterView extends Mixins(NavigationMixin) {
-    @Prop({ default: '' })
-    title!: string;
-
-    @Prop({ default: () => ({}) })
+const props = withDefaults(defineProps<{
+    title?: string;
     options?: { warning?: string; description?: string };
+    builder: UIFilterBuilder;
+    parentConfiguration?: PropertyFilter | null;
+    configuration: PropertyFilter | null;
+    setConfiguration: (configuration: PropertyFilter | null) => void;
+}>(), {
+    title: '',
+    options: () => ({}),
+    parentConfiguration: null,
+});
 
-    @Prop({ required: true })
-    builder!: UIFilterBuilder;
+const dismiss = useDismiss();
+const editingConfiguration = shallowRef<PropertyFilter | null>(props.configuration);
 
-    @Prop({ required: false, default: null })
-    parentConfiguration!: PropertyFilter | null;
-
-    @Prop({ required: true })
-    configuration!: PropertyFilter | null;
-
-    @Prop({ required: true })
-    setConfiguration!: (configuration: PropertyFilter | null) => void;
-
-    editingConfiguration: PropertyFilter | null = this.configuration;
-
-    propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
-        return propertyFilterToString(filter, builder);
-    }
-
-    async cancel() {
-        await this.dismiss({ force: true });
-    }
-
-    async save() {
-        this.setConfiguration(this.editingConfiguration);
-        await this.dismiss({ force: true });
-    }
-
-    isChanged() {
-        if (this.editingConfiguration === null || this.configuration === null) {
-            return this.editingConfiguration !== this.configuration;
-        }
-        return JSON.stringify(this.editingConfiguration.encode({ version: Version })) !== JSON.stringify(this.configuration.encode({ version: Version }));
-    }
-
-    async shouldNavigateAway() {
-        if (!this.isChanged()) {
-            return true;
-        }
-        return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
-    }
+async function save() {
+    props.setConfiguration(editingConfiguration.value);
+    await dismiss({ force: true });
 }
+
+function isChanged() {
+    if (editingConfiguration.value === null || props.configuration === null) {
+        return editingConfiguration.value !== props.configuration;
+    }
+    return JSON.stringify(editingConfiguration.value.encode({ version: Version })) !== JSON.stringify(props.configuration.encode({ version: Version }));
+}
+
+async function shouldNavigateAway() {
+    if (!isChanged()) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+}
+
+defineExpose({ shouldNavigateAway });
 </script>

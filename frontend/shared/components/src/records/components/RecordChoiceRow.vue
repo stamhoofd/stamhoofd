@@ -14,94 +14,83 @@
     </STListItem>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import STListItem from '#layout/STListItem.vue';
 import type { RecordChoice, RecordSettings } from '@stamhoofd/structures';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { computed } from 'vue';
 
 import EditRecordChoiceView from '../EditRecordChoiceView.vue';
 
-@Component({
-    components: {
-        STListItem
-    },
-})
-export default class ChoiceRow extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    choice: RecordChoice
+const props = defineProps<{
+    choice: RecordChoice;
+    parentRecord: RecordSettings;
+}>();
+const emit = defineEmits<{
+    patch: [patch: PatchableArrayAutoEncoder<RecordChoice>];
+}>();
+const present = usePresent();
+const choices = computed(() => props.parentRecord.choices);
 
-    @Prop({ required: true })
-    parentRecord: RecordSettings
+async function editChoice() {
+    await present(new ComponentWithProperties(EditRecordChoiceView, {
+        choice: props.choice,
+        parentRecord: props.parentRecord,
+        isNew: false,
+        saveHandler: addPatch,
+    }).setDisplayStyle('popup'));
+}
 
-    get choices(): RecordChoice[] {
-        return this.parentRecord.choices
+function addPatch(patch: PatchableArrayAutoEncoder<RecordChoice>) {
+    emit('patch', patch);
+}
+
+function moveUp() {
+    const index = choices.value.findIndex(c => c.id === props.choice.id);
+    if (index === -1 || index === 0) {
+        return;
     }
 
-    async editChoice() {
-        await this.present(new ComponentWithProperties(EditRecordChoiceView, {
-            choice: this.choice,
-            parentRecord: this.parentRecord,
-            isNew: false,
-            saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => {
-                this.addPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
+    const moveTo = index - 2;
+    const patch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
+    patch.addMove(props.choice.id, choices.value[moveTo]?.id ?? null);
+    addPatch(patch);
+}
+
+function moveDown() {
+    const index = choices.value.findIndex(c => c.id === props.choice.id);
+    if (index === -1 || index >= choices.value.length - 1) {
+        return;
     }
 
-    addPatch(patch: PatchableArrayAutoEncoder<RecordChoice>) {
-        this.$emit("patch", patch)
-    }
+    const moveTo = index + 1;
+    const patch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
+    patch.addMove(props.choice.id, choices.value[moveTo]?.id ?? null);
+    addPatch(patch);
+}
 
-    moveUp() {
-        const index = this.choices.findIndex(c => c.id === this.choice.id)
-        if (index === -1 || index === 0) {
-            return;
-        }
-
-        const moveTo = index - 2
-        const p: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray()
-        p.addMove(this.choice.id, this.choices[moveTo]?.id ?? null)
-        this.addPatch(p)
-    }
-     
-    moveDown() {
-        const index = this.choices.findIndex(c => c.id === this.choice.id)
-        if (index === -1 || index >= this.choices.length - 1) {
-            return;
-        }
-
-        const moveTo = index + 1
-        const p: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray()
-        p.addMove(this.choice.id, this.choices[moveTo]?.id ?? null)
-        this.addPatch(p)
-    }
-
-    showContextMenu(event: TouchEvent | MouseEvent) {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: $t(`%11f`),
-                    icon: "arrow-up",
-                    action: () => {
-                        this.moveUp()
-                        return true;
-                    }
-                }),
-                new ContextMenuItem({
-                    name: $t(`%11g`),
-                    icon: "arrow-down",
-                    action: () => {
-                        this.moveDown()
-                        return true;
-                    }
-                }),
-            ]
-        ])
-        menu.show({ clickEvent: event }).catch(console.error)
-    }
+function showContextMenu(event: TouchEvent | MouseEvent) {
+    const menu = new ContextMenu([[
+        new ContextMenuItem({
+            name: $t(`%11f`),
+            icon: 'arrow-up',
+            action: () => {
+                moveUp();
+                return true;
+            },
+        }),
+        new ContextMenuItem({
+            name: $t(`%11g`),
+            icon: 'arrow-down',
+            action: () => {
+                moveDown();
+                return true;
+            },
+        }),
+    ]]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>

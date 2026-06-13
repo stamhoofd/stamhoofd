@@ -19,6 +19,7 @@ import STNavigationTitle from './navigation/STNavigationTitle.vue';
 import { Toast, ToastButton } from './overlays/Toast';
 import ToastBox from './overlays/ToastBox.vue';
 import ToastView from './overlays/ToastView.vue';
+import AddDiscountCodeBox from './views/AddDiscountCodeBox.vue';
 
 function renderComponent(component: any, props: Record<string, unknown> = {}, slots?: Record<string, string>, extra: Record<string, unknown> = {}) {
     return render(component, {
@@ -207,4 +208,19 @@ test('LoginView reacts to a realistically typed developer email', async () => {
     await userEvent.click(password);
 
     await vi.waitFor(() => expect(document.querySelector('.version-footer')).not.toBeNull());
+});
+
+test('AddDiscountCodeBox cleans and applies a code through the visible user flow', async () => {
+    const applyCode = vi.fn().mockResolvedValue(true);
+    renderComponent(AddDiscountCodeBox, { applyCode });
+
+    await userEvent.click(document.querySelector<HTMLButtonElement>('button')!);
+
+    const input = document.querySelector<HTMLInputElement>('input[type="text"]')!;
+    await userEvent.click(input);
+    await userEvent.keyboard('  Summer Deal  ');
+    await userEvent.click(document.querySelector<HTMLButtonElement>('button[type="submit"]')!);
+
+    await vi.waitFor(() => expect(applyCode).toHaveBeenCalledWith('SUMMER-DEAL'));
+    await vi.waitFor(() => expect(document.querySelector('form')).toBeNull());
 });

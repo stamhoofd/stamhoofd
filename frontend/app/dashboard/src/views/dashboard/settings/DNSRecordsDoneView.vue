@@ -25,47 +25,16 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+<script lang="ts" setup>
+import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        BackButton,
-        LoadingButton,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class DNSRecordsDoneView extends Mixins(NavigationMixin) {
-    get organization() {
-        return this.$organization;
-    }
-
-    get enableMemberModule() {
-        return this.organization.meta.modules.useMembers;
-    }
-
-    get registerDomain() {
-        return this.$organization.registerDomain ?? '?';
-    }
-
-    get mailDomain() {
-        return this.$organization.privateMeta?.mailDomain ?? '?';
-    }
-}
+const organization = useRequiredOrganization();
+const dismiss = useDismiss();
+const enableMemberModule = computed(() => organization.value.meta.modules.useMembers);
+const registerDomain = computed(() => organization.value.registerDomain ?? '?');
+const mailDomain = computed(() => organization.value.privateMeta?.mailDomain ?? '?');
 </script>

@@ -71,29 +71,29 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { StamhoofdFilter} from '@stamhoofd/structures';
-import { ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
-import { Formatter } from '@stamhoofd/utility';
-
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
+
 import { getSelectableWorkbook } from '../../payments/getSelectableWorkbook';
 
 class DateRangeSuggestion {
@@ -107,336 +107,261 @@ class DateRangeSuggestion {
         this.endDate = endDate;
     }
 }
-@Component({
-    components: {
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        STList,
-        STListItem,
-        SaveView,
-        DateSelection,
-        TimeInput,
+
+const context = useContext();
+const organization = useRequiredOrganization();
+const show = useShow();
+const requestOwner = {};
+const errorBox = ref<ErrorBox | null>(null);
+const saving = ref(false);
+const internalStartDate = ref(new Date());
+const internalEndDate = ref(new Date());
+const methods = ref<PaymentMethod[]>([]);
+const providers = ref<PaymentProvider[]>([]);
+const loadingStripeAccounts = ref(false);
+const stripeAccounts = shallowRef<StripeAccount[]>([]);
+const dateRangeSuggestions = shallowRef<DateRangeSuggestion[]>([]);
+const useUTCTimezone = ref(false);
+
+const startDate = computed({
+    get: () => internalStartDate.value,
+    set: (value: Date) => {
+        internalStartDate.value = new Date(value.getTime());
+        internalStartDate.value.setHours(0, 0, 0, 0);
     },
-})
-export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-    saving = false;
+});
+const endDate = computed({
+    get: () => internalEndDate.value,
+    set: (value: Date) => {
+        internalEndDate.value = new Date(value.getTime());
+        internalEndDate.value.setHours(23, 59, 59, 0);
+    },
+});
+const correctedStartDate = computed(() => {
+    if (!useUTCTimezone.value) {
+        return startDate.value;
+    }
+    const date = new Date();
+    date.setUTCFullYear(startDate.value.getFullYear(), startDate.value.getMonth(), startDate.value.getDate());
+    date.setUTCHours(0, 0, 0, 0);
+    return date;
+});
+const correctedEndDate = computed(() => {
+    if (!useUTCTimezone.value) {
+        return endDate.value;
+    }
+    const date = new Date();
+    date.setUTCFullYear(endDate.value.getFullYear(), endDate.value.getMonth(), endDate.value.getDate());
+    date.setUTCHours(23, 59, 59, 0);
+    return date;
+});
+const country = I18nController.shared.countryCode;
+const hasPayconiq = computed(() => !!organization.value.privateMeta?.payconiqApiKey);
+const hasMollie = computed(() => !!organization.value.privateMeta?.mollieOnboarding?.canReceivePayments);
+const hasBuckaroo = computed(() => organization.value.privateMeta?.buckarooSettings !== null);
+const sortedPaymentMethods = computed(() => {
+    const result: PaymentMethod[] = [PaymentMethod.Transfer];
+    if (country === Country.Netherlands) {
+        result.push(PaymentMethod.iDEAL);
+    }
+    result.push(PaymentMethod.Bancontact);
+    if (country === Country.Belgium || getPaymentMethod(PaymentMethod.Payconiq)) {
+        result.push(PaymentMethod.Payconiq);
+    }
+    if (country !== Country.Netherlands) {
+        result.push(PaymentMethod.iDEAL);
+    }
+    result.push(PaymentMethod.CreditCard);
+    result.push(PaymentMethod.PointOfSale);
+    return result;
+});
+const allPaymentProviders = computed(() => {
+    const result: PaymentProvider[] = [];
+    if (stripeAccounts.value.length > 0) {
+        result.push(PaymentProvider.Stripe);
+    }
+    if (hasPayconiq.value) {
+        result.push(PaymentProvider.Payconiq);
+    }
+    if (hasMollie.value) {
+        result.push(PaymentProvider.Mollie);
+    }
+    if (hasBuckaroo.value) {
+        result.push(PaymentProvider.Buckaroo);
+    }
+    return result;
+});
+const canContinue = computed(() => methods.value.length > 0 && (
+    providers.value.length > 0
+    || methods.value.includes(PaymentMethod.Transfer)
+    || methods.value.includes(PaymentMethod.PointOfSale)
+));
 
-    internalStartDate = new Date();
-    internalEndDate = new Date();
+onMounted(() => {
+    methods.value = sortedPaymentMethods.value.slice();
+    buildSuggestions();
+    selectSuggestion(dateRangeSuggestions.value[0]!);
+    loadStripeAccounts().catch(console.error);
+});
+onBeforeUnmount(() => Request.cancelAll(requestOwner));
 
-    methods: PaymentMethod[] = [];
-    providers: PaymentProvider[] = [];
+function buildSuggestions() {
+    dateRangeSuggestions.value = [
+        new DateRangeSuggestion({
+            name: Formatter.month(Formatter.luxon().startOf('month').toJSDate()),
+            startDate: Formatter.luxon().startOf('month').toJSDate(),
+            endDate: Formatter.luxon().endOf('month').toJSDate(),
+        }),
+        new DateRangeSuggestion({
+            name: Formatter.month(Formatter.luxon().minus({ month: 1 }).startOf('month').toJSDate()),
+            startDate: Formatter.luxon().minus({ month: 1 }).startOf('month').toJSDate(),
+            endDate: Formatter.luxon().minus({ month: 1 }).endOf('month').toJSDate(),
+        }),
+        new DateRangeSuggestion({
+            name: Formatter.month(Formatter.luxon().minus({ month: 2 }).startOf('month').toJSDate()),
+            startDate: Formatter.luxon().minus({ month: 2 }).startOf('month').toJSDate(),
+            endDate: Formatter.luxon().minus({ month: 2 }).endOf('month').toJSDate(),
+        }),
+        new DateRangeSuggestion({
+            name: Formatter.month(Formatter.luxon().minus({ month: 3 }).startOf('month').toJSDate()),
+            startDate: Formatter.luxon().minus({ month: 3 }).startOf('month').toJSDate(),
+            endDate: Formatter.luxon().minus({ month: 3 }).endOf('month').toJSDate(),
+        }),
+        new DateRangeSuggestion({
+            name: Formatter.year(Formatter.luxon().startOf('year').toJSDate()).toString(),
+            startDate: Formatter.luxon().startOf('year').toJSDate(),
+            endDate: Formatter.luxon().endOf('year').toJSDate(),
+        }),
+        new DateRangeSuggestion({
+            name: Formatter.year(Formatter.luxon().minus({ year: 1 }).startOf('year').toJSDate()).toString(),
+            startDate: Formatter.luxon().minus({ year: 1 }).startOf('year').toJSDate(),
+            endDate: Formatter.luxon().minus({ year: 1 }).endOf('year').toJSDate(),
+        }),
+    ];
+}
 
-    loadingStripeAccounts = false;
-    stripeAccounts: StripeAccount[] = [];
+function selectSuggestion(suggestion: DateRangeSuggestion) {
+    startDate.value = suggestion.startDate;
+    endDate.value = suggestion.endDate;
+}
 
-    dateRangeSuggestions: DateRangeSuggestion[] = [];
+function isSuggestionSelected(suggestion: DateRangeSuggestion) {
+    return Formatter.dateIso(startDate.value) === Formatter.dateIso(suggestion.startDate)
+        && Formatter.dateIso(endDate.value) === Formatter.dateIso(suggestion.endDate);
+}
 
-    useUTCTimezone = false;
+async function loadStripeAccounts() {
+    try {
+        loadingStripeAccounts.value = true;
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/stripe/accounts',
+            decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
+            shouldRetry: false,
+            owner: requestOwner,
+        });
+        stripeAccounts.value = response.data;
+        providers.value = allPaymentProviders.value.slice();
+    } catch (e) {
+        console.error(e);
+    }
+    loadingStripeAccounts.value = false;
+}
 
-    created() {
-        this.loadStripeAccounts().catch(console.error);
+function getProviderName(provider: PaymentProvider) {
+    return provider;
+}
+
+function getMethodName(paymentMethod: PaymentMethod): string {
+    return PaymentMethodHelper.getNameCapitalized(paymentMethod);
+}
+
+function getPaymentMethod(method: PaymentMethod) {
+    return methods.value.includes(method);
+}
+
+function setPaymentMethod(method: PaymentMethod, enabled: boolean) {
+    methods.value = methods.value.filter(item => item !== method);
+    if (enabled) {
+        methods.value.push(method);
+    }
+}
+
+function getProvider(provider: PaymentProvider) {
+    return providers.value.includes(provider);
+}
+
+function setProvider(provider: PaymentProvider, enabled: boolean) {
+    providers.value = providers.value.filter(item => item !== provider);
+    if (enabled) {
+        providers.value.push(provider);
+    }
+}
+
+async function save() {
+    if (saving.value) {
+        return;
     }
 
-    mounted() {
-        this.methods = this.sortedPaymentMethods.slice();
-        this.buildSuggestions();
-        this.selectSuggestion(this.dateRangeSuggestions[0]);
-    }
-
-    get startDate() {
-        return this.internalStartDate;
-    }
-
-    set startDate(value: Date) {
-        this.internalStartDate = new Date(value.getTime());
-        this.internalStartDate.setHours(0, 0, 0, 0);
-    }
-
-    get endDate() {
-        return this.internalEndDate;
-    }
-
-    set endDate(value: Date) {
-        this.internalEndDate = new Date(value.getTime());
-        this.internalEndDate.setHours(23, 59, 59, 0);
-    }
-
-    get correctedStartDate() {
-        if (this.useUTCTimezone) {
-            const date = new Date();
-            date.setUTCFullYear(this.startDate.getFullYear(), this.startDate.getMonth(), this.startDate.getDate());
-            date.setUTCHours(0, 0, 0, 0);
-            return date;
-        }
-        else {
-            return this.startDate;
-        }
-    }
-
-    get correctedEndDate() {
-        if (this.useUTCTimezone) {
-            const date = new Date();
-            date.setUTCFullYear(this.endDate.getFullYear(), this.endDate.getMonth(), this.endDate.getDate());
-            date.setUTCHours(23, 59, 59, 0);
-            return date;
-        }
-        else {
-            return this.endDate;
-        }
-    }
-
-    buildSuggestions() {
-        this.dateRangeSuggestions = [
-            new DateRangeSuggestion({
-                name: Formatter.month(Formatter.luxon().startOf('month').toJSDate()),
-                startDate: Formatter.luxon().startOf('month').toJSDate(),
-                endDate: Formatter.luxon().endOf('month').toJSDate(),
-            }),
-            new DateRangeSuggestion({
-                name: Formatter.month(Formatter.luxon().minus({ month: 1 }).startOf('month').toJSDate()),
-                startDate: Formatter.luxon().minus({ month: 1 }).startOf('month').toJSDate(),
-                endDate: Formatter.luxon().minus({ month: 1 }).endOf('month').toJSDate(),
-            }),
-            new DateRangeSuggestion({
-                name: Formatter.month(Formatter.luxon().minus({ month: 2 }).startOf('month').toJSDate()),
-                startDate: Formatter.luxon().minus({ month: 2 }).startOf('month').toJSDate(),
-                endDate: Formatter.luxon().minus({ month: 2 }).endOf('month').toJSDate(),
-            }),
-            new DateRangeSuggestion({
-                name: Formatter.month(Formatter.luxon().minus({ month: 3 }).startOf('month').toJSDate()),
-                startDate: Formatter.luxon().minus({ month: 3 }).startOf('month').toJSDate(),
-                endDate: Formatter.luxon().minus({ month: 3 }).endOf('month').toJSDate(),
-            }),
-            new DateRangeSuggestion({
-                name: Formatter.year(Formatter.luxon().startOf('year').toJSDate()).toString(),
-                startDate: Formatter.luxon().startOf('year').toJSDate(),
-                endDate: Formatter.luxon().endOf('year').toJSDate(),
-            }),
-            new DateRangeSuggestion({
-                name: Formatter.year(Formatter.luxon().minus({ year: 1 }).startOf('year').toJSDate()).toString(),
-                startDate: Formatter.luxon().minus({ year: 1 }).startOf('year').toJSDate(),
-                endDate: Formatter.luxon().minus({ year: 1 }).endOf('year').toJSDate(),
-            }),
-        ];
-    }
-
-    selectSuggestion(suggestion: DateRangeSuggestion) {
-        this.startDate = suggestion.startDate;
-        this.endDate = suggestion.endDate;
-    }
-
-    isSuggestionSelected(suggestion: DateRangeSuggestion) {
-        return Formatter.dateIso(this.startDate) === Formatter.dateIso(suggestion.startDate) && Formatter.dateIso(this.endDate) === Formatter.dateIso(suggestion.endDate);
-    }
-
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get enableMemberModule() {
-        return this.organization.meta.modules.useMembers;
-    }
-
-    get enableWebshopModule() {
-        return this.organization.meta.modules.useWebshops;
-    }
-
-    get country() {
-        return I18nController.shared.countryCode;
-    }
-
-    get hasPayconiq() {
-        return !!this.organization.privateMeta?.payconiqApiKey;
-    }
-
-    get hasMollie() {
-        return !!this.organization.privateMeta?.mollieOnboarding?.canReceivePayments;
-    }
-
-    get hasBuckaroo() {
-        return this.organization.privateMeta?.buckarooSettings !== null;
-    }
-
-    async loadStripeAccounts() {
-        try {
-            this.loadingStripeAccounts = true;
-            const response = await this.$context.authenticatedServer.request({
-                method: 'GET',
-                path: '/stripe/accounts',
-                decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
-                shouldRetry: false,
-                owner: this,
-            });
-            this.stripeAccounts = response.data;
-            this.providers = this.allPaymentProviders.slice();
-        }
-        catch (e) {
-            console.error(e);
-        }
-        this.loadingStripeAccounts = false;
-    }
-
-    get sortedPaymentMethods() {
-        const r: PaymentMethod[] = [
-            PaymentMethod.Transfer,
-        ];
-
-        // Force a given ordering
-        if (this.country === Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL);
-        }
-
-        // Force a given ordering
-        r.push(PaymentMethod.Bancontact);
-
-        // Force a given ordering
-        if (this.country === Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq);
-        }
-
-        // Force a given ordering
-        if (this.country !== Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL);
-        }
-
-        r.push(PaymentMethod.CreditCard);
-        r.push(PaymentMethod.PointOfSale);
-        return r;
-    }
-
-    get allPaymentProviders() {
-        const r: PaymentProvider[] = [];
-
-        if (this.stripeAccounts.length > 0) {
-            r.push(PaymentProvider.Stripe);
-        }
-
-        if (this.hasPayconiq) {
-            r.push(PaymentProvider.Payconiq);
-        }
-
-        if (this.hasMollie) {
-            r.push(PaymentProvider.Mollie);
-        }
-
-        if (this.hasBuckaroo) {
-            r.push(PaymentProvider.Buckaroo);
-        }
-
-        return r;
-    }
-
-    getProviderName(provider: PaymentProvider) {
-        return provider;
-    }
-
-    getMethodName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getNameCapitalized(paymentMethod);
-    }
-
-    getPaymentMethod(method: PaymentMethod) {
-        return this.methods.includes(method);
-    }
-
-    setPaymentMethod(method: PaymentMethod, enabled: boolean) {
-        this.methods = this.methods.filter(m => m !== method);
-        if (enabled) {
-            this.methods.push(method);
-        }
-    }
-
-    getProvider(provider: PaymentProvider) {
-        return this.providers.includes(provider);
-    }
-
-    setProvider(provider: PaymentProvider, enabled: boolean) {
-        this.providers = this.providers.filter(m => m !== provider);
-        if (enabled) {
-            this.providers.push(provider);
-        }
-    }
-
-    get canContinue() {
-        return this.methods.length > 0 && (this.providers.length > 0 || this.methods.includes(PaymentMethod.Transfer) || this.methods.includes(PaymentMethod.PointOfSale));
-    }
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-
-        this.saving = true;
-
-        try {
-            await this.show({
-                components: [
-                    new ComponentWithProperties(ExcelExportView, {
-                        type: ExcelExportType.Payments,
-                        filter: new LimitedFilteredRequest({
-                            filter: this.buildFilter(),
-                            limit: 100,
-                            sort: [
-                                {
-                                    key: 'paidAt',
-                                    order: SortItemDirection.ASC,
-                                },
-                                {
-                                    key: 'id',
-                                    order: SortItemDirection.ASC,
-                                },
-                            ],
-                        }),
-                        workbook: getSelectableWorkbook(),
-                        configurationId: 'configure-payment-export',
-                        title: [
-                            this.organization && this.$context.auth.hasSomePlatformAccess() ? this.organization.name : null,
-                            this.methods.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('Betalingen'),
-                            Formatter.dateRange(this.startDate, this.endDate, ' tem ', false)
-                        ].filter(Boolean).join(' - '),
+    saving.value = true;
+    try {
+        await show({
+            components: [
+                new ComponentWithProperties(ExcelExportView, {
+                    type: ExcelExportType.Payments,
+                    filter: new LimitedFilteredRequest({
+                        filter: buildFilter(),
+                        limit: 100,
+                        sort: [
+                            {
+                                key: 'paidAt',
+                                order: SortItemDirection.ASC,
+                            },
+                            {
+                                key: 'id',
+                                order: SortItemDirection.ASC,
+                            },
+                        ],
                     }),
-                ],
-            });
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e as Error);
-        }
-        this.saving = false;
-    }
-
-    
-
-    buildFilter(): StamhoofdFilter {
-        return {
-            $and: [
-                {
-                    status: PaymentStatus.Succeeded,
-                    method: {
-                        $in: this.methods,
-                    },
-                    provider: {
-                        $in: [null, ...this.providers],
-                    },
-                },
-                {
-                    paidAt: {
-                        $gte: this.correctedStartDate,
-                    },
-                },
-                {
-                    paidAt: {
-                        $lte: this.correctedEndDate,
-                    },
-                },
+                    workbook: getSelectableWorkbook(),
+                    configurationId: 'configure-payment-export',
+                    title: [
+                        context.value.auth.hasSomePlatformAccess() ? organization.value.name : null,
+                        methods.value.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(methods.value[0]!) : $t('Betalingen'),
+                        Formatter.dateRange(startDate.value, endDate.value, ' tem ', false),
+                    ].filter(Boolean).join(' - '),
+                }),
             ],
-        };
+        });
+    } catch (e) {
+        errorBox.value = new ErrorBox(e as Error);
     }
+    saving.value = false;
+}
+
+function buildFilter(): StamhoofdFilter {
+    return {
+        $and: [
+            {
+                status: PaymentStatus.Succeeded,
+                method: {
+                    $in: methods.value,
+                },
+                provider: {
+                    $in: [null, ...providers.value],
+                },
+            },
+            {
+                paidAt: {
+                    $gte: correctedStartDate.value,
+                },
+            },
+            {
+                paidAt: {
+                    $lte: correctedEndDate.value,
+                },
+            },
+        ],
+    };
 }
 </script>

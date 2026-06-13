@@ -94,11 +94,11 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import type { StamhoofdFilter} from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, PropertyFilter, Version } from '@stamhoofd/structures';
+import { computed, onMounted, shallowRef } from 'vue';
 
 import Radio from '../inputs/Radio.vue';
 import STInputBox from '../inputs/STInputBox.vue';
@@ -109,216 +109,130 @@ import type { UIFilter, UIFilterBuilder } from './UIFilter';
 import { filterToString } from './UIFilter';
 import UIFilterEditor from './UIFilterEditor.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        STList,
-        STListItem,
-        Radio,
-    },
-})
-export default class PropertyFilterInput extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    modelValue!: PropertyFilter | null;
+const model = defineModel<PropertyFilter | null>({ required: true });
+const props = withDefaults(defineProps<{
+    required?: boolean;
+    disabledText?: string;
+    disabledDescription?: string;
+    allowOptional?: boolean;
+    builder: UIFilterBuilder;
+}>(), {
+    required: true,
+    disabledText: '',
+    disabledDescription: '',
+    allowOptional: true,
+});
 
-    @Prop({ default: true })
-    required!: boolean;
+const present = usePresent();
+const cachedRequiredFilter = shallowRef<StamhoofdFilter | null>(null);
+const cachedEnabledFilter = shallowRef<StamhoofdFilter | null>(null);
+const hasFilters = computed(() => props.builder instanceof GroupUIFilterBuilder && props.builder.builders.length > 1);
+const isDevelopment = STAMHOOFD.environment === 'development';
+const encodedJson = computed(() => model.value === null ? 'null' : JSON.stringify(model.value.encode({ version: Version }), null, 4));
+const enabledText = computed(() => model.value?.enabledWhen ? filterToString(model.value.enabledWhen, props.builder) : '');
+const requiredText = computed(() => !model.value || isEmptyFilter(model.value.requiredWhen) ? '' : filterToString(model.value.requiredWhen, props.builder));
 
-    @Prop({ default: '' })
-    disabledText!: string;
+onMounted(cacheIfNeeded);
 
-    @Prop({ default: '' })
-    disabledDescription!: string;
+function isAlwaysEnabled() {
+    if (model.value === null) {
+        return false;
+    }
+    return model.value.enabledWhen === null || isEmptyFilter(model.value.enabledWhen);
+}
 
-    @Prop({ default: true })
-    allowOptional!: boolean;
+function isAlwaysRequired() {
+    if (model.value === null) {
+        return false;
+    }
+    return model.value.requiredWhen !== null && isEmptyFilter(model.value.requiredWhen);
+}
 
-    @Prop({ required: true })
-    builder!: UIFilterBuilder;
+function isNeverRequired() {
+    if (model.value === null) {
+        return true;
+    }
+    return model.value.requiredWhen === null;
+}
 
-    cachedRequiredFilter: StamhoofdFilter | null = null;
-    cachedEnabledFilter: StamhoofdFilter | null = null;
+function cacheIfNeeded() {
+    if (!model.value) {
+        return;
+    }
+    if (model.value.requiredWhen && !isEmptyFilter(model.value.requiredWhen)) {
+        cachedRequiredFilter.value = model.value.requiredWhen;
+    }
+    if (model.value.enabledWhen && !isEmptyFilter(model.value.enabledWhen)) {
+        cachedEnabledFilter.value = model.value.enabledWhen;
+    }
+}
 
-    isAlwaysEnabled() {
-        if (this.modelValue === null) {
-            return false;
-        }
-        return this.modelValue.enabledWhen === null || isEmptyFilter(this.modelValue.enabledWhen);
+function setAlwaysEnabled() {
+    model.value = new PropertyFilter(null, model.value?.requiredWhen ?? {});
+}
+
+function isDisabled() {
+    return model.value === null;
+}
+
+function setDisabled() {
+    model.value = null;
+}
+
+async function setEnabledWhen(useCache = false) {
+    if (useCache && cachedEnabledFilter.value && !isEmptyFilter(cachedEnabledFilter.value)) {
+        model.value = new PropertyFilter(cachedEnabledFilter.value, model.value?.requiredWhen ?? {});
+        return;
     }
 
-    isAlwaysRequired() {
-        if (this.modelValue === null) {
-            return false;
-        }
-        return this.modelValue.requiredWhen !== null && isEmptyFilter(this.modelValue.requiredWhen);
-    }
-
-    isNeverRequired() {
-        if (this.modelValue === null) {
-            return true;
-        }
-        return this.modelValue.requiredWhen === null;
-    }
-
-    get hasFilters() {
-        return this.builder instanceof GroupUIFilterBuilder && this.builder.builders.length > 1;
-    }
-
-    mounted() {
-        this.cacheIfNeeded();
-    }
-
-    get isDevelopment() {
-        return STAMHOOFD.environment === 'development';
-    }
-
-    get encodedJson() {
-        if (this.modelValue === null) {
-            return 'null';
-        }
-
-        return JSON.stringify(
-            this.modelValue.encode({ version: Version }),
-            null,
-            4,
-        );
-    }
-
-    cacheIfNeeded() {
-        if (!this.modelValue) {
-            return;
-        }
-        if (this.modelValue.requiredWhen && !isEmptyFilter(this.modelValue.requiredWhen)) {
-            this.cachedRequiredFilter = this.modelValue.requiredWhen;
-        }
-        if (this.modelValue.enabledWhen && !isEmptyFilter(this.modelValue.enabledWhen)) {
-            this.cachedEnabledFilter = this.modelValue.enabledWhen;
-        }
-    }
-
-    setAlwaysEnabled() {
-        this.$emit('update:modelValue',
-            new PropertyFilter(
-                null,
-                this.modelValue?.requiredWhen ?? {},
-            ),
-        );
-    }
-
-    isDisabled() {
-        return this.modelValue === null;
-    }
-
-    setDisabled() {
-        this.$emit('update:modelValue',
-            null,
-        );
-    }
-
-    async setEnabledWhen(useCache = false) {
-        if (useCache && this.cachedEnabledFilter && !isEmptyFilter(this.cachedEnabledFilter)) {
-            this.$emit('update:modelValue',
-                new PropertyFilter(
-                    this.cachedEnabledFilter,
-                    this.modelValue?.requiredWhen ?? {},
-                ),
-            );
-            return;
-        }
-
-        const filter = this.modelValue?.enabledWhen ? this.builder.fromFilter(this.modelValue.enabledWhen) : this.builder.create();
-
-        await this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(UIFilterEditor, {
-                        filter,
-                        saveHandler: (filter: UIFilter) => {
-                            this.cachedEnabledFilter = filter.build();
-                            console.log('set enabled when', filter, this.cachedEnabledFilter);
-                            this.$emit('update:modelValue',
-                                new PropertyFilter(
-                                    this.cachedEnabledFilter,
-                                    this.modelValue?.requiredWhen ?? {},
-                                ),
-                            );
-                        },
-                    }),
+    const filter = model.value?.enabledWhen ? props.builder.fromFilter(model.value.enabledWhen) : props.builder.create();
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(UIFilterEditor, {
+                    filter,
+                    saveHandler: (filter: UIFilter) => {
+                        cachedEnabledFilter.value = filter.build();
+                        model.value = new PropertyFilter(cachedEnabledFilter.value, model.value?.requiredWhen ?? {});
+                    },
                 }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
+
+function setAlwaysRequired() {
+    model.value = new PropertyFilter(model.value?.enabledWhen ?? null, {});
+}
+
+function setNeverRequired() {
+    model.value = new PropertyFilter(model.value?.enabledWhen ?? null, null);
+}
+
+async function setRequiredWhen(useCache = false) {
+    if (useCache && cachedRequiredFilter.value && !isEmptyFilter(cachedRequiredFilter.value)) {
+        model.value = new PropertyFilter(model.value?.enabledWhen ?? null, cachedRequiredFilter.value);
+        return;
     }
 
-    setAlwaysRequired() {
-        this.$emit('update:modelValue',
-            new PropertyFilter(
-                this.modelValue?.enabledWhen ?? null,
-                {},
-            ),
-        );
-    }
+    const filter = !model.value || isEmptyFilter(model.value.requiredWhen)
+        ? props.builder.create()
+        : props.builder.fromFilter(model.value.requiredWhen);
 
-    setNeverRequired() {
-        this.$emit('update:modelValue',
-            new PropertyFilter(
-                this.modelValue?.enabledWhen ?? null,
-                null,
-            ),
-        );
-    }
-
-    async setRequiredWhen(useCache = false) {
-        if (useCache && this.cachedRequiredFilter && !isEmptyFilter(this.cachedRequiredFilter)) {
-            this.$emit('update:modelValue',
-                new PropertyFilter(
-                    this.modelValue?.enabledWhen ?? null,
-                    this.cachedRequiredFilter,
-                ),
-            );
-            return;
-        }
-
-        const filter = !this.modelValue ? (this.builder.create()) : (isEmptyFilter(this.modelValue.requiredWhen) ? this.builder.create() : this.builder.fromFilter(this.modelValue.requiredWhen));
-
-        await this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(UIFilterEditor, {
-                        filter,
-                        saveHandler: (filter: UIFilter) => {
-                            this.cachedRequiredFilter = filter.build();
-
-                            this.$emit('update:modelValue',
-                                new PropertyFilter(
-                                    this.modelValue?.enabledWhen ?? null,
-                                    this.cachedRequiredFilter,
-                                ),
-                            );
-                        },
-                    }),
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(UIFilterEditor, {
+                    filter,
+                    saveHandler: (filter: UIFilter) => {
+                        cachedRequiredFilter.value = filter.build();
+                        model.value = new PropertyFilter(model.value?.enabledWhen ?? null, cachedRequiredFilter.value);
+                    },
                 }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
-
-    get enabledText() {
-        if (!this.modelValue) {
-            return '';
-        }
-        return this.modelValue.enabledWhen ? filterToString(this.modelValue.enabledWhen, this.builder) : '';
-    }
-
-    get requiredText() {
-        if (!this.modelValue) {
-            return '';
-        }
-
-        if (isEmptyFilter(this.modelValue.requiredWhen)) {
-            return '';
-        }
-        return filterToString(this.modelValue.requiredWhen, this.builder);
-    }
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
 }
 </script>

@@ -4,49 +4,25 @@
     </div>
 </template>
 
-
-<script lang="ts">
-import Checkbox from '#inputs/Checkbox.vue';
-import STList from '#layout/STList.vue';
-import STListItem from '#layout/STListItem.vue';
-import STNavigationBar from '#navigation/STNavigationBar.vue';
-import STToolbar from '#navigation/STToolbar.vue';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import type { useDismiss } from '@simonbackx/vue-app-navigation';
 import type { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
-import ProductBox from "./ProductBox.vue";
+import ProductBox from './ProductBox.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Checkbox,
-        ProductBox
-    },
-    filters: {
-        price: Formatter.price
-    }
-})
-export default class ProductGrid extends Mixins(NavigationMixin){
-    @Prop({ default: false })
-        admin: boolean
-
-    @Prop({ required: true })
-        products: Product[]
-
-    @Prop({ required: true })
-        webshop: Webshop
-        
-    @Prop({ required: true })
-        checkout: Checkout
-
-    @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
-}
+withDefaults(defineProps<{
+    admin?: boolean;
+    products: Product[];
+    webshop: Webshop;
+    checkout: Checkout;
+    saveHandler: (
+        newItem: CartItem,
+        oldItem: CartItem | null,
+        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean },
+    ) => void;
+}>(), {
+    admin: false,
+});
 </script>
 
 <style lang="scss">

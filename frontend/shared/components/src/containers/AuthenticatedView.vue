@@ -11,102 +11,89 @@
     </div>
 </template>
 
-<script lang="ts">
-import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+<script lang="ts" setup>
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { onBeforeUnmount, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
+import { useContext } from '../hooks/useContext';
 import LoadingViewTransition from './LoadingViewTransition.vue';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 
-@Component({
-    components: {
-        ComponentWithPropertiesInstance,
-        LoadingViewTransition,
-    },
-})
-export default class AuthenticatedView extends VueComponent {
-    @Prop()
-    root!: ComponentWithProperties;
-
-    @Prop()
-    loginRoot!: ComponentWithProperties;
-
+const props = defineProps<{
+    root: ComponentWithProperties;
+    loginRoot: ComponentWithProperties;
     /**
      * Set this as the root when the user doesn't have permissions (don't set if permissions are not needed)
      */
-    @Prop()
-    noPermissionsRoot!: ComponentWithProperties | null;
+    noPermissionsRoot?: ComponentWithProperties | null;
+}>();
 
-    loggedIn = false;
-    userId: string | null = null;
-    hasToken = false;
-    showPermissionsRoot = false;
-    lastOrganizationFetch = new Date();
-    errorBox: ErrorBox | null = null;
-    preventComplete = false;
+const context = useContext() as { value: SessionContext };
+const loggedIn = ref(false);
+const userId = ref<string | null>(null);
+const hasToken = ref(false);
+const showPermissionsRoot = ref(false);
+const lastOrganizationFetch = ref(new Date());
+const errorBox = ref<ErrorBox | null>(null);
+const preventComplete = ref(false);
+const listenerOwner = {};
 
-    created() {
-        // We need to check data already before loading any component!
-        this.changed();
-        ((this as any).$context as SessionContext).addListener(this, this.changed.bind(this));
-        document.addEventListener('visibilitychange', this.onVisibilityChange);
+function changed() {
+    if (props.noPermissionsRoot) {
+        loggedIn.value = (context.value.isComplete() ?? false) && !!context.value.auth.permissions && !context.value.auth.permissions?.isEmpty;
+        hasToken.value = context.value.hasToken() ?? false;
+        showPermissionsRoot.value = context.value.isComplete() ?? false;
+    } else {
+        loggedIn.value = context.value.isComplete() ?? false;
+        hasToken.value = context.value.hasToken() ?? false;
+        showPermissionsRoot.value = false;
+    }
+    userId.value = context.value.user?.id ?? null;
+    errorBox.value = context.value.loadingError ? new ErrorBox(context.value.loadingError) : null;
+    preventComplete.value = context.value.preventComplete ?? false;
+}
+
+function onVisibilityChange() {
+    if (document.visibilityState !== 'visible') {
+        return;
     }
 
-    beforeUnmount() {
-        ((this as any).$context as SessionContext).removeListener(this);
-        document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    console.info('Window became visible again');
+
+    if (!context.value || !context.value.isComplete()) {
+        return;
     }
 
-    changed() {
-        if (this.noPermissionsRoot) {
-            this.loggedIn = (((this as any).$context as SessionContext).isComplete() ?? false) && !!((this as any).$context as SessionContext).auth.permissions && !((this as any).$context as SessionContext).auth.permissions?.isEmpty;
-            this.hasToken = (((this as any).$context as SessionContext).hasToken() ?? false);
-            this.showPermissionsRoot = ((this as any).$context as SessionContext).isComplete() ?? false;
-            this.userId = ((this as any).$context as SessionContext).user?.id ?? null;
-            this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
-        }
-        else {
-            this.loggedIn = ((this as any).$context as SessionContext).isComplete() ?? false;
-            this.hasToken = (((this as any).$context as SessionContext).hasToken() ?? false);
-            this.showPermissionsRoot = false;
-            this.userId = ((this as any).$context as SessionContext).user?.id ?? null;
-            this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
-        }
-        this.preventComplete = ((this as any).$context as SessionContext).preventComplete ?? false;
-    }
-
-    onVisibilityChange() {
-        if (document.visibilityState === 'visible') {
-            // TODO
-            console.info('Window became visible again');
-
-            if (!((this as any).$context as SessionContext) || !((this as any).$context as SessionContext).isComplete()) {
-                return;
-            }
-
-            if (STAMHOOFD.environment === 'development' || this.lastOrganizationFetch.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
-                // Update when at least 5 minutes inactive
-                console.info('Updating organization');
-                this.lastOrganizationFetch = new Date();
-
-                ((this as any).$context as SessionContext).updateData(true, false, false).catch(console.error);
-            }
-        }
-    }
-
-    async shouldNavigateAway() {
-        if (this.loggedIn) {
-            return await this.root.shouldNavigateAway();
-        }
-        if (this.noPermissionsRoot && this.showPermissionsRoot) {
-            return await this.noPermissionsRoot.shouldNavigateAway();
-        }
-        if (!this.hasToken) {
-            return await this.loginRoot.shouldNavigateAway();
-        }
-        return true;
+    if (STAMHOOFD.environment === 'development' || lastOrganizationFetch.value.getTime() + 1000 * 60 * 5 < Date.now()) {
+        console.info('Updating organization');
+        lastOrganizationFetch.value = new Date();
+        context.value.updateData(true, false, false).catch(console.error);
     }
 }
+
+changed();
+context.value.addListener(listenerOwner, changed);
+document.addEventListener('visibilitychange', onVisibilityChange);
+
+onBeforeUnmount(() => {
+    context.value.removeListener(listenerOwner);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+});
+
+async function shouldNavigateAway() {
+    if (loggedIn.value) {
+        return await props.root.shouldNavigateAway();
+    }
+    if (props.noPermissionsRoot && showPermissionsRoot.value) {
+        return await props.noPermissionsRoot.shouldNavigateAway();
+    }
+    if (!hasToken.value) {
+        return await props.loginRoot.shouldNavigateAway();
+    }
+    return true;
+}
+
+defineExpose({ shouldNavigateAway });
 </script>

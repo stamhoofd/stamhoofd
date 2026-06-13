@@ -7,7 +7,7 @@
             </h3>
             <p v-if="answer.settings.description.length" class="style-description-small pre-wrap style-wysiwyg" v-html="linkText(answer.settings.description.toString())" />
         </Checkbox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errors.errorBox">
+        <STInputBox v-else-if="answer.settings.type === RecordType.MultipleChoice" class="max" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
@@ -20,7 +20,7 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.ChooseOne" class="max" :title="label" error-fields="input" :error-box="errors.errorBox">
+        <STInputBox v-else-if="answer.settings.type === RecordType.ChooseOne" class="max" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
@@ -33,21 +33,21 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.Text" :title="label" error-fields="input" :error-box="errors.errorBox">
+        <STInputBox v-else-if="answer.settings.type === RecordType.Text" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
             <input v-model="textValue" :placeholder="inputPlaceholder.toString()" class="input">
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errors.errorBox">
+        <STInputBox v-else-if="answer.settings.type === RecordType.Textarea" :title="label.toString()" class="max" error-fields="input" :error-box="errors.errorBox">
             <textarea v-model="textValue" :placeholder="inputPlaceholder.toString()" class="input" />
         </STInputBox>
-        <AddressInput v-else-if="answer.settings.type === RecordType.Address" v-model="addressValue" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
+        <AddressInput v-else-if="answer.settings.type === RecordType.Address" v-model="addressValue" :title="label.toString()" :required="required" :validator="errors.validator" :nullable="true" />
         <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder.toString()" :title="label.toString()" :required="required" :validator="errors.validator" :nullable="true" />
-        <EmailInput v-else-if="answer.settings.type === RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
-        <STInputBox v-else-if="answer.settings.type === RecordType.Date" :title="label" error-fields="input" :error-box="errors.errorBox">
+        <EmailInput v-else-if="answer.settings.type === RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label.toString()" :required="required" :validator="errors.validator" :nullable="true" />
+        <STInputBox v-else-if="answer.settings.type === RecordType.Date" :title="label.toString()" error-fields="input" :error-box="errors.errorBox">
             <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
         <PriceInputBox v-else-if="answer.settings.type === RecordType.Price" v-model="priceValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label.toString()" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
-        <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
+        <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label.toString()" :required="required" :validator="errors.validator" :is-private="true" />
         <NumberInputBox v-else-if="answer.settings.type === RecordType.Integer" v-model="integerValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
 
         <p v-else class="error-box">

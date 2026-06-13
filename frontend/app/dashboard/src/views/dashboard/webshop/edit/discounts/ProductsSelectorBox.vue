@@ -25,12 +25,12 @@
             </div>
         </STInputBox>
 
-        <div v-for="{product, productSelector} of products" :key="product.id">
+        <div v-for="{product, productSelector: selector} of products" :key="product.id">
             <STInputBox v-if="product && product.prices.length > 1" :title="products.length === 1 ? 'Prijskeuzes' : ('Prijskeuzes ' + product.name)" error-fields="productPriceIds" :error-box="errorBox" class="max">
                 <STList>
                     <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox :model-value="isPriceSelected(productSelector, price)" @update:model-value="setPriceSelected({product, productSelector}, price, $event)" />
+                            <Checkbox :model-value="isPriceSelected(selector, price)" @update:model-value="setPriceSelected({product, productSelector: selector}, price, $event)" />
                         </template>
 
                         <h2 class="style-title-list">
@@ -44,7 +44,7 @@
                 <STList>
                     <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                         <template #left>
-                            <Checkbox :model-value="isOptionSelected(productSelector, optionMenu, option)" @update:model-value="setOptionSelected(productSelector, optionMenu, option, $event)" />
+                            <Checkbox :model-value="isOptionSelected(selector, optionMenu, option)" @update:model-value="setOptionSelected(selector, optionMenu, option, $event)" />
                         </template>
 
                         <h2 class="style-title-list">
@@ -52,8 +52,8 @@
                         </h2>
 
                         <template #right>
-                            <button v-if="optionMenu.multipleChoice" class="button text" type="button" @click.stop.prevent="showRequirementMenu(productSelector, optionMenu, option, $event)">
-                                <span>{{ getRequirementName(getOptionRequirement(productSelector, optionMenu, option)) }}</span>
+                            <button v-if="optionMenu.multipleChoice" class="button text" type="button" @click.stop.prevent="showRequirementMenu(selector, optionMenu, option, $event)">
+                                <span>{{ getRequirementName(getOptionRequirement(selector, optionMenu, option)) }}</span>
                                 <span class="icon arrow-down-small" />
                             </button>
                         </template>
@@ -64,10 +64,11 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -76,222 +77,159 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import type { Option, OptionMenu} from '@stamhoofd/structures';
+import type { Option, OptionMenu } from '@stamhoofd/structures';
 import { OptionSelectionRequirementHelper, ProductSelector } from '@stamhoofd/structures';
 import { OptionSelectionRequirement } from '@stamhoofd/structures';
-import type { PrivateWebshop, Product, ProductPrice} from '@stamhoofd/structures';
+import type { PrivateWebshop, Product, ProductPrice } from '@stamhoofd/structures';
 import { ProductsSelector } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed, ref } from 'vue';
 
 import ChooseProductsView from './ChooseProductsView.vue';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        ImageComponent,
-        Checkbox,
-        STInputBox,
-    },
-})
-export default class ProductsSelectorBox extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
-
-    @Prop({ required: true })
     productSelector: ProductsSelector;
+    validator?: Validator | null;
+}>(), {
+    validator: null,
+});
+const emit = defineEmits<{
+    patch: [patch: AutoEncoderPatchType<ProductsSelector>];
+}>();
+const present = usePresent();
+const errorBox = ref<ErrorBox | null>(null);
 
-    @Prop({ default: null })
-    validator: Validator | null;
+if (props.validator) {
+    useValidation(props.validator, validate);
+}
 
-    errorBox: ErrorBox | null = null;
+function addPatch(patch: AutoEncoderPatchType<ProductsSelector>) {
+    emit('patch', patch);
+}
 
-    addPatch(patch: AutoEncoderPatchType<ProductsSelector>) {
-        this.$emit('patch', patch);
-    }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate();
-            });
-        }
-    }
-
-    destroyed() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    async changeProduct() {
-        await this.present({
-            components: [
-                new ComponentWithProperties(ChooseProductsView, {
-                    webshop: this.webshop,
-                    selectedProductIds: this.productSelector.products.map(p => p.productId),
-                    saveHandler: (ids: string[]) => {
-                        const productSelectors = this.productSelector.products.filter(p => ids.includes(p.productId));
-                        // Add any missing
-                        for (const id of ids) {
-                            if (!productSelectors.find(p => p.productId === id)) {
-                                productSelectors.push(ProductSelector.create({
-                                    productId: id,
-                                    optionIds: new Map(),
-                                }));
-                            }
+async function changeProduct() {
+    await present({
+        components: [
+            new ComponentWithProperties(ChooseProductsView, {
+                webshop: props.webshop,
+                selectedProductIds: props.productSelector.products.map(p => p.productId),
+                saveHandler: (ids: string[]) => {
+                    const productSelectors = props.productSelector.products.filter(p => ids.includes(p.productId));
+                    for (const id of ids) {
+                        if (!productSelectors.find(p => p.productId === id)) {
+                            productSelectors.push(ProductSelector.create({
+                                productId: id,
+                                optionIds: new Map(),
+                            }));
                         }
-                        const patch = ProductsSelector.patch({
-                            products: productSelectors,
-                        });
-                        this.addPatch(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
-
-    async validate() {
-        if (this.productSelector.products.length === 0) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: 'Kies een artikel',
-                field: 'productId',
-            }));
-            return false;
-        }
-
-        return true;
-    }
-
-    get products() {
-        return this.productSelector.products.flatMap((ps) => {
-            const product = this.webshop.products.find(p => p.id === ps.productId);
-            if (product) {
-                return [{ product, productSelector: ps }];
-            }
-            return [];
-        });
-    }
-
-    isPriceSelected(productSelector: ProductSelector, price: ProductPrice) {
-        return productSelector.productPriceIds.includes(price.id) || productSelector.productPriceIds.length === 0;
-    }
-
-    setPriceSelected({ product, productSelector }: { product: Product; productSelector: ProductSelector }, price: ProductPrice, selected: boolean) {
-        let productPriceIds = productSelector.productPriceIds.filter(i => i !== price.id);
-        if (productPriceIds.length === 0 && product) {
-            productPriceIds = product!.prices.map(p => p.id).filter(i => i !== price.id);
-        }
-
-        if (selected) {
-            productPriceIds.push(price.id);
-        }
-
-        if (productPriceIds.length === product.prices.length) {
-            productPriceIds = [];
-        }
-
-        this.addPatch(ProductsSelector.patch({
-            products: this.productSelector.products.map((p) => {
-                if (p.productId === productSelector.productId) {
-                    return ProductSelector.create({
-                        ...p,
-                        productPriceIds: productPriceIds,
-                    });
-                }
-                return p;
+                    }
+                    addPatch(ProductsSelector.patch({
+                        products: productSelectors,
+                    }));
+                },
             }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
+
+async function validate() {
+    if (props.productSelector.products.length === 0) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: 'Kies een artikel',
+            field: 'productId',
         }));
+        return false;
+    }
+    errorBox.value = null;
+    return true;
+}
+
+const products = computed(() => props.productSelector.products.flatMap((productSelector) => {
+    const product = props.webshop.products.find(p => p.id === productSelector.productId);
+    return product ? [{ product, productSelector }] : [];
+}));
+
+function isPriceSelected(productSelector: ProductSelector, price: ProductPrice) {
+    return productSelector.productPriceIds.includes(price.id) || productSelector.productPriceIds.length === 0;
+}
+
+function setPriceSelected({ product, productSelector }: { product: Product; productSelector: ProductSelector }, price: ProductPrice, selected: boolean) {
+    let productPriceIds = productSelector.productPriceIds.filter(i => i !== price.id);
+    if (productPriceIds.length === 0) {
+        productPriceIds = product.prices.map(p => p.id).filter(i => i !== price.id);
     }
 
-    getOptionRequirement(productSelector: ProductSelector, menu: OptionMenu, option: Option): OptionSelectionRequirement {
-        return productSelector.getOptionRequirement(menu, option);
+    if (selected) {
+        productPriceIds.push(price.id);
     }
 
-    setOptionRequirement(productSelector: ProductSelector, menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
-        const map = new Map(productSelector.optionIds);
-
-        map.set(option.id, requirement);
-
-        this.addPatch(ProductsSelector.patch({
-            products: this.productSelector.products.map((p) => {
-                if (p.productId === productSelector.productId) {
-                    return ProductSelector.create({
-                        ...p,
-                        optionIds: map,
-                    });
-                }
-                return p;
-            }),
-        }));
+    if (productPriceIds.length === product.prices.length) {
+        productPriceIds = [];
     }
 
-    isOptionSelected(productSelector: ProductSelector, menu: OptionMenu, option: Option): boolean {
-        return productSelector.getOptionRequirement(menu, option) !== OptionSelectionRequirement.Excluded;
+    addPatch(ProductsSelector.patch({
+        products: props.productSelector.products.map(p => p.productId === productSelector.productId
+            ? ProductSelector.create({ ...p, productPriceIds })
+            : p),
+    }));
+}
+
+const getOptionRequirement = (productSelector: ProductSelector, menu: OptionMenu, option: Option) => productSelector.getOptionRequirement(menu, option);
+
+function setOptionRequirement(productSelector: ProductSelector, menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
+    const map = new Map(productSelector.optionIds);
+    map.set(option.id, requirement);
+
+    addPatch(ProductsSelector.patch({
+        products: props.productSelector.products.map(p => p.productId === productSelector.productId
+            ? ProductSelector.create({ ...p, optionIds: map })
+            : p),
+    }));
+}
+
+const isOptionSelected = (productSelector: ProductSelector, menu: OptionMenu, option: Option) => getOptionRequirement(productSelector, menu, option) !== OptionSelectionRequirement.Excluded;
+
+function setOptionSelected(productSelector: ProductSelector, menu: OptionMenu, option: Option, selected: boolean) {
+    if (isOptionSelected(productSelector, menu, option) === selected) {
+        return;
     }
 
-    setOptionSelected(productSelector: ProductSelector, menu: OptionMenu, option: Option, selected: boolean) {
-        const currentSelected = this.isOptionSelected(productSelector, menu, option);
-
-        if (currentSelected === selected) {
-            return;
-        }
-
-        const map = new Map(productSelector.optionIds);
-
-        if (selected) {
-            map.set(option.id, OptionSelectionRequirement.Optional);
-        }
-        else {
-            map.set(option.id, OptionSelectionRequirement.Excluded);
-        }
-
-        this.addPatch(ProductsSelector.patch({
-            products: this.productSelector.products.map((p) => {
-                if (p.productId === productSelector.productId) {
-                    return ProductSelector.create({
-                        ...p,
-                        optionIds: map,
-                    });
-                }
-                return p;
-            }),
-        }));
+    const map = new Map(productSelector.optionIds);
+    if (selected) {
+        map.set(option.id, OptionSelectionRequirement.Optional);
+    } else {
+        map.set(option.id, OptionSelectionRequirement.Excluded);
     }
 
-    getRequirementName(requirement: OptionSelectionRequirement) {
-        return OptionSelectionRequirementHelper.getName(requirement);
-    }
+    addPatch(ProductsSelector.patch({
+        products: props.productSelector.products.map(p => p.productId === productSelector.productId
+            ? ProductSelector.create({ ...p, optionIds: map })
+            : p),
+    }));
+}
 
-    showRequirementMenu(productSelector: ProductSelector, menu: OptionMenu, option: Option, event: MouseEvent) {
-        const value = this.getOptionRequirement(productSelector, menu, option);
-        let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded];
+const getRequirementName = OptionSelectionRequirementHelper.getName.bind(OptionSelectionRequirementHelper);
 
-        if (!menu.multipleChoice) {
-            values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded];
-        }
+function showRequirementMenu(productSelector: ProductSelector, menu: OptionMenu, option: Option, event: MouseEvent) {
+    const value = getOptionRequirement(productSelector, menu, option);
+    const values = menu.multipleChoice
+        ? [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded]
+        : [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded];
 
-        const c = new ContextMenu([
-            values.map((v) => {
-                return new ContextMenuItem({
-                    name: OptionSelectionRequirementHelper.getName(v),
-                    selected: v === value,
-                    action: () => {
-                        this.setOptionRequirement(productSelector, menu, option, v);
-                        return true;
-                    },
-                });
-            }),
-        ]);
-
-        c.show({
-            button: event.currentTarget as HTMLElement,
-            xPlacement: 'left',
-            yPlacement: 'bottom',
-        }).catch(console.error);
-    }
+    new ContextMenu([values.map(v => new ContextMenuItem({
+        name: OptionSelectionRequirementHelper.getName(v),
+        selected: v === value,
+        action: () => {
+            setOptionRequirement(productSelector, menu, option, v);
+            return true;
+        },
+    }))]).show({
+        button: event.currentTarget as HTMLElement,
+        xPlacement: 'left',
+        yPlacement: 'bottom',
+    }).catch(console.error);
 }
 </script>
 

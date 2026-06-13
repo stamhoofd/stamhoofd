@@ -282,7 +282,7 @@
                 <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
             </p>
 
-            <STList>
+            <STList v-if="webshop">
                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 

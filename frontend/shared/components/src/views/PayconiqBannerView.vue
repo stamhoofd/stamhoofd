@@ -18,140 +18,26 @@
     </div>
 </template>
 
-<script lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
 import type { Server } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { Payment, PaymentStatus } from '@stamhoofd/structures';
+import type { Payment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import STErrorsDefault from '../errors/STErrorsDefault.vue';
-import EmailInput from '../inputs/EmailInput.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
-import STFloatingFooter from '../navigation/STFloatingFooter.vue';
-import STNavigationBar from '../navigation/STNavigationBar.vue';
-import { CenteredMessage } from '../overlays/CenteredMessage';
+import { usePayconiqPayment } from './usePayconiqPayment';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STFloatingFooter,
-        EmailInput,
-        LoadingButton,
-        STErrorsDefault,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-})
-export default class PayconiqBannerView extends Mixins(NavigationMixin) {
-    @Prop({})
-    paymentUrl: string;
-
-    @Prop({ required: true })
-    initialPayment!: Payment;
-
-    payment: Payment = this.initialPayment;
-
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
+    paymentUrl?: string;
+    initialPayment: Payment;
     server: Server;
-
-    @Prop({ required: true })
     finishedHandler: (payment: Payment | null) => void;
+}>(), {
+    paymentUrl: '',
+});
 
-    pollCount = 0;
-    timer: NodeJS.Timeout | null = null;
+const formatPrice = Formatter.price.bind(Formatter);
+const { close, payment, price, qrCodeSrc, shouldNavigateAway } = usePayconiqPayment(props);
 
-    loading = false;
-    canceling = false;
-
-    mounted() {
-        this.timer = setTimeout(this.poll.bind(this), 3000);
-    }
-
-    async close() {
-        // Try to cancel the payment in the background
-        await this.dismiss();
-    }
-
-    cancel() {
-        if (this.canceling) {
-            return;
-        }
-        this.canceling = true;
-        const paymentId = this.payment.id;
-        this.server
-            .request({
-                method: 'POST',
-                path: '/payments/' + paymentId,
-                query: {
-                    cancel: true,
-                },
-                decoder: Payment as Decoder<Payment>,
-            }).catch(console.error);
-    }
-
-    async shouldNavigateAway() {
-        if (await CenteredMessage.confirm($t(`%12e`), $t(`%12f`))) {
-            this.cancel();
-            return true;
-        }
-        return false;
-    }
-
-    get price() {
-        return this.payment?.price ?? 0;
-    }
-
-    poll() {
-        this.timer = null;
-        const paymentId = this.payment.id;
-        this.server
-            .request({
-                method: 'POST',
-                path: '/payments/' + paymentId,
-                decoder: Payment as Decoder<Payment>,
-            }).then((response) => {
-                const payment = response.data;
-                this.payment = payment;
-
-                if (payment.status === PaymentStatus.Succeeded) {
-                    this.finishedHandler(payment);
-                    this.dismiss({ force: true }).catch(console.error);
-                }
-
-                if (payment.status === PaymentStatus.Failed) {
-                    // TODO: temporary message
-                    this.finishedHandler(payment);
-                    this.dismiss({ force: true }).catch(console.error);
-                }
-            }).catch((e) => {
-                // too: handle this
-                console.error(e);
-            }).finally(() => {
-                this.pollCount++;
-                if (this.payment.status === PaymentStatus.Succeeded || this.payment.status === PaymentStatus.Failed) {
-                    return;
-                }
-                this.timer = setTimeout(this.poll.bind(this), 3000);
-            });
-    }
-
-    beforeUnmount() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
-        }
-
-        if (this.payment.status !== PaymentStatus.Succeeded && this.payment.status !== PaymentStatus.Failed) {
-            this.finishedHandler(this.payment);
-        }
-    }
-
-    get qrCodeSrc() {
-        return this.paymentUrl;
-    }
-}
+defineExpose({ shouldNavigateAway });
 </script>
 
 <style lang="scss">

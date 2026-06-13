@@ -38,7 +38,7 @@
                                     disabledPerson: isDisabledPersonSeat(seat),
                                     selected: isSelected(row, seat),
                                     highlighted: isHighlighted(row, seat) && !isSelected(row, seat),
-                                    hasHighlights: highlightSeats.length > 0 && !setSeats,
+                                    hasHighlights: validHighlightSeats.length > 0 && !setSeats,
                                     occupied: isOccupied(row, seat) && !isSelected(row, seat) && !isHighlighted(row, seat),
                                 }"
                                 :style="{
@@ -63,332 +63,204 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
-import type { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection} from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { useIsMobile } from '#hooks/useIsMobile.ts';
+import type { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection } from '@stamhoofd/structures';
 import { CartReservedSeat, ReservedSeat, SeatingSizeConfiguration, SeatMarkings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import { Toast } from '../overlays/Toast';
 
-@Component({
-    components: {
-
-    },
-})
-export default class SeatSelectionBox extends Mixins(NavigationMixin) {
-    @Prop({ default: false })
-    admin: boolean;
-
-    @Prop({ required: false, default: null })
-    sizeConfig: SeatingSizeConfiguration | null;
-
-    @Prop({ required: true })
-    seatingPlan!: SeatingPlan;
-
-    @Prop({ required: true })
-    seatingPlanSection!: SeatingPlanSection;
-
-    @Prop({ required: false, default: null })
-    amount: number | null;
-
-    @Prop({ required: false, default: () => [] })
-    seats!: ReservedSeat[];
-
+const props = withDefaults(defineProps<{
+    admin?: boolean;
+    sizeConfig?: SeatingSizeConfiguration | null;
+    seatingPlan: SeatingPlan;
+    seatingPlanSection: SeatingPlanSection;
+    amount?: number | null;
+    seats?: ReservedSeat[];
     /**
      * Seats that are not available for selection anymore
      */
-    @Prop({ required: false, default: () => [] })
-    reservedSeats!: ReservedSeat[];
-
-    @Prop({ required: false, default: () => [] })
-    highlightSeats!: ReservedSeat[];
-
-    @Prop({ required: false })
+    reservedSeats?: ReservedSeat[];
+    highlightSeats?: (ReservedSeat | null)[];
     setSeats?: (seats: ReservedSeat[]) => void;
-
-    @Prop({ required: false })
     onClickSeat?: (seat: ReservedSeat) => void;
-
-    @Prop({ required: false })
     onHoverSeat?: (seat: ReservedSeat) => void;
+}>(), {
+    admin: false,
+    sizeConfig: null,
+    amount: null,
+    seats: () => [],
+    reservedSeats: () => [],
+    highlightSeats: () => [],
+    setSeats: undefined,
+    onClickSeat: undefined,
+    onHoverSeat: undefined,
+});
 
-    lastPriceToast: Toast | null = null;
+const isMobile = useIsMobile();
+const selectedSeats = ref<HTMLButtonElement[]>([]);
+let lastPriceToast: Toast | null = null;
+const validHighlightSeats = computed(() => props.highlightSeats.filter((seat): seat is ReservedSeat => seat !== null));
 
-    created() {
-        this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig);
+const defaultSizeConfig = computed(() => {
+    let config = new SeatingSizeConfiguration({
+        seatWidth: 28,
+        seatHeight: 28,
+        seatXSpacing: 3,
+        seatYSpacing: 8,
+    });
 
-        // Default selection
-        if (this.amount && this.setSeats) {
-            // if (this.seats.length < this.amount) {
-            //     let seats: ReservedSeat[] = []
-            //     const plan = this.seatingPlan
-            //     for (const section of plan.sections) {
-            //         for (const row of section.rows) {
-            //             for (const seat of row.seats) {
-            //                 if (seats.length >= this.amount) {
-            //                     break
-            //                 }
-            //
-            //                 if (seat.isSpace) {
-            //                     continue
-            //                 }
-            //
-            //                 const s = ReservedSeat.create({
-            //                     section: section.id,
-            //                     row: row.label,
-            //                     seat: seat.label
-            //                 })
-            //
-            //                 if (this.reservedSeats.find(r => r.equals(s))) {
-            //                     continue
-            //                 }
-            //
-            //                 seats.push(
-            //                     s
-            //                 )
-            //             }
-            //         }
-            //     }
-            //     this.setSeats?.(seats)
-            // }
-            let updatedSeats = this.seats.slice();
-
-            // Remove invalid seats
-            updatedSeats = updatedSeats.filter((seat) => {
-                return this.seatingPlan.isValidSeat(seat, this.reservedSeats);
-            });
-
-            if (updatedSeats.length > this.amount) {
-                this.setSeats(updatedSeats.slice(0, this.amount));
-            }
-            else {
-                this.setSeats(updatedSeats);
-            }
-        }
-    }
-
-    mounted() {
-        setTimeout(() => {
-            if (this.$refs.selectedSeats) {
-                const selectedSeats = this.$refs.selectedSeats as HTMLElement[];
-                if (selectedSeats.length > 0) {
-                    const bounds = selectedSeats[0].getBoundingClientRect();
-                    const scrollHeight = selectedSeats[0].closest('main')?.clientHeight;
-
-                    if (!scrollHeight) {
-                        return;
-                    }
-
-                    if (bounds.top + bounds.height > scrollHeight - 30) {
-                        selectedSeats[0].scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center',
-                            inline: 'center',
-                        });
-
-                        // iOS fix:
-                        document.documentElement.scrollTop = 0;
-                    }
-                }
-            }
-        }, 400);
-    }
-
-    @Watch('seatingPlanSection')
-    onPlanChange() {
-        this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig);
-    }
-
-    get rows() {
-        return this.seatingPlanSection.rows;
-    }
-
-    get defaultSizeConfig() {
-        let config = new SeatingSizeConfiguration({
-            seatWidth: 28,
-            seatHeight: 28,
+    if (!props.setSeats && isMobile) {
+        config = new SeatingSizeConfiguration({
+            seatWidth: 20,
+            seatHeight: 20,
+            seatXSpacing: 2,
+            seatYSpacing: 8,
+        });
+    } else if (isMobile) {
+        config = new SeatingSizeConfiguration({
+            seatWidth: 30,
+            seatHeight: 30,
             seatXSpacing: 3,
-            seatYSpacing: 8
-        })
-
-        if (!this.setSeats && (this as any).$isMobile) {
-            config = new SeatingSizeConfiguration({
-                seatWidth: 20,
-                seatHeight: 20,
-                seatXSpacing: 2,
-                seatYSpacing: 8
-            })
-        } else if ((this as any).$isMobile) {
-            config = new SeatingSizeConfiguration({
-                seatWidth: 30,
-                seatHeight: 30,
-                seatXSpacing: 3,
-                seatYSpacing: 8
-            })
-        }
-
-        this.seatingPlanSection.correctSizeConfig(config)
-        return config
-    }
-
-    get size() {
-        return this.seatingPlanSection.calculateSize(this.sizeConfig ?? this.defaultSizeConfig);
-    }
-
-    isDisabledPersonSeat(seat: SeatingPlanSeat) {
-        return seat.markings.includes(SeatMarkings.DisabledPerson);
-    }
-
-    isSelected(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        const s = ReservedSeat.create({
-            section: this.seatingPlanSection.id,
-            row: row.label,
-            seat: seat.label,
+            seatYSpacing: 8,
         });
-
-        for (const reservedSeat of this.seats) {
-            if (reservedSeat.equals(s)) {
-                return true;
-            }
-        }
-        return false;
     }
 
-    isHighlighted(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        const s = ReservedSeat.create({
-            section: this.seatingPlanSection.id,
-            row: row.label,
-            seat: seat.label,
-        });
-        return !!this.highlightSeats.find(r => r.equals(s));
-    }
+    props.seatingPlanSection.correctSizeConfig(config);
+    return config;
+});
 
-    isOccupied(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        const category = this.seatingPlan.categories.find(c => c.id === seat.category);
-        if (!this.admin && category && category.adminOnly) {
-            return true;
-        }
+const rows = computed(() => props.seatingPlanSection.rows);
+const size = computed(() => props.seatingPlanSection.calculateSize(props.sizeConfig ?? defaultSizeConfig.value));
 
-        const s = ReservedSeat.create({
-            section: this.seatingPlanSection.id,
-            row: row.label,
-            seat: seat.label,
-        });
-        return !!this.reservedSeats.find(r => r.equals(s));
-    }
+function updatePositions() {
+    props.seatingPlanSection.updatePositions(props.sizeConfig ?? defaultSizeConfig.value);
+}
 
-    getSeatColor(seat: SeatingPlanSeat) {
-        return this.seatingPlan.getSeatColor(seat);
-    }
+updatePositions();
+watch(() => props.seatingPlanSection, updatePositions);
 
-    onHover(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        if (this.onHoverSeat) {
-            this.onHoverSeat(ReservedSeat.create({
-                section: this.seatingPlanSection.id,
-                row: row.label,
-                seat: seat.label,
-            }));
+if (props.amount && props.setSeats) {
+    const updatedSeats = props.seats.filter(seat => props.seatingPlan.isValidSeat(seat, props.reservedSeats));
+    props.setSeats(updatedSeats.length > props.amount ? updatedSeats.slice(0, props.amount) : updatedSeats);
+}
+
+onMounted(() => {
+    setTimeout(() => {
+        const selectedSeat = selectedSeats.value[0];
+        if (!selectedSeat) {
             return;
         }
-    }
-
-    onClick(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        if (this.onClickSeat) {
-            this.onClickSeat(ReservedSeat.create({
-                section: this.seatingPlanSection.id,
-                row: row.label,
-                seat: seat.label,
-            }));
-            return;
-        }
-        if (!this.setSeats) {
-            return;
-        }
-
-        if (seat.isSpace) {
-            return;
-        }
-
-        if (this.lastPriceToast) {
-            this.lastPriceToast.hide();
-            this.lastPriceToast = null;
-        }
-
-        // select/deselect this seat
-        const selected = this.isSelected(row, seat);
-        if (selected) {
-            // deselect
-            this.setSeats(
-                this.seats.filter(s => s.section !== this.seatingPlanSection.id || s.row !== row.label || s.seat !== seat.label),
-            );
-        }
-        else {
-            if (this.isOccupied(row, seat)) {
-                new Toast($t(`%12r`), 'error red').show();
-                return;
-            }
-
-            // select
-            const addedSeat = ReservedSeat.create({
-                section: this.seatingPlanSection.id,
-                row: row.label,
-                seat: seat.label,
+        const bounds = selectedSeat.getBoundingClientRect();
+        const scrollHeight = selectedSeat.closest('main')?.clientHeight;
+        if (scrollHeight && bounds.top + bounds.height > scrollHeight - 30) {
+            selectedSeat.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'center',
             });
+            document.documentElement.scrollTop = 0;
+        }
+    }, 400);
+});
 
-            let seats = [...this.seats, addedSeat];
+function toReservedSeat(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+    return ReservedSeat.create({
+        section: props.seatingPlanSection.id,
+        row: row.label,
+        seat: seat.label,
+    });
+}
 
-            if (this.amount && seats.length > this.amount) {
-                // Remove seat that is the furthest away
-                const currentPosition = { x: seat.x, y: seat.y };
+function isDisabledPersonSeat(seat: SeatingPlanSeat) {
+    return seat.markings.includes(SeatMarkings.DisabledPerson);
+}
 
-                let furthestSeat: { seat: ReservedSeat; distance: number } | null = null;
+function isSelected(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+    const reservedSeat = toReservedSeat(row, seat);
+    return props.seats.some(s => s.equals(reservedSeat));
+}
 
-                for (const s of seats) {
-                    if (s.equals(addedSeat)) {
-                        continue;
-                    }
-                    if (s.section !== this.seatingPlanSection.id) {
-                        continue;
-                    }
+function isHighlighted(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+    const reservedSeat = toReservedSeat(row, seat);
+    return validHighlightSeats.value.some(s => s.equals(reservedSeat));
+}
 
-                    const row = this.seatingPlanSection.rows.find(r => r.label === s.row);
-                    if (!row) {
-                        continue;
-                    }
+function isOccupied(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+    const category = props.seatingPlan.categories.find(c => c.id === seat.category);
+    if (!props.admin && category?.adminOnly) {
+        return true;
+    }
+    const reservedSeat = toReservedSeat(row, seat);
+    return props.reservedSeats.some(s => s.equals(reservedSeat));
+}
 
-                    const seat = row.seats.find(ss => ss.label === s.seat);
-                    if (!seat) {
-                        continue;
-                    }
+function getSeatColor(seat: SeatingPlanSeat) {
+    return props.seatingPlan.getSeatColor(seat);
+}
 
-                    const distance = Math.sqrt(Math.pow(currentPosition.x - seat.x, 2) + Math.pow(currentPosition.y - seat.y, 2));
-                    if (!furthestSeat || distance > furthestSeat.distance) {
-                        furthestSeat = { seat: s, distance };
-                    }
-                }
+function onHover(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+    if (props.onHoverSeat) {
+        props.onHoverSeat(toReservedSeat(row, seat));
+    }
+}
 
-                if (furthestSeat) {
-                    seats = seats.filter(s => !s.equals(furthestSeat!.seat));
-                }
-                else {
-                    // Remove first
-                    seats = seats.slice(1);
-                }
+function onClick(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+    if (props.onClickSeat) {
+        props.onClickSeat(toReservedSeat(row, seat));
+        return;
+    }
+    if (!props.setSeats || seat.isSpace) {
+        return;
+    }
+
+    lastPriceToast?.hide();
+    lastPriceToast = null;
+
+    if (isSelected(row, seat)) {
+        props.setSeats(props.seats.filter(s => s.section !== props.seatingPlanSection.id || s.row !== row.label || s.seat !== seat.label));
+        return;
+    }
+
+    if (isOccupied(row, seat)) {
+        new Toast($t(`%12r`), 'error red').show();
+        return;
+    }
+
+    const addedSeat = toReservedSeat(row, seat);
+    let seats = [...props.seats, addedSeat];
+
+    if (props.amount && seats.length > props.amount) {
+        const currentPosition = { x: seat.x, y: seat.y };
+        let furthestSeat: { seat: ReservedSeat; distance: number } | null = null;
+
+        for (const selectedSeat of seats) {
+            if (selectedSeat.equals(addedSeat) || selectedSeat.section !== props.seatingPlanSection.id) {
+                continue;
             }
-
-            this.setSeats(seats);
-
-            // Show a toast if price is higher
-            const cartReservedSeat = CartReservedSeat.create(addedSeat);
-            cartReservedSeat.calculatePrice(this.seatingPlan);
-
-            if (cartReservedSeat.price > 0) {
-                this.lastPriceToast = new Toast($t(`%12s`) + ' ' + Formatter.price(cartReservedSeat.price), 'info');
-                this.lastPriceToast.show();
+            const selectedRow = props.seatingPlanSection.rows.find(r => r.label === selectedSeat.row);
+            const seatData = selectedRow?.seats.find(s => s.label === selectedSeat.seat);
+            if (!seatData) {
+                continue;
+            }
+            const distance = Math.hypot(currentPosition.x - seatData.x, currentPosition.y - seatData.y);
+            if (!furthestSeat || distance > furthestSeat.distance) {
+                furthestSeat = { seat: selectedSeat, distance };
             }
         }
+
+        seats = furthestSeat ? seats.filter(s => !s.equals(furthestSeat.seat)) : seats.slice(1);
+    }
+
+    props.setSeats(seats);
+
+    const cartReservedSeat = CartReservedSeat.create(addedSeat);
+    cartReservedSeat.calculatePrice(props.seatingPlan);
+    if (cartReservedSeat.price > 0) {
+        lastPriceToast = new Toast($t(`%12s`) + ' ' + Formatter.price(cartReservedSeat.price), 'info');
+        lastPriceToast.show();
     }
 }
 </script>

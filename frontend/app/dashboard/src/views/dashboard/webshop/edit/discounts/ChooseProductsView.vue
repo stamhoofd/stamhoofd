@@ -30,94 +30,63 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+<script lang="ts" setup>
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import type { PrivateWebshop, Product, ProductDateRange } from '@stamhoofd/structures';
 import { Category } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed, ref } from 'vue';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        STNavigationBar,
-
-    },
-})
-export default class ChooseProductView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
-
-    @Prop({ default: () => [] })
-    selectedProductIds: string[];
-
-    editableSelectedProductIds: string[] = [];
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    selectedProductIds?: string[];
     saveHandler: (selectedIds: string[]) => void;
+}>(), {
+    selectedProductIds: () => [],
+});
 
-    mounted() {
-        this.editableSelectedProductIds = [...this.selectedProductIds];
+const title = 'Selecteer één of meerdere artikels';
+const editableSelectedProductIds = ref([...props.selectedProductIds]);
+
+function getCategoryProducts(category: Category) {
+    return category.productIds.flatMap((id) => {
+        const product = props.webshop.products.find(p => p.id === id);
+        return product ? [product] : [];
+    });
+}
+
+const categories = computed(() => {
+    const categories = props.webshop.categories.filter(c => getCategoryProducts(c).length > 0) ?? [];
+    if (categories.length <= 0) {
+        return [
+            Category.create({
+                name: '',
+                productIds: props.webshop.products.map(p => p.id),
+            }),
+        ];
     }
+    return categories;
+});
 
-    get title() {
-        return 'Selecteer één of meerdere artikels';
-    }
+const doFormatDateRange = (dateRange: ProductDateRange) => Formatter.capitalizeFirstLetter(dateRange.toString());
 
-    get categories() {
-        const categories = this.webshop.categories.filter(c => this.getCategoryProducts(c).length > 0) ?? [];
-        if (categories.length <= 0) {
-            return [
-                Category.create({
-                    name: '',
-                    productIds: this.webshop.products.map(p => p.id),
-                }),
-            ];
+function isProductSelected(product: Product) {
+    return editableSelectedProductIds.value.includes(product.id);
+}
+
+function selectProduct(product: Product) {
+    editableSelectedProductIds.value = editableSelectedProductIds.value.filter(id => props.webshop.products.some(p => p.id === id));
+
+    if (editableSelectedProductIds.value.includes(product.id)) {
+        if (editableSelectedProductIds.value.length <= 1) {
+            return;
         }
-        return categories;
+        editableSelectedProductIds.value = editableSelectedProductIds.value.filter(id => id !== product.id);
+    } else {
+        editableSelectedProductIds.value.push(product.id);
     }
-
-    getCategoryProducts(category: Category) {
-        return category.productIds.flatMap((p) => {
-            const product = this.webshop.products.find(pp => pp.id === p);
-            if (product) {
-                return [product];
-            }
-            return [];
-        });
-    }
-
-    doFormatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString());
-    }
-
-    isProductSelected(product: Product) {
-        return this.editableSelectedProductIds.includes(product.id);
-    }
-
-    selectProduct(product: Product) {
-        // First remove all invalid editable selected product ids
-        this.editableSelectedProductIds = this.editableSelectedProductIds.filter(id => this.webshop.products.find(p => p.id === id) !== undefined);
-
-        if (this.editableSelectedProductIds.includes(product.id)) {
-            if (this.editableSelectedProductIds.length <= 1) {
-                // At least one product should be selected
-                return;
-            }
-            this.editableSelectedProductIds = this.editableSelectedProductIds.filter(id => id !== product.id);
-        }
-        else {
-            this.editableSelectedProductIds.push(product.id);
-        }
-
-        this.saveHandler(this.editableSelectedProductIds);
-    }
+    props.saveHandler(editableSelectedProductIds.value);
 }
 </script>

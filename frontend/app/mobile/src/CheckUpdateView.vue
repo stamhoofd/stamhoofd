@@ -33,94 +33,63 @@
     </LoadingViewTransition>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
-import Spinner from '@stamhoofd/components/Spinner.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import type { UpdateOptions } from '@stamhoofd/networking/AppManager';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
-import { UpdateStatus } from './UpdateStatus';
+const props = defineProps<{
+    status: {
+        progress: number | null;
+        shouldBeVisible: boolean;
+        status: 'checking' | 'downloading' | 'installing';
+        options: UpdateOptions;
+        setDoHide: (doHide: () => void) => void;
+    };
+}>();
 
-@Component({
-    components: {
-        Spinner,
-        STNavigationBar,
-        LoadingViewTransition,
-    },
-})
-export default class CheckUpdateView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    status: UpdateStatus;
+const dismiss = useDismiss();
+const spinnerLeft = ref(true);
+const texts = ['Wist je dat je ons naast onze documentatiepagina\'s ook altijd via e-mail kan bereiken via een link onderaan de documentatie?', 'Is er iets dat niet goed werkt? Dan horen we dat altijd graag!', 'We werken voortdurend aan nieuwe functionaliteiten.'];
+const visibleText = ref(0);
+let interval: ReturnType<typeof setInterval> | null = null;
+let textInterval: ReturnType<typeof setInterval> | null = null;
 
-    spinnerLeft = true;
-    interval: NodeJS.Timeout | null = null;
-    textInterval: NodeJS.Timeout | null = null;
+const nextTextIndex = computed(() => (visibleText.value + 1) % texts.length);
+const title = 'Update';
+const showLoading = computed(() => props.status.status === 'checking' && props.status.options.visibleCheck !== 'text');
+const statusX = computed(() => props.status.progress !== null ? '0' : spinnerLeft.value ? '-30%' : '100%');
+const width = computed(() => props.status.progress !== null ? props.status.progress * 100 + '%' : '30%');
+const transform = computed(() => 'translateX(' + statusX.value + ')');
 
-    texts = ['Wist je dat je ons naast onze documentatiepagina\'s ook altijd via e-mail kan bereiken via een link onderaan de documentatie?', 'Is er iets dat niet goed werkt? Dan horen we dat altijd graag!', 'We werken voortdurend aan nieuwe functionaliteiten.'];
-    visibleText = 0;
-
-    get nextTextIndex() {
-        return (this.visibleText + 1) % this.texts.length;
+onMounted(() => {
+    console.log('Mounted CheckUpdateView');
+    if (!props.status.shouldBeVisible) {
+        console.log('Update should not be visible: dismiss on mount');
+        dismiss({ force: true, animated: false }).catch(console.error);
     }
+    props.status.setDoHide(() => {
+        dismiss({ force: true, animated: false }).catch(console.error);
+    });
 
-    get title() {
-        return 'Update';
+    interval = setInterval(() => {
+        spinnerLeft.value = !spinnerLeft.value;
+    }, 800);
+    textInterval = setInterval(() => {
+        visibleText.value = (visibleText.value + 1) % texts.length;
+    }, 3500);
+});
+
+onBeforeUnmount(() => {
+    if (interval) {
+        clearInterval(interval);
     }
-
-    get showLoading() {
-        return this.status.status === 'checking' && this.status.options.visibleCheck !== 'text';
+    if (textInterval) {
+        clearInterval(textInterval);
     }
-
-    mounted() {
-        console.log('Mounted CheckUpdateView');
-        if (!this.status.shouldBeVisible) {
-            console.log('Update should not be visible: dismiss on mount');
-            this.dismiss({ force: true, animated: false }).catch(console.error);
-        }
-        this.status.setDoHide(() => {
-            this.dismiss({ force: true, animated: false }).catch(console.error);
-        });
-
-        this.interval = setInterval(() => {
-            this.spinnerLeft = !this.spinnerLeft;
-        }, 800);
-
-        this.textInterval = setInterval(() => {
-            this.visibleText = (this.visibleText + 1) % this.texts.length;
-        }, 3500);
-    }
-
-    beforeUnmount() {
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
-        if (this.textInterval) {
-            clearInterval(this.textInterval);
-        }
-    }
-
-    get statusX() {
-        if (this.status.progress !== null) {
-            return '0';
-        }
-        if (this.spinnerLeft) {
-            return '-30%';
-        }
-        return '100%';
-    }
-
-    get width() {
-        if (this.status.progress !== null) {
-            return this.status.progress * 100 + '%';
-        }
-        return '30%';
-    }
-
-    get transform() {
-        return 'translateX(' + this.statusX + ')';
-    }
-}
+});
 </script>
 
 <style lang="scss">

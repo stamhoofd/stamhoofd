@@ -30,102 +30,76 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import Radio from '#inputs/Radio.vue';
 import SaveView from '#navigation/SaveView.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Toast } from '#overlays/Toast.ts';
-import TooltipDirective from '#directives/Tooltip.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
+import { onMounted, ref } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        Radio,
-        STList,
-        STListItem,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class DevPanelView extends Mixins(NavigationMixin) {
-    releaseChannel = '';
-    customChannel = '';
-    saving = false;
-    availableChannels: { name: string; url: string }[] = [];
+const dismiss = useDismiss();
+const releaseChannel = ref('');
+const customChannel = ref('');
+const saving = ref(false);
+const availableChannels = ref<{ name: string; url: string }[]>([]);
 
-    mounted() {
-        this.availableChannels = [
-            {
-                name: $t(`%v6`),
-                url: STAMHOOFD.APP_UPDATE_SERVER_URL,
-            },
-            {
-                name: $t(`%1N`),
-                url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL,
-            },
-            {
-                name: $t(`%24`),
-                url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
-            },
-            {
-                name: $t(`%2F`),
-                url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL,
-            },
-        ].filter(c => c.url !== undefined) as any;
+onMounted(() => {
+    availableChannels.value = [
+        { name: $t(`%v6`), url: STAMHOOFD.APP_UPDATE_SERVER_URL },
+        { name: $t(`%1N`), url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL },
+        { name: $t(`%24`), url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL },
+        { name: $t(`%2F`), url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL },
+    ].filter((channel): channel is { name: string; url: string } => channel.url !== undefined);
 
-        Storage.keyValue.getItem('UPDATE_SERVER').then((value) => {
-            this.releaseChannel = value ?? '';
-            this.customChannel = value ?? '';
+    Storage.keyValue.getItem('UPDATE_SERVER').then((value) => {
+        releaseChannel.value = value ?? '';
+        customChannel.value = value ?? '';
 
-            if (!this.availableChannels.find(c => c.url === value)) {
-                this.releaseChannel = 'custom';
-            }
-        }).catch(console.error);
+        if (!availableChannels.value.find(c => c.url === value)) {
+            releaseChannel.value = 'custom';
+        }
+    }).catch(console.error);
+});
+
+async function saveChannel() {
+    if (releaseChannel.value === '') {
+        await Storage.keyValue.removeItem('UPDATE_SERVER');
+    }
+    if (releaseChannel.value === 'custom') {
+        // Check valid
+        new URL(customChannel.value);
+        await Storage.keyValue.setItem('UPDATE_SERVER', customChannel.value);
+    } else {
+        await Storage.keyValue.setItem('UPDATE_SERVER', releaseChannel.value);
+    }
+    await AppManager.shared.checkUpdates({
+        visibleCheck: 'text',
+        visibleDownload: true,
+        installAutomatically: true,
+        checkTimeout: 15 * 1000,
+        force: true,
+        channel: releaseChannel.value === 'custom' ? customChannel.value : releaseChannel.value,
+    });
+}
+
+async function save() {
+    if (saving.value) {
+        return;
+    }
+    saving.value = true;
+
+    try {
+        await saveChannel();
+        new Toast($t(`%54`), 'success').show();
+        await dismiss({ force: true });
+    } catch (e) {
+        Toast.fromError(e as Error).show();
     }
 
-    async saveChannel() {
-        if (this.releaseChannel === '') {
-            await Storage.keyValue.removeItem('UPDATE_SERVER');
-        } if (this.releaseChannel === 'custom') {
-            // Check valid
-            new URL(this.customChannel);
-            await Storage.keyValue.setItem('UPDATE_SERVER', this.customChannel);
-        }
-        else {
-            await Storage.keyValue.setItem('UPDATE_SERVER', this.releaseChannel);
-        }
-        await AppManager.shared.checkUpdates({
-            visibleCheck: 'text',
-            visibleDownload: true,
-            installAutomatically: true,
-            checkTimeout: 15 * 1000,
-            force: true,
-            channel: this.releaseChannel === 'custom' ? this.customChannel : this.releaseChannel,
-        });
-    }
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-        this.saving = true;
-
-        try {
-            await this.saveChannel();
-            new Toast($t(`%54`), 'success').show();
-            await this.dismiss({ force: true });
-        }
-        catch (e) {
-            Toast.fromError(e as Error).show();
-        }
-
-        this.saving = false;
-    }
+    saving.value = false;
 }
 </script>

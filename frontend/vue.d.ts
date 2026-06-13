@@ -75,20 +75,3 @@ declare module 'vue' {
         vFormatInput: typeof FormatInputDirective;
     }
 }
-
-// Make sure VueComponent from '@simonbackx/vue-app-navigation/classes' has a property named $t
-declare module '@simonbackx/vue-app-navigation/classes' {
-    interface VueComponent {
-        $t: typeof import('@stamhoofd/frontend-i18n/I18n').I18n.prototype.$t;
-        $attrs: any;
-        $props: any;
-        $: any;
-        $emit: any;
-        $slots: any;
-        $refs: any;
-        $nextTick: any;
-        $isMobile: boolean;
-        $el: HTMLElement;
-        $parent: any;
-    }
-}

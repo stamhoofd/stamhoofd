@@ -60,34 +60,26 @@
     </STList>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { nextTick, useTemplateRef } from 'vue';
 
 import Radio from '../inputs/Radio.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import type { StringUIFilter } from './StringUIFilter';
-import { StringFilterMode } from './StringUIFilter';
+import { StringFilterMode } from './StringFilterMode';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        Radio,
-    },
-})
-export default class StringUIFilterView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    filter: StringUIFilter;
+defineProps<{
+    filter: {
+        id: string;
+        mode: StringFilterMode;
+        value: string;
+    };
+}>();
 
-    get StringFilterMode() {
-        return StringFilterMode;
-    }
+const input = useTemplateRef<HTMLInputElement>('input');
 
-    async onChange() {
-        await this.$nextTick();
-        (this.$refs['input'] as any).focus();
-    }
+async function onChange() {
+    await nextTick();
+    input.value?.focus();
 }
 </script>

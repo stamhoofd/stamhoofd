@@ -94,11 +94,10 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { ErrorBox } from '#errors/ErrorBox.ts';
 import Radio from '#inputs/Radio.vue';
@@ -108,203 +107,117 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Validator } from '#errors/Validator.ts';
-import type { RecordSettings, TranslatedString} from '@stamhoofd/structures';
+import type { RecordSettings, TranslatedString } from '@stamhoofd/structures';
 import { RecordChoice, RecordWarning, RecordWarningType, Version } from '@stamhoofd/structures';
+import { computed, ref, shallowRef } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        STList,
-        STListItem,
-        Radio,
-    },
-})
-export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    choice!: RecordChoice;
-
-    @Prop({ required: false, default: null })
-    parentCategory!: RecordSettings | null;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    patchChoice: AutoEncoderPatchType<RecordChoice> = RecordChoice.patch({ id: this.choice.id });
-
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
+    choice: RecordChoice;
+    parentCategory?: RecordSettings | null;
+    isNew: boolean;
     saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => void;
+}>(), {
+    parentCategory: null,
+});
+const pop = usePop();
+const errorBox = ref<ErrorBox | null>(null);
+const validator = new Validator();
+const patchChoice = shallowRef<AutoEncoderPatchType<RecordChoice>>(RecordChoice.patch({ id: props.choice.id }));
+const patchedChoice = computed(() => props.choice.patch(patchChoice.value));
+const title = computed(() => props.isNew ? $t(`%10x`) : $t(`%10y`));
+const name = computed({
+    get: () => patchedChoice.value.name,
+    set: (name: TranslatedString) => patchChoice.value = patchChoice.value.patch({ name }),
+});
+const description = computed({
+    get: () => patchedChoice.value.description,
+    set: (description: TranslatedString) => patchChoice.value = patchChoice.value.patch({ description }),
+});
 
-    get RecordWarningType() {
-        return RecordWarningType;
-    }
-
-    get patchedChoice() {
-        return this.choice.patch(this.patchChoice);
-    }
-
-    get title(): string {
-        if (this.isNew) {
-            return $t(`%10x`);
-        }
-        return $t(`%10y`);
-    }
-
-    get name() {
-        return this.patchedChoice.name;
-    }
-
-    set name(name: TranslatedString) {
-        this.patchChoice = this.patchChoice.patch({ name });
-    }
-
-    get description() {
-        return this.patchedChoice.description;
-    }
-
-    set description(description: TranslatedString) {
-        this.patchChoice = this.patchChoice.patch({ description });
-    }
-
-    get warningInverted() {
-        return this.patchedChoice.warning?.inverted ?? null;
-    }
-
-    set warningInverted(inverted: boolean | null) {
+const warningInverted = computed({
+    get: () => patchedChoice.value.warning?.inverted ?? null,
+    set: (inverted: boolean | null) => {
         if (inverted === null) {
-            this.patchChoice = this.patchChoice.patch({
-                warning: null,
-            });
+            patchChoice.value = patchChoice.value.patch({ warning: null });
             return;
         }
-        if (this.warningInverted === null) {
-            this.patchChoice = this.patchChoice.patch({
-                warning: RecordWarning.create({
-                    inverted,
-                }),
-            });
-        }
-        else {
-            this.patchChoice = this.patchChoice.patch({
-                warning: RecordWarning.patch({
-                    inverted,
-                }),
-            });
-        }
-    }
+        patchChoice.value = patchChoice.value.patch({
+            warning: warningInverted.value === null
+                ? RecordWarning.create({ inverted })
+                : RecordWarning.patch({ inverted }),
+        });
+    },
+});
 
-    get warningText() {
-        return this.patchedChoice.warning?.text ?? null;
-    }
-
-    set warningText(text: TranslatedString | null) {
+const warningText = computed({
+    get: () => patchedChoice.value.warning?.text ?? null,
+    set: (text: TranslatedString | null) => {
         if (text === null) {
-            this.patchChoice = this.patchChoice.patch({
-                warning: null,
-            });
+            patchChoice.value = patchChoice.value.patch({ warning: null });
             return;
         }
-        if (this.warningText === null) {
-            this.patchChoice = this.patchChoice.patch({
-                warning: RecordWarning.create({
-                    text,
-                }),
-            });
-        }
-        else {
-            this.patchChoice = this.patchChoice.patch({
-                warning: RecordWarning.patch({
-                    text,
-                }),
-            });
-        }
-    }
+        patchChoice.value = patchChoice.value.patch({
+            warning: warningText.value === null
+                ? RecordWarning.create({ text })
+                : RecordWarning.patch({ text }),
+        });
+    },
+});
 
-    get warningType() {
-        return this.patchedChoice.warning?.type ?? null;
-    }
-
-    set warningType(type: RecordWarningType | null) {
+const warningType = computed({
+    get: () => patchedChoice.value.warning?.type ?? null,
+    set: (type: RecordWarningType | null) => {
         if (type === null) {
-            this.patchChoice = this.patchChoice.patch({
-                warning: null,
-            });
+            patchChoice.value = patchChoice.value.patch({ warning: null });
             return;
         }
-        if (this.warningType === null) {
-            this.patchChoice = this.patchChoice.patch({
-                warning: RecordWarning.create({
-                    type,
-                }),
-            });
-        }
-        else {
-            this.patchChoice = this.patchChoice.patch({
-                warning: RecordWarning.patch({
-                    type,
-                }),
-            });
-        }
+        patchChoice.value = patchChoice.value.patch({
+            warning: warningType.value === null
+                ? RecordWarning.create({ type })
+                : RecordWarning.patch({ type }),
+        });
+    },
+});
+
+const hasChanges = computed(() => patchContainsChanges(patchChoice.value, props.choice, { version: Version }));
+
+async function save() {
+    if (!await validator.validate()) {
+        return;
     }
 
-    addPatch(patch: AutoEncoderPatchType<RecordChoice>) {
-        this.patchChoice = this.patchChoice.patch(patch);
+    const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
+    if (props.isNew) {
+        arrayPatch.addPut(patchedChoice.value);
+    } else {
+        arrayPatch.addPatch(patchChoice.value);
     }
-
-    async save() {
-        const isValid = await this.validator.validate();
-        if (!isValid) {
-            return;
-        }
-
-        const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
-
-        if (this.isNew) {
-            arrayPatch.addPut(this.patchedChoice);
-        }
-        else {
-            arrayPatch.addPatch(this.patchChoice);
-        }
-
-        this.saveHandler(arrayPatch);
-        await this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm($t(`%10z`), $t(`%CJ`))) {
-            return;
-        }
-
-        if (this.isNew) {
-            // do nothing
-            await this.pop({ force: true });
-            return;
-        }
-
-        const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
-        arrayPatch.addDelete(this.choice.id);
-
-        this.saveHandler(arrayPatch);
-        await this.pop({ force: true });
-    }
-
-    async cancel() {
-        await this.pop();
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchChoice, this.choice, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
-    }
+    props.saveHandler(arrayPatch);
+    await pop({ force: true });
 }
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm($t(`%10z`), $t(`%CJ`))) {
+        return;
+    }
+
+    if (props.isNew) {
+        await pop({ force: true });
+        return;
+    }
+
+    const arrayPatch: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray();
+    arrayPatch.addDelete(props.choice.id);
+    props.saveHandler(arrayPatch);
+    await pop({ force: true });
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+}
+
+defineExpose({ shouldNavigateAway });
 </script>

@@ -73,7 +73,7 @@
                         <span>{{ $t('%R7') }}</span>
                     </button>
                 </template>
-                <PrefixInput v-model="domainUri" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" :placeholder="$t(`%RE`)" @blur="resetCache" />
+                <PrefixInput :model-value="domainUri ?? ''" :prefix="domainUri ? (webshop.domain ?? '') + '/' : (webshop.domain ?? '')" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" :placeholder="$t(`%RE`)" @update:model-value="domainUri = $event" @blur="resetCache" />
             </STInputBox>
             <p class="style-description-small">
                 {{ $t('%R8') }}

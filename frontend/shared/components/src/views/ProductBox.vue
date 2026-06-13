@@ -37,6 +37,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, useCanDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import type { useDismiss } from '@simonbackx/vue-app-navigation';
 import CartItemView from '#views/CartItemView.vue';
 import type { Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Cart, CartItem, CartStockHelper } from '@stamhoofd/structures';
@@ -48,7 +49,11 @@ const props = withDefaults(defineProps<{
     product: Product;
     webshop: Webshop;
     checkout: Checkout;
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void;
+    saveHandler: (
+        newItem: CartItem,
+        oldItem: CartItem | null,
+        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean },
+    ) => void;
 }>(), {
     admin: false,
 });

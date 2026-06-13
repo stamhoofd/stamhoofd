@@ -28,127 +28,100 @@
     </STErrorsInput>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+<script lang="ts" setup>
 import Checkbox from '#inputs/Checkbox.vue';
 import type { ErrorBox } from '#errors/ErrorBox.ts';
 import Radio from '#inputs/Radio.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
-import STNavigationBar from '#navigation/STNavigationBar.vue';
-import STToolbar from '#navigation/STToolbar.vue';
 import STErrorsInput from '#errors/STErrorsInput.vue';
 import type { Cart, CartItem, Option, OptionMenu, Webshop } from '@stamhoofd/structures';
 import { CartItemOption, CartStockHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        Checkbox,
-        STErrorsInput
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-    },
-})
-export default class OptionMenuBox extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     webshop: Webshop;
-
-    @Prop({ required: true })
     cart: Cart;
-
-    @Prop({ required: true })
     cartItem: CartItem;
-
-    @Prop({ required: true })
     optionMenu: OptionMenu;
+    oldItem?: CartItem | null;
+    admin?: boolean;
+    errorBox?: ErrorBox | null;
+}>(), {
+    oldItem: null,
+    admin: false,
+    errorBox: null,
+});
 
-    @Prop({ default: null })
-    oldItem: CartItem | null;
+const formatPriceChange = Formatter.priceChange.bind(Formatter);
+const product = computed(() => props.cartItem.product);
 
-    @Prop({ default: false })
-    admin: boolean;
+function isOptionSelected(option: Option) {
+    return !!props.cartItem.options.find(o => o.optionMenu.id === props.optionMenu.id && o.option.id === option.id);
+}
 
-    @Prop({ default: null })
-    errorBox: ErrorBox | null;
-
-    isOptionSelected(option: Option) {
-        return !!this.cartItem.options.find(o => o.optionMenu.id === this.optionMenu.id && o.option.id === option.id);
+function selectOption(option: Option, selected: boolean) {
+    const filtered = props.cartItem.options.filter(o => o.optionMenu.id !== props.optionMenu.id || o.option.id !== option.id);
+    if (selected) {
+        filtered.push(CartItemOption.create({ optionMenu: props.optionMenu, option }));
     }
+    props.cartItem.options = filtered;
+}
 
-    selectOption(option: Option, selected: boolean) {
-        const filtered = this.cartItem.options.filter(o => o.optionMenu.id !== this.optionMenu.id || o.option.id !== option.id);
-        if (selected) {
-            filtered.push(CartItemOption.create({ optionMenu: this.optionMenu, option }));
-        }
-        this.cartItem.options = filtered;
-    }
-
-    get selectedOption() {
-        return this.cartItem.options.find(o => o.optionMenu.id === this.optionMenu.id)?.option?.id ?? '';
-    }
-
-    set selectedOption(id: string) {
-        const option = this.optionMenu.options.find(o => o.id === id);
+const selectedOption = computed({
+    get: () => props.cartItem.options.find(o => o.optionMenu.id === props.optionMenu.id)?.option?.id ?? '',
+    set: (id: string) => {
+        const option = props.optionMenu.options.find(o => o.id === id);
         if (!option) {
             return;
         }
-        const filtered = this.cartItem.options.filter(o => o.optionMenu.id !== this.optionMenu.id);
-        filtered.push(CartItemOption.create({ optionMenu: this.optionMenu, option }));
-        this.cartItem.options = filtered;
+        const filtered = props.cartItem.options.filter(o => o.optionMenu.id !== props.optionMenu.id);
+        filtered.push(CartItemOption.create({ optionMenu: props.optionMenu, option }));
+        props.cartItem.options = filtered;
+    },
+});
+
+const maximumRemainingAcrossOptions = computed(() => CartStockHelper.getRemainingAcrossOptions({
+    product: product.value,
+    oldItem: props.oldItem,
+    cart: props.cart,
+    webshop: props.webshop,
+    admin: props.admin,
+    amount: props.cartItem.amount,
+}, { inMultipleCartItems: false }));
+
+function getOptionStock(option: Option) {
+    const optionStock = CartStockHelper.getOptionStock({
+        product: product.value,
+        oldItem: props.oldItem,
+        cart: props.cart,
+        option,
+        webshop: props.webshop,
+        admin: props.admin,
+        amount: props.cartItem.amount,
+    });
+    if (!optionStock) {
+        return null;
     }
 
-    get product() {
-        return this.cartItem.product;
+    if (optionStock.remaining !== null && maximumRemainingAcrossOptions.value !== null && optionStock.remaining > maximumRemainingAcrossOptions.value) {
+        return null;
     }
+    return optionStock;
+}
 
-    get maximumRemainingAcrossOptions() {
-        return CartStockHelper.getRemainingAcrossOptions({
-            product: this.product,
-            oldItem: this.oldItem,
-            cart: this.cart,
-            webshop: this.webshop,
-            admin: this.admin,
-            amount: this.cartItem.amount,
-        }, { inMultipleCartItems: false });
+function getOptionStockText(option: Option) {
+    if (maximumRemainingAcrossOptions.value === 0) {
+        return null;
     }
+    return getOptionStock(option)?.shortText;
+}
 
-    getOptionStock(option: Option) {
-        const optionStock = CartStockHelper.getOptionStock({ product: this.product, oldItem: this.oldItem, cart: this.cart, option, webshop: this.webshop, admin: this.admin, amount: this.cartItem.amount });
-        if (!optionStock) {
-            return null;
-        }
-
-        if (optionStock.remaining !== null && this.maximumRemainingAcrossOptions !== null && optionStock.remaining > this.maximumRemainingAcrossOptions) {
-            // Doesn't matter to show this
-            return null;
-        }
-        return optionStock;
+function canSelectOption(option: Option) {
+    if (maximumRemainingAcrossOptions.value === 0) {
+        return false;
     }
-
-    getOptionStockText(option: Option) {
-        // Don't show text if all options are sold out
-        if (this.maximumRemainingAcrossOptions === 0) {
-            return null;
-        }
-
-        return this.getOptionStock(option)?.shortText;
-    }
-
-    canSelectOption(option: Option) {
-        if (this.maximumRemainingAcrossOptions === 0) {
-            return false;
-        }
-
-        return this.getOptionStock(option)?.remaining !== 0;
-    }
+    return getOptionStock(option)?.remaining !== 0;
 }
 </script>

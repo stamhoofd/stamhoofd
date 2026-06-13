@@ -20,68 +20,55 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import LoadingButton from '#navigation/LoadingButton.vue';
 import STInputBox from '#inputs/STInputBox.vue';
-import STList from '#layout/STList.vue';
-import STListItem from '#layout/STListItem.vue';
+import LoadingButton from '#navigation/LoadingButton.vue';
 import { Formatter } from '@stamhoofd/utility';
+import { ref } from 'vue';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        LoadingButton,
-        STInputBox,
-    },
-})
-export default class AddDiscountCodeBox extends VueComponent {
-    @Prop({ required: true })
+const props = defineProps<{
     applyCode: (code: string) => Promise<boolean>;
+}>();
 
-    isEnteringDiscountCode = false;
-    code = '';
-    errorBox: ErrorBox | null = null;
-    loading = false;
+const isEnteringDiscountCode = ref(false);
+const code = ref('');
+const errorBox = ref<ErrorBox | null>(null);
+const loading = ref(false);
 
-    addDiscountCode() {
-        this.isEnteringDiscountCode = true;
+function addDiscountCode() {
+    isEnteringDiscountCode.value = true;
+}
+
+function cleanCode() {
+    code.value = Formatter.slug(code.value.trim()).toUpperCase();
+}
+
+async function addEnteredCode() {
+    if (loading.value) {
+        return;
     }
-
-    cleanCode() {
-        this.code = Formatter.slug(this.code.trim()).toUpperCase();
+    loading.value = true;
+    try {
+        cleanCode();
+        if (await props.applyCode(code.value)) {
+            isEnteringDiscountCode.value = false;
+            code.value = '';
+        } else {
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: 'invalid_code',
+                field: 'code',
+                message: $t(`%12O`),
+            }));
+        }
+    } catch (e) {
+        console.error(e);
+        if (isSimpleError(e) || isSimpleErrors(e)) {
+            e.addNamespace('code');
+        }
+        errorBox.value = new ErrorBox(e);
     }
-
-    async addEnteredCode() {
-        if (this.loading) {
-            return;
-        }
-        this.loading = true;
-        try {
-            this.cleanCode();
-            if (await this.applyCode(this.code)) {
-                this.isEnteringDiscountCode = false;
-                this.code = '';
-            }
-            else {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_code',
-                    field: 'code',
-                    message: $t(`%12O`),
-                }));
-            }
-        }
-        catch (e) {
-            console.error(e);
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                e.addNamespace('code');
-            }
-            this.errorBox = new ErrorBox(e);
-        }
-        this.loading = false;
-    }
+    loading.value = false;
 }
 </script>

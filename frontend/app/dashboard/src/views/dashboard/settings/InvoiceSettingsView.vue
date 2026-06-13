@@ -58,7 +58,7 @@
             <CheckboxListItem v-model="forwardOnlyVAT" :label="$t('Enkel facturen van BTW-plichtige bedrijven of bedrijven met een custom PEPPOL Endpoint ID doorsturen naar de boekhoudsoftware')" />
         </STList>
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`%1FK`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`%1FK`)" @update:model-value="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`%1FK`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`%1FK`)" @update:model-value="setEmail(n - 1, $event ?? '')">
             <template #right>
                 <EmailAddressWarning :email="getEmail(n-1)" />
                 <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />

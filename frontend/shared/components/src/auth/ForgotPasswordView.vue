@@ -17,68 +17,58 @@
     </form>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import BackButton from '#navigation/BackButton.vue';
+<script lang="ts" setup>
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import LoadingButton from '#navigation/LoadingButton.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import STFloatingFooter from '#navigation/STFloatingFooter.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
+import { ref } from 'vue';
+import { useContext } from '../hooks/useContext';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STFloatingFooter,
-        EmailInput,
-        LoadingButton,
-        STErrorsDefault,
-        BackButton,
-    },
-})
-export default class ForgotPasswordView extends Mixins(NavigationMixin) {
-    loading = false;
+const props = withDefaults(defineProps<{
+    initialEmail?: string;
+}>(), {
+    initialEmail: '',
+});
 
-    @Prop({ default: '' })
-    initialEmail!: string;
+const context = useContext();
+const dismiss = useDismiss();
+const loading = ref(false);
+const email = ref(props.initialEmail);
+const validator = new Validator();
+const errorBox = ref<ErrorBox | null>(null);
 
-    email = this.initialEmail;
-    validator = new Validator();
-    errorBox: ErrorBox | null = null;
-
-    async submit() {
-        if (this.loading) {
-            return;
-        }
-        this.loading = true;
-        this.errorBox = null;
-
-        if (!(await this.validator.validate())) {
-            this.loading = false;
-            return;
-        }
-
-        try {
-            await this.$context.server.request({
-                method: 'POST',
-                path: '/forgot-password',
-                body: ForgotPasswordRequest.create({ email: this.email }),
-                shouldRetry: false,
-            });
-
-            await this.dismiss({ force: true });
-            new Toast($t(`%v0`), 'success').show();
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e);
-        }
-
-        this.loading = false;
+async function submit() {
+    if (loading.value) {
+        return;
     }
+    loading.value = true;
+    errorBox.value = null;
+
+    if (!(await validator.validate())) {
+        loading.value = false;
+        return;
+    }
+
+    try {
+        await context.value.server.request({
+            method: 'POST',
+            path: '/forgot-password',
+            body: ForgotPasswordRequest.create({ email: email.value }),
+            shouldRetry: false,
+        });
+
+        await dismiss({ force: true });
+        new Toast($t(`%v0`), 'success').show();
+    } catch (e) {
+        errorBox.value = new ErrorBox(e);
+    }
+
+    loading.value = false;
 }
 </script>

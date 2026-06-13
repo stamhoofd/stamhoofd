@@ -21,80 +21,58 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import LoadingButton from '#navigation/LoadingButton.vue';
 import PasswordStrength from '#inputs/PasswordStrength.vue';
 import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import STFloatingFooter from '#navigation/STFloatingFooter.vue';
 import STInputBox from '#inputs/STInputBox.vue';
-import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { computed, ref } from 'vue';
+import { useContext } from '../hooks/useContext';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STFloatingFooter,
-        STInputBox,
-        LoadingButton,
-        STErrorsDefault,
-        PasswordStrength,
-        SaveView,
-    },
-})
-export default class ChangePasswordView extends Mixins(NavigationMixin) {
-    loading = false;
+const context = useContext();
+const dismiss = useDismiss();
+const loading = ref(false);
+const password = ref('');
+const passwordRepeat = ref('');
+const errorBox = ref<ErrorBox | null>(null);
+const email = computed(() => context.value.user?.email ?? '');
 
-    password = '';
-    passwordRepeat = '';
-
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    get email() {
-        return this.$context.user?.email ?? '';
+async function submit() {
+    if (loading.value) {
+        return;
     }
 
-    async submit() {
-        if (this.loading) {
-            return;
-        }
+    // Request the key constants
 
-        // Request the key constants
+    if (password.value !== passwordRepeat.value) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: '',
+            message: $t(`%12T`),
+        }));
+        return;
+    }
 
-        if (this.password !== this.passwordRepeat) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: '',
-                message: $t(`%12T`),
-            }));
-            return;
-        }
+    if (password.value.length < 8) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: '',
+            message: $t(`%v2`),
+        }));
+        return;
+    }
+    loading.value = true;
 
-        if (this.password.length < 8) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: '',
-                message: $t(`%v2`),
-            }));
-            return;
-        }
-        this.loading = true;
-
-        try {
-            await LoginHelper.changePassword(this.$context, this.password);
-            await this.dismiss({ force: true });
-            new Toast($t(`%12U`), 'success').show();
-        }
-        catch (e) {
-            this.loading = false;
-            this.errorBox = new ErrorBox(e);
-            return;
-        }
+    try {
+        await LoginHelper.changePassword(context.value, password.value);
+        await dismiss({ force: true });
+        new Toast($t(`%12U`), 'success').show();
+    } catch (e) {
+        loading.value = false;
+        errorBox.value = new ErrorBox(e);
     }
 }
 </script>

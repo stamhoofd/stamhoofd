@@ -48,20 +48,16 @@
     </LoadingViewTransition>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import Checkbox from '#inputs/Checkbox.vue';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useAppNavigate } from '#hooks/useAppNavigate.ts';
 import LoadingButton from '#navigation/LoadingButton.vue';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import PasswordStrength from '#inputs/PasswordStrength.vue';
-import Spinner from '#Spinner.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import STFloatingFooter from '#navigation/STFloatingFooter.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
@@ -70,228 +66,160 @@ import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { AppRoute, NewUser, Token } from '@stamhoofd/structures';
+import { computed, onMounted, ref, shallowRef } from 'vue';
+import { useContext } from '../hooks/useContext';
+import { useOrganization } from '../hooks/useOrganization';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 
-// The header component detects if the user scrolled past the header position and adds a background gradient in an animation
-@Component({
-    components: {
-        STNavigationBar,
-        STFloatingFooter,
-        STInputBox,
-        LoadingButton,
-        STErrorsDefault,
-        EmailInput,
-        Checkbox,
-        Spinner,
-        PasswordStrength,
-        LoadingViewTransition,
-        SignupPoliciesBox,
-    },
-})
-export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
-    loading = false;
-    loadingToken = true;
-    email = '';
-    password = '';
-    firstName = '';
-    lastName = '';
+const props = defineProps<{
+    token: string;
+}>();
 
-    passwordRepeat = '';
+const context = useContext();
+const organization = useOrganization();
+const dismiss = useDismiss();
+const appNavigate = useAppNavigate();
+const loading = ref(false);
+const loadingToken = ref(true);
+const email = ref('');
+const password = ref('');
+const firstName = ref('');
+const lastName = ref('');
+const passwordRepeat = ref('');
+const errorBox = ref<ErrorBox | null>(null);
+const validator = new Validator();
+const session = shallowRef<SessionContext | null>(null);
+const hasAccount = ref(false);
 
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
+const loadingSession = computed(() => !session.value?.user || loadingToken.value);
+const title = computed(() => hasAccount.value ? $t(`%oM`) : $t(`%ur`));
+const allowNameChange = computed(() => !hasAccount.value || session.value?.user?.permissions !== null);
+const description = computed(() => {
+    if (organization.value) {
+        return hasAccount.value
+            ? $t(`%1AZ`, { organizationName: organization.value.name })
+            : $t(`%1Aa`, { organizationName: organization.value.name });
+    }
+    return hasAccount.value ? $t(`%us`) : $t(`%ut`);
+});
+const buttonText = computed(() => hasAccount.value ? $t(`%uu`) : $t(`%ur`));
 
-    @Prop({ required: true })
-    token!: string;
-
-    session: SessionContext | null = null;
-
-    acceptPrivacy = false;
-    acceptTerms = false;
-    acceptDataAgreement = false;
-    hasAccount = false;
-
-    get loadingSession() {
-        return !this.session || !this.session.user || this.loadingToken;
+onMounted(() => {
+    if (!props.token) {
+        new Toast($t(`%EF`), 'error red').show();
+        dismiss({ force: true }).catch(console.error);
+        return;
     }
 
-    get title() {
-        return this.hasAccount ? $t(`%oM`) : $t(`%ur`);
+    context.value.server.request({
+        method: 'POST',
+        path: '/oauth/token',
+        body: {
+            grant_type: 'password_token',
+            token: props.token,
+        },
+        decoder: Token,
+    }).then(async (response) => {
+        const newSession = new SessionContext(context.value.organization);
+        newSession.disableStorage();
+        await newSession.setToken(response.data);
+        await newSession.updateData(false, false);
+        session.value = newSession;
+        return newSession;
+    }).then((loadedSession) => {
+        email.value = loadedSession.user?.email ?? '';
+        firstName.value = loadedSession.user?.firstName ?? '';
+        lastName.value = loadedSession.user?.lastName ?? '';
+        hasAccount.value = loadedSession.user?.hasAccount ?? false;
+        loadingToken.value = false;
+    }).catch(() => {
+        new Toast($t(`%uv`), 'error red').show();
+        dismiss({ force: true }).catch(console.error);
+    });
+});
+
+async function submit() {
+    if (loading.value || loadingToken.value || !session.value) {
+        return;
     }
 
-    get allowNameChange() {
-        return !this.hasAccount || (this.session && this.session.user && this.session.user.permissions !== null);
-    }
-
-    get description() {
-        if (this.$organization) {
-            return this.hasAccount
-                ? $t(`%1AZ`, { organizationName: this.$organization.name })
-                : $t(`%1Aa`, { organizationName: this.$organization.name });
-        }
-        return this.hasAccount ? $t(`%us`) : $t(`%ut`);
-    }
-
-    get buttonText() {
-        return this.hasAccount ? $t(`%uu`) : $t(`%ur`);
-    }
-
-    mounted() {
-        this.loadingToken = true;
-
-        if (this.token) {
-            const token = this.token;
-
-            this.loadingToken = true;
-
-            this.$context.server.request({
-                method: 'POST',
-                path: '/oauth/token',
-                body: {
-                    grant_type: 'password_token',
-                    token: token,
-                },
-                decoder: Token,
-            }).then(async (response) => {
-                // Create new session to prevent signing in
-                this.session = new SessionContext(this.$context.organization);
-                // We don't want to save this session or reuse it on the next loads (yet)
-                this.session.disableStorage();
-                await this.session.setToken(response.data);
-                await this.session.updateData(false, false);
-                return this.session;
-            })
-                .then((session) => {
-                    this.email = session.user?.email ?? '';
-                    this.firstName = session.user?.firstName ?? '';
-                    this.lastName = session.user?.lastName ?? '';
-                    this.hasAccount = session.user?.hasAccount ?? false;
-                    this.loadingToken = false;
-                }).catch((e) => {
-                    new Toast($t(`%uv`), 'error red').show();
-                    this.dismiss({ force: true }).catch(console.error);
-                });
-        } else {
-            new Toast($t(`%EF`), 'error red').show();
-            this.dismiss({ force: true }).catch(console.error);
-        }
-    }
-
-    get hasPermissions() {
-        return this.session && this.session.user && !!this.session.user.permissions;
-    }
-
-    async submit() {
-        if (this.loading || this.loadingToken || !this.session) {
-            return;
-        }
-
-        if (this.allowNameChange) {
-            try {
-                const errors = new SimpleErrors();
-                if (this.firstName.length < 2) {
-                    errors.addError(new SimpleError({
-                        code: 'invalid_field',
-                        message: $t(`%uw`),
-                        field: 'firstName',
-                    }));
-                }
-                if (this.lastName.length < 2) {
-                    errors.addError(new SimpleError({
-                        code: 'invalid_field',
-                        message: $t(`%ux`),
-                        field: 'lastName',
-                    }));
-                }
-                errors.throwIfNotEmpty();
-            } catch (e) {
-                this.errorBox = new ErrorBox(e);
-                return;
-            }
-        }
-
-        const valid = await this.validator.validate();
-
-        if (this.password !== this.passwordRepeat) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: '',
-                message: $t(`%12T`),
-            }));
-            return;
-        }
-
-        const minChars = 8;
-
-        if (this.password.length < minChars) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: '',
-                message: $t(`%14k`, { count: minChars }),
-            }));
-            return;
-        }
-
-        if (!valid) {
-            this.errorBox = null;
-            return;
-        }
-
-        this.loading = true;
-
-        // Request the key constants
+    if (allowNameChange.value) {
         try {
-            const patch = !this.allowNameChange
-                ? NewUser.patch({
-                        id: this.session.user!.id,
-                        password: this.password,
-                        email: this.email,
-                    })
-                : NewUser.patch({
-                        id: this.session.user!.id,
-                        password: this.password,
-                        email: this.email,
-                        firstName: this.firstName,
-                        lastName: this.lastName,
-                    });
-
-            // Also change the email if it has been changed
-            const { verificationToken } = await LoginHelper.patchUser(this.session, patch);
-            // await SessionManager.setCurrentSession(this.session)
-            await SessionManager.prepareSessionForUsage(this.session);
-
-            // todo: switch current $context to session
-
-            if (this.hasAccount) {
-                new Toast($t(`%12U`), 'success green').show();
-            } else {
-                new Toast($t(`%uy`), 'success green').show();
+            const errors = new SimpleErrors();
+            if (firstName.value.length < 2) {
+                errors.addError(new SimpleError({ code: 'invalid_field', message: $t(`%uw`), field: 'firstName' }));
             }
-
-            const appNavigate = useAppNavigate();
-            const org = this.session.organization;
-
-            if (verificationToken) {
-                await appNavigate(AppRoute.VerifyEmail, {
-                    properties: {
-                        token: verificationToken,
-                        email: this.email,
-                        organization: org,
-                    },
-                });
-            } else {
-                if (org) {
-                    await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } });
-                } else {
-                    await appNavigate(AppRoute.UnscopedAuto);
-                }
+            if (lastName.value.length < 2) {
+                errors.addError(new SimpleError({ code: 'invalid_field', message: $t(`%ux`), field: 'lastName' }));
             }
-
-            await this.dismiss({ force: true });
-            this.loading = false;
+            errors.throwIfNotEmpty();
         } catch (e) {
-            this.loading = false;
-            this.errorBox = new ErrorBox(e);
+            errorBox.value = new ErrorBox(e);
             return;
         }
+    }
+
+    const valid = await validator.validate();
+    if (password.value !== passwordRepeat.value) {
+        errorBox.value = new ErrorBox(new SimpleError({ code: '', message: $t(`%12T`) }));
+        return;
+    }
+
+    const minChars = 8;
+    if (password.value.length < minChars) {
+        errorBox.value = new ErrorBox(new SimpleError({ code: '', message: $t(`%14k`, { count: minChars }) }));
+        return;
+    }
+    if (!valid) {
+        errorBox.value = null;
+        return;
+    }
+
+    loading.value = true;
+    try {
+        const patch = !allowNameChange.value
+            ? NewUser.patch({
+                    id: session.value.user!.id,
+                    password: password.value,
+                    email: email.value,
+                })
+            : NewUser.patch({
+                    id: session.value.user!.id,
+                    password: password.value,
+                    email: email.value,
+                    firstName: firstName.value,
+                    lastName: lastName.value,
+                });
+
+        const { verificationToken } = await LoginHelper.patchUser(session.value, patch);
+        await SessionManager.prepareSessionForUsage(session.value);
+
+        if (hasAccount.value) {
+            new Toast($t(`%12U`), 'success green').show();
+        } else {
+            new Toast($t(`%uy`), 'success green').show();
+        }
+
+        const org = session.value.organization;
+        if (verificationToken) {
+            await appNavigate(AppRoute.VerifyEmail, {
+                properties: {
+                    token: verificationToken,
+                    email: email.value,
+                    organization: org,
+                },
+            });
+        } else if (org) {
+            await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } });
+        } else {
+            await appNavigate(AppRoute.UnscopedAuto);
+        }
+
+        await dismiss({ force: true });
+        loading.value = false;
+    } catch (e) {
+        loading.value = false;
+        errorBox.value = new ErrorBox(e);
     }
 }
 </script>

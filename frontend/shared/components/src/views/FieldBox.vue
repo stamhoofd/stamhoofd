@@ -9,50 +9,36 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
 import type { ErrorBox } from '#errors/ErrorBox.ts';
 import STInputBox from '#inputs/STInputBox.vue';
-import type { WebshopField} from '@stamhoofd/structures';
+import type { WebshopField } from '@stamhoofd/structures';
 import { WebshopFieldAnswer } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STInputBox,
-    },
-})
-export default class FieldBox extends Mixins(NavigationMixin) {
-    @Prop({ default: true })
-    withTitle: boolean;
-
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
+    withTitle?: boolean;
     field: WebshopField;
-
-    @Prop({ required: true })
-    errorBox: ErrorBox;
-
-    @Prop({ required: true })
+    errorBox: ErrorBox | null;
     answers: WebshopFieldAnswer[];
+}>(), {
+    withTitle: true,
+});
 
-    get value() {
-        return this.answers.find(a => a.field.id === this.field.id)?.answer ?? '';
-    }
-
-    set value(value: string) {
-        const answer = this.answers.find(a => a.field.id === this.field.id);
-
+const value = computed({
+    get: () => props.answers.find(a => a.field.id === props.field.id)?.answer ?? '',
+    set: (value: string) => {
+        const answer = props.answers.find(a => a.field.id === props.field.id);
         if (answer) {
             answer.answer = value;
-        }
-        else {
-            this.answers.push(WebshopFieldAnswer.create({
-                field: this.field,
+        } else {
+            props.answers.push(WebshopFieldAnswer.create({
+                field: props.field,
                 answer: value,
             }));
         }
-    }
-}
+    },
+});
 </script>
 
 <style lang="scss">

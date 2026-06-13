@@ -24,98 +24,81 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
+<script lang="ts" setup>
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
-import STToolbar from '#navigation/STToolbar.vue';
 import type { Order, TicketPublic, Webshop } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
 import SeatSelectionBox from './SeatSelectionBox.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STErrorsDefault,
-        SeatSelectionBox,
-        STListItem,
-        STList,
-    },
-})
-export default class ShowSeatsView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     ticket: TicketPublic;
-
-    @Prop({ required: false, default: null })
-    order: Order | null;
-
-    @Prop({ required: true })
+    order?: Order | null;
     webshop: Webshop;
+    allowDismiss?: boolean;
+}>(), {
+    order: null,
+    allowDismiss: true,
+});
 
-    @Prop({ default: true })
-    allowDismiss: boolean;
+const seatingPlan = computed(() => {
+    const id = props.ticket.getSeatingPlanId();
+    return props.webshop.meta.seatingPlans.find(p => p.id === id);
+});
 
-    get seatingPlanSection() {
-        const plan = this.seatingPlan;
-        if (!plan) {
-            return null;
-        }
-        const seat = this.ticket.seat;
-        if (!seat) {
-            return plan.sections[0];
-        }
-        return plan.sections.find(s => s.id === seat.section) ?? null;
+const seatingPlanSection = computed(() => {
+    const plan = seatingPlan.value;
+    if (!plan) {
+        return null;
     }
-
-    get seatingPlan() {
-        const id = this.ticket.getSeatingPlanId();
-        return this.webshop.meta.seatingPlans.find(p => p.id === id);
+    const seat = props.ticket.seat;
+    if (!seat) {
+        return plan.sections[0];
     }
+    return plan.sections.find(s => s.id === seat.section) ?? null;
+});
 
-    get seats() {
-        const seat = this.ticket.seat;
-        if (!seat) {
-            return [];
-        }
-        return [seat];
-    }
-
-    get seatDescription() {
-        const seat = this.ticket.seat;
-        const product = this.ticket.items[0]?.product;
-        if (!seat || !product) {
-            return [];
-        }
-        return seat.getName(this.webshop, product);
-    }
-
-    get reservedSeats() {
-        const product = this.ticket.items[0]?.product;
-        if (product) {
-            const updatedProduct = this.webshop.products.find(p => p.id === product.id);
-            if (updatedProduct) {
-                return updatedProduct.reservedSeats;
-            }
-        }
+const seats = computed(() => {
+    const seat = props.ticket.seat;
+    if (!seat) {
         return [];
     }
+    return [seat];
+});
 
-    get highlightSeats() {
-        // Other seats from this order (if any)
-        if (!this.order) {
-            return [];
-        }
-        const product = this.ticket.items[0]?.product;
-        if (!product) {
-            return [];
-        }
-        return this.order.data.cart.items.filter(i => i.product.seatingPlanId === this.seatingPlan?.id && i.product.id === product.id).flatMap(i => i.seats);
+const seatDescription = computed(() => {
+    const seat = props.ticket.seat;
+    const product = props.ticket.items[0]?.product;
+    if (!seat || !product) {
+        return [];
     }
-}
+    return seat.getName(props.webshop, product);
+});
+
+const reservedSeats = computed(() => {
+    const product = props.ticket.items[0]?.product;
+    if (product) {
+        const updatedProduct = props.webshop.products.find(p => p.id === product.id);
+        if (updatedProduct) {
+            return updatedProduct.reservedSeats;
+        }
+    }
+    return [];
+});
+
+const highlightSeats = computed(() => {
+    // Other seats from this order (if any)
+    if (!props.order) {
+        return [];
+    }
+    const product = props.ticket.items[0]?.product;
+    if (!product) {
+        return [];
+    }
+    return props.order.data.cart.items.filter(i => i.product.seatingPlanId === seatingPlan.value?.id && i.product.id === product.id).flatMap(i => i.seats);
+});
 </script>
 
 <style lang="scss">
