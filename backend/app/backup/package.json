@@ -20,16 +20,16 @@
     "devDependencies": {
         "@types/formidable": "3.5.1",
         "@types/luxon": "3.7.1",
-        "@types/mysql": "^2.15.20",
-        "@types/node": "^22"
+        "@types/mysql": "2.15.27",
+        "@types/node": "22.15.34"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.839.0",
+        "@aws-sdk/client-s3": "3.1068.0",
         "@simonbackx/simple-database": "1.37.1",
         "@simonbackx/simple-encoding": "2.26.8",
         "@simonbackx/simple-endpoints": "1.21.1",
-        "@simonbackx/simple-errors": "^1.5",
-        "@simonbackx/simple-logging": "^1.0.1",
+        "@simonbackx/simple-errors": "1.5.0",
+        "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "*",
         "@stamhoofd/backend-middleware": "*",
         "@stamhoofd/crons": "*",
@@ -37,11 +37,11 @@
         "@stamhoofd/queues": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "chalk": "^4.1.2",
+        "chalk": "4.1.2",
         "formidable": "3.5.4",
         "luxon": "3.7.2",
-        "mockdate": "^3.0.2",
-        "mysql2": "^3.20.0"
+        "mockdate": "3.0.5",
+        "mysql2": "3.22.5"
     },
     "publishConfig": {
         "access": "public"

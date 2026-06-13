@@ -29,9 +29,9 @@
     "dependencies": {
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "chalk": "^4.1.2"
+        "chalk": "4.1.2"
     },
     "devDependencies": {
-        "concurrently": "^10.0.3"
+        "concurrently": "10.0.3"
     }
 }

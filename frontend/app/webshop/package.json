@@ -17,7 +17,7 @@
     ],
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.8",
-        "@simonbackx/simple-errors": "^1.5",
+        "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/vue-app-navigation": "2.20.1",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
@@ -34,6 +34,6 @@
     "devDependencies": {
         "@stamhoofd/vite-config": "*",
         "eslint-plugin-stamhoofd": "*",
-        "vite": "^8.0.0"
+        "vite": "8.0.16"
     }
 }

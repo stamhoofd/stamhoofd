@@ -35,6 +35,6 @@
         "access": "public"
     },
     "dependencies": {
-        "@simonbackx/simple-logging": "^1.0.1"
+        "@simonbackx/simple-logging": "1.0.1"
     }
 }

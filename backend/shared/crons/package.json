@@ -18,7 +18,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
-        "@simonbackx/simple-logging": "^1.0.1"
+        "@simonbackx/simple-logging": "1.0.1"
     },
     "peerDependencies": {
         "@stamhoofd/utility": "*"
