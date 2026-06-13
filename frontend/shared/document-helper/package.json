@@ -3,13 +3,13 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-        "@simonbackx/simple-errors": "^1.5",
+        "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/utility": "*",
-        "jszip": "^3.7.1"
+        "jszip": "3.10.1"
     },
     "type": "module",
     "scripts": {

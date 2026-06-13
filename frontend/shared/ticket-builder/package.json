@@ -17,7 +17,7 @@
     },
     "type": "module",
     "devDependencies": {
-        "@types/qrcode": "^1.5.3",
+        "@types/qrcode": "1.5.6",
         "eslint-plugin-stamhoofd": "*"
     }
 }

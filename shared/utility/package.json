@@ -29,10 +29,10 @@
     },
     "dependencies": {
         "@stamhoofd/types": "*",
-        "ibantools": "^4.5.4"
+        "ibantools": "4.5.4"
     },
     "devDependencies": {
         "@types/luxon": "3.7.1",
-        "vitest": "^4.1.8"
+        "vitest": "4.1.8"
     }
 }

@@ -24,15 +24,15 @@
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
         "@stamhoofd/test-utils": "*",
-        "vitest": "^4.1.8"
+        "vitest": "4.1.8"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.8",
-        "@simonbackx/simple-errors": "^1.5",
-        "@simonbackx/simple-logging": "^1.0.1",
-        "lru-cache": "^11.2.6"
+        "@simonbackx/simple-errors": "1.5.0",
+        "@simonbackx/simple-logging": "1.0.1",
+        "lru-cache": "11.5.1"
     }
 }
