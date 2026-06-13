@@ -1,6 +1,20 @@
 <template>
     <LoadingViewTransition>
-        <ModernTableView v-if="!isLoading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
+        <ModernTableView
+            v-if="!isLoading"
+            ref="modernTableView"
+            :table-object-fetcher="tableObjectFetcher"
+            :filter-builders="filterBuilders"
+            :title="title"
+            :column-configuration-id="configurationId"
+            :default-filter="defaultFilter"
+            :actions="actions"
+            :all-columns="allColumns"
+            :estimated-rows="estimatedRows"
+            :route
+            :default-sort-column="defaultSortColumn"
+            :default-sort-direction="defaultSortDirection"
+        >
             <p v-if="isLimitedGroup" class="style-description-block">
                 {{ $t('%1HO') }}
             </p>
@@ -24,6 +38,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { Column } from '#tables/classes/Column.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
@@ -35,9 +50,7 @@ import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
-import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
-import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;
@@ -297,8 +310,8 @@ const allColumns: Column<ObjectType, any>[] = getRegistrationColumns({
 const defaultSortColumn = allColumns.find(c => c.id === 'registeredAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
 
-const Route = {
-    Component: MemberSegmentedView,
+const route = {
+    component: async () => (await import('../members/MemberSegmentedView.vue')).default,
     objectKey: 'registration',
     getProperties: () => ({
         group: props.group,

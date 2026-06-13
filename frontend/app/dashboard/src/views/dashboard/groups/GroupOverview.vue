@@ -267,11 +267,11 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+
 import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
 import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
@@ -280,7 +280,7 @@ import type { Group, MemberResponsibility, Organization, OrganizationRegistratio
 import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import RegistrationInvitationsTableView from '@stamhoofd/components/registrations/RegistrationInvitationsTableView.vue';
+
 import { countAll } from '@stamhoofd/components/tables/classes/ObjectFetcher';
 import { useRegistrationInvitationEventListener } from '@stamhoofd/components/registrations/classes/useRegistrationInvitationEventListener';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
@@ -334,7 +334,7 @@ enum Routes {
 defineRoutes([{
     url: 'inschrijvingen',
     name: Routes.Members,
-    component: RegistrationsTableView,
+    component: async () => (await import('@stamhoofd/components/registrations/RegistrationsTableView.vue')).default,
     defaultProperties: () => {
         return {
             group: props.group,
@@ -345,7 +345,7 @@ defineRoutes([{
 {
     url: 'uitnodigingen',
     name: Routes.Invitations,
-    component: RegistrationInvitationsTableView,
+    component: async () => (await import('@stamhoofd/components/registrations/RegistrationInvitationsTableView.vue')).default,
     defaultProperties: () => {
         return {
             group: props.group,
@@ -380,7 +380,7 @@ defineRoute({
     params: {
         slug: String,
     },
-    component: MembersTableView,
+    component: async () => (await import('@stamhoofd/components/members/MembersTableView.vue')).default,
     paramsToProps(params) {
         const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug);
 

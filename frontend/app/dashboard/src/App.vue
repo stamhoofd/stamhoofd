@@ -4,15 +4,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
-import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
-import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
-import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
-import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
@@ -46,7 +42,7 @@ function getNoPermissionsView() {
                 icon: 'key',
                 name: $t(`%GV`),
                 component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(NoPermissionsView, {}),
+                    root: AsyncComponent(() => import('@stamhoofd/components/auth/NoPermissionsView.vue'), {}),
                 }),
             }),
         ],
@@ -60,7 +56,7 @@ function getRoot() {
     }
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     const startView = new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {}),
+        root: AsyncComponent(() => import('./views/start/StartView.vue'), {}),
     });
 
     setTitleSuffix(context.value.organization?.name ?? '');
@@ -97,7 +93,7 @@ function getRoot() {
         icon: 'calendar',
         name: $t(`%uB`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ManageEventsView, {}),
+            root: AsyncComponent(() => import('@stamhoofd/components/events/ManageEventsView.vue'), {}),
         }),
     });
 
@@ -157,7 +153,7 @@ function getRoot() {
         icon: 'history',
         name: $t(`%GY`),
         component: new ComponentWithProperties(SplitViewController, {
-            root: new ComponentWithProperties(AuditLogsView, {}),
+            root: AsyncComponent(() => import('@stamhoofd/components/audit-logs/AuditLogsView.vue'), {}),
         }),
     });
 
@@ -166,7 +162,7 @@ function getRoot() {
         icon: 'email-filled',
         name: $t(`%1DK`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(CommunicationView, {}),
+            root: AsyncComponent(() => import('@stamhoofd/components/communication/CommunicationView.vue'), {}),
         }),
     });
 

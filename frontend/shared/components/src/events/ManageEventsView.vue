@@ -78,7 +78,7 @@ import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import EventRow from './components/EventRow.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
 import EditEventView from './EditEventView.vue';
-import EventOverview from './EventOverview.vue';
+
 
 type ObjectType = Event;
 
@@ -120,7 +120,7 @@ enum Routes {
 defineRoute({
     name: Routes.Event,
     url: '@id',
-    component: EventOverview,
+    component: async () => (await import('./EventOverview.vue')).default,
     params: {
         id: String,
     },

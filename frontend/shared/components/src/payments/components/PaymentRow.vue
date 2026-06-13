@@ -41,7 +41,7 @@
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { Payment } from '@stamhoofd/structures';
 import { PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
-import AsyncPaymentView from '../AsyncPaymentView.vue';
+
 import PaymentMethodIcon from './PaymentMethodIcon.vue';
 
 const props = withDefaults(
@@ -66,7 +66,7 @@ defineRoutes([
         url: props.payment.id,
         name: Route.Detail,
         show: true,
-        component: AsyncPaymentView,
+        component: async () => (await import('../AsyncPaymentView.vue')).default,
         defaultProperties() {
             return {
                 payment: props.payment,

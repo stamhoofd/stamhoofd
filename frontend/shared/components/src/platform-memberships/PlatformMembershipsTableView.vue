@@ -1,6 +1,19 @@
 <template>
     <LoadingViewTransition>
-        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :Route="Route">
+        <ModernTableView
+            v-if="!loading"
+            ref="modernTableView"
+            :table-object-fetcher="tableObjectFetcher"
+            :filter-builders="filterBuilders"
+            :title="title"
+            :column-configuration-id="configurationId"
+            :default-filter="defaultFilter"
+            :actions="actions"
+            :all-columns="allColumns"
+            :default-sort-column="defaultSortColumn"
+            :default-sort-direction="defaultSortDirection"
+            :route
+        >
             <template #empty>
                 {{ $t('%1OS') }}
             </template>
@@ -11,6 +24,7 @@
 <script lang="ts" setup>
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
@@ -19,10 +33,8 @@ import { SortItemDirection } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { usePlatformMemberhipsObjectFetcher } from '../fetchers/usePlatformMembershipsObjectFetcher';
 import { useGetPlatformMembershipsUIFilterBuilders } from '../filters/filter-builders/platform-memberships';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { usePlatformMembershipActions } from './classes/PlatformMembershipActionBuilder';
 import { useGetPlatformMembershipColumns } from './classes/PlatformMembershipColumns';
-import PlatformMembershipView from './PlatformMembershipView.vue';
 
 type ObjectType = PlatformMembership;
 
@@ -67,12 +79,12 @@ const allColumns = useGetPlatformMembershipColumns();
 const defaultSortColumn = allColumns.find(c => c.id === 'createdAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
 
-const  actionBuilder = usePlatformMembershipActions();
+const actionBuilder = usePlatformMembershipActions();
 
 const actions: TableAction<ObjectType>[] = actionBuilder.getActions();
 
-const Route = {
-    Component: PlatformMembershipView,
+const route = {
+    component: async () => (await import('./PlatformMembershipView.vue')).default,
     objectKey: 'platformMembership',
     getProperties: (object: ObjectType) => {
         return {

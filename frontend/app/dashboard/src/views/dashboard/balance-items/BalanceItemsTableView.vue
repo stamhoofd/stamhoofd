@@ -1,5 +1,17 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-sort-direction="SortItemDirection.DESC" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :filter-builders="filterBuilders"
+        :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
+        :default-sort-direction="SortItemDirection.DESC"
+        :default-filter="defaultFilter"
+        :title="title"
+        :column-configuration-id="configurationId"
+        :actions="actions"
+        :all-columns="allColumns"
+        :route
+    >
         <template #empty>
             {{ $t('%Lu') }}
         </template>
@@ -12,7 +24,6 @@ import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts'
 import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
 import { getBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import EditBalanceItemView from '@stamhoofd/components/payments/EditBalanceItemView.vue';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -183,19 +194,21 @@ const allColumns: Column<ObjectType, any>[] = [
         allowSorting: false,
     }),
 
-    ...(organization.value && organization.value.meta.invoicesEnabled ? [
-        new Column<ObjectType, number>({
-            id: 'priceInvoiced',
-            name: $t('%1US'),
-            getValue: object => object.priceInvoiced,
-            format: (val, width) => Formatter.price(val),
-            getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
-            minimumWidth: 50,
-            recommendedWidth: 150,
-            enabled: true,
-            allowSorting: false,
-        }),
-    ] : []),
+    ...(organization.value && organization.value.meta.invoicesEnabled
+        ? [
+                new Column<ObjectType, number>({
+                    id: 'priceInvoiced',
+                    name: $t('%1US'),
+                    getValue: object => object.priceInvoiced,
+                    format: (val, width) => Formatter.price(val),
+                    getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
+                    minimumWidth: 50,
+                    recommendedWidth: 150,
+                    enabled: true,
+                    allowSorting: false,
+                }),
+            ]
+        : []),
 
     ...[...Object.values(BalanceItemRelationType)].map((type) => {
         return new Column<ObjectType, string>({
@@ -250,13 +263,13 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const Route = {
-    Component: EditBalanceItemView,
+const route = {
+    component: async () => (await import('@stamhoofd/components/payments/EditBalanceItemView.vue')).default,
     objectKey: 'balanceItem',
     getProperties: (balanceItem: BalanceItem) => {
         return {
             isNew: false,
-            balanceItem
+            balanceItem,
         };
     },
 };

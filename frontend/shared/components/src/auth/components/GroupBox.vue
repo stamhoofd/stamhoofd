@@ -23,7 +23,7 @@ import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import GroupTag from './GroupTag.vue';
-import GroupView from './GroupView.vue';
+
 
 const props = defineProps<{
     group: Group;
@@ -33,7 +33,7 @@ const navigate = useNavigate();
 
 const ViewRoute = defineRoute({
     url: Formatter.slug(props.group.settings.name.toString()),
-    component: GroupView,
+    component: async () => (await import('./GroupView.vue')).default,
     present: 'popup',
     defaultProperties() {
         return {

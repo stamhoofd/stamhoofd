@@ -9,7 +9,7 @@
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
         :estimated-rows="estimatedRows"
-        :Route="Route"
+        :route
     >
         <template #empty>
             {{ $t('%39') }}
@@ -44,7 +44,6 @@ import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExport
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
-import OrganizationView from './OrganizationView.vue';
 import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
@@ -209,8 +208,8 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const Route = {
-    Component: OrganizationView,
+const route = {
+    component: async () => (await import('./OrganizationView.vue')).default,
     objectKey: 'organization',
 };
 

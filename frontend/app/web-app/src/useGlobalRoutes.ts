@@ -1,6 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
-import ForgotPasswordResetView from '@stamhoofd/components/auth/ForgotPasswordResetView.vue';
+
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -20,7 +20,7 @@ export function useGlobalRoutes() {
 
     defineRoute({
         url: 'reset-password',
-        component: () => ForgotPasswordResetView,
+        component: async () => (await import('@stamhoofd/components/auth/ForgotPasswordResetView.vue')).default,
         defaultProperties(query?: URLSearchParams | null) {
             return {
                 token: query?.get('token') || '',

@@ -51,7 +51,7 @@ import { OrganizationTagType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
-import OrganizationTagView from './OrganizationTagView.vue';
+
 
 const props = defineProps<{
     tag: OrganizationTag;
@@ -106,7 +106,7 @@ defineRoute({
 defineRoute({
     url: 'tag/@slug',
     name: Routes.Tag,
-    component: OrganizationTagView,
+    component: async () => (await import('./OrganizationTagView.vue')).default,
     params: {
         slug: String,
     },

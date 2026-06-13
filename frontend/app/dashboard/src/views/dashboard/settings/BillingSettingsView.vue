@@ -141,17 +141,14 @@
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
-import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
-import PayableBalancePaymentsView from '@stamhoofd/components/payments/PayableBalancePaymentsView.vue';
-import PayableInvoicesView from '@stamhoofd/components/payments/PayableInvoicesView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import PayableBalanceMandatesBox from '@stamhoofd/components/payments/components/PayableBalanceMandatesBox.vue';
 import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
@@ -161,9 +158,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useLoadPayableBalance } from './hooks/useLoadPayableBalance';
 import { PayBalanceMode } from './packages/OrganizationCheckoutViewModel';
-import PackageSettingsView from './packages/PackageSettingsView.vue';
 import { useStartOrganizationCheckout } from './packages/useStartOrganizationCheckout';
-import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance;
@@ -215,7 +210,7 @@ enum Routes {
 defineRoutes([
     {
         url: Routes.Payments,
-        component: PayableBalancePaymentsView,
+        component: async () => (await import('@stamhoofd/components/payments/PayableBalancePaymentsView.vue')).default,
         present: 'popup',
         defaultProperties() {
             return {
@@ -225,7 +220,7 @@ defineRoutes([
     },
     {
         url: Routes.Invoices,
-        component: PayableInvoicesView,
+        component: async () => (await import('@stamhoofd/components/payments/PayableInvoicesView.vue')).default,
         present: 'popup',
         defaultProperties() {
             return {
@@ -235,12 +230,12 @@ defineRoutes([
     },
     {
         url: Routes.Settings,
-        component: GeneralSettingsView,
+        component: async () => (await import('@stamhoofd/components/organizations/GeneralSettingsView.vue')).default,
         present: 'popup',
     },
     {
         url: Routes.Items,
-        component: PayableBalanceItemsView,
+        component: async () => (await import('./PayableBalanceItemsView.vue')).default,
         present: 'popup',
         defaultProperties() {
             return {
@@ -250,7 +245,7 @@ defineRoutes([
     },
     {
         url: Routes.Packages,
-        component: PackageSettingsView,
+        component: async () => (await import('./packages/PackageSettingsView.vue')).default,
         present: 'popup',
     },
 ]);

@@ -59,20 +59,20 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+
 import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
+
 import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
 import { Organization } from '@stamhoofd/structures/Organization.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import GroupTrashView from '../dashboard/groups/GroupTrashView.vue';
-import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
+
+
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
 import GroupCategoryMenuBox from './GroupCategoryMenuBox.vue';
@@ -192,7 +192,7 @@ defineRoutes([
     {
         url: Routes.Settings,
         show: 'detail',
-        component: MembersSettingsView,
+        component: async () => (await import('../dashboard/settings/MembersSettingsView.vue')).default,
         defaultProperties: () => {
             return {
                 period: props.period, // don't pass period.value here
@@ -207,7 +207,7 @@ defineRoutes([
         // should match after settings
         url: Routes.OrganizationRegistrationPeriods,
         present: 'popup',
-        component: EditRegistrationPeriodsView,
+        component: async () => (await import('@stamhoofd/components/periods/EditRegistrationPeriodsView.vue')).default,
         defaultProperties: () => {
             return {
                 period: props.period, // don't pass period.value here
@@ -218,7 +218,7 @@ defineRoutes([
     {
         url: Routes.Trash,
         show: 'detail',
-        component: GroupTrashView,
+        component: async () => (await import('../dashboard/groups/GroupTrashView.vue')).default,
         defaultProperties: () => {
             return {
                 period: period.value,
@@ -231,7 +231,7 @@ defineRoute({
     url: 'allemaal',
     name: Routes.All,
     show: 'detail',
-    component: MembersTableView,
+    component: async () => (await import('@stamhoofd/components/members/MembersTableView.vue')).default,
     defaultProperties: () => {
         return {
             periodId: period.value.period.id,

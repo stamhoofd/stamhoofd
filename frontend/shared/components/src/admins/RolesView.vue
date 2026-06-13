@@ -77,7 +77,7 @@ import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation
 import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import STList from '../layout/STList.vue';
-import EditRoleView from './EditRoleView.vue';
+
 import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
@@ -85,7 +85,7 @@ import { usePatchRoles } from './hooks/useRoles';
 defineRoute({
     url: 'nieuw',
     name: 'createRole',
-    component: EditRoleView,
+    component: async () => (await import('./EditRoleView.vue')).default,
     present: 'popup',
     defaultProperties: () => {
         const role = PermissionRoleDetailed.create({});
@@ -107,7 +107,7 @@ defineRoute({
 defineRoute({
     url: '@roleId',
     name: 'editRole',
-    component: EditRoleView,
+    component: async () => (await import('./EditRoleView.vue')).default,
     present: 'popup',
     params: {
         roleId: String,

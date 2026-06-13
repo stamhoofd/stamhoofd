@@ -68,7 +68,7 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
-import EmailOverview from './EmailOverview.vue';
+
 
 type ObjectType = EmailPreview;
 
@@ -94,7 +94,7 @@ enum Routes {
 defineRoute({
     name: Routes.Email,
     url: '@id',
-    component: EmailOverview,
+    component: async () => (await import('./EmailOverview.vue')).default,
     params: {
         id: String,
     },

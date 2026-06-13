@@ -63,10 +63,11 @@
 </template>
 
 <script lang="ts" setup>
+import { useKeyDown } from '#hooks/useKeyDown.ts';
 import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { TranslatedString } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
-import { useKeyDown } from '#hooks/useKeyDown.ts';
 import { defineEditorContext } from '../inputs/hooks/useEditorContext';
 import BackButton from './BackButton.vue';
 import LoadingButton from './LoadingButton.vue';
@@ -75,8 +76,6 @@ import STNavigationBar from './STNavigationBar.vue';
 import STToolbar from './STToolbar.vue';
 import type { SaveViewProps } from './SaveViewProps';
 import { SaveViewDefaults } from './SaveViewProps';
-import { TranslatedString } from '@stamhoofd/structures';
-import { Comment, Fragment, isVNode } from 'vue';
 
 defineOptions({
     inheritAttrs: false,

@@ -249,31 +249,16 @@ import houseIllustration from '@stamhoofd/assets/images/illustrations/house.svg'
 import listIllustration from '@stamhoofd/assets/images/illustrations/list.svg';
 import membershipIllustration from '@stamhoofd/assets/images/illustrations/membership.svg';
 import tentIllustration from '@stamhoofd/assets/images/illustrations/tent.svg';
-import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
-import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
-import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
-import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
+
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
-import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
-import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
+
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
-import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
-import EditResponsibilitiesView from '@stamhoofd/components/responsibilities/EditResponsibilitiesView.vue';
+
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
-import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
-import EditEventNotificationTypesView from './event-notification-types/EditEventNotificationTypesView.vue';
-import EditEventTypesView from './event-types/EditEventTypesView.vue';
-import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
-import LabsView from './LabsView.vue';
-import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
-import OrganizationRecordConfigurationView from './organization-records/OrganizationRecordConfigurationView.vue';
-import EditPrivacyView from './privacy/EditPrivacyView.vue';
 
 // todo translations
 enum Routes {
@@ -357,12 +342,12 @@ const unusedSettingItems = computed(() => settingItems.value.filter(item => item
 defineRoutes([
     {
         url: Routes.Admins,
-        component: AdminsView,
+        component: async () => (await import('@stamhoofd/components/admins/AdminsView.vue')).default,
     },
     {
         url: Routes.Records,
         present: 'popup',
-        component: RecordsConfigurationView,
+        component: async () => (await import('@stamhoofd/components/records/RecordsConfigurationView.vue')).default,
         defaultProperties() {
             return {
                 recordsConfiguration: platform.value.config.recordsConfiguration,
@@ -380,7 +365,7 @@ defineRoutes([
     {
         name: Routes.FinancialSupport,
         url: 'financiele-ondersteuning',
-        component: FinancialSupportSettingsView,
+        component: async () => (await import('@stamhoofd/components/records/FinancialSupportSettingsView.vue')).default,
         defaultProperties() {
             return {
                 financialSupport: platform.value.config.financialSupport ?? FinancialSupportSettings.create({}),
@@ -400,7 +385,7 @@ defineRoutes([
     {
         name: Routes.DataPermissions,
         url: 'toestemming-gegevensverzameling',
-        component: DataPermissionSettingsView,
+        component: async () => (await import('@stamhoofd/components/records/DataPermissionSettingsView.vue')).default,
         defaultProperties() {
             return {
                 dataPermission: platform.value.config.dataPermission ?? DataPermissionsSettings.create({}),
@@ -420,67 +405,67 @@ defineRoutes([
     {
         url: Routes.CorporateIdentity,
         present: 'popup',
-        component: EditCorporateIdView,
+        component: async () => (await import('./corporate-identity/EditCorporateIdView.vue')).default,
     },
     {
         url: Routes.Labs,
         present: 'popup',
-        component: LabsView,
+        component: async () => (await import('./LabsView.vue')).default,
     },
     {
         url: Routes.DefaultAgeGroups,
         present: 'popup',
-        component: EditDefaultAgeGroupsView,
+        component: async () => (await import('./default-age-groups/EditDefaultAgeGroupsView.vue')).default,
     },
     {
         url: Routes.Terms,
         present: 'popup',
-        component: EditPrivacyView,
+        component: async () => (await import('./privacy/EditPrivacyView.vue')).default,
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditResponsibilitiesView,
+        component: async () => (await import('@stamhoofd/components/responsibilities/EditResponsibilitiesView.vue')).default,
     },
     {
         url: Routes.RegistrationPeriods,
         present: 'popup',
-        component: EditRegistrationPeriodsView,
+        component: async () => (await import('@stamhoofd/components/periods/EditRegistrationPeriodsView.vue')).default,
     },
     {
         url: Routes.PlatformMembershipTypes,
         present: 'popup',
-        component: EditPlatformMembershipTypesView,
+        component: async () => (await import('./membership-types/EditPlatformMembershipTypesView.vue')).default,
     },
     {
         url: Routes.EmailTemplates,
         present: 'popup',
-        component: EditEmailTemplatesView,
+        component: async () => (await import('@stamhoofd/components/email/EditEmailTemplatesView.vue')).default,
     },
     {
         url: Routes.EmailSettings,
         present: 'popup',
-        component: EmailSettingsView,
+        component: async () => (await import('@stamhoofd/components/email/EmailSettingsView.vue')).default,
     },
     {
         url: Routes.EventTypes,
         present: 'popup',
-        component: EditEventTypesView,
+        component: async () => (await import('./event-types/EditEventTypesView.vue')).default,
     },
     {
         url: Routes.EventNotificationTypes,
         present: 'popup',
-        component: EditEventNotificationTypesView,
+        component: async () => (await import('./event-notification-types/EditEventNotificationTypesView.vue')).default,
     },
     {
         url: Routes.Premises,
         present: 'popup',
-        component: EditPremiseTypesView,
+        component: async () => (await import('./event-types/EditPremiseTypesView.vue')).default,
     },
     {
         url: Routes.OrganizationRecordConfiguration,
         present: 'popup',
-        component: OrganizationRecordConfigurationView,
+        component: async () => (await import('./organization-records/OrganizationRecordConfigurationView.vue')).default,
         defaultProperties() {
             return {
                 recordsConfiguration: platform.value.config.organizationLevelRecordsConfiguration,
@@ -505,7 +490,7 @@ defineRoute({
     params: {
         provider: String,
     },
-    component: SSOSettingsView,
+    component: async () => (await import('@stamhoofd/components/auth/SSOSettingsView.vue')).default,
 
     async paramsToProps(params) {
         const provider = Object.values(LoginProviderType).includes(params.provider as LoginProviderType) ? params.provider as LoginProviderType : null;

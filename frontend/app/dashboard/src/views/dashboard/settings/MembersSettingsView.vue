@@ -193,31 +193,26 @@
 </template>
 
 <script lang="ts" setup>
-import BundleDiscountSettingsView from '@stamhoofd/components/bundle-discounts/BundleDiscountSettingsView.vue';
+
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
-import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
-import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
+
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
-import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
+
 import { useEditGroupsView } from './hooks/useEditGroupsView';
-import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
-import ImportMembersView from './modules/members/ImportMembersView.vue';
+
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
@@ -253,12 +248,12 @@ defineRoutes([
     {
         url: Routes.RegistrationPaymentMethods,
         present: 'popup',
-        component: RegistrationPaymentSettingsView,
+        component: async () => (await import('./RegistrationPaymentSettingsView.vue')).default,
     },
     {
         url: Routes.RegistrationPage,
         present: 'popup',
-        component: () => RegistrationPageSettingsView,
+        component: async () => (await import('./RegistrationPageSettingsView.vue')).default,
     },
     {
         url: Routes.RegistrationGroups,
@@ -270,7 +265,7 @@ defineRoutes([
     {
         url: Routes.BundleDiscounts,
         present: 'popup',
-        component: BundleDiscountSettingsView,
+        component: async () => (await import('@stamhoofd/components/bundle-discounts/BundleDiscountSettingsView.vue')).default,
         defaultProperties() {
             return {
                 period: period.value,
@@ -284,7 +279,7 @@ defineRoutes([
     {
         url: Routes.RegistrationRecords,
         present: 'popup',
-        component: RecordsConfigurationView,
+        component: async () => (await import('@stamhoofd/components/records/RecordsConfigurationView.vue')).default,
         defaultProperties() {
             return {
                 inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({ platform: platform.value }),
@@ -304,24 +299,24 @@ defineRoutes([
     {
         url: Routes.RegistrationFreeContributions,
         present: 'popup',
-        component: () => FreeContributionSettingsView,
+        component: async () => (await import('./modules/members/FreeContributionSettingsView.vue')).default,
     },
     {
         url: Routes.MembersImport,
         present: 'popup',
-        component: ImportMembersView,
+        component: async () => (await import('./modules/members/ImportMembersView.vue')).default,
     },
     {
         url: Routes.OrganizationRegistrationPeriods,
         present: 'popup',
-        component: EditRegistrationPeriodsView,
+        component: async () => (await import('@stamhoofd/components/periods/EditRegistrationPeriodsView.vue')).default,
     },
     ...(!isPlatform
         ? [
                 {
                     name: Routes.FinancialSupport,
                     url: 'financiele-ondersteuning',
-                    component: FinancialSupportSettingsView,
+                    component: async () => (await import('@stamhoofd/components/records/FinancialSupportSettingsView.vue')).default,
                     defaultProperties() {
                         return {
                             financialSupport: getFinancialSupportSettingsOrDefault(platform.value, organization.value),
@@ -341,7 +336,7 @@ defineRoutes([
                 {
                     name: Routes.DataPermissions,
                     url: 'toestemming-gegevensverzameling',
-                    component: DataPermissionSettingsView,
+                    component: async () => (await import('@stamhoofd/components/records/DataPermissionSettingsView.vue')).default,
                     defaultProperties() {
                         return {
                             dataPermission: getDataPermissionSettingsOrDefault(platform.value, organization.value),

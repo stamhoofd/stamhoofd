@@ -8,7 +8,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :estimated-rows="estimatedRows"
-        :Route="Route"
+        :route
         :default-filter="defaultFilter"
     >
         <p v-if="props.filterType === 'complaints'" class="style-description-block">
@@ -48,20 +48,19 @@
 </template>
 
 <script lang="ts" setup>
-import { Column } from '#tables/classes/Column.ts';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import ModernTableView from '#tables/ModernTableView.vue';
-import type { TableAction } from '#tables/classes/TableAction.ts';
 import { useEmailRecipientsFilterBuilders } from '#filters/filterBuilders.ts';
+import ModernTableView from '#tables/ModernTableView.vue';
+import { Column } from '#tables/classes/Column.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { EmailPreview, EmailRecipient, StamhoofdFilter } from '@stamhoofd/structures';
+import { isSoftEmailRecipientError } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useEmailRecipientsObjectFetcher } from '../fetchers/useEmailRecipientsObjectFetcher';
-import EmailRecipientView from './EmailRecipientView.vue';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
-import { isSoftEmailRecipientError } from '@stamhoofd/structures';
 
 type ObjectType = EmailRecipient;
 
@@ -240,8 +239,8 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const Route = {
-    Component: EmailRecipientView,
+const route = {
+    component: async () => (await import('./EmailRecipientView.vue')).default,
     objectKey: 'recipient',
     getProperties: (object: ObjectType) => {
         return {

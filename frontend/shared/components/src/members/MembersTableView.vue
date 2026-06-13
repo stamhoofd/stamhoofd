@@ -1,6 +1,18 @@
 <template>
     <LoadingViewTransition :loading="isLoading">
-        <ModernTableView v-if="!isLoading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
+        <ModernTableView
+            v-if="!isLoading"
+            ref="modernTableView"
+            :table-object-fetcher="tableObjectFetcher"
+            :filter-builders="filterBuilders"
+            :title="title"
+            :column-configuration-id="configurationId"
+            :default-filter="defaultFilter"
+            :actions="actions"
+            :all-columns="allColumns"
+            :estimated-rows="estimatedRows"
+            :route
+        >
             <p v-if="isLimitedGroup" class="style-description-block">
                 {{ $t('%1HO') }}
             </p>
@@ -239,8 +251,8 @@ const allColumns = getMemberColumns({
     financialRead: financialRead.value,
 });
 
-const Route = {
-    Component: MemberSegmentedView,
+const route = {
+    component: async () => (await import('./MemberSegmentedView.vue')).default,
     objectKey: 'member',
     getProperties: () => ({
         group: props.group,

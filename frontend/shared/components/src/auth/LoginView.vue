@@ -108,7 +108,7 @@ import { useContext } from '../hooks/useContext.ts';
 import { useLoginMethod } from '../hooks/useLoginMethods.ts';
 
 import EmailInput from '../inputs/EmailInput.vue';
-import ForgotPasswordView from './ForgotPasswordView.vue';
+
 import PlatformFooter from './PlatformFooter.vue';
 
 const props = withDefaults(
@@ -130,7 +130,7 @@ defineRoutes([
     {
         name: Routes.ForgotPassword,
         url: 'wachtwoord-vergeten',
-        component: ForgotPasswordView as any,
+        component: async () => (await import('./ForgotPasswordView.vue')).default,
         defaultProperties() {
             return {
                 initialEmail: email.value,

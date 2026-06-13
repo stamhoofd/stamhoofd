@@ -78,7 +78,7 @@ import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { User } from '@stamhoofd/structures';
 import { PermissionLevel, Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import EditAdminView from './EditAdminView.vue';
+
 import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins } from './hooks/useAdmins';
 import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
@@ -134,7 +134,7 @@ enum Routes {
 defineRoute({
     url: 'nieuw',
     name: Routes.CreateAdmin,
-    component: EditAdminView,
+    component: async () => (await import('./EditAdminView.vue')).default,
     present: 'popup',
     defaultProperties: () => {
         const p = UserPermissions.create({});
@@ -160,7 +160,7 @@ defineRoute({
 defineRoute({
     url: '@userId',
     name: Routes.EditAdmin,
-    component: EditAdminView,
+    component: async () => (await import('./EditAdminView.vue')).default,
     present: 'popup',
     params: {
         userId: String,

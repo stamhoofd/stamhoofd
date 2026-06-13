@@ -24,8 +24,8 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
-import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+
+
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
 import TransitionFade from '@stamhoofd/components/transitions/TransitionFade.vue';
@@ -35,10 +35,10 @@ import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityCh
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed, onActivated, ref } from 'vue';
-import PremisesView from '../../views/dashboard/settings/PremisesView.vue';
-import RegistrationPaymentSettingsView from '../dashboard/settings/RegistrationPaymentSettingsView.vue';
-import GroupsReview from './GroupsReview.vue';
-import FunctionsReview from './ResponsibilitiesReview.vue';
+
+
+
+
 
 const organization$ = useOrganization();
 const platform = usePlatform();
@@ -87,37 +87,37 @@ defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
-        component: PremisesView,
+        component: async () => (await import('../../views/dashboard/settings/PremisesView.vue')).default,
         defaultProperties: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Companies,
         present: 'popup',
-        component: GeneralSettingsView,
+        component: async () => (await import('@stamhoofd/components/organizations/GeneralSettingsView.vue')).default,
         defaultProperties: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Payment,
         present: 'popup',
-        component: RegistrationPaymentSettingsView,
+        component: async () => (await import('../dashboard/settings/RegistrationPaymentSettingsView.vue')).default,
         defaultProperties: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Groups,
         present: 'popup',
-        component: GroupsReview,
+        component: async () => (await import('./GroupsReview.vue')).default,
         defaultProperties: paramToPropsFactory(),
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: FunctionsReview,
+        component: async () => (await import('./ResponsibilitiesReview.vue')).default,
         defaultProperties: paramToPropsFactory(),
     },
     {
         url: Routes.Emails,
         present: 'popup',
-        component: EmailSettingsView,
+        component: async () => (await import('@stamhoofd/components/email/EmailSettingsView.vue')).default,
         defaultProperties: paramToPropsFactory(),
     },
 ]);

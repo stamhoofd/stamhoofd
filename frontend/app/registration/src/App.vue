@@ -5,6 +5,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
@@ -13,15 +14,9 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useEventTypes } from '@stamhoofd/components/hooks/useEventTypes.ts';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { computed } from 'vue';
-import CartView from './views/cart/CartView.vue';
-import MemberCommunicationView from './views/communication/MemberCommunicationView.vue';
-import EventsOverview from './views/events/EventsOverview.vue';
-import StartView from './views/start/StartView.vue';
 
 const context = useContext();
-const platformManager = usePlatformManager();
 const memberManager = useMemberManager();
 const getLoginRoot = useLoginRoot();
 const eventTypes = useEventTypes();
@@ -45,11 +40,11 @@ function areEventsEnabled(): boolean {
 
 function getRoot() {
     const startView = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(StartView, {}),
+        root: AsyncComponent(() => import('./views/start/StartView.vue'), {}),
     });
 
     const cartRoot = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(CartView, {}),
+        root: AsyncComponent(() => import('./views/cart/CartView.vue'), {}),
     });
 
     const calendarTab = new TabBarItem({
@@ -57,7 +52,7 @@ function getRoot() {
         icon: 'calendar',
         name: $t(`%uB`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EventsOverview, {}),
+            root: AsyncComponent(() => import('./views/events/EventsOverview.vue'), {}),
         }),
     });
 
@@ -66,7 +61,7 @@ function getRoot() {
         icon: 'email-filled',
         name: $t(`%1DK`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberCommunicationView, {}),
+            root: AsyncComponent(() => import('./views/communication/MemberCommunicationView.vue'), {}),
         }),
     });
 

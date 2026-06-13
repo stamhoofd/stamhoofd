@@ -39,7 +39,7 @@
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
-import EventView from '@stamhoofd/components/events/EventView.vue';
+
 import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
@@ -100,7 +100,7 @@ enum Routes {
 defineRoute({
     name: Routes.Event,
     url: '@year/@slug/@id',
-    component: EventView,
+    component: async () => (await import('@stamhoofd/components/events/EventView.vue')).default,
     params: {
         year: Number,
         slug: String,
