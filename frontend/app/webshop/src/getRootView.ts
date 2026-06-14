@@ -1,4 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -9,8 +10,8 @@ import { WebshopAuthType } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
 import { CheckoutManager } from './classes/CheckoutManager';
 import { WebshopManager } from './classes/WebshopManager';
-import RequiredLoginView from './views/RequiredLoginView.vue';
-import WebshopView from './views/WebshopView.vue';
+
+
 
 export async function wrapContext(
     context: SessionContext,
@@ -44,7 +45,7 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 export async function getWebshopRootView(session: SessionContext, webshop: Webshop) {
     // Do we need to require login?
     let root = wrapWithModalStack(new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(WebshopView, {}),
+        root: AsyncComponent(() => import('./views/WebshopView.vue'), {}),
     }));
 
     if (webshop.meta.authType === WebshopAuthType.Required) {
@@ -52,7 +53,7 @@ export async function getWebshopRootView(session: SessionContext, webshop: Websh
             new ComponentWithProperties(AuthenticatedView, {
                 root,
                 loginRoot: wrapWithModalStack(new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(RequiredLoginView, {}),
+                    root: AsyncComponent(() => import('./views/RequiredLoginView.vue'), {}),
                 })),
             }),
         );

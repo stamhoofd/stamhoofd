@@ -32,12 +32,13 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Sponsor, SponsorConfig } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditSponsorView from './EditSponsorView.vue';
+
 
 const props = defineProps<{
     config: SponsorConfig | null;
@@ -66,7 +67,7 @@ function addSponsor() {
 
     present({
         components: [
-            new ComponentWithProperties(EditSponsorView, {
+            AsyncComponent(() => import('./EditSponsorView.vue'), {
                 sponsor,
                 isNew: true,
                 saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
@@ -83,7 +84,7 @@ function addSponsor() {
 function editSponsor(sponsor: Sponsor) {
     present({
         components: [
-            new ComponentWithProperties(EditSponsorView, {
+            AsyncComponent(() => import('./EditSponsorView.vue'), {
                 sponsor,
                 isNew: false,
                 saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {

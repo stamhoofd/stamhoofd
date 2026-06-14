@@ -116,6 +116,7 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, PatchAnswers } from '@stamhoofd/structures';
 import { PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
@@ -134,8 +135,8 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import type { NavigationActions } from '../types/NavigationActions';
-import EditRecordView from './EditRecordView.vue';
-import FillRecordCategoryView from './FillRecordCategoryView.vue';
+
+
 import type { RecordEditorSettings } from './RecordEditorSettings';
 import { RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
@@ -387,7 +388,7 @@ async function addRecord(parent: RecordCategory = patchedCategory.value) {
 
     await present({
         components: [
-            new ComponentWithProperties(EditRecordView, {
+            AsyncComponent(() => import('./EditRecordView.vue'), {
                 record,
                 isNew: true,
                 parentCategory: parent,
@@ -410,7 +411,7 @@ async function addRecord(parent: RecordCategory = patchedCategory.value) {
 async function editRecord(record: RecordSettings, parent: RecordCategory = patchedCategory.value) {
     await present({
         components: [
-            new ComponentWithProperties(EditRecordView, {
+            AsyncComponent(() => import('./EditRecordView.vue'), {
                 record,
                 isNew: false,
                 savedRecordIds: props.savedRecordIds,
@@ -610,7 +611,7 @@ async function showExample() {
     const reactiveValue = reactive(props.settings.exampleValue);
     await present({
         components: [
-            new ComponentWithProperties(FillRecordCategoryView, {
+            AsyncComponent(() => import('./FillRecordCategoryView.vue'), {
                 category: patchedCategory.value.patch({
                     // Disable filter on category level for the preview, since these cannot work
                     filter: null,

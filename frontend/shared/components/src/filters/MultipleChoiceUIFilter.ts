@@ -1,8 +1,9 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdCompareValue, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import MultipleChoiceUIFilterView from './MultipleChoiceUIFilterView.vue';
+
 import type { StyledDescription, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
@@ -44,7 +45,7 @@ export class MultipleChoiceUIFilter extends UIFilter<MultipleChoiceFilterBuilder
     }
 
     getComponent(): ComponentWithProperties {
-        return new ComponentWithProperties(MultipleChoiceUIFilterView, {
+        return AsyncComponent(() => import('./MultipleChoiceUIFilterView.vue'), {
             filter: this,
         });
     }

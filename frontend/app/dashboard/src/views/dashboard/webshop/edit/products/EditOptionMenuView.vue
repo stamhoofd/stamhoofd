@@ -66,6 +66,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -76,7 +77,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { Option, OptionMenu, Product } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditOptionView from './EditOptionView.vue';
+
 import OptionMenuOptions from './OptionMenuOptions.vue';
 
 const props = defineProps<{
@@ -133,7 +134,7 @@ function addOption() {
     const p = OptionMenu.patch({ id: props.optionMenu.id });
     p.options.addPut(option);
 
-    present(new ComponentWithProperties(EditOptionView, { optionMenu: patchedOptionMenu.value.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+    present(AsyncComponent(() => import('./EditOptionView.vue'), { optionMenu: patchedOptionMenu.value.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
         // Merge both patches
         addOptionMenuPatch(p.patch(patch));
 

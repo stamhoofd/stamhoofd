@@ -1,9 +1,10 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import PromiseView from '#containers/PromiseView.vue';
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { Toast } from '../../overlays/Toast';
-import EventOverview from '../EventOverview.vue';
+
 
 export function useShowEvent() {
     const present = usePresent();
@@ -23,7 +24,7 @@ export function useShowEvent() {
                         Toast.error($t(`%yY`)).show();
                         throw new Error('Event not found');
                     }
-                    return new ComponentWithProperties(EventOverview, {
+                    return AsyncComponent(() => import('../EventOverview.vue'), {
                         event: events.results[0],
                     });
                 },

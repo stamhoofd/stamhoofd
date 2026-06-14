@@ -134,7 +134,7 @@ import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useValidation } from '#errors/useValidation.ts';
-import EditGroupView from '#groups/EditGroupView.vue';
+
 import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
 import { useContext } from '#hooks/useContext.ts';
 import { usePatch } from '#hooks/usePatch.ts';
@@ -143,6 +143,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
@@ -288,7 +289,7 @@ async function editGroup(group: Group) {
 
     await present({
         components: [
-            new ComponentWithProperties(EditGroupView, {
+            AsyncComponent(() => import('#groups/EditGroupView.vue'), {
                 period: patchedPeriod.value,
                 groupId: group.id,
                 isNew: false,

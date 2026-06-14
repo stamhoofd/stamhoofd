@@ -124,9 +124,10 @@
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import Checkbox from '#inputs/Checkbox.vue';
-import EditResourceRolesView from '#admins/EditResourceRolesView.vue';
+
 import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import IconContainer from '#icons/IconContainer.vue';
@@ -175,7 +176,7 @@ async function editPermissions(animated = true) {
         adjustHistory: animated,
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResourceRolesView, {
+            AsyncComponent(() => import('#admins/EditResourceRolesView.vue'), {
                 description: $t('%1Dx'),
                 resource: {
                     id: props.email.id,

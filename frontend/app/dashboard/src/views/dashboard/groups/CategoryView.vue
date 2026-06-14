@@ -102,6 +102,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
@@ -109,10 +110,10 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
-import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+
 
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { GroupCategoryTree } from '@stamhoofd/structures';
@@ -120,8 +121,8 @@ import { computed } from 'vue';
 import { useGroupActions } from '../../members/useGroupActions';
 import { useGroupCategoryActions } from '../../members/useGroupCategoryActions';
 import { useCreateGroupView } from '../settings/hooks/useCreateGroupView';
-import CategoryView from './CategoryView.vue';
-import GroupOverview from './GroupOverview.vue';
+
+
 
 const props = defineProps<{
     category: GroupCategory;
@@ -182,7 +183,7 @@ function openCategorySelector(event: MouseEvent) {
 
 function swapCategory(category: GroupCategory) {
     show({
-        components: [new ComponentWithProperties(CategoryView, {
+        components: [AsyncComponent(() => import('./CategoryView.vue'), {
             category,
             period: props.period,
         })],
@@ -226,14 +227,14 @@ const groups = computed(() => tree.value.groups);
 const subCategories = computed(() => tree.value.categories);
 
 function openCategory(category: GroupCategory) {
-    show(new ComponentWithProperties(CategoryView, {
+    show(AsyncComponent(() => import('./CategoryView.vue'), {
         category,
         period: props.period,
     })).catch(console.error);
 }
 
 function openGroup(group: Group) {
-    show(new ComponentWithProperties(GroupOverview, {
+    show(AsyncComponent(() => import('./GroupOverview.vue'), {
         group,
         period: props.period,
     })).catch(console.error);
@@ -241,11 +242,11 @@ function openGroup(group: Group) {
 
 function openAll(animated = true) {
     const displayedComponent = shouldShowRegistrations.value
-        ? new ComponentWithProperties(RegistrationsTableView, {
+        ? AsyncComponent(() => import('@stamhoofd/components/registrations/RegistrationsTableView.vue'), {
             category: tree.value,
             periodId: props.period.period.id,
         })
-        : new ComponentWithProperties(MembersTableView, {
+        : AsyncComponent(() => import('@stamhoofd/components/members/MembersTableView.vue'), {
             category: tree.value,
             periodId: props.period.period.id,
         });

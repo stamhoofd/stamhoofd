@@ -24,6 +24,7 @@
 <script lang="ts" setup>
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
@@ -35,7 +36,7 @@ import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { OrganizationTag, Platform, PlatformConfig, TagHelper } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import TagRow from './components/TagRow.vue';
-import EditOrganizationTagView from './EditOrganizationTagView.vue';
+
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -58,7 +59,7 @@ async function addTag() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditOrganizationTagView, {
+            AsyncComponent(() => import('./EditOrganizationTagView.vue'), {
                 allTags: tags.value,
                 tag,
                 isNew: true,
@@ -74,7 +75,7 @@ async function editTag(tag: OrganizationTag) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditOrganizationTagView, {
+            AsyncComponent(() => import('./EditOrganizationTagView.vue'), {
                 allTags: tags.value,
                 tag,
                 isNew: false,

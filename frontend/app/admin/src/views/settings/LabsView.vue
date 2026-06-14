@@ -68,8 +68,8 @@
 
 <script lang="ts" setup>
 import type { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import LoginMethodSettingsView from '@stamhoofd/components/auth/LoginMethodSettingsView.vue';
+import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';
@@ -138,7 +138,7 @@ function setLoginMethod(method: LoginMethod, value: boolean) {
 async function editLoginMethodConfig(loginMethod: LoginMethod) {
     await present({
         components: [
-            new ComponentWithProperties(LoginMethodSettingsView, {
+            AsyncComponent(() => import('@stamhoofd/components/auth/LoginMethodSettingsView.vue'), {
                 loginMethod,
                 title: getLoginMethodTitle(loginMethod),
                 configs: patched.value.config.loginMethods,

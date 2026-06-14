@@ -56,6 +56,9 @@ function getCustomProvide(index: number, key: number) {
 }
 
 function showToast(toast: Toast) {
+    // DO NOT LOAD ASYNC! In case of network errors, we need to be able to show an error to the user
+    // and we don't want to load an extra chunk
+    // eslint-disable-next-line stamhoofd/async-component-with-properties
     show(new ComponentWithProperties(ToastView, { toast }));
 }
 

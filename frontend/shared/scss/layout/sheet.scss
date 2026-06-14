@@ -5,6 +5,11 @@
 .modal-dynamic-size {
     @extend .modal;
 
+    /**
+    By default force a minimum height of 50px for loading views that are also the first view to display
+    */
+    --frozen-height: 150px;
+
     .navigation-controller {
         transition: height 0.25s cubic-bezier(0.4, 0.0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
         will-change: height, width;

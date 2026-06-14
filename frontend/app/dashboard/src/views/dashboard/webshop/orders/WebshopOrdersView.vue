@@ -32,6 +32,7 @@ import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, Paym
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -39,7 +40,7 @@ import { computed, onBeforeUnmount } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
-import OrderView from './OrderView.vue';
+
 import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
@@ -536,7 +537,7 @@ function openOrder(order: PrivateOrder) {
     };
 
     const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(OrderView, {
+        root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
             getNextOrder: (order: PrivateOrder) => {

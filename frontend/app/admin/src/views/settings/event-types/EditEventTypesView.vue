@@ -25,6 +25,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
@@ -35,7 +36,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Platform, PlatformConfig, PlatformEventType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import EditEventTypeView from './EditEventTypeView.vue';
+
 import EventTypeRow from './components/EventTypeRow.vue';
 
 const errors = useErrors();
@@ -61,7 +62,7 @@ async function addType() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditEventTypeView, {
+            AsyncComponent(() => import('./EditEventTypeView.vue'), {
                 type,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformEventType>) => {
@@ -78,7 +79,7 @@ async function editType(type: PlatformEventType) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditEventTypeView, {
+            AsyncComponent(() => import('./EditEventTypeView.vue'), {
                 type,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformEventType>) => {

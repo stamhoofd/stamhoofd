@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { NumberFilterFormat } from './NumberFilterFormat.ts';
-import NumberUIFilterView from './NumberUIFilterView.vue';
+
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 import { UINumberFilterMode } from './UINumberFilterMode.ts';
@@ -48,7 +49,7 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
     }
 
     getComponent(): ComponentWithProperties {
-        return new ComponentWithProperties(NumberUIFilterView, {
+        return AsyncComponent(() => import('./NumberUIFilterView.vue'), {
             filter: this,
         });
     }

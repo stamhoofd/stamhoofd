@@ -8,8 +8,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
-import SearchOrganizationView from '#members/SearchOrganizationView.vue';
+
 import type { Organization } from '@stamhoofd/structures';
 
 const model = defineModel<Organization | null>({
@@ -20,7 +21,7 @@ const present = usePresent();
 async function selectOrganization() {
     await present({
         components: [
-            new ComponentWithProperties(SearchOrganizationView, {
+            AsyncComponent(() => import('#members/SearchOrganizationView.vue'), {
                 title: $t('%6w'),
                 description: $t('%6x'),
                 selectOrganization: async (organization: Organization, navigation: NavigationActions) => {

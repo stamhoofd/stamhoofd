@@ -1,7 +1,8 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RegisterCheckout } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';
-import FreeContributionView from '../FreeContributionView.vue';
+
 import type {ViewStepsManager} from '#steps/ViewStepsManager.ts';
 import type {ViewStep} from '#steps/ViewStep.ts';
 
@@ -38,7 +39,7 @@ export class FreeContributionStep implements ViewStep {
     }
 
     getComponent(manager: ViewStepsManager): ComponentWithProperties {
-        return new ComponentWithProperties(FreeContributionView, {
+        return AsyncComponent(() => import('../FreeContributionView.vue'), {
             checkout: this.checkout,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

@@ -1,10 +1,11 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
+
 import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -12,7 +13,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Organization, Platform } from '@stamhoofd/structures';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
@@ -116,7 +117,7 @@ export class PaymentActionBuilder {
                     await this.present({
                         components: [
                             new ComponentWithProperties(NavigationController, {
-                                root: new ComponentWithProperties(ExcelExportView, {
+                                root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                                     type: ExcelExportType.Payments,
                                     filter: selection.filter,
                                     workbook: this.selectableWorkbook.getSelectableWorkbook(),
@@ -407,7 +408,7 @@ export class PaymentActionBuilder {
         }
 
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EmailView, {
+            root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
                 recipientFilterOptions: options,
             }),
         });

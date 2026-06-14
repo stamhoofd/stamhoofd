@@ -197,6 +197,7 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
@@ -210,7 +211,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { appToUri, Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import EditOrganizationView from './EditOrganizationView.vue';
+
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
 
 
@@ -273,7 +274,7 @@ async function editOrganization() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditOrganizationView, {
+            AsyncComponent(() => import('./EditOrganizationView.vue'), {
                 organization: props.organization,
                 isNew: false,
                 saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {

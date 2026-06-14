@@ -272,8 +272,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import EmailView from '#email/EmailView.vue';
+
 import IconContainer from '#icons/IconContainer.vue';
 import ProgressRing from '#icons/ProgressRing.vue';
 import Spinner from '#Spinner.vue';
@@ -290,7 +291,7 @@ import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { usePatchEmail } from './hooks/usePatchEmail';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
-import EmailSendSettingsView from '../email/EmailSendSettingsView.vue';
+
 
 const props = defineProps<{
     email: EmailPreview;
@@ -475,7 +476,7 @@ async function editEmail() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EmailView, {
+                root: AsyncComponent(() => import('#email/EmailView.vue'), {
                     recipientFilterOptions: [],
                     editEmail: props.email,
                 }),
@@ -489,7 +490,7 @@ async function editSendSettings() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EmailSendSettingsView, {
+                root: AsyncComponent(() => import('../email/EmailSendSettingsView.vue'), {
                     editEmail: props.email,
                     willSend: false,
                 }),

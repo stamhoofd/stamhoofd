@@ -1,12 +1,13 @@
 import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PlatformMember, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { GroupType, PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
 import { GlobalEventBus } from '../../EventBus';
 import { Toast } from '../../overlays/Toast';
-import PaymentSuccessView from '../../payments/PaymentSuccessView.vue';
+
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { updateContextFromMembersBlob } from '../helpers/updateContextFromMembersBlob';
@@ -162,7 +163,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
 
             await navigate.show({
                 components: [
-                    new ComponentWithProperties(PaymentSuccessView, {
+                    AsyncComponent(() => import('../../payments/PaymentSuccessView.vue'), {
                         payment,
                     }),
                 ],
@@ -186,7 +187,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
 
     await navigate.show({
         components: [
-            new ComponentWithProperties(PaymentSuccessView, {
+            AsyncComponent(() => import('../../payments/PaymentSuccessView.vue'), {
                 payment,
                 fallback: fallback(registrations),
             }),

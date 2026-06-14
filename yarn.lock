@@ -2215,6 +2215,11 @@
     "@simonbackx/simple-logging" "^1.0.0"
     mysql2 "3.14.1"
 
+"@simonbackx/simple-encoding@2.26.6":
+  version "2.26.6"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.26.6.tgz#cfcc554a3fbf5901dbae28545a7648fe24b037ef"
+  integrity sha512-3pDd9caNyhgeB5rRQhIZ2sDzFmdcrDQj3IpiKBRhSpMSkZ2gq0T2hqP2TYk36+3MasRRN9UAf6HlrpsLWOza4Q==
+
 "@simonbackx/simple-encoding@2.26.8":
   version "2.26.8"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.26.8.tgz#b0f5630cd2e0c70212b44aa0b79add6a03b5ae3c"
@@ -2225,7 +2230,7 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.21.1.tgz#daccc481597ade6bf4d18b08fd2e80b3ea6aad03"
   integrity sha512-k5JcRxBfk+rWrOoEGwVlKGqbmtOCYnM7KjnUcDmLF0CTYu/FHWxTK2s82slD9vTvX/xeZNqb3Ul9DaDzMHOf5Q==
 
-"@simonbackx/simple-errors@1.5.0":
+"@simonbackx/simple-errors@1.5.0", "@simonbackx/simple-errors@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.5.0.tgz#0490057a58da30fc43786f263041a6bd2308cb0b"
   integrity sha512-UnMU3DQlO0sEGnCld9ASP9YTsTOJ5qvo6ZwyrlVEnsrGMsgaDk5TwONU7Q9kuXYykPMwen7LQPFv41xTF1+eQw==
@@ -2241,6 +2246,13 @@
   version "1.23.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.23.0.tgz#9861ba4b243c675b8eb3c8454472b26bbe75e3df"
   integrity sha512-O0o3AQgfvAO3GBBPZmmD4fytaSSQiQ2bK6tyi4sTAjHVmpJYA6ydDdwRgnD516WgNoaqNWYgUFg02+q++c+q0Q==
+
+"@simonbackx/vue-app-navigation@2.20.1":
+  version "2.20.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.20.1.tgz#075c04b4e8a949a7bfe83964d00b911f6419e034"
+  integrity sha512-8Qp2fsBQIXK01xkjFgJymE8KY/i4kHgJnp/G0S4zqXlbeRh6LgDPa3FxonqDkPjy74o1CPxEF8tHXAzGGUXHcw==
+  dependencies:
+    "@vue/shared" "^3.5.12"
 
 "@simonbackx/vue-app-navigation@2.22.0":
   version "2.22.0"
@@ -2883,7 +2895,7 @@
     "@types/node" "*"
     form-data "^4.0.4"
 
-"@types/node@*", "@types/node@22.15.34", "@types/node@>=10.0.0", "@types/node@>=8.1.0", "@types/node@^18.11.18":
+"@types/node@*", "@types/node@22.15.34", "@types/node@>=10.0.0", "@types/node@>=8.1.0", "@types/node@^18.11.18", "@types/node@^22":
   version "22.15.34"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-22.15.34.tgz#3995a6461d2cfc51c81907da0065fc328f6a459e"
   integrity sha512-8Y6E5WUupYy1Dd0II32BsWAx5MWdcnRd8L84Oys3veg1YrYtNtzgO4CFhiBg6MDSjk7Ay36HYOnU7/tuOzIzcw==

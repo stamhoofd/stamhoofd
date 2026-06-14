@@ -159,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import EditRoleView from '#admins/EditRoleView.vue';
+
 import JumpToContainer from '#containers/JumpToContainer.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -172,6 +172,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberResponsibility } from '@stamhoofd/structures';
 import { PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
@@ -326,7 +327,7 @@ async function editPermissions() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditRoleView, {
+            AsyncComponent(() => import('#admins/EditRoleView.vue'), {
                 role,
                 isNew,
                 scope: organizationBased.value ? 'organization' : 'admin',

@@ -340,9 +340,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, setUrl, usePop, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import Logo from '@stamhoofd/components/icons/Logo.vue';
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
@@ -353,7 +354,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import TransferPaymentView from '@stamhoofd/components/views/TransferPaymentView.vue';
+
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { Payment } from '@stamhoofd/structures';
 import { Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
@@ -451,7 +452,7 @@ function getLowerCaseName(paymentMethod: PaymentMethod): string {
 function openTransferView(payment: Payment) {
     if (payment.method === PaymentMethod.Transfer) {
         present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TransferPaymentView, {
+            root: AsyncComponent(() => import('@stamhoofd/components/views/TransferPaymentView.vue'), {
                 type: 'order',
                 payment,
                 organization: webshopManager.organization,
@@ -558,7 +559,7 @@ function openTicket(ticket: TicketPublic) {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(DetailedTicketView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/DetailedTicketView.vue'), {
                     ticket: ticket,
                     order: order.value,
                     webshop: webshop.value,

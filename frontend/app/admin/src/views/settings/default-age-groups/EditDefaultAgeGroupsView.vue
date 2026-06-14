@@ -26,6 +26,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
@@ -37,7 +38,7 @@ import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { DefaultAgeGroup, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import DefaultAgeGroupRow from './components/DefaultAgeGroupRow.vue';
-import EditDefaultAgeGroupView from './EditDefaultAgeGroupView.vue';
+
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -60,7 +61,7 @@ async function addGroup() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditDefaultAgeGroupView, {
+            AsyncComponent(() => import('./EditDefaultAgeGroupView.vue'), {
                 group,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<DefaultAgeGroup>) => {
@@ -77,7 +78,7 @@ async function editGroup(group: DefaultAgeGroup) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditDefaultAgeGroupView, {
+            AsyncComponent(() => import('./EditDefaultAgeGroupView.vue'), {
                 group,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<DefaultAgeGroup>) => {

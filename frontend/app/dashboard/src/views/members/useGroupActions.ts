@@ -1,7 +1,8 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -67,7 +68,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         }
 
         async function editGroup() {
-            await present(new ComponentWithProperties(EditGroupView, {
+            await present(AsyncComponent(() => import('@stamhoofd/components/groups/EditGroupView.vue'), {
                 period: props.period,
                 groupId: props.group.id,
                 isNew: false,

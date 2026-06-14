@@ -25,6 +25,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
@@ -36,7 +37,7 @@ import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Platform, PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PlatformMembershipTypeRow from './components/PlatformMembershipTypeRow.vue';
-import EditMembershipTypeView from './EditMembershipTypeView.vue';
+
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -59,7 +60,7 @@ async function addType() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditMembershipTypeView, {
+            AsyncComponent(() => import('./EditMembershipTypeView.vue'), {
                 type,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipType>) => {
@@ -76,7 +77,7 @@ async function editType(type: PlatformMembershipType) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditMembershipTypeView, {
+            AsyncComponent(() => import('./EditMembershipTypeView.vue'), {
                 type,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipType>) => {

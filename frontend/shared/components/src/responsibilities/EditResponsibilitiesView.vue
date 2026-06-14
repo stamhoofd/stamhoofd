@@ -55,15 +55,16 @@ import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Group, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import EditRoleView from '../admins/EditRoleView.vue';
+
 import { useLoadAdmins } from '../admins/hooks/useLoadAdmins';
 import { usePatchRoles } from '../admins/hooks/useRoles';
 import InheritedResponsibilityRow from './components/InheritedResponsibilityRow.vue';
 import ResponsibilityRow from './components/ResponsibilityRow.vue';
-import EditResponsibilityView from './EditResponsibilityView.vue';
+
 
 const pop = usePop();
 const present = usePresent();
@@ -125,7 +126,7 @@ async function addResponsibility() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResponsibilityView, {
+            AsyncComponent(() => import('./EditResponsibilityView.vue'), {
                 responsibility,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<MemberResponsibility>) => {
@@ -142,7 +143,7 @@ async function editResponsibility(responsibility: MemberResponsibility) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResponsibilityView, {
+            AsyncComponent(() => import('./EditResponsibilityView.vue'), {
                 responsibility,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<MemberResponsibility>) => {
@@ -171,7 +172,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditRoleView, {
+            AsyncComponent(() => import('../admins/EditRoleView.vue'), {
                 role,
                 inheritedRoles: [responsibility.getPermissions(group?.id ?? null)],
                 isNew,

@@ -115,6 +115,7 @@
 import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { encodeObject, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { EmailRecipientSubfilter, File} from '@stamhoofd/structures';
@@ -122,7 +123,7 @@ import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter
 import { Formatter, sleep, throttle } from '@stamhoofd/utility';
 import type { Ref} from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import EditEmailTemplatesView from '#email/EditEmailTemplatesView.vue';
+
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import EditorView from '../editor/EditorView.vue';
@@ -142,9 +143,9 @@ import UploadFileButton from '../inputs/UploadFileButton.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import EmailSettingsView from './EmailSettingsView.vue';
+
 import ProgressRing from '../icons/ProgressRing.vue';
-import EmailSendSettingsView from './EmailSendSettingsView.vue';
+
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -583,7 +584,7 @@ async function updateEmail() {
 async function manageEmails() {
     await present({
         components: [
-            new ComponentWithProperties(EmailSettingsView, {}),
+            AsyncComponent(() => import('./EmailSettingsView.vue'), {}),
         ],
         modalDisplayStyle: 'popup',
     });
@@ -659,7 +660,7 @@ async function send() {
         // Open EmailSendSettingsView instead
         await show({
             components: [
-                new ComponentWithProperties(EmailSendSettingsView, {
+                AsyncComponent(() => import('./EmailSendSettingsView.vue'), {
                     editEmail: patchedEmail.value,
                     willSend: willSend.value,
                 }),
@@ -851,7 +852,7 @@ async function openTemplates() {
 
     await present({
         components: [
-            new ComponentWithProperties(EditEmailTemplatesView, {
+            AsyncComponent(() => import('#email/EditEmailTemplatesView.vue'), {
                 types: [type],
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {

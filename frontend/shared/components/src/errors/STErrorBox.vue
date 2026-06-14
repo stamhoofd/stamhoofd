@@ -22,6 +22,7 @@
 import type { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { computed, useTemplateRef, watch } from 'vue';
+import { isModuleImportError } from './isModuleImportError';
 
 const props = defineProps<{
     error: SimpleError;
@@ -30,6 +31,10 @@ const props = defineProps<{
 const errorBoxElement = useTemplateRef('error-box');
 
 const errorMessage = computed(() => {
+    if (isModuleImportError(props.error)) {
+        return $t(`%ge`);
+    }
+
     if (Request.isNetworkError(props.error)) {
         return $t(`%ge`);
     }

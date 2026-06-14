@@ -61,13 +61,14 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
 import ProductRow from './products/ProductRow.vue';
 
 import { computed } from 'vue';
-import EditCategoryView from './categories/EditCategoryView.vue';
-import EditProductView from './products/EditProductView.vue';
+
+
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
@@ -114,8 +115,7 @@ function addProduct() {
     const p = PrivateWebshop.patch({});
     p.products.addPut(product);
 
-    present(new ComponentWithProperties(EditProductView,
-        {
+    present(AsyncComponent(() => import('./products/EditProductView.vue'), {
             product,
             webshop: webshop.value.patch(p),
             isNew: true,
@@ -125,8 +125,7 @@ function addProduct() {
 
                 // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
             },
-        },
-    ).setDisplayStyle('popup'))
+        }).setDisplayStyle('popup'))
         .catch(console.error);
 }
 
@@ -141,9 +140,7 @@ function addCategory() {
     const p = PrivateWebshop.patch({});
     p.categories.addPut(category);
 
-    present(new ComponentWithProperties(
-        EditCategoryView,
-        {
+    present(AsyncComponent(() => import('./categories/EditCategoryView.vue'), {
             category,
             webshop: webshop.value.patch(p),
             isNew: true,

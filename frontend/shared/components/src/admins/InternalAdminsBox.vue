@@ -60,7 +60,8 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import MemberSegmentedView from '#members/MemberSegmentedView.vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+
 import PromiseView from '#containers/PromiseView.vue';
 import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -127,7 +128,7 @@ async function editMember(memberAdmin: MemberAdmin) {
             }
             const member = results[0] as PlatformMember;
             return new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MemberSegmentedView, {
+                root: AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
                     member,
                 }),
             });

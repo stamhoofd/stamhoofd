@@ -42,8 +42,9 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
-import DeleteView from '#views/DeleteView.vue';
+
 import { GlobalEventBus } from '../../../EventBus';
 import { Toast } from '../../../overlays/Toast';
 import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';
@@ -75,7 +76,7 @@ async function deleteMember() {
 
     await present({
         components: [
-            new ComponentWithProperties(DeleteView, {
+            AsyncComponent(() => import('#views/DeleteView.vue'), {
                 title: $t(`%15Y`, { name }),
                 description: $t(`%15Z`, { name }),
                 confirmationTitle: $t(`%eu`),

@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type {ViewStep} from '#steps/ViewStep.ts';
 import type {ViewStepsManager} from '#steps/ViewStepsManager.ts';
 import type { RegisterCheckout } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';
-import PaymentCustomerView from '../PaymentCustomerView.vue';
+
 
 export class PaymentCustomerStep implements ViewStep {
     checkout: RegisterCheckout;
@@ -25,7 +26,7 @@ export class PaymentCustomerStep implements ViewStep {
     }
 
     getComponent(manager: ViewStepsManager): ComponentWithProperties {
-        return new ComponentWithProperties(PaymentCustomerView, {
+        return AsyncComponent(() => import('../PaymentCustomerView.vue'), {
             checkout: this.checkout,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
@@ -17,7 +18,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
-import SelectBalanceItemsView from '@stamhoofd/components/payments/SelectBalanceItemsView.vue';
+
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BalanceItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
@@ -69,9 +70,7 @@ async function checkout(item: DetailedPayableBalance) {
         if (items.length > 1) {
             return await show({
                 components: [
-                    new ComponentWithProperties(
-                        SelectBalanceItemsView,
-                        {
+                    AsyncComponent(() => import('@stamhoofd/components/payments/SelectBalanceItemsView.vue'), {
                             title: $t(`%1Qf`),
                             items,
                             isPayable: true,
@@ -94,8 +93,7 @@ async function checkout(item: DetailedPayableBalance) {
                                 await navigate.pop({ force: true });
                                 await goToCheckout(checkout, item);
                             },
-                        },
-                    ),
+                        }),
                 ],
             });
         }

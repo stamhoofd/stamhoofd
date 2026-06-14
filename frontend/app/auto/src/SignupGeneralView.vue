@@ -112,6 +112,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import bikeIllustration from '@stamhoofd/assets/images/illustrations/bike.svg';
 import charityIllustration from '@stamhoofd/assets/images/illustrations/charity.svg';
 import educationIllustration from '@stamhoofd/assets/images/illustrations/education.svg';
@@ -138,7 +139,7 @@ import { AcquisitionType, Address, Organization, OrganizationMetaData, Organizat
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
-import SignupAccountView from './SignupAccountView.vue';
+
 
 useMetaInfo({
     title: 'Sluit jouw vereniging aan | Stamhoofd',
@@ -442,7 +443,7 @@ async function goNext() {
 
         loading.value = false;
         errors.errorBox = null;
-        show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: registerCode })).catch(console.error);
+        show(AsyncComponent(() => import('./SignupAccountView.vue'), { organization, registerCode: registerCode })).catch(console.error);
         plausible('signupGeneral');
     } catch (e) {
         loading.value = false;

@@ -160,7 +160,7 @@ defineRoute({
             period,
         };
     },
-    propsToParams(props) {
+    propsToParams(props: { period: OrganizationRegistrationPeriod }) {
         return {
             params: {
                 slug: Formatter.slug(props.period.period.name),

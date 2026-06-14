@@ -90,6 +90,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { GroupOptionMenu } from '@stamhoofd/structures';
 import { Group, GroupOption, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -102,8 +103,8 @@ import StepperInput from '../../inputs/StepperInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
-import GroupOptionMenuView from './GroupOptionMenuView.vue';
-import GroupOptionView from './GroupOptionView.vue';
+
+
 
 const props = withDefaults(
     defineProps<{
@@ -165,7 +166,7 @@ function addOption() {
 async function editOption(option: GroupOption) {
     await present({
         components: [
-            new ComponentWithProperties(GroupOptionView, {
+            AsyncComponent(() => import('./GroupOptionView.vue'), {
                 option,
                 optionMenu: patched.value,
                 group: props.group,
@@ -185,7 +186,7 @@ async function editOption(option: GroupOption) {
 async function editOptionMenu() {
     await present({
         components: [
-            new ComponentWithProperties(GroupOptionMenuView, {
+            AsyncComponent(() => import('./GroupOptionMenuView.vue'), {
                 optionMenu: patched.value,
                 group: props.group,
                 isNew: false,

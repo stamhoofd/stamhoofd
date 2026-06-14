@@ -52,6 +52,7 @@ import { Toast } from '#overlays/Toast.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Group, Organization, PlatformMember } from '@stamhoofd/structures';
 import { GroupCategoryTree, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -188,7 +189,7 @@ async function searchOrganization() {
     await present({
         url: 'zoeken',
         components: [
-            new ComponentWithProperties(SearchOrganizationView, {
+            AsyncComponent(() => import('./SearchOrganizationView.vue'), {
                 title: searchOrganizationTitle.value,
                 selectOrganization: async (organization: Organization, { pop }: NavigationActions) => {
                     addOrganization(organization);

@@ -114,11 +114,11 @@
 
 <script setup lang="ts">
 import {
-    ComponentWithProperties,
     useCanDismiss,
     useCanPop,
     usePresent,
 } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembersObjectFetcher.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
@@ -142,7 +142,6 @@ import {
     SGVOAuth,
 } from '../SGVOAuth';
 import { SGVSyncReport } from '../SGVSyncReport.ts';
-import SGVReportView from './SGVReportView.vue';
 
 const props = defineProps<{
     code?: string;
@@ -234,7 +233,7 @@ async function sync() {
         Toast.success($t('Synchronisatie voltooid')).show();
         await present({
             components: [
-                new ComponentWithProperties(SGVReportView, { report }),
+                AsyncComponent(() => import('./SGVReportView.vue'), { report }),
             ],
             modalDisplayStyle: 'popup',
         });

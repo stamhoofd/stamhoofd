@@ -165,6 +165,7 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
@@ -174,7 +175,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
+
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate } from '@stamhoofd/structures';
@@ -462,7 +463,7 @@ function gotoRecordCategory(index: number) {
     }
 
     const category = props.template.privateSettings.templateDefinition.exportFieldCategories[index];
-    return new ComponentWithProperties(FillRecordCategoryView, {
+    return AsyncComponent(() => import('@stamhoofd/components/records/FillRecordCategoryView.vue'), {
         category,
         value: props.template,
         forceMarkReviewed: true,

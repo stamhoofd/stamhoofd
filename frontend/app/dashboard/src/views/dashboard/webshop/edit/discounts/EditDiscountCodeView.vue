@@ -90,6 +90,7 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -108,7 +109,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import { computed } from 'vue';
-import EditDiscountView from './EditDiscountView.vue';
+
 
 const props = defineProps<{
     discountCode: DiscountCode;
@@ -188,7 +189,7 @@ function addDiscount() {
 
     present({
         components: [
-            new ComponentWithProperties(EditDiscountView, {
+            AsyncComponent(() => import('./EditDiscountView.vue'), {
                 isNew: true,
                 discount,
                 webshop: props.webshop,
@@ -205,7 +206,7 @@ function addDiscount() {
 function editDiscount(discount: Discount) {
     present({
         components: [
-            new ComponentWithProperties(EditDiscountView, {
+            AsyncComponent(() => import('./EditDiscountView.vue'), {
                 isNew: false,
                 discount,
                 webshop: props.webshop,

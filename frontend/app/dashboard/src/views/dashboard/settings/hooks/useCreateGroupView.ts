@@ -1,7 +1,8 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { Group, GroupCategory, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
@@ -33,7 +34,7 @@ export function useCreateGroupView(saveHandler?: (patch: AutoEncoderPatchType<Or
 
         const basePatch = OrganizationRegistrationPeriod.patch({ groups, settings, id: period.id });
 
-        const displayedComponent = new ComponentWithProperties(EditGroupView, {
+        const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/groups/EditGroupView.vue'), {
             period: period.patch(basePatch),
             groupId: group.id,
             isNew: true,

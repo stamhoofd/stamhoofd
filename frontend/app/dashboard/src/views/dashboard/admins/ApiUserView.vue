@@ -78,6 +78,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EditUserPermissionsBox from '@stamhoofd/components/admins/components/EditUserPermissionsBox.vue';
 import { useAdminLabels } from '@stamhoofd/components/admins/hooks/useAdminLabels';
@@ -90,7 +91,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { ApiUser, ApiUserRateLimits, ApiUserWithToken, UserMeta } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import CopyApiTokenView from './CopyApiTokenView.vue';
+
 
 const errors = useErrors();
 const saving = ref(false);
@@ -189,7 +190,7 @@ async function save() {
         if (props.isNew) {
             await show({
                 components: [
-                    new ComponentWithProperties(CopyApiTokenView, { user }),
+                    AsyncComponent(() => import('./CopyApiTokenView.vue'), { user }),
                 ],
                 replace: 1,
                 animated: true,

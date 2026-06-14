@@ -254,11 +254,12 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
@@ -482,7 +483,7 @@ async function editGeneral(animated = true) {
                 try {
                     // Make sure we have an up to date group
                     await organizationManager.value.forceUpdate();
-                    return new ComponentWithProperties(EditGroupView, {
+                    return AsyncComponent(() => import('@stamhoofd/components/groups/EditGroupView.vue'), {
                         period: props.period,
                         groupId: props.group.id,
                         isNew: false,
@@ -514,7 +515,7 @@ async function editPermissions(animated = true) {
         adjustHistory: animated,
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResourceRolesView, {
+            AsyncComponent(() => import('@stamhoofd/components/admins/EditResourceRolesView.vue'), {
                 description: $t('%1Dp'),
                 resource: {
                     id: props.group.id,
@@ -534,7 +535,7 @@ async function editPage(animated = true) {
 async function editEmails(animated = true) {
     await present({
         components: [
-            new ComponentWithProperties(EditEmailTemplatesView, {
+            AsyncComponent(() => import('@stamhoofd/components/email/EditEmailTemplatesView.vue'), {
                 groups: props.group.waitingList ? [props.group, props.group.waitingList] : [props.group],
                 allowEditGenerated: false,
                 types: [

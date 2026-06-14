@@ -77,8 +77,9 @@ import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewM
 import { PayBalanceMode } from '../OrganizationCheckoutViewModel';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { SimpleError } from '@simonbackx/simple-errors';
-import DiscountsSheet from '@stamhoofd/components/payments/components/DiscountsSheet.vue';
+
 
 const props = defineProps<{
     model: OrganizationCheckoutViewModel;
@@ -269,7 +270,7 @@ async function showDiscountSheet(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(DiscountsSheet, {
+                root: AsyncComponent(() => import('@stamhoofd/components/payments/components/DiscountsSheet.vue'), {
                     items: discounts.value
                 }),
             }),

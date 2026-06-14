@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 
 import type { UIFilterBuilder } from './UIFilter';
 import { UIFilter } from './UIFilter';
-import UnknownUIFilterView from './UnknownUIFilterView.vue';
+
 
 export class UnknownUIFilter extends UIFilter<UnknownFilterBuilder> {
     value: StamhoofdFilter
@@ -22,7 +23,7 @@ export class UnknownUIFilter extends UIFilter<UnknownFilterBuilder> {
     }
 
     getComponent(): ComponentWithProperties {
-        return new ComponentWithProperties(UnknownUIFilterView, {
+        return AsyncComponent(() => import('./UnknownUIFilterView.vue'), {
             filter: this
         })
     }

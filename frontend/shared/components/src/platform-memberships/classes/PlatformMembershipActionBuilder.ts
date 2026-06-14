@@ -1,5 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMembership } from '@stamhoofd/structures';
@@ -74,7 +75,7 @@ export class PlatformMembershipActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ExcelExportView, {
+                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                         type: ExcelExportType.PlatformMemberships,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(),

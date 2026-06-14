@@ -118,6 +118,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -135,7 +136,6 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, onMounted, ref } from 'vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
-import WebshopDNSRecordsView from './WebshopDNSRecordsView.vue';
 
 const props = defineProps<UseEditWebshopProps>();
 
@@ -214,8 +214,7 @@ function quickValidate() {
         // Invalidate all currently working checks
         if (availabilityCheckerCount.value === 0) {
             // keep at zero, no need to say again that it is valid
-        }
-        else {
+        } else {
             availabilityCheckerCount.value++;
         }
 
@@ -323,12 +322,10 @@ async function checkUriAvailability() {
         checkingAvailability.value = false;
         if (response.data.available) {
             isAvailable.value = true;
-        }
-        else {
+        } else {
             isAvailable.value = false;
         }
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
         checkingAvailability.value = false;
         isAvailable.value = null;
@@ -363,14 +360,12 @@ set: (customUrl: string) => {
     if (split[0].length === 0) {
         patch.domain = null;
         patch.domainUri = '';
-    }
-    else {
+    } else {
         patch.domain = split[0].toLowerCase().replace(/[^a-z0-9-.]/gi, '');
 
         if (!split[1] || split[1].length === 0) {
             patch.domainUri = '';
-        }
-        else {
+        } else {
             patch.domainUri = Formatter.slug(split[1]);
         }
     }
@@ -380,7 +375,7 @@ set: (customUrl: string) => {
 });
 
 function openDnsRecordSettings(replace = false) {
-    const component = new ComponentWithProperties(WebshopDNSRecordsView, {
+    const component = AsyncComponent(() => import('./WebshopDNSRecordsView.vue'), {
         webshopManager: props.webshopManager,
     });
 
@@ -389,8 +384,7 @@ function openDnsRecordSettings(replace = false) {
             components: [component],
             animated: true,
         }).catch(console.error);
-    }
-    else {
+    } else {
         present({
             components: [component],
             modalDisplayStyle: 'popup',
@@ -427,8 +421,7 @@ const dnsRecords = computed(() => {
     }
     try {
         return webshop.value.buildDNSRecords();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     return [];
@@ -437,8 +430,7 @@ const dnsRecords = computed(() => {
 async function copyLink(event: MouseEvent) {
     if (navigator.clipboard) {
         await navigator.clipboard.writeText(url.value);
-    }
-    else {
+    } else {
         const input = document.createElement('input');
         input.value = url.value;
         document.body.appendChild(input);
@@ -471,8 +463,7 @@ async function validate() {
         }
 
         addPatch(PrivateWebshop.patch({ domainUri: null, domain: null }));
-    }
-    else {
+    } else {
         // Don't change the uri, because error handling could get weird if it is duplicate (the user won't notice it is changed)
         addPatch(PrivateWebshop.patch({ uri: originalWebshop.uri }));
 
@@ -503,8 +494,7 @@ async function validate() {
                     message: "Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie.",
                 });
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 throw e;
             }

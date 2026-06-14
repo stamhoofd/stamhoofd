@@ -57,6 +57,7 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { computed } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
@@ -64,7 +65,7 @@ import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
-import EditEmergencyContactView from './EditEmergencyContactView.vue';
+
 import Title from './Title.vue';
 
 defineOptions({
@@ -151,7 +152,7 @@ function setContactSelected(contact: EmergencyContact, selected: boolean) {
 async function editContact(emergencyContact: EmergencyContact) {
     await present({
         components: [
-            new ComponentWithProperties(EditEmergencyContactView, {
+            AsyncComponent(() => import('./EditEmergencyContactView.vue'), {
                 member: props.member,
                 emergencyContact,
                 isNew: false,
@@ -165,7 +166,7 @@ async function addContact() {
     const emergencyContact = EmergencyContact.create({});
     await present({
         components: [
-            new ComponentWithProperties(EditEmergencyContactView, {
+            AsyncComponent(() => import('./EditEmergencyContactView.vue'), {
                 member: props.member,
                 emergencyContact,
                 isNew: true,

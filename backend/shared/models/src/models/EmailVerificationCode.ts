@@ -122,7 +122,7 @@ export class EmailVerificationCode extends QueryableModel {
 
     getEmailVerificationUrl(user: User, organization: Organization | null, i18n: I18n) {
         const host = getAppHost('verify-email', organization, !!user.permissions, i18n);
-        return 'https://' + host + '?code=' + encodeURIComponent(this.code) + '&token=' + encodeURIComponent(this.token);
+        return 'https://' + host + '?code=' + encodeURIComponent(this.code) + '&token=' + encodeURIComponent(this.token) + '&email=' + encodeURIComponent(this.email);
     }
 
     /**

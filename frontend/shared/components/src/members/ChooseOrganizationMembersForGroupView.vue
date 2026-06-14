@@ -74,6 +74,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { PlatformFamily } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
@@ -90,7 +91,7 @@ import { useNavigationActions } from '../types/NavigationActions';
 import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
-import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
+
 import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
 
 const props = defineProps<{
@@ -196,7 +197,7 @@ async function searchMembers() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(SearchOrganizationMembersForGroupView, {
+                root: AsyncComponent(() => import('./SearchOrganizationMembersForGroupView.vue'), {
                     ...props,
                     saveHandler: async (navigate: NavigationActions) => {
                         await navigate.dismiss({ force: true });

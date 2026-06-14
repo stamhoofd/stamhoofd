@@ -76,8 +76,9 @@
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
-import PropertyFilterView from '#filters/PropertyFilterView.vue';
+
 import { Toast } from '#overlays/Toast.ts';
 import { propertyFilterToString } from '#filters/UIFilter.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
@@ -87,7 +88,7 @@ import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfigu
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Platform, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
-import FillRecordCategoryView from '../FillRecordCategoryView.vue';
+
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
 
 const props = withDefaults(
@@ -277,7 +278,7 @@ async function editPropertyFilterConfiguration(property: MemberPropertyWithFilte
 
     await present({
         components: [
-            new ComponentWithProperties(PropertyFilterView, {
+            AsyncComponent(() => import('#filters/PropertyFilterView.vue'), {
                 parentConfiguration: props.inheritedRecordsConfiguration?.[property],
                 configuration: patched.value[property] ?? (props.inheritedRecordsConfiguration?.[property] ? null : PropertyFilter.createDefault()), // do not use inherits when editing a configuration
                 title,
@@ -361,7 +362,7 @@ async function editInheritedFilterConfiguration(categoryId: string) {
 
     await present({
         components: [
-            new ComponentWithProperties(PropertyFilterView, {
+            AsyncComponent(() => import('#filters/PropertyFilterView.vue'), {
                 configuration: props.recordsConfiguration.inheritedRecordCategories.get(categoryId) ?? PropertyFilter.createDefault(),
                 title: category.name,
                 builder: settings.filterBuilder([]),
@@ -385,7 +386,7 @@ async function editInheritedFilterConfiguration(categoryId: string) {
 async function previewCategory(category: RecordCategory) {
     await present({
         components: [
-            new ComponentWithProperties(FillRecordCategoryView, {
+            AsyncComponent(() => import('../FillRecordCategoryView.vue'), {
                 category: category.patch({
                     // Disable filter on category level for the preview, since these cannot work
                     filter: null,

@@ -21,8 +21,9 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
+
 import type { RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher.ts';
 import { useGetOrganizationUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/organizations.ts';
@@ -36,14 +37,14 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
 import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, TagHelper } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import EditOrganizationView from './EditOrganizationView.vue';
+
 import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
@@ -433,7 +434,7 @@ async function openMail(selection: TableActionSelection<Organization>) {
     }
 
     const displayedComponent = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EmailView, {
+        root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
             recipientFilterOptions: [option],
         }),
     });
@@ -449,7 +450,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ExcelExportView, {
+                root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                     type: ExcelExportType.Organizations,
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),
@@ -488,7 +489,7 @@ if (auth.hasPlatformFullAccess()) {
                     privateMeta: OrganizationPrivateMetaData.create({}),
                 });
 
-                const component = new ComponentWithProperties(EditOrganizationView, {
+                const component = AsyncComponent(() => import('./EditOrganizationView.vue'), {
                     isNew: true,
                     organization,
                     saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {

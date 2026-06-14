@@ -584,7 +584,7 @@
 </template>
 
 <script setup lang="ts">
-import AuditLogsView from '#audit-logs/AuditLogsView.vue';
+
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -601,6 +601,7 @@ import { RecordEditorSettings, RecordEditorType } from '#records/RecordEditorSet
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { DefaultAgeGroup, MemberProperty, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
@@ -620,10 +621,10 @@ import TTextarea from '../inputs/TTextarea.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
-import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
+
 import GroupPriceBox from './components/GroupPriceBox.vue';
-import GroupPriceView from './components/GroupPriceView.vue';
-import EditGroupView from './EditGroupView.vue';
+
+
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 
@@ -676,7 +677,7 @@ function addPreventGroupIds() {
 async function viewAudit() {
     await present({
         components: [
-            new ComponentWithProperties(AuditLogsView, {
+            AsyncComponent(() => import('#audit-logs/AuditLogsView.vue'), {
                 objectIds: [props.groupId],
             }),
         ],
@@ -1259,7 +1260,7 @@ async function addGroupPrice() {
 
         await present({
             components: [
-                new ComponentWithProperties(GroupPriceView, {
+                AsyncComponent(() => import('./components/GroupPriceView.vue'), {
                     period: patchedPeriod.value.patch(basePatch),
                     price,
                     group: patchedGroup,
@@ -1279,7 +1280,7 @@ async function addGroupPrice() {
 async function editGroupPrice(price: GroupPrice) {
     await present({
         components: [
-            new ComponentWithProperties(GroupPriceView, {
+            AsyncComponent(() => import('./components/GroupPriceView.vue'), {
                 period: patchedPeriod.value,
                 price,
                 group: patchedGroup,
@@ -1309,7 +1310,7 @@ async function addGroupOptionMenu() {
 
     await present({
         components: [
-            new ComponentWithProperties(GroupOptionMenuView, {
+            AsyncComponent(() => import('./components/GroupOptionMenuView.vue'), {
                 optionMenu,
                 group: patchedGroup,
                 isNew: true,
@@ -1343,7 +1344,7 @@ async function addWaitingList() {
     // Edit the group
     await present({
         components: [
-            new ComponentWithProperties(EditGroupView, {
+            AsyncComponent(() => import('./EditGroupView.vue'), {
                 period: patchedPeriod.value.patch(basePatch),
                 groupId: waitingList.id,
                 isNew: true,
@@ -1380,7 +1381,7 @@ async function editWaitingList(waitingList: Group) {
 
     await present({
         components: [
-            new ComponentWithProperties(EditGroupView, {
+            AsyncComponent(() => import('./EditGroupView.vue'), {
                 period: patchedPeriod.value,
                 groupId: waitingList.id,
                 isNew: false,

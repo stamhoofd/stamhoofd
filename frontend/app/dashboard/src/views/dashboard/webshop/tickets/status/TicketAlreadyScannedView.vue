@@ -50,6 +50,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -60,7 +61,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { ref, watch } from 'vue';
 import type { WebshopManager } from '../../WebshopManager';
-import ValidTicketView from './ValidTicketView.vue';
+
 
 const props = defineProps<{
     webshopManager: WebshopManager;
@@ -86,7 +87,7 @@ function formatDateTime(date: Date) {
 function viewTicket() {
     show({
         components: [
-            new ComponentWithProperties(ValidTicketView, {
+            AsyncComponent(() => import('./ValidTicketView.vue'), {
                 webshopManager: props.webshopManager,
                 ticket: props.ticket,
                 order: props.order,

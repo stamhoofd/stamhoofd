@@ -422,6 +422,7 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ObjectData, PatchableArray, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
@@ -442,14 +443,14 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
 import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
-import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';
+import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
 import { computed, onBeforeUnmount, onMounted } from 'vue';
-import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
+
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
-import ChooseSeatingPlanView from '../seating/ChooseSeatingPlanView.vue';
-import EditOptionMenuView from './EditOptionMenuView.vue';
-import EditProductPriceView from './EditProductPriceView.vue';
+
+
+
 import OptionMenuSection from './OptionMenuSection.vue';
 import ProductPriceBox from './ProductPriceBox.vue';
 import ProductPriceRow from './ProductPriceRow.vue';
@@ -560,7 +561,7 @@ function chooseSeatingPlan() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ChooseSeatingPlanView, {
+                root: AsyncComponent(() => import('../seating/ChooseSeatingPlanView.vue'), {
                     product: patchedProduct.value,
                     webshop: patchedWebshop.value,
                     saveHandler: (patchProduct: AutoEncoderPatchType<PrivateWebshop>, patch: AutoEncoderPatchType<PrivateWebshop>) => {
@@ -880,8 +881,7 @@ function addOptionMenu() {
     const p = Product.patch({ id: props.product.id });
     p.optionMenus.addPut(optionMenu);
 
-    present(new ComponentWithProperties(EditOptionMenuView,
-        {
+    present(AsyncComponent(() => import('./EditOptionMenuView.vue'), {
             product: patchedProduct.value.patch(p),
             optionMenu,
             isNew: true,
@@ -901,7 +901,7 @@ function addField() {
     p.addPut(field);
 
     present(
-        new ComponentWithProperties(EditWebshopFieldView, {
+        AsyncComponent(() => import('../fields/EditWebshopFieldView.vue'), {
             field,
             isNew: true,
             saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
@@ -950,7 +950,7 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
                 // replace all view on there NavigationController with a product price edit view
                 await navigationActions.show({
                     components: [
-                        new ComponentWithProperties(EditProductPriceView, {
+                        AsyncComponent(() => import('./EditProductPriceView.vue'), {
                             product: patchedProduct.value.patch(p),
                             productPrice: price,
                             isNew: true,
@@ -965,7 +965,7 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
                 return;
             }
             // they didn't make a NavigationController, so we just present the view
-            present(new ComponentWithProperties(EditProductPriceView, { product: patchedProduct.value.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+            present(AsyncComponent(() => import('./EditProductPriceView.vue'), { product: patchedProduct.value.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
                 // Merge both patches
                 addProductPatch(p.patch(patch));
 
@@ -981,7 +981,7 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
     const p = Product.patch({ id: props.product.id });
     p.prices.addPut(price);
 
-    present(new ComponentWithProperties(EditProductPriceView, { product: patchedProduct.value.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+    present(AsyncComponent(() => import('./EditProductPriceView.vue'), { product: patchedProduct.value.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
         // Merge both patches
         addProductPatch(p.patch(patch));
 

@@ -1,9 +1,10 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import PromiseView from '#containers/PromiseView.vue';
 import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import { Toast } from '../../overlays/Toast';
-import MemberSegmentedView from '../MemberSegmentedView.vue';
+
 
 export function useShowMember() {
     const memberFetcher = useMembersObjectFetcher();
@@ -23,7 +24,7 @@ export function useShowMember() {
                         Toast.error($t(`%yX`)).show();
                         throw new Error('Member not found');
                     }
-                    return new ComponentWithProperties(MemberSegmentedView, {
+                    return AsyncComponent(() => import('../MemberSegmentedView.vue'), {
                         member: members.results[0],
                     });
                 },

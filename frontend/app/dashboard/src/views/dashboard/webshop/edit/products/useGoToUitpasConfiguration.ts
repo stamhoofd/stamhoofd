@@ -1,13 +1,14 @@
 import type { Product, UitpasEventResponse } from '@stamhoofd/structures';
 import { UitpasClientCredentialsStatus } from '@stamhoofd/structures';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import type { NavigationActions } from '#types/NavigationActions.ts';
-import SearchUitpasEventView from '#organizations/components/SearchUitpasEventView.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { useRequiredOrganization } from '#hooks/useOrganization.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import UitpasSettingsView from '@stamhoofd/dashboard/src/views/dashboard/settings/UitpasSettingsView.vue';
-import { useSetUitpasEvent } from './useSetUitpasEvent';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
+import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
 import type { Ref } from 'vue';
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 
@@ -52,7 +53,7 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
     const goToUitpasEventSearch = async (showNoteAboutNonOfficialFlow: boolean, onFixed: (navigationActions: NavigationActions) => Promise<void>) => {
         await present(
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(SearchUitpasEventView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/organizations/components/SearchUitpasEventView.vue'), {
                     title: $t('%1Bs'),
                     selectEvent: async (event: UitpasEventResponse | null, navigationActions: NavigationActions) => {
                         await setUitpasEvent(event);
@@ -68,7 +69,7 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
     const goToUitpasSettings = async (onFixed: (navigationActions: NavigationActions) => Promise<void>) => {
         await present(
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UitpasSettingsView, {
+                root: AsyncComponent(() => import('../../../settings/UitpasSettingsView.vue'), {
                     initialUitpasEvent: patchedProduct.value.uitpasEvent,
                     onFixedAndEventSelected: async (event: UitpasEventResponse, navigationActions: NavigationActions) => {
                         await setUitpasEvent(event);
