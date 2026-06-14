@@ -138,7 +138,7 @@ jobs:
     if: needs.job_setup.outputs.changed_backend == 'true'
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:c36050afdca850f23cef85703f84c7531a5ae155a11b5ee1c60acb09937c4084
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -168,7 +168,7 @@ jobs:
     if: needs.job_setup.outputs.changed_models == 'true'
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:c36050afdca850f23cef85703f84c7531a5ae155a11b5ee1c60acb09937c4084
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -198,7 +198,7 @@ jobs:
     if: needs.job_setup.outputs.changed_sql == 'true'
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:c36050afdca850f23cef85703f84c7531a5ae155a11b5ee1c60acb09937c4084
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -244,7 +244,7 @@ jobs:
     needs: [job_setup, job_build_shared]
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:c36050afdca850f23cef85703f84c7531a5ae155a11b5ee1c60acb09937c4084
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests
@@ -325,7 +325,7 @@ jobs:
       SPACES_CI_REGION: ams3
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:c36050afdca850f23cef85703f84c7531a5ae155a11b5ee1c60acb09937c4084
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: stamhoofd-tests

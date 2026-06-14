@@ -13,7 +13,7 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "pdfkit": "^0.19.1"
+        "pdfkit": "0.19.1"
     },
     "type": "module",
     "devDependencies": {
