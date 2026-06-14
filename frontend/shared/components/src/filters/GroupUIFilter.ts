@@ -1,8 +1,9 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 
 import { markRaw } from 'vue';
-import GroupUIFilterView from './GroupUIFilterView.vue';
+
 import type { StyledDescription, UIFilterBuilder, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 import { UnknownFilterBuilder, UnknownUIFilter } from './UnknownUIFilter';
@@ -74,7 +75,7 @@ export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
     }
 
     getComponent(): ComponentWithProperties {
-        return new ComponentWithProperties(GroupUIFilterView, {
+        return AsyncComponent(() => import('./GroupUIFilterView.vue'), {
             filter: this,
         });
     }

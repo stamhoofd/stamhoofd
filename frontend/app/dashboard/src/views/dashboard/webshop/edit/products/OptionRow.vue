@@ -26,6 +26,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
@@ -35,7 +36,7 @@ import type { Option } from '@stamhoofd/structures';
 import { OptionMenu } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditOptionView from './EditOptionView.vue';
+
 
 const props = defineProps<{
     optionMenu: OptionMenu;
@@ -48,7 +49,7 @@ const present = usePresent();
 const isFirst = computed(() => props.optionMenu.options[0].id === props.option.id);
 
 function editOption() {
-    present(new ComponentWithProperties(EditOptionView, { option: props.option, optionMenu: props.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+    present(AsyncComponent(() => import('./EditOptionView.vue'), { option: props.option, optionMenu: props.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
         emits('patch', patch);
 
         // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

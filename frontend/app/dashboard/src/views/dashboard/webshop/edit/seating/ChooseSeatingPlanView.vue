@@ -82,6 +82,7 @@
 import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -96,7 +97,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, WebshopMetaData } from '@stamhoofd/structures';
 import { sleep, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import EditSeatingPlanView from './EditSeatingPlanView.vue';
+
 
 const props = defineProps<{
     product: Product;
@@ -306,7 +307,7 @@ function addSeatingPlan() {
 
     present({
         components: [
-            new ComponentWithProperties(EditSeatingPlanView, {
+            AsyncComponent(() => import('./EditSeatingPlanView.vue'), {
                 webshop: patchedWebshop.value.patch(webshopPatch),
                 seatingPlan,
                 isNew: true,
@@ -331,7 +332,7 @@ function editSeatingPlan(seatingPlan: SeatingPlan) {
 
     present({
         components: [
-            new ComponentWithProperties(EditSeatingPlanView, {
+            AsyncComponent(() => import('./EditSeatingPlanView.vue'), {
                 webshop: patchedWebshop.value.patch(patched.webshopPatch),
                 seatingPlan: seatingPlanPatched,
                 isNew: !!added,
@@ -389,7 +390,7 @@ async function importSeatingPlan(event: InputEvent & any) {
 
         present({
             components: [
-                new ComponentWithProperties(EditSeatingPlanView, {
+                AsyncComponent(() => import('./EditSeatingPlanView.vue'), {
                     webshop: patchedWebshop.value.patch(webshopPatch),
                     seatingPlan,
                     isNew: true,

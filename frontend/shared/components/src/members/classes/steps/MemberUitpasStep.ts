@@ -1,5 +1,6 @@
-import MemberStepView from '#members/MemberStepView.vue';
+
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';
@@ -49,7 +50,7 @@ export class MemberUitpasStep implements EditMemberStep {
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
-        return new ComponentWithProperties(MemberStepView, {
+        return AsyncComponent(() => import('#members/MemberStepView.vue'), {
             title: $t(`%14`),
             member: manager.member,
             component: markRaw(EditMemberUitpasBox),

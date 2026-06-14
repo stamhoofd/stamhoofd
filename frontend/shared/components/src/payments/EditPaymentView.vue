@@ -164,12 +164,13 @@ import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
-import SearchOrganizationView from '#members/SearchOrganizationView.vue';
+
 import { CenteredMessage } from '#overlays/CenteredMessage';
 import { Toast } from '#overlays/Toast';
 import type { NavigationActions } from '#types/NavigationActions';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { BalanceItem, Organization, PaymentGeneral } from '@stamhoofd/structures';
 import { BalanceItemRelationType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
@@ -211,7 +212,7 @@ async function choosePayingOrganization() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(SearchOrganizationView, {
+                root: AsyncComponent(() => import('#members/SearchOrganizationView.vue'), {
                     selectOrganization: async (organization: Organization, { dismiss }: NavigationActions) => {
                         await dismiss({ force: true });
                         addPatch({

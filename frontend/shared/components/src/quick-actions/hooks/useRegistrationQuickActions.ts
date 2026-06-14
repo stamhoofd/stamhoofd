@@ -22,11 +22,12 @@ import { useNavigationActions } from '../../types/NavigationActions';
 import type { QuickAction, QuickActions } from '../classes/QuickActions';
 
 import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
-import EventView from '#events/EventView.vue';
+
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
 import RegistrationInvitationIcon from '../RegistrationInvitationIcon.vue';
@@ -326,7 +327,7 @@ function getEventsWhereInvited({events, memberManager}: {events: Event[], member
 
 function openEvent({event, show}: {event: Event, show: ReturnType<typeof useShow>} ) {
     const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EventView, {
+        root: AsyncComponent(() => import('#events/EventView.vue'), {
             event,
         }),
     });

@@ -4,7 +4,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, ComponentWithPropertiesInstance, useCurrentComponent } from '@simonbackx/vue-app-navigation';
-import VerifyEmailView from './VerifyEmailView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 
 const props = defineProps<{
     token: string;
@@ -16,7 +17,7 @@ const token = props.token;
 const code = props.code;
 const email = props.email;
 
-const root = new ComponentWithProperties(VerifyEmailView, {
+const root = AsyncComponent(() => import('./VerifyEmailView.vue'), {
     token,
     code,
     email,

@@ -99,6 +99,7 @@ import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
@@ -114,7 +115,7 @@ import type { Image } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { computed, ref, shallowRef } from 'vue';
 
-import DomainSettingsView from './DomainSettingsView.vue';
+
 
 const baseOrganization = useRequiredOrganization();
 const organizationManager = useOrganizationManager();
@@ -239,7 +240,7 @@ async function save() {
 
 async function setupDomain() {
     await present(new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(DomainSettingsView, {}),
+        root: AsyncComponent(() => import('./DomainSettingsView.vue'), {}),
     }).setDisplayStyle('popup'));
 }
 

@@ -1,5 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
@@ -7,7 +8,7 @@ import { computed, ref, unref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import SearchOrganizationView from '#members/SearchOrganizationView.vue';
+
 import type { NavigationActions } from '../../types/NavigationActions';
 
 export function useLoadOrganization() {
@@ -120,7 +121,7 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
             await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(SearchOrganizationView, {
+                        root: AsyncComponent(() => import('#members/SearchOrganizationView.vue'), {
                             title,
                             selectOrganization: async (organization: Organization, { dismiss }: NavigationActions) => {
                                 if (canSelect && !(await canSelect(organization))) {

@@ -1,15 +1,16 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import AuditLogsView from '#audit-logs/AuditLogsView.vue';
-import CommunicationView from '#communication/CommunicationView.vue';
+
+
 import { LoadComponent } from '#containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '#email/EmailView.vue';
-import EmailView from '#email/EmailView.vue';
+
 import { useContext } from '#hooks/useContext.ts';
 import { manualFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -22,7 +23,7 @@ import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsA
 import { Toast } from '../../overlays/Toast';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
-import ChargeRegistrationsView from '../ChargeRegistrationsView.vue';
+
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectRegistrationActions(options?: {
@@ -299,7 +300,7 @@ export class RegistrationActionBuilder {
                 await this.present({
                     modalDisplayStyle: 'popup',
                     components: [
-                        new ComponentWithProperties(ChargeRegistrationsView, {
+                        AsyncComponent(() => import('../ChargeRegistrationsView.vue'), {
                             filter: selection.filter.filter,
                         }),
                     ],
@@ -332,7 +333,7 @@ export class RegistrationActionBuilder {
                     }
                     await this.present({
                         components: [
-                            new ComponentWithProperties(AuditLogsView, {
+                            AsyncComponent(() => import('#audit-logs/AuditLogsView.vue'), {
                                 objectIds: members.map(m => m.id),
                             }),
                         ],
@@ -365,7 +366,7 @@ export class RegistrationActionBuilder {
                     await this.present({
                         components: [
                             new ComponentWithProperties(NavigationController, {
-                                root: new ComponentWithProperties(CommunicationView, {
+                                root: AsyncComponent(() => import('#communication/CommunicationView.vue'), {
                                     members,
                                 }),
                             }),
@@ -703,7 +704,7 @@ export class RegistrationActionBuilder {
         });
 
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EmailView, {
+            root: AsyncComponent(() => import('#email/EmailView.vue'), {
                 recipientFilterOptions: options,
                 defaultSenderId: this.groups.length === 1 ? this.groups[0].privateSettings?.defaultEmailId : null,
             }),
@@ -780,7 +781,7 @@ export class RegistrationActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ExcelExportView, {
+                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                         type: ExcelExportType.Registrations,
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),

@@ -30,9 +30,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import MemberSegmentedView from '#members/MemberSegmentedView.vue';
+
 
 defineOptions({
     inheritAttrs: false,
@@ -56,7 +57,7 @@ async function gotoMember(member: PlatformMember) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MemberSegmentedView, {
+                root: AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
                     member,
                 }),
             }),

@@ -52,12 +52,13 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
-import OrganizationTagSelectorView from '@stamhoofd/components/organizations/OrganizationTagSelectorView.vue';
+
 import type { OrganizationTag, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice } from '@stamhoofd/structures';
 import { ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -107,7 +108,7 @@ async function addPriceForTag() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(OrganizationTagSelectorView, {
+            AsyncComponent(() => import('@stamhoofd/components/organizations/OrganizationTagSelectorView.vue'), {
                 tagIds: Array.from(patched.value.prices.keys()).filter(id => id !== ''),
                 onAdd: async (_allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => {
                     const map = new PatchMap<string, ReduceablePrice | null>();

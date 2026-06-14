@@ -1,4 +1,5 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
@@ -238,7 +239,7 @@ describe('TimeInput', async () => {
         const app = mount(TestAppWithModalStackComponent, {
             attachTo: document.body,
             props: {
-                root: new ComponentWithProperties(TimeInput, {
+                root: AsyncComponent(() => import('./TimeInput.vue'), {
                     'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
                     'onUpdate:modelValue': async () => {
                     },

@@ -66,6 +66,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import AddressInput from '#inputs/AddressInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -84,7 +85,7 @@ import type { PatchAnswers} from '@stamhoofd/structures';
 import { Company, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
-import EditCompanyView from './components/EditCompanyView.vue';
+
 import CompanyRow from '../companies/CompanyRow.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
@@ -160,7 +161,7 @@ async function addCompany() {
 
     await present({
         components: [
-            new ComponentWithProperties(EditCompanyView, {
+            AsyncComponent(() => import('./components/EditCompanyView.vue'), {
                 company,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<Company>) => {
@@ -185,7 +186,7 @@ async function editCompany(company: Company) {
     }
     await present({
         components: [
-            new ComponentWithProperties(EditCompanyView, {
+            AsyncComponent(() => import('./components/EditCompanyView.vue'), {
                 company,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<Company>) => {

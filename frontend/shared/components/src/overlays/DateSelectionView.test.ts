@@ -3,12 +3,10 @@ import type { VueWrapper } from '@vue/test-utils';
 import { mount } from '@vue/test-utils';
 import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
-
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Locator } from '@vitest/browser/context';
 import { page } from '@vitest/browser/context';
 import { ref } from 'vue';
-import DateSelectionView from './DateSelectionView.vue';
 
 // DO NOT COPY THIS PATTERN!
 // DO NOT COPY THIS PATTERN!
@@ -83,12 +81,11 @@ describe.skip('DateSelectionView', () => {
             wrapper = mount(TestAppWithModalStackComponent, {
                 attachTo: document.body,
                 props: {
-                    root: new ComponentWithProperties(DateSelectionView, {
+                    root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                         selectedDay: new Date(2023, 2, 14, 22, 0, 0, 0),
                         onClose,
                         setDate,
-                    },
-                    ),
+                    }),
                 },
             });
 
@@ -112,12 +109,11 @@ describe.skip('DateSelectionView', () => {
             wrapper = mount(TestAppWithModalStackComponent, {
                 attachTo: document.body,
                 props: {
-                    root: new ComponentWithProperties(DateSelectionView, {
+                    root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                         selectedDay,
                         onClose,
                         setDate,
-                    },
-                    ),
+                    }),
                 },
             });
 
@@ -139,12 +135,11 @@ describe.skip('DateSelectionView', () => {
             wrapper = mount(TestAppWithModalStackComponent, {
                 attachTo: document.body,
                 props: {
-                    root: new ComponentWithProperties(DateSelectionView, {
+                    root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                         selectedDay,
                         onClose,
                         setDate,
-                    },
-                    ),
+                    }),
                 },
             });
 
@@ -168,12 +163,11 @@ describe.skip('DateSelectionView', () => {
             wrapper = mount(TestAppWithModalStackComponent, {
                 attachTo: document.body,
                 props: {
-                    root: new ComponentWithProperties(DateSelectionView, {
+                    root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                         selectedDay,
                         onClose,
                         setDate,
-                    },
-                    ),
+                    }),
                 },
             });
 
@@ -208,14 +202,13 @@ describe.skip('DateSelectionView', () => {
         wrapper = mount(TestAppWithModalStackComponent, {
             attachTo: document.body,
             props: {
-                root: new ComponentWithProperties(DateSelectionView, {
+                root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                     selectedDay,
                     min,
                     max,
                     onClose,
                     setDate,
-                },
-                ),
+                }),
             },
         });
 
@@ -251,12 +244,11 @@ describe.skip('DateSelectionView', () => {
         wrapper = mount(TestAppWithModalStackComponent, {
             attachTo: document.body,
             props: {
-                root: new ComponentWithProperties(DateSelectionView, {
+                root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                     selectedDay,
                     onClose,
                     setDate,
-                },
-                ),
+                }),
             },
         });
 
@@ -305,12 +297,11 @@ describe.skip('DateSelectionView', () => {
             wrapper = mount(TestAppWithModalStackComponent, {
                 attachTo: document.body,
                 props: {
-                    root: new ComponentWithProperties(DateSelectionView, {
+                    root: AsyncComponent(() => import('./DateSelectionView.vue'), {
                         selectedDay: selectedDayRef,
                         onClose,
                         setDate,
-                    },
-                    ),
+                    }),
                 },
             });
 

@@ -9,8 +9,10 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -30,9 +32,6 @@ import { Language } from '@stamhoofd/types/Language';
 import { GoogleTranslateHelper, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';
 import { getWebshopRootView } from './getRootView';
-import ChooseWebshopView from './views/ChooseWebshopView.vue';
-import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
-import PrerenderRedirectView from './views/errors/PrerenderRedirectView.vue';
 
 const owner = {};
 const root = new ComponentWithProperties(PromiseView, {
@@ -61,8 +60,7 @@ const root = new ComponentWithProperties(PromiseView, {
             if (usedUri) {
                 if (UrlHelper.fixedPrefix) {
                     UrlHelper.fixedPrefix = UrlHelper.fixedPrefix + '/' + usedUri;
-                }
-                else {
+                } else {
                     UrlHelper.fixedPrefix = usedUri;
                 }
                 console.info('Using fixed prefix', UrlHelper.fixedPrefix);
@@ -81,14 +79,13 @@ const root = new ComponentWithProperties(PromiseView, {
                         const u = UrlHelper.initial.getFullHref({ host: url.hostname, removePrefix: true, appendPrefix: prefix });
 
                         if (isPrerender) {
-                            return new ComponentWithProperties(PrerenderRedirectView, { location: u });
+                            return AsyncComponent(() => import('./views/errors/PrerenderRedirectView.vue'), { location: u });
                         }
 
                         window.location.href = u;
                         return new ComponentWithProperties(LoadingView, {});
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
@@ -106,7 +103,7 @@ const root = new ComponentWithProperties(PromiseView, {
 
             if (!response.data.webshop) {
                 return new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ChooseWebshopView, {
+                    root: AsyncComponent(() => import('./views/ChooseWebshopView.vue'), {
                         organization: response.data.organization,
                         webshops: response.data.webshops,
                     }),
@@ -119,15 +116,13 @@ const root = new ComponentWithProperties(PromiseView, {
             document.title = webshop.meta.name + ' - ' + organization.name;
 
             return await getWebshopRootView(session, webshop);
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e);
             // Check if we have an organization on this domain
             if (!I18nController.shared) {
                 try {
                     await I18nController.loadDefault(null, undefined, Language.Dutch);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
@@ -136,7 +131,7 @@ const root = new ComponentWithProperties(PromiseView, {
                 if (!(e.hasCode('invalid_domain') || e.hasCode('unknown_organization') || e.hasCode('unknown_webshop'))) {
                     Toast.fromError(e).show();
 
-                    return new ComponentWithProperties(InvalidWebshopView, {
+                    return AsyncComponent(() => import('./views/errors/InvalidWebshopView.vue'), {
                         errorBox: new ErrorBox(e),
                     });
                 }
@@ -147,12 +142,12 @@ const root = new ComponentWithProperties(PromiseView, {
                 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
                 if (isPrerender) {
-                    return new ComponentWithProperties(PrerenderRedirectView, { location: marketingWebshops });
+                    return AsyncComponent(() => import('./views/errors/PrerenderRedirectView.vue'), { location: marketingWebshops });
                 }
 
                 // window.location.href = marketingWebshops
             }
-            return new ComponentWithProperties(InvalidWebshopView, {});
+            return AsyncComponent(() => import('./views/errors/InvalidWebshopView.vue'), {});
         }
     },
 });
@@ -182,8 +177,7 @@ watch(modalStack, (modalStack: InstanceType<typeof ModalStackComponent> | null) 
     ModalStackEventBus.addListener(owner, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (options instanceof ComponentWithProperties) {
             await modalStack.present({ components: [options] });
-        }
-        else {
+        } else {
             await modalStack.present(options);
         }
     });

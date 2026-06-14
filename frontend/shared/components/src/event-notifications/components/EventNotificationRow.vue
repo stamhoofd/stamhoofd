@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import { ComponentWithProperties, defineRoute, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Event, EventNotificationType, Organization } from '@stamhoofd/structures';
 import { EventNotificationStatus, EventNotificationStatusHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -35,7 +36,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { Toast } from '../../overlays/Toast';
 import { useNavigationActions } from '../../types/NavigationActions';
 import { EventNotificationViewModel } from '../classes/EventNotificationViewModel';
-import EventNotificationView from '../EventNotificationView.vue';
+
 import { getEventNotificationSteps } from '../getEventNotificationSteps';
 import { useEventNotification } from '../hooks/useEventNotification';
 
@@ -69,7 +70,7 @@ defineRoute({
             const manager = new ViewStepsManager(steps, async ({ show }) => {
                 await show({
                     components: [
-                        new ComponentWithProperties(EventNotificationView, options.componentProperties),
+                        AsyncComponent(() => import('../EventNotificationView.vue'), options.componentProperties),
                     ],
                     replace: 1000,
                     force: true,
@@ -87,7 +88,7 @@ defineRoute({
             // Go to the general view
             await present({
                 components: [
-                    new ComponentWithProperties(EventNotificationView, options.componentProperties),
+                    AsyncComponent(() => import('../EventNotificationView.vue'), options.componentProperties),
                 ],
                 checkRoutes: options.checkRoutes,
                 url: options.url,

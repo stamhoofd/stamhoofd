@@ -1,10 +1,11 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
-import ChooseGroupForMemberView from '#members/ChooseGroupForMemberView.vue';
+
 import { loadFamilyIfNeeded } from '#members/hooks/useLoadFamily.ts';
 import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
@@ -12,7 +13,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '../../overlays/Toast';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
-import ChooseFamilyMembersForGroupView from '../ChooseFamilyMembersForGroupView.vue';
+
 import type { EditMemberStep } from '../classes/MemberStepManager';
 import { MemberStepManager } from '../classes/MemberStepManager';
 import { getAllMemberSteps } from '#members/classes/steps/getAllMemberSteps.ts';
@@ -285,7 +286,7 @@ export async function chooseFamilyMembersForGroup({ navigate, group, family, dis
     await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ChooseFamilyMembersForGroupView, {
+                root: AsyncComponent(() => import('../ChooseFamilyMembersForGroupView.vue'), {
                     family,
                     group,
                 }),
@@ -431,7 +432,7 @@ export async function chooseGroupForMember({ member, navigate, context, displayO
     await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ChooseGroupForMemberView, {
+                root: AsyncComponent(() => import('#members/ChooseGroupForMemberView.vue'), {
                     member,
                     defaultOrganization,
                     selectionHandler: async ({ group, groupOrganization }: { group: Group; groupOrganization: Organization }, navigate: NavigationActions) => {

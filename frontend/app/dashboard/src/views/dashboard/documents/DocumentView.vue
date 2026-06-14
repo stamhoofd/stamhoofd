@@ -83,10 +83,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+
 import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -159,7 +160,7 @@ function showContextMenu(event: MouseEvent) {
     const el = event.currentTarget as HTMLElement;
     const bounds = el.getBoundingClientRect();
 
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/tables/TableActionsContextMenu.vue'), {
         x: bounds.left,
         y: bounds.bottom,
         xPlacement: 'right',

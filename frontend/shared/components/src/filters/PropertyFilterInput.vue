@@ -96,6 +96,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, PropertyFilter, Version } from '@stamhoofd/structures';
 import { computed, onMounted, shallowRef } from 'vue';
@@ -107,7 +108,7 @@ import STListItem from '../layout/STListItem.vue';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import type { UIFilter, UIFilterBuilder } from './UIFilter';
 import { filterToString } from './UIFilter';
-import UIFilterEditor from './UIFilterEditor.vue';
+
 
 const model = defineModel<PropertyFilter | null>({ required: true });
 const props = withDefaults(defineProps<{
@@ -189,7 +190,7 @@ async function setEnabledWhen(useCache = false) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('./UIFilterEditor.vue'), {
                     filter,
                     saveHandler: (filter: UIFilter) => {
                         cachedEnabledFilter.value = filter.build();
@@ -223,7 +224,7 @@ async function setRequiredWhen(useCache = false) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('./UIFilterEditor.vue'), {
                     filter,
                     saveHandler: (filter: UIFilter) => {
                         cachedRequiredFilter.value = filter.build();

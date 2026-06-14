@@ -1,6 +1,7 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import ChargeOrganizationsView from '../ChargeOrganizationsView.vue';
+
 
 export function useChargeOrganizationsPopup() {
     const present = usePresent();
@@ -10,7 +11,7 @@ export function useChargeOrganizationsPopup() {
             await present({
                 modalDisplayStyle: 'popup',
                 components: [
-                    new ComponentWithProperties(ChargeOrganizationsView, {
+                    AsyncComponent(() => import('../ChargeOrganizationsView.vue'), {
                         filter,
                     }),
                 ],

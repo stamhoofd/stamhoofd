@@ -124,7 +124,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import MemberSegmentedView from '#members/MemberSegmentedView.vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+
 import PromiseView from '#containers/PromiseView.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useBackForward } from '#hooks/useBackForward.ts';
@@ -185,7 +186,7 @@ async function showMember(memberId: string) {
                     Toast.error($t(`%yX`)).show();
                     throw new Error('Member not found');
                 }
-                return new ComponentWithProperties(MemberSegmentedView, {
+                return AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
                     member: members.results[0],
                 });
             },

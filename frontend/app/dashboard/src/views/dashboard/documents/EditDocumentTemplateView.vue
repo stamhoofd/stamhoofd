@@ -125,6 +125,7 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -145,7 +146,7 @@ import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
+
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -156,7 +157,7 @@ import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/u
 import { computed, onMounted, ref, watch } from 'vue';
 
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
-import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
+
 import { fiscal } from './definitions/fiscal';
 import { participation } from './definitions/participation';
 
@@ -918,7 +919,7 @@ async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Na
     const category = patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories[index];
     await actions.show({
         components: [
-            new ComponentWithProperties(FillRecordCategoryView, {
+            AsyncComponent(() => import('@stamhoofd/components/records/FillRecordCategoryView.vue'), {
                 category,
                 value: group,
                 forceMarkReviewed: true,
@@ -937,7 +938,7 @@ async function addGroup() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
+                root: AsyncComponent(() => import('./ChooseDocumentTemplateGroup.vue'), {
                     year: year.value,
                     documentType: editingType.value,
                     addGroup: async (group: DocumentTemplateGroup, actions: NavigationActions) => {
@@ -980,7 +981,7 @@ function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
     }
 
     const category = patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories[index];
-    return new ComponentWithProperties(FillRecordCategoryView, {
+    return AsyncComponent(() => import('@stamhoofd/components/records/FillRecordCategoryView.vue'), {
         category,
         forceMarkReviewed: true,
         value: group,

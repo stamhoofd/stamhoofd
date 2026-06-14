@@ -2242,10 +2242,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.23.0.tgz#9861ba4b243c675b8eb3c8454472b26bbe75e3df"
   integrity sha512-O0o3AQgfvAO3GBBPZmmD4fytaSSQiQ2bK6tyi4sTAjHVmpJYA6ydDdwRgnD516WgNoaqNWYgUFg02+q++c+q0Q==
 
-"@simonbackx/vue-app-navigation@2.20.1":
-  version "2.20.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.20.1.tgz#075c04b4e8a949a7bfe83964d00b911f6419e034"
-  integrity sha512-8Qp2fsBQIXK01xkjFgJymE8KY/i4kHgJnp/G0S4zqXlbeRh6LgDPa3FxonqDkPjy74o1CPxEF8tHXAzGGUXHcw==
+"@simonbackx/vue-app-navigation@2.21.0":
+  version "2.21.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.21.0.tgz#adbbfdb1cfe62ec43e721c25ed9f6072e0e35f36"
+  integrity sha512-hOXAa3luFbso6uo+UPg7Rfn1HobtMreMeKJWTKUTVJb1C6AGdG1KX3zuFKXJKlKfj5kXP2IcYfCySfmR6HMWzw==
   dependencies:
     "@vue/shared" "^3.5.12"
 

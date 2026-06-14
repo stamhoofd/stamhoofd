@@ -72,7 +72,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
     const frontendDir = options.frontendDir;
 
     return {
-        mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
+        mode: process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test' ? 'development' : 'production',
         logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
         resolve: {
             dedupe: [
@@ -133,8 +133,14 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                     rollupOptions: {
                         treeshake: true,
                         output: {
-                            manualChunks: undefined,
-                            inlineDynamicImports: true,
+                            // One chunk per npm package > ~3 KB. Cache invalidation
+                            // becomes per-library instead of per-app-revision.
+                            manualChunks(id) {
+                                if (id.includes('node_modules')) {
+                                    const pkg = id.match(/node_modules\/([^/]+)/)?.[1];
+                                    if (pkg) return `vendor-${pkg}`;
+                                }
+                            },
                         },
                     },
                     cssCodeSplit: false,

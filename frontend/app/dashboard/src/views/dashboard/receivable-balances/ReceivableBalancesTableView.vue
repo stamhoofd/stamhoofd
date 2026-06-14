@@ -19,8 +19,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
+
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
 import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
@@ -36,7 +37,7 @@ import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableActi
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
@@ -177,7 +178,7 @@ const actions: TableAction<ObjectType>[] = [
             await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(ExcelExportView, {
+                        root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                             type: ExcelExportType.ReceivableBalances,
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
@@ -296,7 +297,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
     }
 
     const displayedComponent = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EmailView, {
+        root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
             recipientFilterOptions: $feature('organization-receivable-balances') ? [memberOptions, organizationOption] : [memberOptions],
         }),
     });

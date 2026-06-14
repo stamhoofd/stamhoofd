@@ -94,7 +94,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import EditParentView from '@stamhoofd/components/members/components/edit/EditParentView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
 import { useEditMember } from '@stamhoofd/components/members/hooks/useEditMember';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager';
@@ -120,7 +121,7 @@ async function editParent(parent: Parent) {
     const clone = memberManager.family.clone();
     await present({
         components: [
-            new ComponentWithProperties(EditParentView, {
+            AsyncComponent(() => import('@stamhoofd/components/members/components/edit/EditParentView.vue'), {
                 parent: parent.clone(),
                 isNew: false,
                 family: clone,

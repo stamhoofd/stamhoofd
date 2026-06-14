@@ -4,25 +4,20 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, ComponentWithPropertiesInstance, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController, useCurrentComponent } from '@simonbackx/vue-app-navigation';
-import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
-import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
+
 import { useLoginRoot } from '@stamhoofd/components/auth/useLoginRoot.ts';
-import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
+
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
-import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
+
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';
-import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
-import MembersMenu from './views/members/MembersMenu.vue';
-import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
-import WebshopsTableView from './views/webshops/WebshopsTableView.vue';
+
 import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
 
 const getLoginRoot = useLoginRoot();
@@ -51,7 +46,7 @@ function getNoPermissionsView() {
                 icon: 'key',
                 name: $t(`%GV`),
                 component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(NoPermissionsView, {}),
+                    root: AsyncComponent(() => import('@stamhoofd/components/auth/NoPermissionsView.vue'), {}),
                 }),
             }),
         ],
@@ -69,11 +64,11 @@ function getRoot() {
     });
 
     const membersTableView = new ComponentWithProperties(SplitViewController, {
-        root: new ComponentWithProperties(MembersMenu, {}),
+        root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {}),
     });
 
     const organizationsTableView = new ComponentWithProperties(SplitViewController, {
-        root: new ComponentWithProperties(OrganizationsMenu, {}),
+        root: AsyncComponent(() => import('./views/organizations/OrganizationsMenu.vue'), {}),
     });
 
     setTitleSuffix($t(`%GW`));
@@ -104,7 +99,7 @@ function getRoot() {
         icon: 'calendar',
         name: $t(`%uB`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ManageEventsView, {}),
+            root: AsyncComponent(() => import('@stamhoofd/components/events/ManageEventsView.vue'), {}),
         }),
     });
 
@@ -113,7 +108,7 @@ function getRoot() {
         icon: 'calculator',
         name: $t(`%GX`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ChargeMembershipsView, {}),
+            root: AsyncComponent(() => import('./views/finances/ChargeMembershipsView.vue'), {}),
         }),
     });
 
@@ -122,7 +117,7 @@ function getRoot() {
         icon: 'notification',
         name: $t(`%CV`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EventNotificationsTableView, {}),
+            root: AsyncComponent(() => import('./views/event-notifications/EventNotificationsTableView.vue'), {}),
         }),
     });
 
@@ -131,7 +126,7 @@ function getRoot() {
         icon: 'history',
         name: $t(`%GY`),
         component: new ComponentWithProperties(SplitViewController, {
-            root: new ComponentWithProperties(AuditLogsView, {
+            root: AsyncComponent(() => import('@stamhoofd/components/audit-logs/AuditLogsView.vue'), {
                 customRenderers: auditLogRenderers,
             }),
         }),
@@ -142,7 +137,7 @@ function getRoot() {
         icon: 'basket',
         name: $t('%1Pd'),
         component: new ComponentWithProperties(SplitViewController, {
-            root: new ComponentWithProperties(WebshopsTableView, {}),
+            root: AsyncComponent(() => import('./views/webshops/WebshopsTableView.vue'), {}),
         }),
     });
 
@@ -158,7 +153,7 @@ function getRoot() {
         icon: 'email-filled',
         name: $t(`%1DK`),
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(CommunicationView, {}),
+            root: AsyncComponent(() => import('@stamhoofd/components/communication/CommunicationView.vue'), {}),
         }),
     });
 

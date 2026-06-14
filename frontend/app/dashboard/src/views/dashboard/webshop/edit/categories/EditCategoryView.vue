@@ -52,6 +52,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -63,7 +64,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { Category, PrivateWebshop, Product, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditProductView from '../products/EditProductView.vue';
+
 import ProductRow from '../products/ProductRow.vue';
 
 const props = defineProps<{
@@ -124,7 +125,7 @@ function addProduct() {
     cp.productIds.addPut(product.id);
     p.categories.addPatch(cp);
 
-    present(new ComponentWithProperties(EditProductView, { product, webshop: patched.value.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+    present(AsyncComponent(() => import('../products/EditProductView.vue'), { product, webshop: patched.value.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
         // Merge both patches
         addPatch(p.patch(patch));
 

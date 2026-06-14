@@ -4,16 +4,15 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
-import type { Organization } from '@stamhoofd/structures';
-import { AppRoute } from '@stamhoofd/structures';
-import { wrapAndReplace } from './wrapAndReplace';
-import type { SharedOptions } from './wrapAndReplace';
-import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
 import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
-import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
-import type { Ref } from 'vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import type { Organization } from '@stamhoofd/structures';
+import { AppRoute } from '@stamhoofd/structures';
+import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
+import type { SharedOptions } from './wrapAndReplace';
+import { wrap, wrapAndReplace } from './wrapAndReplace';
 
 provideAppNavigate(useNavigate());
 
@@ -68,7 +67,7 @@ async function loadRegistration(organization: Organization | null, options: Shar
 async function loadAuto(organization: Organization | null, options: SharedOptions) {
     console.error('Loading auto after', organization?.clone());
     const auto = await import('@stamhoofd/auto');
-    await wrapAndReplace(organization, 'auto', new ComponentWithProperties(auto.App, {}), options);
+    return await wrap(organization, 'auto', new ComponentWithProperties(auto.App, {}), options);
 }
 
 async function showSpinner() {
@@ -169,21 +168,21 @@ if (orgInDomain) {
             email: query?.get('email') ?? '',
             code: query?.get('code') ?? undefined,
         }),
-        handler: async (options) => {
+        component: async (options) => {
             await showSpinner();
             await loadVerifyEmail(await orgInDomain(), options);
         },
         propsToParams: props => ({
             query: props.code
                 ? new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                    ['code', props.code],
-                ])
+                        ['token', props.token],
+                        ['email', props.email],
+                        ['code', props.code],
+                    ])
                 : new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                ]),
+                        ['token', props.token],
+                        ['email', props.email],
+                    ]),
         }),
     });
 } else if (STAMHOOFD.userMode === 'platform') {
@@ -202,14 +201,14 @@ if (orgInDomain) {
         propsToParams: props => ({
             query: props.code
                 ? new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                    ['code', props.code],
-                ])
+                        ['token', props.token],
+                        ['email', props.email],
+                        ['code', props.code],
+                    ])
                 : new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                ]),
+                        ['token', props.token],
+                        ['email', props.email],
+                    ]),
         }),
     });
 } else {
@@ -242,14 +241,14 @@ if (orgInDomain) {
             },
             query: props.code
                 ? new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                    ['code', props.code],
-                ])
+                        ['token', props.token],
+                        ['email', props.email],
+                        ['code', props.code],
+                    ])
                 : new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                ]),
+                        ['token', props.token],
+                        ['email', props.email],
+                    ]),
         }),
         handler: async (options) => {
             await showSpinner();
@@ -264,18 +263,18 @@ if (orgInDomain) {
         name: AppRoute.OrgScopedAuto,
         url: '',
         isDefault: {},
-        handler: async (options) => {
-            await showSpinner();
-            await loadAuto(await orgInDomain(), options);
+        force: true,
+        replace: 100,
+        component: async () => {
+            return await loadAuto(await orgInDomain(), {});
         },
     });
 } else {
     defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.OrgScopedAuto,
         url: 'auto/@organizationUri',
-        handler: async (options) => {
-            await showSpinner();
-            await loadAuto(options.componentProperties.organization, options);
+        component: async (properties) => {
+            return await loadAuto(properties.organization, {});
         },
         ...orgInUriParams,
     });
@@ -283,9 +282,10 @@ if (orgInDomain) {
         name: AppRoute.UnscopedAuto,
         url: '',
         isDefault: {},
-        handler: async (options) => {
-            await showSpinner();
-            await loadAuto(null, options);
+        force: true,
+        replace: 100,
+        component: async () => {
+            return await loadAuto(null, {});
         },
     });
 }

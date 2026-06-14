@@ -21,7 +21,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Order, Organization, TicketPublic, Webshop} from '@stamhoofd/structures';
 import { WebshopTicketType } from '@stamhoofd/structures';
@@ -47,7 +48,7 @@ function openTicket() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(DetailedTicketView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/DetailedTicketView.vue'), {
                     ticket: props.ticket,
                     order: props.order,
                     webshop: props.webshop,

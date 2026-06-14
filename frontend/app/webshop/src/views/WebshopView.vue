@@ -65,6 +65,7 @@
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { useDismiss, usePopup } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
@@ -75,7 +76,7 @@ import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import PaymentPendingView from '@stamhoofd/components/payments/PaymentPendingView.vue';
+
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
 import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
@@ -86,11 +87,11 @@ import { LoginProviderType, PaymentStatus } from '@stamhoofd/structures';
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
 import { useWebshopManager } from '../composables/useWebshopManager';
-import CartView from './checkout/CartView.vue';
+
 import type { CheckoutStep } from './checkout/CheckoutStepsManager';
 import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
-import OrderView from './orders/OrderView.vue';
-import TicketView from './orders/TicketView.vue';
+
+
 
 import FullPageProduct from './FullPageProduct.vue';
 
@@ -211,7 +212,7 @@ function openCart(animated = true, components: ComponentWithProperties[] = []) {
     }
 
     const getCartComponentWithUrl = () => {
-        const cartComponent = new ComponentWithProperties(CartView);
+        const cartComponent = AsyncComponent(() => import('./checkout/CartView.vue'), {});
         cartComponent.provide.reactive_navigation_url = 'cart';
         return cartComponent;
     };
@@ -317,7 +318,7 @@ onMounted(() => {
             animated: false,
             adjustHistory: false,
             components: [
-                new ComponentWithProperties(OrderView, { orderId }),
+                AsyncComponent(() => import('./orders/OrderView.vue'), { orderId }),
             ],
             url: path.join('/'),
         }).catch(console.error);
@@ -328,7 +329,7 @@ onMounted(() => {
             animated: false,
             adjustHistory: false,
             components: [
-                new ComponentWithProperties(TicketView, { secret }),
+                AsyncComponent(() => import('./orders/TicketView.vue'), { secret }),
             ],
             url: path.join('/'),
         }).catch(console.error);
@@ -342,7 +343,7 @@ onMounted(() => {
             animated: false,
             force: true,
             components: [
-                new ComponentWithProperties(PaymentPendingView, {
+                AsyncComponent(() => import('@stamhoofd/components/payments/PaymentPendingView.vue'), {
                     server: webshopManager.server,
                     paymentId,
                     cancel,
@@ -355,7 +356,7 @@ onMounted(() => {
                                 // So replace with a force instead of dimissing
                                 present({
                                     components: [
-                                        new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
+                                        AsyncComponent(() => import('./orders/OrderView.vue'), { paymentId: payment.id, success: true }),
                                     ],
                                     replace: 1,
                                     force: true,
@@ -367,7 +368,7 @@ onMounted(() => {
                                 navigationActions.dismiss({ force: true, animated: true }).catch(console.error);
                                 present({
                                     components: [
-                                        new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
+                                        AsyncComponent(() => import('./orders/OrderView.vue'), { paymentId: payment.id, success: true }),
                                     ],
                                 }).catch(console.error);
                             }

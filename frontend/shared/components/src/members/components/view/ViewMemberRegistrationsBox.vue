@@ -42,6 +42,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
@@ -62,7 +63,7 @@ import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { Toast } from '../../../overlays/Toast';
 import { getDeleteInvitationAction } from '../../../registrations/classes/RegistrationInvitationActionBuilder';
 import type { TableActionSelection } from '#tables/classes/TableAction.ts';
-import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
+
 import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useRegistrationsActionBuilder } from '../../classes/RegistrationsActionBuilder';
 import ViewMemberInvitationRow from './ViewMemberInvitationRow.vue';
@@ -185,7 +186,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
         markedRowsAreSelected: true,
     };
 
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('../../../tables/TableActionsContextMenu.vue'), {
         x: bounds.right,
         y: bounds.bottom,
         xPlacement: 'left',
@@ -243,7 +244,7 @@ async function editInvitation(memberRegistrationInvitation: MemberRegistrationIn
         markedRowsAreSelected: true,
     };
 
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('../../../tables/TableActionsContextMenu.vue'), {
         x: bounds.right,
         y: bounds.bottom,
         xPlacement: 'left',

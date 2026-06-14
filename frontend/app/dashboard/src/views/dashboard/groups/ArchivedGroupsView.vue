@@ -38,6 +38,7 @@
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -48,7 +49,7 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import type { Group } from '@stamhoofd/structures';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
-import GroupOverview from './GroupOverview.vue';
+
 
 const organizationManager = useOrganizationManager();
 const show = useShow();
@@ -72,7 +73,7 @@ async function load() {
 async function openGroup(group: Group) {
     await show({
         components: [
-            new ComponentWithProperties(GroupOverview, {
+            AsyncComponent(() => import('./GroupOverview.vue'), {
                 group,
             }),
         ],

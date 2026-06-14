@@ -6,7 +6,7 @@
     "sideEffects": false,
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.8",
-        "@simonbackx/vue-app-navigation": "2.20.1",
+        "@simonbackx/vue-app-navigation": "2.21.0",
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/structures": "*",

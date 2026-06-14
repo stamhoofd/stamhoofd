@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { AuditLog} from '@stamhoofd/structures';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -38,7 +39,7 @@ import { computed } from 'vue';
 import IconContainer from '../../icons/IconContainer.vue';
 import ProgressIcon from '../../icons/ProgressIcon.vue';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import AuditLogsView from '../AuditLogsView.vue';
+
 import PatchListText from './PatchListText.vue';
 import type { AuditLogCustomRenderers } from './RenderTextComponent';
 import { RenderTextComponent } from './RenderTextComponent';
@@ -100,7 +101,7 @@ async function showContext(event: MouseEvent) {
                 action: async () => {
                     await present({
                         components: [
-                            new ComponentWithProperties(AuditLogsView, {
+                            AsyncComponent(() => import('../AuditLogsView.vue'), {
                                 objectIds: [props.log.objectId],
                                 customRenderers: props.customRenderers,
                             }),

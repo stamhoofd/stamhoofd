@@ -18,9 +18,9 @@ import { useGlobalRoutes } from './useGlobalRoutes';
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
 }
-export type SharedOptions = { url: string | null | Ref<string | null>; query: URLSearchParams | null | Ref<URLSearchParams | null>; checkRoutes: boolean };
+export type SharedOptions = { url?: string | null | Ref<string | null>; query?: URLSearchParams | null | Ref<URLSearchParams | null>; checkRoutes?: boolean };
 
-export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: SharedOptions) {
+export async function wrap(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: SharedOptions) {
     const onOurDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
 
     if ((STAMHOOFD.singleOrganization || organization?.resolvedRegisterDomain) && !onOurDomain) {
@@ -64,6 +64,11 @@ export async function wrapAndReplace(organization: Organization | null = null, a
         })),
     });
 
+    return root;
+}
+
+export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: SharedOptions) {
+    const root = await wrap(organization, app, component, options);
     if (options.checkRoutes) {
         root.setCheckRoutes();
     }

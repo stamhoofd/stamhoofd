@@ -1,3 +1,4 @@
+import { isModuleImportError } from '#errors/isModuleImportError.ts';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { reactive } from 'vue';
@@ -85,6 +86,10 @@ export class Toast {
                 code: 'unknown_error',
                 message: (errors as Error).message,
             }));
+        }
+
+        if (isModuleImportError((errors as Error))) {
+            return new Toast($t(`%ge`), 'error red');
         }
 
         if (Request.isNetworkError((errors as Error))) {

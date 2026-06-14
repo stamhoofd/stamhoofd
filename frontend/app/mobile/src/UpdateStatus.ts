@@ -2,13 +2,14 @@ import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UpdateOptions } from '@stamhoofd/networking/AppManager';
 import { sleep } from '@stamhoofd/utility';
 
-import CheckUpdateView from './CheckUpdateView.vue';
+
 
 class Release extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -146,7 +147,7 @@ export class UpdateStatus {
         this.shouldBeVisible = true;
         ModalStackEventBus.sendEvent('present', {
             components: [
-                new ComponentWithProperties(CheckUpdateView, {
+                AsyncComponent(() => import('./CheckUpdateView.vue'), {
                     status: this,
                 }),
             ],

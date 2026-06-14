@@ -44,7 +44,7 @@ import { inject, shallowRef } from 'vue';
 import { GlobalEventBus } from '../EventBus';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
 import type TabBarController from './TabBarController.vue';
-import TabBarDropdownView from './TabBarDropdownView.vue';
+
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
     const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController> | Ref<InstanceType<typeof TabBarController>>;
@@ -79,6 +79,7 @@ export function useHideTabBar() {
 
 <script setup lang="ts">
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { ComponentPublicInstance, Ref } from 'vue';
@@ -107,7 +108,7 @@ const tabs = computed(() => {
                     new TabBarItem({
                         ...t,
                         component: new ComponentWithProperties(NavigationController, {
-                            root: new ComponentWithProperties(TabBarDropdownView, {
+                            root: AsyncComponent(() => import('./TabBarDropdownView.vue'), {
                                 group: t,
                                 selectedItem: selectedItem,
                                 selectItem: selectItem,
@@ -318,7 +319,7 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem | TabBarItemGroup) =
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(TabBarDropdownView, {
+                root: AsyncComponent(() => import('./TabBarDropdownView.vue'), {
                     group: tab,
                     selectedItem: selectedItem,
                     selectItem: selectItem,

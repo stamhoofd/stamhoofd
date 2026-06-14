@@ -103,6 +103,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
@@ -111,7 +112,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import EditEmailTemplateView from './EditEmailTemplateView.vue';
+
 
 const props = withDefaults(
     defineProps<{
@@ -266,7 +267,7 @@ function getTemplatePrefix(emailTemplate: EmailTemplate) {
 async function editEmail(emailTemplate: EmailTemplate) {
     await present({
         components: [
-            new ComponentWithProperties(EditEmailTemplateView, {
+            AsyncComponent(() => import('./EditEmailTemplateView.vue'), {
                 prefix: getTemplatePrefix(emailTemplate),
                 emailTemplate,
                 isNew: !emailTemplate.id,

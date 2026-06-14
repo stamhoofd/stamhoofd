@@ -238,14 +238,15 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
 import { FileType, PermissionLevel, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditRecordChoiceView from './EditRecordChoiceView.vue';
+
 import type { RecordEditorSettings } from './RecordEditorSettings';
 import { RecordEditorType } from './RecordEditorSettings';
-import PreviewRecordView from './components/PreviewRecordView.vue';
+
 import RecordChoiceRow from './components/RecordChoiceRow.vue';
 
 const props = withDefaults(defineProps<{
@@ -693,7 +694,7 @@ function addChoicesPatch(patch: PatchableArrayAutoEncoder<RecordChoice>) {
 function addChoice() {
     const choice = RecordChoice.create({});
 
-    present(new ComponentWithProperties(EditRecordChoiceView, {
+    present(AsyncComponent(() => import('./EditRecordChoiceView.vue'), {
         choice,
         isNew: true,
         parentRecord: patchedRecord.value,
@@ -765,7 +766,7 @@ const shouldNavigateAway = async () => {
 };
 
 function openPreview() {
-    present(new ComponentWithProperties(PreviewRecordView, {
+    present(AsyncComponent(() => import('./components/PreviewRecordView.vue'), {
         record: patchedRecord,
     }).setDisplayStyle('popup')).catch(console.error);
 }

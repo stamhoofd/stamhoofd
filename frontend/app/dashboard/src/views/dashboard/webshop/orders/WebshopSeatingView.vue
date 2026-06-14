@@ -36,6 +36,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import SeatSelectionBox from '@stamhoofd/components/views/SeatSelectionBox.vue';
@@ -49,9 +50,9 @@ import { PermissionLevel, PrivateOrderWithTickets } from '@stamhoofd/structures'
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Ref} from 'vue';
 import { computed, onBeforeUnmount, ref } from 'vue';
-import EditSeatingPlanView from '../edit/seating/EditSeatingPlanView.vue';
+
 import type { WebshopManager } from '../WebshopManager';
-import OrderView from './OrderView.vue';
+
 
 const props = defineProps<{
     webshopManager: WebshopManager;
@@ -184,7 +185,7 @@ const highlightedSeats = ref<ReservedSeat[]>([]);
 function editSeatingPlan() {
     present({
         components: [
-            new ComponentWithProperties(EditSeatingPlanView, {
+            AsyncComponent(() => import('../edit/seating/EditSeatingPlanView.vue'), {
                 webshop: webshop.value,
                 seatingPlan: seatingPlan.value,
                 isNew: false,
@@ -354,7 +355,7 @@ function reload() {
 
 function openOrder(order: PrivateOrderWithTickets) {
     const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(OrderView, {
+        root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
         }),

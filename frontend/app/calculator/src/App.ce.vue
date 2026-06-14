@@ -7,6 +7,7 @@
 
 <script lang="ts" setup>
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
@@ -16,7 +17,9 @@ import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import webfontsString from 'virtual:vite-svg-2-webfont.css?inline';
 import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import CalculatorView from './CalculatorView.vue';
+
 const root = new ComponentWithProperties(NavigationController, {
+    // eslint-disable-next-line stamhoofd/async-component-with-properties
     root: new ComponentWithProperties(CalculatorView, {}),
 });
 
@@ -24,7 +27,7 @@ const root = new ComponentWithProperties(NavigationController, {
 const splitted = webfontsString.split(/(^@font-face\{[^}]*\})/, 3);
 const [, fontFaceDefinition, restOfCss] = splitted;
 if (!fontFaceDefinition || !restOfCss) {
-    console.error('Could not split font face css', splitted, webfontsString)
+    console.error('Could not split font face css', splitted, webfontsString);
 }
 
 // Get shadow dom and inject a new style element with webfontsString as content
@@ -59,8 +62,7 @@ watch(modalStack, (modalStack) => {
     ModalStackEventBus.addListener(owner, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (!(options as any).components) {
             await modalStack.present({ components: [options] });
-        }
-        else {
+        } else {
             await modalStack.present(options);
         }
     });

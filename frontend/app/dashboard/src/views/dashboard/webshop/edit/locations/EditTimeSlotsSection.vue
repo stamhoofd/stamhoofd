@@ -43,13 +43,14 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { PrivateWebshop} from '@stamhoofd/structures';
 import { WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditTimeSlotView from './EditTimeSlotView.vue';
+
 
 const props = defineProps<{
     title: string;
@@ -76,7 +77,7 @@ function addTimeSlot() {
     const p = WebshopTimeSlots.patch({});
     p.timeSlots.addPut(timeSlot);
 
-    present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: props.timeSlots.patch(p), isNew: true, webshop: props.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+    present(AsyncComponent(() => import('./EditTimeSlotView.vue'), { timeSlots: props.timeSlots.patch(p), isNew: true, webshop: props.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
         // Merge both patches
         addPatch(p.patch(patch));
 
@@ -85,7 +86,7 @@ function addTimeSlot() {
 }
 
 function editTimeSlot(timeSlot: WebshopTimeSlot) {
-    present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: props.timeSlots, isNew: false, webshop: props.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+    present(AsyncComponent(() => import('./EditTimeSlotView.vue'), { timeSlots: props.timeSlots, isNew: false, webshop: props.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
         addPatch(patch);
 
         // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

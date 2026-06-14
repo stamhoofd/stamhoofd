@@ -1,8 +1,9 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, unwrapFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 
-import StringUIFilterView from './StringUIFilterView.vue';
+
 import { StringFilterMode } from './StringFilterMode';
 import type { StyledDescriptionChoice, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
@@ -94,7 +95,7 @@ export class StringUIFilter extends UIFilter<StringFilterBuilder> {
     }
 
     getComponent(): ComponentWithProperties {
-        return new ComponentWithProperties(StringUIFilterView, {
+        return AsyncComponent(() => import('./StringUIFilterView.vue'), {
             filter: this,
         });
     }

@@ -37,8 +37,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, useCanDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { useDismiss } from '@simonbackx/vue-app-navigation';
-import CartItemView from '#views/CartItemView.vue';
+
 import type { Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Cart, CartItem, CartStockHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -168,7 +169,7 @@ function onClicked() {
     }
 
     if (canDismiss.value) {
-        show(new ComponentWithProperties(CartItemView, {
+        show(AsyncComponent(() => import('#views/CartItemView.vue'), {
             admin: props.admin,
             cartItem,
             oldItem,
@@ -181,7 +182,7 @@ function onClicked() {
         present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(CartItemView, {
+                    root: AsyncComponent(() => import('#views/CartItemView.vue'), {
                         admin: props.admin,
                         cartItem,
                         oldItem,

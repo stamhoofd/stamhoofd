@@ -5,11 +5,12 @@
 <script setup lang="ts">
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { DetailedReceivableBalance } from '@stamhoofd/structures';
 import { BalanceItem, DetailedPayableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import DiscountsSheet from './components/DiscountsSheet.vue';
+
 
 const props = defineProps<{
     item: DetailedPayableBalance | DetailedReceivableBalance;
@@ -84,7 +85,7 @@ async function showDiscountSheet(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(DiscountsSheet, {
+                root: AsyncComponent(() => import('./components/DiscountsSheet.vue'), {
                     items: props.item.discountBalanceItems
                 }),
             }),

@@ -67,17 +67,18 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 import CompanyInputBox from '#organizations/components/CompanyInputBox.vue';
-import GeneralSettingsView from '#organizations/GeneralSettingsView.vue';
+
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Checkoutable, RegisterCheckout } from '@stamhoofd/structures';
 import { Company, Organization, OrganizationMetaData, PaymentCustomer } from '@stamhoofd/structures';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import CompanyRow from '../../companies/CompanyRow.vue';
-import EditCompanyView from '../../organizations/components/EditCompanyView.vue';
+
 import { usePatchOrganization } from '../../organizations/usePatchOrganization';
 
 const props = withDefaults(
@@ -123,7 +124,7 @@ async function openEditCompany(company: Company) {
     }
     await present({
         components: [
-            new ComponentWithProperties(EditCompanyView, {
+            AsyncComponent(() => import('../../organizations/components/EditCompanyView.vue'), {
                 company,
                 isNew: false,
                 saveHandler: async (patch: AutoEncoderPatchType<Company>) => {
@@ -163,9 +164,7 @@ function buildCustomer() {
 async function editInvoiceSettings() {
     await present({
         components: [
-            new ComponentWithProperties(
-                GeneralSettingsView,
-            ),
+            AsyncComponent(() => import('#organizations/GeneralSettingsView.vue'), {}),
         ],
         modalDisplayStyle: 'popup',
     });

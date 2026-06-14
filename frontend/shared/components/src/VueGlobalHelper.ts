@@ -5,14 +5,18 @@ import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { App, ComponentPublicInstance } from 'vue';
 
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { importWithRetry } from '#containers/AsyncComponent.ts';
 import LoadingView from '#containers/LoadingView.vue';
 import { useAppContext } from '#context/appContext.ts';
 import CopyableDirective from '#directives/Copyable.ts';
 import LongPressDirective from '#directives/LongPress.ts';
 import TooltipDirective from '#directives/Tooltip.ts';
 import { GlobalEventBus } from '#EventBus.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
 import Checkbox from '#inputs/Checkbox.vue';
 import Radio from '#inputs/Radio.vue';
 import STList from '#layout/STList.vue';
@@ -20,16 +24,13 @@ import SaveView from '#navigation/SaveView.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import Spinner from '#Spinner.vue';
 import { ViewportHelper } from '#ViewportHelper.ts';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import PromiseView from './containers/PromiseView.vue';
 import { AutofocusDirective } from './directives/AutofocusDirective';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
-import { useContext } from '#hooks/useContext.ts';
-import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import { useUser } from '#hooks/useUser.ts';
 import STInputBox from './inputs/STInputBox.vue';
 import TInput from './inputs/TInput.vue';
 import TTextarea from './inputs/TTextarea.vue';
@@ -37,10 +38,10 @@ import STListItem from './layout/STListItem.vue';
 import LoadingButton from './navigation/LoadingButton.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
 
-export type ComponentExposed<T> =
-	T extends new (...args: any[]) => infer E ? E :
-	    T extends ((props: any, ctx: any, expose: (exposed: infer E) => any, ...args: any[]) => any) ? NonNullable<E> :
-	        object;
+export type ComponentExposed<T>
+    = T extends new (...args: any[]) => infer E ? E
+        : T extends ((props: any, ctx: any, expose: (exposed: infer E) => any, ...args: any[]) => any) ? NonNullable<E>
+            : object;
 
 /**
  * Return false if it should not cancel the default behaviour
@@ -103,6 +104,8 @@ function focusNextElement() {
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
         (window as any).PromiseComponent = PromiseView;
+        (window as any)._importWithRetry = importWithRetry;
+
         app.config.globalProperties.$country = 'BE'; // todo
         app.config.globalProperties.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
         app.config.globalProperties.$focusNext = () => {

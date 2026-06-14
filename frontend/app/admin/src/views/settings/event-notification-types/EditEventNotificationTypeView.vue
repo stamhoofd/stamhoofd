@@ -59,6 +59,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useEventNotificationInMemoryFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
@@ -75,7 +76,7 @@ import type { EventNotificationType, RecordCategory } from '@stamhoofd/structure
 import { Address, BaseOrganization, EventNotification, EventNotificationDeadline } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
-import EditEventNotificationDeadlineView from './EditEventNotificationDeadlineView.vue';
+
 
 const errors = useErrors();
 const saving = ref(false);
@@ -196,7 +197,7 @@ async function addDeadline() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditEventNotificationDeadlineView, {
+            AsyncComponent(() => import('./EditEventNotificationDeadlineView.vue'), {
                 deadline,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<EventNotificationDeadline>) => {
@@ -213,7 +214,7 @@ async function editDeadline(deadline: EventNotificationDeadline) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditEventNotificationDeadlineView, {
+            AsyncComponent(() => import('./EditEventNotificationDeadlineView.vue'), {
                 deadline,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<EventNotificationDeadline>) => {

@@ -15,10 +15,11 @@
 <script lang="ts" setup>
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { WebshopField } from '@stamhoofd/structures';
 
-import EditWebshopFieldView from './EditWebshopFieldView.vue';
+
 
 const props = defineProps<{
     field: WebshopField;
@@ -32,7 +33,7 @@ const emits = defineEmits<{
 }>();
 
 function editField() {
-    present(new ComponentWithProperties(EditWebshopFieldView, { field: props.field, isNew: false, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
+    present(AsyncComponent(() => import('./EditWebshopFieldView.vue'), { field: props.field, isNew: false, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
         emits('patch', patch);
 
         // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

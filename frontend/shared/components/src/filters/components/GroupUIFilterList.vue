@@ -45,13 +45,14 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import { computed } from 'vue';
 import Dropdown from '../../inputs/Dropdown.vue';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { GroupUIFilter, GroupUIFilterMode } from '../GroupUIFilter';
 import type { StyledDescriptionChoice, UIFilter } from '../UIFilter';
-import UIFilterEditor from '../UIFilterEditor.vue';
+
 
 const props = defineProps<{
     filter: GroupUIFilter;
@@ -94,7 +95,7 @@ async function showChoices(event: MouseEvent, choices: StyledDescriptionChoice[]
 async function editFilter(index: number, filter: UIFilter) {
     await show({
         components: [
-            new ComponentWithProperties(UIFilterEditor, {
+            AsyncComponent(() => import('../UIFilterEditor.vue'), {
                 filter,
                 saveHandler: (f: UIFilter) => {
                     const ff = f.flatten();

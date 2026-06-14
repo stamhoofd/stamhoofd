@@ -11,9 +11,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { EmailInformation } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import EmailInformationView from './EmailAddressInformationView.vue';
+
 import { useEmailInformation } from '../hooks/useEmailInformation';
 import { useEmailWarning } from '../hooks/useEmailWarning';
 import { useAuth } from '../hooks/useAuth';
@@ -40,7 +41,7 @@ function onClickEmail() {
 
 async function presentEmailInformation(emailInformation: EmailInformation) {
     const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EmailInformationView, {
+        root: AsyncComponent(() => import('./EmailAddressInformationView.vue'), {
             emailInformation,
         }),
     });

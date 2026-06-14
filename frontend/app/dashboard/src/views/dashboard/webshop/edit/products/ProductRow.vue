@@ -29,6 +29,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -37,7 +38,7 @@ import { Category, PrivateWebshop } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { computed } from 'vue';
-import EditProductView from './EditProductView.vue';
+
 
 const props = withDefaults(defineProps<{
     product: Product;
@@ -58,7 +59,7 @@ const emits = defineEmits<{
 }>();
 
 function editProduct() {
-    present(new ComponentWithProperties(EditProductView, { product: props.product, webshop: props.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+    present(AsyncComponent(() => import('./EditProductView.vue'), { product: props.product, webshop: props.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
         emits('patch', patch);
 
         // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

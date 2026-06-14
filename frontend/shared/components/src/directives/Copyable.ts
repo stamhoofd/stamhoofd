@@ -1,5 +1,4 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-
 import type { ObjectDirective } from 'vue';
 import { ModalStackEventBus } from '../overlays/ModalStackEventBus';
 import Tooltip from '../overlays/Tooltip.vue';
@@ -21,8 +20,7 @@ const helper = {
         if (w.getSelection) {
             if (w.getSelection().empty) { // Chrome
                 w.getSelection().empty();
-            }
-            else if (w.getSelection().removeAllRanges) { // Firefox
+            } else if (w.getSelection().removeAllRanges) { // Firefox
                 w.getSelection().removeAllRanges();
             }
         }
@@ -36,7 +34,7 @@ const helper = {
         if (!_el || !(_el instanceof HTMLElement)) {
             return;
         }
-        const el = _el as HTMLElement & {$tooltipDisplayedComponent?: undefined | null |  ComponentWithProperties};
+        const el = _el as HTMLElement & { $tooltipDisplayedComponent?: undefined | null | ComponentWithProperties };
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
@@ -61,8 +59,7 @@ const helper = {
             try {
                 (el.$tooltipDisplayedComponent.componentInstance() as any)?.hide?.();
                 el.$tooltipDisplayedComponent = null;
-            }
-            catch (e) {
+            } catch (e) {
                 // ignore
             }
         }
@@ -88,8 +85,7 @@ const helper = {
                 console.error(e);
                 this.copyElementFallback(event);
             });
-        }
-        else {
+        } else {
             console.warn('No navigator.clipboard support');
             this.copyElementFallback(event);
         }

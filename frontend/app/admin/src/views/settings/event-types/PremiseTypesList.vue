@@ -19,9 +19,10 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { PlatformPremiseType } from '@stamhoofd/structures';
-import EditBuildingTypeView from './EditPremiseTypeView.vue';
+
 import PremiseTypeRow from './components/PremiseTypeRow.vue';
 
 const errors = useErrors();
@@ -43,7 +44,7 @@ async function addType() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditBuildingTypeView, {
+            AsyncComponent(() => import('./EditPremiseTypeView.vue'), {
                 type,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPremiseType>) => {
@@ -60,7 +61,7 @@ async function editType(type: PlatformPremiseType) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditBuildingTypeView, {
+            AsyncComponent(() => import('./EditPremiseTypeView.vue'), {
                 type,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPremiseType>) => {

@@ -110,15 +110,16 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { UitpasOrganizerResponse, UitpasEventResponse } from '@stamhoofd/structures';
 import { OrganizationMetaData, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper } from '@stamhoofd/structures';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import SearchUitpasOrganizerView from '@stamhoofd/components/organizations/components/SearchUitpasOrganizerView.vue';
-import SetUitpasClientCredentialsView from '@stamhoofd/components/organizations/components/SetUitpasClientCredentialsView.vue';
+
+
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import ProgressIcon from '@stamhoofd/components/icons/ProgressIcon.vue';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import SearchUitpasEventView from '@stamhoofd/components/organizations/components/SearchUitpasEventView.vue';
+
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
@@ -168,7 +169,7 @@ const uitpasClientCredentialsStatus = computed(() => organizationManager.value.o
 
 const openSearchOrganizer = async () => {
     await show(
-        new ComponentWithProperties(SearchUitpasOrganizerView, {
+        AsyncComponent(() => import('@stamhoofd/components/organizations/components/SearchUitpasOrganizerView.vue'), {
             title: $t('%1Br'),
             selectOrganizer: async (organizer: UitpasOrganizerResponse, { pop }: NavigationActions) => {
                 uitpasOrganizerName.value = organizer.name;
@@ -188,7 +189,7 @@ const openSearchOrganizer = async () => {
 const openSetUitpasClientCredentialsView = async () => {
     present({
         components: [
-            new ComponentWithProperties(SetUitpasClientCredentialsView, {
+            AsyncComponent(() => import('@stamhoofd/components/organizations/components/SetUitpasClientCredentialsView.vue'), {
                 onFixed: async ({ dismiss }: NavigationActions) => {
                     await dismiss({ force: true });
                     if (props.onFixedAndEventSelected && uitpasEvent.value) {
@@ -204,7 +205,7 @@ const openSetUitpasClientCredentialsView = async () => {
 const openSearchUitpasEvent = async () => {
     await show({
         components: [
-            new ComponentWithProperties(SearchUitpasEventView, {
+            AsyncComponent(() => import('@stamhoofd/components/organizations/components/SearchUitpasEventView.vue'), {
                 title: $t('%1Bs'),
                 selectEvent: async (event: UitpasEventResponse | null, navigationActions: NavigationActions) => {
                     uitpasEvent.value = event;

@@ -32,9 +32,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
-import type { ComputedRef, Ref} from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import { computed, nextTick, onActivated, onBeforeMount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useIsMobile } from '#hooks/useIsMobile.ts';
 import DateSelectionView from '../overlays/DateSelectionView.vue';
@@ -120,8 +121,7 @@ const selectedDay = computed(() => {
     let d = DateTime.fromObject(defaultLocalTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone);
     if (model.value) {
         d = setTime(Formatter.luxon(model.value));
-    }
-    else if (props.placeholderDate) {
+    } else if (props.placeholderDate) {
         d = setTime(Formatter.luxon(props.placeholderDate));
     }
     d = limitDateTime(d) ?? d;
@@ -275,33 +275,27 @@ const onKey = (event: KeyboardEvent) => {
     if (key === 'Backspace' && config.model.value.length === 0) {
         if (index > 0) {
             selectNext(index - 1);
-        }
-        else {
+        } else {
             blurAllIfValid();
         }
         event.preventDefault();
-    }
-    else if (key === 'ArrowLeft') {
+    } else if (key === 'ArrowLeft') {
         if (index > 0) {
             selectNext(index - 1);
-        }
-        else {
+        } else {
             blurAllIfValid();
         }
         event.preventDefault();
-    }
-    else if (key === 'ArrowRight') {
+    } else if (key === 'ArrowRight') {
         selectNext(index + 1);
         event.preventDefault();
-    }
-    else if (key === 'ArrowUp' || key === 'PageUp') {
+    } else if (key === 'ArrowUp' || key === 'PageUp') {
         const value = parseInt(config.model.value);
         if (!isNaN(value) && value < config.max) {
             config.model.value = ((value + 1).toString());
         }
         event.preventDefault();
-    }
-    else if (key === 'ArrowDown' || key === 'PageDown') {
+    } else if (key === 'ArrowDown' || key === 'PageDown') {
         const value = parseInt(config.model.value);
         if (!isNaN(value) && value > config.min) {
             config.model.value = ((value - 1).toString());
@@ -327,8 +321,7 @@ async function updateHasFocus() {
 
     if (isMobile) {
         focus = false;
-    }
-    else if (displayedComponent) {
+    } else if (displayedComponent) {
         const instance = displayedComponent.componentInstance();
         if (instance) {
             if (instance.$el && document.activeElement && instance.$el.contains(document.activeElement)) {
@@ -344,8 +337,7 @@ async function updateHasFocus() {
         if (hasFocus.value !== initial) {
             openContextMenu(false);
         }
-    }
-    else {
+    } else {
         hasFocus.value = false;
         updateText();
 
@@ -471,8 +463,7 @@ function selectNext(index: number) {
             // iOS fix
             nextInput.select();
         }
-    }
-    else {
+    } else {
         blurAllIfValid();
     }
 }
@@ -549,8 +540,7 @@ function limitDateTime(dateTime: DateTime): DateTime | null {
                     dateTime = setTime(dateTime);
                 }
             }
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -568,8 +558,7 @@ function limitDateTime(dateTime: DateTime): DateTime | null {
                     dateTime = setTime(dateTime);
                 }
             }
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -581,8 +570,7 @@ function limitDateTime(dateTime: DateTime): DateTime | null {
         if (dayWithTime > max) {
             // set to max if closer to max
             dateTime = max;
-        }
-        else {
+        } else {
             // set to min if closer to min
             dateTime = min;
         }
@@ -596,6 +584,7 @@ function openContextMenu(autoDismiss = true) {
         return;
     }
 
+    // eslint-disable-next-line stamhoofd/async-component-with-properties
     const newDisplayedComponent = new ComponentWithProperties(DateSelectionView, {
         x: el.value.getBoundingClientRect().left + el.value.offsetWidth,
         y: el.value.getBoundingClientRect().top + el.value.offsetHeight - 2,
