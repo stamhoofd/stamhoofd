@@ -143,6 +143,7 @@ import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from 
 import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
@@ -154,13 +155,13 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import InputSheet from '@stamhoofd/components/overlays/InputSheet.vue';
+
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
-import ApiUsersView from '../admins/ApiUsersView.vue';
+
 
 const context = useContext();
 const baseOrganization = useRequiredOrganization();
@@ -212,7 +213,7 @@ onBeforeUnmount(() => Request.cancelAll(requestOwner));
 async function openApiUsers(animated = true) {
     await show({
         components: [
-            new ComponentWithProperties(ApiUsersView, {}),
+            AsyncComponent(() => import('../admins/ApiUsersView.vue'), {}),
         ],
         animated,
     });
@@ -389,7 +390,7 @@ async function doUploadSettings(blob: unknown) {
 async function applyDiscountCode() {
     await present({
         components: [
-            new ComponentWithProperties(InputSheet, {
+            AsyncComponent(() => import('@stamhoofd/components/overlays/InputSheet.vue'), {
                 title: 'Kortingscode toepassen',
                 description: 'De kortingscode zal meteen worden toegepast op deze vereniging. De andere vereniging ontvangt een e-mail dat de kortingscode is gebruikt, en zal meteen tegoed ontvangen als de vereniging al een betalende klant is (in het andere geval pas later).',
                 placeholder: 'Vul hier de code in',

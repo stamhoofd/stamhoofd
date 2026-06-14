@@ -159,6 +159,7 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -176,7 +177,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
-import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
+
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
 import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
@@ -187,7 +188,7 @@ import { CheckoutMethodType, Customer, OrderData, PaymentConfiguration, PaymentM
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
-import AddItemView from './AddItemView.vue';
+
 
 const props = withDefaults(defineProps<{
     initialOrder?: PrivateOrder | null;
@@ -515,7 +516,7 @@ async function addProduct() {
     const w = await props.webshopManager.loadWebshopIfNeeded();
 
     present(new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(AddItemView, {
+        root: AsyncComponent(() => import('./AddItemView.vue'), {
             checkout: clone,
             webshop: w,
             saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component: any) => {
@@ -555,7 +556,7 @@ async function editCartItem(cartItem: CartItem) {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(CartItemView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/CartItemView.vue'), {
                     admin: true,
                     cartItem: newCartItem,
                     oldItem: cartItem,

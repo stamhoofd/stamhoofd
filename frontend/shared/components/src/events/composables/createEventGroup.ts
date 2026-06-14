@@ -2,7 +2,8 @@ import type { Event, Organization} from '@stamhoofd/structures';
 import { Group, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import SearchOrganizationView from '#members/SearchOrganizationView.vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+
 import type { NavigationActions } from '../../types/NavigationActions';
 
 export function useCreateEventGroup() {
@@ -30,7 +31,7 @@ export function useCreateEventGroup() {
             await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(SearchOrganizationView, {
+                        root: AsyncComponent(() => import('#members/SearchOrganizationView.vue'), {
                             title: $t('%CO'),
                             description: $t('%CP'),
                             selectOrganization: async (organization: Organization, navigationActions: NavigationActions) => {

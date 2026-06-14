@@ -1,5 +1,6 @@
-import MemberStepView from '#members/MemberStepView.vue';
+
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RecordCategory, RegisterItem } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
@@ -52,7 +53,7 @@ export class MemberRecordCategoryStep implements EditMemberStep {
 
         const recordCategory = enabledCategories.find(c => c.id === this.recordCategory.id) ?? this.recordCategory;
 
-        return new ComponentWithProperties(MemberStepView, {
+        return AsyncComponent(() => import('#members/MemberStepView.vue'), {
             title: recordCategory.name,
             member: manager.member,
             component: markRaw(EditMemberRecordCategoryBox),

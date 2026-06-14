@@ -416,7 +416,7 @@
 </template>
 
 <script lang="ts" setup>
-import AuditLogsView from '#audit-logs/AuditLogsView.vue';
+
 import { useAppContext } from '#context/appContext.ts';
 import EmailAddress from '#email/EmailAddress.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
@@ -439,14 +439,15 @@ import { Company, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, Pay
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
-import EditInvoiceView from './EditInvoiceView.vue';
-import EditPaymentView from './EditPaymentView.vue';
-import InvoiceView from './InvoiceView.vue';
+
+
+
 import PaymentItemsBox from './PaymentItemsBox.vue';
 
 const props = withDefaults(
@@ -495,7 +496,7 @@ async function editPayment() {
     await reload();
     await present({
         components: [
-            new ComponentWithProperties(EditPaymentView, {
+            AsyncComponent(() => import('./EditPaymentView.vue'), {
                 payment: props.payment,
                 isNew: false,
                 balanceItems: [],
@@ -584,7 +585,7 @@ async function mark(status: PaymentStatus) {
 async function viewAudit() {
     await present({
         components: [
-            new ComponentWithProperties(AuditLogsView, {
+            AsyncComponent(() => import('#audit-logs/AuditLogsView.vue'), {
                 objectIds: [props.payment.id],
             }),
         ],
@@ -605,7 +606,7 @@ async function createInvoice() {
         });
         invoice.buildFromPayments();
 
-        const component = new ComponentWithProperties(EditInvoiceView, {
+        const component = AsyncComponent(() => import('./EditInvoiceView.vue'), {
             invoice,
             isNew: true,
             saveHandler: (updated: Invoice) => {
@@ -640,7 +641,7 @@ async function openInvoice() {
             const invoice = result.results[0];
             await show({
                 components: [
-                    new ComponentWithProperties(InvoiceView, {
+                    AsyncComponent(() => import('./InvoiceView.vue'), {
                         invoice,
                     }),
                 ],

@@ -31,13 +31,14 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import { computed } from 'vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { GroupUIFilter, GroupUIFilterBuilder } from './GroupUIFilter';
 import type { UIFilter, UIFilterBuilder } from './UIFilter';
-import UIFilterEditor from './UIFilterEditor.vue';
+
 import GroupUIFilterList from './components/GroupUIFilterList.vue';
 
 const props = defineProps<{
@@ -65,7 +66,7 @@ async function addFilter(builder: UIFilterBuilder) {
     const filter = builder.create();
     await show({
         components: [
-            new ComponentWithProperties(UIFilterEditor, {
+            AsyncComponent(() => import('./UIFilterEditor.vue'), {
                 filter,
                 saveHandler: (f: UIFilter) => {
                     const ff = f.flatten();

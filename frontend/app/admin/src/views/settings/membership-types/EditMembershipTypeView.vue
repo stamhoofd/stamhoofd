@@ -84,6 +84,7 @@ import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import DefaultAgeGroupIdsInput from '@stamhoofd/components/inputs/DefaultAgeGroupIdsInput.vue';
@@ -102,7 +103,7 @@ import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from '@
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref} from 'vue';
 import { computed, ref } from 'vue';
-import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
+
 import PlatformMembershipTypeConfigRow from './components/PlatformMembershipTypeConfigRow.vue';
 
 const errors = useErrors();
@@ -237,7 +238,7 @@ const requiredDefaultAgeGroupIds = computed({
 async function editPeriod(config: PlatformMembershipTypeConfig, period: RegistrationPeriod) {
     await present({
         components: [
-            new ComponentWithProperties(EditMembershipTypeConfigView, {
+            AsyncComponent(() => import('./EditMembershipTypeConfigView.vue'), {
                 type: patched.value,
                 period,
                 config,
@@ -318,7 +319,7 @@ async function addConfigForPeriod(period: RegistrationPeriod) {
 
     await present({
         components: [
-            new ComponentWithProperties(EditMembershipTypeConfigView, {
+            AsyncComponent(() => import('./EditMembershipTypeConfigView.vue'), {
                 type: patched.value,
                 period,
                 config,

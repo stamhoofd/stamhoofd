@@ -67,6 +67,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -78,7 +79,7 @@ import { ApiUser, PermissionLevel, Permissions, UserPermissions } from '@stamhoo
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
-import ApiUserView from './ApiUserView.vue';
+
 
 const context = useContext();
 const organization = useRequiredOrganization();
@@ -128,7 +129,7 @@ async function createUser() {
     const permissions = UserPermissions.create({});
     permissions.organizationPermissions.set(organization.value.id, Permissions.create({ level: PermissionLevel.Full }));
     await present(new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(ApiUserView, {
+        root: AsyncComponent(() => import('./ApiUserView.vue'), {
             user: ApiUser.create({
                 organizationId: organization.value.id,
                 permissions,
@@ -141,7 +142,7 @@ async function createUser() {
 
 async function editUser(user: ApiUser) {
     await present(new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(ApiUserView, {
+        root: AsyncComponent(() => import('./ApiUserView.vue'), {
             user,
             isNew: false,
             callback: () => load().catch(console.error),

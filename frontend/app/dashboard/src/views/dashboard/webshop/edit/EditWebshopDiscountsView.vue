@@ -86,6 +86,7 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
@@ -96,8 +97,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { Discount, DiscountCode, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
-import EditDiscountCodeView from './discounts/EditDiscountCodeView.vue';
-import EditDiscountView from './discounts/EditDiscountView.vue';
+
+
 
 import { computed, nextTick, onMounted, ref } from 'vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
@@ -171,7 +172,7 @@ function addDiscount() {
 
     present({
         components: [
-            new ComponentWithProperties(EditDiscountView, {
+            AsyncComponent(() => import('./discounts/EditDiscountView.vue'), {
                 isNew: true,
                 discount,
                 webshop: webshop.value,
@@ -188,7 +189,7 @@ function addDiscount() {
 function editDiscount(discount: Discount) {
     present({
         components: [
-            new ComponentWithProperties(EditDiscountView, {
+            AsyncComponent(() => import('./discounts/EditDiscountView.vue'), {
                 isNew: false,
                 discount,
                 webshop: webshop.value,
@@ -210,7 +211,7 @@ function addDiscountCode() {
 
     present({
         components: [
-            new ComponentWithProperties(EditDiscountCodeView, {
+            AsyncComponent(() => import('./discounts/EditDiscountCodeView.vue'), {
                 isNew: true,
                 discountCode,
                 webshop: webshop.value,
@@ -234,7 +235,7 @@ function addDiscountCode() {
 function editDiscountCode(discountCode: DiscountCode) {
     present({
         components: [
-            new ComponentWithProperties(EditDiscountCodeView, {
+            AsyncComponent(() => import('./discounts/EditDiscountCodeView.vue'), {
                 isNew: false,
                 discountCode,
                 webshop: webshop.value,

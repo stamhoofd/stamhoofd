@@ -370,6 +370,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -378,10 +379,10 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
-import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
+
+
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import type { Payment, PrivateOrder, ProductDateRange, TicketPublicPrivate } from '@stamhoofd/structures';
 import { AccessRight, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
@@ -390,7 +391,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
-import OrderView from '../../orders/OrderView.vue';
+
 import type { WebshopManager } from '../../WebshopManager';
 
 const props = defineProps<{
@@ -477,7 +478,7 @@ function openPayment(payment: Payment) {
 
     present({
         components: [
-            new ComponentWithProperties(AsyncPaymentView, {
+            AsyncComponent(() => import('@stamhoofd/components/payments/AsyncPaymentView.vue'), {
                 payment,
             }),
         ],
@@ -487,7 +488,7 @@ function openPayment(payment: Payment) {
 
 function markAs(event: Event) {
     const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/tables/TableActionsContextMenu.vue'), {
         x: el.getBoundingClientRect().left + el.offsetWidth,
         y: el.getBoundingClientRect().top + el.offsetHeight,
         xPlacement: 'left',
@@ -500,7 +501,7 @@ function markAs(event: Event) {
 
 function changePaymentStatus(event: Event) {
     const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/tables/TableActionsContextMenu.vue'), {
         x: el.getBoundingClientRect().left + el.offsetWidth,
         y: el.getBoundingClientRect().top + el.offsetHeight,
         xPlacement: 'left',
@@ -550,7 +551,7 @@ const recordCategories = computed(() => {
 function openOrder() {
     present({
         components: [
-            new ComponentWithProperties(OrderView, {
+            AsyncComponent(() => import('../../orders/OrderView.vue'), {
                 initialOrder: PrivateOrderWithTickets.create(props.order),
                 webshopManager: props.webshopManager,
             }),
@@ -593,7 +594,7 @@ function createPayment() {
         paidAt: new Date(),
     });
 
-    const component = new ComponentWithProperties(EditPaymentView, {
+    const component = AsyncComponent(() => import('@stamhoofd/components/payments/EditPaymentView.vue'), {
         payment,
         balanceItems: props.order.balanceItems,
         isNew: true,

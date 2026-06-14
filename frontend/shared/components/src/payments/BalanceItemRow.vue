@@ -50,8 +50,9 @@
 <script lang="ts" setup>
 import { useContext } from '#hooks/useContext.ts';
 import STGridItem from '#layout/STGridItem.vue';
-import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { GroupedBalanceItems } from '@stamhoofd/structures';
 import { BalanceItem, BalanceItemStatus } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -89,7 +90,7 @@ async function clickHandler() {
 }
 
 async function editBalanceItem(balanceItem: BalanceItem) {
-    const component = new ComponentWithProperties(EditBalanceItemView, {
+    const component = AsyncComponent(() => import('#payments/EditBalanceItemView.vue'), {
         balanceItem,
         isNew: false
     });

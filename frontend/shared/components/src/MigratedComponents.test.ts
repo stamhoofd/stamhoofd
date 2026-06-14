@@ -1,5 +1,6 @@
 /* eslint-disable vue/one-component-per-file */
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Organization, Webshop } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { expect, test, vi } from 'vitest';
@@ -7,7 +8,7 @@ import { render } from 'vitest-browser-vue';
 import { userEvent } from 'vitest/browser';
 import { defineComponent, ref } from 'vue';
 import TestAppWithModalStackComponent from '../tests/helpers/TestAppWithModalStackComponent.vue';
-import LoginView from './auth/LoginView.vue';
+
 import OrganizationLogo from './context/OrganizationLogo.vue';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
 import STInputBox from './inputs/STInputBox.vue';
@@ -178,7 +179,7 @@ test('LoginView reacts to a realistically typed developer email', async () => {
     TestUtils.setEnvironment('userMode', 'organization');
     render(TestAppWithModalStackComponent, {
         props: {
-            root: new ComponentWithProperties(LoginView, {}),
+            root: AsyncComponent(() => import('./auth/LoginView.vue'), {}),
         },
         global: {
             config: {

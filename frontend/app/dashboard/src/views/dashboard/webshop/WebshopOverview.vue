@@ -464,9 +464,10 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, useCanDismiss, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -475,7 +476,6 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -484,7 +484,6 @@ import { AccessRight, EmailTemplate, EmailTemplateType, PaymentMethod, Permissio
 import { Country } from '@stamhoofd/types/Country';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import PackageSettingsView from '../settings/packages/PackageSettingsView.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
@@ -495,12 +494,9 @@ import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
 import EditWebshopRecordSettingsView from './edit/EditWebshopRecordSettingsView.vue';
-import WebshopOrdersView from './orders/WebshopOrdersView.vue';
-import WebshopSeatingView from './orders/WebshopSeatingView.vue';
-import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
-import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
-import { WebshopManager } from './WebshopManager';
+
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import { WebshopManager } from './WebshopManager';
 
 const props = defineProps<{ preview: WebshopPreview }>();
 const context = useContext();
@@ -559,7 +555,7 @@ function openPackages() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(PackageSettingsView),
+                root: AsyncComponent(() => import('../settings/packages/PackageSettingsView.vue'), {}),
             }),
         ],
         modalDisplayStyle: 'popup',
@@ -592,7 +588,7 @@ function openOrders(animated = true) {
         animated,
         adjustHistory: animated,
         components: [
-            new ComponentWithProperties(WebshopOrdersView, {
+            AsyncComponent(() => import('./orders/WebshopOrdersView.vue'), {
                 webshopManager: webshopManager.value,
             }),
         ],
@@ -604,7 +600,7 @@ function openSeating(animated = true) {
         animated,
         adjustHistory: animated,
         components: [
-            new ComponentWithProperties(WebshopSeatingView, {
+            AsyncComponent(() => import('./orders/WebshopSeatingView.vue'), {
                 webshopManager: webshopManager.value,
             }),
         ],
@@ -616,7 +612,7 @@ function openStatistics(animated = true) {
         animated,
         adjustHistory: animated,
         components: [
-            new ComponentWithProperties(WebshopStatisticsView, {
+            AsyncComponent(() => import('./statistics/WebshopStatisticsView.vue'), {
                 webshopManager: webshopManager.value,
             }),
         ],
@@ -628,7 +624,7 @@ function openTickets(animated = true) {
         animated,
         adjustHistory: animated,
         components: [
-            new ComponentWithProperties(TicketScannerSetupView, {
+            AsyncComponent(() => import('./tickets/TicketScannerSetupView.vue'), {
                 webshopManager: webshopManager.value,
             }),
         ],
@@ -677,7 +673,7 @@ function editPermissions(animated = true) {
         adjustHistory: animated,
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResourceRolesView, {
+            AsyncComponent(() => import('@stamhoofd/components/admins/EditResourceRolesView.vue'), {
                 description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
                 resource: {
                     id: props.preview.id,
@@ -693,7 +689,7 @@ function editPermissions(animated = true) {
 async function editEmails(animated = true) {
     await present({
         components: [
-            new ComponentWithProperties(EditEmailTemplatesView, {
+            AsyncComponent(() => import('@stamhoofd/components/email/EditEmailTemplatesView.vue'), {
                 groups: null,
                 webshopId: props.preview.id,
                 allowEditGenerated: false,
@@ -782,7 +778,7 @@ function duplicateWebshop() {
                     });
                     const templates = response.data;
 
-                    return new ComponentWithProperties(EditWebshopGeneralView, {
+                    return AsyncComponent(() => import('./edit/EditWebshopGeneralView.vue'), {
                         initialWebshop: duplicate,
                         savedHandler: async (duplicateWebshop: PrivateWebshop) => {
                             // Copy over the templates

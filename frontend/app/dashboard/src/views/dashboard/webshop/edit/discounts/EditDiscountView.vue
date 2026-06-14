@@ -108,6 +108,7 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
@@ -122,8 +123,8 @@ import { Discount, DiscountRequirement, GeneralDiscount, ProductDiscountSettings
 import PermyriadInputBox from '@stamhoofd/components/inputs/PermyriadInputBox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { computed } from 'vue';
-import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
-import EditProductDiscountView from './EditProductDiscountView.vue';
+
+
 
 const props = defineProps<{
     discount: Discount;
@@ -199,7 +200,7 @@ function addRequirement() {
 
     present({
         components: [
-            new ComponentWithProperties(EditDiscountRequirementView, {
+            AsyncComponent(() => import('./EditDiscountRequirementView.vue'), {
                 isNew: true,
                 discountRequirement: requirement,
                 webshop: props.webshop,
@@ -216,7 +217,7 @@ function addRequirement() {
 function editRequirement(discountRequirement: DiscountRequirement) {
     present({
         components: [
-            new ComponentWithProperties(EditDiscountRequirementView, {
+            AsyncComponent(() => import('./EditDiscountRequirementView.vue'), {
                 isNew: false,
                 discountRequirement: discountRequirement,
                 webshop: props.webshop,
@@ -244,7 +245,7 @@ function addProductDiscount() {
 
     present({
         components: [
-            new ComponentWithProperties(EditProductDiscountView, {
+            AsyncComponent(() => import('./EditProductDiscountView.vue'), {
                 isNew: true,
                 productDiscount,
                 webshop: props.webshop,
@@ -261,7 +262,7 @@ function addProductDiscount() {
 function editProductDiscount(productDiscount: ProductDiscountSettings) {
     present({
         components: [
-            new ComponentWithProperties(EditProductDiscountView, {
+            AsyncComponent(() => import('./EditProductDiscountView.vue'), {
                 isNew: false,
                 productDiscount,
                 webshop: props.webshop,

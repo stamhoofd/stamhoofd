@@ -270,6 +270,7 @@ import EventNotificationRow from '#event-notifications/components/EventNotificat
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -304,7 +305,7 @@ import { useRegistrationInvitationEventListener } from '#registrations/classes/u
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { countAll } from '#tables/classes/ObjectFetcher.ts';
 import ImageComponent from '../views/ImageComponent.vue';
-import EditEventView from './EditEventView.vue';
+
 import EventInfoTable from './components/EventInfoTable.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
 
@@ -518,7 +519,7 @@ defineRoute({
 
 defineRoute({
     url: Routes.Edit,
-    component: EditEventView,
+    component: async () => (await import('./EditEventView.vue')).default,
     present: 'popup',
     defaultProperties: () => {
         return {
@@ -918,7 +919,7 @@ function duplicateEvent() {
                         templates = response.data;
                     }
 
-                    return new ComponentWithProperties(EditEventView, {
+                    return AsyncComponent(() => import('./EditEventView.vue'), {
                         event: duplicateEvent,
                         isNew: true,
                         callback: async () => {

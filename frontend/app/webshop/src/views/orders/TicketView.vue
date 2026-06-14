@@ -14,7 +14,8 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
@@ -66,7 +67,7 @@ function openTicket() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(DetailedTicketView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/DetailedTicketView.vue'), {
                     ticket: tickets.value[0],
                     webshop: webshop.value,
                     organization: organization.value,

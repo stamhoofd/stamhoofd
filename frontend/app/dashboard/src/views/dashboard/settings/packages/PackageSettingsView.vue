@@ -81,6 +81,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -97,7 +98,7 @@ import { useActivatePackages } from './hooks/useActivatePackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { PayBalanceMode } from './OrganizationCheckoutViewModel';
-import PackagesDetailsView from './PackagesDetailsView.vue';
+
 import { useStartOrganizationCheckout } from './useStartOrganizationCheckout';
 
 const errors = useErrors();
@@ -416,7 +417,7 @@ async function viewPackages(pack: SelectablePackage) {
     if (filteredPackages.length) {
         await show({
             components: [
-                new ComponentWithProperties(PackagesDetailsView, {
+                AsyncComponent(() => import('./PackagesDetailsView.vue'), {
                     packages: filteredPackages,
                 }),
             ],

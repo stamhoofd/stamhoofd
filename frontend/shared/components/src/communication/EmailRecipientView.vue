@@ -206,6 +206,7 @@
 <script setup lang="ts">
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { EmailPreview } from '@stamhoofd/structures';
@@ -220,7 +221,7 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useBackForward } from '#hooks/useBackForward.ts';
 import { useContext } from '#hooks/useContext.ts';
 import IconContainer from '../icons/IconContainer.vue';
-import MemberSegmentedView from '#members/MemberSegmentedView.vue';
+
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
@@ -407,7 +408,7 @@ async function showMember(memberId: string) {
                     Toast.error($t(`%yX`)).show();
                     throw new Error('Member not found');
                 }
-                return new ComponentWithProperties(MemberSegmentedView, {
+                return AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {
                     member: members.results[0],
                 });
             },

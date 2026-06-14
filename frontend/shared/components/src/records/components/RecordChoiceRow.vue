@@ -18,12 +18,13 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import STListItem from '#layout/STListItem.vue';
 import type { RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
-import EditRecordChoiceView from '../EditRecordChoiceView.vue';
+
 
 const props = defineProps<{
     choice: RecordChoice;
@@ -36,7 +37,7 @@ const present = usePresent();
 const choices = computed(() => props.parentRecord.choices);
 
 async function editChoice() {
-    await present(new ComponentWithProperties(EditRecordChoiceView, {
+    await present(AsyncComponent(() => import('../EditRecordChoiceView.vue'), {
         choice: props.choice,
         parentRecord: props.parentRecord,
         isNew: false,

@@ -1,5 +1,6 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import PaymentCustomerView from '@stamhoofd/components/members/checkout/PaymentCustomerView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import type { ViewStep } from '@stamhoofd/components/steps/ViewStep';
 import type { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
@@ -17,7 +18,7 @@ export class PaymentCustomerStep implements ViewStep {
     }
 
     getComponent(manager: ViewStepsManager): ComponentWithProperties {
-        return new ComponentWithProperties(PaymentCustomerView, {
+        return AsyncComponent(() => import('@stamhoofd/components/members/checkout/PaymentCustomerView.vue'), {
             checkout: this.model.checkout,
             invoicesEnabled: this.model.sellingOrganization.meta.invoicesEnabled,
 

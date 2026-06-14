@@ -58,6 +58,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -71,7 +72,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { computed, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
-import TicketScannerView from './TicketScannerView.vue';
+
 
 const props = defineProps<{
     webshopManager: WebshopManager;
@@ -162,7 +163,7 @@ function setProductSelected(product: Product, selected: boolean) {
 
 function start() {
     present(new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(TicketScannerView, {
+        root: AsyncComponent(() => import('./TicketScannerView.vue'), {
             webshopManager: props.webshopManager,
             disabledProducts: disabledProducts.value,
         }),

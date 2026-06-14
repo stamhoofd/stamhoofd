@@ -1,12 +1,13 @@
 import { useAppContext } from '#context/appContext';
 import { useContext } from '#hooks/useContext.ts';
 import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CoverImageContainer from '#containers/CoverImageContainer.vue';
 import TabBarController from '#containers/TabBarController.vue';
 import { TabBarItem } from '#containers/TabBarItem.ts';
-import LoginView from './LoginView.vue';
-import MembersHomeView from './MembersHomeView.vue';
-import RedirectView from './RedirectView.vue';
+
+
+
 import { getAppHost } from '@stamhoofd/structures';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 
@@ -20,7 +21,7 @@ export function useLoginRoot() {
                 const urlCopy = new URL(UrlHelper.initial.url);
                 urlCopy.hostname = STAMHOOFD.REDIRECT_LOGIN_DOMAIN;
 
-                return new ComponentWithProperties(RedirectView, {
+                return AsyncComponent(() => import('./RedirectView.vue'), {
                     location: urlCopy.href,
                 });
             }
@@ -54,7 +55,7 @@ export function useLoginRoot() {
                         icon: '',
                         name: '',
                         component: new ComponentWithProperties(NavigationController, {
-                            root: new ComponentWithProperties(MembersHomeView, {}),
+                            root: AsyncComponent(() => import('./MembersHomeView.vue'), {}),
                         }),
                     }),
                 ],
@@ -63,7 +64,7 @@ export function useLoginRoot() {
 
         const base = new ComponentWithProperties(CoverImageContainer, {
             root: new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(LoginView, {
+                root: AsyncComponent(() => import('./LoginView.vue'), {
                     initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? '',
                 }),
             }),

@@ -93,6 +93,7 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '#context/appContext.ts';
@@ -102,7 +103,7 @@ import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
-import EditParentView from './EditParentView.vue';
+
 import Title from './Title.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
@@ -236,7 +237,7 @@ function setParentSelected(parent: Parent, selected: boolean) {
 async function editParent(parent: Parent) {
     await present({
         components: [
-            new ComponentWithProperties(EditParentView, {
+            AsyncComponent(() => import('./EditParentView.vue'), {
                 member: props.member,
                 parent,
                 isNew: false,
@@ -250,7 +251,7 @@ async function addParent() {
     const parent = Parent.create({});
     await present({
         components: [
-            new ComponentWithProperties(EditParentView, {
+            AsyncComponent(() => import('./EditParentView.vue'), {
                 member: props.member,
                 parent,
                 isNew: true,

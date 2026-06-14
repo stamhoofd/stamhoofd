@@ -168,6 +168,7 @@
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { CartItem, Checkout, ProductDateRange, ProductPrice, Webshop } from '@stamhoofd/structures';
 import { CartStockHelper, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -189,7 +190,7 @@ import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import ChooseSeatsView from './ChooseSeatsView.vue';
+
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
@@ -377,7 +378,7 @@ async function addToCart() {
 }
 
 function chooseSeats() {
-    const component = new ComponentWithProperties(ChooseSeatsView, {
+    const component = AsyncComponent(() => import('./ChooseSeatsView.vue'), {
         cartItem: props.cartItem,
         oldItem: props.oldItem,
         webshop: props.webshop,

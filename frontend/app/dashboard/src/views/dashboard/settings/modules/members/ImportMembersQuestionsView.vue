@@ -180,6 +180,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
@@ -201,8 +202,8 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref} from 'vue';
 import { computed, ref, watch } from 'vue';
 import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
-import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
-import ImportMembersErrorReportView from './ImportMembersErrorReportView.vue';
+
+
 import { MemberImporter } from './MemberImporter';
 
 const props = defineProps<{
@@ -399,7 +400,7 @@ function getGroupAutoAssignCountForPriority(group: Group) {
 
 function openAssignment() {
     autoAssignMembers(props.importMemberResults);
-    present(new ComponentWithProperties(ImportAutoAssignedView, {
+    present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
         title: $t(`%19I`),
         description: $t(`%19J`),
         members: membersNeedingAssignment.value.flatMap((m) => {
@@ -416,7 +417,7 @@ function openAssignment() {
 }
 
 function openPriorityAssignedToGroup(group: Group) {
-    present(new ComponentWithProperties(ImportAutoAssignedView, {
+    present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
         title: $t(`%19K`, { group: group.settings.name }),
         description: $t(`%19L`, { group: group.settings.name }),
         members: membersWithMultipleGroups.value.flatMap((m) => {
@@ -438,7 +439,7 @@ function openPriorityAssignedToGroup(group: Group) {
 }
 
 function openMultipleGroups() {
-    present(new ComponentWithProperties(ImportAutoAssignedView, {
+    present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
         title: $t(`%19M`),
         description: $t(`%19N`),
         members: membersWithMultipleGroups.value.flatMap((m) => {
@@ -477,7 +478,7 @@ function getParentDescription(parent: Parent) {
 }
 
 function openResultView() {
-    present(new ComponentWithProperties(ImportAutoAssignedView, {
+    present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
         title: $t(`%19R`),
         description: $t(`%19S`),
         members: props.importMemberResults.map((member) => {
@@ -641,7 +642,7 @@ const draggableGroups = computed({
 });
 
 function openWithoutMatchingGroups() {
-    present(new ComponentWithProperties(ImportAutoAssignedView, {
+    present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
         title: $t(`%19k`),
         description: $t(`%19l`),
         members: membersWithoutMatchingGroups.value.flatMap((m) => {
@@ -672,7 +673,7 @@ async function goNext() {
         toast.hide();
 
         if (reports.some(r => r.hasError)) {
-            show(new ComponentWithProperties(ImportMembersErrorReportView, {
+            show(AsyncComponent(() => import('./ImportMembersErrorReportView.vue'), {
                 reports,
                 onNext: () => {
                     pop()?.catch(console.error);

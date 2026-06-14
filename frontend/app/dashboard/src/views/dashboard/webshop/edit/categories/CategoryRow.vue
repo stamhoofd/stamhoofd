@@ -24,20 +24,21 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Category } from '@stamhoofd/structures';
 import { PrivateWebshop } from '@stamhoofd/structures';
 
-import EditCategoryView from './EditCategoryView.vue';
+
 
 const props = defineProps<{ category: Category; webshop: PrivateWebshop }>();
 const present = usePresent();
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<PrivateWebshop>): void; (e: 'move-up'): void; (e: 'move-down'): void; (e: 'delete'): void }>();
 
 function editCategory() {
-    present(new ComponentWithProperties(EditCategoryView, {
+    present(AsyncComponent(() => import('./EditCategoryView.vue'), {
         category: props.category,
         webshop: props.webshop,
         isNew: false,

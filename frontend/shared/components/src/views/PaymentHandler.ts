@@ -1,12 +1,13 @@
 import type { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 
 import type { NavigationActions } from '../types/NavigationActions';
-import PayconiqBannerView from './PayconiqBannerView.vue';
-import PayconiqButtonView from './PayconiqButtonView.vue';
-import TransferPaymentView from './TransferPaymentView.vue';
+
+
+
 import { GlobalEventBus } from '../EventBus';
 import { Toast } from '../overlays/Toast';
 
@@ -83,7 +84,7 @@ export class PaymentHandler {
                 transferHandler(payment)?.catch(console.error);
             }
 
-            await navigate.show(new ComponentWithProperties(TransferPaymentView, {
+            await navigate.show(AsyncComponent(() => import('./TransferPaymentView.vue'), {
                 created: true,
                 type: settings.type,
                 organization,
@@ -98,7 +99,7 @@ export class PaymentHandler {
         else if (payment.provider === PaymentProvider.Payconiq && paymentUrl) {
             if (!paymentQRCode || this.getOS() == 'android' || this.getOS() == 'iOS') {
                 // we need this view for polling
-                const buttonComponent = new ComponentWithProperties(PayconiqButtonView, {
+                const buttonComponent = AsyncComponent(() => import('./PayconiqButtonView.vue'), {
                     paymentUrl,
                     server,
                     initialPayment: payment,
@@ -117,7 +118,7 @@ export class PaymentHandler {
             }
             else {
                 // only on desktop
-                const bannerComponent = new ComponentWithProperties(PayconiqBannerView, {
+                const bannerComponent = AsyncComponent(() => import('./PayconiqBannerView.vue'), {
                     paymentUrl: paymentQRCode,
                     server,
                     initialPayment: payment,

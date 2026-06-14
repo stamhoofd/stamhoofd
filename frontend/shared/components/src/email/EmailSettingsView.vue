@@ -47,6 +47,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import IconContainer from '#icons/IconContainer.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
@@ -57,7 +58,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { OrganizationEmail } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import EditEmailView from './EditEmailView.vue';
+
 
 const organization = useOrganization();
 const platform = usePlatform();
@@ -68,7 +69,7 @@ const present = usePresent();
 async function editEmail(email: OrganizationEmail) {
     await present({
         components: [
-            new ComponentWithProperties(EditEmailView, {
+            AsyncComponent(() => import('./EditEmailView.vue'), {
                 email,
                 isNew: false,
             }),
@@ -81,7 +82,7 @@ async function addEmail() {
     const email = OrganizationEmail.create({ email: '' });
     await present({
         components: [
-            new ComponentWithProperties(EditEmailView, {
+            AsyncComponent(() => import('./EditEmailView.vue'), {
                 email,
                 isNew: true,
             }),

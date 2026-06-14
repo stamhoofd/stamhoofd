@@ -102,6 +102,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -127,8 +128,8 @@ import { AdministrationFeeSettings, PaymentConfiguration, PaymentMethod, Payment
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
-import PaymentSettingsView from '../views/dashboard/settings/PaymentSettingsView.vue';
-import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
+
+
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -198,7 +199,7 @@ function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
 async function editPaymentMethodSettings(paymentMethod: PaymentMethod) {
     await present({
         components: [
-            new ComponentWithProperties(EditPaymentMethodSettingsView, {
+            AsyncComponent(() => import('./EditPaymentMethodSettingsView.vue'), {
                 type: props.type,
                 paymentMethod,
                 configuration: props.config,
@@ -216,7 +217,7 @@ async function openPaymentSettings() {
         components: [
             // todo: test
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(PaymentSettingsView, {}),
+                root: AsyncComponent(() => import('../views/dashboard/settings/PaymentSettingsView.vue'), {}),
             }),
         ],
         modalDisplayStyle: 'popup',

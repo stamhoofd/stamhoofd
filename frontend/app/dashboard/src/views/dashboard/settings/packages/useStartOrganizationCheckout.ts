@@ -1,12 +1,13 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
-import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue';
+
 import { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
 import type { DisplayOptions, NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
@@ -186,7 +187,7 @@ async function handleCheckoutResponse({ response, sellingOrganization, context, 
         }, async (payment, navigate: NavigationActions) => {
             await navigate.show({
                 components: [
-                    new ComponentWithProperties(PaymentSuccessView, {
+                    AsyncComponent(() => import('@stamhoofd/components/payments/PaymentSuccessView.vue'), {
                         payment,
                     }),
                 ],
@@ -204,7 +205,7 @@ async function handleCheckoutResponse({ response, sellingOrganization, context, 
 
     await navigate.show({
         components: [
-            new ComponentWithProperties(PaymentSuccessView, {
+            AsyncComponent(() => import('@stamhoofd/components/payments/PaymentSuccessView.vue'), {
                 payment,
                 fallback: {
                     title: $t('Hoera, gelukt!'),

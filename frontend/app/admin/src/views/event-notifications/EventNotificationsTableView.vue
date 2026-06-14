@@ -21,7 +21,8 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import { EventNotificationViewModel } from '@stamhoofd/components/event-notifications/classes/EventNotificationViewModel.ts';
 import { useEventNotificationsObjectFetcher } from '@stamhoofd/components/fetchers/useEventNotificationsObjectFetcher.ts';
 import { useEventNotificationBackendFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
@@ -32,7 +33,7 @@ import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableActi
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+
 import type { EventNotification, EventNotificationType, StamhoofdFilter } from '@stamhoofd/structures';
 import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -202,7 +203,7 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
     }
 
     const displayedComponent = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EmailView, {
+        root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
             recipientFilterOptions: [],
         }),
     });
@@ -218,7 +219,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ExcelExportView, {
+                root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                     type: ExcelExportType.EventNotifications,
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),

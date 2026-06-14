@@ -30,8 +30,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { countryCodes, CountryHelper } from '@stamhoofd/structures';
-import type { CountryCode } from "@stamhoofd/types/Country";
-import { Country } from "@stamhoofd/types/Country";
+import type { CountryCode } from '@stamhoofd/types/Country';
+import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js/max';
 import { computed, ref, watch } from 'vue';
@@ -98,8 +98,7 @@ function isValid(phone: string, country?: CountryCode) {
         if (phoneNumber && phoneNumber.isValid()) {
             return true;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     return false;
@@ -112,8 +111,7 @@ function formatPhone(phone: string) {
         if (phoneNumber && phoneNumber.isValid()) {
             return phoneNumber.formatInternational();
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     return phone;
@@ -126,8 +124,7 @@ function formatIncompletePhone(phone: string) {
         if (f) {
             return f;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     return phone;
@@ -207,8 +204,7 @@ function validate(final = true, silent = false) {
             }));
         }
         return false;
-    }
-    else {
+    } else {
         const formatted = formatPhone(unformatted);
         if (!silent && formatted !== phoneRaw.value) {
             phoneRaw.value = formatted;

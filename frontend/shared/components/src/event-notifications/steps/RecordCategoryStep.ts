@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RecordCategory } from '@stamhoofd/structures';
 import type {ViewStepsManager} from '#steps/ViewStepsManager.ts';
 import type {ViewStep} from '#steps/ViewStep.ts';
 import type { EventNotificationViewModel } from '../classes/EventNotificationViewModel';
-import EditEventNotificationRecordCategoryView from '../EditEventNotificationRecordCategoryView.vue';
+
 import type { NavigationActions } from '../../types/NavigationActions';
 
 export class RecordCategoryStep implements ViewStep {
@@ -16,7 +17,7 @@ export class RecordCategoryStep implements ViewStep {
     }
 
     getComponent(manager: ViewStepsManager): Promise<ComponentWithProperties> | ComponentWithProperties {
-        return new ComponentWithProperties(EditEventNotificationRecordCategoryView, {
+        return AsyncComponent(() => import('../EditEventNotificationRecordCategoryView.vue'), {
             viewModel: this.viewModel,
             category: this.recordCategory,
             saveHandler: async (navigate: NavigationActions) => {

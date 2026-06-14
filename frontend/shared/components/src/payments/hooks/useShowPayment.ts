@@ -1,8 +1,9 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetcher.ts';
 import { Toast } from '../../overlays/Toast';
-import PaymentView from '../PaymentView.vue';
+
 import PromiseView from '#containers/PromiseView.vue';
 
 export function useShowPayment() {
@@ -23,7 +24,7 @@ export function useShowPayment() {
                         Toast.error($t(`%yW`)).show();
                         throw new Error('Payment not found');
                     }
-                    return new ComponentWithProperties(PaymentView, {
+                    return AsyncComponent(() => import('../PaymentView.vue'), {
                         payment: payments.results[0],
                     });
                 },

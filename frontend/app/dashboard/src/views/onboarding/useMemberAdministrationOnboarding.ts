@@ -1,4 +1,5 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { DisplayOptions, NavigationActions } from '@stamhoofd/components/types/NavigationActions';
@@ -9,7 +10,7 @@ import OnboardingGroupPricesView from './OnboardingGroupPricesView.vue';
 import OnboardingGroupsView from './OnboardingGroupsView.vue';
 import OnboardingMemberAdministrationView from './OnboardingMemberAdministrationView.vue';
 import OnboardingRegistrationPeriodView from './OnboardingRegistrationPeriodView.vue';
-import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
+
 import type { Organization } from '@stamhoofd/structures';
 import { OrganizationCheckout, OrganizationType, OrganizationTypeHelper, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
 import { useActivatePackages } from '../dashboard/settings/packages/hooks/useActivatePackages';
@@ -61,7 +62,7 @@ export function useMemberAdministrationOnboarding() {
     const navigationActions = useNavigationActions();
 
     function buildStep(index: number, model: MemberAdministrationOnboardingViewModel, stepList: Component[], displayOptions: DisplayOptions, finishHandler: () => Promise<void> | void): ComponentWithProperties {
-        return new ComponentWithProperties(BoxedController, {
+        return AsyncComponent(() => import('@stamhoofd/components/containers/BoxedController.vue'), {
             root: new ComponentWithProperties(stepList[index], {
                 viewModel: model,
                 stepNumber: index + 1,

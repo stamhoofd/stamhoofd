@@ -60,6 +60,7 @@ import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
@@ -68,7 +69,7 @@ import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useAppContext } from '#context/appContext.ts';
-import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
+
 import RegistrationPeriodRow from './RegistrationPeriodRow.vue';
 
 const errors = useErrors();
@@ -120,7 +121,7 @@ async function addPeriod() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditRegistrationPeriodView, {
+            AsyncComponent(() => import('./EditRegistrationPeriodView.vue'), {
                 period,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
@@ -137,7 +138,7 @@ async function editPeriod(period: RegistrationPeriod) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditRegistrationPeriodView, {
+            AsyncComponent(() => import('./EditRegistrationPeriodView.vue'), {
                 period,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {

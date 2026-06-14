@@ -133,7 +133,34 @@ export default {
                     stamhoofd: stamhoofdPlugin,
                 },
                 rules: {
-                    'stamhoofd/async-component-with-properties': 'warn',
+                    'stamhoofd/async-component-with-properties': ['error', {
+                        allow: [
+                            // Add all components that should work if internet breaks, such as error messages, toasts...
+                            // Also add all overlays, because animations are broken for async display of overlays (tooltips etc)
+                            'App',
+                            'AuthenticatedView',
+                            'CenteredMessageView',
+                            'ContextProvider',
+                            'CoverImageContainer',
+                            'ModalStackComponent',
+                            'NavigationController',
+                            'PromiseView',
+                            'SplitViewController',
+                            'TabBarController',
+                            'ToastView',
+                            'Tooltip',
+                            'CustomHooksContainer',
+                            'ContextNavigationBar',
+                            'OrganizationSwitcher',
+                            'AccountSwitcher',
+                            'LoadingView',
+                            'ColumnSelectorContextMenu',
+                            'ColumnSortingContextMenu',
+                            'TableActionsContextMenu',
+                            'GeneralContextMenuView',
+                            'ImportErrorView',
+                        ],
+                    }],
                     'stamhoofd/async-route-components': 'error',
                     'import/no-cycle': ['error', { maxDepth: 100, ignoreExternal: false, allowUnsafeDynamicCyclicDependency: true }],
                     // Disallow importing from barrel files (index files that only re-export).

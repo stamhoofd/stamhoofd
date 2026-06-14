@@ -2,7 +2,7 @@
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div class="promise-view">
         <LoadingViewTransition :error-box="errorBox">
-            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
+            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" v-bind="$attrs" />
         </LoadingViewTransition>
     </div>
 </template>
@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance, useCanDismiss, useCurrentComponent, useDismiss } from '@simonbackx/vue-app-navigation';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, shallowRef } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { Toast } from '../overlays/Toast';
@@ -20,7 +20,7 @@ const props = defineProps<{
     promise: () => Promise<ComponentWithProperties>;
 }>();
 
-const root = ref<ComponentWithProperties | null>(null);
+const root = shallowRef<ComponentWithProperties | null>(null);
 const errorBox = ref<ErrorBox | null>(null);
 const component = useCurrentComponent();
 

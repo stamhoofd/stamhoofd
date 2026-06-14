@@ -20,14 +20,15 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useIsMac } from '@stamhoofd/components/hooks/useIsMac.ts';
 import { Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
 
 import { ref, watch } from 'vue';
-import EditOptionMenuView from './EditOptionMenuView.vue';
-import EditOptionView from './EditOptionView.vue';
+
+
 import OptionMenuOptions from './OptionMenuOptions.vue';
 
 const props = defineProps<{
@@ -100,7 +101,7 @@ function addOption() {
     const p = OptionMenu.patch({ id: props.optionMenu.id });
     p.options.addPut(option);
 
-    present(new ComponentWithProperties(EditOptionView, { optionMenu: props.optionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+    present(AsyncComponent(() => import('./EditOptionView.vue'), { optionMenu: props.optionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
         // Merge both patches
         const product = Product.patch({ id: props.product.id });
         product.optionMenus.addPatch(p.patch(patch));
@@ -111,8 +112,7 @@ function addOption() {
 }
 
 function editOptionMenu() {
-    present(new ComponentWithProperties(EditOptionMenuView,
-        {
+    present(AsyncComponent(() => import('./EditOptionMenuView.vue'), {
             product: props.product,
             optionMenu: props.optionMenu,
             isNew: false,

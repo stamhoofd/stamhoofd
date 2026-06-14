@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ViewStep } from '@stamhoofd/components/steps/ViewStep';
 import type { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
-import PackageOverviewStepView from './PackageOverviewStepView.vue';
+
 
 export class PackageOverviewStep implements ViewStep {
     model: OrganizationCheckoutViewModel;
@@ -17,7 +18,7 @@ export class PackageOverviewStep implements ViewStep {
     }
 
     getComponent(manager: ViewStepsManager): ComponentWithProperties {
-        return new ComponentWithProperties(PackageOverviewStepView, {
+        return AsyncComponent(() => import('./PackageOverviewStepView.vue'), {
             model: this.model,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

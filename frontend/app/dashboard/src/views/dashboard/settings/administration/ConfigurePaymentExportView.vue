@@ -76,6 +76,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -86,7 +87,7 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import ExcelExportView from '@stamhoofd/frontend-excel-export/ExcelExportView.vue';
+
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
@@ -307,7 +308,7 @@ async function save() {
     try {
         await show({
             components: [
-                new ComponentWithProperties(ExcelExportView, {
+                AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                     type: ExcelExportType.Payments,
                     filter: new LimitedFilteredRequest({
                         filter: buildFilter(),

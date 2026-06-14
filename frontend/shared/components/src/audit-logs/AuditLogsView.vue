@@ -52,6 +52,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import DateSelection from '#inputs/DateSelection.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
@@ -64,7 +65,7 @@ import { useErrors } from '../errors/useErrors';
 import { useAuditLogsObjectFetcher } from '#fetchers/useAuditLogsObjectFetcher.ts';
 import { useAuditLogUIFilterBuilders } from '../filters/filterBuilders';
 import type { UIFilter } from '../filters/UIFilter';
-import UIFilterEditor from '../filters/UIFilterEditor.vue';
+
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
@@ -141,7 +142,7 @@ async function editFilter(log: MouseEvent) {
     await presentPositionableSheet(log, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('../filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

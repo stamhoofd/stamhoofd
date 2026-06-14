@@ -217,12 +217,13 @@
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ContextMenu } from '#overlays/ContextMenu.ts';
 import { ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import EventOverview from '#events/EventOverview.vue';
-import InputSheet from '#overlays/InputSheet.vue';
+
+
 import PatchListText from '#audit-logs/components/PatchListText.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
@@ -236,8 +237,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';
-import EditEventNotificationRecordCategoryView from './EditEventNotificationRecordCategoryView.vue';
-import OriginalEventNotificationAnswersView from './OriginalEventNotificationAnswersView.vue';
+
+
 
 const props = withDefaults(
     defineProps<{
@@ -307,7 +308,7 @@ async function editRecordCategory(recordCategory: RecordCategory) {
 
     await present({
         components: [
-            new ComponentWithProperties(EditEventNotificationRecordCategoryView, {
+            AsyncComponent(() => import('./EditEventNotificationRecordCategoryView.vue'), {
                 viewModel: props.viewModel,
                 category: rootCategory,
             }),
@@ -349,7 +350,7 @@ async function openEvent(event: Event | null) {
 
     await present({
         components: [
-            new ComponentWithProperties(EventOverview, {
+            AsyncComponent(() => import('#events/EventOverview.vue'), {
                 event: event,
             }),
         ],
@@ -372,7 +373,7 @@ async function doSubmit() {
 async function doAcceptPartially() {
     await present({
         components: [
-            new ComponentWithProperties(InputSheet, {
+            AsyncComponent(() => import('#overlays/InputSheet.vue'), {
                 title: $t('%Cb'),
                 description: $t('%Cc'),
                 saveText: $t('%Cb'),
@@ -413,7 +414,7 @@ async function doAccept() {
 async function doReject() {
     await present({
         components: [
-            new ComponentWithProperties(InputSheet, {
+            AsyncComponent(() => import('#overlays/InputSheet.vue'), {
                 title: $t('%BF'),
                 description: $t('%BG'),
                 saveText: $t('%aq'),
@@ -441,7 +442,7 @@ async function doReject() {
 async function editFeedbackText() {
     await present({
         components: [
-            new ComponentWithProperties(InputSheet, {
+            AsyncComponent(() => import('#overlays/InputSheet.vue'), {
                 title: $t('%BI'),
                 description: $t('%BG'),
                 saveText: $t('%1Op'),
@@ -462,7 +463,7 @@ async function editFeedbackText() {
 async function showOriginalAnswers() {
     await present({
         components: [
-            new ComponentWithProperties(OriginalEventNotificationAnswersView, {
+            AsyncComponent(() => import('./OriginalEventNotificationAnswersView.vue'), {
                 viewModel: props.viewModel,
             }),
         ],

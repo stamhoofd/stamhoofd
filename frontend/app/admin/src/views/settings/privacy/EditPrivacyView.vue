@@ -24,7 +24,8 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
@@ -36,7 +37,6 @@ import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Platform, PlatformConfig, PlatformPolicy, PrivacySettings } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import PolicyRow from './components/PolicyRow.vue';
-import EditPolicyView from './EditPolicyView.vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -66,7 +66,7 @@ async function addPolicy() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditPolicyView, {
+            AsyncComponent(() => import('./EditPolicyView.vue'), {
                 policy,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPolicy>) => {
@@ -87,7 +87,7 @@ async function editPolicy(policy: PlatformPolicy) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditPolicyView, {
+            AsyncComponent(() => import('./EditPolicyView.vue'), {
                 policy,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPolicy>) => {
@@ -129,8 +129,7 @@ async function save() {
         await platformManager.value.patch(patch.value);
         new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

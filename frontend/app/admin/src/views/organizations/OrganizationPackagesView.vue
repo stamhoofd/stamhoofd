@@ -42,6 +42,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -56,7 +57,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, STPackage } from '@stamhoofd/structures';
 import { OrganizationPackagesStatus, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
-import EditPackageView from './EditPackageView.vue';
+
 
 const props = withDefaults(
     defineProps<{
@@ -112,7 +113,7 @@ async function createPackage() {
     
     await present({
         components: [
-            new ComponentWithProperties(EditPackageView, {
+            AsyncComponent(() => import('./EditPackageView.vue'), {
                 pack,
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<STPackage>) => {
@@ -129,7 +130,7 @@ async function createPackage() {
 async function editPackage(pack: STPackage) {
     await present({
         components: [
-            new ComponentWithProperties(EditPackageView, {
+            AsyncComponent(() => import('./EditPackageView.vue'), {
                 pack,
                 isNew: false,
                 saveHandler: async (patch: AutoEncoderPatchType<STPackage>) => {

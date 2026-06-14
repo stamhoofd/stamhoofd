@@ -115,7 +115,7 @@ import LoadingInputBox from '@stamhoofd/components/navigation/LoadingInputBox.vu
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/uitpas/useGetOfficialUitpasSocialTariff.ts';
-import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';
+import { useGoToUitpasConfiguration } from './useGoToUitpasConfiguration.ts';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 import { computed, onMounted, ref, watch } from 'vue';
 

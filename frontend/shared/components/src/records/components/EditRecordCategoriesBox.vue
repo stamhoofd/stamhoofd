@@ -19,9 +19,10 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { RecordCategory } from '@stamhoofd/structures';
 import type { RecordEditorSettings } from '#records/RecordEditorSettings.ts';
-import EditRecordCategoryView from '#records/EditRecordCategoryView.vue';
+
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useEmitPatchArray } from '#hooks/useEmitPatchArray.ts';
 import RecordCategoryRow from './RecordCategoryRow.vue';
@@ -49,7 +50,7 @@ const savedRecordIds = new Set(props.categories.flatMap(c => c.getAllRecords().m
 async function editCategory(category: RecordCategory) {
     await present({
         components: [
-            new ComponentWithProperties(EditRecordCategoryView, {
+            AsyncComponent(() => import('#records/EditRecordCategoryView.vue'), {
                 categoryId: category.id,
                 rootCategories: props.categories,
                 settings: props.settings,
@@ -72,7 +73,7 @@ async function addCategory(base?: RecordCategory) {
 
     await present({
         components: [
-            new ComponentWithProperties(EditRecordCategoryView, {
+            AsyncComponent(() => import('#records/EditRecordCategoryView.vue'), {
                 categoryId: category.id,
                 rootCategories: [...props.categories, category],
                 settings: props.settings,

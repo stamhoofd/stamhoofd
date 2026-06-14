@@ -1,7 +1,8 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
-import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue';
+
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -42,7 +43,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
 
             await present({
                 components: [
-                    new ComponentWithProperties(StartNewRegistrationPeriodView, {
+                    AsyncComponent(() => import('@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue'), {
                         period: p,
                         callback: async () => {
                             const newList = await organizationManager.value.loadPeriods(false, false, owner);

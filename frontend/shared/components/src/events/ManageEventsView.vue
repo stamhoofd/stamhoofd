@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -64,7 +65,7 @@ import { useAppContext } from '#context/appContext.ts';
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '../filters/filterBuilders';
 import type { UIFilter } from '../filters/UIFilter';
-import UIFilterEditor from '../filters/UIFilterEditor.vue';
+
 import { useAuth } from '#hooks/useAuth.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -77,7 +78,7 @@ import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import EventRow from './components/EventRow.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
-import EditEventView from './EditEventView.vue';
+
 
 
 type ObjectType = Event;
@@ -274,7 +275,7 @@ async function addEvent(template?: Event) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditEventView, {
+            AsyncComponent(() => import('./EditEventView.vue'), {
                 event,
                 isNew: true,
                 callback: () => {
@@ -307,7 +308,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('../filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

@@ -150,12 +150,13 @@ import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
 import { Toast } from '#overlays/Toast.ts';
 import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
-import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
-import EditPaymentView from '#payments/EditPaymentView.vue';
+
+
 import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BaseOrganization, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
 import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
@@ -278,7 +279,7 @@ async function createPayment(type: PaymentType) {
         payment.payingOrganizationId = props.item.object.id;
     }
 
-    const component = new ComponentWithProperties(EditPaymentView, {
+    const component = AsyncComponent(() => import('#payments/EditPaymentView.vue'), {
         createBalanceItem,
         payment,
         customers: detailedItem.value.object.customers,
@@ -321,7 +322,7 @@ async function createBalanceItem() {
         balanceItem.userId = props.item.object.id;
     }
 
-    const component = new ComponentWithProperties(EditBalanceItemView, {
+    const component = AsyncComponent(() => import('#payments/EditBalanceItemView.vue'), {
         balanceItem,
         isNew: true,
         saveHandler: async () => {

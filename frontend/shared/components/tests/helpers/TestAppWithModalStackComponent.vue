@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -37,10 +37,10 @@ const wrappedRoot = new ComponentWithProperties(ContextProvider, {
     context: markRaw({
         $context: new SessionContext(null),
         $platformManager: platformManager,
-        //$memberManager,
+        // $memberManager,
         $organizationManager: new OrganizationManager(context),
-        //$webshopManager,
-        //$checkoutManager,
+        // $webshopManager,
+        // $checkoutManager,
         stamhoofd_app: 'auto',
     }),
     root: props.root,
@@ -61,8 +61,7 @@ onMounted(async () => {
     ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (!(options as any).components) {
             await manualPresent(stack.present, { components: [options as ComponentWithProperties] });
-        }
-        else {
+        } else {
             await manualPresent(stack.present, options);
         }
     });
