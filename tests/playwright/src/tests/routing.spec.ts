@@ -72,17 +72,14 @@ async function testRoute({ page, ...options }: {
         throw new Error('Invaid usage NOT expectedSwitcher with expectedSwitchOptions');
     }
 
-    await page.goto(options.url);
+    await page.goto(options.url + '?initial=true'); // nav framework should remove this param
 
     // Settings view should be visible
     await expect(page.locator(options.expectedLocator)).toBeVisible();
     await checkScopedTo({ page, organization: options.expectedScope });
 
-    // Url will only get updated after a certain timeout
-    await page.waitForTimeout(5_000);
-
-    // Url should be the same
-    await expect(page).toHaveURL(options.expectedUrl);
+    // Wait until URL is as expected, or time-out after 5 seconds
+    await expect(page).toHaveURL(options.expectedUrl, { timeout: 5_000 });
 
     if (options.expectedSwitcher === undefined) {
         return;
