@@ -209,9 +209,10 @@ function getFix(sourceCode, node, importedComponent, filename) {
         });
 
         if (asyncComponent.importDeclaration && asyncComponent.importSource) {
+            const indent = ' '.repeat(asyncComponent.importDeclaration.loc.start.column);
             fixes.push(fixer.insertTextAfter(
                 asyncComponent.importDeclaration,
-                `\nimport { AsyncComponent } from '${asyncComponent.importSource}';`,
+                `\n${indent}import { AsyncComponent } from '${asyncComponent.importSource}';`,
             ));
         }
 
