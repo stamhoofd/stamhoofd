@@ -1,9 +1,8 @@
 import { column, Migration } from '@simonbackx/simple-database';
 import { AutoEncoder, field } from '@simonbackx/simple-encoding';
-import { Organization, Webshop } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { DataPermissionsSettings, FinancialSupportSettings, Version } from '@stamhoofd/structures';
-import { LoggingTools } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { SeedTools } from '../helpers/SeedTools.js';
 
