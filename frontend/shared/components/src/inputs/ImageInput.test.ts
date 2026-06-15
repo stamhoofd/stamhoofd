@@ -1,5 +1,5 @@
 import { File as StructFile, Image, Resolution, ResolutionRequest } from '@stamhoofd/structures';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import type { RenderResult } from 'vitest-browser-vue';

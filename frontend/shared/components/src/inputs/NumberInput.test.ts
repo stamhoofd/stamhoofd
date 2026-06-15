@@ -1,4 +1,4 @@
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
 import NumberInput from './NumberInput.vue';

@@ -2,7 +2,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
-import { userEvent } from '@vitest/browser/context';
+import { userEvent } from 'vitest/browser';
 import { expect, test } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import { FormatInputDirective } from '../directives/FormatInputDirective';

@@ -5,8 +5,8 @@ import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import type { Locator } from '@vitest/browser/context';
-import { page } from '@vitest/browser/context';
+import type { Locator } from 'vitest/browser';
+import { page } from 'vitest/browser';
 import { ref } from 'vue';
 import DateSelectionView from './DateSelectionView.vue';
 

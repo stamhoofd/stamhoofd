@@ -1,7 +1,7 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { VueWrapper } from '@vue/test-utils';
 import { mount } from '@vue/test-utils';
-import { page } from '@vitest/browser/context';
+import { page } from 'vitest/browser';
 import { defineComponent, h, withDirectives } from 'vue';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import TooltipDirective from '#directives/Tooltip.ts';
