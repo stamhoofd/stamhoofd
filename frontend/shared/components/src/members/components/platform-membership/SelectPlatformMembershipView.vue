@@ -102,7 +102,7 @@
                             <DateSelection
                                 v-model="customEndDate"
                                 class="option"
-                                :min="customStartDate"
+                                :min="minimumStartDateForDaysTypes"
                                 :max="maximumEndDateForDaysTypes"
                             />
                         </STInputBox>
