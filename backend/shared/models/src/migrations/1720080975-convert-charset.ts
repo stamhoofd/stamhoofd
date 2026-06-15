@@ -4,7 +4,7 @@ import { LoggingTools } from '@stamhoofd/utility';
 export default new Migration(async () => {
     process.stdout.write('\n');
 
-    if (STAMHOOFD.userMode === 'platform' && STAMHOOFD.environment === 'production') {
+    if (STAMHOOFD.userMode === 'platform' && (STAMHOOFD.environment === 'production' || STAMHOOFD.environment === 'staging')) {
         console.log('Skipped convert charset for userMode platform in production.');
         return;
     }

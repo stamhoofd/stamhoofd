@@ -9,7 +9,7 @@ import { Database, Migration } from '@simonbackx/simple-database';
 export default new Migration(async () => {
     process.stdout.write('\n');
 
-    if (STAMHOOFD.userMode === 'platform' && STAMHOOFD.environment === 'production') {
+    if (STAMHOOFD.userMode === 'platform' && (STAMHOOFD.environment === 'production' || STAMHOOFD.environment === 'staging')) {
         console.log('Skipped update leads charset for userMode platform in production.');
         return Promise.resolve();
     }
