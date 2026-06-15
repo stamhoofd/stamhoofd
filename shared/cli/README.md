@@ -20,43 +20,43 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 
 ### Commands
 
-| Area | Command | Purpose |
-| --- | --- | --- |
-| Build | `yarn stam build` | Build shared packages and all app packages for the selected environment. |
-| Setup | `yarn stam setup` | Check the machine and offer recommended setup fixes. |
-| Setup | `yarn stam setup node` | Install the Node.js version from `.nvmrc` and copy global packages from the active version. |
-| Setup | `yarn stam setup dns` | Configure local `.stamhoofd` DNS. |
-| Setup | `yarn stam setup cert` | Trust the local Caddy HTTPS authority. |
-| Development | `yarn stam dev all` | Start shared services and the full app stack. |
-| Development | `yarn stam dev backend` | Start backend apps for the current instance. |
-| Development | `yarn stam dev frontend` | Start frontend apps only. |
-| Development | `yarn stam dev instance` | Start this workspace instance using shared services. |
-| Services | `yarn stam services up` | Start shared Docker services. |
-| Services | `yarn stam services status` | Show shared service status. |
-| Services | `yarn stam services logs` | Tail shared service logs. |
-| Services | `yarn stam services restart` | Restart shared services with interactive progress output. |
-| Services | `yarn stam services down` | Stop shared services. |
-| Services | `yarn stam services stop` | Alias for `yarn stam services down`. |
-| Status | `yarn stam status` | Show shared services, active instances, URLs, and credentials. |
-| Config | `yarn stam config explain` | Explain resolved instance config. |
-| Config | `yarn stam config print` | Print resolved domains and backend environment values as JSON. |
-| Database | `yarn stam db shell` | Open a MySQL shell for the current local database. |
-| Database | `yarn stam db migrate` | Build shared packages and run migrations. |
-| SSO | `yarn stam sso config` | Print local SSO client, user, and issuer settings. |
-| SSO | `yarn stam sso start <redirect-uri>` | Start Keycloak and import the local realm. |
-| SSO | `yarn stam sso logs` | Tail Keycloak logs. |
-| SSO | `yarn stam sso stop` | Stop the local Keycloak container. |
-| Tests | `yarn stam test unit` | Run unit tests with isolated MySQL. |
-| Tests | `yarn stam test e2e` | Run Playwright tests. |
-| Tests | `yarn stam test all --ci` | Run unit and E2E tests in CI mode. |
-| Checks | `yarn stam check lint` | Run ESLint across the monorepo. |
-| Checks | `yarn stam check typecheck` | Run TypeScript checks across the monorepo. |
-| Checks | `yarn stam check all` | Run build, lint, typecheck, unit tests, and E2E tests. |
-| Cleanup | `yarn stam clean build` | Remove build artifacts. |
-| Cleanup | `yarn stam clean db` | Drop the selected local MySQL database after confirmation. |
-| Cleanup | `yarn stam clean sso` | Stop the local SSO server. |
-| Cleanup | `yarn stam clean services` | Stop shared services. |
-| Cleanup | `yarn stam clean all` | Clean build artifacts and stop shared services. |
+| Area        | Command                              | Purpose                                                                  |
+| ----------- | ------------------------------------ | ------------------------------------------------------------------------ |
+| Build       | `yarn stam build`                    | Build shared packages and all app packages for the selected environment. |
+| Setup       | `yarn stam setup`                    | Check the machine and offer recommended setup fixes.                     |
+| Setup       | `yarn stam setup node`               | Install the Node.js version from `.nvmrc` using fnm or nvm.              |
+| Setup       | `yarn stam setup dns`                | Configure local `.stamhoofd` DNS.                                        |
+| Setup       | `yarn stam setup cert`               | Trust the local Caddy HTTPS authority.                                   |
+| Development | `yarn stam dev all`                  | Start shared services and the full app stack.                            |
+| Development | `yarn stam dev backend`              | Start backend apps for the current instance.                             |
+| Development | `yarn stam dev frontend`             | Start frontend apps only.                                                |
+| Development | `yarn stam dev instance`             | Start this workspace instance using shared services.                     |
+| Services    | `yarn stam services up`              | Start shared Docker services.                                            |
+| Services    | `yarn stam services status`          | Show shared service status.                                              |
+| Services    | `yarn stam services logs`            | Tail shared service logs.                                                |
+| Services    | `yarn stam services restart`         | Restart shared services with interactive progress output.                |
+| Services    | `yarn stam services down`            | Stop shared services.                                                    |
+| Services    | `yarn stam services stop`            | Alias for `yarn stam services down`.                                     |
+| Status      | `yarn stam status`                   | Show shared services, active instances, URLs, and credentials.           |
+| Config      | `yarn stam config explain`           | Explain resolved instance config.                                        |
+| Config      | `yarn stam config print`             | Print resolved domains and backend environment values as JSON.           |
+| Database    | `yarn stam db shell`                 | Open a MySQL shell for the current local database.                       |
+| Database    | `yarn stam db migrate`               | Build shared packages and run migrations.                                |
+| SSO         | `yarn stam sso config`               | Print local SSO client, user, and issuer settings.                       |
+| SSO         | `yarn stam sso start <redirect-uri>` | Start Keycloak and import the local realm.                               |
+| SSO         | `yarn stam sso logs`                 | Tail Keycloak logs.                                                      |
+| SSO         | `yarn stam sso stop`                 | Stop the local Keycloak container.                                       |
+| Tests       | `yarn stam test unit`                | Run unit tests with isolated MySQL.                                      |
+| Tests       | `yarn stam test e2e`                 | Run Playwright tests.                                                    |
+| Tests       | `yarn stam test all --ci`            | Run unit and E2E tests in CI mode.                                       |
+| Checks      | `yarn stam check lint`               | Run ESLint across the monorepo.                                          |
+| Checks      | `yarn stam check typecheck`          | Run TypeScript checks across the monorepo.                               |
+| Checks      | `yarn stam check all`                | Run build, lint, typecheck, unit tests, and E2E tests.                   |
+| Cleanup     | `yarn stam clean build`              | Remove build artifacts.                                                  |
+| Cleanup     | `yarn stam clean db`                 | Drop the selected local MySQL database after confirmation.               |
+| Cleanup     | `yarn stam clean sso`                | Stop the local SSO server.                                               |
+| Cleanup     | `yarn stam clean services`           | Stop shared services.                                                    |
+| Cleanup     | `yarn stam clean all`                | Clean build artifacts and stop shared services.                          |
 
 ### Development Configuration
 
@@ -91,12 +91,13 @@ Useful environment variables:
 - `STAMHOOFD_DOMAIN` overrides the shared local domain, defaulting to `stamhoofd`.
 - `MYSQL_PORT` overrides the local MySQL host port, defaulting to `3307`.
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE` tunes the MySQL container InnoDB buffer pool size (e.g. `512M`, `1G`), defaulting to `4G`.
-- `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container  InnoDB buffer pool instances defaulting to `4`.
+- `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container InnoDB buffer pool instances defaulting to `4`.
 - `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
 
 When needing a heavy duty MySQL instance to test migrations, you can restart MySQL using:
+
 ```
 STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES=10 \
 STAMHOOFD_MYSQL_SORT_BUFFER_SIZE=64M \
@@ -335,7 +336,7 @@ Use `yarn stam setup` first. It checks Node, Docker, Caddy, DNS, and certificate
 
 - **The active Node.js version differs from `.nvmrc`**
 
-  Run `source .development/install-node.sh` from the repository. This installs or activates the pinned version and copies global packages once per old-to-new version pair. `stam status` also reports this mismatch, and `stam dev` will stop before starting processes with the wrong version.
+    Run `source .development/install-node.sh`. The script uses [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm), whichever is available. `stam status` also reports this mismatch, and `stam dev` will stop before starting processes with the wrong version.
 
 If that does not tell you enough, use the first matching case below.
 
