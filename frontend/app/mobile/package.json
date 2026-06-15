@@ -4,15 +4,15 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "serve": "NODE_ENV=development ENV_FILE=../../.env.json vite",
+        "android": "cap open android",
         "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
-        "sync": "cap sync",
-        "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y && trapeze run display-name.yaml -y",
-        "sync:production": "yarn -s trapeze && cap sync",
         "ios": "cap open ios",
-        "android": "cap open android",
-        "lint": "eslint"
+        "lint": "eslint",
+        "serve": "NODE_ENV=development ENV_FILE=../../.env.json vite",
+        "sync": "cap sync",
+        "sync:production": "yarn -s trapeze && cap sync",
+        "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y && trapeze run display-name.yaml -y"
     },
     "dependencies": {
         "@capacitor-community/in-app-review": "7.1.0",

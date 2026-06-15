@@ -13,18 +13,18 @@
         "dist",
         "package.json"
     ],
-    "license": "UNLICENCED",
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
-    },
-    "publishConfig": {
-        "access": "public"
     },
     "dependencies": {
         "jose": "5.10.0"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
     }
 }

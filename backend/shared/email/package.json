@@ -2,10 +2,9 @@
     "name": "@stamhoofd/email",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "files": [
         "dist",
@@ -15,13 +14,10 @@
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
     },
-    "peerDependencies": {
-        "@simonbackx/simple-errors": "1.5.0",
-        "@stamhoofd/backend-i18n": "*",
-        "@stamhoofd/queues": "*",
-        "@stamhoofd/sql": "*",
-        "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*"
+    "dependencies": {
+        "@simonbackx/simple-database": "1.37.1",
+        "html-to-text": "10.0.0",
+        "nodemailer": "8.0.11"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "*",
@@ -30,11 +26,15 @@
         "@types/uuid": "8.3.4",
         "sinon": "18.0.1"
     },
-    "dependencies": {
-        "@simonbackx/simple-database": "1.37.1",
-        "html-to-text": "10.0.0",
-        "nodemailer": "8.0.11"
+    "peerDependencies": {
+        "@simonbackx/simple-errors": "1.5.0",
+        "@stamhoofd/backend-i18n": "*",
+        "@stamhoofd/queues": "*",
+        "@stamhoofd/sql": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
     },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
     }

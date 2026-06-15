@@ -1,18 +1,14 @@
 {
     "name": "eslint-plugin-stamhoofd",
     "version": "2.121.0",
-    "main": "./src/index.js",
-    "license": "UNLICENCED",
-    "sideEffects": false,
     "type": "module",
+    "main": "./src/index.js",
+    "sideEffects": false,
     "files": [
         "src"
     ],
     "scripts": {
         "test": "vitest run"
-    },
-    "publishConfig": {
-        "access": "public"
     },
     "dependencies": {
         "@eslint/js": "10.0.1",
@@ -29,5 +25,9 @@
     },
     "devDependencies": {
         "vitest": "4.1.8"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
     }
 }

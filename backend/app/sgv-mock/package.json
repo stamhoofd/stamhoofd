@@ -8,28 +8,28 @@
             "require": "./dist/index.js"
         }
     },
-    "license": "UNLICENCED",
     "scripts": {
-        "dev": "wait-on ../../../shared/sgv/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5859 --watch dist --watch '../../../shared/sgv/dist/' --ext .ts,.json,.js --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "dev:build": "yarn -s build",
-        "dev:full": "yarn -s dev",
         "build": "tsc --build tsconfig.build.json",
         "build:full": "yarn -s clear && yarn -s build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
-        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "dev": "wait-on ../../../shared/sgv/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5859 --watch dist --watch '../../../shared/sgv/dist/' --ext .ts,.json,.js --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "dev:build": "yarn -s build",
+        "dev:full": "yarn -s dev",
         "lint": "eslint .",
+        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
         "test": "vitest"
     },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.8",
+        "@simonbackx/simple-endpoints": "1.21.1",
+        "@simonbackx/simple-errors": "*",
+        "@stamhoofd/sgv": "*"
+    },
     "devDependencies": {
-        "@types/node": "^22",
+        "@types/node": "22",
         "vitest": "4.1.8"
     },
-    "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.6",
-        "@simonbackx/simple-endpoints": "1.21.1",
-        "@simonbackx/simple-errors": "^1.5.0",
-        "@stamhoofd/sgv": "2.121.0"
-    },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
     }

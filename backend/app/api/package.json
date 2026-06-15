@@ -20,43 +20,29 @@
             "require": "./dist/src/boot.js"
         },
         "./tests/helpers": {
-            "@stamhoofd/source": "./tests/helpers/index.ts",
             "types": "./dist/tests/helpers/index.d.ts",
             "import": "./dist/tests/helpers/index.js",
-            "require": "./dist/tests/helpers/index.js"
+            "require": "./dist/tests/helpers/index.js",
+            "@stamhoofd/source": "./tests/helpers/index.ts"
         }
     },
-    "license": "UNLICENCED",
     "scripts": {
+        "build": "tsc --build tsconfig.build.json --clean && yarn -s copy-assets && tsc --build tsconfig.build.json",
+        "build:full": "yarn -s clear && yarn -s build",
+        "build:playwright:pre": "yarn -s build && tsc --build tsconfig.test.json",
+        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
+        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"yarn -s dev:watch\"",
+        "dev:backend": "yarn -s dev",
         "dev:build": "yarn -s build",
         "dev:full": "yarn -s dev",
         "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'echo \"Restarting API...\" && exec node --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
-        "dev:backend": "yarn -s dev",
-        "build": "tsc --build tsconfig.build.json --clean && yarn -s copy-assets && tsc --build tsconfig.build.json",
-        "build:playwright:pre": "yarn -s build && tsc --build tsconfig.test.json",
-        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
-        "build:full": "yarn -s clear && yarn -s build",
-        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
+        "lint": "eslint",
+        "migrations": "yarn -s build:full && node ./dist/migrations.js",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
-        "test:reset": "yarn -s build:full && yarn -s test",
-        "migrations": "yarn -s build:full && node ./dist/migrations.js",
-        "lint": "eslint"
-    },
-    "devDependencies": {
-        "@stamhoofd/test-utils": "*",
-        "@types/cookie": "^0.6.0",
-        "@types/luxon": "3.7.1",
-        "@types/mailparser": "3.4.6",
-        "@types/mysql": "2.15.27",
-        "@types/node": "22.15.34",
-        "@types/uuid": "8.3.4",
-        "nock": "14.0.15",
-        "qs": "6.15.2",
-        "sinon": "18.0.1",
-        "vitest": "4.1.8"
+        "test:reset": "yarn -s build:full && yarn -s test"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "3.1068.0",
@@ -88,8 +74,8 @@
         "archiver": "7.0.1",
         "axios": "1.16.0",
         "base-x": "3.0.11",
-        "chalk": "4.1.2",
-        "cookie": "^0.7.0",
+        "chalk": "5.6.2",
+        "cookie": "0.7.1",
         "formidable": "3.5.4",
         "handlebars": "4.7.9",
         "jose": "5.10.0",
@@ -104,6 +90,20 @@
         "openid-client": "5.7.1",
         "stripe": "16.12.0"
     },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "*",
+        "@types/cookie": "0.6.0",
+        "@types/luxon": "3.7.1",
+        "@types/mailparser": "3.4.6",
+        "@types/mysql": "2.15.27",
+        "@types/node": "22.15.34",
+        "@types/uuid": "8.3.4",
+        "nock": "14.0.15",
+        "qs": "6.15.2",
+        "sinon": "18.0.1",
+        "vitest": "4.1.8"
+    },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
     }

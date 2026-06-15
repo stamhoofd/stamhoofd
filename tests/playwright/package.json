@@ -4,11 +4,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "yarn -s build && NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* playwright test -c dist",
-        "test:trace": "yarn -s test --trace on",
-        "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 yarn -s test --grep @extra",
+        "build": "tsc --build",
         "lint": "eslint",
-        "build": "tsc --build"
+        "test": "yarn -s build && NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* playwright test -c dist",
+        "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 yarn -s test --grep @extra",
+        "test:trace": "yarn -s test --trace on"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
@@ -19,10 +19,10 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "pino": "^10.1.1"
+        "pino": "10.1.1"
     },
     "devDependencies": {
-        "@playwright/test": "^1.58.2",
+        "@playwright/test": "1.58.2",
         "@stamhoofd/test-utils": "*",
         "eslint-plugin-stamhoofd": "*"
     }

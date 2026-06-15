@@ -2,18 +2,28 @@
     "name": "@stamhoofd/sql",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "files": [
         "dist"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "test": "vitest",
         "lint": "eslint",
+        "test": "vitest",
         "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.8",
+        "@simonbackx/simple-errors": "1.5.0",
+        "@simonbackx/simple-logging": "1.0.1",
+        "lru-cache": "11.5.1"
+    },
+    "devDependencies": {
+        "@simonbackx/simple-database": "1.37.1",
+        "@stamhoofd/test-utils": "*",
+        "vitest": "4.1.8"
     },
     "peerDependencies": {
         "@simonbackx/simple-database": "1.37.1",
@@ -21,18 +31,8 @@
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"
     },
-    "devDependencies": {
-        "@simonbackx/simple-database": "1.37.1",
-        "@stamhoofd/test-utils": "*",
-        "vitest": "4.1.8"
-    },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
-    },
-    "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.8",
-        "@simonbackx/simple-errors": "1.5.0",
-        "@simonbackx/simple-logging": "1.0.1",
-        "lru-cache": "11.5.1"
     }
 }

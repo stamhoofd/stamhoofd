@@ -2,9 +2,8 @@
     "name": "@stamhoofd/logging",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "files": [
         "src",
@@ -17,6 +16,7 @@
     "dependencies": {
         "@simonbackx/simple-logging": "1.0.1"
     },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
     }

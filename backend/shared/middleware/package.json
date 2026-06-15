@@ -2,9 +2,8 @@
     "name": "@stamhoofd/backend-middleware",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "files": [
         "src",
@@ -19,10 +18,11 @@
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1"
     },
-    "publishConfig": {
-        "access": "public"
-    },
     "peerDependencies": {
         "@stamhoofd/structures": "*"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
     }
 }

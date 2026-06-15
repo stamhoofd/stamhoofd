@@ -4,16 +4,16 @@
     "private": true,
     "type": "module",
     "main": "src/exports.ts",
-    "scripts": {
-        "dev:build": "yarn -s build",
-        "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
-        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
-        "typecheck": "vue-tsc --noEmit",
-        "lint": "eslint"
-    },
     "files": [
         "dist"
     ],
+    "scripts": {
+        "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
+        "dev:build": "yarn -s build",
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/vue-app-navigation": "2.22.0",

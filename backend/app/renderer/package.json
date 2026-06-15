@@ -8,27 +8,17 @@
             "require": "./dist/index.js"
         }
     },
-    "license": "UNLICENCED",
     "scripts": {
-        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "dev:build": "yarn -s build",
-        "dev:full": "yarn -s dev",
         "build": "tsc --build tsconfig.build.json",
         "build:full": "yarn -s clear && yarn -s build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
-        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "dev:build": "yarn -s build",
+        "dev:full": "yarn -s dev",
         "lint": "eslint",
+        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
-    },
-    "devDependencies": {
-        "@stamhoofd/test-utils": "*",
-        "@types/formidable": "3.5.1",
-        "@types/luxon": "3.7.1",
-        "@types/mysql": "2.15.27",
-        "@types/node": "22.15.34",
-        "nock": "14.0.15",
-        "vitest": "4.1.8"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
@@ -50,6 +40,16 @@
         "mysql2": "3.22.5",
         "puppeteer": "25.1.0"
     },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "*",
+        "@types/formidable": "3.5.1",
+        "@types/luxon": "3.7.1",
+        "@types/mysql": "2.15.27",
+        "@types/node": "22.15.34",
+        "nock": "14.0.15",
+        "vitest": "4.1.8"
+    },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
     }

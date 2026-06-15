@@ -4,20 +4,21 @@
     "private": true,
     "type": "module",
     "main": "./src/exports.ts",
-    "scripts": {
-        "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "dev:build": "yarn -s build",
-        "build": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
-        "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
-        "build:production": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
-        "test": "yarn -s typecheck",
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
-    },
     "files": [
         "dist"
     ],
+    "scripts": {
+        "build": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
+        "build:production": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
+        "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
+        "dev:build": "yarn -s build",
+        "lint": "eslint",
+        "test": "yarn -s typecheck",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
+        "@simonbackx/simple-errors": "*",
         "@simonbackx/vue-app-navigation": "2.22.0",
         "@stamhoofd/admin-frontend": "*",
         "@stamhoofd/assets": "*",
@@ -36,7 +37,6 @@
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "@stamhoofd/verify-email": "*",
-        "@simonbackx/simple-errors": "*",
         "qr-scanner": "1.4.2",
         "vue": "3.5.38"
     },

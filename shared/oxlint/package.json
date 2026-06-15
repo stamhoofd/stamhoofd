@@ -1,17 +1,17 @@
 {
     "name": "oxlint-plugin-stamhoofd",
     "version": "2.121.0",
-    "main": "./src/index.js",
-    "license": "UNLICENCED",
-    "sideEffects": false,
     "type": "module",
+    "main": "./src/index.js",
+    "sideEffects": false,
     "files": [
         "src"
     ],
+    "dependencies": {
+        "oxlint-tsgolint": "0.23.0"
+    },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
-    },
-    "dependencies": {
-        "oxlint-tsgolint": "^0.23.0"
     }
 }

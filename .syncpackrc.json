@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/syncpack/schema.json",
+  "strict": true,
+  "source": [
+    "package.json",
+    ".development/i18n-uuid/package.json",
+    "backend/app/*/package.json",
+    "backend/shared/*/package.json",
+    "frontend/app/*/package.json",
+    "frontend/shared/*/package.json",
+    "shared/*/package.json",
+    "tests/*/package.json"
+  ],
+  "sortFirst": [
+    "name", "description", "version", "private", "type", "main", "module", "types", "sideEffects", "exports", "imports", "files", "bin", "scripts", "dependencies", "devDependencies", "peerDependencies"
+  ],
+  "versionGroups": [
+    {
+      "label": "Use wildcards for workspace dependencies",
+      "dependencies": ["$LOCAL"],
+      "dependencyTypes": ["dev", "peer", "prod"],
+      "pinVersion": "*"
+    },
+    {
+      "label": "Use the highest version for external dependencies",
+      "dependencies": ["!$LOCAL"],
+      "specifierTypes": ["exact"],
+      "preferVersion": "highestSemver"
+    }
+  ],
+  "semverGroups": [
+    {
+      "label": "Allow wildcards for workspace dependencies",
+      "dependencies": ["$LOCAL"],
+      "isIgnored": true
+    },
+    {
+      "label": "Pin external dependencies",
+      "dependencies": ["!$LOCAL"],
+      "range": ""
+    }
+  ]
+}

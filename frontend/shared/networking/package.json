@@ -2,21 +2,21 @@
     "name": "@stamhoofd/networking",
     "version": "1.0.0",
     "private": true,
-    "sideEffects": false,
     "type": "module",
+    "sideEffects": false,
     "exports": {
         "./*": "./src/*.ts",
         "./*.ts": "./src/*.ts",
         "./*.vue": "./src/*.vue"
     },
-    "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
-    },
     "imports": {
         "#*.vue": "./src/*.vue",
         "#*.ts": "./src/*.ts",
         "#*": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.8",

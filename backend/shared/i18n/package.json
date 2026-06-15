@@ -2,20 +2,19 @@
     "name": "@stamhoofd/backend-i18n",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "require": "./dist/index.js",
-            "import": "./dist/index.js"
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
         },
         "./*": {
             "types": "./dist/*.d.ts",
-            "require": "./dist/*.js",
-            "import": "./dist/*.js"
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
         }
     },
     "files": [
@@ -25,16 +24,17 @@
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
     },
+    "dependencies": {
+        "@simonbackx/simple-logging": "1.0.1"
+    },
     "peerDependencies": {
         "@simonbackx/simple-endpoints": "1.21.1",
         "@stamhoofd/locales": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*"
     },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
-    },
-    "dependencies": {
-        "@simonbackx/simple-logging": "1.0.1"
     }
 }

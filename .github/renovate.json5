@@ -28,7 +28,8 @@
   internalChecksFilter: "strict",
 
   prCreation: "not-pending",
-  rebaseWhen: "conflicted",
+  // Keep dependency branches aligned with newly added workspace manifests.
+  rebaseWhen: "behind-base-branch",
 
   postUpdateOptions: ["yarnDedupeFewer"],
 
