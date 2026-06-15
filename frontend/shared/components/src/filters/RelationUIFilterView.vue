@@ -111,7 +111,16 @@ const asyncOptions = computed(() => props.filter.relationFetcher.resultsToOption
 
 const firstOptions = computed(() => {
     const defaultOptions = props.filter.defaultOptions;
-    return defaultOptions.concat(filterDistinctOptions(defaultOptions, props.filter.values));
+
+    // Keep visible async options in their loaded order. Example: selecting "Group B" in
+    // [Group A, Group B, Group C] should not move it above Group A; only selected
+    // options that are not in the current async results are pinned here.
+    const invisibleSelectedOptions = filterDistinctOptions(
+        defaultOptions.concat(asyncOptions.value),
+        props.filter.values,
+    );
+
+    return defaultOptions.concat(invisibleSelectedOptions);
 });
 
 const lastOptions = computed(() => filterDistinctOptions(firstOptions.value, asyncOptions.value));
