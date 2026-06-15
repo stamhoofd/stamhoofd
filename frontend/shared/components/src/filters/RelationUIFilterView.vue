@@ -62,6 +62,7 @@ import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
+import { getRelationFilterDisplayOptions } from './relationFilterOptions';
 
 const props = defineProps<{
     filter: RelationUIFilter<T>;
@@ -109,30 +110,14 @@ watchEffect(() => {
 
 const asyncOptions = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.value?.objects ?? []));
 
-const firstOptions = computed(() => {
-    const defaultOptions = props.filter.defaultOptions;
+const displayOptions = computed(() => getRelationFilterDisplayOptions({
+    defaultOptions: props.filter.defaultOptions,
+    selectedOptions: props.filter.values,
+    asyncOptions: asyncOptions.value,
+}));
 
-    // Keep visible async options in their loaded order. Example: selecting "Group B" in
-    // [Group A, Group B, Group C] should not move it above Group A; only selected
-    // options that are not in the current async results are pinned here.
-    const invisibleSelectedOptions = filterDistinctOptions(
-        defaultOptions.concat(asyncOptions.value),
-        props.filter.values,
-    );
-
-    return defaultOptions.concat(invisibleSelectedOptions);
-});
-
-const lastOptions = computed(() => filterDistinctOptions(firstOptions.value, asyncOptions.value));
-
-/**
- * Returns the options that are not in the sourceOptions but are in the optionsToFilter.
- * @param sourceOptions
- * @param optionsToFilter
- */
-function filterDistinctOptions(sourceOptions: RelationFilterOption<T>[], optionsToFilter: RelationFilterOption<T>[]) {
-    return optionsToFilter.filter(option => !sourceOptions.some(o => o.value === option.value && o.name === option.name));
-}
+const firstOptions = computed(() => displayOptions.value.pinnedOptions);
+const lastOptions = computed(() => displayOptions.value.regularOptions);
 
 const selectedSubFilterOption = ref(null) as any as Ref<RelationFetcherSubFilterOption | null>;
 
