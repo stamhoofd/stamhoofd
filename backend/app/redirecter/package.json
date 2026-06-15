@@ -3,22 +3,15 @@
     "version": "2.121.0",
     "type": "module",
     "main": "index.ts",
-    "license": "UNLICENCED",
     "scripts": {
-        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "build": "tsc --build tsconfig.build.json && yarn -s copy-assets",
-        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && yarn -s build",
-        "start": "yarn build && node ./dist/index.js",
+        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
+        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "lint": "eslint",
+        "start": "yarn build && node ./dist/index.js",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
-    },
-    "devDependencies": {
-        "@stamhoofd/test-utils": "*",
-        "@types/node": "22.15.34",
-        "nock": "14.0.15",
-        "vitest": "4.1.8"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
@@ -29,6 +22,13 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*"
     },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "*",
+        "@types/node": "22.15.34",
+        "nock": "14.0.15",
+        "vitest": "4.1.8"
+    },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
     }

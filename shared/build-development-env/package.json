@@ -2,9 +2,10 @@
     "name": "@stamhoofd/build-development-env",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
-    "module": "./dist/index.js",
     "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "sideEffects": false,
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -16,22 +17,21 @@
         "dist",
         "package.json"
     ],
-    "license": "UNLICENCED",
-    "sideEffects": false,
     "scripts": {
-        "start": "node dist/init.js",
         "build": "tsc --build tsconfig.build.json",
-        "lint": "eslint ."
-    },
-    "publishConfig": {
-        "access": "public"
+        "lint": "eslint .",
+        "start": "node dist/init.js"
     },
     "dependencies": {
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "chalk": "4.1.2"
+        "chalk": "5.6.2"
     },
     "devDependencies": {
         "concurrently": "10.0.3"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
     }
 }

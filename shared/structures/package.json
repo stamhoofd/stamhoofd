@@ -2,18 +2,9 @@
     "name": "@stamhoofd/structures",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
-    "module": "./dist/index.js",
     "main": "./dist/index.js",
-    "exports": {
-        ".": "./dist/index.js",
-        "./*.js": "./dist/*.js"
-    },
-    "files": [
-        "dist",
-        "package.json"
-    ],
-    "license": "UNLICENCED",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "sideEffects": [
         "./src/circular-dependencies/*.ts",
         "./src/index.ts",
@@ -22,11 +13,22 @@
         "./src/Version.ts",
         "./dist/Version.js"
     ],
+    "exports": {
+        ".": "./dist/index.js",
+        "./*.js": "./dist/*.js"
+    },
+    "files": [
+        "dist",
+        "package.json"
+    ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
-        "test": "vitest",
         "lint": "eslint",
+        "test": "vitest",
         "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.8"
     },
     "devDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
@@ -41,10 +43,8 @@
         "@stamhoofd/utility": "*",
         "uuid": "14.0.0"
     },
+    "license": "UNLICENCED",
     "publishConfig": {
         "access": "public"
-    },
-    "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.8"
     }
 }

@@ -2,6 +2,11 @@
     "name": "@stamhoofd/document-helper",
     "version": "1.0.0",
     "private": true,
+    "type": "module",
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
@@ -10,11 +15,6 @@
         "@stamhoofd/networking": "*",
         "@stamhoofd/utility": "*",
         "jszip": "3.10.1"
-    },
-    "type": "module",
-    "scripts": {
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"

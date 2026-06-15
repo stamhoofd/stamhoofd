@@ -2,9 +2,8 @@
     "name": "@stamhoofd/crons",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "files": [
         "dist"
@@ -13,14 +12,15 @@
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
     },
-    "publishConfig": {
-        "access": "public"
-    },
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
         "@simonbackx/simple-logging": "1.0.1"
     },
     "peerDependencies": {
         "@stamhoofd/utility": "*"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
     }
 }

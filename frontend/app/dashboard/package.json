@@ -4,17 +4,17 @@
     "private": true,
     "type": "module",
     "main": "./src/exports.ts",
-    "scripts": {
-        "dev:build": "yarn -s build",
-        "build": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
-        "build:production": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
-        "test": "yarn -s typecheck",
-        "lint": "eslint",
-        "typecheck": "vue-tsc --noEmit"
-    },
     "files": [
         "dist"
     ],
+    "scripts": {
+        "build": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:production": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
+        "dev:build": "yarn -s build",
+        "lint": "eslint",
+        "test": "yarn -s typecheck",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.8",
         "@simonbackx/simple-errors": "1.5.0",

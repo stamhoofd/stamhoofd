@@ -4,15 +4,6 @@
     "private": true,
     "type": "module",
     "sideEffects": false,
-    "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.8",
-        "@simonbackx/vue-app-navigation": "2.22.0",
-        "@stamhoofd/components": "*",
-        "@stamhoofd/networking": "*",
-        "@stamhoofd/structures": "*",
-        "@stamhoofd/utility": "*",
-        "vue": "3.5.38"
-    },
     "exports": {
         "./*": "./src/*.ts",
         "./*.ts": "./src/*.ts",
@@ -26,6 +17,15 @@
     "scripts": {
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.8",
+        "@simonbackx/vue-app-navigation": "2.22.0",
+        "@stamhoofd/components": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/utility": "*",
+        "vue": "3.5.38"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"

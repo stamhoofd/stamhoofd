@@ -2,12 +2,10 @@
     "name": "@stamhoofd/cli",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
-    "module": "./dist/index.js",
     "main": "./dist/index.js",
-    "bin": {
-        "stam": "./bin/stam.js"
-    },
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "sideEffects": false,
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -20,8 +18,9 @@
         "dist",
         "package.json"
     ],
-    "license": "UNLICENSED",
-    "sideEffects": false,
+    "bin": {
+        "stam": "./bin/stam.js"
+    },
     "scripts": {
         "build": "rm -rf dist && tsc --build tsconfig.build.json --force",
         "lint": "eslint .",
@@ -37,6 +36,10 @@
         "ora": "9.4.0",
         "terminal-link": "4.0.0"
     },
+    "devDependencies": {
+        "vitest": "4.1.8"
+    },
+    "license": "UNLICENSED",
     "oclif": {
         "bin": "stam",
         "description": "Stamhoofd development CLI",
@@ -58,8 +61,5 @@
             "sectionDescription": "white",
             "version": "magenta"
         }
-    },
-    "devDependencies": {
-        "vitest": "4.1.8"
     }
 }

@@ -2,9 +2,8 @@
     "name": "@stamhoofd/backend-env",
     "version": "2.121.0",
     "type": "module",
-    "types": "./dist/index.d.ts",
     "main": "./dist/index.js",
-    "license": "UNLICENCED",
+    "types": "./dist/index.d.ts",
     "sideEffects": false,
     "files": [
         "dist"
@@ -13,16 +12,17 @@
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
     },
-    "publishConfig": {
-        "access": "public"
-    },
     "dependencies": {
-        "chalk": "4.1.2"
+        "chalk": "5.6.2"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "*"
     },
     "peerDependencies": {
         "@stamhoofd/cli": "*"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
     }
 }

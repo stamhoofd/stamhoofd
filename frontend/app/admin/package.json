@@ -4,13 +4,13 @@
     "private": true,
     "type": "module",
     "main": "./src/exports.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
     },
-    "files": [
-        "dist"
-    ],
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.8",
         "@simonbackx/simple-errors": "1.5.0",

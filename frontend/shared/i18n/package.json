@@ -2,8 +2,8 @@
     "name": "@stamhoofd/frontend-i18n",
     "version": "1.0.0",
     "private": true,
-    "sideEffects": false,
     "type": "module",
+    "sideEffects": false,
     "exports": {
         "./*": "./*.ts",
         "./*.ts": "./*.ts",
