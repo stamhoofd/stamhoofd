@@ -5,17 +5,13 @@
 
         // This option is part of the recommended tsconfig as of TS 5.9.
         "exactOptionalPropertyTypes": false,
-        
+
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         // Required in Vue projects
         "jsx": "preserve",
         "jsxImportSource": "vue",
-        "lib": [
-            "es2023",
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["es2023", "DOM", "DOM.Iterable"],
         "libReplacement": false,
         // As long as you are using a build tool, we recommend you to author and ship in ES modules.
         // Even if you are targeting Node.js, because
@@ -43,12 +39,17 @@
             "@stamhoofd/components/*": [
                 "./shared/components/src/*"
             ],
-            "@stamhoofd/components/*.ts": [
-                "./shared/components/src/*.ts"
-            ],
+             "@stamhoofd/components/*.ts": [
+                 "./shared/components/src/*.ts"
+             ],
             "@stamhoofd/components/*.vue": [
                 "./shared/components/src/*.vue"
-            ]
+            ],
+            // SGV Frontend
+            "@stamhoofd/sgv-frontend": ["./shared/sgv/src/index.ts"],
+            "@stamhoofd/sgv-frontend/*": ["./shared/sgv/src/*"],
+            "@stamhoofd/sgv-frontend/*.ts": ["./shared/sgv/src/*.ts"],
+            "@stamhoofd/sgv-frontend/*.vue": ["./shared/sgv/src/*.vue"]
         },
         "resolveJsonModule": true,
         // See <https://github.com/vuejs/vue-cli/pull/5688>

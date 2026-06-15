@@ -14,6 +14,8 @@ export function build(service: Service): any {
             },
             api: 'ravot.api.stamhoofd',
             rendererApi: 'ravot.renderer.stamhoofd',
+            sgvLoginUrl: 'https://login.sgv.ravot.stamhoofd',
+            sgvAdminUrl: 'https://admin.sgv.ravot.stamhoofd',
 
             defaultTransactionalEmail: {
                 '': 'stamhoofd.be',

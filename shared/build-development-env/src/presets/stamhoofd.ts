@@ -21,6 +21,8 @@ export function build(service: Service): any {
             },
             api: 'api.stamhoofd',
             rendererApi: 'renderer.stamhoofd',
+            sgvLoginUrl: 'https://login.sgv.stamhoofd',
+            sgvAdminUrl: 'https://admin.sgv.stamhoofd',
 
             defaultTransactionalEmail: {
                 '': 'stamhoofd.be',

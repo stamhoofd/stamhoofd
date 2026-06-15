@@ -15,6 +15,15 @@
                 </dd>
             </template>
 
+            <template v-if="sgvSyncIsEnabled">
+                <dt>{{ $t('Gesynchroniseerd') }}</dt>
+                <dd>
+                    <span v-tooltip="$t('Leden moeten na wijzigingen opnieuw gesynchroniseerd worden met Scouts en Gidsen Vlaanderen.')" class="style-tooltip">
+                        {{ sgvSyncDate }}
+                    </span>
+                </dd>
+            </template>
+
             <template v-if="member.patchedMember.details.birthDay">
                 <dt>{{ $t('%fn') }}</dt>
                 <dd>
@@ -88,10 +97,13 @@
 </template>
 
 <script setup lang="ts">
+import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
-import { useCountry } from '#hooks/useCountry.ts';
+import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 import EmailAddress from '../../../email/EmailAddress.vue';
+import { useCountry } from '#hooks/useCountry.ts';
 
 defineOptions({
     inheritAttrs: false,
@@ -102,4 +114,6 @@ const props = defineProps<{
 }>();
 
 const currentCountry = useCountry();
+const { sgvSyncIsEnabled } = useSGVSync([props.member.member]);
+const sgvSyncDate = computed(() => props.member.patchedMember.details.lastExternalSync ? Formatter.date(props.member.patchedMember.details.lastExternalSync, true) : $t('Nooit'));
 </script>
