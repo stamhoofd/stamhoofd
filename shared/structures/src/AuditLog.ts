@@ -122,6 +122,11 @@ export enum AuditLogType {
     // Registration invitations
     RegistrationInvitationAdded = 'RegistrationInvitationAdded',
     RegistrationInvitationDeleted = 'RegistrationInvitationDeleted',
+
+    // Event notifications
+    EventNotificationAdded = 'EventNotificationAdded',
+    EventNotificationEdited = 'EventNotificationEdited',
+    EventNotificationDeleted = 'EventNotificationDeleted',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -257,6 +262,12 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Nieuwe uitnodigingen`;
         case AuditLogType.RegistrationInvitationDeleted:
             return `Verwijderde uitnodigingen`;
+        case AuditLogType.EventNotificationAdded:
+            return `Nieuwe kampmeldingen`;
+        case AuditLogType.EventNotificationEdited:
+            return `Wijzigingen aan kampmeldingen`;
+        case AuditLogType.EventNotificationDeleted:
+            return `Verwijderde kampmeldingen`;
     }
 }
 
@@ -404,6 +415,12 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`email`, `add green`];
         case AuditLogType.RegistrationInvitationDeleted:
             return [`email`, `trash red stroke`];
+        case AuditLogType.EventNotificationAdded:
+            return [`calendar`, `add green`];
+        case AuditLogType.EventNotificationEdited:
+            return [`calendar`, `edit stroke`];
+        case AuditLogType.EventNotificationDeleted:
+            return [`calendar`, `trash red stroke`];
     }
 }
 
@@ -571,6 +588,12 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}`;
         case AuditLogType.RegistrationInvitationDeleted:
             return `De uitnodiging van {{m}} voor {{g}}{{if org " (" org ")"}} werd verwijderd`;
+        case AuditLogType.EventNotificationAdded:
+            return `De kampmelding {{n}}{{if org " (" org ")"}} werd aangemaakt`;
+        case AuditLogType.EventNotificationEdited:
+            return `De kampmelding {{n}}{{if org " (" org ")"}} werd gewijzigd`;
+        case AuditLogType.EventNotificationDeleted:
+            return `De kampmelding {{n}}{{if org " (" org ")"}} werd verwijderd`;
     }
 }
 
@@ -605,6 +628,10 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.RegistrationInvitationAdded:
         case AuditLogType.RegistrationInvitationDeleted:
             return ['m', 'g'];
+        case AuditLogType.EventNotificationAdded:
+        case AuditLogType.EventNotificationEdited:
+        case AuditLogType.EventNotificationDeleted:
+            return ['n'];
         case AuditLogType.OrganizationEdited:
         case AuditLogType.OrganizationAdded:
         case AuditLogType.OrganizationDeleted:

@@ -1,5 +1,7 @@
 import type { ModelEvent } from '@simonbackx/simple-database';
 import { Model } from '@simonbackx/simple-database';
+import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { getAuditLogEnumDecoderObject, getAuditLogEnumType } from '@stamhoofd/structures';
 import type { AuditLogSource } from '@stamhoofd/structures';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
@@ -14,6 +16,26 @@ export type AuditLogContextSettings = {
     fallbackOrganizationId?: string | null;
 };
 export const modelLogDefinitions = new Map<typeof Model, { logEvent: (event: ModelEvent) => Promise<any> }>();
+
+function getEnumDecoders(decoder: unknown): EnumDecoder<any>[] {
+    if (decoder instanceof EnumDecoder) {
+        return [decoder];
+    }
+
+    if (decoder instanceof SymbolDecoder) {
+        return getEnumDecoders(decoder.decoder);
+    }
+
+    if (decoder instanceof ArrayDecoder) {
+        return getEnumDecoders(decoder.decoder);
+    }
+
+    if (decoder instanceof MapDecoder) {
+        return [...getEnumDecoders(decoder.keyDecoder), ...getEnumDecoders(decoder.valueDecoder)];
+    }
+
+    return [];
+}
 
 export class AuditLogService {
     private constructor() { }
@@ -46,6 +68,29 @@ export class AuditLogService {
     }
 
     static listening = false;
+
+    static validateAuditLogEnumTranslations() {
+        const missing: string[] = [];
+
+        for (const [model] of modelLogDefinitions) {
+            const columns = model.columns;
+            if (!columns) {
+                continue;
+            }
+
+            for (const [key, column] of columns) {
+                for (const enumDecoder of getEnumDecoders(column.decoder)) {
+                    if (!getAuditLogEnumType(getAuditLogEnumDecoderObject(enumDecoder))) {
+                        missing.push(`${model.name}.${key}`);
+                    }
+                }
+            }
+        }
+
+        if (missing.length > 0) {
+            throw new Error(`Missing audit log enum translation registration for: ${missing.join(', ')}`);
+        }
+    }
 
     static listen() {
         if (this.listening) {

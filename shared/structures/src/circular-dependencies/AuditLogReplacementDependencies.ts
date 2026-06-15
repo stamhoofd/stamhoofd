@@ -1,43 +1,38 @@
-import { AccessRightHelper } from '../AccessRight.js';
+import { Country } from '@stamhoofd/types/Country';
+import { AccessRight, AccessRightHelper } from '../AccessRight.js';
 import { CountryHelper } from '../addresses/CountryDecoder.js';
-import { AuditLogReplacementDependencies } from '../AuditLogReplacement.js';
-import { STPackageTypeHelper } from '../billing/STPackage.js';
-import { DocumentStatusHelper } from '../Document.js';
-import { EmailTemplate } from '../email/EmailTemplate.js';
-import { getGroupStatusName } from '../Group.js';
+import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditLogReplacement.js';
+import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
+import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
+import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
+import { EventNotificationStatus, EventNotificationStatusHelper } from '../EventNotificationStatus.js';
+import { GroupStatus, getGroupStatusName } from '../Group.js';
 import { uuidToName } from '../helpers/uuidToName.js';
-import { getGenderName } from '../members/Gender.js';
-import { ParentTypeHelper } from '../members/ParentType.js';
-import { OrganizationTypeHelper } from '../OrganizationType.js';
-import { PaymentMethodHelper } from '../PaymentMethod.js';
-import { PaymentStatusHelper } from '../PaymentStatus.js';
-import { getSetupStepName } from '../SetupStepType.js';
-import { UmbrellaOrganizationHelper } from '../UmbrellaOrganization.js';
-import { OrderStatusHelper } from '../webshops/Order.js';
-import { CheckoutMethodTypeHelper } from '../webshops/WebshopMetaData.js';
+import { Gender, getGenderName } from '../members/Gender.js';
+import { ParentType, ParentTypeHelper } from '../members/ParentType.js';
+import { OrganizationType, OrganizationTypeHelper } from '../OrganizationType.js';
+import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
+import { PaymentStatus, PaymentStatusHelper } from '../PaymentStatus.js';
+import { SetupStepType, getSetupStepName } from '../SetupStepType.js';
+import { UmbrellaOrganization, UmbrellaOrganizationHelper } from '../UmbrellaOrganization.js';
+import { OrderStatus, OrderStatusHelper } from '../webshops/Order.js';
+import { CheckoutMethodType, CheckoutMethodTypeHelper } from '../webshops/WebshopMetaData.js';
 
-AuditLogReplacementDependencies.enumHelpers.push(
-    PaymentMethodHelper.getPluralName,
-    ParentTypeHelper.getName,
-    OrderStatusHelper.getName,
-    DocumentStatusHelper.getName,
-    AccessRightHelper.getName,
-    CheckoutMethodTypeHelper.getName,
-    CountryHelper.getName,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    OrganizationTypeHelper.getName.bind(OrganizationTypeHelper) as any,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    PaymentStatusHelper.getName.bind(PaymentStatusHelper),
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    UmbrellaOrganizationHelper.getName.bind(UmbrellaOrganizationHelper),
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    STPackageTypeHelper.getName.bind(STPackageTypeHelper),
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    ParentTypeHelper.getName.bind(ParentTypeHelper),
-    getGroupStatusName,
-    getGenderName,
-    getSetupStepName,
-    EmailTemplate.getTypeTitle,
-);
+registerAuditLogEnum('PaymentMethod', PaymentMethod, PaymentMethodHelper.getPluralName, { legacy: true });
+registerAuditLogEnum('ParentType', ParentType, ParentTypeHelper.getName, { legacy: true });
+registerAuditLogEnum('OrderStatus', OrderStatus, OrderStatusHelper.getName, { legacy: true });
+registerAuditLogEnum('DocumentStatus', DocumentStatus, DocumentStatusHelper.getName, { legacy: true });
+registerAuditLogEnum('AccessRight', AccessRight, AccessRightHelper.getName, { legacy: true });
+registerAuditLogEnum('CheckoutMethodType', CheckoutMethodType, CheckoutMethodTypeHelper.getName, { legacy: true });
+registerAuditLogEnum('Country', Country, CountryHelper.getName, { legacy: true });
+registerAuditLogEnum('OrganizationType', OrganizationType, (key: OrganizationType) => OrganizationTypeHelper.getName(key), { legacy: true });
+registerAuditLogEnum('PaymentStatus', PaymentStatus, PaymentStatusHelper.getName, { legacy: true });
+registerAuditLogEnum('UmbrellaOrganization', UmbrellaOrganization, UmbrellaOrganizationHelper.getName, { legacy: true });
+registerAuditLogEnum('STPackageType', STPackageType, STPackageTypeHelper.getName, { legacy: true });
+registerAuditLogEnum('GroupStatus', GroupStatus, getGroupStatusName, { legacy: true });
+registerAuditLogEnum('Gender', Gender, getGenderName, { legacy: true });
+registerAuditLogEnum('SetupStepType', SetupStepType, getSetupStepName, { legacy: true });
+registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTypeTitle, { legacy: true });
+registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
 
 AuditLogReplacementDependencies.uuidToName = uuidToName;
