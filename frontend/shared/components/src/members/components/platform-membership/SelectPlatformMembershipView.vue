@@ -103,7 +103,6 @@
                                 v-model="customEndDate"
                                 class="option"
                                 :min="minimumStartDateForDaysTypes"
-                                :max="maximumEndDateForDaysTypes"
                             />
                         </STInputBox>
                     </div>
@@ -166,7 +165,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import type { PlatformMember, PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
 import DateSelection from '../../../inputs/DateSelection.vue';
@@ -237,50 +236,6 @@ const maximumDaysDescription = computed(() => {
     }
 
     return $t('%4U') + ': ' + maximumDays;
-});
-
-// The maximum end date that can be selected when membership behaviour is "Days".
-const maximumEndDateForDaysTypes = computed(() => {
-    const type = selectedMembershipType.value;
-    const periodConfig = selectedPeriodConfig.value;
-
-    if (!type || !periodConfig) {
-        return props.period.endDate;
-    }
-
-    return periodConfig.getMaximumEndDate(
-        customStartDate.value,
-        type.behaviour,
-    );
-});
-
-// When changing the start date, update the end date.
-// Keep the offset between the dates consistent and make sure that it's a valid
-// end date as well.
-watch(customStartDate, (startDate, oldStartDate) => {
-    if (
-        selectedMembershipType.value?.behaviour
-        !== PlatformMembershipTypeBehaviour.Days
-    ) {
-        return;
-    }
-
-    // Preserve the selected duration when moving the start date, then clamp to the configured maximum if needed.
-    const oldStart = Formatter.luxon(oldStartDate).startOf('day');
-    const oldEnd = Formatter.luxon(customEndDate.value).startOf('day');
-    const offsetDays = Math.max(
-        0,
-        Math.round(oldEnd.diff(oldStart, 'days').days),
-    );
-    const nextEndDate = Formatter.luxon(startDate)
-        .plus({ days: offsetDays })
-        .toJSDate();
-
-    if (nextEndDate > maximumEndDateForDaysTypes.value) {
-        customEndDate.value = maximumEndDateForDaysTypes.value;
-    } else {
-        customEndDate.value = nextEndDate;
-    }
 });
 
 async function save() {
