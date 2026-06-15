@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Status from './status.js';
 import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
+import { checkNodeVersion, printNodeVersionStatus } from '../workflows/setup-node.js';
 
 vi.mock('../runtime/manifest-store.js', () => ({
     listActiveInstanceManifests: vi.fn(async () => []),
@@ -9,6 +10,11 @@ vi.mock('../runtime/manifest-store.js', () => ({
 
 vi.mock('../services/shared-services.js', () => ({
     printSharedServicesStatus: vi.fn(),
+}));
+
+vi.mock('../workflows/setup-node.js', () => ({
+    checkNodeVersion: vi.fn(async () => ({ ok: true })),
+    printNodeVersionStatus: vi.fn(),
 }));
 
 describe('Status command', () => {
@@ -38,6 +44,8 @@ describe('Status command', () => {
 
         await command.run();
 
+        expect(checkNodeVersion).toHaveBeenCalled();
+        expect(printNodeVersionStatus).toHaveBeenCalled();
         expect(createContext).toHaveBeenCalledWith({ verbose: true });
         expect(printSharedServicesStatus).toHaveBeenCalled();
         expect(listActiveInstanceManifests).toHaveBeenCalled();

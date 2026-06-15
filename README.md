@@ -51,8 +51,8 @@ You can read the documentation of the most important building blocks of Stamhoof
 #### Yarn, node and nvm
 
 - Install nvm locally. This allows you to have multiple Node versions locally on your computer between your projects: https://github.com/nvm-sh/nvm
-- Clone the repository and cd to the repository location and run `nvm install`. This installs the Node version we use at the moment for Stamhoofd and makes sure this version is used when working on Stamhoofd.
-- Afterwards install yarn 2: `npm install --global yarn` - this will globally install yarn. Every time node is updated you'll need to reinstall yarn (which isn't a huge issue as it will keep the installation directory clean).
+- Clone the repository, cd to the repository location and run `source .development/install-node.sh`. This installs the Node version pinned in `.nvmrc`, uses it, and carries over global packages such as Yarn.
+- Afterwards install yarn 2: `npm install --global yarn` (we are planning to move to pnpm soon) - this will globally install yarn. Every time node is updated you'll need to reinstall yarn (which isn't a huge issue as it will keep the installation directory clean).
 - Set the yarn version used to the one used by the project by running `yarn policies set-version 1.22.19`. We currently use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
 - Run `yarn install`
 
@@ -65,6 +65,8 @@ yarn install
 yarn stam setup
 yarn stam dev all
 ```
+
+Run `yarn stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `yarn` and the need to always run commands in the project root).
 
 `yarn stam setup` checks required tools, DNS, and local HTTPS certificate trust. `yarn stam dev all` starts the shared Docker services and app processes. Run `yarn stam status` to see local URLs, credentials, services, and active instances.
 

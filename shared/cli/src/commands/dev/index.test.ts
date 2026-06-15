@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Dev from './index.js';
 import { DevTarget, runDev } from '../../workflows/start-dev.js';
 import { showHelp } from '../../runtime/show-help.js';
+import { checkNodeVersion, printNodeVersionStatus } from '../../workflows/setup-node.js';
 
 vi.mock('../../workflows/start-dev.js', async (importOriginal) => ({
     ...await importOriginal<typeof import('../../workflows/start-dev.js')>(),
@@ -12,9 +13,20 @@ vi.mock('../../runtime/show-help.js', () => ({
     showHelp: vi.fn(),
 }));
 
+vi.mock('../../workflows/setup-node.js', () => ({
+    checkNodeVersion: vi.fn(),
+    printNodeVersionStatus: vi.fn(),
+}));
+
 describe('Dev command', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(checkNodeVersion).mockResolvedValue({
+            ok: true,
+            current: 'v22.22.3',
+            expected: 'v22.22.3',
+            details: 'v22.22.3 matches .nvmrc',
+        });
     });
 
     it('shows help when no target is provided', async () => {
@@ -57,6 +69,25 @@ describe('Dev command', () => {
             stripe: true,
             open: true,
         });
+    });
+
+    it('stops before creating a development context when Node.js is wrong', async () => {
+        vi.mocked(checkNodeVersion).mockResolvedValue({
+            ok: false,
+            current: 'v22.21.1',
+            expected: 'v22.22.3',
+            details: 'v22.21.1 is active, but .nvmrc requires v22.22.3',
+        });
+        const command = createCommand({
+            args: { target: DevTarget.All },
+            flags: { services: undefined, stripe: false, open: false },
+        });
+
+        await command.run();
+
+        expect(printNodeVersionStatus).toHaveBeenCalled();
+        expect((command as any).createContext).not.toHaveBeenCalled();
+        expect(runDev).not.toHaveBeenCalled();
     });
 });
 

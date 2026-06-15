@@ -1,9 +1,12 @@
+import path from 'node:path';
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../base-command.js';
 import { localFilesAccessKey, localFilesSecretKey, maildevPassword, maildevUsername, successSymbol } from '../config/shared-service-config.js';
+import { getProjectPath } from '../context/project-path.js';
 import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 import { link } from '../runtime/ux.js';
+import { checkNodeVersion, printNodeVersionStatus } from '../workflows/setup-node.js';
 
 export default class Status extends BaseCommand {
     static summary = 'Show local development status';
@@ -18,6 +21,11 @@ export default class Status extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags } = await this.parse(Status);
+        const rootDir = path.resolve(getProjectPath());
+        const nodeCheck = await checkNodeVersion(rootDir);
+        printNodeVersionStatus(nodeCheck);
+        this.log('');
+
         const context = await this.createContext({ verbose: flags.verbose });
         if (flags.watch) {
             while (true) {
