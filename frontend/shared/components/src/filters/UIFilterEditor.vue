@@ -11,7 +11,7 @@
                 {{ capitalizeFirstLetter((filter as any).name ? (filter as any).name : filter.builder.name) }}
             </h1>
 
-            <FramedComponent :root="filterComponent" />
+            <FramedComponent :root="filterComponent" :view="false" />
         </main>
 
         <STToolbar v-if="!live || !popup">

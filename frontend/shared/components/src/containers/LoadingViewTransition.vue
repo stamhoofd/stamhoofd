@@ -1,5 +1,5 @@
 <template>
-    <LoadingBoxTransition :error-box="errorBox" :view="true" :loading="loading">
+    <LoadingBoxTransition :error-box="errorBox" :view="view" :loading="loading">
         <slot />
     </LoadingBoxTransition>
 </template>
@@ -12,10 +12,12 @@ withDefaults(
     defineProps<{
         errorBox?: ErrorBox | null;
         loading?: boolean;
+        view?: boolean;
     }>(),
     {
         errorBox: null,
         loading: false,
+        view: true,
     },
 );
 

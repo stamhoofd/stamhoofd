@@ -12,7 +12,7 @@
     <div v-else-if="errorBox">
         <STErrorsDefault :error-box="errorBox" />
     </div>
-    <div v-else-if="show" class="loading-view">
+    <div v-else-if="show" class="st-loading-box">
         <Spinner class="center gray" />
     </div>
 </template>
@@ -61,6 +61,32 @@ onMounted(() => {
     }
 }
 
+// Inline (non-view) loading indicator: used when a placeholder is rendered as a box inside another
+// view's <main> instead of as a full st-view. Stays in normal flow so it gives its container a
+// height (the absolute .loading-view would collapse it).
+.st-loading-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+
+    opacity: 1;
+    transition: opacity 0.2s;
+
+    &.fade-leave-active {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+    }
+
+    &.fade-leave-to {
+        opacity: 0;
+    }
+}
+
 .loading-view {
     position: absolute !important;
     left: 0;
@@ -79,7 +105,9 @@ onMounted(() => {
         position: absolute !important;
         min-height: 100vh;
         min-height: 100dvh;
-        min-height: calc(var(--vh, 1vh) * 100);
+        // Prefer the height the navigation controller is pinned to (set while frozen, e.g. in a
+        // sheet during navigation/loading). Falls back to the viewport height when not available.
+        min-height: var(--frozen-height, calc(var(--vh, 1vh) * 100));
     }
 
     > .spinner-container {

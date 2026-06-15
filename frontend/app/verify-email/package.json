@@ -12,7 +12,7 @@
         "dist"
     ],
     "dependencies": {
-        "@simonbackx/vue-app-navigation": "2.20.1",
+        "@simonbackx/vue-app-navigation": "2.22.0",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
