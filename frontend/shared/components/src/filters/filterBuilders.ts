@@ -1,6 +1,6 @@
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
-import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes } from '@stamhoofd/structures';
+import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useContext } from '#hooks/useContext.ts';
@@ -10,10 +10,12 @@ import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from './NumberUIFilter';
+import { RelationFilterBuilder } from './RelationUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
+import { useGroupsRelationFetcher } from './relation-fetchers/groups';
 import { NumberFilterFormat } from './NumberFilterFormat';
 
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
@@ -422,11 +424,12 @@ export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
 // Events
 export function useEventUIFilterBuilders({ platform, organizations, app }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto' }) {
     const context = useContext();
+    const groupsRelationFetcher = useGroupsRelationFetcher();
 
-    return computed(() => getEventUIFilterBuilders({ platform, organizations, app, permissions: context.value.auth.permissions }));
+    return computed(() => getEventUIFilterBuilders({ platform, organizations, app, permissions: context.value.auth.permissions, groupsRelationFetcher }));
 }
 
-function getEventUIFilterBuilders({ platform, organizations, app, permissions }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto'; permissions: LoadedPermissions | null | undefined }) {
+function getEventUIFilterBuilders({ platform, organizations, app, permissions, groupsRelationFetcher }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto'; permissions: LoadedPermissions | null | undefined; groupsRelationFetcher: ReturnType<typeof useGroupsRelationFetcher> }) {
     const all: UIFilterBuilder<UIFilter>[] = [];
     const isPlatform = STAMHOOFD.userMode === 'platform';
 
@@ -492,22 +495,22 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
         all.push(defaultAgeGroupFilter);
     }
 
-    const groupFilter = new MultipleChoiceFilterBuilder({
-        name: $t(`%1IL`),
-        allowCreation: organizations.length > 0,
-        options: [
-            new MultipleChoiceUIFilterOption($t(`%cA`), null),
-            ...organizations
-                .flatMap(organization => organization.period.getCategoryTree({ permissions }).getAllGroups().map((g) => {
-                    return new MultipleChoiceUIFilterOption((organizations.length > 1 ? (organization.name + ' - ') : '') + g.settings.name, g.id);
-                })),
-        ],
-        wrapper: {
-            groupIds: {
-                $in: FilterWrapperMarker,
-            },
-        },
+    const periodId = organizations[0]?.period.period.id;
+
+    const groupFilter = new RelationFilterBuilder({
+        name: $t('%14Z'),
+        type: GroupType.Membership,
+        key: 'groupIds',
+        allowCreation: true,
+        wrapper: FilterWrapperMarker,
+        relationFetcher: groupsRelationFetcher({ type: GroupType.Membership, defaultPeriodId: periodId, isPeriodRequired: true }),
+        defaultOptions: [{
+            name: $t('geen'),
+            value: null,
+            description: $t('Activiteiten waar je niet verplicht ingeschreven moet zijn voor een inschrijvingsgroep.'),
+        }],
     });
+
     all.push(groupFilter);
 
     if (app !== 'registration') {

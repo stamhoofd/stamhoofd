@@ -6,28 +6,30 @@ import { RelationFetcher } from '../RelationUIFilter';
 
 export function useEventGroupsRelationFetcher() {
     // event fetcher
-    const fetcher = useEventsObjectFetcher({requiredFilter: {
+    const fetcher = useEventsObjectFetcher({ requiredFilter: {
         groupId: {
-            $not: null
-        }
-    }});
+            $not: null,
+        },
+    } });
 
     const organization = useOrganization();
 
-    return ({periodId}: {periodId?: string} = {}) => {
-        const filter = periodId ? {
-            group: {
-                $elemMatch: {
-                    periodId
+    return ({ periodId }: { periodId?: string } = {}) => {
+        const filter = periodId
+            ? {
+                    group: {
+                        $elemMatch: {
+                            periodId,
+                        },
+                    },
                 }
-            }
-        } : undefined;
+            : undefined;
 
         return new RelationFetcher({
             fetcher,
             filter,
-            getName: (event) => event.name,
-            getValue: (event) => getGroup(event).id,
+            getName: event => event.name,
+            getValue: event => getGroup(event).id,
             getDescription: (event) => {
                 if (!organization.value) {
                     const organizationName = event.meta.organizationCache?.name;
@@ -41,7 +43,7 @@ export function useEventGroupsRelationFetcher() {
             },
             sort: [{ key: 'name', order: SortItemDirection.ASC }],
         });
-    }
+    };
 }
 
 function getGroup(event: Event): Group {

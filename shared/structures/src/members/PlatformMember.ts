@@ -401,7 +401,8 @@ export class PlatformFamily {
     getRecommendedEventsFilter(): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
-        const groups = new Set<string>();
+        const groupIds = new Set<string>();
+        const groups: Group[] = [];
         const defaultGroupIds = new Set<string>();
         const organizationIds = new Set<string>();
         const organizationTags = new Set<string>();
@@ -417,16 +418,20 @@ export class PlatformFamily {
 
         for (const member of this.members) {
             for (const group of member.filterGroups({ types: [GroupType.Membership], periodIds: periodIdsArray, includePending: true })) {
-                groups.add(group.id);
-                if (group.defaultAgeGroupId) {
-                    defaultGroupIds.add(group.defaultAgeGroupId);
-                }
-                organizationIds.add(group.organizationId);
+                if (!groupIds.has(group.id)) {
+                    groupIds.add(group.id);
+                    groups.push(group);
 
-                const organization = this.getOrganization(group.organizationId);
-                if (organization) {
-                    for (const tag of organization.meta.tags) {
-                        organizationTags.add(tag);
+                    if (group.defaultAgeGroupId) {
+                        defaultGroupIds.add(group.defaultAgeGroupId);
+                    }
+                    organizationIds.add(group.organizationId);
+
+                    const organization = this.getOrganization(group.organizationId);
+                    if (organization) {
+                        for (const tag of organization.meta.tags) {
+                            organizationTags.add(tag);
+                        }
                     }
                 }
 
@@ -452,11 +457,27 @@ export class PlatformFamily {
 
         inOrganizationIds.push(...organizationIds.values());
 
-        filter.push({
-            groupIds: {
-                $in: [null, ...groups.values()],
-            },
-        });
+        // prevent filter on too many groups
+        if (groupIds.size < 10) {
+            filter.push({
+                groupIds: {
+                    $in: [
+                        {
+                            $: '$rel',
+                            name: $t('geen'),
+                            value: null,
+                            type: 'Membership',
+                        },
+                        ...groups.map((g) => {
+                            return {
+                                $: '$rel',
+                                name: g.settings.name.toString(),
+                                value: g.id,
+                            };
+                        })],
+                },
+            });
+        }
 
         if (inOrganizationIds.length > 1) {
             filter.push({

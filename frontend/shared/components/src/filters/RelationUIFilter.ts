@@ -20,6 +20,7 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     // The optional type of the magic relation filter.
     type?: string;
     values: RelationFilterOption<T>[] = [];
+    defaultOptions: RelationFilterOption<T>[] = [];
 
     constructor(data: Partial<RelationUIFilter<T>>, options: { isInverted?: boolean } = {}) {
         super(data, options);
@@ -68,7 +69,11 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     }
 
     get valuesToString() {
-        return Formatter.joinLast(this.values.map(v => v.name), ', ', ` ${$t('of')} `);
+        return Formatter.joinLastLimited(this.values.map(v => v.name), {
+            separator: ', ',
+            lastSeparator: ` ${$t('of')} `,
+            maxLength: 250,
+        });
     }
 
     get styledDescription() {
@@ -100,7 +105,12 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     // The optional type of the magic relation filter.
     readonly type?: string;
 
-    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean; relationFetcher: RelationFetcher<any, T> }) {
+    /**
+     * Options that should always be shown. For example to filter on objects that have no relation (where the value is null).
+     */
+    private readonly defaultOptions?: RelationFilterOption<T>[];
+
+    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean; relationFetcher: RelationFetcher<any, T>; defaultOptions?: RelationFilterOption<T>[] }) {
         this.key = data.key;
         this.type = data.type;
         this.wrapFilter = data.wrapFilter;
@@ -109,6 +119,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         this.name = data.name;
         this.allowCreation = data.allowCreation;
         this.relationFetcher = data.relationFetcher;
+        this.defaultOptions = data.defaultOptions;
     }
 
     create(options?: { isInverted?: boolean }): RelationUIFilter<T> {
@@ -116,6 +127,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
             builder: this,
             relationFetcher: this.relationFetcher,
             type: this.type,
+            defaultOptions: this.defaultOptions,
         }, options);
     }
 
@@ -171,6 +183,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
                     relationFetcher: this.relationFetcher,
                     values: options,
                     type: this.type,
+                    defaultOptions: this.defaultOptions,
                 }, { isInverted });
             }
         }
@@ -184,9 +197,20 @@ export type RelationFetcherSubFilterOption = { filter: StamhoofdFilter; name: st
 export class RelationFetcherSubFilter {
     private readonly getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[];
     private options: RelationFetcherSubFilterOption[] | null = null;
+    readonly isRequired: boolean;
+    readonly findDefaultOption?: (option: RelationFetcherSubFilterOption) => boolean;
 
-    constructor({ getOptions }: { getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[] }) {
+    constructor({ getOptions, isRequired, findDefaultOption }: {
+        getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[];
+        isRequired?: boolean;
+        findDefaultOption?: (option: RelationFetcherSubFilterOption) => boolean; }) {
         this.getOptions = getOptions;
+        this.findDefaultOption = findDefaultOption;
+        this.isRequired = isRequired ?? false;
+    }
+
+    get shouldHaveDefaultFilter(): boolean {
+        return this.isRequired || this.findDefaultOption !== undefined;
     }
 
     async loadOptions(): Promise<RelationFetcherSubFilterOption[]> {
@@ -196,6 +220,35 @@ export class RelationFetcherSubFilter {
 
         this.options = await this.getOptions();
         return this.options;
+    }
+
+    getDefaultOption(options: RelationFetcherSubFilterOption[]): RelationFetcherSubFilterOption {
+        if (this.findDefaultOption) {
+            return options.find(this.findDefaultOption) ?? RelationFetcherSubFilter.emptyOption;
+        }
+
+        if (this.isRequired) {
+            return options[0] ?? RelationFetcherSubFilter.emptyOption;
+        }
+
+        return RelationFetcherSubFilter.emptyOption;
+    }
+
+    async getAllOptions() {
+        const options = await this.loadOptions();
+
+        if (this.isRequired) {
+            return options;
+        }
+
+        return [RelationFetcherSubFilter.emptyOption, ...options];
+    }
+
+    static get emptyOption(): RelationFetcherSubFilterOption {
+        return {
+            name: $t('Geen filter'),
+            filter: null,
+        };
     }
 }
 
@@ -234,7 +287,7 @@ export class RelationFetcher<OBJECT extends { id: string }, T extends string | n
 
     configureInfiniteObjectFetcher(infiniteObjectFetcher: InfiniteObjectFetcher<OBJECT>) {
         if (this.filter) {
-            infiniteObjectFetcher.setFilter(this.filter);
+            infiniteObjectFetcher.baseFilter = this.filter;
         }
 
         if (this.sort) {
