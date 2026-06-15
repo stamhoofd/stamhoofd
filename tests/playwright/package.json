@@ -22,7 +22,7 @@
         "pino": "10.1.1"
     },
     "devDependencies": {
-        "@playwright/test": "1.58.2",
+        "@playwright/test": "1.60.0",
         "@stamhoofd/test-utils": "*",
         "eslint-plugin-stamhoofd": "*"
     }
