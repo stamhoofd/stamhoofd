@@ -114,7 +114,7 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
                     warmup: {
                         clientFiles: [
                             ...(options?.clientFiles ?? []),
-                            './main.ts',
+                            // '.main/.ts',
                         ],
                     },
                 }

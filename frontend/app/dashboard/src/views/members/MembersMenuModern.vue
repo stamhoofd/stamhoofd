@@ -65,13 +65,11 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 
-import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
 import { Organization } from '@stamhoofd/structures/Organization.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-
 
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
@@ -130,7 +128,7 @@ defineRoute({
     params: {
         slug: String,
     },
-    component: (props) => {
+    component: (props: { period: OrganizationRegistrationPeriod }) => {
         return new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./MembersMenuModern.vue'), props),
         });
@@ -253,7 +251,7 @@ const present = usePresent();
 async function startPeriod(p: RegistrationPeriod) {
     await present({
         components: [
-            new ComponentWithProperties(StartNewRegistrationPeriodView, {
+            AsyncComponent(() => import('@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue'), {
                 period: p,
                 callback: async () => {
                     const newList = await fetchPeriods({ shouldRetry: false, force: true });

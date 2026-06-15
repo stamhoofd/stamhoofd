@@ -168,6 +168,7 @@
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { CartItem, Checkout, ProductDateRange, ProductPrice, Webshop } from '@stamhoofd/structures';
 import { CartStockHelper, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -189,7 +190,7 @@ import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import ChooseSeatsView from './ChooseSeatsView.vue';
+
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
@@ -268,8 +269,7 @@ async function validate() {
 
         if (!cartEnabled.value) {
             clonedCart.clear();
-        }
-        else if (props.oldItem) {
+        } else if (props.oldItem) {
             clonedCart.removeItem(props.oldItem);
         }
 
@@ -282,8 +282,7 @@ async function validate() {
         if (props.cartItem.productPrice.uitpasBaseProductPriceId !== null) {
             await validateUitpasNumbers();
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
         return false;
@@ -327,8 +326,7 @@ async function validateUitpasNumbers() {
         for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
             props.cartItem.uitpasNumbers[i].price = reducedPrices[i];
         }
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             throw e;
         }
@@ -366,8 +364,7 @@ async function addToCart() {
             dismiss,
             canDismiss: canDismiss.value,
         });
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
         loading.value = false;
@@ -377,7 +374,7 @@ async function addToCart() {
 }
 
 function chooseSeats() {
-    const component = new ComponentWithProperties(ChooseSeatsView, {
+    const component = AsyncComponent(() => import('./ChooseSeatsView.vue'), {
         cartItem: props.cartItem,
         oldItem: props.oldItem,
         webshop: props.webshop,
@@ -393,8 +390,7 @@ function chooseSeats() {
             ],
             modalDisplayStyle: 'sheet',
         }).catch(console.error);
-    }
-    else {
+    } else {
         // Sheet
         show({
             components: [
@@ -520,12 +516,10 @@ function handleNewAmount(newAmount: number) {
             });
             uitpasNumbers.value.push(u);
         }
-    }
-    else if (newAmount === 0) {
+    } else if (newAmount === 0) {
         // clear all
         uitpasNumbers.value = [];
-    }
-    else if (newAmount < uitpasNumbers.value.length) {
+    } else if (newAmount < uitpasNumbers.value.length) {
         // start removing empty strings from the end
         let index = uitpasNumbers.value.length - 1;
         do {

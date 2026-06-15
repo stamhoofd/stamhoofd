@@ -27,6 +27,13 @@
             max-height: calc(var(--vh, 1vh) * 100);
             contain: content;
         }
+
+        // A loading placeholder only contains an absolutely-positioned spinner, so with height: auto
+        // its st-view collapses to 0 and the spinner (positioned against the sliding wrapper) has no
+        // height during the navigation animation. Pin it to the frozen sheet height instead.
+        .st-view.loading-view-container:not(.st-view .st-view) {
+            min-height: var(--frozen-height, calc(var(--vh, 1vh) * 100));
+        }
     }
 }
 
