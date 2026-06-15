@@ -1,9 +1,10 @@
+import { AuditLogService, modelLogDefinitions } from '../services/AuditLogService.js';
 import { DocumentTemplateLogger } from './DocumentTemplateLogger.js';
 import { EmailAddressLogger } from './EmailAddressLogger.js';
 import { EmailLogger } from './EmailLogger.js';
 import { EmailTemplateLogger } from './EmailTemplateLogger.js';
-import { EventNotificationLogger } from './EventNotificationLogger.js';
 import { EventLogger } from './EventLogger.js';
+import { EventNotificationLogger } from './EventNotificationLogger.js';
 import { GroupLogger } from './GroupLogger.js';
 import { MemberLogger } from './MemberLogger.js';
 import { MemberPlatformMembershipLogger } from './MemberPlatformMembershipLogger.js';
@@ -13,13 +14,12 @@ import { OrganizationLogger } from './OrganizationLogger.js';
 import { OrganizationRegistrationPeriodLogger } from './OrganizationRegistrationPeriodLogger.js';
 import { PaymentLogger } from './PaymentLogger.js';
 import { PlatformLogger } from './PlatformLogger.js';
+import { RegistrationInvitationLogger } from './RegistrationInvitationLogger.js';
 import { RegistrationLogger } from './RegistrationLogger.js';
 import { RegistrationPeriodLogger } from './RegistrationPeriodLogger.js';
 import { StripeAccountLogger } from './StripeAccountLogger.js';
 import { UserLogger } from './UserLogger.js';
 import { WebshopLogger } from './WebshopLogger.js';
-import { AuditLogService, modelLogDefinitions } from '../services/AuditLogService.js';
-import { RegistrationInvitationLogger } from './RegistrationInvitationLogger.js';
 
 modelLogDefinitions.set(RegistrationLogger.model, RegistrationLogger);
 modelLogDefinitions.set(GroupLogger.model, GroupLogger);
@@ -43,4 +43,6 @@ modelLogDefinitions.set(EmailAddressLogger.model, EmailAddressLogger);
 modelLogDefinitions.set(UserLogger.model, UserLogger);
 modelLogDefinitions.set(RegistrationInvitationLogger.model, RegistrationInvitationLogger);
 
-AuditLogService.validateAuditLogEnumTranslations();
+if (STAMHOOFD.environment !== 'production') {
+    AuditLogService.validateAuditLogEnumTranslations();
+}
