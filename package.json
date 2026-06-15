@@ -122,11 +122,8 @@
     "semver": "7.7.2",
     "sharp": "0.35.1",
     "sortablejs": "1.15.7",
-    "string-width": "4.2.3",
-    "strip-ansi": "6.0.1",
     "tar": "7.5.16",
     "vue": "3.5.38",
-    "wrap-ansi": "7.0.0",
     "ws": "8.21.0",
     "yargs": "17.7.2"
   },
