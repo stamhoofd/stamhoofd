@@ -2,16 +2,15 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint.js';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
-import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint.js';
 import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint.js';
-import { PlatformMembershipService } from '../../src/services/PlatformMembershipService.js';
-import { testServer } from '../helpers/TestServer.js';
-import { TestUtils } from '@stamhoofd/test-utils';
 import { BalanceItemService } from '../../src/services/BalanceItemService.js';
+import { PlatformMembershipService } from '../../src/services/PlatformMembershipService.js';
 import { assertBalances } from '../assertions/assertBalances.js';
+import { testServer } from '../helpers/TestServer.js';
 
 describe('E2E.Register', () => {
     const registerEndpoint = new RegisterMembersEndpoint();

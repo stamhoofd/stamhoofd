@@ -207,8 +207,7 @@ export class MemberPlatformMembership extends QueryableModel {
             this.startDate = startBrussels.toJSDate();
             this.endDate = endBrussels.toJSDate();
             this.expireDate = null;
-        }
-        else {
+        } else {
             this.endDate = Formatter.luxon(periodConfig.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
             this.expireDate = periodConfig.expireDate ? Formatter.luxon(periodConfig.expireDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate() : null;
 
@@ -222,8 +221,7 @@ export class MemberPlatformMembership extends QueryableModel {
                     startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
                     this.startDate = startBrussels.toJSDate();
                 }
-            }
-            else {
+            } else {
                 // Keep the set date, but make sure it is at 0:00 in CET
                 let startBrussels = Formatter.luxon(this.startDate);
                 startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
@@ -277,12 +275,10 @@ export class MemberPlatformMembership extends QueryableModel {
                 }
 
                 this.trialUntil = trialUntil.toJSDate();
-            }
-            else {
+            } else {
                 this.trialUntil = null;
             }
-        }
-        else {
+        } else {
             // No trial
             this.trialUntil = null;
         }
@@ -357,8 +353,7 @@ export class MemberPlatformMembership extends QueryableModel {
             if (alreadyUsed < periodConfig.amountFree) {
                 freeDays = periodConfig.amountFree - alreadyUsed;
                 console.log('Free membership created for ', this.id, periodConfig.amountFree, alreadyUsed);
-            }
-            else {
+            } else {
                 console.log('No free membership created for', this.id, periodConfig.amountFree, alreadyUsed);
             }
         }
@@ -369,8 +364,7 @@ export class MemberPlatformMembership extends QueryableModel {
             this.priceWithoutDiscount = earliestPriceConfig.calculatePrice(tagIds, false, days);
             this.price = priceConfig.calculatePrice(tagIds, shouldApplyReducedPrice, Math.max(0, days - freeDays));
             this.freeAmount = Math.min(days, freeDays);
-        }
-        else {
+        } else {
             this.priceWithoutDiscount = earliestPriceConfig.getBasePrice(tagIds, false);
             this.price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
             this.maximumFreeAmount = this.price > 0 ? 1 : 0;

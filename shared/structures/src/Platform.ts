@@ -204,7 +204,9 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
      */
     getMaximumEndDate(startDate: Date, behaviour: PlatformMembershipTypeBehaviour): Date {
         if (behaviour === PlatformMembershipTypeBehaviour.Period || this.maximumDays === null) {
-            return this.endDate;
+            return Formatter.luxon(this.endDate)
+                .set({ hour: 23, minute: 59, second: 59, millisecond: 0 })
+                .toJSDate();
         }
 
         const maxEndDate = Formatter.luxon(startDate)
