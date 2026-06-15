@@ -9,6 +9,8 @@ export type StamhoofdDomains = {
     legacyWebshop?: string; // In the past, webshops were hosted on a subdomain. This is deprecated, but the links should still work. E.g. stamhoofd.shop for *.stamhoofd.shop
     api: string; // requires wildcard prefix DNS
     rendererApi: string;
+    sgvLoginUrl?: string;
+    sgvAdminUrl?: string;
 
     /**
      * @deprecated
