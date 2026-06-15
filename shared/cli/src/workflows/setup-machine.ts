@@ -16,10 +16,12 @@ import type { TableCellInput, TableRow } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
+import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 
 const directDnsQueryTimeoutMs = 1000;
 
 export type SetupReport = {
+    node: CheckResult;
     docker: CheckResult;
     privilegedPorts: CheckResult;
     caddy: CheckResult;
@@ -28,6 +30,7 @@ export type SetupReport = {
 };
 
 export enum SetupAutomaticFixKey {
+    Node = 'node',
     Dns = 'dns',
     PrivilegedPorts = 'privileged-ports',
     Services = 'services',
@@ -50,6 +53,7 @@ export type CheckResult = {
 export async function checkSetup(context: CliContext): Promise<SetupReport> {
     const profile = await currentSharedServiceProfile();
     return {
+        node: await nodeCheck(context),
         docker: await dockerCheck(),
         privilegedPorts: await privilegedPortRedirectCheck(profile),
         caddy: await caddyCheck(),
@@ -61,6 +65,7 @@ export async function checkSetup(context: CliContext): Promise<SetupReport> {
 export async function checkSetupWithTable(context: CliContext, options: { live: boolean }): Promise<SetupReport> {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
     const rows = {
+        node: Table.row(['Node.js', Table.cell('checking', { indeterminate: true }), '']),
         docker: Table.row(['Podman / Docker', Table.cell('checking', { indeterminate: true }), '']),
         privilegedPorts: Table.row(['Privileged port redirects', Table.cell('checking', { indeterminate: true }), '']),
         caddy: Table.row(['Caddy', Table.cell('checking', { indeterminate: true }), '']),
@@ -70,12 +75,13 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
     const liveTable = Table.create({
         title: 'Checking Stamhoofd local development setup',
         headers: ['Check', 'Status', 'Details'],
-        rows: [rows.docker, rows.privilegedPorts, rows.caddy, rows.dns, rows.cert],
+        rows: [rows.node, rows.docker, rows.privilegedPorts, rows.caddy, rows.dns, rows.cert],
         live: options.live,
     });
 
     const profilePromise = currentSharedServiceProfile();
     const results = await Promise.allSettled([
+        runSetupCheck(rows.node, 'Node.js', nodeCheck(context)),
         runSetupCheck(rows.docker, 'Podman / Docker', dockerCheck()),
         profilePromise.then(profile => runSetupCheck(rows.privilegedPorts, 'Privileged port redirects', privilegedPortRedirectCheck(profile))),
         runSetupCheck(rows.caddy, 'Caddy', caddyCheck()),
@@ -91,16 +97,18 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
     }
 
     return {
-        docker: results[0].status === 'fulfilled' ? results[0].value : neverRejected(results[0]),
-        privilegedPorts: results[1].status === 'fulfilled' ? results[1].value : neverRejected(results[1]),
-        caddy: results[2].status === 'fulfilled' ? results[2].value : neverRejected(results[2]),
-        dns: results[3].status === 'fulfilled' ? results[3].value : neverRejected(results[3]),
-        cert: results[4].status === 'fulfilled' ? results[4].value : neverRejected(results[4]),
+        node: results[0].status === 'fulfilled' ? results[0].value : neverRejected(results[0]),
+        docker: results[1].status === 'fulfilled' ? results[1].value : neverRejected(results[1]),
+        privilegedPorts: results[2].status === 'fulfilled' ? results[2].value : neverRejected(results[2]),
+        caddy: results[3].status === 'fulfilled' ? results[3].value : neverRejected(results[3]),
+        dns: results[4].status === 'fulfilled' ? results[4].value : neverRejected(results[4]),
+        cert: results[5].status === 'fulfilled' ? results[5].value : neverRejected(results[5]),
     };
 }
 
 export function printSetupReport(report: SetupReport): void {
     table(['Check', 'Status', 'Details'], [
+        row('Node.js', report.node),
         row('Podman / Docker', report.docker),
         row('Privileged port redirects', report.privilegedPorts),
         row('Caddy', report.caddy),
@@ -127,7 +135,11 @@ export async function runSetup(context: CliContext): Promise<void> {
         return;
     }
     for (const fix of fixes) {
-        if (fix.key === SetupAutomaticFixKey.Dns) {
+        if (fix.key === SetupAutomaticFixKey.Node) {
+            await setupNodeVersion(context.rootDir, { verbose: context.verbose });
+            console.log('\nActivate the new version in this terminal, then run stam setup again.');
+            return;
+        } else if (fix.key === SetupAutomaticFixKey.Dns) {
             await setupDns({ yes: true, dryRun: false, verbose: context.verbose });
         } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
             await setupPrivilegedPortRedirects({ yes: true, dryRun: false, verbose: context.verbose });
@@ -152,6 +164,9 @@ export function getRecommendedSetupFixes(report: SetupReport): AutomaticFix[] {
             break;
         }
         fixes.push(check.automaticFix);
+        if (check.automaticFix.key === SetupAutomaticFixKey.Node) {
+            break;
+        }
     }
 
     return fixes;
@@ -162,7 +177,24 @@ export function isSetupReady(report: SetupReport): boolean {
 }
 
 function setupChecks(report: SetupReport): CheckResult[] {
-    return [report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert];
+    return [report.node, report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert];
+}
+
+async function nodeCheck(context: CliContext): Promise<CheckResult> {
+    const check = await checkNodeVersion(context.rootDir);
+    if (check.ok) {
+        return { ok: true, details: check.details };
+    }
+
+    return {
+        ok: false,
+        details: check.details,
+        manualFix: 'stam setup node',
+        automaticFix: {
+            key: SetupAutomaticFixKey.Node,
+            label: `Install Node.js ${check.expected}`,
+        },
+    };
 }
 
 enum IptablesChain {

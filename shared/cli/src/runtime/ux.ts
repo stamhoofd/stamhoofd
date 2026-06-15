@@ -7,7 +7,8 @@ import terminalLink from 'terminal-link';
 import { stripVTControlCharacters } from 'node:util';
 import { successSymbol } from '../config/shared-service-config.js';
 import { OutputStream, writeOutputLine } from './output-target.js';
-import { CliStatus, formatStatusLabel } from './status.js';
+import type { CliStatus } from './status.js';
+import { formatStatusLabel } from './status.js';
 
 const spinnerFrames = ['-', '\\', '|', '/'];
 
@@ -20,7 +21,7 @@ export function success(message: string): void {
 }
 
 export function warning(message: string): void {
-    writeOutputLine(`${chalk.yellow('!')} ${message}`);
+    writeOutputLine(`${chalk.yellow('⚠')} ${message}`);
 }
 
 export function failure(message: string): void {
@@ -33,8 +34,7 @@ export async function step<T>(message: string, fn: () => Promise<T>, options: { 
         const result = await fn();
         spinner.stopAndPersist({ symbol: chalk.green(successSymbol), text: options.successMessage?.(result) ?? message });
         return result;
-    }
-    catch (error) {
+    } catch (error) {
         spinner.fail(message);
         throw error;
     }

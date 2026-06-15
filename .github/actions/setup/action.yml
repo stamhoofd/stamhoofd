@@ -3,9 +3,9 @@ description: 'Set up Node.js with the yarn download cache, pin the yarn version 
 
 inputs:
   node-version:
-    description: 'Node.js version to use'
+    description: 'Node.js version to use. When empty, the version from .nvmrc is used.'
     required: false
-    default: '22'
+    default: ''
   production:
     description: 'Install production dependencies only (--production)'
     required: false
@@ -18,6 +18,7 @@ runs:
       uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
       with:
         node-version: ${{ inputs.node-version }}
+        node-version-file: '.nvmrc'
         cache: 'yarn'
         cache-dependency-path: 'yarn.lock'
     - name: Use correct yarn version

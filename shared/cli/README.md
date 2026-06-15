@@ -10,6 +10,8 @@ yarn stam setup
 yarn stam dev all
 ```
 
+Run `yarn stam setup shell` to install the CLI alias `stam` in your .zshrc or .bashrc (that removes the need to type `yarn` and the need to always run commands in the project root).
+
 Open the dashboard URL printed by the CLI, or run `yarn stam status` to see active services, instances, URLs, and credentials.
 
 Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
@@ -22,6 +24,7 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 | --- | --- | --- |
 | Build | `yarn stam build` | Build shared packages and all app packages for the selected environment. |
 | Setup | `yarn stam setup` | Check the machine and offer recommended setup fixes. |
+| Setup | `yarn stam setup node` | Install the Node.js version from `.nvmrc` and copy global packages from the active version. |
 | Setup | `yarn stam setup dns` | Configure local `.stamhoofd` DNS. |
 | Setup | `yarn stam setup cert` | Trust the local Caddy HTTPS authority. |
 | Development | `yarn stam dev all` | Start shared services and the full app stack. |
@@ -328,7 +331,11 @@ yarn stam clean --help
 
 ## Troubleshooting
 
-Use `yarn stam setup check` first. It checks Node, Yarn, Docker, Caddy, DNS, and certificate trust.
+Use `yarn stam setup` first. It checks Node, Docker, Caddy, DNS, and certificate trust.
+
+- **The active Node.js version differs from `.nvmrc`**
+
+  Run `source .development/install-node.sh` from the repository. This installs or activates the pinned version and copies global packages once per old-to-new version pair. `stam status` also reports this mismatch, and `stam dev` will stop before starting processes with the wrong version.
 
 If that does not tell you enough, use the first matching case below.
 

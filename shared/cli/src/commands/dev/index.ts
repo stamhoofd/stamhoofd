@@ -1,7 +1,10 @@
+import path from 'node:path';
 import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { openFlag, servicesOptionFlag, stripeFlag } from '../../command-flags.js';
+import { getProjectPath } from '../../context/project-path.js';
 import { showHelp } from '../../runtime/show-help.js';
+import { checkNodeVersion, printNodeVersionStatus } from '../../workflows/setup-node.js';
 import { DevTarget, runDev } from '../../workflows/start-dev.js';
 
 const devTargets = Object.values(DevTarget);
@@ -38,6 +41,12 @@ export default class Dev extends BaseCommand {
         }
 
         const target = parseDevTarget(args.target);
+        const rootDir = path.resolve(getProjectPath());
+        const nodeCheck = await checkNodeVersion(rootDir);
+        if (!nodeCheck.ok) {
+            printNodeVersionStatus(nodeCheck);
+            return;
+        }
 
         await runDev(await this.createContext(flags), target, {
             services: flags.services ?? defaultServicesForTarget(target),

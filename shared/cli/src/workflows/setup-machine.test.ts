@@ -7,6 +7,7 @@ import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
+import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 
 const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
@@ -39,6 +40,11 @@ vi.mock('../runtime/ux.js', async (importOriginal) => ({
     confirm: vi.fn(),
 }));
 
+vi.mock('./setup-node.js', () => ({
+    checkNodeVersion: vi.fn(),
+    setupNodeVersion: vi.fn(),
+}));
+
 describe('setup machine workflow', () => {
     const platform = process.platform;
 
@@ -46,6 +52,12 @@ describe('setup machine workflow', () => {
         vi.clearAllMocks();
         setPlatform(platform);
         vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Docker);
+        vi.mocked(checkNodeVersion).mockResolvedValue({
+            ok: true,
+            current: 'v22.22.3',
+            expected: 'v22.22.3',
+            details: 'v22.22.3 matches .nvmrc',
+        });
         vi.mocked(docker.containerIsRunning).mockResolvedValue(false);
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
         dnsResolver.resolve4.mockResolvedValue(['127.0.0.1']);
@@ -61,6 +73,36 @@ describe('setup machine workflow', () => {
         expect(getRecommendedSetupFixes(report)).toEqual([
             { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' },
             { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' },
+        ]);
+    });
+
+    it('offers to install the configured Node.js version before other setup fixes', async () => {
+        vi.mocked(checkNodeVersion).mockResolvedValue({
+            ok: false,
+            current: 'v22.22.3',
+            expected: 'v24.1.0',
+            details: 'v22.22.3 is active, but .nvmrc requires v24.1.0',
+        });
+        vi.mocked(confirm).mockResolvedValue(true);
+        setPlatform('linux');
+        mockSetupCommands({
+            dns: 'Global: 127.0.0.1:1053\n',
+            domains: 'Global: ~stamhoofd\n',
+        });
+
+        await runSetup({ rootDir: '/repo', verbose: true } as any);
+
+        expect(setupNodeVersion).toHaveBeenCalledWith('/repo', { verbose: true });
+    });
+
+    it('only recommends the Node.js fix when the active version is wrong', () => {
+        const report = setupReport({
+            node: missingAutomatic(SetupAutomaticFixKey.Node, 'Install Node.js v24.1.0'),
+            dns: missingAutomatic(SetupAutomaticFixKey.Dns, 'Configure local DNS'),
+        });
+
+        expect(getRecommendedSetupFixes(report)).toEqual([
+            { key: SetupAutomaticFixKey.Node, label: 'Install Node.js v24.1.0' },
         ]);
     });
 
@@ -339,6 +381,7 @@ describe('setup machine workflow', () => {
 
 function setupReport(overrides: Partial<SetupReport>): SetupReport {
     return {
+        node: ok(),
         docker: ok(),
         privilegedPorts: ok(),
         caddy: ok(),

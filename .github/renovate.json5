@@ -40,6 +40,11 @@
 
   packageRules: [
     {
+      description: "Preserve Node.js engine compatibility ranges",
+      matchDepTypes: ["engines"],
+      rangeStrategy: "widen",
+    },
+    {
       description: "Auto-merge patch updates",
       matchUpdateTypes: ["patch", "pin", "digest"],
       // Skip 0.x: patch/minor bumps there can be breaking.
