@@ -19,6 +19,19 @@
             {{ $t('%I1') }}
         </p>
 
+        <NumberInputBox
+            v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days"
+            v-model="maximumDays"
+            :title="$t('%4U')"
+            error-fields="maximumDays" :error-box="errors.errorBox"
+            :suffix="$t('%1N6')"
+            :suffix-singular="$t('%1N7')"
+            :min="1"
+            :validator="errors.validator"
+            :placeholder="$t('%4a')"
+            :required="false"
+        />
+
         <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('%1J7')" error-fields="expireDate" :error-box="errors.errorBox">
             <DateSelection v-model="expireDate" :required="false" :placeholder="$t('%3S')" :time="{hours: 23, minutes: 59, seconds: 59}" />
         </STInputBox>
@@ -189,6 +202,11 @@ const amountFree = computed({
 const trialDays = computed({
     get: () => patched.value.trialDays,
     set: trialDays => addPatch({ trialDays }),
+});
+
+const maximumDays = computed({
+    get: () => patched.value.maximumDays,
+    set: maximumDays => addPatch({ maximumDays }),
 });
 
 const shouldNavigateAway = async () => {
