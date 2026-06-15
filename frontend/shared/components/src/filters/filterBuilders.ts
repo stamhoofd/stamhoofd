@@ -2,12 +2,10 @@ import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
 import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, reactive } from 'vue';
+import { computed } from 'vue';
 import { DateFilterBuilder } from './DateUIFilter';
 import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
@@ -15,6 +13,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './Mul
 import { NumberFilterFormat } from './NumberFilterFormat';
 import { NumberFilterBuilder } from './NumberUIFilter';
 import { useGroupsRelationFetcher } from './relation-fetchers/groups';
+import { useRegistrationPeriodsRelationFetcher } from './relation-fetchers/useRegistrationPeriodsRelationFetcher';
 import { RelationFilterBuilder } from './RelationUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
@@ -638,19 +637,7 @@ export function getDocumentsUIFilterBuilders() {
 export function useEventNotificationBackendFilterBuilders() {
     const platform = usePlatform();
     const eventTypes = useEventTypes();
-    const platformManager = usePlatformManager();
-    const owner = useRequestOwner();
-    const periodOptions = reactive<MultipleChoiceUIFilterOption[]>([
-        new MultipleChoiceUIFilterOption(platform.value.period.name, platform.value.period.id),
-    ]);
-
-    platformManager.value.loadPeriods(false, true, owner).then((loadedPeriods) => {
-        periodOptions.splice(0, periodOptions.length, ...loadedPeriods.map((period) => {
-            return new MultipleChoiceUIFilterOption(period.name, period.id);
-        }));
-    }).catch((e) => {
-        console.error('Failed to load periods in useEventNotificationBackendFilterBuilders', e);
-    });
+    const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
 
     return () => {
         const all: UIFilterBuilders = [
@@ -662,19 +649,10 @@ export function useEventNotificationBackendFilterBuilders() {
                 name: $t('%1P8'),
                 key: 'endDate',
             }),
-            new MultipleChoiceFilterBuilder({
+            new RelationFilterBuilder({
                 name: $t('%7Z'),
-                options: periodOptions,
-                wrapper: {
-                    periodId: {
-                        $in: FilterWrapperMarker,
-                    },
-                },
-                additionalUnwrappers: [
-                    {
-                        periodId: FilterWrapperMarker,
-                    },
-                ],
+                key: 'periodId',
+                relationFetcher: registrationPeriodsRelationFetcher,
             }),
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),

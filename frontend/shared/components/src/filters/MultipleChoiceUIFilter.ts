@@ -1,10 +1,9 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { StamhoofdCompareValue, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-
-import type { StyledDescription, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import type { StyledDescription, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export class MultipleChoiceUIFilterOption {
@@ -105,6 +104,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
     allowCreation?: boolean | undefined;
 
     multipleChoiceOptions: MultipleChoiceUIFilterOption[] = [];
+
     multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration = {
         mode: MultipleChoiceUIFilterMode.Or,
         isSubjectPlural: false,

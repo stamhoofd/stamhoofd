@@ -1,4 +1,5 @@
 <template>
+    <STErrorsDefault :error-box="errorBox" />
     <STList v-if="options.length">
         <STListItem v-if="filter.configuration.showOptionSelectAll" :selectable="true" element-name="label">
             <template #left>
@@ -26,6 +27,8 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import Checkbox from '../inputs/Checkbox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -34,6 +37,7 @@ import type { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './Mul
 const props = defineProps<{ filter: MultipleChoiceUIFilter }>();
 
 const isSelectAll = ref(false);
+const errorBox = ref<ErrorBox | null>(null);
 
 watch(isSelectAll, (isSelectAll) => {
     if (isSelectAll) {
