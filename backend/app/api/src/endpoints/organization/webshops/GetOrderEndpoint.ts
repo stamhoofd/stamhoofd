@@ -1,10 +1,11 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order } from '@stamhoofd/models';
+import { Order, Webshop } from '@stamhoofd/models';
 import type { Order as OrderStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
+import { WebshopAuthHelper } from './WebshopAuthHelper.js';
 type Params = { id: string; orderId: string };
 type Query = undefined;
 type Body = undefined;
@@ -35,6 +36,17 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
                 human: $t(`%FY`),
             });
         }
+
+        const webshop = await Webshop.getByID(request.params.id);
+        if (!webshop || webshop.organizationId !== organization.id) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Webshop not found',
+                human: $t(`%FX`),
+            });
+        }
+
+        await WebshopAuthHelper.checkOrderAccess(webshop, order);
 
         return new Response(await order.getStructure());
     }

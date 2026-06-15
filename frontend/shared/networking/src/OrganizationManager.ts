@@ -49,8 +49,14 @@ export class OrganizationManager {
     }
 
     /**
-     * @deprecated
-     * Use hooks
+     * @deprecated Use usePatchOrganization from @stamhoofd/components/organizations/usePatchOrganization instead.
+     *
+     * Example:
+     * const patchOrganization = usePatchOrganization();
+     * await patchOrganization(Organization.patch({ ... }));
+     *
+     * See frontend/shared/components/src/organizations/usePatchOrganization.ts and
+     * frontend/app/dashboard/src/views/dashboard/settings/RegistrationPaymentSettingsView.vue.
      */
     async patch(patch: AutoEncoderPatchType<Organization>, options: { shouldRetry?: boolean; owner?: any } = {}) {
         if (!this.$context.organization) {

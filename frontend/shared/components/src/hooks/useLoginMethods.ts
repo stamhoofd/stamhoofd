@@ -1,15 +1,18 @@
 import { LoginMethod, LoginMethodConfig } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
 import { computed } from 'vue';
+import { useOrganization } from './useOrganization';
 import { usePlatform } from './usePlatform';
 
 export function useLoginMethods(): Ref<Map<LoginMethod, LoginMethodConfig>> {
     const platform = usePlatform();
+    const organization = useOrganization();
+
     return computed(() => {
         if (STAMHOOFD.userMode === 'platform') {
             return platform.value.config.loginMethods;
         }
-        return new Map<LoginMethod, LoginMethodConfig>([[LoginMethod.Password, LoginMethodConfig.create({})]]);
+        return organization.value?.meta.loginMethods ?? new Map<LoginMethod, LoginMethodConfig>([[LoginMethod.Password, LoginMethodConfig.create({})]]);
     });
 }
 

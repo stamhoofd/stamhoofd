@@ -6,6 +6,7 @@ import type { PrivateWebshop, Webshop as WebshopStruct } from '@stamhoofd/struct
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { WebshopAuthHelper } from './WebshopAuthHelper.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -28,7 +29,6 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope(); // editing webshop from the admin panel -> no scope
-        await Context.optionalAuthenticate();
 
         const webshop = await Webshop.getByID(request.params.id);
         if (!webshop) {
@@ -38,6 +38,8 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 human: $t(`%FX`),
             });
         }
+
+        await WebshopAuthHelper.optionalAuthenticateForWebshop(webshop);
 
         return new Response(
             await AuthenticatedStructures.webshop(webshop),

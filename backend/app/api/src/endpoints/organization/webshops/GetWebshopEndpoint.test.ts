@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { PermissionLevel, Permissions, WebshopAuthType, WebshopMetaData } from '@stamhoofd/structures';
 
-import { TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetWebshopEndpoint } from './GetWebshopEndpoint.js';
 
@@ -41,6 +41,38 @@ describe('Endpoint.GetWebshop', () => {
 
         expect(response.body.id).toEqual(webshop.id);
         expect((response.body as any).privateMeta).toBeUndefined();
+    });
+
+    test('Reject anonymous access for required-auth webshop', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const webshop = await new WebshopFactory({
+            organizationId: organization.id,
+            meta: WebshopMetaData.create({
+                authType: WebshopAuthType.Required,
+            }),
+        }).create();
+
+        const r = Request.buildJson('GET', '/webshop/' + webshop.id, organization.getApiHost());
+
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('not_authenticated'));
+    });
+
+    test('Allow signed in user access for required-auth webshop', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization }).create();
+        const token = await Token.createToken(user);
+        const webshop = await new WebshopFactory({
+            organizationId: organization.id,
+            meta: WebshopMetaData.create({
+                authType: WebshopAuthType.Required,
+            }),
+        }).create();
+
+        const r = Request.buildJson('GET', '/webshop/' + webshop.id, organization.getApiHost());
+        r.headers.authorization = 'Bearer ' + token.accessToken;
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.body.id).toEqual(webshop.id);
     });
 
     test('Get webshop as admin', async () => {

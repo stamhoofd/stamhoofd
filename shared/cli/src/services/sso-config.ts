@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import type { buildDomains } from '../config/build-config.js';
 import type { CliContext } from '../context/create-context.js';
 
 export const ssoRealm = 'stamhoofd';
@@ -10,6 +11,35 @@ export const ssoUserPassword = 'password';
 export const ssoUserName = 'Local SSO User';
 export const ssoAdminUser = 'admin';
 export const ssoAdminPassword = 'admin';
+
+export function buildSsoConfigOutput(domains: ReturnType<typeof buildDomains>, redirectUri?: string): string {
+    const issuer = `https://${domains.sso}/dex/realms/${ssoRealm}`;
+    const resolvedRedirectUri = redirectUri ?? `https://<organization-id>.${domains.api}/openid/callback`;
+
+    return `Local SSO settings:
+
+  Issuer:        ${issuer}
+  Discovery:     ${issuer}/.well-known/openid-configuration
+  Client ID:     ${ssoClientId}
+  Client secret: ${ssoClientSecret}
+  Redirect URI:  ${resolvedRedirectUri}
+
+Test user:
+
+  Email:         ${ssoUserEmail}
+  Password:      ${ssoUserPassword}
+  Name:          ${ssoUserName}
+
+Admin console:
+
+  URL:           https://${domains.sso}/dex/admin
+  Username:      ${ssoAdminUser}
+  Password:      ${ssoAdminPassword}
+
+Commands:
+
+  stam sso start "${resolvedRedirectUri}"`;
+}
 
 export function buildKeycloakRealm(redirectUri: string): Record<string, unknown> {
     const [firstName, lastName] = splitName(ssoUserName);

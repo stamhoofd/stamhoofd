@@ -60,7 +60,7 @@ export class WebshopManager {
     }
 
     async reload() {
-        const response = await this.server.request({
+        const response = await this.optionalAuthenticatedServer.request({
             method: 'GET',
             path: '/webshop/' + this.webshop.id,
             decoder: Webshop as Decoder<Webshop>,

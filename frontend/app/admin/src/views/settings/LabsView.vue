@@ -69,7 +69,7 @@
 <script lang="ts" setup>
 import type { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import LoginMethodConfigView from '@stamhoofd/components/auth/LoginMethodConfigView.vue';
+import LoginMethodSettingsView from '@stamhoofd/components/auth/LoginMethodSettingsView.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';
@@ -79,7 +79,7 @@ import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue'
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
+import { LoginMethod, LoginMethodConfig, LoginProviderType, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
 const platformManager = usePlatformManager();
@@ -138,10 +138,12 @@ function setLoginMethod(method: LoginMethod, value: boolean) {
 async function editLoginMethodConfig(loginMethod: LoginMethod) {
     await present({
         components: [
-            new ComponentWithProperties(LoginMethodConfigView, {
+            new ComponentWithProperties(LoginMethodSettingsView, {
                 loginMethod,
+                title: getLoginMethodTitle(loginMethod),
                 configs: patched.value.config.loginMethods,
-                saveHandler: (patchMap: ConvertArrayToPatchableArray<Map<LoginMethod, LoginMethodConfig>>) => {
+                provider: getLoginMethodProvider(loginMethod),
+                saveHandler: async (patchMap: ConvertArrayToPatchableArray<Map<LoginMethod, LoginMethodConfig>>) => {
                     addPatch({
                         config: PlatformConfig.patch({
                             loginMethods: patchMap,
@@ -152,6 +154,30 @@ async function editLoginMethodConfig(loginMethod: LoginMethod) {
         ],
         modalDisplayStyle: 'popup',
     });
+}
+
+function getLoginMethodProvider(loginMethod: LoginMethod) {
+    if (loginMethod === LoginMethod.SSO) {
+        return LoginProviderType.SSO;
+    }
+
+    if (loginMethod === LoginMethod.Google) {
+        return LoginProviderType.Google;
+    }
+
+    return null;
+}
+
+function getLoginMethodTitle(loginMethod: LoginMethod) {
+    if (loginMethod === LoginMethod.Password) {
+        return $t(`%HK`);
+    }
+
+    if (loginMethod === LoginMethod.Google) {
+        return $t(`%1p`);
+    }
+
+    return $t(`%2b`);
 }
 
 async function save() {

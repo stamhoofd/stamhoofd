@@ -1,9 +1,11 @@
 import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
+import { buildDomains } from '../../config/build-config.js';
 import { CaddyService } from '../../services/definitions/caddy-service.js';
 import { ssoService } from '../../services/definitions/sso-service.js';
 import { allRunning, startServices } from '../../services/manager.js';
 import { sharedServiceDefinitions } from '../../services/registry.js';
+import { buildSsoConfigOutput } from '../../services/sso-config.js';
 
 export default class SsoStart extends BaseCommand {
     static summary = 'Start the local SSO server';
@@ -22,6 +24,7 @@ export default class SsoStart extends BaseCommand {
             this.error('Expected an HTTPS /openid/callback URL copied from the SSO settings view.');
         }
         const context = await this.createContext(flags);
+        this.log(buildSsoConfigOutput(buildDomains(context), args.redirectUri));
         if (!(await allRunning(context, sharedServiceDefinitions))) {
             await startServices(context, sharedServiceDefinitions);
         }

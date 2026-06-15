@@ -38,22 +38,9 @@
                                 </button>
                             </LoadingButton>
 
-                            <template v-if="googleConfig">
-                                <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
-                                    <span class="icon">
-                                        <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
-                                    <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                    <span v-else>{{ $t('%15b') }}</span>
-                                </button>
-                            </template>
+                            <LoginMethodButton v-if="googleConfig" :config="googleConfig" :provider="LoginProviderType.Google" tabindex="-1" @click="startSSO(LoginProviderType.Google)" />
 
-                            <template v-if="ssoConfig">
-                                <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
-                                    <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                    <span v-else-if="!passwordConfig">{{ $t('%Qg') }}</span>
-                                    <span v-else>{{ $t('%Zk') }}</span>
-                                </button>
-                            </template>
+                            <LoginMethodButton v-if="ssoConfig" :config="ssoConfig" :provider="LoginProviderType.SSO" :fallback-text="!passwordConfig ? $t('%Qg') : $t('%Zk')" tabindex="-1" @click="startSSO(LoginProviderType.SSO)" />
                         </div>
 
                         <hr><p class="style-description-small">
@@ -71,16 +58,8 @@
                         </p>
 
                         <div class="style-form-buttons">
-                            <button v-if="ssoConfig" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
-                                <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('%Qg') }}</span>
-                            </button>
-                            <button v-if="googleConfig" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
-                                <span class="icon">
-                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
-                                <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('%15b') }}</span>
-                            </button>
+                            <LoginMethodButton v-if="ssoConfig" :config="ssoConfig" :provider="LoginProviderType.SSO" :primary="true" :fallback-text="$t('%Qg')" tabindex="-1" @click="startSSO(LoginProviderType.SSO)" />
+                            <LoginMethodButton v-if="googleConfig" :config="googleConfig" :provider="LoginProviderType.Google" tabindex="-1" @click="startSSO(LoginProviderType.Google)" />
                         </div>
                     </template>
                 </div>
@@ -109,6 +88,7 @@ import { useLoginMethod } from '../hooks/useLoginMethods.ts';
 
 import EmailInput from '../inputs/EmailInput.vue';
 
+import LoginMethodButton from './LoginMethodButton.vue';
 import PlatformFooter from './PlatformFooter.vue';
 
 const props = withDefaults(
