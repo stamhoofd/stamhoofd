@@ -1,10 +1,10 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import type { InfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { SortList, StamhoofdFilter, StamhoofdMagicRelationFilter, WrapperFilter } from '@stamhoofd/structures';
 import { isMagicRelationFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { InfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
-import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
@@ -109,7 +109,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     /**
      * Options that should always be shown. For example to filter on objects that have no relation (where the value is null).
      */
-    private readonly defaultOptions?: RelationFilterOption<T>[];
+    private readonly defaultOptions: RelationFilterOption<T>[];
 
     constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean; relationFetcher: RelationFetcher<any, T>; defaultOptions?: RelationFilterOption<T>[] }) {
         this.key = data.key;
@@ -120,7 +120,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         this.name = data.name;
         this.allowCreation = data.allowCreation;
         this.relationFetcher = data.relationFetcher;
-        this.defaultOptions = data.defaultOptions;
+        this.defaultOptions = data.defaultOptions || [];
     }
 
     create(options?: { isInverted?: boolean }): RelationUIFilter<T> {
