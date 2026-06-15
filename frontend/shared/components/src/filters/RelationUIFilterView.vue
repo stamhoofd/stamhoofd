@@ -50,16 +50,17 @@
 </template>
 
 <script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
-import { LoadingBoxTransition } from '#containers/index.ts';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import type { InfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
+import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { mergeFilters } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import type { InfiniteObjectFetcher, ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
-import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
-import InfiniteObjectFetcherEnd from '../tables/InfiniteObjectFetcherEnd.vue';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
 
 const props = defineProps<{
