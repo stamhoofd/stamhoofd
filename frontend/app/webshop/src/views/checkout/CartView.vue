@@ -46,9 +46,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AddDiscountCodeBox from '@stamhoofd/components/views/AddDiscountCodeBox.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
-import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
+
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
@@ -121,7 +122,7 @@ function editCartItem(cartItem: CartItem) {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(CartItemView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/CartItemView.vue'), {
                     cartItem: cartItem.clone(),
                     oldItem: cartItem,
                     cart: checkoutManager.cart,

@@ -51,11 +51,16 @@ import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { AppRoute } from '@stamhoofd/structures';
 
-const props = defineProps<{
-    token: string;
-    email: string;
-    code?: string;
-}>();
+const props = withDefaults(
+    defineProps<{
+        token: string;
+        email?: string | null;
+        code?: string | null;
+    }>(), {
+        email: null,
+        code: null,
+    },
+);
 
 const context = useContext();
 const appNavigate = useAppNavigate();

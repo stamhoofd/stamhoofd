@@ -36,6 +36,7 @@
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "@stamhoofd/verify-email": "*",
+        "@simonbackx/simple-errors": "*",
         "qr-scanner": "1.4.2",
         "vue": "3.5.38"
     },

@@ -106,6 +106,7 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMember, RegistrationPeriod } from '@stamhoofd/structures';
@@ -121,7 +122,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
-import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
+
 
 const props = defineProps<{
     member: PlatformMember;
@@ -174,7 +175,7 @@ function getOrganizationName(membership: MemberPlatformMembership) {
 async function addMembership(period: RegistrationPeriod) {
     await present({
         components: [
-            new ComponentWithProperties(SelectPlatformMembershipView, {
+            AsyncComponent(() => import('../components/platform-membership/SelectPlatformMembershipView.vue'), {
                 member: props.member,
                 period,
             }),

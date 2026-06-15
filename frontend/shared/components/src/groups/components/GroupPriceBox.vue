@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import BundleDiscountSettingsView from '#bundle-discounts/BundleDiscountSettingsView.vue';
+
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import type { Validator } from '#errors/Validator.ts';
@@ -131,6 +131,7 @@ import TimeInput from '#inputs/TimeInput.vue';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BundleDiscount, Group, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { BundleDiscountGroupPriceSettings, GroupPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -348,7 +349,7 @@ function setCustomBundleDiscounts(bundleDiscount: BundleDiscount, discounts: Gro
 async function editBundleDiscounts() {
     await present({
         components: [
-            new ComponentWithProperties(BundleDiscountSettingsView, {
+            AsyncComponent(() => import('#bundle-discounts/BundleDiscountSettingsView.vue'), {
                 period: props.period,
                 saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                     addPeriodPatch(patch);

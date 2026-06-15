@@ -37,13 +37,14 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
 
 import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
@@ -174,7 +175,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('@stamhoofd/components/filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

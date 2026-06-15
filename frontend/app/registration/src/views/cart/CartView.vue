@@ -54,7 +54,8 @@ import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import BalanceItemCartItemDiscountsSheet from '@stamhoofd/components/members/components/group/BalanceItemCartItemDiscountsSheet.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 const memberManager = useMemberManager();
@@ -117,7 +118,7 @@ async function showDiscountSheet(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(BalanceItemCartItemDiscountsSheet, {
+                root: AsyncComponent(() => import('@stamhoofd/components/members/components/group/BalanceItemCartItemDiscountsSheet.vue'), {
                     items: cart.value.balanceItemDiscounts
                 }),
             }),

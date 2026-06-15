@@ -1,11 +1,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import PaymentPendingView from '@stamhoofd/components/payments/PaymentPendingView.vue';
-import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import type { PaymentGeneral } from '@stamhoofd/structures';
@@ -73,7 +72,7 @@ export function useGlobalRoutes() {
             const cancel = queryString.get('cancel') === 'true';
 
             if (paymentId) {
-                await present(new ComponentWithProperties(PaymentPendingView, {
+                await present(AsyncComponent(() => import('@stamhoofd/components/payments/PaymentPendingView.vue'), {
                     server: organizationId ? context.value.getOptionalAuthenticatedServerForOrganization(organizationId) : context.value.optionalAuthenticatedServer,
                     paymentId,
                     cancel,
@@ -87,7 +86,7 @@ export function useGlobalRoutes() {
                         if (payment && payment.status === PaymentStatus.Succeeded) {
                             await navigationActions.show({
                                 components: [
-                                    new ComponentWithProperties(PaymentSuccessView, {
+                                    AsyncComponent(() => import('@stamhoofd/components/payments/PaymentSuccessView.vue'), {
                                         payment,
                                     }),
                                 ],

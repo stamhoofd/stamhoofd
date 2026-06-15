@@ -43,6 +43,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -51,8 +52,8 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import type { CheckoutMethod} from '@stamhoofd/structures';
 import { PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
 
-import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
-import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
+
+
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
@@ -76,7 +77,7 @@ function addOnSiteMethod() {
     meta.checkoutMethods.addPut(onSiteMethod);
     p.meta = meta;
 
-    present(new ComponentWithProperties(EditTakeoutMethodView, {
+    present(AsyncComponent(() => import('./locations/EditTakeoutMethodView.vue'), {
         isNew: true,
         takeoutMethod: onSiteMethod,
         webshop: webshop.value.patch(p),
@@ -99,7 +100,7 @@ function addTakeoutMethod() {
     meta.checkoutMethods.addPut(takeoutMethod);
     p.meta = meta;
 
-    present(new ComponentWithProperties(EditTakeoutMethodView, {
+    present(AsyncComponent(() => import('./locations/EditTakeoutMethodView.vue'), {
         isNew: true,
         takeoutMethod,
         webshop: webshop.value.patch(p),
@@ -120,7 +121,7 @@ function addDeliveryMethod() {
     meta.checkoutMethods.addPut(deliveryMethod);
     p.meta = meta;
 
-    present(new ComponentWithProperties(EditDeliveryMethodView, {
+    present(AsyncComponent(() => import('./locations/EditDeliveryMethodView.vue'), {
         isNew: true,
         deliveryMethod,
         webshop: webshop.value.patch(p),
@@ -135,7 +136,7 @@ function addDeliveryMethod() {
 function editCheckoutMethod(checkoutMethod: CheckoutMethod) {
     if (checkoutMethod instanceof WebshopTakeoutMethod || checkoutMethod instanceof WebshopOnSiteMethod) {
         present(
-            new ComponentWithProperties(EditTakeoutMethodView, {
+            AsyncComponent(() => import('./locations/EditTakeoutMethodView.vue'), {
                 isNew: false,
                 takeoutMethod: checkoutMethod,
                 webshop: webshop.value,
@@ -148,7 +149,7 @@ function editCheckoutMethod(checkoutMethod: CheckoutMethod) {
     }
     else {
         present(
-            new ComponentWithProperties(EditDeliveryMethodView, {
+            AsyncComponent(() => import('./locations/EditDeliveryMethodView.vue'), {
                 isNew: false,
                 deliveryMethod: checkoutMethod,
                 webshop: webshop.value,

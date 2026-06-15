@@ -7,7 +7,7 @@ type CenteredMessageCheckbox = {
     text: string;
 };
 
-type ConfirmOptions = {title: string, confirmText: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string, availabilityDelay?: number}
+type ConfirmOptions = { title: string; confirmText: string; description?: string; cancelText?: string; destructive?: boolean; requireCheckbox?: string; availabilityDelay?: number };
 
 export class CenteredMessageButton {
     text: string;
@@ -26,7 +26,7 @@ export class CenteredMessageButton {
     constructor(text: string, settings?: {
         action?: (() => Promise<any>);
         type?: 'destructive' | 'secundary' | 'primary';
-        icon?: string ;
+        icon?: string;
         href?: string;
         disabled?: boolean;
         requireAcceptCheckbox?: boolean;
@@ -63,11 +63,9 @@ export class CenteredMessage {
         let simpleErrors: SimpleErrors;
         if (isSimpleError(errors)) {
             simpleErrors = new SimpleErrors(errors);
-        }
-        else if (isSimpleErrors(errors)) {
+        } else if (isSimpleErrors(errors)) {
             simpleErrors = errors;
-        }
-        else {
+        } else {
             simpleErrors = new SimpleErrors(new SimpleError({
                 code: 'unknown_error',
                 message: (errors as any).message,
@@ -127,9 +125,9 @@ export class CenteredMessage {
      * @param requireCheckbox if a text is provided a checkbox has to be checked first before the message can be confirmed
      * @returns
      */
-    static confirm(options: ConfirmOptions): Promise<boolean>
-    /** @deprecated, use options variant */ static confirm(text: string, confirmText: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string): Promise<boolean>
-    static confirm(options: string | ConfirmOptions, confirmText?: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string /*confirmText?: string, description, cancelText?: string, destructive = true, requireCheckbox: string | undefined = undefined*/): Promise<boolean> {
+    static confirm(options: ConfirmOptions): Promise<boolean>;
+    /** @deprecated, use options variant */ static confirm(text: string, confirmText: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string): Promise<boolean>;
+    static confirm(options: string | ConfirmOptions, confirmText?: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string /* confirmText?: string, description, cancelText?: string, destructive = true, requireCheckbox: string | undefined = undefined */): Promise<boolean> {
         if (typeof options === 'string') {
             return this.confirm({
                 title: options,
@@ -138,8 +136,8 @@ export class CenteredMessage {
                 cancelText,
                 destructive,
                 requireCheckbox,
-                availabilityDelay: destructive && confirmText !== $t('%4X') ? 1_000 : undefined
-            })
+                availabilityDelay: destructive && confirmText !== $t('%4X') ? 1_000 : undefined,
+            });
         }
         return this.show({
             title: options.title,
@@ -153,7 +151,7 @@ export class CenteredMessage {
                     requireAcceptCheckbox: options.requireCheckbox !== undefined,
                 },
                 {
-                    text: options.cancelText ?? $t(`%9b`),
+                    text: options.cancelText ?? $t(`Annuleren`),
                     type: 'secundary',
                     value: false,
                 },

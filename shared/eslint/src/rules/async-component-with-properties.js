@@ -3,16 +3,6 @@ const asyncComponentImportNames = new Set([
     '#containers/AsyncComponent.ts',
     '@stamhoofd/components/containers/AsyncComponent.ts',
 ]);
-const allowedComponentNames = new Set([
-    'AuthenticatedView',
-    'ContextProvider',
-    'CoverImageContainer',
-    'ModalStackComponent',
-    'NavigationController',
-    'PromiseView',
-    'SplitViewController',
-    'TabBarController',
-]);
 
 function unwrapExpression(node) {
     while (
@@ -185,7 +175,7 @@ function getAsyncComponent(sourceCode, node, filename) {
 
 function getFix(sourceCode, node, importedComponent, filename) {
     const asyncComponent = getAsyncComponent(sourceCode, node, filename);
-    if (!asyncComponent || node.arguments.length > 2) {
+    if (!asyncComponent || node.arguments.length > 3) {
         return null;
     }
 
@@ -202,9 +192,12 @@ function getFix(sourceCode, node, importedComponent, filename) {
             const properties = construction.arguments[1]
                 ? sourceCode.getText(construction.arguments[1])
                 : '{}';
+            const options = construction.arguments[2]
+                ? `, ${sourceCode.getText(construction.arguments[2])}`
+                : '';
             return fixer.replaceText(
                 construction,
-                `${asyncComponent.name}(() => import(${importSource}), ${properties})`,
+                `${asyncComponent.name}(() => import(${importSource}), ${properties}${options})`,
             );
         });
 
@@ -240,13 +233,24 @@ export default {
             description: 'Require imported Vue components to be loaded through AsyncComponent.',
         },
         fixable: 'code',
-        schema: [],
+        schema: [{
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+                allow: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    uniqueItems: true,
+                },
+            },
+        }],
         messages: {
             asyncComponent: 'Use AsyncComponent(() => import(...), properties) instead of eagerly constructing an imported component.',
         },
     },
     create(context) {
         const sourceCode = context.sourceCode;
+        const allowedComponentNames = new Set(context.options[0]?.allow ?? []);
 
         return {
             NewExpression(node) {

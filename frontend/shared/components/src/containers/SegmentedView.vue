@@ -2,7 +2,9 @@
     <div class="segmented-view">
         <!-- The v-if="root" fixes animation on initial load, so there is no animation for the first selected tab -->
         <SegmentedControl v-if="root" v-model="segmentedControlItem" :items="segmentedControlItems" :labels="segmentedControlLabels" />
-        <FramedComponent v-if="root" :key="root.key" :root="root" v-bind="$attrs" />
+        <div class="content">
+            <FramedComponent v-if="root" :key="root.key" :root="root" v-bind="$attrs" />
+        </div>
     </div>
 </template>
 
@@ -140,3 +142,9 @@ defineExpose({
 });
 
 </script>
+
+<style lang="scss">
+.segmented-view > .content {
+    position: relative;
+}
+</style>

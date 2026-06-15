@@ -59,9 +59,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
@@ -80,7 +81,7 @@ import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filte
 import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 
-import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
+
 
 type ObjectType = DocumentTemplatePrivate;
 
@@ -212,7 +213,7 @@ function addDocument() {
 
     present({
         components: [
-            new ComponentWithProperties(EditDocumentTemplateView, {
+            AsyncComponent(() => import('./EditDocumentTemplateView.vue'), {
                 isNew: true,
                 document: DocumentTemplatePrivate.create({
                     year,
@@ -244,7 +245,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('@stamhoofd/components/filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

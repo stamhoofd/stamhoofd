@@ -90,6 +90,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
@@ -101,7 +102,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+
 import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
@@ -274,7 +275,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('@stamhoofd/components/filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

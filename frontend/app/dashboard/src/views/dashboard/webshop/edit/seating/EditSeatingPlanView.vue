@@ -103,6 +103,7 @@ import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -121,7 +122,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { computed, ref } from 'vue';
-import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
+
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
 
 const props = defineProps<{
@@ -297,7 +298,7 @@ function addCategory() {
 
     present({
         components: [
-            new ComponentWithProperties(EditSeatingPlanCategoryView, {
+            AsyncComponent(() => import('./EditSeatingPlanCategoryView.vue'), {
                 seatingPlan: patchedSeatingPlan.value.patch(patch),
                 isNew: true,
                 category,
@@ -313,7 +314,7 @@ function addCategory() {
 function editCategory(category: SeatingPlanCategory) {
     present({
         components: [
-            new ComponentWithProperties(EditSeatingPlanCategoryView, {
+            AsyncComponent(() => import('./EditSeatingPlanCategoryView.vue'), {
                 seatingPlan: patchedSeatingPlan.value,
                 isNew: false,
                 category,

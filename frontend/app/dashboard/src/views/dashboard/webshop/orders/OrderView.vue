@@ -296,6 +296,7 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useArrowUpDown } from '@stamhoofd/components/hooks/useArrowUpDown.ts';
@@ -305,24 +306,24 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
-import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
+
+
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { AccessRight, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import OrderView from './OrderView.vue';
+
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { ComputedRef } from 'vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
-import OrderTicketsView from './OrderTicketsView.vue';
+
 
 const props = withDefaults(defineProps<{
     initialOrder: PrivateOrderWithTickets;
@@ -389,7 +390,7 @@ const sortedWarnings = computed(() => {
 function openTickets() {
     present({
         components: [
-            new ComponentWithProperties(OrderTicketsView, {
+            AsyncComponent(() => import('./OrderTicketsView.vue'), {
                 initialOrder: order.value,
                 webshopManager: props.webshopManager,
             }),
@@ -404,7 +405,7 @@ function openPayment(payment: PrivatePayment) {
     }
     present({
         components: [
-            new ComponentWithProperties(AsyncPaymentView, {
+            AsyncComponent(() => import('@stamhoofd/components/payments/AsyncPaymentView.vue'), {
                 payment,
             }),
         ],
@@ -492,7 +493,7 @@ function showContextMenu(event: MouseEvent) {
     const el = event.currentTarget as HTMLElement;
     const bounds = el.getBoundingClientRect();
 
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/tables/TableActionsContextMenu.vue'), {
         x: bounds.left,
         y: bounds.bottom,
         xPlacement: 'right',
@@ -515,7 +516,7 @@ function showContextMenu(event: MouseEvent) {
 
 function markAs(event: MouseEvent) {
     const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/tables/TableActionsContextMenu.vue'), {
         x: el.getBoundingClientRect().left + el.offsetWidth,
         y: el.getBoundingClientRect().top + el.offsetHeight,
         xPlacement: 'left',
@@ -535,7 +536,7 @@ function changePaymentStatus(event: TouchEvent | MouseEvent) {
     const x = (event as TouchEvent).changedTouches ? (event as TouchEvent).changedTouches[0].pageX : (event as MouseEvent).clientX;
     const y = (event as TouchEvent).changedTouches ? (event as TouchEvent).changedTouches[0].pageY : (event as MouseEvent).clientY;
 
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/tables/TableActionsContextMenu.vue'), {
         x,
         y,
         xPlacement: 'right',
@@ -611,7 +612,7 @@ function goBack() {
     if (!o) {
         return;
     }
-    const component = new ComponentWithProperties(OrderView, {
+    const component = AsyncComponent(() => import('./OrderView.vue'), {
         initialOrder: o,
         webshopManager: props.webshopManager,
         getNextOrder: props.getNextOrder,
@@ -631,7 +632,7 @@ function goNext() {
     if (!o) {
         return;
     }
-    const component = new ComponentWithProperties(OrderView, {
+    const component = AsyncComponent(() => import('./OrderView.vue'), {
         initialOrder: o,
         webshopManager: props.webshopManager,
         getNextOrder: props.getNextOrder,
@@ -699,7 +700,7 @@ function createPayment() {
         paidAt: new Date(),
     });
 
-    const component = new ComponentWithProperties(EditPaymentView, {
+    const component = AsyncComponent(() => import('@stamhoofd/components/payments/EditPaymentView.vue'), {
         payment,
         balanceItems: order.value.balanceItems,
         customers: [

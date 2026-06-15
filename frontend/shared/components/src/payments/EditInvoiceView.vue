@@ -115,6 +115,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -124,7 +125,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import RadioListItem from '@stamhoofd/components/inputs/RadioListItem.vue';
 import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
-import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import PaymentCustomerSelectionBox from '@stamhoofd/components/payments/components/PaymentCustomerSelectionBox.vue';
@@ -242,9 +243,7 @@ async function save() {
 async function editInvoiceSettings() {
     await present({
         components: [
-            new ComponentWithProperties(
-                GeneralSettingsView,
-            ),
+            AsyncComponent(() => import('@stamhoofd/components/organizations/GeneralSettingsView.vue'), {}),
         ],
         modalDisplayStyle: 'popup',
     });

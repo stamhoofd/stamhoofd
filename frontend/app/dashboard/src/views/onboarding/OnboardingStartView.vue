@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
@@ -51,9 +52,9 @@ import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { OrganizationCheckout, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
 import { useActivatePackages } from '../dashboard/settings/packages/hooks/useActivatePackages';
-import EditWebshopGeneralView from '../dashboard/webshop/edit/EditWebshopGeneralView.vue';
+
 import { useMemberAdministrationOnboarding } from './useMemberAdministrationOnboarding';
-import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
+
 
 const startMemberAdministrationOnboarding = useMemberAdministrationOnboarding();
 const show = useShow();
@@ -100,8 +101,8 @@ async function startSelling() {
     }
     await show({
         components: [
-            new ComponentWithProperties(BoxedController, {
-                root: new ComponentWithProperties(EditWebshopGeneralView, {
+            AsyncComponent(() => import('@stamhoofd/components/containers/BoxedController.vue'), {
+                root: AsyncComponent(() => import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'), {
                     savedHandler: async () => {
                         return await activateWebshopsTrial();
                     },

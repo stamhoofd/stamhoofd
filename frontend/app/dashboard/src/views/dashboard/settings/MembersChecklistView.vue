@@ -113,6 +113,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
@@ -126,7 +127,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import PackageSettingsView from './packages/PackageSettingsView.vue';
+
 
 enum Routes {
     Admins = 'beheerders',
@@ -263,7 +264,7 @@ function openPackages() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(PackageSettingsView),
+                root: AsyncComponent(() => import('./packages/PackageSettingsView.vue'), {}),
             }),
         ],
         modalDisplayStyle: 'popup',

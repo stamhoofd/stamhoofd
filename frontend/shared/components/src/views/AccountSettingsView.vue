@@ -215,15 +215,16 @@ import LoadingButton from '#navigation/LoadingButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import ChangePasswordView from '#views/ChangePasswordView.vue';
+
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { AppRoute, LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { useAppNavigate } from '../hooks/useAppNavigate.ts';
-import DeleteView from './DeleteView.vue';
+
 import { useSwitchLanguage } from './hooks/useSwitchLanguage';
 
 const $context = useContext();
@@ -344,7 +345,7 @@ async function deleteRequest() {
 
     await present({
         components: [
-            new ComponentWithProperties(DeleteView, {
+            AsyncComponent(() => import('./DeleteView.vue'), {
                 title: $t(`%12B`),
                 description: $t(`%15a`),
                 confirmationTitle: $t(`%12C`),
@@ -365,7 +366,7 @@ async function deleteRequest() {
 }
 
 async function openChangePassword() {
-    await present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle('sheet'));
+    await present(AsyncComponent(() => import('#views/ChangePasswordView.vue'), {}).setDisplayStyle('sheet'));
 }
 
 let disconnecting = false;

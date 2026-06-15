@@ -68,6 +68,7 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
@@ -84,7 +85,7 @@ import type { PrivateWebshop, Product, ProductPrice } from '@stamhoofd/structure
 import { ProductsSelector } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-import ChooseProductsView from './ChooseProductsView.vue';
+
 
 const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
@@ -110,7 +111,7 @@ function addPatch(patch: AutoEncoderPatchType<ProductsSelector>) {
 async function changeProduct() {
     await present({
         components: [
-            new ComponentWithProperties(ChooseProductsView, {
+            AsyncComponent(() => import('./ChooseProductsView.vue'), {
                 webshop: props.webshop,
                 selectedProductIds: props.productSelector.products.map(p => p.productId),
                 saveHandler: (ids: string[]) => {

@@ -3,7 +3,7 @@ import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
+
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -13,6 +13,7 @@ import type { PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 
 import type { usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
@@ -300,7 +301,7 @@ export class OrderActionBuilder {
         });
 
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EmailView, {
+            root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
                 recipientFilterOptions: options,
                 defaultSenderId: this.webshopManager.preview?.privateMeta.defaultEmailId,
             }),

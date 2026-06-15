@@ -27,18 +27,16 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useBackForward } from '#hooks/useBackForward.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import TableActionsContextMenu from '#tables/TableActionsContextMenu.vue';
+
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { TableActionSelection } from '#tables/classes/TableAction.ts';
-import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import type { Group, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { AccessRight, Gender, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
 import { useEditMember } from './composables/useEditMember';
-import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
-import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
-import MemberPlatformMembershipTab from './tabs/MemberPlatformMembershipTab.vue';
 
 type PropType = {
     initialTab?: number | null;
@@ -65,8 +63,7 @@ const props = withDefaults(
 const member = computed(() => {
     if ('member' in props && props.member) {
         return props.member;
-    }
-    else if ('registration' in props && props.registration) {
+    } else if ('registration' in props && props.registration) {
         return props.registration.member;
     }
     throw new Error('Either member or registration prop must be provided');
@@ -80,20 +77,20 @@ const organization = useOrganization();
 const tabs = computed(() => {
     const base = [{
         name: $t(`%zM`),
-        component: new ComponentWithProperties(MemberDetailsTab),
+        component: AsyncComponent(() => import('./tabs/MemberDetailsTab.vue'), {}),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
             name: $t(`%1Ny`),
-            component: new ComponentWithProperties(MemberPlatformMembershipTab),
+            component: AsyncComponent(() => import('./tabs/MemberPlatformMembershipTab.vue'), {}),
         });
     }
 
     if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
             name: $t(`%zN`),
-            component: new ComponentWithProperties(MemberPaymentsTab),
+            component: AsyncComponent(() => import('./tabs/MemberPaymentsTab.vue'), {}),
         });
     }
 
@@ -141,7 +138,7 @@ async function showContextMenu(event: MouseEvent) {
         markedRowsAreSelected: true,
     };
 
-    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+    const displayedComponent = AsyncComponent(() => import('#tables/TableActionsContextMenu.vue'), {
         x: bounds.left,
         y: bounds.bottom,
         xPlacement: 'right',

@@ -1,8 +1,9 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
 import EditMemberGeneralBox from '#members/components/edit/EditMemberGeneralBox.vue';
-import MemberStepView from '#members/MemberStepView.vue';
+
 import { useAppContext } from '#context/appContext.ts';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
@@ -29,7 +30,7 @@ export function useAddMember() {
         }
 
         const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberStepView, {
+            root: AsyncComponent(() => import('#members/MemberStepView.vue'), {
                 title: $t(`%g5`),
                 saveText: $t('%16p'),
                 member,

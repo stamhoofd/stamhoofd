@@ -97,9 +97,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import ImageComponent from '#views/ImageComponent.vue';
 import OrganizationLogo from '#context/OrganizationLogo.vue';
-import ShowSeatsView from '#views/ShowSeatsView.vue';
+
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
@@ -147,7 +148,7 @@ function share() {
 function showSeats() {
     show({
         components: [
-            new ComponentWithProperties(ShowSeatsView, {
+            AsyncComponent(() => import('#views/ShowSeatsView.vue'), {
                 webshop: props.webshop,
                 ticket: props.ticket,
                 order: props.order,

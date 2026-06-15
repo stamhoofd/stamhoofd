@@ -101,6 +101,7 @@
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
@@ -131,9 +132,9 @@ import { ImportMembersBaseResultWithErrors, ImportMembersResultWithErrors } from
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
 import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from '../../../../../classes/import/TextColumnMatcher';
-import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
-import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
-import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
+
+
+
 import RegistrationPeriodSelector from './RegistrationPeriodSelector.vue';
 
 const errors = useErrors();
@@ -577,12 +578,12 @@ async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], exis
     const result = await importData(sheet, columns, importResults);
 
     if (result.errors.length > 0) {
-        showCallback(new ComponentWithProperties(ImportMembersErrorsView, {
+        showCallback(AsyncComponent(() => import('./ImportMembersErrorsView.vue'), {
             importErrors: result.errors,
         })).catch(console.error);
     }
     else {
-        showCallback(new ComponentWithProperties(ImportMembersQuestionsView, {
+        showCallback(AsyncComponent(() => import('./ImportMembersQuestionsView.vue'), {
             importMemberResults: result.data,
             period: period.value,
         })).catch(console.error);
@@ -600,7 +601,7 @@ async function goNext() {
         const result = importBaseData(sheet.value, columns.value);
 
         if (result.errors.length > 0) {
-            show(new ComponentWithProperties(ImportMembersErrorsView, {
+            show(AsyncComponent(() => import('./ImportMembersErrorsView.vue'), {
                 importErrors: result.errors,
             })).catch(console.error);
         }
@@ -610,7 +611,7 @@ async function goNext() {
 
             const probablyEqualResults = results.filter(r => r.isProbablyEqual);
             if (probablyEqualResults.length) {
-                show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
+                show(AsyncComponent(() => import('./ImportVerifyProbablyEqualView.vue'), {
                     members: probablyEqualResults,
                     onVerified: (show: (options: PushOptions | ComponentWithProperties) => Promise<void>) => {
                         if (!sheet.value) {

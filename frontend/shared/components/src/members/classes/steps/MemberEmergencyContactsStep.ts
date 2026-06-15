@@ -1,5 +1,6 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import MemberStepView from '#members/MemberStepView.vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+
 import type { NavigationActions } from '../../../types/NavigationActions';
 import EditEmergencyContactsBox from '../../components/edit/EditEmergencyContactsBox.vue';
 import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
@@ -45,7 +46,7 @@ export class MemberEmergencyContactsStep implements EditMemberStep {
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
-        return new ComponentWithProperties(MemberStepView, {
+        return AsyncComponent(() => import('#members/MemberStepView.vue'), {
             title: $t(`%f1`),
             member: manager.member,
             component: markRaw(EditEmergencyContactsBox),

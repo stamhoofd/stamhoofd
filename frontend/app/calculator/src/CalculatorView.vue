@@ -84,11 +84,12 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import { computed, ref } from 'vue';
 import CalculationOutputBox from './CalculationOutputBox.vue';
-import CalculatorSettingsView from './CalculatorSettingsView.vue';
+
 import { CalculationInput, CalculationProduct } from './classes/CalculationInput';
 import { Country } from './classes/Country';
 import { ModuleType } from './classes/ModuleType';
@@ -137,7 +138,7 @@ async function showSettingsView() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(CalculatorSettingsView, {
+                root: AsyncComponent(() => import('./CalculatorSettingsView.vue'), {
                     input: input.value,
                 }),
             }),

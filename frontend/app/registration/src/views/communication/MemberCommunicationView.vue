@@ -46,10 +46,11 @@
 <script setup lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useUserEmailsObjectFetcher } from '@stamhoofd/components/fetchers/useUserEmailsObjectFetcher.ts';
 import { useEmailFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
@@ -191,7 +192,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('@stamhoofd/components/filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

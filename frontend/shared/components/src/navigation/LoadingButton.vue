@@ -27,8 +27,7 @@ watch(() => props.loading, (val, old) => {
         setTimeout(() => {
             delayLoading.value = false;
         }, 500);
-    }
-    else {
+    } else {
         if (val) {
             delayLoading.value = true;
         }
@@ -41,6 +40,7 @@ watch(() => props.loading, (val, old) => {
 .loading-button {
     position: relative;
     display: block;
+    max-width: fit-content;
     //max-width: max-content;
 
     &:first-child:last-child {

@@ -53,7 +53,7 @@
 import { useEmailsObjectFetcher } from '#fetchers/useEmailsObjectFetcher.ts';
 import { useAdminEmailFilterBuilders } from '#filters/filterBuilders.ts';
 import type { UIFilter } from '#filters/UIFilter.ts';
-import UIFilterEditor from '#filters/UIFilterEditor.vue';
+
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
 import { Toast } from '#overlays/Toast.ts';
@@ -62,6 +62,7 @@ import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { EmailPreview, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -199,7 +200,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('#filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

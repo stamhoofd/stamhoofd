@@ -24,24 +24,23 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss, useNavigationController, usePopup, usePresent } from '@simonbackx/vue-app-navigation';
+import { useDismiss, useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler.ts';
 import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { Payment} from '@stamhoofd/structures';
+import type { Payment } from '@stamhoofd/structures';
 import { OrderData, OrderResponse, PaymentMethod } from '@stamhoofd/structures';
-
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
-import OrderView from '../orders/OrderView.vue';
 
 const loading = ref(false);
 const errors = useErrors();
@@ -86,7 +85,7 @@ async function goToOrder(id: string, args: NavigationActions) {
         // So replace with a force instead of dimissing
         await args.present({
             components: [
-                new ComponentWithProperties(OrderView, { orderId: id, success: true }, {
+                AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
                     provide: {
                         reactive_navigation_url: 'order/' + id,
                     },
@@ -96,13 +95,12 @@ async function goToOrder(id: string, args: NavigationActions) {
             force: true,
 
         });
-    }
-    else {
+    } else {
         // Desktop: push
         await args.dismiss({ force: true });
         await args.present({
             components: [
-                new ComponentWithProperties(OrderView, { orderId: id, success: true }, {
+                AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
                     provide: {
                         reactive_navigation_url: 'order/' + id,
                     },
@@ -159,8 +157,7 @@ async function goNext() {
         // Go to success page
         loading.value = false;
         await goToOrder(response.data.order.id, navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         let error = e;
 
         if (isSimpleError(e)) {
@@ -174,20 +171,17 @@ async function goNext() {
 
                 if (webshop.value.meta.cartEnabled) {
                     navigationController.value!.popToRoot({ force: true }).catch(e => console.error(e));
-                }
-                else {
+                } else {
                     dismiss({ force: true }).catch(console.error);
                 }
                 Toast.fromError(e).show();
-            }
-            else if (error.hasFieldThatStartsWith('fieldAnswers')) {
+            } else if (error.hasFieldThatStartsWith('fieldAnswers')) {
                 // A cart error: force a reload and go back to the cart.
                 await webshopManager.reload();
 
                 if (webshop.value.meta.cartEnabled) {
                     navigationController.value!.popToRoot({ force: true }).catch(e => console.error(e));
-                }
-                else {
+                } else {
                     dismiss({ force: true }).catch(console.error);
                 }
 

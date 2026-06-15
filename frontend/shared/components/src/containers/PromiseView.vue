@@ -2,15 +2,15 @@
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div class="promise-view">
         <LoadingViewTransition :error-box="errorBox" :view="view">
-            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
+            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" v-bind="$attrs" />
         </LoadingViewTransition>
     </div>
 </template>
 
 <script setup lang="ts">
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance, useAnimateHeightChange, useCanDismiss, useContentState, useCurrentComponent, useDismiss } from '@simonbackx/vue-app-navigation';
-import { nextTick, onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref, shallowRef } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { Toast } from '../overlays/Toast';
@@ -26,7 +26,7 @@ const props = withDefaults(
     },
 );
 
-const root = ref<ComponentWithProperties | null>(null);
+const root = shallowRef<ComponentWithProperties | null>(null);
 const errorBox = ref<ErrorBox | null>(null);
 const component = useCurrentComponent();
 
@@ -79,6 +79,11 @@ function run() {
             passRoutes = false;
             c.setCheckRoutes();
         }
+        if (component && component.historyIndex !== null && component.ownsHistoryIndex()) {
+            // Transfer ownership to child
+            c.historyIndex = component.historyIndex;
+            ComponentWithProperties.historyIndexOwners.set(component.historyIndex, c);
+        }
         applyContentChange(() => {
             root.value = c;
         });
@@ -86,14 +91,14 @@ function run() {
         console.error(e);
         console.error('Promise error not caught, defaulting to dismiss behaviour in PromiseView');
 
-        if (canDismiss.value) {
-            Toast.fromError(e).show();
-            dismiss({ force: true }).catch(console.error);
-        } else {
-            applyContentChange(() => {
-                errorBox.value = new ErrorBox(e);
-            });
-        }
+        // if (canDismiss.value) {
+        //    Toast.fromError(e).show();
+        //    dismiss({ force: true }).catch(console.error);
+        // } else {
+        applyContentChange(() => {
+            errorBox.value = new ErrorBox(e);
+        });
+        // }
     });
 }
 

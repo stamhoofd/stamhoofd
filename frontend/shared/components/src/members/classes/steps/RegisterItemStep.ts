@@ -1,7 +1,8 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RegisterItem } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';
-import RegisterItemView from '../../RegisterItemView.vue';
+
 import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
 
 export class RegisterItemStep implements EditMemberStep {
@@ -27,7 +28,7 @@ export class RegisterItemStep implements EditMemberStep {
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
-        return new ComponentWithProperties(RegisterItemView, {
+        return AsyncComponent(() => import('../../RegisterItemView.vue'), {
             member: manager.member,
             item: this.item.clone(),
             willStartCheckoutFlow: this.willStartCheckoutFlow,

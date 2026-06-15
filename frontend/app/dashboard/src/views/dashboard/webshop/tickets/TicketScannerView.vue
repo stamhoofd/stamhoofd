@@ -45,6 +45,7 @@
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
@@ -58,8 +59,8 @@ import QrScanner from 'qr-scanner';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
-import TicketAlreadyScannedView from './status/TicketAlreadyScannedView.vue';
-import ValidTicketView from './status/ValidTicketView.vue';
+
+
 
 // if you have another AudioContext class use that one, as some browsers have a limit
 // var audioCtx = new (window.AudioContext || (window as any).webkitAudioContext || (window as any).audioContext)();
@@ -435,7 +436,7 @@ function alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
     // Disable scanning same one for 2 seconds
     cooldown.value = new Date(new Date().getTime() + 2 * 1000);
 
-    show(new ComponentWithProperties(TicketAlreadyScannedView, {
+    show(AsyncComponent(() => import('./status/TicketAlreadyScannedView.vue'), {
         webshopManager: props.webshopManager,
         ticket,
         order,
@@ -448,7 +449,7 @@ function validTicket(ticket: TicketPrivate, order: PrivateOrder) {
     // Disable scanning same one for 2 seconds
     cooldown.value = new Date(new Date().getTime() + 2 * 1000);
 
-    show(new ComponentWithProperties(ValidTicketView, {
+    show(AsyncComponent(() => import('./status/ValidTicketView.vue'), {
         webshopManager: props.webshopManager,
         ticket,
         order,

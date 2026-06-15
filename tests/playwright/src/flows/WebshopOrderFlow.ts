@@ -56,6 +56,12 @@ export class WebshopOrderFlow {
             }
             await seatsView.getByTestId('confirm-seats-button').click();
         }
+
+        // Wait for cart view
+        if (this.cartEnabled) {
+            // Wait for cart view to be visible to avoid fkalyness
+            await expect(this.page.getByTestId('cart-add-more-button')).toBeVisible();
+        }
     }
 
     /**

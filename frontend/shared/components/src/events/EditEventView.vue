@@ -254,7 +254,7 @@
 </template>
 
 <script setup lang="ts">
-import AuditLogsView from '#audit-logs/AuditLogsView.vue';
+
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { GlobalEventBus } from '#EventBus.ts';
@@ -275,6 +275,7 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Organization } from '@stamhoofd/structures';
 import { AccessRight, Event, EventLocation, EventMeta, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
@@ -288,7 +289,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
-import DeleteView from '../views/DeleteView.vue';
+
 import { useEventPermissions } from './composables/useEventPermissions';
 
 const props = withDefaults(
@@ -328,7 +329,7 @@ const { externalOrganization, choose: chooseOrganizer } = useExternalOrganizatio
 async function viewAudit() {
     await present({
         components: [
-            new ComponentWithProperties(AuditLogsView, {
+            AsyncComponent(() => import('#audit-logs/AuditLogsView.vue'), {
                 objectIds: [props.event.id],
             }),
         ],
@@ -738,7 +739,7 @@ async function deleteMe() {
 
     await present({
         components: [
-            new ComponentWithProperties(DeleteView, {
+            AsyncComponent(() => import('../views/DeleteView.vue'), {
                 title: $t('%6L'),
                 description: $t('%6M'),
                 confirmationTitle: $t('%6N'),

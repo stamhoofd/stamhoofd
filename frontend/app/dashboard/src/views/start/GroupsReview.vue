@@ -21,7 +21,8 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -58,7 +59,7 @@ async function editGroup(group: Group) {
                 try {
                     // Make sure we have an up to date group
                     await organizationManager.value.forceUpdate();
-                    return new ComponentWithProperties(EditGroupView, {
+                    return AsyncComponent(() => import('@stamhoofd/components/groups/EditGroupView.vue'), {
                         period: period.value,
                         groupId: group.id,
                         iswNew: false,

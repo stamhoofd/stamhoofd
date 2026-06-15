@@ -87,6 +87,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -101,7 +102,7 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-import DNSRecordsView from './DNSRecordsView.vue';
+
 
 const context = useContext();
 const organization = useRequiredOrganization();
@@ -184,7 +185,7 @@ async function save() {
             decoder: Organization as Decoder<Organization>,
         });
         context.value.updateOrganization(response.data);
-        await show(new ComponentWithProperties(DNSRecordsView, {}));
+        await show(AsyncComponent(() => import('./DNSRecordsView.vue'), {}));
     } catch (e) {
         console.error(e);
         errorBox.value = new ErrorBox(e);

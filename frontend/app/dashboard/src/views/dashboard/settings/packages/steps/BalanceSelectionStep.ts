@@ -1,10 +1,11 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ViewStep } from '@stamhoofd/components/steps/ViewStep';
 import type { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { PayBalanceMode } from '../OrganizationCheckoutViewModel';
-import BalanceSelectionStepView from './BalanceSelectionStepView.vue';
+
 
 export class BalanceSelectionStep implements ViewStep {
     model: OrganizationCheckoutViewModel;
@@ -22,7 +23,7 @@ export class BalanceSelectionStep implements ViewStep {
     }
 
     getComponent(manager: ViewStepsManager): ComponentWithProperties {
-        return new ComponentWithProperties(BalanceSelectionStepView, {
+        return AsyncComponent(() => import('./BalanceSelectionStepView.vue'), {
             model: this.model,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

@@ -146,6 +146,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
@@ -161,7 +162,7 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import type { DarkMode, Image, RichText, SponsorConfig} from '@stamhoofd/structures';
 import { Cart, CartItem, CartReservedSeat, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
@@ -358,7 +359,7 @@ function previewTicket() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(DetailedTicketView, {
+                root: AsyncComponent(() => import('@stamhoofd/components/views/DetailedTicketView.vue'), {
                     organization: organization.value,
                     webshop: webshop.value,
                     ticket,

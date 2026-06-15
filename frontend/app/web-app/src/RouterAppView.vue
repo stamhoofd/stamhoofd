@@ -3,21 +3,39 @@
 </template>
 
 <script lang="ts" setup>
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
-import type { Organization } from '@stamhoofd/structures';
-import { AppRoute } from '@stamhoofd/structures';
-import { wrapAndReplace } from './wrapAndReplace';
-import type { SharedOptions } from './wrapAndReplace';
-import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
 import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
-import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
-import type { Ref } from 'vue';
+import type { Organization } from '@stamhoofd/structures';
+import { AppRoute } from '@stamhoofd/structures';
+import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
+import type { SharedOptions } from './wrapAndReplace';
+import { wrap, wrapAndReplace } from './wrapAndReplace';
 
 provideAppNavigate(useNavigate());
 
 const isDashboardDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard;
+
+async function paramsToRequiredOrganization<T extends { organizationUri: string }>(params: T) {
+    const org = await uriToOrganization(params.organizationUri);
+    if (!org) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            field: 'organizationUrl',
+            message: 'No organization found for the given URI, but required for this route',
+            human: $t('Deze link is niet (meer) geldig omdat de vereniging niet bestaat', { uri: params.organizationUri }),
+        });
+    }
+    return org;
+}
+
+function organizationToParams(organization: Organization): { organizationUri: string } {
+    return {
+        organizationUri: organization.uri,
+    };
+}
 
 // false OR function to fetch the org from domain
 const orgInDomain = !isDashboardDomain || STAMHOOFD.singleOrganization
@@ -34,33 +52,28 @@ const orgInDomain = !isDashboardDomain || STAMHOOFD.singleOrganization
 const orgInUriParams = {
     params: { organizationUri: String },
     paramsToProps: async (params: { organizationUri: string }) => {
-        const org = await uriToOrganization(params.organizationUri);
-        if (!org) {
-            Toast.error($t('Deze vereniging bestaat niet (meer)')).show();
-            throw new Error('No organization found for the given URI, but required for this route');
-        }
-        return { organization: org };
+        return {
+            organization: await paramsToRequiredOrganization(params),
+        };
     },
     propsToParams: (props: { organization: Organization }) => ({
-        params: {
-            organizationUri: props.organization.uri,
-        },
+        params: organizationToParams(props.organization),
         query: null,
     }),
 };
 
-async function loadAdmin(options: SharedOptions) {
+async function replaceWithAdmin(options: SharedOptions) {
     const admin = await import('@stamhoofd/admin-frontend');
     await wrapAndReplace(null, 'admin', new ComponentWithProperties(admin.App, {}), options);
 }
 
-async function loadDashboard(organization: Organization, options: SharedOptions) {
+async function replaceWithDashboard(organization: Organization, options: SharedOptions) {
     const dashboard = await import('@stamhoofd/dashboard');
     console.error('Loading dashboard after', organization.clone());
     await wrapAndReplace(organization, 'dashboard', new ComponentWithProperties(dashboard.App, {}), options);
 }
 
-async function loadRegistration(organization: Organization | null, options: SharedOptions) {
+async function replaceWithRegistration(organization: Organization | null, options: SharedOptions) {
     const registration = await import('@stamhoofd/registration');
     await wrapAndReplace(organization, 'registration', new ComponentWithProperties(registration.App, {}), options);
 }
@@ -68,16 +81,16 @@ async function loadRegistration(organization: Organization | null, options: Shar
 async function loadAuto(organization: Organization | null, options: SharedOptions) {
     console.error('Loading auto after', organization?.clone());
     const auto = await import('@stamhoofd/auto');
-    await wrapAndReplace(organization, 'auto', new ComponentWithProperties(auto.App, {}), options);
+    return await wrap(organization, 'auto', new ComponentWithProperties(auto.App, {}), options);
 }
 
-async function showSpinner() {
+async function replaceWithSpinner() {
     await ReplaceRootEventBus.sendEvent('replace', new ComponentWithProperties(LoadingView, {}));
 }
 
-async function loadVerifyEmail(organization: Organization | null, options: SharedOptions & { componentProperties: { token: string; email: string; code?: string } }) {
+async function loadVerifyEmail(organization: Organization | null, componentProperties: { token: string; email: string | null; code: string | null }) {
     const auth = await import('@stamhoofd/verify-email');
-    await wrapAndReplace(organization, 'verify-email', new ComponentWithProperties(auth.App, options.componentProperties), options);
+    return await wrap(organization, 'verify-email', new ComponentWithProperties(auth.App, componentProperties));
 }
 
 // ADMIN
@@ -85,9 +98,10 @@ if (UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard) {
     defineRoute({
         name: AppRoute.Admin,
         url: $t('platform'),
+        // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
-            await showSpinner();
-            await loadAdmin(options);
+            await replaceWithSpinner();
+            await replaceWithAdmin(options);
         },
     });
 }
@@ -97,18 +111,20 @@ if (orgInDomain) {
     defineRoute({
         name: AppRoute.Dashboard,
         url: $t('beheerders'),
+        // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
-            await showSpinner();
-            await loadDashboard(await orgInDomain(), options);
+            await replaceWithSpinner();
+            await replaceWithDashboard(await orgInDomain(), options);
         },
     });
 } else {
-    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
+    defineRoute({
         name: AppRoute.Dashboard,
         url: $t('beheerders') + '/@organizationUri',
+        // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
-            await showSpinner();
-            await loadDashboard(options.componentProperties.organization, options);
+            await replaceWithSpinner();
+            await replaceWithDashboard(options.componentProperties.organization, options);
         },
         ...orgInUriParams,
     });
@@ -119,9 +135,10 @@ if (orgInDomain) {
     defineRoute({
         name: AppRoute.OrgScopedRegistration,
         url: $t('leden'),
+        // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
-            await showSpinner();
-            await loadRegistration(await orgInDomain(), options);
+            await replaceWithSpinner();
+            await replaceWithRegistration(await orgInDomain(), options);
         },
     });
 } else {
@@ -131,19 +148,21 @@ if (orgInDomain) {
             defineRoute({
                 // no name, because we should not really reference these routes
                 url: $t('leden') + '/' + uri,
+                // TODO: move to component pattern (see verify-email)
                 handler: async (options) => {
-                    await showSpinner();
-                    await loadRegistration(null, { ...options, url: $t('leden') });
+                    await replaceWithSpinner();
+                    await replaceWithRegistration(null, { ...options, url: $t('leden') });
                 },
             });
         }
     }
-    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
+    defineRoute({
         name: AppRoute.OrgScopedRegistration,
         url: $t('leden') + '/@organizationUri',
+        // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
-            await showSpinner();
-            await loadRegistration(options.componentProperties.organization, options);
+            await replaceWithSpinner();
+            await replaceWithRegistration(options.componentProperties.organization, options);
         },
         ...orgInUriParams,
     });
@@ -151,12 +170,42 @@ if (orgInDomain) {
         defineRoute({
             name: AppRoute.UnscopedRegistration,
             url: $t('leden'),
+            // TODO: move to component pattern (see verify-email)
             handler: async (options) => {
-                await showSpinner();
-                await loadRegistration(null, options);
+                await replaceWithSpinner();
+                await replaceWithRegistration(null, options);
             },
         });
     }
+}
+
+function parseEmailVerifyQuery(query: URLSearchParams | null | undefined) {
+    if (!query?.get('token')) {
+        throw new SimpleError({
+            code: 'missing_field',
+            field: 'token',
+            message: 'Token or email missing in query parameters for verify-email route',
+            human: $t('Kan je e-mailadres niet verifiëren: ongeldige link'),
+        });
+    }
+    return {
+        token: query?.get('token') ?? '',
+        email: query?.get('email') ?? null,
+        code: query?.get('code') ?? null,
+    };
+}
+
+function getEmailVerifyQuery(props: ReturnType<typeof parseEmailVerifyQuery>) {
+    return props.code
+        ? new URLSearchParams([
+                ['token', props.token],
+                ['email', props.email ?? ''],
+                ['code', props.code],
+            ])
+        : new URLSearchParams([
+                ['token', props.token],
+                ['email', props.email ?? ''],
+            ]);
 }
 
 // VERIFY-EMAIL
@@ -164,53 +213,29 @@ if (orgInDomain) {
     defineRoute({
         name: AppRoute.VerifyEmail,
         url: $t('verify-email'),
-        defaultProperties: query => ({
-            token: query?.get('token') ?? '',
-            email: query?.get('email') ?? '',
-            code: query?.get('code') ?? undefined,
-        }),
-        handler: async (options) => {
-            await showSpinner();
-            await loadVerifyEmail(await orgInDomain(), options);
-        },
+        defaultProperties: parseEmailVerifyQuery,
         propsToParams: props => ({
-            query: props.code
-                ? new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                    ['code', props.code],
-                ])
-                : new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                ]),
+            query: getEmailVerifyQuery(props),
         }),
+        component: async (props) => {
+            return await loadVerifyEmail(await orgInDomain(), props);
+        },
     });
 } else if (STAMHOOFD.userMode === 'platform') {
     defineRoute({
         name: AppRoute.VerifyEmail,
         url: $t('verify-email'),
         defaultProperties: query => ({
-            token: query?.get('token') ?? '',
-            email: query?.get('email') ?? '',
-            code: query?.get('code') ?? undefined,
+            ...parseEmailVerifyQuery(query),
         }),
-        handler: async (options) => {
-            await showSpinner();
-            await loadVerifyEmail(null, options);
-        },
         propsToParams: props => ({
-            query: props.code
-                ? new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                    ['code', props.code],
-                ])
-                : new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                ]),
+            query: getEmailVerifyQuery(props),
         }),
+        component: async (props) => {
+            console.log('Verify email view', props);
+
+            return await loadVerifyEmail(null, props);
+        },
     });
 } else {
     defineRoute({
@@ -218,42 +243,18 @@ if (orgInDomain) {
         url: 'verify-email/@organizationUri',
         params: { organizationUri: String },
         paramsToProps: async (params, query) => {
-            await showSpinner();
-            const org = await uriToOrganization(params.organizationUri);
-            if (!org) {
-                Toast.error($t('Kan je e-mailadres niet verifiëren: deze vereniging bestaat niet (meer)', { uri: params.organizationUri })).show();
-                throw new Error('No organization found for the given URI, but required for this route');
-            }
-            if (!query?.get('token') || !query?.get('email')) {
-                Toast.error($t('Kan je e-mailadres niet verifiëren: ongeldige link')).show();
-                throw new Error('Token or email missing in query parameters for verify-email route');
-            }
-            console.log('Loaded verify email route with organization', org, 'and query', query);
             return {
-                organization: org,
-                token: query?.get('token') ?? '',
-                email: query?.get('email') ?? '',
-                code: query?.get('code') ?? undefined,
+                organization: await paramsToRequiredOrganization(params),
+                ...parseEmailVerifyQuery(query),
             };
         },
         propsToParams: props => ({
-            params: {
-                organizationUri: props.organization.uri,
-            },
-            query: props.code
-                ? new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                    ['code', props.code],
-                ])
-                : new URLSearchParams([
-                    ['token', props.token],
-                    ['email', props.email],
-                ]),
+            params: organizationToParams(props.organization),
+            query: getEmailVerifyQuery(props),
         }),
-        handler: async (options) => {
-            await showSpinner();
-            await loadVerifyEmail(options.componentProperties.organization, options);
+        component: async (props) => {
+            console.log('Verify email view', props);
+            return await loadVerifyEmail(props.organization, props);
         },
     });
 }
@@ -264,18 +265,18 @@ if (orgInDomain) {
         name: AppRoute.OrgScopedAuto,
         url: '',
         isDefault: {},
-        handler: async (options) => {
-            await showSpinner();
-            await loadAuto(await orgInDomain(), options);
+        force: true,
+        replace: 100,
+        component: async () => {
+            return await loadAuto(await orgInDomain(), {});
         },
     });
 } else {
     defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.OrgScopedAuto,
         url: 'auto/@organizationUri',
-        handler: async (options) => {
-            await showSpinner();
-            await loadAuto(options.componentProperties.organization, options);
+        component: async (properties) => {
+            return await loadAuto(properties.organization, {});
         },
         ...orgInUriParams,
     });
@@ -283,9 +284,10 @@ if (orgInDomain) {
         name: AppRoute.UnscopedAuto,
         url: '',
         isDefault: {},
-        handler: async (options) => {
-            await showSpinner();
-            await loadAuto(null, options);
+        force: true,
+        replace: 100,
+        component: async () => {
+            return await loadAuto(null, {});
         },
     });
 }

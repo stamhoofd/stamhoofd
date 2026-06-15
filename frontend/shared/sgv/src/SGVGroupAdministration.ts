@@ -6,7 +6,8 @@ import type {
 } from '@simonbackx/simple-networking';
 import { Request, Server } from '@simonbackx/simple-networking';
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { MemberManager } from '@stamhoofd/networking/MemberManager';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -28,8 +29,7 @@ import {
     SGVSyncStatus,
 } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
-import SGVOldMembersView from './components/SGVOldMembersView.vue';
-import SGVVerifyProbablyEqualView from './components/SGVVerifyProbablyEqualView.vue';
+
 import type { SGVOAuth } from './SGVOAuth.ts';
 import type { GroepFunctie, SGVSyncReport } from './SGVSyncReport.ts';
 import {
@@ -351,9 +351,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
         onPopup: () => void,
         allMembers: MemberWithRegistrationsBlob[],
     ): Promise<{
-            matchedMembers: SGVLidMatch[];
-            newMembers: MemberWithRegistrationsBlob[];
-        }> {
+        matchedMembers: SGVLidMatch[];
+        newMembers: MemberWithRegistrationsBlob[];
+    }> {
         // Members that are missing in groepsadmin
         let newMembers: MemberWithRegistrationsBlob[] = [];
 
@@ -439,7 +439,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
             await new Promise<void>((resolve, reject) => {
                 let resolved = false;
                 present(
-                    new ComponentWithProperties(SGVVerifyProbablyEqualView, {
+                    AsyncComponent(() => import('./components/SGVVerifyProbablyEqualView.vue'), {
                         matches: probablyEqualList,
                         onCancel: () => {
                             if (resolved) {
@@ -518,7 +518,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
                 // Show a window
                 let resolved = false;
                 present(
-                    new ComponentWithProperties(SGVOldMembersView, {
+                    AsyncComponent(() => import('./components/SGVOldMembersView.vue'), {
                         members: oldMembers,
                         onCancel: () => {
                             if (resolved) {

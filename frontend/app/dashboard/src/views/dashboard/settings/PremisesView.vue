@@ -43,6 +43,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -60,7 +61,7 @@ import type { PlatformPremiseType} from '@stamhoofd/structures';
 import { Organization, OrganizationPrivateMetaData, Premise, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PremiseRow from './PremiseRow.vue';
-import PremiseView from './PremiseView.vue';
+
 
 type PremiseLimitationWarning = { id: string; message: string };
 
@@ -101,7 +102,7 @@ async function addPremise() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(PremiseView, {
+            AsyncComponent(() => import('./PremiseView.vue'), {
                 premise,
                 isNew: true,
                 premiseTypeCount,
@@ -120,7 +121,7 @@ async function editPremise(premise: Premise) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(PremiseView, {
+            AsyncComponent(() => import('./PremiseView.vue'), {
                 premise,
                 isNew: false,
                 premiseTypeCount,

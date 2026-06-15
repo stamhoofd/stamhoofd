@@ -18,13 +18,14 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
 import { useOrganization } from '#hooks/useOrganization';
 import { usePositionableSheet } from '#tables/usePositionableSheet';
 import { useAppContext, useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import { useContextOptions } from './hooks/useContextOptions';
-import OrganizationAppSelector from './OrganizationAppSelector.vue';
+
 import OrganizationLogo from './OrganizationLogo.vue';
 import PlatformLogo from './PlatformLogo.vue';
 
@@ -55,7 +56,7 @@ const open = async (event: MouseEvent) => {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(OrganizationAppSelector, {}),
+                root: AsyncComponent(() => import('./OrganizationAppSelector.vue'), {}),
             }, {
                 provide: {
                     reactive_navigation_disable_url: true,

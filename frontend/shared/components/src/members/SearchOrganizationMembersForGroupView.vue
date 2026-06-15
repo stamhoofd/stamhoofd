@@ -42,12 +42,13 @@
 <script setup lang="ts">
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { Toast } from '#overlays/Toast.ts';
 import type { UIFilter } from '#filters/UIFilter.ts';
-import UIFilterEditor from '#filters/UIFilterEditor.vue';
+
 import { useErrors } from '#errors/useErrors.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
@@ -103,7 +104,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(UIFilterEditor, {
+                root: AsyncComponent(() => import('#filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),
