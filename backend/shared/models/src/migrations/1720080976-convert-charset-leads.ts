@@ -3,14 +3,14 @@ import { Database, Migration } from '@simonbackx/simple-database';
 /**
  * If the charset of the leads table is not converted this results
  * in foreign keys constraint errors in other migrations.
- * 
+ *
  * todo: will we keep the leads table after the migration?
  */
 export default new Migration(async () => {
     process.stdout.write('\n');
 
-    if (STAMHOOFD.userMode === 'platform') {
-        console.log('Skipped update leads charset for userMode platform.')
+    if (STAMHOOFD.userMode === 'platform' && (STAMHOOFD.environment === 'production' || STAMHOOFD.environment === 'staging')) {
+        console.log('Skipped update leads charset for userMode platform in production.');
         return Promise.resolve();
     }
 
@@ -22,7 +22,7 @@ export default new Migration(async () => {
             'set foreign_key_checks=0;',
             'ALTER TABLE `leads` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
             'ALTER TABLE `leads` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
-            'set foreign_key_checks=1;'
+            'set foreign_key_checks=1;',
         ].join('');
 
         console.log('Start updating charset of leads table.');
@@ -40,7 +40,7 @@ async function tableExists(tableName: string): Promise<boolean> {
         WHERE table_schema = DATABASE()
         AND table_name = ?
         `,
-        [tableName]
+        [tableName],
     );
 
     const count = rows[0]['']['count'];
