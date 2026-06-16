@@ -183,7 +183,7 @@ export class VueGlobalHelper {
         if (app.config.globalProperties.$OS === 'iOS') {
             document.addEventListener('focusin', (event) => {
                 const el = document.activeElement as HTMLElement;
-                if (el) {
+                if (el && el.tagName !== 'BUTTON') {
                     ViewportHelper.scrollIntoView(el, 'center');
 
                     window.setTimeout(() => {
