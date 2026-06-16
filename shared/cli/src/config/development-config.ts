@@ -7,9 +7,9 @@ import { createContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
 
-export type AppService =
-    | BackendAppService
-    | FrontendAppService;
+export type AppService
+    = | BackendAppService
+        | FrontendAppService;
 
 export enum BackendApp {
     Api = 'api',
@@ -245,6 +245,7 @@ function environmentPreset(env: string): EnvironmentPreset {
             fixedCountry: 'BE' as SharedEnvironment['fixedCountry'],
             memberNumberAlgorithm: MemberNumberAlgorithm.Incremental,
             memberNumberAlgorithmLength: 10,
+            documentation: 'docs.keeo.fos.be',
         };
     }
     if (env === 'ravot') {
@@ -254,6 +255,7 @@ function environmentPreset(env: string): EnvironmentPreset {
             platformName: 'ravot',
             fixedCountry: 'BE' as SharedEnvironment['fixedCountry'],
             memberNumberAlgorithm: MemberNumberAlgorithm.KSA,
+            documentation: 'docs.ravot.ksa.be',
         };
     }
     if (env === 'jambo') {
@@ -273,5 +275,6 @@ function environmentPreset(env: string): EnvironmentPreset {
         translationNamespace: 'stamhoofd',
         platformName: 'stamhoofd',
         stripeConnectMethod: 'express' as const,
+        documentation: 'www.stamhoofd.be/docs-v2',
     };
 }
