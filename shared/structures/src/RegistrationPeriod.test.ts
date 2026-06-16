@@ -15,6 +15,7 @@ describe('RegistrationPeriodBase naming', () => {
         ['Periode 2025 - 2026', 'Periode', '2025 - 2026', '2025 - 2026'],
         ['Periode 25-26', 'Periode', '25-26', '25-26'],
         ['Periode 25 - 26', 'Periode', '25 - 26', '25 - 26'],
+        ['Test 27', 'Test', '27', '27'],
     ])('splits custom name %s', (customName, prefix, suffix, nameShort) => {
         const period = RegistrationPeriod.create({
             customName,
