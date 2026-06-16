@@ -1,8 +1,39 @@
-# Source this file so nvm can activate the requested version in the current shell.
+# Source this file so fnm or nvm can activate the requested version in the current shell.
+
+find_nvmrc() {
+    search_dir="$PWD"
+    while [ "$search_dir" != "/" ]; do
+        if [ -f "$search_dir/.nvmrc" ]; then
+            printf '%s\n' "$search_dir/.nvmrc"
+            return 0
+        fi
+        search_dir="$(dirname "$search_dir")"
+    done
+    return 1
+}
+
+if command -v fnm >/dev/null 2>&1; then
+    nvmrc_path="$(find_nvmrc)"
+    if [ -z "$nvmrc_path" ]; then
+        echo "No .nvmrc found. Run this script from inside the Stamhoofd repository." >&2
+        return 1
+    fi
+
+    repo_dir="$(dirname "$nvmrc_path")"
+    original_dir="$PWD"
+    cd "$repo_dir" && fnm install && fnm use && npm install --global yarn
+    fnm_status=$?
+    cd "$original_dir" || return 1
+
+    unset original_dir fnm_status nvmrc_path repo_dir
+    unset -f find_nvmrc
+    return "$fnm_status"
+fi
+
 if ! command -v nvm >/dev/null 2>&1; then
     export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
     if [ ! -s "$NVM_DIR/nvm.sh" ]; then
-        echo "nvm is not installed or could not be found at $NVM_DIR/nvm.sh" >&2
+        echo "Install fnm or nvm. nvm could not be found at $NVM_DIR/nvm.sh" >&2
         return 1
     fi
     . "$NVM_DIR/nvm.sh"
@@ -31,3 +62,4 @@ else
 fi
 
 unset current_version installed_version marker_dir marker_path nvmrc_path requested_version
+unset -f find_nvmrc
