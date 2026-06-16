@@ -158,7 +158,14 @@ export function useAdmins(options?: {forceLoadOnMount?: boolean}) {
     // Sorted members todo
 
     const pushInMemory = (user: UserWithMembers) => {
-        return admins.value.push(user);
+        // Inviting an existing admin again returns a user that is already in the list, so
+        // merge by id to avoid showing the same admin twice.
+        const existing = admins.value.find(u => u.id === user.id);
+        if (existing) {
+            existing.deepSet(user);
+            return;
+        }
+        admins.value.push(user);
     };
 
     const dropFromMemory = (user: UserWithMembers) => {

@@ -61,6 +61,15 @@ function randomEmail(prefix: string) {
 }
 
 /**
+ * A unique name for an invited admin. The list shows multiple admins at once (they
+ * accumulate within an environment), so every invited admin needs a distinct name to
+ * avoid matching another admin's row.
+ */
+function randomName(prefix: string) {
+    return { firstName: prefix, lastName: 'Beheerder-' + Math.floor(Math.random() * 1_000_000_000) };
+}
+
+/**
  * Sign in by setting the token in local storage (same as routing.spec.ts).
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
@@ -105,9 +114,9 @@ async function openNewAdminPopup(page: Page, adminsUrl: string): Promise<Locator
  * Fill the new admin form: name, email and the requested rights (full access checkbox
  * or the checkbox of a specific role).
  */
-async function fillAdminForm(popup: Locator, { email, rights }: { email: string; rights: Rights | null }) {
-    await popup.locator('input[autocomplete="given-name"]').fill('Nieuwe');
-    await popup.locator('input[autocomplete="family-name"]').fill('Beheerder');
+async function fillAdminForm(popup: Locator, { firstName, lastName, email, rights }: { firstName: string; lastName: string; email: string; rights: Rights | null }) {
+    await popup.locator('input[autocomplete="given-name"]').fill(firstName);
+    await popup.locator('input[autocomplete="family-name"]').fill(lastName);
     await popup.getByTestId('email-input').fill(email);
 
     if (rights === 'full') {
@@ -118,18 +127,40 @@ async function fillAdminForm(popup: Locator, { email, rights }: { email: string;
 }
 
 /**
+ * The label shown in the admins list for the requested rights: the full access label or
+ * the role name.
+ */
+function expectedRightsLabel(rights: Rights): string {
+    return rights === 'full' ? $t('Hoofdbeheerders') : rights.role;
+}
+
+/**
  * Invite an admin via the UI, wait until the popup is closed (= request succeeded) and
  * verify the new admin is visible in the list on the admins settings page.
+ *
+ * The row must immediately show the correct name and rights, without a page reload.
+ * Regression guard: a freshly invited admin briefly rendered without a name (falling back
+ * to the email) and without permissions ("Geen toegangsrechten") until the page was reloaded.
  */
-async function inviteAdminViaUI(page: Page, { adminsUrl, email, rights }: { adminsUrl: string; email: string; rights: Rights }) {
+async function inviteAdminViaUI(page: Page, { adminsUrl, email, rights, expectedName }: { adminsUrl: string; email: string; rights: Rights; expectedName?: string }) {
+    const { firstName, lastName } = randomName('Nieuwe');
+    // For an existing user the backend keeps the existing name, so the caller passes it in.
+    // For a new (nameless) user the name we fill in is the one that gets shown.
+    const name = expectedName ?? (firstName + ' ' + lastName);
+
     const popup = await openNewAdminPopup(page, adminsUrl);
-    await fillAdminForm(popup, { email, rights });
+    await fillAdminForm(popup, { firstName, lastName, email, rights });
 
     await popup.getByTestId('save-button').click();
     await expect(popup.getByTestId('save-view')).toHaveCount(0, { timeout: 20_000 });
 
-    // The new admin should appear in the list on the settings page
-    await expect(page.locator('p.style-description-small', { hasText: email }).first()).toBeVisible({ timeout: 10_000 });
+    // The new admin should appear in the list on the settings page, immediately showing the
+    // correct name and rights (without reloading the page).
+    const row = page.locator('.st-list-item', { hasText: email });
+    await expect(row).toBeVisible({ timeout: 10_000 });
+    await expect(row.locator('h2.style-title-list')).toHaveText(name);
+    await expect(row).toContainText(expectedRightsLabel(rights));
+    await expect(row).not.toContainText($t('Geen toegangsrechten'));
 }
 
 /**
@@ -244,7 +275,7 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
 
         await loginAs({ page, user: ctx.organizationAdmin });
         const popup = await openNewAdminPopup(page, ctx.adminsUrl);
-        await fillAdminForm(popup, { email, rights: null });
+        await fillAdminForm(popup, { ...randomName('Nieuwe'), email, rights: null });
         await popup.getByTestId('save-button').click();
 
         // An error should be shown, the popup should stay open and no user may be created
@@ -259,13 +290,12 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         const existing = await new UserFactory({
             email: randomEmail('invite-platform-admin'),
             password: PASSWORD,
-            firstName: 'Platform',
-            lastName: 'Admin',
+            ...randomName('Platform'),
             globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
 
         await loginAs({ page, user: ctx.organizationAdmin });
-        await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, rights: 'full' });
+        await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, expectedName: existing.firstName + ' ' + existing.lastName, rights: 'full' });
 
         // The permissions are merged into the existing user
         const merged = await getSingleUserByEmail(existing.email);
@@ -281,14 +311,13 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         const existing = await new UserFactory({
             email: randomEmail('invite-org-admin'),
             password: PASSWORD,
-            firstName: 'Bestaande',
-            lastName: 'Beheerder',
+            ...randomName('Bestaande'),
             organization: ctx.organization,
             permissions: Permissions.create({ level: PermissionLevel.Write }),
         }).create();
 
         await loginAs({ page, user: ctx.organizationAdmin });
-        await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, rights: 'full' });
+        await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, expectedName: existing.firstName + ' ' + existing.lastName, rights: 'full' });
 
         const merged = await getSingleUserByEmail(existing.email);
         expect(merged.id).toBe(existing.id);
@@ -304,14 +333,13 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
             const existing = await new UserFactory({
                 email: randomEmail('invite-other-org-admin'),
                 password: PASSWORD,
-                firstName: 'Andere',
-                lastName: 'Beheerder',
+                ...randomName('Andere'),
                 organization: otherOrganization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
             await loginAs({ page, user: ctx.organizationAdmin });
-            await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, rights: 'full' });
+            await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, expectedName: existing.firstName + ' ' + existing.lastName, rights: 'full' });
 
             // The user now has full access to both organizations
             const merged = await getSingleUserByEmail(existing.email);
@@ -328,14 +356,13 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         const existing = await new UserFactory({
             email: randomEmail('invite-normal-user'),
             password: PASSWORD,
-            firstName: 'Gewone',
-            lastName: 'Gebruiker',
+            ...randomName('Gewone'),
             organization: ctx.organization,
             permissions: null,
         }).create();
 
         await loginAs({ page, user: ctx.organizationAdmin });
-        await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, rights: 'full' });
+        await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email: existing.email, expectedName: existing.firstName + ' ' + existing.lastName, rights: 'full' });
 
         const merged = await getSingleUserByEmail(existing.email);
         expect(merged.id).toBe(existing.id);
