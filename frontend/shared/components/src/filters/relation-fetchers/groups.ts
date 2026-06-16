@@ -1,5 +1,4 @@
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import type { Group, GroupType, StamhoofdFilter } from '@stamhoofd/structures';
 import { SortItemDirection } from '@stamhoofd/structures';
 import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
@@ -11,8 +10,7 @@ export function useGroupsRelationFetcher() {
     const fetcher = useGroupsObjectFetcher({ requiredFilter: {
         deletedAt: null,
     } });
-    const organizationManager = useOrganizationManager();
-    const owner = useRequestOwner();
+    const fetchRegistrationPeriods = useFetchRegistrationPeriods();
 
     return ({ periodId, type, defaultPeriodId, isPeriodRequired }: { periodId?: string; type?: GroupType | GroupType[]; defaultPeriodId?: string; isPeriodRequired?: boolean } = {}) => {
         const filter: StamhoofdFilter = {};
@@ -41,9 +39,9 @@ export function useGroupsRelationFetcher() {
 
             subFilter = new RelationFetcherSubFilter({
                 getOptions: async () => {
-                    const list = await organizationManager.value.loadPeriods(false, false, owner);
+                    const list = await fetchRegistrationPeriods({ shouldRetry: false });
 
-                    return (list.periods.slice(0, 10) ?? []).map((p) => {
+                    return (list.slice(0, 10) ?? []).map((p) => {
                         return {
                             name: p.name,
                             filter: { periodId: p.id },
