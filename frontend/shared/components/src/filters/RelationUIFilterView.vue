@@ -1,6 +1,6 @@
 <template>
-    <div class="input-with-buttons">
-        <div>
+    <div v-if="searchEnabled || relationFetcher.subFilter" class="input-with-buttons">
+        <div v-if="searchEnabled">
             <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
                 <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
@@ -61,11 +61,12 @@ import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
+import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilterViewProperties } from './RelationUIFilter';
+import { getRelationFilterDisplayOptions } from './relationFilterOptions';
 
-const props = defineProps<{
-    filter: RelationUIFilter<T>;
-}>();
+const props = withDefaults(defineProps<RelationUIFilterViewProperties<T>>(), {
+    searchEnabled: true,
+});
 
 const relationFetcher = props.filter.relationFetcher;
 const objectFetcher: ObjectFetcher<ObjectType> = relationFetcher.fetcher;
@@ -101,7 +102,7 @@ const errorBox = computed(() => {
 const searchQuery = ref('');
 
 watchEffect(() => {
-    if (!infiniteObjectFetcher.value) {
+    if (!props.searchEnabled || !infiniteObjectFetcher.value) {
         return;
     }
     infiniteObjectFetcher.value.setSearchQuery(searchQuery.value);
@@ -109,21 +110,14 @@ watchEffect(() => {
 
 const asyncOptions = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.value?.objects ?? []));
 
-const firstOptions = computed(() => {
-    const defaultOptions = props.filter.defaultOptions;
-    return defaultOptions.concat(filterDistinctOptions(defaultOptions, props.filter.values));
-});
+const displayOptions = computed(() => getRelationFilterDisplayOptions({
+    defaultOptions: props.filter.defaultOptions,
+    selectedOptions: props.filter.values,
+    asyncOptions: asyncOptions.value,
+}));
 
-const lastOptions = computed(() => filterDistinctOptions(firstOptions.value, asyncOptions.value));
-
-/**
- * Returns the options that are not in the sourceOptions but are in the optionsToFilter.
- * @param sourceOptions
- * @param optionsToFilter
- */
-function filterDistinctOptions(sourceOptions: RelationFilterOption<T>[], optionsToFilter: RelationFilterOption<T>[]) {
-    return optionsToFilter.filter(option => !sourceOptions.some(o => o.value === option.value && o.name === option.name));
-}
+const firstOptions = computed(() => displayOptions.value.pinnedOptions);
+const lastOptions = computed(() => displayOptions.value.regularOptions);
 
 const selectedSubFilterOption = ref(null) as any as Ref<RelationFetcherSubFilterOption | null>;
 

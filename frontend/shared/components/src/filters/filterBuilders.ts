@@ -1,22 +1,23 @@
+import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
 import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useContext } from '#hooks/useContext.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { DateFilterBuilder } from './DateUIFilter';
+import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
+import { NumberFilterFormat } from './NumberFilterFormat';
 import { NumberFilterBuilder } from './NumberUIFilter';
+import { useGroupsRelationFetcher } from './relation-fetchers/groups';
+import { useRegistrationPeriodsRelationFetcher } from './relation-fetchers/useRegistrationPeriodsRelationFetcher';
 import { RelationFilterBuilder } from './RelationUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
-import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
-import { useGroupsRelationFetcher } from './relation-fetchers/groups';
-import { NumberFilterFormat } from './NumberFilterFormat';
 
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -636,6 +637,7 @@ export function getDocumentsUIFilterBuilders() {
 export function useEventNotificationBackendFilterBuilders() {
     const platform = usePlatform();
     const eventTypes = useEventTypes();
+    const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
 
     return () => {
         const all: UIFilterBuilders = [
@@ -646,6 +648,14 @@ export function useEventNotificationBackendFilterBuilders() {
             new DateFilterBuilder({
                 name: $t('%1P8'),
                 key: 'endDate',
+            }),
+            new RelationFilterBuilder({
+                name: $t('%7Z'),
+                key: 'periodId',
+                relationFetcher: registrationPeriodsRelationFetcher,
+                viewProperties: {
+                    searchEnabled: false,
+                },
             }),
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),

@@ -24,7 +24,7 @@
             {{ $t('%7r') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
+        <Checkbox :model-value="getFeatureFlag('event-notifications')" :disabled="STAMHOOFD.userMode !== 'platform'" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
             {{ $t('%CV') }}
         </Checkbox>
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
@@ -70,6 +70,7 @@
 import type { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';

@@ -1,13 +1,13 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
-import { ArrayDecoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
-import type { AppType} from '@stamhoofd/structures';
-import { LimitedFilteredRequest, OrganizationAdmins, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, Version } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { AppType } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, Version } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { inject, reactive, toRef } from 'vue';
 import { QueueHandler } from './QueueHandler';
-import type {SessionContext} from './SessionContext';
+import type { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
 
 export function usePlatformManager(): Ref<PlatformManager> {
@@ -204,8 +204,7 @@ export class PlatformManager {
             const result = decoder.decode(new ObjectData(JSON.parse(value), { version: 0 }));
 
             return result.data;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             return null;
         }
