@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
     <head>
         <title>{{name}}</title>
@@ -6,7 +6,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <style>
             /* Default styles */
-            body, html {
+            body,
+            html {
                 padding: 0;
                 margin: 0;
                 font-family: Arial, "Helvetica Neue", sans-serif;
@@ -27,8 +28,12 @@
                 margin: 1.75cm 2cm;
             }
 
-
-            p, h1, div, h2, h3, h4 {
+            p,
+            h1,
+            div,
+            h2,
+            h3,
+            h4 {
                 margin: 0;
                 padding: 0;
             }
@@ -120,14 +125,16 @@
                 table-layout: fixed;
             }
 
-            table td, table th {
+            table td,
+            table th {
                 border: 0;
                 padding: 4px 7px;
                 text-align: left;
                 vertical-align: top;
                 min-height: 36px;
             }
-            table th, table td:first-child {
+            table th,
+            table td:first-child {
                 font-weight: bold;
                 padding-left: 0;
                 width: 25%;
@@ -150,14 +157,15 @@
                 position: relative;
             }
             img::before {
-                content: '';
+                content: "";
                 width: 100%;
                 height: 100%;
                 background-color: white;
                 position: absolute;
             }
 
-            header, footer {
+            header,
+            footer {
                 display: grid;
                 grid-template-columns: 1fr auto;
                 align-items: flex-start;
@@ -200,7 +208,7 @@
             .page-box {
                 border-top: 1px solid lightgray;
                 border-bottom: 1px solid lightgray;
-                padding: 0.75cm  0;
+                padding: 0.75cm 0;
             }
 
             .logo-container {
@@ -212,45 +220,38 @@
                     max-width: 400px;
                 }
             }
-
-            /*@media screen {
-                body {
-                    padding: 2cm;
-                    width: 21cm;
-                    height: 29.7cm;
-                    background: white;
-                    margin: 0 auto;
-                }
-
-                html {
-                    background: black;
-                }
-            }*/
         </style>
     </head>
     <body>
         <main class="page-container">
             <header>
+                {{#if platform.logo}}
                 <div class="logo-container">
-                    {{#if platform.logo}}
-                        <img src="{{src platform.logo height=120}}" alt="" width="{{src-width platform.logo height=120}}"
-                            height="{{src-width platform.logo height=120}}" />
-                    {{/if}}
+                    <img
+                        src="{{src platform.logo height=120}}"
+                        alt=""
+                        width="{{src-width platform.logo height=120}}"
+                        height="{{src-width platform.logo height=120}}"
+                    />
                 </div>
+                {{/if}}
 
                 <div class="title-container">
+                    {{#if platform.logo}}
                     <h1>{{name}}</h1>
-
-                    {{#if registration.showGroup}}
-                        <p class="subtitle">{{ group.name }}</p>
-                    {{/if}}
-
-                    {{#if registration.showDate}}
-                        <p class="subtitle">{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</p>
                     {{else}}
-                        <p class="subtitle">{{ formatDate created_at }}</p>
+                    <h1>{{organization.name}}</h1>
+                    <h2>{{name}}</h2>
+                    {{/if}} {{#if registration.showGroup}}
+                    <p class="subtitle">{{ group.name }}</p>
+                    {{/if}} {{#if registration.showDate}}
+                    <p class="subtitle">
+                        {{ formatDate registration.startDate }} tot {{
+                        formatDate registration.endDate }}
+                    </p>
+                    {{else}}
+                    <p class="subtitle">{{ formatDate created_at }}</p>
                     {{/if}}
-
                 </div>
             </header>
             <div class="page-box">
@@ -269,61 +270,61 @@
                             <td>Geboortedatum</td>
                             <td>{{ formatDate member.birthDay}}</td>
                         </tr>
-                        {{/if}}
-                        {{#if member.nationalRegisterNumber}}
+                        {{/if}} {{#if member.nationalRegisterNumber}}
                         <tr>
                             <td>Rijksregisternummer</td>
                             <td>{{member.nationalRegisterNumber}}</td>
                         </tr>
-                        {{/if}}
-                        {{#if member.address}}
+                        {{/if}} {{#if member.address}}
                         <tr>
                             <td>Adres</td>
-                            <td>{{member.address.street}} {{member.address.number}}, {{member.address.postalCode}}
-                                {{member.address.city}}</td>
+                            <td>
+                                {{member.address.street}}
+                                {{member.address.number}},
+                                {{member.address.postalCode}}
+                                {{member.address.city}}
+                            </td>
                         </tr>
-                        {{/if}}
-                        {{#if member.email}}
+                        {{/if}} {{#if member.email}}
                         <tr>
                             <td>E-mailadres</td>
                             <td>{{member.email}}</td>
                         </tr>
-                        {{/if}}
-                        {{#if registration.showGroup}}
-                            <tr>
-                                <td>
-                                    {{#if (eq group.type 'EventRegistration') }}
-                                        Activiteit
-                                    {{else}}
-                                        Groep
-                                    {{/if}}
-                                </td>
-                                <td>{{ group.name }}</td>
-                            </tr>
-                        {{/if}}
-                        {{#if registration.showDate}}
-                            <tr>
-                                <td>Datum</td>
-                                <td>{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</td>
-                            </tr>
-                            {{#if (eq group.type 'EventRegistration') }}
-                                <tr>
-                                    <td>Aantal dagen</td>
-                                    <td>{{ days registration.startDate registration.endDate }}</td>
-                                </tr>
-                            {{/if}}
-                        {{/if}}
-                        {{#if registration.price}}
-                            <tr>
-                                <td>Bedrag</td>
-                                <td>{{ formatPrice registration.price }}</td>
-                            </tr>
-                        {{/if}}
-                        {{#if (and registration.showPaidAt registration.paidAt) }}
-                            <tr>
-                                <td>Betaald op</td>
-                                <td>{{ formatDate registration.paidAt }}</td>
-                            </tr>
+                        {{/if}} {{#if registration.showGroup}}
+                        <tr>
+                            <td>
+                                {{#if (eq group.type 'EventRegistration') }}
+                                Activiteit {{else}} Groep {{/if}}
+                            </td>
+                            <td>{{ group.name }}</td>
+                        </tr>
+                        {{/if}} {{#if registration.showDate}}
+                        <tr>
+                            <td>Datum</td>
+                            <td>
+                                {{ formatDate registration.startDate }} tot {{
+                                formatDate registration.endDate }}
+                            </td>
+                        </tr>
+                        {{#if (eq group.type 'EventRegistration') }}
+                        <tr>
+                            <td>Aantal dagen</td>
+                            <td>
+                                {{ days registration.startDate
+                                registration.endDate }}
+                            </td>
+                        </tr>
+                        {{/if}} {{/if}} {{#if registration.price}}
+                        <tr>
+                            <td>Bedrag</td>
+                            <td>{{ formatPrice registration.price }}</td>
+                        </tr>
+                        {{/if}} {{#if (and registration.showPaidAt
+                        registration.paidAt) }}
+                        <tr>
+                            <td>Betaald op</td>
+                            <td>{{ formatDate registration.paidAt }}</td>
+                        </tr>
                         {{/if}}
                     </tbody>
                 </table>
@@ -343,8 +344,12 @@
                         {{/if}}
                         <tr>
                             <td>Adres</td>
-                            <td>{{organization.address.street}} {{organization.address.number}}, {{organization.address.postalCode}}
-                                {{organization.address.city}}</td>
+                            <td>
+                                {{organization.address.street}}
+                                {{organization.address.number}},
+                                {{organization.address.postalCode}}
+                                {{organization.address.city}}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -353,16 +358,29 @@
                 <p class="plaintext">{{commentsFooter}}</p>
                 {{/if}}
 
-                <p class="avoid">Opgemaakt op {{ formatDate created_at }}. {{#if signature.name}}Ondertekend door {{signature.name}}.{{/if}}</p>
+                <p class="avoid">
+                    Opgemaakt op {{ formatDate created_at }}. {{#if
+                    signature.name}}Ondertekend door {{signature.name}}.{{/if}}
+                </p>
 
                 {{#if signature.image}}
-                    <img src="{{src signature.image height=150}}" alt="" width="{{src-width signature.image height=150}}"
-                        height="{{src-width signature.image height=150}}" class="signature" />
+                <img
+                    src="{{src signature.image height=150}}"
+                    alt=""
+                    width="{{src-width signature.image height=150}}"
+                    height="{{src-width signature.image height=150}}"
+                    class="signature"
+                />
                 {{/if}}
             </div>
             <footer>
                 <div class="barcode-container">
-                    <img src="{{datamatrix id}}" alt="" class="barcode" height="50"/>
+                    <img
+                        src="{{datamatrix id}}"
+                        alt=""
+                        class="barcode"
+                        height="50"
+                    />
                 </div>
                 <p class="document-id">{{id}}</p>
             </footer>
