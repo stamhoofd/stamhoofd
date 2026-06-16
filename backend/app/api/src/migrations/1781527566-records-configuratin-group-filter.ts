@@ -1,314 +1,314 @@
-import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization } from '@stamhoofd/models';
-import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdFilter } from '@stamhoofd/structures';
-import { PropertyFilter } from '@stamhoofd/structures';
-import { SeedTools } from '../helpers/SeedTools.js';
+// import { Migration } from '@simonbackx/simple-database';
+// import { Group, Organization } from '@stamhoofd/models';
+// import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdFilter } from '@stamhoofd/structures';
+// import { PropertyFilter } from '@stamhoofd/structures';
+// import { SeedTools } from '../helpers/SeedTools.js';
 
-type GroupStamhoofdFilter = { group: { id: { $eq: string } } };
+// type GroupStamhoofdFilter = { group: { id: { $eq: string } } };
 
-// class GroupStamhoofdFilterUpdateHelper {
-//     private readonly filter: GroupStamhoofdFilter;
-//     private readonly removePropertyFilter: () => void;
-//     private readonly setPropertyFilterOnGroup: (group: Group) => void;
+// // class GroupStamhoofdFilterUpdateHelper {
+// //     private readonly filter: GroupStamhoofdFilter;
+// //     private readonly removePropertyFilter: () => void;
+// //     private readonly setPropertyFilterOnGroup: (group: Group) => void;
 
-//     constructor({ filter, removePropertyFilter, setPropertyFilterOnGroup }: { filter: GroupStamhoofdFilter; removePropertyFilter: () => void; setPropertyFilterOnGroup: (group: Group) => void }) {
-//         this.filter = filter;
-//         this.removePropertyFilter = removePropertyFilter;
-//         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
-//     }
+// //     constructor({ filter, removePropertyFilter, setPropertyFilterOnGroup }: { filter: GroupStamhoofdFilter; removePropertyFilter: () => void; setPropertyFilterOnGroup: (group: Group) => void }) {
+// //         this.filter = filter;
+// //         this.removePropertyFilter = removePropertyFilter;
+// //         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
+// //     }
 
-//     get groupId() {
-//         return this.filter.group.id.$eq;
-//     }
+// //     get groupId() {
+// //         return this.filter.group.id.$eq;
+// //     }
 
-//     async getGroup() {
-//         return await Group.getByID(this.groupId);
-//     }
+// //     async getGroup() {
+// //         return await Group.getByID(this.groupId);
+// //     }
 
-//     // todo: remove propertyFilter
-//     async update() {
-//         // todo: remove property filter
-//         const group = await this.getGroup();
+// //     // todo: remove propertyFilter
+// //     async update() {
+// //         // todo: remove property filter
+// //         const group = await this.getGroup();
 
-//         // todo: support old groups with cycle?
-//         if (group) {
-//             this.removePropertyFilter();
-//             this.setPropertyFilterOnGroup(group);
-//         } else {
-//             // todo: disable?
-//         }
-//         // todo: move property filter to group
-//     }
-// }
+// //         // todo: support old groups with cycle?
+// //         if (group) {
+// //             this.removePropertyFilter();
+// //             this.setPropertyFilterOnGroup(group);
+// //         } else {
+// //             // todo: disable?
+// //         }
+// //         // todo: move property filter to group
+// //     }
+// // }
 
-// /**
-//  * Needed:
-//  * groupId
-//  * remove property Filter
-//  * stamhoofd filter without group filter
-//  */
+// // /**
+// //  * Needed:
+// //  * groupId
+// //  * remove property Filter
+// //  * stamhoofd filter without group filter
+// //  */
 
-// class GroupStamhoofdFilterUpdateHelper2 {
+// // class GroupStamhoofdFilterUpdateHelper2 {
+// //     private readonly groupId: string;
+// //     private readonly removePropertyFilter: () => void;
+// //     private readonly setPropertyFilterOnGroup: (group: Group) => void;
+
+// //     constructor({ groupId, removePropertyFilter, setPropertyFilterOnGroup }:
+// //     { groupId: string; removePropertyFilter: () => void; setPropertyFilterOnGroup: (group: Group) => void }) {
+// //         this.groupId = groupId;
+// //         this.removePropertyFilter = removePropertyFilter;
+// //         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
+// //     }
+
+// //     async getGroup() {
+// //         return await Group.getByID(this.groupId);
+// //     }
+
+// //     // todo: remove propertyFilter
+// //     async update() {
+// //         // todo: remove property filter
+// //         const group = await this.getGroup();
+
+// //         // todo: support old groups with cycle?
+// //         if (group) {
+// //             this.removePropertyFilter();
+// //             this.setPropertyFilterOnGroup(group);
+// //         } else {
+// //             // todo: disable?
+// //         }
+// //         // todo: move property filter to group
+// //     }
+// // }
+
+// class StamhoofdFilterUpdateHelper {
 //     private readonly groupId: string;
-//     private readonly removePropertyFilter: () => void;
-//     private readonly setPropertyFilterOnGroup: (group: Group) => void;
+//     private readonly setStamhoofdFilter: (propertyFilter: PropertyFilter) => void;
 
-//     constructor({ groupId, removePropertyFilter, setPropertyFilterOnGroup }:
-//     { groupId: string; removePropertyFilter: () => void; setPropertyFilterOnGroup: (group: Group) => void }) {
+//     constructor({ groupId, setStamhoofdFilter }:
+//     { groupId: string; setStamhoofdFilter: (propertyFilter: PropertyFilter) => void }) {
 //         this.groupId = groupId;
-//         this.removePropertyFilter = removePropertyFilter;
-//         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
+//         this.setStamhoofdFilter = setStamhoofdFilter;
 //     }
+
+//     // get groupId() {
+//     //     return this.filter.group.id.$eq;
+//     // }
 
 //     async getGroup() {
 //         return await Group.getByID(this.groupId);
 //     }
 
+//     getStamhoofdFilterWithoutGroupFilter(): StamhoofdFilter {
+//         // todo!!!
+//         throw new Error('not implemented');
+//     }
+
 //     // todo: remove propertyFilter
-//     async update() {
+//     async update(propertyFilter: PropertyFilter): Promise<boolean> {
 //         // todo: remove property filter
 //         const group = await this.getGroup();
 
 //         // todo: support old groups with cycle?
 //         if (group) {
-//             this.removePropertyFilter();
-//             this.setPropertyFilterOnGroup(group);
-//         } else {
-//             // todo: disable?
+//             this.setStamhoofdFilter(propertyFilter);
+//             return true;
 //         }
-//         // todo: move property filter to group
+
+//         // todo: disable?
+//         return false;
 //     }
 // }
 
-class StamhoofdFilterUpdateHelper {
-    private readonly groupId: string;
-    private readonly setStamhoofdFilter: (propertyFilter: PropertyFilter) => void;
+// class PropertyFilterUpdateHelper {
+//     private readonly propertyFilter: PropertyFilter;
+//     private readonly removePropertyFilter: () => void;
+//     private readonly setPropertyFilterOnGroup: (group: Group) => void;
 
-    constructor({ groupId, setStamhoofdFilter }:
-    { groupId: string; setStamhoofdFilter: (propertyFilter: PropertyFilter) => void }) {
-        this.groupId = groupId;
-        this.setStamhoofdFilter = setStamhoofdFilter;
-    }
+//     constructor({ propertyFilter, removePropertyFilter, setPropertyFilterOnGroup }:
+//     { propertyFilter: PropertyFilter; removePropertyFilter: () => void; setPropertyFilterOnGroup: (group: Group) => void }) {
+//         this.propertyFilter = propertyFilter;
+//         this.removePropertyFilter = removePropertyFilter;
+//         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
+//     }
 
-    // get groupId() {
-    //     return this.filter.group.id.$eq;
-    // }
+//     private getStamhoofdFilterHelpers(): StamhoofdFilterUpdateHelper[] {
+//         // only returns if some stamhoofd filter has a group filter
+//         return findGroupFilters([this.propertyFilter.enabledWhen, this.propertyFilter.requiredWhen]);
+//     }
 
-    async getGroup() {
-        return await Group.getByID(this.groupId);
-    }
+//     async update() {
+//         // todo: remove property filter
+//         const stamhoofdFilterHelpers = this.getStamhoofdFilterHelpers();
 
-    getStamhoofdFilterWithoutGroupFilter(): StamhoofdFilter {
-        // todo!!!
-        throw new Error('not implemented');
-    }
+//         if (stamhoofdFilterHelpers.length === 0) {
+//             // do nothing, no group filters
+//             return;
+//         }
 
-    // todo: remove propertyFilter
-    async update(propertyFilter: PropertyFilter): Promise<boolean> {
-        // todo: remove property filter
-        const group = await this.getGroup();
+//         // this.removePropertyFilter()
 
-        // todo: support old groups with cycle?
-        if (group) {
-            this.setStamhoofdFilter(propertyFilter);
-            return true;
-        }
+//         let didSucceed = false;
 
-        // todo: disable?
-        return false;
-    }
-}
+//         for (const helper of stamhoofdFilterHelpers) {
+//             const isSucceeded = await helper.update(this.propertyFilter);
+//             if (isSucceeded) {
+//                 didSucceed = true;
+//             }
+//         }
 
-class PropertyFilterUpdateHelper {
-    private readonly propertyFilter: PropertyFilter;
-    private readonly removePropertyFilter: () => void;
-    private readonly setPropertyFilterOnGroup: (group: Group) => void;
+//         if (didSucceed) {
+//             this.removePropertyFilter();
+//             this.setPropertyFilterOnGroup();
+//         }
 
-    constructor({ propertyFilter, removePropertyFilter, setPropertyFilterOnGroup }:
-    { propertyFilter: PropertyFilter; removePropertyFilter: () => void; setPropertyFilterOnGroup: (group: Group) => void }) {
-        this.propertyFilter = propertyFilter;
-        this.removePropertyFilter = removePropertyFilter;
-        this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
-    }
+//         if (!didSucceed) {
+//             // todo: disable?
+//         }
 
-    private getStamhoofdFilterHelpers(): StamhoofdFilterUpdateHelper[] {
-        // only returns if some stamhoofd filter has a group filter
-        return findGroupFilters([this.propertyFilter.enabledWhen, this.propertyFilter.requiredWhen]);
-    }
-
-    async update() {
-        // todo: remove property filter
-        const stamhoofdFilterHelpers = this.getStamhoofdFilterHelpers();
-
-        if (stamhoofdFilterHelpers.length === 0) {
-            // do nothing, no group filters
-            return;
-        }
-
-        // this.removePropertyFilter()
-
-        let didSucceed = false;
-
-        for (const helper of stamhoofdFilterHelpers) {
-            const isSucceeded = await helper.update(this.propertyFilter);
-            if (isSucceeded) {
-                didSucceed = true;
-            }
-        }
-
-        if (didSucceed) {
-            this.removePropertyFilter();
-            this.setPropertyFilterOnGroup();
-        }
-
-        if (!didSucceed) {
-            // todo: disable?
-        }
-
-        // // todo: support old groups with cycle?
-        // if (group) {
-        //     this.removeStamhoofFilter();
-        //     this.setStamhoofdFilter(group);
-        // } else {
-        //     // todo: disable?
-        // }
-        // // todo: move property filter to group
-    }
-}
-
-export async function startMigration() {
-    // todo: loop all record configurations where a groupId is configured
-    // should only be the case for organization record configurations
-
-    await SeedTools.loop({
-        batchSize: 100,
-        query: Organization.select(),
-        action: async (organization: Organization) => {
-            const allGroupFilters: GroupStamhoofdFilterUpdateHelper[] = [];
-            for (const filter of getAllStamhoofdFilters(organization)) {
-                const groupFilters = findGroupFilters(filter);
-                allGroupFilters.push(...groupFilters);
-            }
-
-            if (allGroupFilters.length === 0) {
-                return;
-            }
-
-            const groupIds = new Set(allGroupFilters.map(filter => filter.group.id.$eq));
-            const groups = await Group.getByIDs(...groupIds);
-            const groupMap = new Map(groups.map(g => [g.id, g]));
-
-            for (const filter of allGroupFilters) {
-                const group = groupMap.get(filter.group.id.$eq);
-                if (!group) {
-                    console.error('Could not find group with id', filter.group.id.$eq);
-                }
-
-                // todo: update filter
-            }
-        },
-    });
-}
-
-export default new Migration(async () => {
-    if (STAMHOOFD.environment === 'test') {
-        console.log('skipped in tests');
-        return;
-    }
-
-    if (STAMHOOFD.platformName.toLowerCase() !== 'stamhoofd') {
-        console.log('skipped for platform (only runs for Stamhoofd): ' + STAMHOOFD.platformName);
-        return;
-    }
-
-    await startMigration();
-    throw new Error('test');
-});
-
-// function getAllStamhoofdFilters(organization: Organization): StamhoofdFilter[] {
-//     return getAllPropertyFilters(organization)
-//         .flatMap(propertyFilter => [propertyFilter.enabledWhen, propertyFilter.requiredWhen].filter(filter => filter !== null) as StamhoofdFilter[]);
+//         // // todo: support old groups with cycle?
+//         // if (group) {
+//         //     this.removeStamhoofFilter();
+//         //     this.setStamhoofdFilter(group);
+//         // } else {
+//         //     // todo: disable?
+//         // }
+//         // // todo: move property filter to group
+//     }
 // }
 
-function getAllPropertyFilters(organization: Organization): GroupStamhoofdFilterUpdateHelper2[] {
-    const recordsConfig: OrganizationRecordsConfiguration = organization.meta.recordsConfiguration;
+// export async function startMigration() {
+//     // todo: loop all record configurations where a groupId is configured
+//     // should only be the case for organization record configurations
 
-    const propertyFilters: PropertyFilter[] = [];
+//     await SeedTools.loop({
+//         batchSize: 100,
+//         query: Organization.select(),
+//         action: async (organization: Organization) => {
+//             const allGroupFilters: GroupStamhoofdFilterUpdateHelper[] = [];
+//             for (const filter of getAllStamhoofdFilters(organization)) {
+//                 const groupFilters = findGroupFilters(filter);
+//                 allGroupFilters.push(...groupFilters);
+//             }
 
-    for (const [key, value] of Object.entries(recordsConfig)) {
-        if (value instanceof PropertyFilter) {
-            propertyFilters.push(value);
-        }
-    }
+//             if (allGroupFilters.length === 0) {
+//                 return;
+//             }
 
-    // todo: also add record categories
-    const recordCategoryFilters: PropertyFilter[] = recordsConfig.recordCategories.flatMap(category => getAllRecordCategories(category)).map(c => c.filter).filter(f => f !== null);
+//             const groupIds = new Set(allGroupFilters.map(filter => filter.group.id.$eq));
+//             const groups = await Group.getByIDs(...groupIds);
+//             const groupMap = new Map(groups.map(g => [g.id, g]));
 
-    return [...propertyFilters, ...recordCategoryFilters];
-}
+//             for (const filter of allGroupFilters) {
+//                 const group = groupMap.get(filter.group.id.$eq);
+//                 if (!group) {
+//                     console.error('Could not find group with id', filter.group.id.$eq);
+//                 }
 
-function getAllRecordCategories(recordCategory: RecordCategory): RecordCategory[] {
-    const childCategories = recordCategory.childCategories.flatMap(c => getAllRecordCategories(c));
-    return [recordCategory, ...childCategories];
-}
-
-function findGroupFilters(filter: StamhoofdFilter): GroupStamhoofdFilterUpdateHelper[] {
-    if (filter === null) {
-        return [];
-    }
-
-    if (typeof filter !== 'object') {
-        return [];
-    }
-
-    if (filter instanceof Date) {
-        return [];
-    }
-
-    if (Array.isArray(filter)) {
-        return filter.flatMap(f => findGroupFilters(f) ?? []);
-    }
-
-    const results: GroupStamhoofdFilterUpdateHelper[] = [];
-
-    // iterate properties
-    for (const [key, value] of Object.entries(filter as object)) {
-        if (key === 'group') {
-            const possibleMatch: { id?: { $eq?: string | any } | any } | any = value;
-            if (typeof possibleMatch?.id?.$eq === 'string') {
-                const groupFilter = possibleMatch as GroupStamhoofdFilter;
-                const result = new GroupStamhoofdFilterUpdateHelper({
-                    filter: groupFilter,
-                    removePropertyFilter: () => {
-
-                    },
-                    setPropertyFilterOnGroup: () => {
-
-                    },
-                });
-                results.push(result);
-                continue;
-            }
-        }
-
-        results.push(...findGroupFilters(value));
-    }
-
-    return results;
-}
-
-// function findGroupFiltersHelper<T extends Record<string, StamhoofdFilter>>(filter: T): T[] | null {
-//     // if(filter === null) {
-//     //     return null;
-//     // }
-
-//     // if(typeof filter !== 'object') {
-//     //     return null;
-//     // }
-
-//     // if(Array.isArray(filter)) {
-//     //     return filter.flatMap(f => findGroupFilters(f) ?? []);
-//     // }
-
-//     // return null;
+//                 // todo: update filter
+//             }
+//         },
+//     });
 // }
+
+// export default new Migration(async () => {
+//     if (STAMHOOFD.environment === 'test') {
+//         console.log('skipped in tests');
+//         return;
+//     }
+
+//     if (STAMHOOFD.platformName.toLowerCase() !== 'stamhoofd') {
+//         console.log('skipped for platform (only runs for Stamhoofd): ' + STAMHOOFD.platformName);
+//         return;
+//     }
+
+//     await startMigration();
+//     throw new Error('test');
+// });
+
+// // function getAllStamhoofdFilters(organization: Organization): StamhoofdFilter[] {
+// //     return getAllPropertyFilters(organization)
+// //         .flatMap(propertyFilter => [propertyFilter.enabledWhen, propertyFilter.requiredWhen].filter(filter => filter !== null) as StamhoofdFilter[]);
+// // }
+
+// function getAllPropertyFilters(organization: Organization): GroupStamhoofdFilterUpdateHelper2[] {
+//     const recordsConfig: OrganizationRecordsConfiguration = organization.meta.recordsConfiguration;
+
+//     const propertyFilters: PropertyFilter[] = [];
+
+//     for (const [key, value] of Object.entries(recordsConfig)) {
+//         if (value instanceof PropertyFilter) {
+//             propertyFilters.push(value);
+//         }
+//     }
+
+//     // todo: also add record categories
+//     const recordCategoryFilters: PropertyFilter[] = recordsConfig.recordCategories.flatMap(category => getAllRecordCategories(category)).map(c => c.filter).filter(f => f !== null);
+
+//     return [...propertyFilters, ...recordCategoryFilters];
+// }
+
+// function getAllRecordCategories(recordCategory: RecordCategory): RecordCategory[] {
+//     const childCategories = recordCategory.childCategories.flatMap(c => getAllRecordCategories(c));
+//     return [recordCategory, ...childCategories];
+// }
+
+// function findGroupFilters(filter: StamhoofdFilter): GroupStamhoofdFilterUpdateHelper[] {
+//     if (filter === null) {
+//         return [];
+//     }
+
+//     if (typeof filter !== 'object') {
+//         return [];
+//     }
+
+//     if (filter instanceof Date) {
+//         return [];
+//     }
+
+//     if (Array.isArray(filter)) {
+//         return filter.flatMap(f => findGroupFilters(f) ?? []);
+//     }
+
+//     const results: GroupStamhoofdFilterUpdateHelper[] = [];
+
+//     // iterate properties
+//     for (const [key, value] of Object.entries(filter as object)) {
+//         if (key === 'group') {
+//             const possibleMatch: { id?: { $eq?: string | any } | any } | any = value;
+//             if (typeof possibleMatch?.id?.$eq === 'string') {
+//                 const groupFilter = possibleMatch as GroupStamhoofdFilter;
+//                 const result = new GroupStamhoofdFilterUpdateHelper({
+//                     filter: groupFilter,
+//                     removePropertyFilter: () => {
+
+//                     },
+//                     setPropertyFilterOnGroup: () => {
+
+//                     },
+//                 });
+//                 results.push(result);
+//                 continue;
+//             }
+//         }
+
+//         results.push(...findGroupFilters(value));
+//     }
+
+//     return results;
+// }
+
+// // function findGroupFiltersHelper<T extends Record<string, StamhoofdFilter>>(filter: T): T[] | null {
+// //     // if(filter === null) {
+// //     //     return null;
+// //     // }
+
+// //     // if(typeof filter !== 'object') {
+// //     //     return null;
+// //     // }
+
+// //     // if(Array.isArray(filter)) {
+// //     //     return filter.flatMap(f => findGroupFilters(f) ?? []);
+// //     // }
+
+// //     // return null;
+// // }
