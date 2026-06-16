@@ -1,9 +1,11 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { GroupPrice, GroupSettings, WaitingListType } from './GroupSettings.js';
 import { StockReservation } from './StockReservation.js';
+import { TranslatedString } from './TranslatedString.js';
 
 describe('GroupSettings v73 → v75 upgrade', () => {
     it('should remove max members if not used', () => {
@@ -162,5 +164,42 @@ describe('GroupSettings stock', () => {
             });
             expect(group.settings.getRemainingStockIncludingPrices(group)).toBe(2);
         });
+    });
+});
+describe('GroupSettings.validateName', () => {
+    it('throws for empty group names', () => {
+        const emptyNames = [
+            '',
+            '   ',
+            '\t\n',
+            '\u00A0',
+            '\u200B\u200C\u200D',
+        ];
+
+        for (const name of emptyNames) {
+            const settings = GroupSettings.create({
+                name: TranslatedString.create(name),
+            });
+
+            expect(() => settings.validateName()).toThrow(SimpleError);
+        }
+    });
+
+    it('normalizes whitespace', () => {
+        const settings = GroupSettings.create({
+            name: TranslatedString.create('  Test\u200Bgroep  '),
+        });
+
+        settings.validateName();
+
+        expect(settings.name.toString()).toBe('Test groep');
+    });
+
+    it('throws for names with an empty slug', () => {
+        const settings = GroupSettings.create({
+            name: TranslatedString.create('🎉'),
+        });
+
+        expect(() => settings.validateName()).toThrow(SimpleError);
     });
 });

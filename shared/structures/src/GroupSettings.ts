@@ -922,6 +922,29 @@ export class GroupSettings extends AutoEncoder {
         return !this.prices.find(p => p.price.price > 0) && !this.optionMenus.find(o => o.options.find(p => p.price.price > 0));
     }
 
+    validateName() {
+        const name = Formatter.normalizeWhitespace(this.name.toString()).trim();
+        if (name.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'settings.name',
+                message: 'Group name cannot be empty',
+                human: $t('De naam van de groep mag niet leeg zijn.'),
+            });
+        }
+
+        if (Formatter.slug(name).length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'settings.name',
+                message: 'Group name must include at least one letter or number',
+                human: $t('De naam van de groep moet minstens één letter of cijfer bevatten.'),
+            });
+        }
+
+        this.name = TranslatedString.create(name);
+    }
+
     throwIfInvalidPrices() {
         const isForever = coversForever(this.prices);
         if (!isForever) {

@@ -931,6 +931,7 @@ useValidation(errors.validator, () => {
     for (const group of patchedPeriod.value.groups) {
         if (group.id === props.groupId) {
             try {
+                group.settings.validateName();
                 group.settings.throwIfInvalidPrices();
             } catch (e) {
                 errors.errorBox = new ErrorBox(e);

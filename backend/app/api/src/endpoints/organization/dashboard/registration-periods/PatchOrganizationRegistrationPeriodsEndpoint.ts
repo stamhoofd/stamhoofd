@@ -677,6 +677,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
+        struct.settings.validateName();
+
         if (STAMHOOFD.userMode === 'organization' && (period.organizationId !== organizationId)) {
             throw new SimpleError({
                 code: 'invalid_period',
