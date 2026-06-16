@@ -1,6 +1,6 @@
 <template>
     <div class="input-with-buttons">
-        <div>
+        <div v-if="searchEnabled">
             <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
                 <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
@@ -64,9 +64,12 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
 import { getRelationFilterDisplayOptions } from './relationFilterOptions';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     filter: RelationUIFilter<T>;
-}>();
+    searchEnabled?: boolean;
+}>(), {
+    searchEnabled: true,
+});
 
 const relationFetcher = props.filter.relationFetcher;
 const objectFetcher: ObjectFetcher<ObjectType> = relationFetcher.fetcher;
@@ -102,7 +105,7 @@ const errorBox = computed(() => {
 const searchQuery = ref('');
 
 watchEffect(() => {
-    if (!infiniteObjectFetcher.value) {
+    if (!props.searchEnabled || !infiniteObjectFetcher.value) {
         return;
     }
     infiniteObjectFetcher.value.setSearchQuery(searchQuery.value);
