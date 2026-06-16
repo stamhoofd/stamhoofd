@@ -259,13 +259,43 @@ class PropertyFilterHandler {
         this.recordCategory = recordCategory;
     }
 
+    static hasRegistrationFilter2(propertyFilter: PropertyFilter): boolean {
+        return [propertyFilter.enabledWhen, propertyFilter.requiredWhen].some(filter => StamhoofdFilterHelper.hasRegistrationsFilter(filter));
+    }
+
     static hasRegistrationFilter(propertyFilter: PropertyFilter): boolean {
         if (propertyFilter.requiredWhen && StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.requiredWhen)) {
-            throw new Error('Registrations filter in requiredWhen not supported');
+            if (propertyFilter.enabledWhen && StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.enabledWhen)) {
+                // case same filters
+                if (JSON.stringify(propertyFilter.enabledWhen) === JSON.stringify(propertyFilter.requiredWhen)) {
+                    // todo
+                } else {
+                    throw new Error('Registrations filter in requiredWhen not supported: ' + JSON.stringify(propertyFilter));
+                }
+            }
+            /**
+             * possible solution:
+             * - configure for each group separately,
+             * if groupId in filter then requiredWhen should be {}, else null (if no other filters)
+             */
+            // throw new Error('Registrations filter in requiredWhen not supported: ' + JSON.stringify(propertyFilter));
         }
 
         return StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.enabledWhen);
     }
+
+    /**
+     * case enabledWhen null but requiredWhen not ->
+     *  - set on every group
+     *  - remove from organization
+     *
+     * case enabledWhen not null but requiredWhen null ->
+     * - current handle logic
+     *
+     * case enabledWhen not null and requiredWhen not null ->
+     * - current handle logic for enabledWhen?
+     * - get propertyFilter for group and set requiredWhen?
+     */
 
     async handle() {
         const propertyFilter: PropertyFilter = this.propertyFilter;
