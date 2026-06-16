@@ -537,10 +537,21 @@
                 <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('%1Gx')" />
             </JumpToContainer>
 
-            <template v-if="$feature('member-trials')">
+            <template v-if="!$isPlatform || $feature('member-trials')">
                 <template v-if="patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
                     <hr><h2>{{ $t('%7r') }}</h2>
-                    <p>{{ $t('%7s') }}</p>
+                    <p v-if="$isPlatform">
+                        {{ $t('%7s') }}
+                    </p>
+                    <p v-else>
+                        <I18nComponent :t="$t('Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. <button>Meer info</button>')">
+                            <template #button="{content}">
+                                <a class="inline-link" :href="LocalizedDomains.getDocs('proefperiodes')" target="_blank">
+                                    {{ content }}
+                                </a>
+                            </template>
+                        </I18nComponent>
+                    </p>
 
                     <NumberInputBox v-model="trialDays" :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" :validator="errors.validator" />
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
@@ -548,7 +559,7 @@
                     </p>
 
                     <template v-if="!hasCustomDates">
-                        <STInputBox :title="$t('%7u')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                        <STInputBox :title="$t('Datum eerste activiteit')" error-fields="settings.startDate" :error-box="errors.errorBox">
                             <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                         </STInputBox>
 
@@ -624,9 +635,9 @@ import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
 
 import GroupPriceBox from './components/GroupPriceBox.vue';
 
-
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(
     defineProps<{

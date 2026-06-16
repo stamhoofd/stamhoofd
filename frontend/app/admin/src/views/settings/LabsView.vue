@@ -20,7 +20,7 @@
             {{ $t('%uB') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
+        <Checkbox v-if="$isPlatform" :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
             {{ $t('%7r') }}
         </Checkbox>
 
