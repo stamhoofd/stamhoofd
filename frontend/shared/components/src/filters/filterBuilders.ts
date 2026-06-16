@@ -653,6 +653,9 @@ export function useEventNotificationBackendFilterBuilders() {
                 name: $t('%7Z'),
                 key: 'periodId',
                 relationFetcher: registrationPeriodsRelationFetcher,
+                viewProperties: {
+                    searchEnabled: false,
+                },
             }),
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),

@@ -15,8 +15,16 @@ export type RelationFilterOption<T extends string | number | Date | null | boole
     value: T;
 };
 
+export type RelationUIFilterViewProperties<T extends string | number | Date | null | boolean> = {
+    filter: RelationUIFilter<T>;
+    searchEnabled?: boolean;
+};
+
+type RelationUIFilterViewOptions<T extends string | number | Date | null | boolean> = Omit<RelationUIFilterViewProperties<T>, 'filter'>;
+
 export class RelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<RelationFilterBuilder<T>> {
     readonly relationFetcher: RelationFetcher<any, T>;
+    readonly viewProperties: RelationUIFilterViewOptions<T> = {};
     name: string = '';
     // The optional type of the magic relation filter.
     type?: string;
@@ -65,6 +73,7 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
 
     getComponent(): ComponentWithProperties {
         return AsyncComponent(() => import('./RelationUIFilterView.vue'), {
+            ...this.viewProperties,
             filter: this,
         });
     }
@@ -103,6 +112,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     readonly wrapper?: WrapperFilter;
     readonly allowCreation?: boolean;
     readonly relationFetcher: RelationFetcher<any, T>;
+    private readonly viewProperties: RelationUIFilterViewOptions<T>;
     // The optional type of the magic relation filter.
     readonly type?: string;
 
@@ -111,7 +121,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
      */
     private readonly defaultOptions: RelationFilterOption<T>[];
 
-    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean; relationFetcher: RelationFetcher<any, T>; defaultOptions?: RelationFilterOption<T>[] }) {
+    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean; relationFetcher: RelationFetcher<any, T>; defaultOptions?: RelationFilterOption<T>[]; viewProperties?: RelationUIFilterViewOptions<T> }) {
         this.key = data.key;
         this.type = data.type;
         this.wrapFilter = data.wrapFilter;
@@ -121,6 +131,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         this.allowCreation = data.allowCreation;
         this.relationFetcher = data.relationFetcher;
         this.defaultOptions = data.defaultOptions || [];
+        this.viewProperties = data.viewProperties ?? {};
     }
 
     create(options?: { isInverted?: boolean }): RelationUIFilter<T> {
@@ -129,6 +140,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
             relationFetcher: this.relationFetcher,
             type: this.type,
             defaultOptions: this.defaultOptions,
+            viewProperties: this.viewProperties,
         }, options);
     }
 
@@ -185,6 +197,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
                     values: options,
                     type: this.type,
                     defaultOptions: this.defaultOptions,
+                    viewProperties: this.viewProperties,
                 }, { isInverted });
             }
         }

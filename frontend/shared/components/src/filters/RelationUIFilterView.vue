@@ -1,5 +1,5 @@
 <template>
-    <div class="input-with-buttons">
+    <div v-if="searchEnabled || relationFetcher.subFilter" class="input-with-buttons">
         <div v-if="searchEnabled">
             <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
                 <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
@@ -61,13 +61,10 @@ import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
+import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilterViewProperties } from './RelationUIFilter';
 import { getRelationFilterDisplayOptions } from './relationFilterOptions';
 
-const props = withDefaults(defineProps<{
-    filter: RelationUIFilter<T>;
-    searchEnabled?: boolean;
-}>(), {
+const props = withDefaults(defineProps<RelationUIFilterViewProperties<T>>(), {
     searchEnabled: true,
 });
 
