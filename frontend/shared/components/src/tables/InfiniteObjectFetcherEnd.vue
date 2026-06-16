@@ -15,10 +15,9 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import Spinner from '../Spinner.vue';
 import type { InfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 
-
 const props = withDefaults(defineProps<{
-    fetcher: InfiniteObjectFetcher<ObjectType>,
-    emptyMessage?: string
+    fetcher: InfiniteObjectFetcher<ObjectType>;
+    emptyMessage?: string;
 }>(), {
     emptyMessage: $t('Geen resultaten'),
 });
@@ -27,7 +26,7 @@ const el = ref<HTMLElement | null>(null);
 
 // Keep track whether the ref stays in view
 const observer = new IntersectionObserver((entries) => {
-    props.fetcher.setReachedEnd(entries[0].isIntersecting)
+    props.fetcher.setReachedEnd(entries[0].isIntersecting);
 }, {
     root: null,
     rootMargin: '0px',
@@ -39,15 +38,28 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    props.fetcher.setReachedEnd(false)
+    props.fetcher.setReachedEnd(false);
     observer.disconnect();
 });
 </script>
 
-
 <style lang="scss">
+.infinite-object-fetcher-end {
+    // Reduced animation glitches
+    min-height: 60px;
+    padding-top: 1px; // Disable margin collapsing
+
+    > .info-box {
+        margin-top: 0;
+    }
+
+    &:empty {
+        min-height: 0;
+    }
+}
+
 .infinite-object-fetcher-end > .spinner-container {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 </style>

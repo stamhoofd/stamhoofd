@@ -124,7 +124,7 @@
                         </template>
                     </STListItem>
                 </STList>
-                
+
                 <template v-if="hasFullPermissions">
                     <hr><h2>{{ $t('%xU') }}</h2>
 
@@ -153,21 +153,6 @@
                             </h2>
                             <p class="style-description-small">
                                 {{ $t('%Le') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <STListItem :selectable="true" class="left-center" @click="editPage(true)">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/palette.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t("%Ln") }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t('%Lf') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -282,18 +267,17 @@ import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupT
 
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { countAll } from '@stamhoofd/components/tables/classes/ObjectFetcher';
-import { useRegistrationInvitationEventListener } from '@stamhoofd/components/registrations/classes/useRegistrationInvitationEventListener';
+import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import { useRegistrationInvitationEventListener } from '@stamhoofd/components/registrations/classes/useRegistrationInvitationEventListener';
+import { countAll } from '@stamhoofd/components/tables/classes/ObjectFetcher';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useGroupActions } from '../../members/useGroupActions';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditGroupPageView from './edit/EditGroupPageView.vue';
-import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 
 const props = defineProps<{
     group: Group;
@@ -483,7 +467,8 @@ async function editGeneral(animated = true) {
                 try {
                     // Make sure we have an up to date group
                     await organizationManager.value.forceUpdate();
-                    return AsyncComponent(() => import('@stamhoofd/components/groups/EditGroupView.vue'), {
+                    const EditGroupView = (await import('@stamhoofd/components/groups/EditGroupView.vue')).default;
+                    return new ComponentWithProperties(EditGroupView, {
                         period: props.period,
                         groupId: props.group.id,
                         isNew: false,
@@ -526,10 +511,6 @@ async function editPermissions(animated = true) {
             }),
         ],
     });
-}
-
-async function editPage(animated = true) {
-    await displayEditComponent(EditGroupPageView, animated);
 }
 
 async function editEmails(animated = true) {

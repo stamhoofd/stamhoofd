@@ -19,7 +19,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@simonbackx/vue-app-navigation": "2.22.0",
+        "@simonbackx/vue-app-navigation": "2.23.0",
         "@stamhoofd/locales": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/structures": "*",

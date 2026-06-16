@@ -16,6 +16,23 @@
     @extend .modal-full-height;
     @extend .modal-backdrop;
 
+    // A popup has a fixed full height, but its width changes when a view sets a different
+    // --st-popup-width (e.g. a CategorizedView resolving inside a PromiseView). The navigation
+    // controller writes the new width inline, so transition it to animate the change instead of
+    // jumping. Sheets do the same in sheet.scss, but also animate height (their height is dynamic).
+    .navigation-controller {
+        transition: height 0.25s cubic-bezier(0.4, 0.0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+        will-change: height, width;
+
+        > div {
+            // In Popups, the inner views own the width and height, so we should make sure in between views don't take over
+            // the frozen navigation controller's height
+            // Required to animate initial width changes
+            width: fit-content;
+            height: fit-content;
+        }
+    }
+
     --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(40px * var(--keyboard-closed, 1)));
     --popup-padding-bottom-outside: max(0px, calc(80px - var(--popup-padding-top-outside, 0px)));
     --st-horizontal-padding: var(--popup-horizontal-padding, 40px);
@@ -79,6 +96,10 @@
             visibility: hidden;
             z-index: 20000;
             transition: opacity 0.3s, visibility step-end 0.3s;
+        }
+
+        .st-view:not(.st-view .st-view), .payconiq-banner-view {
+            contain: content;
         }
     }
 

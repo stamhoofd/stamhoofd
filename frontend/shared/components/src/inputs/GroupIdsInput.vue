@@ -1,162 +1,122 @@
 <template>
     <LoadingBoxTransition>
-        <div v-if="!loading" class="container">
-            <hr>
-            <h2 class="style-with-button">
-                <span>{{ title }}</span>
-                <div>
-                    <button v-long-press="(e: any) => switchCycle(e)" type="button" class="button text" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
-                        {{ period.name }}
-                        <span class="icon arrow-down-small" />
-                    </button>
-                </div>
-            </h2>
-
-            <STList v-if="nullable || groups.length > 0">
-                <STListItem v-if="nullable" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="allGroups" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('%52') }}
-                    </h3>
-                </STListItem>
-
-                <template v-if="model !== null">
-                    <STListItem v-for="group of groups" :key="group.id" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox :model-value="getGroupValue(group)" @update:model-value="setGroupValue(group, $event)" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ group.name }}
-                        </h3>
-                        <p v-if="group.description" class="style-description-small">
-                            {{ group.description }}
-                        </p>
-                    </STListItem>
+        <STList>
+            <STListItem v-for="group of groups" :key="group.id" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox :model-value="getGroupValue(group)" @update:model-value="setGroupValue(group, $event)" />
                 </template>
-            </STList>
+                <h3 class="style-title-list">
+                    {{ group.settings.name }}
+                </h3>
+                <p v-if="group.dateRange" class="style-description-small">
+                    {{ group.dateRange }}
+                </p>
+            </STListItem>
 
-            <p v-if="groups.length === 0" class="info-box">
-                {{ $t('%8W') }}
-            </p>
-        </div>
+            <STListItem :selectable="true" element-name="label" @click="selectGroup">
+                <template #left>
+                    <span class="icon gray add small" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ addButtonText ?? $t('Toevoegen') }}
+                </h3>
+            </STListItem>
+        </STList>
     </LoadingBoxTransition>
 </template>
 
 <script setup lang="ts">
-import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { RegistrationPeriod} from '@stamhoofd/structures';
-import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
-import { computed, ref, watchEffect } from 'vue';
+import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
+import { Toast } from '#overlays/Toast.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import type { Group } from '@stamhoofd/structures';
+import { LimitedFilteredRequest } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         nullable?: boolean;
         defaultPeriodId?: string | null;
         title?: string;
+        addButtonText?: string | null;
     }>(), {
         nullable: false,
         defaultPeriodId: null,
         title: () => $t(`%wP`),
+        addButtonText: null,
     },
 );
-
 const model = defineModel<string[] | null>({ required: true });
-const organization = useOrganization();
-const organizationManager = useOrganizationManager();
-const owner = useRequestOwner();
-const platform = usePlatform();
-const defaultPeriod = organization.value?.period?.period ?? platform.value.period;
-const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
+const fetcher = useGroupsObjectFetcher();
+const groups = ref<null | Group[]>(null) as Ref<null | Group[]>;
 
-const lastCachedValue = ref<string[] | null>(null);
-const periods = ref(RegistrationPeriodList.create({}) as any) as Ref<RegistrationPeriodList>;
-const loading = ref(true);
-const organizationPeriod = computed(() => periods.value.organizationPeriods.find(p => p.period.id === period.value.id));
-
-const groups = computed(() => {
-    const p = organizationPeriod.value;
-    if (!p) {
-        return [];
-    }
-    return p.adminCategoryTree.getAllGroups().filter(g => g.type === GroupType.Membership).map(group => NamedObject.create({
-        id: group.id,
-        name: group.settings.name.toString(),
-        description: p.period.nameShort,
-    }));
+onMounted(() => {
+    loadGroups().catch(console.error);
 });
 
-organizationManager.value.loadPeriods(false, true, owner).then((p) => {
-    periods.value = p;
-
-    if (props.defaultPeriodId !== null) {
-        const pp = periods.value.periods.find(p => p.id === props.defaultPeriodId);
-
-        if (pp) {
-            period.value = pp;
-        }
+async function loadGroups() {
+    if (model.value === null || model.value.length === 0) {
+        groups.value = [];
+        return;
     }
 
-    loading.value = false;
-}).catch(console.error);
-
-function switchCycle(event: MouseEvent) {
-    const menu = new ContextMenu([
-        (periods.value.organizationPeriods ?? []).map((p) => {
-            const c = p.adminCategoryTree.getAllGroups().map(g => g.id).reduce((a, b) => a + (model.value?.includes(b) ? 1 : 0), 0);
-
-            return new ContextMenuItem({
-                name: p.period.name,
-                selected: p.period.id === period.value.id,
-                rightText: c > 0 ? Formatter.integer(c) : '',
-                action: () => {
-                    period.value = p.period;
-                    return true;
+    try {
+        const result = await fetcher.fetch(new LimitedFilteredRequest({
+            filter: {
+                id: {
+                    $in: model.value,
                 },
-            });
-        }),
-    ]);
-    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error);
+            },
+            limit: model.value.length,
+        }));
+
+        groups.value = result.results;
+    } catch (e) {
+        if (Request.isAbortError(e)) {
+            return;
+        }
+        Toast.fromError(e).show();
+    }
 }
 
-watchEffect(() => {
-    if (model.value !== null) {
-        lastCachedValue.value = model.value;
-    }
-});
+const present = usePresent();
+async function selectGroup() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./ChooseGroupsView.vue'), {
+                    addGroup: async (group: Group, actions: NavigationActions) => {
+                        if (groups.value) {
+                            groups.value.push(group);
+                        } else {
+                            groups.value = [group];
+                        }
+                        setGroupValue(group, true);
+                        await actions.dismiss();
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
-const allGroups = computed({
-    get: () => model.value === null,
-    set: (allGroups) => {
-        if (allGroups) {
-            model.value = null;
-        }
-        else {
-            model.value = (lastCachedValue.value ?? []).slice();
-        }
-    },
-});
-
-function getGroupValue(group: NamedObject) {
+function getGroupValue(group: Group) {
     return !!model.value?.find(id => id === group.id);
 }
 
-function setGroupValue(group: NamedObject, value: boolean) {
+function setGroupValue(group: Group, value: boolean) {
     if (model.value === null) {
         return;
     }
     if (value) {
         model.value = [...model.value.filter(id => id !== group.id), group.id];
-    }
-    else {
+    } else {
         model.value = model.value.filter(id => id !== group.id);
     }
 }

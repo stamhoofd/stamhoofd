@@ -1,11 +1,15 @@
 <template>
     <div ref="root" class="container categorized-box">
-        <p v-if="false" class="style-title-prefix">
-            <IconContainer :icon="icon" />
-        </p>
-        <h2 class="larger">
-            {{ title }}
+        <h2 class="larger style-with-button">
+            <span class="block-icon">
+                <IconContainer :icon="icon" class="gray" />
+            </span>
+            <div>{{ title }}</div>
+            <div>
+                <slot name="buttons" />
+            </div>
         </h2>
+
         <slot />
     </div>
     <p v-if="description" class="style-description-small" v-text="description" />
@@ -13,7 +17,7 @@
 
 <script lang="ts" setup>
 import { getExposeProxy } from '@simonbackx/vue-app-navigation';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, ref, unref, useSlots, useTemplateRef } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
@@ -53,8 +57,7 @@ function updateHasError() {
     if (el) {
         if (el.querySelector('.error-box')) {
             hasError.value = true;
-        }
-        else {
+        } else {
             hasError.value = false;
         }
     }

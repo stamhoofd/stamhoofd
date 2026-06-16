@@ -10,7 +10,7 @@
                         <STList>
                             <STListItem v-for="(category, index) of categories" :key="index" ref="categoryRows" :selectable="true" class="" @click="scrollToCategory(category)">
                                 <template #left>
-                                    <span :class="'icon ' + category.icon.value" />
+                                    <span :class="'icon small ' + category.icon.value" />
                                 </template>
                                 <h2 class="style-title-list">
                                     {{ category.title.value }}
@@ -34,10 +34,15 @@
                 <template v-if="!columnsEnabled && isEnabled" #fixed>
                     <ScrollableSegmentedControl v-model="visibleCategory" :items="[null, ...categories]" :labels="['Overzicht', ...categories.map(c => c.title.value)]" :icons="[null, ...categories.map(c => c.icon.value)]" />
                 </template>
+                <template #buttons>
+                    <slot name="buttons" />
+                </template>
                 <header v-if="!columnsEnabled && isEnabled" class="container">
-                    <h1>
-                        {{ title }}
-                    </h1>
+                    <slot name="title">
+                        <h1>
+                            {{ title }}
+                        </h1>
+                    </slot>
                     <div class="inline-seeker-box">
                         <STList>
                             <STListItem v-for="(category, index) of categories" :key="index" :selectable="true" class="" @click="scrollToCategory(category)">
@@ -68,7 +73,7 @@
 
 <script lang="ts" setup>
 import { Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, defineComponent, getCurrentInstance, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
@@ -208,8 +213,7 @@ function throttle(mainFunction: (...args: unknown[]) => unknown, delay: number) 
                     }
                 });
             }, delay);
-        }
-        else {
+        } else {
             // Make sure to run at the end of current period
             runAtEnd = true;
         }
@@ -256,8 +260,7 @@ watch([visibleCategories, categoryRows], () => {
         if (d) {
             if (visible) {
                 height += d.clientHeight;
-            }
-            else {
+            } else {
                 yOffset += d.clientHeight;
             }
         }
@@ -278,8 +281,7 @@ const visibleCategory = computed({
     set: (c: CategorizedViewCategory | null) => {
         if (c) {
             scrollToCategory(c);
-        }
-        else {
+        } else {
             const s = scrollElement.value;
             if (s) {
                 const exponential = function (x: number): number {
@@ -313,8 +315,7 @@ function scrollToCategory(category: CategorizedViewCategory) {
     const errorElement = el.querySelector('.error-box') as HTMLElement;
     if (errorElement) {
         ViewportHelper.scrollIntoView(errorElement, 'center', false);
-    }
-    else {
+    } else {
         ViewportHelper.scrollIntoView(el, 'center', false);
     }
 }

@@ -58,11 +58,12 @@ import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { mergeFilters } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilterViewProperties } from './RelationUIFilter';
 import { getRelationFilterDisplayOptions } from './relationFilterOptions';
+import { useAnimateHeightChange } from '@simonbackx/vue-app-navigation';
 
 const props = withDefaults(defineProps<RelationUIFilterViewProperties<T>>(), {
     searchEnabled: true,
@@ -110,14 +111,29 @@ watchEffect(() => {
 
 const asyncOptions = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.value?.objects ?? []));
 
-const displayOptions = computed(() => getRelationFilterDisplayOptions({
+const _displayOptions = computed(() => getRelationFilterDisplayOptions({
     defaultOptions: props.filter.defaultOptions,
     selectedOptions: props.filter.values,
     asyncOptions: asyncOptions.value,
 }));
+const animateHeightChange = useAnimateHeightChange();
 
-const firstOptions = computed(() => displayOptions.value.pinnedOptions);
-const lastOptions = computed(() => displayOptions.value.regularOptions);
+const animatedDisplayOptions = ref<ReturnType<typeof getRelationFilterDisplayOptions>>(_displayOptions.value);
+watch(_displayOptions, (ne, old) => {
+    const cOld = old.pinnedOptions.length + old.regularOptions.length;
+    const nNew = ne.pinnedOptions.length + ne.regularOptions.length;
+    if (cOld === nNew) {
+        // Skip animation
+        animatedDisplayOptions.value = ne;
+        return;
+    }
+    animateHeightChange(() => {
+        animatedDisplayOptions.value = ne;
+    }).catch(console.error);
+});
+
+const firstOptions = computed(() => animatedDisplayOptions.value.pinnedOptions);
+const lastOptions = computed(() => animatedDisplayOptions.value.regularOptions);
 
 const selectedSubFilterOption = ref(null) as any as Ref<RelationFetcherSubFilterOption | null>;
 

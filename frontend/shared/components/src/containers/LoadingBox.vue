@@ -68,7 +68,11 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+
+    // Improve guessed height if the previous view is also a promiseview
     min-height: 60px;
+
+    // calc(var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px))
 
     opacity: 1;
     transition: opacity 0.2s;
