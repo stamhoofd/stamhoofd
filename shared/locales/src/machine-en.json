@@ -4212,8 +4212,8 @@
     "translation": "Prevent registrations if already registered with"
   },
   "%1Gy": {
-    "original": "Voeg bij voorkeur een jaartal toe aan de naam.",
-    "translation": "Preferably add a year to the name."
+    "original": "Voeg bij voorkeur een jaartal achteraan toe aan de naam.",
+    "translation": "Please add a year to the end of the name."
   },
   "%1Gz": {
     "original": "Hier kan je je inschrijvingen opdelen in verschillende werkjaren. Wisselen tussen werkjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) werkjaar instellen. ",

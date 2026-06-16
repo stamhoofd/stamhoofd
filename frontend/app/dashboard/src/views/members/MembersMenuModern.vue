@@ -41,7 +41,9 @@
                     <span class="icon date-range" />
                     <div>
                         <h3>{{ period.period.prefix }}</h3>
-                        <p>{{ period.period.nameShort }}</p>
+                        <p v-if="period.period.suffix">
+                            {{ period.period.suffix }}
+                        </p>
                     </div>
                     <span class="icon right gray arrow-swap" />
                 </button>

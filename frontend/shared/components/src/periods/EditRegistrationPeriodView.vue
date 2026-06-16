@@ -55,6 +55,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import { isValidRegistrationPeriodCustomName } from './isValidRegistrationPeriodCustomName';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -155,28 +156,7 @@ const endDate = computed({
 });
 
 const isValidCustomName = computed(() => {
-    if (!customName.value
-        // after the migration of v1 the oldest period is called "Gearchiveerde periodes" -> no warning should be shown
-        || customName.value === 'Gearchiveerde periodes') {
-        return true;
-    }
-
-    const startYear = startDate.value.getFullYear();
-    const endYear = endDate.value.getFullYear();
-
-    // skip extreme cases
-    if (startYear < 1900 || endYear > 9999 || startYear > endYear) {
-        return true;
-    }
-
-    // should contain year between start and end dates (start and end dates included)
-    for (let i = startYear; i <= endYear; i++) {
-        if (customName.value.includes(i.toString().substring(2))) {
-            return true;
-        }
-    }
-
-    return false;
+    return isValidRegistrationPeriodCustomName(patched.value);
 });
 
 const locked = computed({
