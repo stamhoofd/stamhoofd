@@ -128,13 +128,13 @@ class StamhoofdFilterHelper {
         return [filter];
     }
 
-    static throwIfHasOrFilter(filter: StamhoofdFilter, skipKeys: string[] = []): void {
+    static throwIfHasOrFilter(filter: StamhoofdFilter, skipKeys: string[]): void {
         if (!this.isRecordOrArray(filter)) {
             return;
         }
 
         if (Array.isArray(filter)) {
-            filter.forEach(f => this.throwIfHasOrFilter(f));
+            filter.forEach(f => this.throwIfHasOrFilter(f, skipKeys));
             return;
         }
 
@@ -146,7 +146,7 @@ class StamhoofdFilterHelper {
                 return;
             }
 
-            this.throwIfHasOrFilter(value);
+            this.throwIfHasOrFilter(value, skipKeys);
         });
     }
 }
@@ -281,7 +281,14 @@ class PropertyFilterHandler {
         // make sure there are no other $or filters (else the filter possibly cannot be moved)
         orFilters.forEach((filter) => {
             // should not contain $or filter on deeper level than root (unless in registrations filter)
-            StamhoofdFilterHelper.throwIfHasOrFilter(filter, ['registrations']);
+            try {
+                StamhoofdFilterHelper.throwIfHasOrFilter(filter, ['registrations']);
+            } catch (e) {
+                console.error('Error:', e);
+                console.error('enabledWhen:', JSON.stringify(enabledWhen));
+                console.error('filter: ', JSON.stringify(filter));
+                throw e;
+            }
         });
 
         const withoutRegistrationFilters: StamhoofdFilter[] = [];
@@ -351,8 +358,14 @@ class OrganizationHandler {
 
         for (const [key, value] of Object.entries(recordsConfig)) {
             if (value instanceof PropertyFilter) {
-                if (!PropertyFilterHandler.hasRegistrationFilter(value)) {
-                    continue;
+                try {
+                    if (!PropertyFilterHandler.hasRegistrationFilter(value)) {
+                        continue;
+                    }
+                } catch (e) {
+                    console.error('Error:', e);
+                    console.error('key:', key);
+                    throw e;
                 }
 
                 propertyFilterWrappers.push(new PropertyFilterHandler({
