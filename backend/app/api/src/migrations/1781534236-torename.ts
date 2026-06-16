@@ -1,7 +1,7 @@
 // check all propert filters of organization
 
 import type { Group, Organization } from '@stamhoofd/models';
-import type { OrganizationRecordsConfiguration, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
+import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { PropertyFilter } from '@stamhoofd/structures';
 
 // if property filter has some stamhoofd filter with a group filter
@@ -24,15 +24,24 @@ import { PropertyFilter } from '@stamhoofd/structures';
 
 // case 3: both enabledWhen and requiredWhen -> only check enabledWhen but also clean requiredWhen?
 
-function start(organization: Organization) {
-
+async function start(organization: Organization) {
+    const organizationHandler = new OrganizationHandler(organization);
+    await organizationHandler.handle();
 }
 
 type GroupStamhoofdFilter = { group: { id: { $eq: string } } };
 
 class StamhoofdFilterHelper {
+    static isRecordOrArray(value: StamhoofdFilter): value is { [key: string]: StamhoofdFilter } | StamhoofdFilter[] {
+        if (typeof value !== 'object' || value === null || value instanceof Date) {
+            return false;
+        }
+
+        return true;
+    }
+
     static isRecord(value: StamhoofdFilter): value is { [key: string]: StamhoofdFilter } {
-        if (typeof value !== 'object' || value === null || value instanceof Date || Array.isArray(value)) {
+        if (!this.isRecordOrArray(value) || Array.isArray(value)) {
             return false;
         }
 
@@ -46,17 +55,36 @@ class StamhoofdFilterHelper {
 
         return Object.entries(value).length === 1;
     }
-}
 
-class RegistrationsFilterWrapper {
-    private isInverted: boolean;
-    private mode: 'and' | 'or' = 'and';
-    private groupdIds: Set<string>;
-    private otherFilters: StamhoofdFilter[] = [];
+    static hasRegistrationsFilter(filter: StamhoofdFilter): boolean {
+        if (filter === null) {
+            return false;
+        }
 
-    constructor(private readonly filter: StamhoofdFilter & { registrations: StamhoofdFilter }, isInverted: boolean) {
-        this.isInverted = isInverted;
-        this.readDataFromFilter(filter);
+        if (typeof filter !== 'object') {
+            return false;
+        }
+
+        if (filter instanceof Date) {
+            return false;
+        }
+
+        if (Array.isArray(filter)) {
+            return filter.some(f => this.hasRegistrationsFilter(f));
+        }
+
+        if (this.isRegistrationFilter(filter)) {
+            return true;
+        }
+
+        // iterate properties
+        for (const [key, value] of Object.entries(filter as object) as [string, StamhoofdFilter | StamhoofdCompareValue][]) {
+            if (this.hasRegistrationsFilter(value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     static isRegistrationFilter(filter: StamhoofdFilter): filter is { registrations: StamhoofdFilter } & StamhoofdFilter {
@@ -65,6 +93,71 @@ class RegistrationsFilterWrapper {
         }
 
         return Object.entries(filter).some(entry => entry[0] === 'registrations');
+    }
+
+    static splitOrFilterFromRoot(filter: StamhoofdFilter): StamhoofdFilter[] {
+        if (!this.isRecord(filter)) {
+            throw new Error('The root should be a record');
+        }
+
+        const entries = Object.entries(filter);
+        if (entries.length > 1) {
+            // in theory could be possible but this is not expected based on the data -> we do not support this
+            throw new Error('The root unexepctedly has more than one entry');
+        }
+
+        const [key, value] = entries[0];
+        if (key === '$or') {
+            if (Array.isArray(value)) {
+                return value;
+            }
+
+            if (!this.isRecord(value)) {
+                throw new Error('The $or value is not a record');
+            }
+
+            return Object.entries(value).map(([key, value]) => {
+                return {
+                    [key]: value,
+                };
+            });
+        }
+
+        return [filter];
+    }
+
+    static throwIfHasOrFilter(filter: StamhoofdFilter, skipKeys: string[] = []): void {
+        if (!this.isRecordOrArray(filter)) {
+            return;
+        }
+
+        if (Array.isArray(filter)) {
+            filter.forEach(f => this.throwIfHasOrFilter(f));
+            return;
+        }
+
+        Object.entries(filter).forEach(([key, value]) => {
+            if (key === '$or') {
+                throw new Error('The $or filter is not supported');
+            }
+            if (skipKeys.includes(key)) {
+                return;
+            }
+
+            this.throwIfHasOrFilter(value);
+        });
+    }
+}
+
+class RegistrationsFilterHandler {
+    private isInverted: boolean;
+    private mode: 'and' | 'or' = 'and';
+    private groupdIds: Set<string>;
+    private otherFilters: StamhoofdFilter[] = [];
+
+    constructor(private readonly filter: StamhoofdFilter & { registrations: StamhoofdFilter }, isInverted: boolean) {
+        this.isInverted = isInverted;
+        this.readDataFromFilter(filter);
     }
 
     private readDataFromFilter(filter: StamhoofdFilter & { registrations: StamhoofdFilter }) {
@@ -140,107 +233,234 @@ class RegistrationsFilterWrapper {
     }
 }
 
-class PropertyFilterWrapper {
+class PropertyFilterHandler {
     private readonly propertyFilter: PropertyFilter;
+    private readonly recordCategory: RecordCategory | null;
     private readonly setPropertyFilterOnOrganization: (propertyFilter: PropertyFilter | null) => void;
     private readonly setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => void;
 
-    constructor({ propertyFilter, setPropertyFilterOnOrganization, setPropertyFilterOnGroup }: { propertyFilter: PropertyFilter;
+    constructor({ propertyFilter, setPropertyFilterOnOrganization, setPropertyFilterOnGroup, recordCategory }: { propertyFilter: PropertyFilter;
         // to set or remove propertyFilter on the organization
         setPropertyFilterOnOrganization: (propertyFilter: PropertyFilter | null) => void;
         // to set the propertyFilter on the group
         setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => void;
+        // only if the property filter is for a record category
+        recordCategory: RecordCategory | null;
     }) {
+        if (!PropertyFilterHandler.hasRegistrationFilter(propertyFilter)) {
+            throw new Error('No registration filter found');
+        }
+
         this.propertyFilter = propertyFilter;
         this.setPropertyFilterOnOrganization = setPropertyFilterOnOrganization;
         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
+        this.recordCategory = recordCategory;
+    }
+
+    static hasRegistrationFilter(propertyFilter: PropertyFilter): boolean {
+        if (propertyFilter.requiredWhen && StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.requiredWhen)) {
+            throw new Error('Registrations filter in requiredWhen not supported');
+        }
+
+        return StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.enabledWhen);
+    }
+
+    async handle() {
+        const propertyFilter: PropertyFilter = this.propertyFilter;
+
+        // if group filters and no or filters in parent
+        const enabledWhen = propertyFilter.enabledWhen;
+        if (enabledWhen === null) {
+            throw new Error('Did not expect enabled when to be null');
+        }
+
+        const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(enabledWhen);
+
+        // make sure there are no other $or filters (else the filter possibly cannot be moved)
+        orFilters.forEach((filter) => {
+            // should not contain $or filter on deeper level than root (unless in registrations filter)
+            StamhoofdFilterHelper.throwIfHasOrFilter(filter, ['registrations']);
+        });
+
+        const withoutRegistrationFilters: StamhoofdFilter[] = [];
+        const withRegistrationFilters: StamhoofdFilter[] = [];
+
+        for (const filter of orFilters) {
+            if (StamhoofdFilterHelper.hasRegistrationsFilter(filter)) {
+                withRegistrationFilters.push(filter);
+            } else {
+                withoutRegistrationFilters.push(filter);
+            }
+        }
+
+        if (withoutRegistrationFilters.length === 0) {
+            // if category -> set defaultEnabled to false
+            if (this.recordCategory) {
+                this.recordCategory.defaultEnabled = false;
+                this.setPropertyFilterOnOrganization(new PropertyFilter(null, propertyFilter.requiredWhen));
+            } else {
+                this.setPropertyFilterOnOrganization(null);
+            }
+        } else {
+            /**
+             * The property filter should remain on the organization.
+             * Only the stamhoofd filters without registration filters should remain on the organization.
+             */
+            const newEnabledWhen: StamhoofdFilter = {
+                $or: withoutRegistrationFilters,
+            };
+            this.setPropertyFilterOnOrganization(new PropertyFilter(newEnabledWhen, propertyFilter.requiredWhen));
+
+            if (withRegistrationFilters.length > 0) {
+                // todo
+                throw new Error('there is a $or filter in the root with a combination of registration filters and other filters -> not sure how to handle yet');
+            }
+        }
+
+        if (withRegistrationFilters.length > 1) {
+            // these filters should be moved to the group
+
+            // todo
+            throw new Error('todo: implement');
+        }
     }
 }
 
 // has group filter -> remove group filter -> set new StamhoofdFilter -> keep track of group to set config on
 
-abstract class StamhoofdFilterWrapperBase {
-    private readonly hasGroupFilter: boolean;
+// abstract class StamhoofdFilterWrapperBase {
+//     private readonly hasGroupFilter: boolean;
 
-    constructor(filter: StamhoofdFilter) {
+//     constructor(filter: StamhoofdFilter) {
 
+//     }
+
+//     findGroupFilters(filter: StamhoofdFilter | StamhoofdCompareValue, mode: '$and' | '$or' | '$not'): GroupStamhoofdFilter[] {
+//         if (filter === null) {
+//             return [];
+//         }
+
+//         if (typeof filter !== 'object') {
+//             return [];
+//         }
+
+//         if (filter instanceof Date) {
+//             return [];
+//         }
+
+//         if (Array.isArray(filter)) {
+//             return filter.flatMap(f => this.findGroupFilters(f, mode) ?? []);
+//         }
+
+//         const results: GroupStamhoofdFilter[] = [];
+
+//         // iterate properties
+//         for (const [key, value] of Object.entries(filter as object) as [string, StamhoofdFilter | StamhoofdCompareValue][]) {
+//             if (key === '$and' || key === '$or' || key === '$not') {
+//                 results.push(...this.findGroupFilters(value, key as '$and' | '$or' | '$not'));
+//                 continue;
+//             }
+
+//             if (key === 'group') {
+//                 const possibleMatch: { id?: { $eq?: string | any } | any } | any = value;
+//                 if (typeof possibleMatch?.id?.$eq === 'string') {
+//                     const groupFilter = possibleMatch as GroupStamhoofdFilter;
+
+//                     // todo: check if and or or
+//                     // handle
+
+//                     results.push(groupFilter);
+//                     continue;
+//                 }
+//             }
+
+//             results.push(...this.findGroupFilters(value, '$and'));
+//         }
+
+//         return results;
+//     }
+
+//     abstract handle(): void;
+
+//     /**
+//      * check if a group filter is present
+//      * and if so, handle it
+//      */
+//     handleGroupFilter() {
+
+//     }
+// }
+
+// class StamhoofdFilterWrapper {
+//     constructor({ filter, updateFilter }: { filter: StamhoofdFilter; updateFilter: (filter: StamhoofdFilter) => void }) {
+
+//     }
+// }
+
+// function scanPropertyFilters()
+
+class OrganizationHandler {
+    constructor(readonly organization: Organization) {}
+
+    async handle() {
+        const propertyFilterHandlers = this.getAllPropertyFilterWrappers(this.organization);
+
+        for (const propertyFilterHandler of propertyFilterHandlers) {
+            await propertyFilterHandler.handle();
+        }
     }
 
-    findGroupFilters(filter: StamhoofdFilter | StamhoofdCompareValue, mode: '$and' | '$or' | '$not'): GroupStamhoofdFilter[] {
-        if (filter === null) {
-            return [];
-        }
+    private getAllRecordCategories(recordCategory: RecordCategory): RecordCategory[] {
+        const childCategories = recordCategory.childCategories.flatMap(c => this.getAllRecordCategories(c));
+        return [recordCategory, ...childCategories];
+    }
 
-        if (typeof filter !== 'object') {
-            return [];
-        }
+    private getAllPropertyFilterWrappers(organization: Organization): PropertyFilterHandler[] {
+        const recordsConfig: OrganizationRecordsConfiguration = organization.meta.recordsConfiguration;
 
-        if (filter instanceof Date) {
-            return [];
-        }
+        const propertyFilterWrappers: PropertyFilterHandler[] = [];
 
-        if (Array.isArray(filter)) {
-            return filter.flatMap(f => this.findGroupFilters(f, mode) ?? []);
-        }
-
-        const results: GroupStamhoofdFilter[] = [];
-
-        // iterate properties
-        for (const [key, value] of Object.entries(filter as object) as [string, StamhoofdFilter | StamhoofdCompareValue][]) {
-            if (key === '$and' || key === '$or' || key === '$not') {
-                results.push(...this.findGroupFilters(value, key as '$and' | '$or' | '$not'));
-                continue;
-            }
-
-            if (key === 'group') {
-                const possibleMatch: { id?: { $eq?: string | any } | any } | any = value;
-                if (typeof possibleMatch?.id?.$eq === 'string') {
-                    const groupFilter = possibleMatch as GroupStamhoofdFilter;
-
-                    // todo: check if and or or
-                    // handle
-
-                    results.push(groupFilter);
+        for (const [key, value] of Object.entries(recordsConfig)) {
+            if (value instanceof PropertyFilter) {
+                if (!PropertyFilterHandler.hasRegistrationFilter(value)) {
                     continue;
                 }
+
+                propertyFilterWrappers.push(new PropertyFilterHandler({
+                    propertyFilter: value,
+                    setPropertyFilterOnOrganization: (propertyFilter) => {
+                        this.organization.meta.recordsConfiguration[key] = propertyFilter;
+                    },
+                    setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => {
+                        group.settings.recordsConfiguration[key] = propertyFilter;
+                    },
+                    recordCategory: null,
+                }));
             }
-
-            results.push(...this.findGroupFilters(value, '$and'));
         }
 
-        return results;
+        const recordCategoryFilters: PropertyFilterHandler[] = recordsConfig.recordCategories
+            .flatMap(category => this.getAllRecordCategories(category))
+            .flatMap((category) => {
+                const propertyFilter = category.filter;
+
+                if (propertyFilter === null || !PropertyFilterHandler.hasRegistrationFilter(propertyFilter)) {
+                    return [];
+                }
+
+                return new PropertyFilterHandler({
+                    propertyFilter,
+                    setPropertyFilterOnOrganization: (propertyFilter) => {
+                        category.filter = propertyFilter;
+                    },
+                    setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => {
+                        const map = group.settings.recordsConfiguration.inheritedRecordCategories;
+                        map.set(category.id, propertyFilter);
+                    },
+                    recordCategory: category,
+                });
+            });
+
+        return [...propertyFilterWrappers, ...recordCategoryFilters];
     }
-
-    abstract handle(): void;
-
-    /**
-     * check if a group filter is present
-     * and if so, handle it
-     */
-    handleGroupFilter() {
-
-    }
-}
-
-class StamhoofdFilterWrapper {
-    constructor({ filter, updateFilter }: { filter: StamhoofdFilter; updateFilter: (filter: StamhoofdFilter) => void }) {
-
-    }
-}
-
-function getAllPropertyFilters(organization: Organization): GroupStamhoofdFilterUpdateHelper2[] {
-    const recordsConfig: OrganizationRecordsConfiguration = organization.meta.recordsConfiguration;
-
-    const propertyFilters: PropertyFilter[] = [];
-
-    for (const [key, value] of Object.entries(recordsConfig)) {
-        if (value instanceof PropertyFilter) {
-            propertyFilters.push(value);
-        }
-    }
-
-    // todo: also add record categories
-    const recordCategoryFilters: PropertyFilter[] = recordsConfig.recordCategories.flatMap(category => getAllRecordCategories(category)).map(c => c.filter).filter(f => f !== null);
-
-    return [...propertyFilters, ...recordCategoryFilters];
 }
