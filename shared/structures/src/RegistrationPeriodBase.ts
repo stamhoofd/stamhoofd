@@ -47,7 +47,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
      */
     get suffix(): string | null {
         if (this.customName) {
-            // TODO detect periods and return null if none found.
+            return this.customName.trim().match(/(?:\d{4}|\d{2})\s*-\s*(?:\d{4}|\d{2})$|\d{4}$/)?.[0].trim() ?? null;
         }
 
         if (Formatter.year(this.endDate) === Formatter.year(this.startDate)) {

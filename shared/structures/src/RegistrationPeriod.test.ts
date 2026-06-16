@@ -7,6 +7,25 @@ import { OrganizationRegistrationPeriod, RegistrationPeriod } from './Registrati
 import { ReduceablePrice } from './ReduceablePrice.js';
 import { TranslatedString } from './TranslatedString.js';
 
+describe('RegistrationPeriodBase naming', () => {
+    test.each([
+        ['Gearchiveerde periodes', 'Gearchiveerde periodes', null, 'Gearchiveerde periodes'],
+        ['Jaar 2025', 'Jaar', '2025', '2025'],
+        ['Periode 2025-2026', 'Periode', '2025-2026', '2025-2026'],
+        ['Periode 2025 - 2026', 'Periode', '2025 - 2026', '2025 - 2026'],
+        ['Periode 25-26', 'Periode', '25-26', '25-26'],
+        ['Periode 25 - 26', 'Periode', '25 - 26', '25 - 26'],
+    ])('splits custom name %s', (customName, prefix, suffix, nameShort) => {
+        const period = RegistrationPeriod.create({
+            customName,
+        });
+
+        expect(period.prefix).toBe(prefix);
+        expect(period.suffix).toBe(suffix);
+        expect(period.nameShort).toBe(nameShort);
+    });
+});
+
 describe('OrganizationRegistrationPeriod.duplicate', () => {
     it('copies bundle discounts when duplicating to a new registration period', () => {
         const period = RegistrationPeriod.create({
