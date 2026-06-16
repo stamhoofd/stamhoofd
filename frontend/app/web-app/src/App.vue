@@ -8,7 +8,6 @@
 <script lang="ts" setup>
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
@@ -23,6 +22,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import type { Ref } from 'vue';
 import { onMounted, ref } from 'vue';
+import RouterAppView from './RouterAppView.vue';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
@@ -58,11 +58,12 @@ const root = new ComponentWithProperties(PromiseView, {
                 }
             }
 
-            // HIER ROUTER APP RETURNEN
-            // die doet dan PAS DEFINE ROUTES DOEN, ZODAT ALLES GOED STAAT
-            // met loadingView
-            console.log('returning router app view with parts', parts);
-            return AsyncComponent(() => import('./RouterAppView.vue'), {});
+            // eslint-disable-next-line stamhoofd/async-component-with-properties
+            return new ComponentWithProperties(RouterAppView, {}, {
+                // Don't delete the navigation routes when we unmount it
+                // for now this happens because we'll replace it (need to think how to solve this better in the future)
+                keepNavigationRoutes: true,
+            });
         } catch (e) {
             console.error('Error in web-app.App promise', e);
             Toast.fromError(e).setHide(null).show();

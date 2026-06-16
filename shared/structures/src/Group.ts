@@ -33,7 +33,7 @@ export enum GroupStatus {
     Archived = 'Archived',
 }
 
-export function getGroupStatusName(status: GroupStatus) {
+export function getGroupStatusName(status: GroupStatus | 'RegistrationStartDate', startDate?: Date | null) {
     switch (status) {
         case GroupStatus.Open:
             return $t(`%1EN`);
@@ -41,6 +41,12 @@ export function getGroupStatusName(status: GroupStatus) {
             return $t(`%1PH`);
         case GroupStatus.Archived:
             return $t(`%1Pg`);
+        case 'RegistrationStartDate': {
+            if (startDate) {
+                return $t('Vanaf {date}', { date: Formatter.startDate(startDate) });
+            }
+            return $t('Open vanaf datum');
+        }
     }
 }
 
@@ -248,6 +254,13 @@ export class Group extends AutoEncoder {
 
     get squareImage() {
         return this.settings.squarePhoto ?? this.settings.coverPhoto;
+    }
+
+    get dateRange() {
+        if (this.type === GroupType.EventRegistration) {
+            return Formatter.dateRange(this.settings.startDate, this.settings.endDate);
+        }
+        return this.settings.period?.nameShort ?? null;
     }
 
     /**

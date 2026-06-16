@@ -1,84 +1,94 @@
 <template>
     <LoadingViewTransition :error-box="loadingExternalOrganizerErrorBox">
-        <SaveView v-if="!loadingOrganizer && patchedPeriod" :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+        <CategorizedView v-if="!loadingOrganizer && patchedPeriod" :title :loading="saving" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
             <template #buttons>
                 <button v-if="!isNew && type !== GroupType.EventRegistration" class="button icon history" type="button" @click="viewAudit" />
             </template>
-            <h1>
+            <template #title>
                 {{ title }}
 
                 <span v-if="patchedGroup.settings.period && patchedGroup.settings.period.id !== patchedPeriod.period.id" class="title-suffix">
                     {{ patchedGroup.settings.period.nameShort }}
                 </span>
-            </h1>
+            </template>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <template v-if="type === GroupType.Membership">
-                <p v-if="isNew" class="info-box">
-                    {{ $t('%cI') }}
+            <CategorizedBox icon="flag" :title="$t('Algemeen')">
+                <template #summary>
+                    <p class="style-description-small">
+                        {{ name.toString() }}
+                    </p>
+                </template>
+                <template v-if="type === GroupType.Membership">
+                    <p v-if="isNew" class="info-box">
+                        {{ $t('%cI') }}
+                    </p>
+
+                    <div class="split-inputs">
+                        <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :autofocus="isNew ? true : undefined" />
+
+                        <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
+                            <Dropdown v-model="defaultAgeGroupId">
+                                <option :value="null">
+                                    {{ $t('%cJ') }}
+                                </option>
+                                <option v-for="ageGroup of defaultAgeGroupsFiltered" :key="ageGroup.id" :value="ageGroup.id">
+                                    {{ getAgeGroupSelectionText(ageGroup) }}
+                                </option>
+                            </Dropdown>
+                        </STInputBox>
+                    </div>
+                    <p v-if="defaultAgeGroups.length" class="style-description-small">
+                        {{ $t('%3') }}
+                    </p>
+                </template>
+
+                <template v-if="type === GroupType.WaitingList">
+                    <div class="split-inputs">
+                        <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
+                    </div>
+                </template>
+
+                <TTextarea v-model="description" :placeholder="$t(`%dA`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
+                <p v-if="patchedGroup.type === GroupType.EventRegistration" class="style-description-small">
+                    {{ $t('%cK') }}
                 </p>
 
-                <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :autofocus="isNew ? true : undefined" />
+                <STList v-if="nonPatchedGroup.settings.hasCustomDates">
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="hasCustomDates" />
+                        </template>
 
-                    <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
-                        <Dropdown v-model="defaultAgeGroupId">
-                            <option :value="null">
-                                {{ $t('%cJ') }}
-                            </option>
-                            <option v-for="ageGroup of defaultAgeGroupsFiltered" :key="ageGroup.id" :value="ageGroup.id">
-                                {{ getAgeGroupSelectionText(ageGroup) }}
-                            </option>
-                        </Dropdown>
-                    </STInputBox>
-                </div>
-                <p v-if="defaultAgeGroups.length" class="style-description-small">
-                    {{ $t('%3') }}
-                </p>
-            </template>
+                        <h3 class="style-title-list">
+                            {{ $t('%1GC') }}
+                        </h3>
 
-            <template v-if="type === GroupType.WaitingList">
-                <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
-                </div>
-            </template>
+                        <template v-if="hasCustomDates">
+                            <div class="split-inputs option" @click.stop.prevent>
+                                <STInputBox :title="$t('%1Of')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                                    <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
+                                </STInputBox>
+                                <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('%1GD')" />
+                            </div>
 
-            <TTextarea v-model="description" :placeholder="$t(`%dA`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
-            <p v-if="patchedGroup.type === GroupType.EventRegistration" class="style-description-small">
-                {{ $t('%cK') }}
-            </p>
+                            <div class="split-inputs option" @click.stop.prevent>
+                                <STInputBox :title="$t('%1P8')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                                    <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
+                                </STInputBox>
+                                <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('%1GD')" />
+                            </div>
+                        </template>
+                    </STListItem>
+                </STList>
+            </CategorizedBox>
 
-            <STList v-if="nonPatchedGroup.settings.hasCustomDates">
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="hasCustomDates" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ $t('%1GC') }}
-                    </h3>
-
-                    <template v-if="hasCustomDates">
-                        <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('%1Of')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                                <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
-                            </STInputBox>
-                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('%1GD')" />
-                        </div>
-
-                        <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('%1P8')" error-fields="settings.endDate" :error-box="errors.errorBox">
-                                <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
-                            </STInputBox>
-                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('%1GD')" />
-                        </div>
-                    </template>
-                </STListItem>
-            </STList>
-
-            <template v-if="patchedGroup.type === GroupType.EventRegistration && isMultiOrganization">
-                <hr><h2>{{ $t('%cL') }}</h2>
+            <CategorizedBox
+                v-if="patchedGroup.type === GroupType.EventRegistration && isMultiOrganization"
+                icon="company"
+                :title="$t('%cL')"
+            >
                 <p>{{ $t('%cM') }}</p>
                 <p class="style-description-block">
                     {{ $t('%cN') }}
@@ -102,18 +112,117 @@
                         </template>
                     </STListItem>
                 </STList>
-            </template>
+            </CategorizedBox>
 
-            <div v-if="type !== GroupType.WaitingList || patchedGroup.settings.prices.length !== 1 || patchedGroup.settings.prices[0]?.price.price" class="container">
-                <hr><h2 class="style-with-button">
-                    <div>{{ $t('%61') }}</div>
-                    <div>
-                        <button class="button text only-icon-smartphone" type="button" @click="addGroupPrice">
-                            <span class="icon add" />
-                            <span>{{ $t('%62') }}</span>
-                        </button>
-                    </div>
-                </h2>
+            <CategorizedBox v-if="type === GroupType.Membership || type === GroupType.WaitingList" icon="camera" :title="$t('Omslagfoto en icoontje')">
+                <ImageInput v-model="squarePhoto" :title="$t('%Ls')" :resolutions="hsSquare" :required="false" />
+                <p class="style-description-small">
+                    {{ $t('%Lt') }}
+                </p>
+
+                <ImageInput v-model="coverPhoto" :title="$t('%7M')" :resolutions="hs" :required="false" class="max" :max-height="null" />
+                <p class="style-description-small">
+                    {{ $t('%Lr') }}
+                </p>
+            </CategorizedBox>
+
+            <CategorizedBox
+                icon="earth"
+                :title="$t(`Online inschrijvingen`)"
+            >
+                <template #summary>
+                    <p class="style-description-small">
+                        {{ getGroupStatusName(virtualOpenStatus, registrationStartDate) }}
+                    </p>
+                </template>
+                <p>{{ $t('%cQ') }}</p>
+
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="virtualOpenStatus" :value="GroupStatus.Closed" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ $t('%1PH') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('%cS') }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="virtualOpenStatus" value="RegistrationStartDate" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ $t('%cT') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('%cU') }}
+                        </p>
+
+                        <div v-if="virtualOpenStatus === 'RegistrationStartDate'" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox :title="$t('%4P')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
+                                <DateSelection v-model="registrationStartDate" />
+                            </STInputBox>
+                            <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('%5M')" :validator="errors.validator" />
+                        </div>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="virtualOpenStatus" :value="GroupStatus.Open" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ $t('%28') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('%cV') }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="virtualOpenStatus !== GroupStatus.Closed" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="useRegistrationEndDate" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ $t('%5K') }}
+                        </h3>
+
+                        <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox :title="$t('%4O')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
+                                <DateSelection v-model="registrationEndDate" />
+                            </STInputBox>
+                            <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('%5L')" :validator="errors.validator" />
+                        </div>
+                    </STListItem>
+                </STList>
+            </CategorizedBox>
+
+            <CategorizedBox
+                v-if="type !== GroupType.WaitingList || patchedGroup.settings.prices.length !== 1 || patchedGroup.settings.prices[0]?.price.price"
+                icon="receive"
+                :title="$t('Tarieven')"
+            >
+                <template #summary>
+                    <p v-if="patchedGroup.settings.prices.length > 1" class="style-description-small">
+                        {{ patchedGroup.settings.prices.map(p => p.name + ' ('+Formatter.price(p.price.price)+')').join(', ') }}
+                    </p>
+                    <p v-if="patchedGroup.settings.prices.length" class="style-description-small">
+                        {{ patchedGroup.settings.prices.map(p => Formatter.price(p.price.price)).join(', ') }}
+                    </p>
+                </template>
+
+                <template #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="addGroupPrice">
+                        <span class="icon add" />
+                        <span>{{ $t('%62') }}</span>
+                    </button>
+                </template>
                 <p>{{ $t("%6e") }}</p>
 
                 <STList v-if="patchedGroup.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
@@ -158,95 +267,50 @@
                     </template>
                 </STList>
                 <GroupPriceBox v-else :period="patchedPeriod" :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :validator="errors.validator" :external-organization="externalOrganization" @patch:period="addPatch" @patch:price="addPricePatch" />
-            </div>
+            </CategorizedBox>
 
-            <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
-                <hr><GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
-            </div>
+            <CategorizedBox
+                icon="success"
+                :title="$t(`Keuzemenu's`)"
+            >
+                <template #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="addGroupOptionMenu">
+                        <span class="icon add" />
+                        <span>{{ $t('Keuzemenu') }}</span>
+                    </button>
+                </template>
 
-            <hr><STList>
-                <STListItem :selectable="true" element-name="button" @click="addGroupOptionMenu()">
-                    <template #left>
-                        <span class="icon add gray" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ $t('%cO') }}
-                    </h3>
-                </STListItem>
-            </STList>
-
-            <hr><h2>{{ $t('%cP') }}</h2>
-            <p>{{ $t('%cQ') }}</p>
-
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="virtualOpenStatus" :value="GroupStatus.Closed" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ $t('%1PH') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('%cS') }}
+                <template #summary>
+                    <p v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="style-description-small">
+                        {{ optionMenu.name }}
                     </p>
-                </STListItem>
+                </template>
 
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="virtualOpenStatus" value="RegistrationStartDate" />
-                    </template>
+                <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
+                    <hr>
 
-                    <h3 class="style-title-list">
-                        {{ $t('%cT') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('%cU') }}
+                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+                </div>
+            </CategorizedBox>
+
+            <CategorizedBox
+                v-if="patchedGroup.type === GroupType.Membership"
+                icon="filter"
+                :title="$t('%cW')"
+            >
+                <template #summary>
+                    <p v-if="patchedGroup.settings.whoShort" class="style-description-small">
+                        {{ patchedGroup.settings.whoShort }}
                     </p>
 
-                    <div v-if="virtualOpenStatus === 'RegistrationStartDate'" class="split-inputs option" @click.stop.prevent>
-                        <STInputBox :title="$t('%4P')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="registrationStartDate" />
-                        </STInputBox>
-                        <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('%5M')" :validator="errors.validator" />
-                    </div>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="virtualOpenStatus" :value="GroupStatus.Open" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ $t('%28') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('%cV') }}
+                    <p v-if="patchedGroup.settings.requireGroupIds.length" class="style-description-small">
+                        {{ $t('Verplichte inschrijving(en)') }}
                     </p>
-                </STListItem>
 
-                <STListItem v-if="virtualOpenStatus !== GroupStatus.Closed" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="useRegistrationEndDate" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ $t('%5K') }}
-                    </h3>
-
-                    <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
-                        <STInputBox :title="$t('%4O')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="registrationEndDate" />
-                        </STInputBox>
-                        <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('%5L')" :validator="errors.validator" />
-                    </div>
-                </STListItem>
-            </STList>
-
-            <div v-if="patchedGroup.type === GroupType.Membership" class="container">
-                <hr><h2>{{ $t('%cW') }}</h2>
-
+                    <p v-if="patchedGroup.settings.preventGroupIds.length" class="style-description-small">
+                        {{ $t('Verboden combinatie(s)') }}
+                    </p>
+                </template>
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
                         <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%Hm`)">
@@ -278,7 +342,7 @@
                     </STList>
                 </STInputBox>
 
-                <STInputBox v-if="requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId)" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`%1Ny`)">
+                <STInputBox v-if="$isPlatform && (requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId))" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`%1Ny`)">
                     <STList>
                         <STListItem :selectable="true" element-name="label">
                             <template #left>
@@ -295,19 +359,57 @@
                     </STList>
                 </STInputBox>
 
-                <button v-if="requireGroupIds.length === 0" type="button" class="button text" @click="addRequireGroupIds">
-                    <span class="icon add" />
-                    <span>{{ $t('%cb') }}</span>
-                </button>
+                <template v-if="patchedGroup.type === GroupType.Membership">
+                    <hr>
+                    <STList>
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="showRequireGroupIds" />
+                            </template>
 
-                <button v-if="preventGroupIds.length === 0" type="button" class="button text" @click="addPreventGroupIds">
-                    <span class="icon add" />
-                    <span>{{ $t('%1Gx') }}</span>
-                </button>
-            </div>
+                            <h3 class="style-title-list">
+                                <span>{{ $t('Verplichte inschrijving(en)') }}</span>
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Leden kunnen pas zelf inschrijven voor {name} als ze ingeschreven zijn voor een bepaalde inschrijvingsgroep(en).', {name: patchedGroup.settings.name.toString()}) }}
+                            </p>
 
-            <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
-                <hr><h2>{{ $t('%1CP') }}</h2>
+                            <div v-if="showRequireGroupIds" class="option">
+                                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :add-button-text="$t('Verplichting toevoegen')" :title="$t(`%dD`)" />
+                            </div>
+                        </STListItem>
+
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="showPreventGroupIds" />
+                            </template>
+
+                            <h3 class="style-title-list">
+                                <span>{{ $t('Verboden combinatie(s) - in één richting') }}</span>
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Maak het onmogelijk voor leden om in te schrijven voor {name} als ze al zijn ingeschreven voor bepaalde inschrijvingsgroep(en).', {name: patchedGroup.settings.name.toString()}) }}
+                            </p>
+
+                            <div v-if="showPreventGroupIds" class="option">
+                                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :add-button-text="$t('Verboden combinatie toevoegen')" :title="$t(`%dD`)" />
+                            </div>
+                        </STListItem>
+                    </STList>
+                </template>
+            </CategorizedBox>
+
+            <CategorizedBox
+                v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers"
+                icon="box"
+                :title="$t('%1CP')"
+            >
+                <template #summary>
+                    <p v-if="maxMembers !== null" class="style-description-small">
+                        {{ $t('{count} plaatsen', {count: maxMembers}) }}
+                    </p>
+                </template>
+
                 <STList>
                     <template v-if="isMultiOrganization">
                         <STListItem :selectable="true" element-name="label">
@@ -387,10 +489,20 @@
                         </div>
                     </STListItem>
                 </STList>
-            </div>
+            </CategorizedBox>
 
-            <div v-if="type === GroupType.Membership || type === GroupType.EventRegistration || waitingList" class="container">
-                <hr><h2>{{ $t('%1IQ') }}</h2>
+            <CategorizedBox
+                v-if="type === GroupType.Membership || type === GroupType.EventRegistration || waitingList"
+                icon="clock"
+                :title="$t('%1IQ')"
+                class="container"
+            >
+                <template #summary>
+                    <p v-if="waitingList !== null" class="style-description-small">
+                        {{ waitingList.settings.name }}
+                    </p>
+                </template>
+
                 <p>{{ $t('%cg') }}</p>
                 <p class="style-description-block">
                     {{ $t('%ch') }}
@@ -432,10 +544,27 @@
                         <span>{{ $t('%ck') }}</span>
                     </button>
                 </p>
-            </div>
+            </CategorizedBox>
 
-            <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership) || waitingList">
-                <hr><h2>{{ $t('%cl') }}</h2>
+            <CategorizedBox
+                v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership) || waitingList"
+                :title="$t('Voorrangsregels')"
+                icon="priority"
+            >
+                <template #summary>
+                    <p v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="style-description-small">
+                        {{ $t('Alle nieuwe leden op de wachtlijst') }}
+                    </p>
+
+                    <p v-if="waitingListType === WaitingListType.All" class="style-description-small">
+                        {{ $t('Iedereen op wachtlijst') }}
+                    </p>
+
+                    <p v-if="patchedGroup.settings.activePreRegistrationDate" class="style-description-small">
+                        {{ $t('Voorinschrijvingen vanaf {dateTime}', {dateTime: formatStartDate(patchedGroup.settings.activePreRegistrationDate) }) }}
+                    </p>
+                </template>
+
                 <p>{{ $t('%cm') }}</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
@@ -527,80 +656,98 @@
                         </div>
                     </STListItem>
                 </STList>
-            </template>
+            </CategorizedBox>
 
-            <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
-                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :title="$t(`%dD`)" />
-            </JumpToContainer>
-
-            <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowPreventGroupIds || !!preventGroupIds.length">
-                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('%1Gx')" />
-            </JumpToContainer>
-
-            <template v-if="!$isPlatform || $feature('member-trials')">
-                <template v-if="patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
-                    <hr><h2>{{ $t('%7r') }}</h2>
-                    <p v-if="$isPlatform">
-                        {{ $t('%7s') }}
-                    </p>
-                    <p v-else>
-                        <I18nComponent :t="$t('Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. <button>Meer info</button>')">
-                            <template #button="{content}">
-                                <a class="inline-link" :href="LocalizedDomains.getDocs('proefperiodes')" target="_blank">
-                                    {{ content }}
-                                </a>
-                            </template>
-                        </I18nComponent>
-                    </p>
-
-                    <NumberInputBox v-model="trialDays" :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" :validator="errors.validator" />
-                    <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
-                        {{ $t('%7t', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
-                    </p>
-
-                    <template v-if="!hasCustomDates">
-                        <STInputBox :title="$t('Datum eerste activiteit')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
-                        </STInputBox>
-
-                        <p class="style-description-small">
-                            {{ $t('%7v') }}
-                        </p>
-                    </template>
-                    <p v-else-if="trialDays && patchedGroup.settings.startDate.getTime() !== patchedPeriod.period.startDate.getTime()" class="info-box">
-                        {{ $t('%1GE', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
+            <CategorizedBox
+                v-if="(!$isPlatform || $feature('member-trials')) && (patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays))"
+                :title="$t('Proefperiode')"
+                icon="trial"
+            >
+                <template #summary>
+                    <p v-if="trialDays" class="style-description-small">
+                        {{ Formatter.days(trialDays) }}
                     </p>
                 </template>
-            </template>
 
-            <hr><h2>{{ $t('%cy') }}</h2>
-            <p>{{ $t('%cz') }}</p>
-            <p v-if="auth.hasFullAccess()" class="info-box">
-                {{ $t('%d0') }}
-            </p>
-            <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
+                <p v-if="$isPlatform">
+                    {{ $t('%7s') }}
+                </p>
+                <p v-else>
+                    <I18nComponent :t="$t('Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. <button>Meer info</button>')">
+                        <template #button="{content}">
+                            <a class="inline-link" :href="LocalizedDomains.getDocs('proefperiodes')" target="_blank">
+                                {{ content }}
+                            </a>
+                        </template>
+                    </I18nComponent>
+                </p>
 
-            <hr><h2>{{ $t('%d1') }}</h2>
-            <p>{{ $t('%d2') }} <strong class="style-strong">{{ $t('%d3') }}</strong> {{ $t('%d4') }}</p>
+                <NumberInputBox v-model="trialDays" :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" :validator="errors.validator" />
+                <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
+                    {{ $t('%7t', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
+                </p>
 
-            <p class="warning-box">
-                <span>
-                    {{ $t('%d5') }} <strong class="style-strong style-underline">{{ $t('%d6') }}</strong> {{ $t('%d7') }}
-                </span>
-            </p>
+                <template v-if="!hasCustomDates">
+                    <STInputBox :title="$t('Datum eerste activiteit')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
+                    </STInputBox>
 
-            <EditRecordCategoriesBox :categories="patchedGroup.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
-        </SaveView>
+                    <p class="style-description-small">
+                        {{ $t('%7v') }}
+                    </p>
+                </template>
+                <p v-else-if="trialDays && patchedGroup.settings.startDate.getTime() !== patchedPeriod.period.startDate.getTime()" class="info-box">
+                    {{ $t('%1GE', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
+                </p>
+            </CategorizedBox>
+
+            <CategorizedBox
+                :title="$t('Persoonsgegevens')"
+                icon="user"
+            >
+                <p>{{ $t('%cz', {name: patchedGroup.settings.name}) }}</p>
+
+                <template v-if="auth.hasFullAccess() && RegistrationRecordSettingsRoute" #buttons>
+                    <button class="button text only-icon-smartphone" type="button" @click="$navigate(RegistrationRecordSettingsRoute)">
+                        <span class="icon settings" />
+                        <span>{{ $t('Algemene instellingen') }}</span>
+                    </button>
+                </template>
+                <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
+            </CategorizedBox>
+
+            <CategorizedBox
+                :title="$t('%d1')"
+                icon="help"
+            >
+                <p>{{ $t('%d2') }} <strong class="style-strong">{{ $t('%d3') }}</strong> {{ $t('%d4') }}</p>
+
+                <p class="warning-box">
+                    <span>
+                        {{ $t('%d5') }} <strong class="style-strong style-underline">{{ $t('%d6') }}</strong> {{ $t('%d7') }}
+                    </span>
+                </p>
+
+                <EditRecordCategoriesBox :categories="patchedGroup.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
+            </CategorizedBox>
+        </CategorizedView>
     </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
 
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import { useRegisterItemFilterBuilders } from '#filters/filterBuilders.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePatchableArray } from '#hooks/usePatchableArray.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import AgeInput from '#inputs/AgeInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
 import Dropdown from '#inputs/Dropdown.vue';
@@ -611,21 +758,13 @@ import InheritedRecordsConfigurationBox from '#records/components/InheritedRecor
 import { RecordEditorSettings, RecordEditorType } from '#records/RecordEditorSettings.ts';
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { DefaultAgeGroup, MemberProperty, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, TranslatedString, WaitingListType } from '@stamhoofd/structures';
+import { useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import type { DefaultAgeGroup, Image, MemberProperty, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useDraggableArray } from '#hooks/useDraggableArray.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePatch } from '#hooks/usePatch.ts';
-import { usePatchableArray } from '#hooks/usePatchableArray.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import TInput from '../inputs/TInput.vue';
 import TTextarea from '../inputs/TTextarea.vue';
@@ -637,7 +776,11 @@ import GroupPriceBox from './components/GroupPriceBox.vue';
 
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import ImageInput from '#inputs/ImageInput.vue';
+import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
+import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { useOrganizationRegistrationRecordSettingsRoute } from '@stamhoofd/components/records/useOrganizationRegistrationRecordSettingsRoute.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -665,6 +808,8 @@ const groupBeforePatch = computed(() => props.period.groups.find(group => group.
 if (!groupBeforePatch.value) {
     console.error(`Group with id ${props.groupId} not found in OrganizationRegistrationPeriod`);
 }
+const $navigate = useNavigate();
+const RegistrationRecordSettingsRoute = organization.value ? useOrganizationRegistrationRecordSettingsRoute('persoonsgegevens') : null;
 
 function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
@@ -684,6 +829,34 @@ function addRequireGroupIds() {
 function addPreventGroupIds() {
     forceShowPreventGroupIds.value = true;
 }
+
+const showRequireGroupIds = computed({
+    get: () => forceShowRequireGroupIds.value || !!patchedGroup.value.settings.requireGroupIds.length,
+    set(val: boolean) {
+        forceShowRequireGroupIds.value = val;
+        if (val === false) {
+            addGroupPatch({
+                settings: GroupSettings.patch({
+                    requireGroupIds: [] as any,
+                }),
+            });
+        }
+    },
+});
+
+const showPreventGroupIds = computed({
+    get: () => forceShowPreventGroupIds.value || !!patchedGroup.value.settings.preventGroupIds.length,
+    set(val: boolean) {
+        forceShowPreventGroupIds.value = val;
+        if (val === false) {
+            addGroupPatch({
+                settings: GroupSettings.patch({
+                    preventGroupIds: [] as any,
+                }),
+            });
+        }
+    },
+});
 
 async function viewAudit() {
     await present({
@@ -1049,6 +1222,34 @@ const maxMembers = computed({
     }),
 });
 
+const coverPhoto = computed({
+    get: () => patchedGroup.value.settings.coverPhoto,
+    set: (coverPhoto: Image | null) => {
+        addGroupPatch({
+            settings: GroupSettings.patch({ coverPhoto }),
+        });
+    },
+});
+
+const hs = [
+    ResolutionRequest.create({ width: 1600 }),
+    ResolutionRequest.create({ width: 800 }),
+    ResolutionRequest.create({ height: 250, width: 250, fit: ResolutionFit.Cover }),
+];
+
+const squarePhoto = computed({
+    get: () => patchedGroup.value.settings.squarePhoto,
+    set: (squarePhoto: Image | null) => {
+        addGroupPatch({
+            settings: GroupSettings.patch({ squarePhoto }),
+        });
+    },
+});
+
+const hsSquare = [
+    ResolutionRequest.create({ width: 250, height: 250, fit: ResolutionFit.Inside }),
+];
+
 const showEnableMaxMembers = computed(() => enableMaxMembers.value || type.value !== GroupType.WaitingList);
 
 const enableMaxMembers = computed({
@@ -1138,6 +1339,24 @@ const trialDays = computed({
     }),
 });
 
+function getDefaultStartDate() {
+    return Formatter.luxon()
+        .plus({ month: 1 })
+        .startOf('month')
+        .set({
+            hour: 12,
+            minute: 0,
+        })
+        .toJSDate();
+}
+
+function getDefaultEndDate() {
+    return Formatter.luxon(patchedGroup.value.settings.registrationStartDate ?? getDefaultStartDate())
+        .plus({ days: 7 })
+        .endOf('month')
+        .toJSDate();
+}
+
 const useRegistrationStartDate = computed({
     get: () => !!patchedGroup.value.settings.registrationStartDate,
     set: (useRegistrationStartDate) => {
@@ -1150,7 +1369,7 @@ const useRegistrationStartDate = computed({
         } else {
             addGroupPatch({
                 settings: GroupSettings.patch({
-                    registrationStartDate: patchedGroup.value.settings.registrationStartDate && patchedGroup.value.settings.registrationStartDate > new Date() ? patchedGroup.value.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24),
+                    registrationStartDate: patchedGroup.value.settings.registrationStartDate && patchedGroup.value.settings.registrationStartDate > new Date() ? patchedGroup.value.settings.registrationStartDate : getDefaultStartDate(),
                 }),
             });
         }
@@ -1169,7 +1388,7 @@ const useRegistrationEndDate = computed({
         } else {
             addGroupPatch({
                 settings: GroupSettings.patch({
-                    registrationEndDate: patchedGroup.value.settings.registrationEndDate ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                    registrationEndDate: patchedGroup.value.settings.registrationEndDate ?? getDefaultEndDate(),
                 }),
             });
         }

@@ -206,41 +206,37 @@
 </template>
 
 <script lang="ts" setup>
-
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
-
 import { useEditGroupsView } from './hooks/useEditGroupsView';
-
 import BillingWarningBox from './packages/BillingWarningBox.vue';
+import { useOrganizationRegistrationRecordSettingsRoute } from '@stamhoofd/components/records/useOrganizationRegistrationRecordSettingsRoute.ts';
 
-enum Routes {
-    RegistrationPaymentMethods = 'betaalmethodes',
-    RegistrationPage = 'pagina',
-    RegistrationGroups = 'groepen',
-    BundleDiscounts = 'kortingen',
-    RegistrationRecords = 'persoonsgegevens',
-    RegistrationFreeContributions = 'vrije-bijdrage',
-    MembersImport = 'leden-importeren',
-    OrganizationRegistrationPeriods = 'werkjaren',
-    FinancialSupport = 'financiele-ondersteuning',
-    DataPermissions = 'toestemming-gegevensverzameling',
-}
+const Routes = {
+    RegistrationPaymentMethods: 'betaalmethodes',
+    RegistrationPage: 'pagina',
+    RegistrationGroups: 'groepen',
+    BundleDiscounts: 'kortingen',
+    RegistrationRecords: useOrganizationRegistrationRecordSettingsRoute('persoonsgegevens'),
+    RegistrationFreeContributions: 'vrije-bijdrage',
+    MembersImport: 'leden-importeren',
+    OrganizationRegistrationPeriods: 'werkjaren',
+    FinancialSupport: 'financiele-ondersteuning',
+    DataPermissions: 'toestemming-gegevensverzameling',
+};
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const $organizationManager = useOrganizationManager();
@@ -287,26 +283,6 @@ defineRoutes([
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                     patch.id = period.value.id;
                     await patchOrganizationPeriod(period.value, patch);
-                },
-            };
-        },
-    },
-    {
-        url: Routes.RegistrationRecords,
-        present: 'popup',
-        component: async () => (await import('@stamhoofd/components/records/RecordsConfigurationView.vue')).default,
-        defaultProperties() {
-            return {
-                inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({ platform: platform.value }),
-                recordsConfiguration: $organizationManager.value.organization.meta.recordsConfiguration,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    await $organizationManager.value.patch(Organization.patch({
-                        id: $organizationManager.value.organization.id,
-                        meta: OrganizationMetaData.patch({
-                            recordsConfiguration: patch,
-                        }),
-                    }));
-                    Toast.success($t('De aanpassingen zijn opgeslagen')).show();
                 },
             };
         },

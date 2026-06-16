@@ -20,8 +20,7 @@ export class ViewportHelper {
         const style = window.getComputedStyle(element);
         if (style.overflowY == 'scroll' || style.overflow == 'scroll' || style.overflow == 'auto' || style.overflowY == 'auto' || style.overflow == 'overlay' || style.overflowY == 'overlay') {
             return element;
-        }
-        else {
+        } else {
             if (!element.parentElement) {
                 return document.documentElement;
             }
@@ -33,8 +32,7 @@ export class ViewportHelper {
         const style = window.getComputedStyle(element);
         if (style.overflowX == 'scroll' || style.overflow == 'scroll' || style.overflow == 'auto' || style.overflowX == 'auto' || style.overflow == 'overlay' || style.overflowX == 'overlay') {
             return element;
-        }
-        else {
+        } else {
             if (!element.parentElement) {
                 return document.documentElement;
             }
@@ -78,8 +76,7 @@ export class ViewportHelper {
             // on iPad resize is not called so we cannot reliably calculate the keyboard height
             // const resizeObserver = new ResizeObserver(viewportHandler);
             // resizeObserver.observe(document.body);
-        }
-        else {
+        } else {
             // We listen to the resize event
             window.addEventListener(
                 'resize',
@@ -146,8 +143,7 @@ export class ViewportHelper {
 
                         scrollElement.style.paddingTop = `${paddingTop + 1}px`;
                         scrollElement.scrollTop = 1;
-                    }
-                    else if (scrollElement.scrollTop == scrollElement.scrollHeight - scrollElement.clientHeight) {
+                    } else if (scrollElement.scrollTop == scrollElement.scrollHeight - scrollElement.clientHeight) {
                         let paddingBottom = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'));
                         paddingBottom = isNaN(paddingBottom) ? 0 : paddingBottom;
 
@@ -190,8 +186,7 @@ export class ViewportHelper {
                     clickedElement = null;
                 }, { passive: true });
             }
-        }
-        else {
+        } else {
             document.body.addEventListener('touchstart', () => { }, { passive: true });
         }
     }
@@ -227,8 +222,7 @@ export class ViewportHelper {
 
                     document.documentElement.style.setProperty('--keyboard-open', `1`);
                     document.documentElement.style.setProperty('--keyboard-closed', `0`);
-                }
-                else {
+                } else {
                     document.documentElement.style.setProperty('--bottom-padding', `${bottomPadding.toFixed(2)}px`);
                     document.documentElement.style.setProperty('--keyboard-height', `0px`);
 
@@ -302,8 +296,7 @@ export class ViewportHelper {
             }
 
             scrollPosition -= Math.max(0, topPadding - elTopPadding);
-        }
-        else {
+        } else {
             scrollPosition += Math.max(0, bottomPadding - elBottomPadding);
         }
 
@@ -367,8 +360,7 @@ export class ViewportHelper {
             }
 
             scrollPosition -= Math.max(0, leftPadding - elLeftPadding);
-        }
-        else {
+        } else {
             let rightPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-right'));
             if (isNaN(rightPadding)) {
                 rightPadding = 25;
@@ -448,8 +440,7 @@ export class ViewportHelper {
                 previousTimeStamp = timestamp;
                 previousPosition = element.scrollTop;
                 window.requestAnimationFrame(step);
-            }
-            else {
+            } else {
                 element.scrollTop = endPosition;
                 element.style.overflow = '';
                 element.style.willChange = '';
@@ -503,8 +494,7 @@ export class ViewportHelper {
                 previousTimeStamp = timestamp;
                 previousPosition = element.scrollLeft;
                 window.requestAnimationFrame(step);
-            }
-            else {
+            } else {
                 element.scrollLeft = endPosition;
                 element.style.overflow = '';
                 element.style.willChange = '';

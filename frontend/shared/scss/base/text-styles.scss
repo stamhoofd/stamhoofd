@@ -989,10 +989,23 @@
 %style-with-button {
     display: flex;
     flex-direction: row;
+    
 
     &> *:first-child {
         flex-grow: 1;
         text-align: left;
+
+        &.block-icon {
+            flex-grow: 0;
+            flex-shrink: 0;
+            margin-right: 10px;
+            padding-bottom: 0 !important;
+
+            & + * {
+                flex-grow: 1;
+                align-self: center;
+            }
+        }
     }
 
     &> *:last-child:not(:first-child) {
@@ -1224,10 +1237,7 @@
         }
 
         > h2.style-with-button {
-            > *:first-child {
-                padding-bottom: 15px;
-            }
-            padding-bottom: 0;
+            padding-bottom: 12px; // Tiny bit less to compenstate by room created by buttons
         }
 
         .segmented-control + h2 {
@@ -1245,10 +1255,6 @@
 
             
         }
-
-        // > h2:not(.style-with-button) + .st-list {
-        //     margin-top: -10px;
-        // }
 
         > hr {
             @extend %style-hr;

@@ -8,12 +8,10 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ComponentWithPropertiesInstance, useAnimateHeightChange, useCanDismiss, useContentState, useCurrentComponent, useDismiss } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, useAnimateHeightChange, useContentState, useCurrentComponent } from '@simonbackx/vue-app-navigation';
 import { nextTick, onMounted, ref, shallowRef } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Toast } from '../overlays/Toast';
 import LoadingViewTransition from './LoadingViewTransition.vue';
 
 const props = withDefaults(
@@ -31,9 +29,6 @@ const errorBox = ref<ErrorBox | null>(null);
 const component = useCurrentComponent();
 
 let passRoutes = component?.checkRoutes ?? false;
-
-const dismiss = useDismiss();
-const canDismiss = useCanDismiss();
 
 // In view mode we tell the navigation controller we have no content yet while loading, so it keeps
 // the sheet height frozen instead of collapsing to the empty loading placeholder.
@@ -59,16 +54,14 @@ function applyContentChange(change: () => void) {
     change();
     // Wait for the real content to render before signaling so the controller can measure it.
     nextTick(() => {
+        console.info('Promise view setting has content', true);
         setHasContent(true);
     }).catch(console.error);
 }
 
 function run() {
     errorBox.value = null;
-    if (props.view) {
-        setHasContent(false);
-    }
-    props.promise().then((value) => {
+    props.promise().then(async (value) => {
         if (!value) {
             console.error('Promise view did not return a component.');
             throw new Error('Missing component in promise');

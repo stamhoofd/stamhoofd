@@ -3,7 +3,7 @@
         <STNavigationBar :title="title" />
 
         <main>
-            <h1>{{ $t('%KA') }}</h1>
+            <h1>{{ $t('Kies een inschrijvingsgroep') }}</h1>
 
             <SegmentedControl v-if="tabs.length > 1" v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 
@@ -33,7 +33,7 @@
                 <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                     <hr><h2>{{ category.settings.name }}</h2>
                     <STList>
-                        <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" :disabled="!filterGroup(group)" @click="selectGroup(group)">
+                        <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" @click="selectGroup(group)">
                             <template #left>
                                 <GroupAvatar :group="group" />
                             </template>
@@ -80,7 +80,7 @@
 
             <template v-else>
                 <STList>
-                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" :disabled="!filterGroup(event.group!)" @click="selectGroup(event.group!)" />
+                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)" />
                 </STList>
                 <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`%KD`)" />
             </template>
@@ -91,40 +91,37 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
-import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
-import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useSwitchablePeriod } from '@stamhoofd/components/hooks/useSwitchablePeriod.ts';
 import SegmentedControl from '@stamhoofd/components/inputs/SegmentedControl.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import Spinner from '@stamhoofd/components/Spinner.vue';
-import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
-import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+
+import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
+import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
+import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
+import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Event, Group, StamhoofdFilter } from '@stamhoofd/structures';
-import { DocumentTemplateGroup, GroupType, isEmptyFilter, NamedObject, SortItemDirection } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { isEmptyFilter, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watchEffect } from 'vue';
-import { fiscal } from './definitions/fiscal';
 type ObjectType = Event;
 
 const props = defineProps<{
-    year: number;
-    documentType: string;
-    addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => Promise<void> | void;
+    addGroup: (group: Group, component: NavigationActions) => Promise<void> | void;
 }>();
 
 enum Tab {
@@ -162,7 +159,7 @@ const activitiesTab = {
     label: 'Activiteiten',
 };
 
-const showOnlyActivities = props.documentType === fiscal.type && STAMHOOFD.userMode === 'platform';
+const showOnlyActivities = false;
 const tabs = ref(showOnlyActivities ? [activitiesTab] : [groupsTab, activitiesTab]);
 const title = showOnlyActivities ? $t('%1IR') : $t(`%1IL`);
 
@@ -184,38 +181,12 @@ const { period, switchPeriod: switchPeriodHelper } = useSwitchablePeriod();
 
 function switchPeriod(event: MouseEvent) {
     // disable periods outside of the selected year
-    switchPeriodHelper(event, (p) => {
-        const startYear = p.startDate.getFullYear();
-        const endYear = p.endDate.getFullYear();
-
-        return props.year >= startYear && props.year <= endYear;
-    }).catch(console.error);
-}
-
-function filterGroup(group: Group): boolean {
-    const startYear = group.settings.startDate.getFullYear();
-
-    return props.year === startYear;
+    switchPeriodHelper(event).catch(console.error);
 }
 
 async function selectGroup(group: Group) {
-    if (!filterGroup(group)) {
-        if (group.type === GroupType.EventRegistration) {
-            Toast.error($t('%1IU', { year: props.year })).show();
-            return;
-        }
-        Toast.error($t('%1IV', { year: props.year })).show();
-        return;
-    }
-
     try {
-        await props.addGroup(DocumentTemplateGroup.create({
-            group: NamedObject.create({
-                id: group.id,
-                name: group.settings.name.toString(),
-                description: group.type === GroupType.Membership ? period.value.period.name : (Formatter.dateRange(group.settings.startDate, group.settings.endDate)),
-            }),
-        }), navigationActions);
+        await props.addGroup(group, navigationActions);
     } catch (e) {
         Toast.fromError(e).show();
     }
