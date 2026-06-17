@@ -5,15 +5,19 @@ import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdCompare
 import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
-export async function startMigration() {
+export async function startMigration(dryRun = false) {
     await SeedTools.loop({
         batchSize: 100,
         query: Organization.select(),
         action: async (organization: Organization) => {
             const organizationHandler = new OrganizationHandler(organization);
-            await organizationHandler.handle();
+            await organizationHandler.handle(dryRun);
         },
     });
+
+    if (dryRun) {
+        throw new Error('Migration did not finish because of dryRun');
+    }
 }
 
 export default new Migration(async () => {
@@ -27,11 +31,10 @@ export default new Migration(async () => {
         return;
     }
 
-    await startMigration();
+    const dryRun = true;
+    await startMigration(dryRun);
     throw new Error('test');
 });
-
-type GroupStamhoofdFilter = { group: { id: { $eq: string } } };
 
 class StamhoofdFilterHelper {
     static isRecordOrArray(value: StamhoofdFilter): value is { [key: string]: StamhoofdFilter } | StamhoofdFilter[] {
@@ -99,13 +102,17 @@ class StamhoofdFilterHelper {
 
     static splitOrFilterFromRoot(filter: StamhoofdFilter): StamhoofdFilter[] {
         if (!this.isRecord(filter)) {
-            throw new Error('The root should be a record');
+            throw new Error('The root should be a record: ' + JSON.stringify(filter));
         }
 
         const entries = Object.entries(filter);
         if (entries.length > 1) {
             // in theory could be possible but this is not expected based on the data -> we do not support this
             throw new Error('The root unexepctedly has more than one entry');
+        }
+
+        if (entries.length === 0) {
+            return [filter];
         }
 
         const [key, value] = entries[0];
@@ -224,6 +231,7 @@ class RegistrationsFilterHandler {
                 }
 
                 this.readRegistrationFilter({ [key]: value });
+                this._didFindRegistrationsFilter = true;
                 continue;
             }
 
@@ -268,7 +276,7 @@ class RegistrationsFilterHandler {
 
     private readRegistrationFilter(registrationFilter: { registrations: StamhoofdFilter }): void {
         if (this._didFindRegistrationsFilter) {
-            throw new Error('Found more than one registrations filter');
+            throw new Error('Found more than one registrations filter: ' + JSON.stringify(this.filter));
         }
 
         if (!StamhoofdFilterHelper.isRecordWithSingleEntry(registrationFilter)) {
@@ -283,6 +291,12 @@ class RegistrationsFilterHandler {
             const currentKey = currentEntry[0];
 
             switch (currentKey) {
+                case 'registrations':
+                case '$elemMatch':
+                case '$or':
+                {
+                    break;
+                }
                 case '$not': {
                     if (this._isInverted === true) {
                         throw new Error('Double inversion, check filter: ' + JSON.stringify(this.filter));
@@ -290,17 +304,23 @@ class RegistrationsFilterHandler {
                     this._isInverted = true;
                     break;
                 }
-                case '$elemMatch': {
-                    break;
-                }
-                case '$or': {
-                    // or is default mode
-                    break;
-                }
                 case '$and': {
+                    const array = currentEntry[1];
+
+                    // only support 1 item
+                    if (!Array.isArray(array)) {
+                        throw new Error(`The $and filter is not an array, check filter: ${JSON.stringify(this.filter)}`);
+                    }
+
+                    // only support 1 item (because the mode does not matter in that case)
+                    if (array.length < 2) {
+                        break;
+                    }
+
+                    // or is default mode
                     throw new Error(`The $and filter is not supported, check filter: ${JSON.stringify(this.filter)}`);
                 }
-                default: throw new Error('Invalid registration filter: ' + JSON.stringify(registrationFilter));
+                default: throw new Error(`Invalid registration filter (currentKey: ${currentKey}): ` + JSON.stringify(registrationFilter));
             }
 
             const currentValue = currentEntry[1];
@@ -347,6 +367,17 @@ class GroupsPropertyFiltersTracker {
     }
 
     private updateFromFilter(propertyFilter: PropertyFilter, type: 'enabledWhen' | 'requiredWhen') {
+        if (propertyFilter[type] === null) {
+            this.set({
+                key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
+                type,
+                filter: null,
+                isInverted: false,
+                mergeType: '$or',
+            });
+            return;
+        }
+
         // clone to prevent side effects
         const filter = cloneObject(propertyFilter[type]);
         const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(filter);
@@ -415,6 +446,47 @@ class GroupsPropertyFiltersTracker {
 
         propertyFilter[type] = mergeFilters([currentFilter, filter], mergeType);
     }
+
+    private get globalPropertyFilter(): PropertyFilter | undefined {
+        return this.groupPropertyFiltersMap.get(GroupsPropertyFiltersTracker.GLOBAL_KEY);
+    }
+
+    /**
+     * Merges all property filters for the given group
+     * @param group
+     * @returns
+     */
+    getPropertyFilterForGroup(group: Group): PropertyFilter | null {
+        const allPropertyFilters: PropertyFilter[] = [];
+        const globalPropertyFilter = this.globalPropertyFilter;
+        if (globalPropertyFilter) {
+            allPropertyFilters.push(globalPropertyFilter);
+        }
+
+        const groupSpecific = this.groupPropertyFiltersMap.get(group.id);
+        if (groupSpecific) {
+            allPropertyFilters.push(groupSpecific);
+        }
+
+        for (const [key, value] of this.invertedGroupPropertyFiltersMap.entries()) {
+            if (key !== group.id) {
+                allPropertyFilters.push(value);
+            }
+        }
+
+        if (allPropertyFilters.length === 0) {
+            return null;
+        }
+
+        const first = allPropertyFilters[0].clone();
+
+        // todo: not sure if merge works as expected -> test
+        for (const propertyFilter of allPropertyFilters.slice(1)) {
+            first.merge(propertyFilter);
+        }
+
+        return first;
+    }
 }
 
 class PropertyFilterHandler {
@@ -477,18 +549,24 @@ class PropertyFilterHandler {
     }
 
     handleGroup(group: Group) {
-        // todo
         const propertyFilter = this.groupPropertyFiltersTracker.getPropertyFilterForGroup(group);
-        this.setPropertyFilterOnGroup(group, propertyFilter);
+
+        if (propertyFilter) {
+            this.setPropertyFilterOnGroup(group, propertyFilter);
+        }
     }
 }
 
 class OrganizationHandler {
     constructor(readonly organization: Organization) {}
 
-    async handle() {
+    async handle(dryRun = false) {
         const propertyFilterHandlers = this.getAllPropertyFilterHandlers(this.organization);
+        if (propertyFilterHandlers.length === 0) {
+            return;
+        }
 
+        // todo: add extra filters to limit amount of groups?
         const query = Group.select().where('organizationId', this.organization.id);
 
         if (!propertyFilterHandlers.some(handler => handler.groupPropertyFiltersTracker.shouldUpdateAllGroups)) {
@@ -505,6 +583,14 @@ class OrganizationHandler {
             for (const propertyFilterHandler of propertyFilterHandlers) {
                 propertyFilterHandler.handleGroup(group);
             }
+
+            if (!dryRun) {
+                await group.save();
+            }
+        }
+
+        if (!dryRun) {
+            await this.organization.save();
         }
     }
 
@@ -518,6 +604,23 @@ class OrganizationHandler {
 
         const propertyFilterWrappers: PropertyFilterHandler[] = [];
 
+        function handlePropertyFilterHandlerError(e: any) {
+            const messagesToSkip = [
+                // todo: skipped for now but should be handled
+                'Found more than one registrations filter',
+                // todo: skipped for now but should be handled
+                'The $and filter is not supported',
+            ];
+            // todo: skipped for now but should be handled
+            if (messagesToSkip.some(m => e?.message?.includes?.(m))) {
+                console.error('ignored error:');
+                console.error(e);
+                return;
+            }
+
+            throw e;
+        }
+
         for (const [key, value] of Object.entries(recordsConfig)) {
             if (value instanceof PropertyFilter) {
                 try {
@@ -530,16 +633,20 @@ class OrganizationHandler {
                     throw e;
                 }
 
-                propertyFilterWrappers.push(new PropertyFilterHandler({
-                    propertyFilter: value,
-                    setPropertyFilterOnOrganization: (propertyFilter) => {
-                        this.organization.meta.recordsConfiguration[key] = propertyFilter;
-                    },
-                    setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => {
-                        group.settings.recordsConfiguration[key] = propertyFilter;
-                    },
-                    recordCategory: null,
-                }));
+                try {
+                    propertyFilterWrappers.push(new PropertyFilterHandler({
+                        propertyFilter: value,
+                        setPropertyFilterOnOrganization: (propertyFilter) => {
+                            this.organization.meta.recordsConfiguration[key] = propertyFilter;
+                        },
+                        setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => {
+                            group.settings.recordsConfiguration[key] = propertyFilter;
+                        },
+                        recordCategory: null,
+                    }));
+                } catch (e) {
+                    handlePropertyFilterHandlerError(e);
+                }
             }
         }
 
@@ -552,17 +659,22 @@ class OrganizationHandler {
                     return [];
                 }
 
-                return new PropertyFilterHandler({
-                    propertyFilter,
-                    setPropertyFilterOnOrganization: (propertyFilter) => {
-                        category.filter = propertyFilter;
-                    },
-                    setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => {
-                        const map = group.settings.recordsConfiguration.inheritedRecordCategories;
-                        map.set(category.id, propertyFilter);
-                    },
-                    recordCategory: category,
-                });
+                try {
+                    return new PropertyFilterHandler({
+                        propertyFilter,
+                        setPropertyFilterOnOrganization: (propertyFilter) => {
+                            category.filter = propertyFilter;
+                        },
+                        setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => {
+                            const map = group.settings.recordsConfiguration.inheritedRecordCategories;
+                            map.set(category.id, propertyFilter);
+                        },
+                        recordCategory: category,
+                    });
+                } catch (e) {
+                    handlePropertyFilterHandlerError(e);
+                    return [];
+                }
             });
 
         return [...propertyFilterWrappers, ...recordCategoryFilters];
