@@ -36,12 +36,12 @@
 
 <script setup lang="ts" name="AccountSwitcher">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useOrganization } from '../hooks/useOrganization';
 import { useUser } from '../hooks/useUser';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const $user = useUser();
 const $navigate = useNavigate();
@@ -91,7 +91,7 @@ const customSiteUrl = computed(() => {
         return null;
     }
 
-    if (window.location.hostname === STAMHOOFD.domains.dashboard) {
+    if (AppManager.shared.isOnDashboardDomain) {
         // Not allowed - confusion with Stamhoofd possible
         return null;
     }

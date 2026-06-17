@@ -17,7 +17,7 @@ import { wrap, wrapAndReplace } from './wrapAndReplace';
 
 provideAppNavigate(useNavigate());
 
-const isDashboardDomain = AppManager.shared.isNative || UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard;
+const isDashboardDomain = AppManager.shared.isOnDashboardDomain;
 
 async function paramsToRequiredOrganization<T extends { organizationUri: string }>(params: T) {
     const org = await uriToOrganization(params.organizationUri);
