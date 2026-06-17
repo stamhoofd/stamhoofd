@@ -4,7 +4,7 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { writeSetupCaddyConfig } from '../config/caddy-config.js';
-import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
+import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddyRootCaPath, caddySetupAdminPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
 import { buildSharedServiceProfile, SharedServiceDnsSetupKind } from '../config/shared-service-profile.js';
 import type { SharedServiceProfile } from '../config/shared-service-profile.js';
 import type { CliContext } from '../context/create-context.js';
@@ -447,7 +447,7 @@ async function dnsConfigurationCheck(domain: string, profile: SharedServiceProfi
 }
 
 async function certCheck(): Promise<CheckResult> {
-    const certPath = path.join(caddyDataDir(), 'pki/authorities/local/root.crt');
+    const certPath = caddyRootCaPath();
     try {
         await fs.access(certPath);
         return { ok: true, details: certPath };
