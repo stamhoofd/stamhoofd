@@ -142,8 +142,10 @@ export const importWithRetry: ImportRetryMethod = async <Args extends unknown[],
  * keep the existing toast + rethrow behaviour.
  */
 function handleLoadError(error: unknown, load: () => Promise<ComponentWithProperties>): ComponentWithProperties {
-    // eslint-disable-next-line stamhoofd/async-component-with-properties
-    return new ComponentWithProperties(ImportErrorView, { load });
+    if (isModuleImportError(error)) {
+        return new ComponentWithProperties(ImportErrorView, { load });
+    }
+    throw error;
 }
 
 /**
