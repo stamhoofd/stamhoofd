@@ -86,6 +86,7 @@
         "**/dist": true,
         "**/dist-playwright": true,
         "**/dist-prefix": true,
+        "**/coverage": true,
         "**/ios/App/App/public": true,
         "**/node_modules": true,
         "**/yarn-error.log": true,
