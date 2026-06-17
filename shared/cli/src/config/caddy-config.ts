@@ -156,6 +156,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
     const subjects = [...new Set([
         domains.mail,
         domains.files,
+        `*.${domains.files}`,
         domains.filesConsole,
         domains.sso,
         ...activeManifests.flatMap(manifest => manifest.caddy.tlsSubjects),

@@ -33,6 +33,18 @@ describe('Caddy config', () => {
         expect(caddyConfig.admin.origins).toEqual([`http://${localhostPort(caddyAdminPort)}`]);
     });
 
+    it('routes wildcard file bucket hosts with TLS coverage', async () => {
+        const config = await writeCaddyConfig(context(rootDir));
+        const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
+        const hosts = routeHosts(caddyConfig);
+        const subjects = caddyConfig.apps.tls.automation.policies[0].subjects;
+
+        expect(hosts).toContain('files.stamhoofd');
+        expect(hosts).toContain('*.files.stamhoofd');
+        expect(subjects).toContain('files.stamhoofd');
+        expect(subjects).toContain('*.files.stamhoofd');
+    });
+
     it('can bind the admin API to the container interface', async () => {
         const config = await writeCaddyConfig(context(rootDir), { adminListenHost: '0.0.0.0' });
         const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
