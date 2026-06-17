@@ -15,16 +15,14 @@ import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/o
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
-import type { Ref } from 'vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, useTemplateRef } from 'vue';
 import RouterAppView from './RouterAppView.vue';
 
-const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
+const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
 
@@ -105,18 +103,6 @@ onMounted(async () => {
             invalidHistory: true,
         });
     });
-
-    // First check updates, and only after that, check for global routes
-    // reason: otherwise the checkUpdates will dismiss the modal stack, and that can hide the reset password view instead of the update view
-    try {
-        await AppManager.shared.checkUpdates({
-            visibleCheck: 'spinner',
-            visibleDownload: true,
-            installAutomatically: true,
-        });
-    } catch (e) {
-        console.error(e);
-    }
 });
 
 </script>

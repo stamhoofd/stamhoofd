@@ -11,7 +11,7 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { App } from '@stamhoofd/dashboard';
+import App from './src/App.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
@@ -137,8 +137,7 @@ if (STAMHOOFD.PLAUSIBLE_DOMAIN && STAMHOOFD.environment === 'production') {
     const w = window as any;
     // eslint-disable-next-line prefer-rest-params
     w.plausible = w.plausible || function () { (w.plausible.q = w.plausible.q || []).push(arguments); };
-}
-else {
+} else {
     (window as any).plausible = function () {
         // eslint-disable-next-line prefer-rest-params
         console.log('Debug plausible with args ', arguments);
@@ -269,8 +268,7 @@ AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: strin
 
     if (data instanceof URL) {
         url = data.href;
-    }
-    else {
+    } else {
         // Convert data to a string
         const base64String = await blobToBase64(data); // capacitor plugin will automatically remove the 'data:image/png;base64,' prefix
 
@@ -289,18 +287,15 @@ AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: strin
                 dialogTitle: filename,
                 url,
             });
-        }
-        else {
+        } else {
             if (data instanceof URL) {
                 // Open in browser
                 window.open(data.href, '_blank');
-            }
-            else {
+            } else {
                 await FileOpener.open({ url });
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         if (isError(e) && (e.message === 'Share canceled' || e.message === 'Error sharing item')) {
             return;
         }
@@ -335,8 +330,7 @@ AppManager.shared.checkUpdates = async (options) => {
     const status = new UpdateStatus(options);
     try {
         await status.start();
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     isCheckingUpdates = false;

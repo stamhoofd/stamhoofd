@@ -1,14 +1,10 @@
-import { useAppContext } from '#context/appContext';
-import { useContext } from '#hooks/useContext.ts';
-import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CoverImageContainer from '#containers/CoverImageContainer.vue';
 import TabBarController from '#containers/TabBarController.vue';
 import { TabBarItem } from '#containers/TabBarItem.ts';
-
-
-
-import { getAppHost } from '@stamhoofd/structures';
+import { useAppContext } from '#context/appContext';
+import { useContext } from '#hooks/useContext.ts';
+import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 
 export function useLoginRoot() {

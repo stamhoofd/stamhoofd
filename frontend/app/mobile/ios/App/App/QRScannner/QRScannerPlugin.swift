@@ -16,7 +16,17 @@ struct QRTarget {
 }
 
 @objc(QRScannerPlugin)
-public class QRScannerPlugin: CAPPlugin {
+public class QRScannerPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "QRScannerPlugin"
+    public let jsName = "QRScanner"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "startScanning", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "stopScanning", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getTorch", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "toggleTorch", returnType: CAPPluginReturnPromise)
+    ]
+
+
     var captureSession: AVCaptureSession?
     var previewLayer: AVCaptureVideoPreviewLayer?
     

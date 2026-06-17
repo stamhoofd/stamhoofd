@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <resources>
-    <string name="app_name">Keeo</string>
-    <string name="package_name">be.fos.keeo</string>
-    <string name="custom_url_scheme">be.fos.keeo</string>
-    <string name="intent_host">keeo.fos.be</string>
+    <string name="app_name">Stamhoofd</string>
+    <string name="package_name">com.stamhoofd.stamhoofd</string>
+    <string name="custom_url_scheme">com.stamhoofd.stamhoofd</string>
+    <string name="intent_host">stamhoofd.app</string>
 </resources>

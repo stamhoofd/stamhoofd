@@ -1,4 +1,4 @@
-package be.fos.keeo;
+package com.stamhoofd.stamhoofd;
 
 import com.getcapacitor.BridgeActivity;
 import android.content.res.Configuration;
@@ -26,8 +26,6 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(FileOpenerPlugin.class);
         super.onCreate(savedInstanceState);
-
-        //WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     }
 
     @Override

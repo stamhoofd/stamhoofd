@@ -8,6 +8,7 @@ import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@s
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
 import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
@@ -16,7 +17,7 @@ import { wrap, wrapAndReplace } from './wrapAndReplace';
 
 provideAppNavigate(useNavigate());
 
-const isDashboardDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard;
+const isDashboardDomain = AppManager.shared.isNative || UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard;
 
 async function paramsToRequiredOrganization<T extends { organizationUri: string }>(params: T) {
     const org = await uriToOrganization(params.organizationUri);
@@ -94,7 +95,7 @@ async function loadVerifyEmail(organization: Organization | null, componentPrope
 }
 
 // ADMIN
-if (UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard) {
+if (isDashboardDomain) {
     defineRoute({
         name: AppRoute.Admin,
         url: $t('platform'),
