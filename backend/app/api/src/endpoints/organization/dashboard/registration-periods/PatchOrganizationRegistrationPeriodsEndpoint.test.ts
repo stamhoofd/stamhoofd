@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { GroupSettings, Group as GroupStruct, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
+import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
@@ -151,6 +151,53 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             // patch organization registration period should not fail
             const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
             expect(response.body).toBeDefined();
+        });
+
+        test('should be able to create a group with a nested waiting list', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const period = await new RegistrationPeriodFactory({ organization }).create();
+            const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period,
+            }).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(user);
+
+            const waitingList = GroupStruct.create({
+                organizationId: organization.id,
+                periodId: period.id,
+                type: GroupType.WaitingList,
+                settings: GroupSettings.create({
+                    name: TranslatedString.create('Waiting list'),
+                }),
+            });
+            const group = GroupStruct.create({
+                organizationId: organization.id,
+                periodId: period.id,
+                waitingList,
+                settings: GroupSettings.create({
+                    name: TranslatedString.create('Group with waiting list'),
+                }),
+            });
+            const groupsPatch: PatchableArrayAutoEncoder<GroupStruct> = new PatchableArray();
+            groupsPatch.addPut(group);
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            patch.addPatch(OrganizationRegistrationPeriodStruct.patch({
+                id: organizationPeriod.id,
+                groups: groupsPatch,
+            }));
+
+            const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
+
+            expect(response.body).toBeDefined();
+            const createdGroup = await Group.getByID(group.id);
+            const createdWaitingList = await Group.getByID(waitingList.id);
+            expect(createdGroup).toBeDefined();
+            expect(createdWaitingList).toBeDefined();
+            expect(createdGroup!.waitingListId).toBe(waitingList.id);
         });
 
         test('should not be able to patch groups of other organization', async () => {
