@@ -3,6 +3,7 @@ import { cloneObject } from '@simonbackx/simple-encoding';
 import { Group, Organization } from '@stamhoofd/models';
 import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';
+import fs from 'fs';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export async function startMigration(dryRun = false) {
@@ -37,6 +38,15 @@ export default new Migration(async () => {
 });
 
 class StamhoofdFilterHelper {
+    static mergeFiltersOfPropertyFilter(filters: (StamhoofdFilter | null)[], propertyFilterType: 'enabledWhen' | 'requiredWhen', mergeType?: '$and' | '$or'): StamhoofdFilter | null {
+        if (propertyFilterType === 'requiredWhen' && filters.some(filter => StamhoofdFilterHelper.isEmptyRecord(filter))) {
+            // always required if empty record
+            return {};
+        }
+
+        return mergeFilters(filters, mergeType);
+    }
+
     static isRecordOrArray(value: StamhoofdFilter): value is { [key: string]: StamhoofdFilter } | StamhoofdFilter[] {
         if (typeof value !== 'object' || value === null || value instanceof Date) {
             return false;
@@ -61,6 +71,14 @@ class StamhoofdFilterHelper {
         return Object.entries(value).length === 1;
     }
 
+    static isEmptyRecord(value: StamhoofdFilter): value is { [key: string]: never } {
+        if (!this.isRecord(value)) {
+            return false;
+        }
+
+        return Object.entries(value).length === 0;
+    }
+
     static hasRegistrationsFilter(filter: StamhoofdFilter): boolean {
         if (filter === null) {
             return false;
@@ -83,7 +101,7 @@ class StamhoofdFilterHelper {
         }
 
         // iterate properties
-        for (const [key, value] of Object.entries(filter as object) as [string, StamhoofdFilter | StamhoofdCompareValue][]) {
+        for (const [, value] of Object.entries(filter as object) as [string, StamhoofdFilter | StamhoofdCompareValue][]) {
             if (this.hasRegistrationsFilter(value)) {
                 return true;
             }
@@ -409,7 +427,7 @@ class GroupsPropertyFiltersTracker {
             this.set({
                 key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
                 type,
-                filter: mergeFilters(globalFilters, '$or'),
+                filter: StamhoofdFilterHelper.mergeFiltersOfPropertyFilter(globalFilters, type, '$or'),
                 isInverted: false,
                 mergeType: '$or',
             });
@@ -444,7 +462,7 @@ class GroupsPropertyFiltersTracker {
             return;
         }
 
-        propertyFilter[type] = mergeFilters([currentFilter, filter], mergeType);
+        propertyFilter[type] = StamhoofdFilterHelper.mergeFiltersOfPropertyFilter([currentFilter, filter], type, mergeType);
     }
 
     private get globalPropertyFilter(): PropertyFilter | undefined {
@@ -490,13 +508,20 @@ class GroupsPropertyFiltersTracker {
 }
 
 class PropertyFilterHandler {
+    readonly name: string;
     private readonly propertyFilter: PropertyFilter;
     private readonly recordCategory: RecordCategory | null;
     private readonly setPropertyFilterOnOrganization: (propertyFilter: PropertyFilter | null) => void;
     private readonly setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => void;
     readonly groupPropertyFiltersTracker: GroupsPropertyFiltersTracker;
 
-    constructor({ propertyFilter, setPropertyFilterOnOrganization, setPropertyFilterOnGroup, recordCategory }: { propertyFilter: PropertyFilter;
+    get original(): PropertyFilter {
+        return this.propertyFilter.clone();
+    }
+
+    constructor({ name, propertyFilter, setPropertyFilterOnOrganization, setPropertyFilterOnGroup, recordCategory }: {
+        // name is only used for logging
+        name: string; propertyFilter: PropertyFilter;
         // to set or remove propertyFilter on the organization
         setPropertyFilterOnOrganization: (propertyFilter: PropertyFilter | null) => void;
         // to set the propertyFilter on the group
@@ -508,6 +533,7 @@ class PropertyFilterHandler {
             throw new Error('No registration filter found');
         }
 
+        this.name = name;
         this.propertyFilter = propertyFilter;
         this.setPropertyFilterOnOrganization = setPropertyFilterOnOrganization;
         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
@@ -548,12 +574,97 @@ class PropertyFilterHandler {
         this.setPropertyFilterOnOrganization(null);
     }
 
-    handleGroup(group: Group) {
+    handleGroup(group: Group): PropertyFilter | null {
         const propertyFilter = this.groupPropertyFiltersTracker.getPropertyFilterForGroup(group);
 
         if (propertyFilter) {
             this.setPropertyFilterOnGroup(group, propertyFilter);
         }
+
+        return propertyFilter;
+    }
+}
+
+/**
+ * Only for testing purposes
+ */
+class PropertyChangesLoggerHelper {
+    private static readonly organizionIdsToLog = new Set(['02ef5b71-da8c-4046-abc1-481fbda74e3a']);
+    private readonly logInfo = new Map<string, Map<string, Set<string>>>();
+    private static readonly FILE_PATH: string = 'property-filter-changes.txt';
+    private shouldLog = false;
+
+    static didInitOneTime = false;
+
+    constructor(private readonly organization: Organization, private readonly propertyFilterHandlers: PropertyFilterHandler[]) {
+        if (!PropertyChangesLoggerHelper.didInitOneTime) {
+            PropertyChangesLoggerHelper.didInitOneTime = true;
+            // clear output
+            fs.writeFileSync(PropertyChangesLoggerHelper.FILE_PATH, '');
+        }
+
+        this.shouldLog = PropertyChangesLoggerHelper.organizionIdsToLog.has(this.organization.id);
+    }
+
+    add(name: string, group: Group, propertyFilter: PropertyFilter | null) {
+        if (!this.shouldLog) {
+            return;
+        }
+
+        let filterMap = this.logInfo.get(name);
+        if (!filterMap) {
+            filterMap = new Map<string, Set<string>>();
+            this.logInfo.set(name, filterMap);
+        }
+
+        const propertyFilterText = JSON.stringify(propertyFilter);
+
+        let groups = filterMap.get(propertyFilterText);
+        if (!groups) {
+            groups = new Set();
+            filterMap.set(propertyFilterText, groups);
+        }
+
+        groups.add(group.id);
+    }
+
+    private logTextToFile(text: string) {
+        try {
+            fs.appendFileSync(PropertyChangesLoggerHelper.FILE_PATH, text);
+        } catch (err) {
+            console.error('Error writing file:', err);
+        }
+    }
+
+    doLog() {
+        if (!this.shouldLog) {
+            return;
+        }
+
+        const changed = [...this.logInfo.entries()].map(([name, filterMap]) => {
+            const original = this.propertyFilterHandlers.find(handler => handler.name === name)!.original;
+
+            return {
+                [name]: {
+                    original,
+                    changes: [...filterMap.entries()].map(([propertyFilterText, groups]) => {
+                        return {
+                            propertyFilter: propertyFilterText,
+                            groups: groups.size < 10 ? [...groups] : groups.size,
+                        };
+                    }) },
+            };
+        });
+
+        const allInfo = {
+            organization: {
+                id: this.organization.id,
+                name: this.organization.name,
+            },
+            changed,
+        };
+
+        this.logTextToFile(JSON.stringify(allInfo) + ',');
     }
 }
 
@@ -578,10 +689,13 @@ class OrganizationHandler {
             propertyFilterHandler.handleOrganization();
         }
 
+        const changesLogger = new PropertyChangesLoggerHelper(this.organization, propertyFilterHandlers);
+
         // todo: take into account cycles (or do this before the registration periods migration for better performance)
         for await (const group of query.all()) {
             for (const propertyFilterHandler of propertyFilterHandlers) {
-                propertyFilterHandler.handleGroup(group);
+                const propertyFilter = propertyFilterHandler.handleGroup(group);
+                changesLogger.add(propertyFilterHandler.name, group, propertyFilter);
             }
 
             if (!dryRun) {
@@ -592,6 +706,8 @@ class OrganizationHandler {
         if (!dryRun) {
             await this.organization.save();
         }
+
+        changesLogger.doLog();
     }
 
     private getAllRecordCategories(recordCategory: RecordCategory): RecordCategory[] {
@@ -635,6 +751,7 @@ class OrganizationHandler {
 
                 try {
                     propertyFilterWrappers.push(new PropertyFilterHandler({
+                        name: key,
                         propertyFilter: value,
                         setPropertyFilterOnOrganization: (propertyFilter) => {
                             this.organization.meta.recordsConfiguration[key] = propertyFilter;
@@ -661,6 +778,7 @@ class OrganizationHandler {
 
                 try {
                     return new PropertyFilterHandler({
+                        name: category.name.toString(),
                         propertyFilter,
                         setPropertyFilterOnOrganization: (propertyFilter) => {
                             category.filter = propertyFilter;
