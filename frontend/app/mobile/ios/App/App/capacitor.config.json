@@ -1,6 +1,6 @@
 {
-	"appId": "be.fos.keeo",
-	"appName": "Keeo",
+	"appId": "com.stamhoofd.stamhoofd",
+	"appName": "Stamhoofd",
 	"webDir": "dist",
 	"loggingBehavior": "none",
 	"plugins": {
@@ -19,7 +19,7 @@
 		}
 	},
 	"server": {
-		"hostname": "keeo.fos.be",
+		"hostname": "stamhoofd.app",
 		"androidScheme": "https"
 	},
 	"packageClassList": [

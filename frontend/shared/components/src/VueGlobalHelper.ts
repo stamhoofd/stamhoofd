@@ -130,8 +130,28 @@ export class VueGlobalHelper {
 
         // For some reason Vue does not log the error itself
         app.config.errorHandler = (err, instance, info) => {
-            console.error('Vue errorHandler caught:', err); // the real Error object
-            console.error('Component info:', info);
+            console.group('Vue errorHandler caught');
+
+            console.error('Error:', err);
+            console.error('Info:', info);
+
+            if (instance) {
+                console.error('Component instance:', instance);
+
+                const type = instance.$?.type;
+                console.error('Component name:', type?.name);
+                console.error('Component file:', type?.__file);
+
+                console.error('Props:', instance.$props);
+                console.error('Data:', instance.$data);
+            }
+
+            console.groupEnd();
+
+            // In development, rethrow so the browser debugger stops closer to the cause.
+            if (import.meta.env.DEV) {
+                throw err;
+            }
         };
 
         app.config.warnHandler = function (msg, instance, trace) {

@@ -1,4 +1,5 @@
-import { PermissionState, PluginListenerHandle, registerPlugin } from '@capacitor/core';
+import type { PermissionState, PluginListenerHandle } from '@capacitor/core';
+import { registerPlugin } from '@capacitor/core';
 
 export interface PermissionStatus {
     /**
@@ -17,7 +18,7 @@ export interface QRScannerPlugin {
     toggleTorch(): Promise<{ status: boolean }>;
 
     /**
-     * Check permission 
+     * Check permission
      */
     checkPermissions(): Promise<PermissionStatus>;
 
@@ -31,7 +32,6 @@ export interface QRScannerPlugin {
         listenerFunc: (result: { value: string }) => void,
     ): Promise<PluginListenerHandle> & PluginListenerHandle;
 }
-
 
 const QRScanner = registerPlugin<QRScannerPlugin>('QRScanner');
 

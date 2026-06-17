@@ -1,15 +1,15 @@
-import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { BundleInfo } from '@capgo/capacitor-updater';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
+import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
+import type { UpdateOptions } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import { UpdateOptions } from '@stamhoofd/networking/AppManager';
-import { sleep } from '@stamhoofd/utility';
-
-
+import { sleep } from '@stamhoofd/utility/Sleep.js';
+import CheckUpdateView from './CheckUpdateView.vue';
 
 class Release extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -29,8 +29,7 @@ function compareVersions(current: string, other: string) {
 
         if (currentPart > otherPart) {
             return -1;
-        }
-        else if (currentPart < otherPart) {
+        } else if (currentPart < otherPart) {
             return 1;
         }
     }
@@ -109,16 +108,14 @@ export class UpdateStatus {
                     url: release.path,
                     version: release.version.toString(),
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 CapacitorUpdater.removeAllListeners().catch(console.error);
                 throw e;
             }
             await CapacitorUpdater.removeAllListeners();
             this.progress = 1;
             // toast?.hide()
-        }
-        else {
+        } else {
             version = alreadyDownloaded;
         }
         return version;
@@ -145,9 +142,10 @@ export class UpdateStatus {
     show() {
         console.log('Show UpdateStatus');
         this.shouldBeVisible = true;
-        ModalStackEventBus.sendEvent('present', {
+        MobileRootEventBus.sendEvent('present', {
             components: [
-                AsyncComponent(() => import('./CheckUpdateView.vue'), {
+                // eslint-disable-next-line stamhoofd/async-component-with-properties
+                new ComponentWithProperties(CheckUpdateView, {
                     status: this,
                 }),
             ],
@@ -196,12 +194,10 @@ export class UpdateStatus {
 
                 // Sleep a bit before resolving the promise (otherwise the app will assume it's already updated)
                 await sleep(5000);
-            }
-            else {
+            } else {
                 await this.installVersion(version);
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             this.hide();
 
@@ -212,11 +208,9 @@ export class UpdateStatus {
 
             if (this.options.visibleCheck && this.status === 'checking') {
                 new Toast($t(`%X2`), 'error red').show();
-            }
-            else if (this.status === 'downloading' && (this.options.visibleCheck || this.options.visibleDownload)) {
+            } else if (this.status === 'downloading' && (this.options.visibleCheck || this.options.visibleDownload)) {
                 new Toast($t(`%X3`), 'error red').show();
-            }
-            else if (this.status === 'installing' && (this.options.visibleCheck || this.options.visibleDownload)) {
+            } else if (this.status === 'installing' && (this.options.visibleCheck || this.options.visibleDownload)) {
                 new Toast($t(`%X4`), 'error red').show();
             }
         }

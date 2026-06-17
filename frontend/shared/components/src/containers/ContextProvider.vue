@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<{
 }>(), {
     context: () => ({}),
 });
+console.info('Providing context', props.context);
 
 if (isReactive(props.context)) {
     // If props.context is a proxy, it will auto unwrap all the reference properties it has

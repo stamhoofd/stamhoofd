@@ -4,8 +4,8 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:keeo.fos.be</string>
-		<string>applinks:keeo.fos.be</string>
+		<string>webcredentials:stamhoofd.app</string>
+		<string>applinks:stamhoofd.app</string>
 	</array>
 </dict>
 </plist>

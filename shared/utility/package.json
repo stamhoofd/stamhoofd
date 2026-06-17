@@ -7,11 +7,8 @@
     "types": "./dist/index.d.ts",
     "sideEffects": false,
     "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.js"
-        }
+        ".": "./dist/index.js",
+        "./*.js": "./dist/*.js"
     },
     "files": [
         "dist",

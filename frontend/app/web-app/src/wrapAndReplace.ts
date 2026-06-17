@@ -14,6 +14,7 @@ import { markRaw } from 'vue';
 import type { Ref } from 'vue';
 import { sessionFromOrganization, sessionGlobal } from './sessionBuilders';
 import { useGlobalRoutes } from './useGlobalRoutes';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
@@ -21,7 +22,7 @@ function wrapWithModalStack(component: ComponentWithProperties) {
 export type SharedOptions = { url?: string | null | Ref<string | null>; query?: URLSearchParams | null | Ref<URLSearchParams | null>; checkRoutes?: boolean };
 
 export async function wrap(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options?: SharedOptions) {
-    const onOurDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
+    const onOurDomain = AppManager.shared.isNative || UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
 
     if ((STAMHOOFD.singleOrganization || organization?.resolvedRegisterDomain) && !onOurDomain) {
         // redirect to our domain
