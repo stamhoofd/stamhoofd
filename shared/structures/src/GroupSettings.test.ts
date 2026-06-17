@@ -42,6 +42,7 @@ describe('GroupSettings v73 → v75 upgrade', () => {
 describe('GroupSettings stock', () => {
     function buildGroup(options: { maxMembers?: number | null; prices: GroupPrice[]; usedGroupStock?: number; usedPriceStock?: Record<string, number> }) {
         const settings = GroupSettings.create({
+            name: TranslatedString.create('Naam'),
             maxMembers: options.maxMembers ?? null,
             prices: options.prices,
         });

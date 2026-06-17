@@ -219,6 +219,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
+                        name: TranslatedString.create('Naam'),
                         description: TranslatedString.create('Inschrijvingsgroep'),
                     }),
                 }),
@@ -338,6 +339,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
+                        name: TranslatedString.create('Naam'),
                         description: TranslatedString.create('Inschrijvingsgroep'),
                     }),
                 }),
@@ -400,6 +402,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                     id: event.id,
                     group: Group.create({
                         settings: GroupSettings.create({
+                            name: TranslatedString.create('Naam'),
                             description: TranslatedString.create('Inschrijvingsgroep'),
                         }),
                     }),
