@@ -9,6 +9,10 @@ export default new Migration(async () => {
         return;
     }
 
+    if (STAMHOOFD.userMode !== 'platform') {
+        throw new Error('singleOrganization should never be combined with userMode organization');
+    }
+
     let organization = await Organization.getByID(STAMHOOFD.singleOrganization);
     if (organization) {
         console.log('Single organization already created.');

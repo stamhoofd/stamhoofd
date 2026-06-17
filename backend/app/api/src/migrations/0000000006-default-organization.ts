@@ -12,7 +12,7 @@ export default new Migration(async () => {
         return;
     }
 
-    const registrationPeriod = (await RegistrationPeriod.select().first(false)) ?? new RegistrationPeriod();
+    const registrationPeriod = STAMHOOFD.userMode === 'platform' ? ((await RegistrationPeriod.select().first(false)) ?? new RegistrationPeriod()) : new RegistrationPeriod();
     if (!registrationPeriod.id) {
         const s = Formatter.luxon();
         const startDate = s.set({
@@ -121,6 +121,11 @@ export default new Migration(async () => {
     }
 
     await organization.save();
+
+    if (STAMHOOFD.userMode === 'organization') {
+        registrationPeriod.organizationId = organization.id;
+        await registrationPeriod.save();
+    }
 
     // Set as platform organization
     platform.membershipOrganizationId = organization.id;
