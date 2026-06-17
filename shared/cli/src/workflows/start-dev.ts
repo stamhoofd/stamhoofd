@@ -12,6 +12,7 @@ import { openUrl } from '../runtime/ux.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { startServices, stopServices } from '../services/manager.js';
 import { sharedServiceDefinitions } from '../services/registry.js';
+import { setupDevelopmentS3Buckets } from '../services/s3-buckets.js';
 import { sharedServicesRunning } from '../services/shared-services.js';
 import { startStripe, stopStripe } from '../services/stripe.js';
 import { checkSetup, isSetupReady, printSetupReport } from './setup-machine.js';
@@ -130,6 +131,10 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 output.log('Resolve the shared service issues above, then retry: stam services up');
                 return;
             }
+        }
+
+        if (options.services && target !== DevTarget.Frontend) {
+            await setupDevelopmentS3Buckets(context);
         }
 
         await writeInstanceManifest(context, {
