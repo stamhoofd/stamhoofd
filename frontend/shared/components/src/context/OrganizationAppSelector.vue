@@ -9,14 +9,14 @@
 
             <template v-if="currentOptions.length">
                 <STList>
-                    <STListItem v-for="option in currentOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" @click="selectOption(option)">
+                    <STListItem v-for="option in currentOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" data-testid="app-switcher-option" :data-app="option.app" :data-organization="option.organization?.id ?? 'null'" @click="selectOption(option)">
                         <template #left>
                             <ContextLogo :organization="option.organization" :app="option.app" />
                         </template>
-                        <h1 class="style-title-list">
+                        <h1 class="style-title-list" data-testid="app-switcher-option-title">
                             {{ getAppTitle(option.app, option.organization, 'current') }}
                         </h1>
-                        <p v-if="getAppDescription(option.app, option.organization, 'current')" class="style-description-small">
+                        <p v-if="getAppDescription(option.app, option.organization, 'current')" class="style-description-small" data-testid="app-switcher-option-description">
                             {{ getAppDescription(option.app, option.organization, 'current') }}
                         </p>
                         <template v-if="isCurrent(option)" #right>
@@ -29,14 +29,14 @@
             </template>
 
             <STList v-if="otherOptions.length">
-                <STListItem v-for="option in otherOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" @click="selectOption(option)">
+                <STListItem v-for="option in otherOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" data-testid="app-switcher-option" :data-app="option.app" :data-organization="option.organization?.id ?? 'null'" @click="selectOption(option)">
                     <template #left>
                         <ContextLogo :organization="option.organization" :app="option.app" />
                     </template>
-                    <h1 class="style-title-list">
+                    <h1 class="style-title-list" data-testid="app-switcher-option-title">
                         {{ getAppTitle(option.app, option.organization, 'other') }}
                     </h1>
-                    <p v-if="getAppDescription(option.app, option.organization, 'other')" class="style-description-small">
+                    <p v-if="getAppDescription(option.app, option.organization, 'other')" class="style-description-small" data-testid="app-switcher-option-description">
                         {{ getAppDescription(option.app, option.organization, 'other') }}
                     </p>
                     <p v-if="option.userDescription" class="style-description-small style-em">
@@ -48,7 +48,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="button" class="left-center" @click="searchOrganizations">
+                <STListItem :selectable="true" element-name="button" class="left-center" data-testid="app-switcher-search-others" @click="searchOrganizations">
                     <template #left>
                         <IconContainer icon="search" class="transparent" />
                     </template>
@@ -60,7 +60,8 @@
             </STList>
 
             <template v-else-if="(STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization">
-                <hr v-if="currentOptions.length || otherOptions.length"><button class="button text" type="button" @click="searchOrganizations">
+                <hr v-if="currentOptions.length || otherOptions.length">
+                <button class="button text" type="button" data-testid="app-switcher-search-others" @click="searchOrganizations">
                     <span class="icon search" />
                     <span>{{ $t('%a3') }}</span>
                 </button>

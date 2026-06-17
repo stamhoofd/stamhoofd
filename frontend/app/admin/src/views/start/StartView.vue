@@ -1,5 +1,5 @@
 <template>
-    <section class="st-view">
+    <section class="st-view" data-testid="platform-start-view">
         <STNavigationBar :title="$t(`%IW`)" />
         <main class="center">
             <h1>
