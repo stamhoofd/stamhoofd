@@ -60,6 +60,7 @@
         "@stamhoofd/backend-env": "*",
         "@stamhoofd/backend-i18n": "*",
         "@stamhoofd/backend-middleware": "*",
+        "@stamhoofd/cli": "*",
         "@stamhoofd/crons": "*",
         "@stamhoofd/email": "*",
         "@stamhoofd/excel-writer": "*",

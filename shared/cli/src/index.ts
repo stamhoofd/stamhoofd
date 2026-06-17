@@ -1,5 +1,6 @@
 export { run } from '@oclif/core';
 export { buildDevelopmentEnvironment } from './config/development-config.js';
+export { createS3Client, type S3ClientEnvironment } from './config/s3-client.js';
 export { caddyAdminPort, localIpv4Host } from './config/shared-service-config.js';
 export { buildCaddyServiceProfile, buildSharedServiceProfile } from './config/shared-service-profile.js';
 export { createContext } from './context/create-context.js';

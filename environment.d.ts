@@ -145,6 +145,8 @@ declare global {
         readonly SPACES_KEY: string;
         readonly SPACES_SECRET: string;
         readonly SPACES_PREFIX?: string;
+        readonly SPACES_FORCE_PATH_STYLE?: boolean;
+        readonly SPACES_PUBLIC_URL?: string;
 
         // Mollie
         readonly MOLLIE_CLIENT_ID: string;
@@ -294,6 +296,7 @@ declare global {
          readonly SPACES_BUCKET: string;
          readonly SPACES_KEY: string;
          readonly SPACES_SECRET: string;
+         readonly SPACES_FORCE_PATH_STYLE?: boolean;
          readonly AWS_REGION: 'eu-west-1' | string; // TODO: add others
          readonly MINIMUM_BACKUP_SIZE?: number; // Expected size (in bytes) of database backup, to detect broken backups
 

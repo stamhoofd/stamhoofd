@@ -2,6 +2,7 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules i
 import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { createS3Client } from '@stamhoofd/cli';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { ResolutionRequest } from '@stamhoofd/structures';
 import { File, Resolution } from '@stamhoofd/structures';
@@ -29,15 +30,7 @@ export class Image extends QueryableModel {
 
     static getS3Client(): S3Client {
         if (!this.s3Client) {
-            this.s3Client = new S3Client({
-                forcePathStyle: false, // Configures to use subdomain/virtual calling format.
-                endpoint: 'https://' + STAMHOOFD.SPACES_ENDPOINT,
-                credentials: {
-                    accessKeyId: STAMHOOFD.SPACES_KEY,
-                    secretAccessKey: STAMHOOFD.SPACES_SECRET,
-                },
-                region: 'eu-west-1', // Not used, but required by the S3Client
-            });
+            this.s3Client = createS3Client(STAMHOOFD);
         }
         return this.s3Client;
     }

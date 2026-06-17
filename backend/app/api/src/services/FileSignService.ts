@@ -4,6 +4,7 @@ import {
 } from '@aws-sdk/s3-request-presigner';
 import type { DecodedRequest, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { createS3Client } from '@stamhoofd/cli';
 import { File } from '@stamhoofd/structures';
 import chalk from 'chalk';
 import * as jose from 'jose';
@@ -15,15 +16,7 @@ export class FileSignService {
     static s3: S3Client;
 
     static async load() {
-        this.s3 = new S3Client({
-            forcePathStyle: false, // Configures to use subdomain/virtual calling format.
-            endpoint: 'https://' + STAMHOOFD.SPACES_ENDPOINT,
-            credentials: {
-                accessKeyId: STAMHOOFD.SPACES_KEY,
-                secretAccessKey: STAMHOOFD.SPACES_SECRET,
-            },
-            region: 'eu-west-1', // Not used, but required by the S3Client
-        });
+        this.s3 = createS3Client(STAMHOOFD);
 
         /**
          * Note the algorithm is only used for signing. For verification the algorithm inside the public keys are used

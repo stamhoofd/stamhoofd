@@ -77,7 +77,7 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
         SPACES_BUCKET: bucket,
         SPACES_KEY: localFilesAccessKey,
         SPACES_SECRET: localFilesSecretKey,
-        SPACES_FORCE_PATH_STYLE: 'true',
+        SPACES_FORCE_PATH_STYLE: 'false',
         SPACES_PUBLIC_URL: `https://${domains.files}/${bucket}`,
     };
 
@@ -163,7 +163,7 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, p
         SPACES_KEY: backendEnv.SPACES_KEY!,
         SPACES_SECRET: backendEnv.SPACES_SECRET!,
         SPACES_PREFIX: '',
-        SPACES_FORCE_PATH_STYLE: true,
+        SPACES_FORCE_PATH_STYLE: false,
         SPACES_PUBLIC_URL: backendEnv.SPACES_PUBLIC_URL!,
         MOLLIE_CLIENT_ID: '',
         MOLLIE_SECRET: '',
