@@ -297,13 +297,13 @@ defineRoutes([
         present: 'popup',
         component: async () => (await import('./modules/members/ImportMembersView.vue')).default,
     },
-    {
-        url: Routes.OrganizationRegistrationPeriods,
-        present: 'popup',
-        component: async () => (await import('@stamhoofd/components/periods/EditRegistrationPeriodsView.vue')).default,
-    },
     ...(!isPlatform
         ? [
+                {
+                    url: Routes.OrganizationRegistrationPeriods,
+                    present: 'popup' as const,
+                    component: async () => (await import('@stamhoofd/components/periods/EditRegistrationPeriodsView.vue')).default,
+                },
                 {
                     name: Routes.FinancialSupport,
                     url: 'financiele-ondersteuning',
