@@ -35,6 +35,17 @@
 
         <STListItem :selectable="true" element-name="label">
             <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.GreaterThanOrEqual" @change="onChange" />
+            </template>
+            <p class="style-title-list">
+                {{ $t('Groter dan of gelijk aan...') }}
+            </p>
+
+            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.GreaterThanOrEqual" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`%bV`)" />
+        </STListItem>
+
+        <STListItem :selectable="true" element-name="label">
+            <template #left>
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.LessThan" @change="onChange" />
             </template>
             <p class="style-title-list">
@@ -42,6 +53,17 @@
             </p>
 
             <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.LessThan" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`%bV`)" />
+        </STListItem>
+
+        <STListItem :selectable="true" element-name="label">
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.LessThanOrEqual" @change="onChange" />
+            </template>
+            <p class="style-title-list">
+                {{ $t('Kleiner dan of gelijk aan...') }}
+            </p>
+
+            <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.LessThanOrEqual" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`%bV`)" />
         </STListItem>
     </STList>
 </template>

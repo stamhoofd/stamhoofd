@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { unwrapFilterByPath } from '@stamhoofd/structures';
@@ -40,9 +40,21 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
                 },
             };
 
+            case UINumberFilterMode.GreaterThanOrEqual: return {
+                [this.builder.key]: {
+                    $gte: this.value,
+                },
+            };
+
             case UINumberFilterMode.LessThan: return {
                 [this.builder.key]: {
                     $lt: this.value,
+                },
+            };
+
+            case UINumberFilterMode.LessThanOrEqual: return {
+                [this.builder.key]: {
+                    $lte: this.value,
                 },
             };
         }
@@ -57,7 +69,9 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
     get combinationWord(): string {
         switch (this.mode) {
             case UINumberFilterMode.GreaterThan: return $t(`%bE`);
+            case UINumberFilterMode.GreaterThanOrEqual: return $t(`is groter dan of gelijk aan`);
             case UINumberFilterMode.LessThan: return $t(`%bF`);
+            case UINumberFilterMode.LessThanOrEqual: return $t(`is kleiner dan of gelijk aan`);
             case UINumberFilterMode.Equals: return $t(`%bG`);
             case UINumberFilterMode.NotEquals: return $t(`%bH`);
         }
@@ -91,8 +105,6 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
         }
     }
 }
-
-
 
 export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     key = '';
@@ -156,6 +168,16 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
             }, { isInverted });
         }
 
+        const lessThanOrEqual = unwrapFilterByPath(unwrapped, [this.key, '$lte']);
+
+        if (typeof lessThanOrEqual === 'number') {
+            return new NumberUIFilter({
+                builder: this,
+                value: lessThanOrEqual,
+                mode: UINumberFilterMode.LessThanOrEqual,
+            }, { isInverted });
+        }
+
         const greaterThan = unwrapFilterByPath(unwrapped, [this.key, '$gt']);
 
         if (typeof greaterThan === 'number') {
@@ -163,6 +185,16 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
                 builder: this,
                 value: greaterThan,
                 mode: UINumberFilterMode.GreaterThan,
+            }, { isInverted });
+        }
+
+        const greaterThanOrEqual = unwrapFilterByPath(unwrapped, [this.key, '$gte']);
+
+        if (typeof greaterThanOrEqual === 'number') {
+            return new NumberUIFilter({
+                builder: this,
+                value: greaterThanOrEqual,
+                mode: UINumberFilterMode.GreaterThanOrEqual,
             }, { isInverted });
         }
 
