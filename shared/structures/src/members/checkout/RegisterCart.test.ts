@@ -8,16 +8,16 @@ import { ReduceablePrice } from '../../ReduceablePrice.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { BooleanStatus, MemberDetails } from '../MemberDetails.js';
+import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
 import { PlatformFamily } from '../PlatformMember.js';
 import { RegisterItem } from './RegisterItem.js';
-import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
 
 // Should be last because of circular dependencies
-import { BundleDiscount } from '../../BundleDiscount.js';
-import { Registration } from '../Registration.js';
 import { AppliedRegistrationDiscount } from '../../AppliedRegistrationDiscount.js';
-import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import { BundleDiscount } from '../../BundleDiscount.js';
 import { GenericBalance } from '../../GenericBalance.js';
+import { Registration } from '../Registration.js';
+import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
 // Helper functions to reduce code duplication
 function createTestPeriod() {
@@ -37,7 +37,7 @@ function createTestGroups(organization: Organization, period: RegistrationPeriod
             organizationId: organization.id,
             periodId: period.id,
             settings: GroupSettings.create({
-                name: names ? new TranslatedString(names[index]) : undefined,
+                name: new TranslatedString(names ? names[index] : 'Name'),
                 prices: [
                     GroupPrice.create({
                         price: ReduceablePrice.create({
