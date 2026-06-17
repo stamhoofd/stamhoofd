@@ -781,8 +781,8 @@ import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSe
 import ImageInput from '#inputs/ImageInput.vue';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useOrganizationRegistrationRecordSettingsRoute } from '@stamhoofd/components/records/useOrganizationRegistrationRecordSettingsRoute.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(
     defineProps<{
@@ -1572,7 +1572,9 @@ async function addWaitingList() {
 
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
     groups.addPut(waitingList);
-    const basePatch = OrganizationRegistrationPeriod.patch({ groups });
+    const basePatch = OrganizationRegistrationPeriod.patch({
+        groups,
+    });
 
     // Edit the group
     await present({
@@ -1584,7 +1586,24 @@ async function addWaitingList() {
                 showToasts: false,
                 organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(basePatch.patch(patch));
+                    // Save the waiting list under the parent group creation,
+                    // it will take care of creating the nested waiting list.
+                    // Otherwise it'll try to create the waiting list twice.
+                    const updatedPeriod = patchedPeriod.value.patch(patch);
+                    const updatedWaitingList = updatedPeriod.groups
+                        .find(g => g.id === waitingList.id)
+                        // This fallback should actually never happen but there's no easy way to return an error.
+                        ?? waitingList;
+
+                    const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+                    groups.addPatch(Group.patch({
+                        id: props.groupId,
+                        waitingList: updatedWaitingList,
+                    }));
+
+                    addPatch(OrganizationRegistrationPeriod.patch({
+                        groups,
+                    }));
                 },
             }),
         ],
