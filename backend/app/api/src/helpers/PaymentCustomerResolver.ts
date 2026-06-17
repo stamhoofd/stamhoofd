@@ -1,4 +1,5 @@
 import { PaymentCustomer } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import type { BalanceItem, Member, Order, Organization, Payment, User } from '@stamhoofd/models';
 
 /**
@@ -54,10 +55,10 @@ export function determinePaymentCustomer(payment: Payment, relations: PaymentCus
     }
 
     // The balance items linked to this payment, used to find members/users/orders.
-    const linkedMemberIds = unique(balanceItems.map(b => b.memberId).filter((id): id is string => id !== null));
-    const linkedUserIds = unique(balanceItems.map(b => b.userId).filter((id): id is string => id !== null));
-    const linkedOrderIds = unique(balanceItems.map(b => b.orderId).filter((id): id is string => id !== null));
-    const linkedPayingOrganizationIds = unique(balanceItems.map(b => b.payingOrganizationId).filter((id): id is string => id !== null));
+    const linkedMemberIds = Formatter.uniqueArray(balanceItems.map(b => b.memberId).filter((id): id is string => id !== null));
+    const linkedUserIds = Formatter.uniqueArray(balanceItems.map(b => b.userId).filter((id): id is string => id !== null));
+    const linkedOrderIds = Formatter.uniqueArray(balanceItems.map(b => b.orderId).filter((id): id is string => id !== null));
+    const linkedPayingOrganizationIds = Formatter.uniqueArray(balanceItems.map(b => b.payingOrganizationId).filter((id): id is string => id !== null));
 
     // 3. A member linked to the balance items
     for (const memberId of linkedMemberIds) {
@@ -140,8 +141,4 @@ function customerFromMember(member: Member): PaymentCustomer | null {
         email: details.getMemberEmails()[0] ?? null,
         phone: details.phone,
     });
-}
-
-function unique(ids: string[]): string[] {
-    return [...new Set(ids)];
 }

@@ -1,5 +1,5 @@
 import { BalanceItem, Member, Order, Organization, Payment, User } from '@stamhoofd/models';
-import { Address, Company, Country, MemberDetails, OrderData, Parent, ParentType } from '@stamhoofd/structures';
+import { Company, MemberDetails, OrderData, Parent, ParentType } from '@stamhoofd/structures';
 import { determinePaymentCustomer } from './PaymentCustomerResolver.js';
 
 describe('PaymentCustomerResolver', () => {
@@ -45,12 +45,16 @@ describe('PaymentCustomerResolver', () => {
         payingOrganizations: [] as Organization[],
     };
 
-    it('returns the company of the paying organization', () => {
+    function createOrganization(id: string, companyName: string): Organization {
         const organization = new Organization();
-        organization.id = 'org-1';
-        organization.name = 'My Organization';
-        organization.address = Address.createDefault(Country.Belgium);
-        organization.meta = { companies: [] } as any;
+        organization.id = id;
+        organization.name = companyName;
+        organization.meta = { companies: [Company.create({ name: companyName })] } as any;
+        return organization;
+    }
+
+    it('returns the company of the paying organization', () => {
+        const organization = createOrganization('org-1', 'My Organization');
 
         const payment = createPayment({ payingOrganizationId: 'org-1' });
 
@@ -167,11 +171,7 @@ describe('PaymentCustomerResolver', () => {
     });
 
     it('prefers the paying organization over a linked member', () => {
-        const organization = new Organization();
-        organization.id = 'org-1';
-        organization.name = 'My Organization';
-        organization.address = Address.createDefault(Country.Belgium);
-        organization.meta = { companies: [Company.create({ name: 'My Company' })] } as any;
+        const organization = createOrganization('org-1', 'My Company');
 
         const payment = createPayment({ payingOrganizationId: 'org-1' });
         const details = MemberDetails.create({ firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', birthDay: new Date(1990, 0, 1) });
