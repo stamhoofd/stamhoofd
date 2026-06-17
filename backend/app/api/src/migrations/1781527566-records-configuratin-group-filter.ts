@@ -1,8 +1,8 @@
 import { Migration } from '@simonbackx/simple-database';
-import type { Group } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
+import { cloneObject } from '@simonbackx/simple-encoding';
+import { Group, Organization } from '@stamhoofd/models';
 import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { PropertyFilter } from '@stamhoofd/structures';
+import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export async function startMigration() {
@@ -152,27 +152,39 @@ class StamhoofdFilterHelper {
 }
 
 class RegistrationsFilterHandler {
-    private isInverted: boolean = false;
-    private groupdIds: Set<string> | null = null;
-    private otherFilters: StamhoofdFilter[] | null = null;
-    private didFindRegistrationsFilter = false;
+    private _isInverted: boolean = false;
+    private _groupdIds: Set<string> | null = null;
+    private _otherFilters: StamhoofdFilter[] | null = null;
+    private _didFindRegistrationsFilter = false;
+
+    get isInverted() {
+        return this._isInverted;
+    }
+
+    get groupIds() {
+        return this._groupdIds!;
+    }
+
+    get otherFilters() {
+        return this._otherFilters!;
+    }
 
     constructor(private readonly filter: StamhoofdFilter) {
         this.initFromFilter(filter);
     }
 
     private initFromFilter(filter: StamhoofdFilter) {
-        this.otherFilters = this.readAndFlattenFilter(filter);
+        this._otherFilters = this.readAndFlattenFilter(filter, false);
 
-        if (this.groupdIds === null) {
+        if (this._groupdIds === null) {
             throw new Error('groupdIds is null');
         }
 
-        if (this.otherFilters === null) {
+        if (this._otherFilters === null) {
             throw new Error('otherFilters is null');
         }
 
-        if (this.didFindRegistrationsFilter === false) {
+        if (this._didFindRegistrationsFilter === false) {
             throw new Error('didFindRegistrationsFilter is false');
         }
     }
@@ -181,7 +193,7 @@ class RegistrationsFilterHandler {
      * Reads data from registration filter and return an array of other filters as a flat array
      * @param filter
      */
-    private readAndFlattenFilter(filter: StamhoofdFilter): StamhoofdFilter[] {
+    private readAndFlattenFilter(filter: StamhoofdFilter, isInverted: boolean): StamhoofdFilter[] {
         // filter should not contain any $or filters
 
         if (!StamhoofdFilterHelper.isRecordOrArray(filter)) {
@@ -189,7 +201,7 @@ class RegistrationsFilterHandler {
         }
 
         if (Array.isArray(filter)) {
-            return filter.flatMap(item => this.readAndFlattenFilter(item));
+            return filter.flatMap(item => this.readAndFlattenFilter(item, isInverted));
         }
 
         const all: StamhoofdFilter[] = [];
@@ -199,7 +211,18 @@ class RegistrationsFilterHandler {
                 throw new Error('The $or filter is not supported');
             }
 
+            if (key === '$not') {
+                if (isInverted) {
+                    throw new Error('Double inversion, check filter: ' + JSON.stringify(this.filter));
+                }
+                isInverted = true;
+            }
+
             if (key === 'registrations') {
+                if (isInverted) {
+                    this._isInverted = true;
+                }
+
                 this.readRegistrationFilter({ [key]: value });
                 continue;
             }
@@ -232,19 +255,19 @@ class RegistrationsFilterHandler {
                         throw new Error('Invalid filter: ' + JSON.stringify(filter));
                     }
 
-                    all.push(...this.readAndFlattenFilter(item).map(filter => ({ [key]: filter })));
+                    all.push(...this.readAndFlattenFilter(item, isInverted).map(filter => ({ [key]: filter })));
                 }
                 continue;
             }
 
-            all.push(...this.readAndFlattenFilter(value).map(filter => ({ [key]: filter })));
+            all.push(...this.readAndFlattenFilter(value, isInverted).map(filter => ({ [key]: filter })));
         }
 
         return all;
     }
 
     private readRegistrationFilter(registrationFilter: { registrations: StamhoofdFilter }): void {
-        if (this.didFindRegistrationsFilter) {
+        if (this._didFindRegistrationsFilter) {
             throw new Error('Found more than one registrations filter');
         }
 
@@ -261,10 +284,10 @@ class RegistrationsFilterHandler {
 
             switch (currentKey) {
                 case '$not': {
-                    if (this.isInverted === true) {
+                    if (this._isInverted === true) {
                         throw new Error('Double inversion, check filter: ' + JSON.stringify(this.filter));
                     }
-                    this.isInverted = true;
+                    this._isInverted = true;
                     break;
                 }
                 case '$elemMatch': {
@@ -285,7 +308,7 @@ class RegistrationsFilterHandler {
             if (StamhoofdFilterHelper.isRecordWithSingleEntry(currentValue)) {
                 currentEntry = Object.entries(currentValue)[0];
             } else if (Array.isArray(currentValue)) {
-                this.groupdIds = new Set(currentValue.map(item => this.getGroupIdsFromGroupFilters(item)));
+                this._groupdIds = new Set(currentValue.map(item => this.getGroupIdsFromGroupFilters(item)));
                 break;
             } else {
                 throw new Error('Invalid registration filter: ' + JSON.stringify(registrationFilter));
@@ -302,11 +325,104 @@ class RegistrationsFilterHandler {
     }
 }
 
+class GroupsPropertyFiltersTracker {
+    static readonly GLOBAL_KEY = 'all';
+
+    // to apply in one of these groups (key can be GLOBAL_KEY if all groups)
+    private readonly groupPropertyFiltersMap: Map<string, PropertyFilter> = new Map();
+
+    // to apply if not in one of these groups
+    private readonly invertedGroupPropertyFiltersMap: Map<string, PropertyFilter> = new Map();
+
+    constructor(propertyFilter: PropertyFilter) {
+        (['enabledWhen', 'requiredWhen'] as ('enabledWhen' | 'requiredWhen')[]).forEach(type => this.updateFromFilter(propertyFilter, type));
+    }
+
+    get shouldUpdateAllGroups() {
+        return this.groupPropertyFiltersMap.has(GroupsPropertyFiltersTracker.GLOBAL_KEY) || this.invertedGroupPropertyFiltersMap.size > 0;
+    }
+
+    get groupIdsToUpdate(): string[] {
+        return [...this.groupPropertyFiltersMap.keys()].filter(key => key !== GroupsPropertyFiltersTracker.GLOBAL_KEY);
+    }
+
+    private updateFromFilter(propertyFilter: PropertyFilter, type: 'enabledWhen' | 'requiredWhen') {
+        // clone to prevent side effects
+        const filter = cloneObject(propertyFilter[type]);
+        const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(filter);
+
+        // make sure there are no other $or filters (else the filter possibly cannot be moved)
+        orFilters.forEach((filter) => {
+            // should not contain $or filter on deeper level than root (unless in registrations filter)
+            try {
+                StamhoofdFilterHelper.throwIfHasOrFilter(filter, ['registrations']);
+            } catch (e) {
+                console.error('Error:', e);
+                console.error(`${type}: ${JSON.stringify(filter)}`);
+                throw e;
+            }
+        });
+
+        const globalFilters: StamhoofdFilter[] = [];
+        const groupSpecificFilters: StamhoofdFilter[] = [];
+
+        for (const filter of orFilters) {
+            if (StamhoofdFilterHelper.hasRegistrationsFilter(filter)) {
+                groupSpecificFilters.push(filter);
+            } else {
+                globalFilters.push(filter);
+            }
+        }
+
+        if (globalFilters.length > 0) {
+            this.set({
+                key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
+                type,
+                filter: mergeFilters(globalFilters, '$or'),
+                isInverted: false,
+                mergeType: '$or',
+            });
+        }
+
+        for (const groupSpecificFilter of groupSpecificFilters) {
+            const registrationFilterHandler = new RegistrationsFilterHandler(groupSpecificFilter);
+
+            for (const groupId of registrationFilterHandler.groupIds.values()) {
+                this.set({
+                    key: groupId,
+                    type,
+                    filter: registrationFilterHandler.otherFilters,
+                    isInverted: registrationFilterHandler.isInverted,
+                    mergeType: '$or',
+                });
+            }
+        }
+    }
+
+    private set({ type, key, filter, isInverted, mergeType }: { type: 'enabledWhen' | 'requiredWhen'; key: string; filter: StamhoofdFilter; isInverted: boolean; mergeType: '$and' | '$or' }) {
+        const map = isInverted ? this.invertedGroupPropertyFiltersMap : this.groupPropertyFiltersMap;
+        let propertyFilter: PropertyFilter | undefined = map.get(key);
+        if (!propertyFilter) {
+            propertyFilter = new PropertyFilter(null, null);
+            map.set(key, propertyFilter);
+        }
+
+        const currentFilter: StamhoofdFilter = propertyFilter[type];
+        if (currentFilter === null) {
+            propertyFilter[type] = filter;
+            return;
+        }
+
+        propertyFilter[type] = mergeFilters([currentFilter, filter], mergeType);
+    }
+}
+
 class PropertyFilterHandler {
     private readonly propertyFilter: PropertyFilter;
     private readonly recordCategory: RecordCategory | null;
     private readonly setPropertyFilterOnOrganization: (propertyFilter: PropertyFilter | null) => void;
     private readonly setPropertyFilterOnGroup: (group: Group, propertyFilter: PropertyFilter) => void;
+    readonly groupPropertyFiltersTracker: GroupsPropertyFiltersTracker;
 
     constructor({ propertyFilter, setPropertyFilterOnOrganization, setPropertyFilterOnGroup, recordCategory }: { propertyFilter: PropertyFilter;
         // to set or remove propertyFilter on the organization
@@ -324,31 +440,11 @@ class PropertyFilterHandler {
         this.setPropertyFilterOnOrganization = setPropertyFilterOnOrganization;
         this.setPropertyFilterOnGroup = setPropertyFilterOnGroup;
         this.recordCategory = recordCategory;
-    }
-
-    static hasRegistrationFilter2(propertyFilter: PropertyFilter): boolean {
-        return [propertyFilter.enabledWhen, propertyFilter.requiredWhen].some(filter => StamhoofdFilterHelper.hasRegistrationsFilter(filter));
+        this.groupPropertyFiltersTracker = new GroupsPropertyFiltersTracker(propertyFilter);
     }
 
     static hasRegistrationFilter(propertyFilter: PropertyFilter): boolean {
-        if (propertyFilter.requiredWhen && StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.requiredWhen)) {
-            if (propertyFilter.enabledWhen && StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.enabledWhen)) {
-                // case same filters
-                if (JSON.stringify(propertyFilter.enabledWhen) === JSON.stringify(propertyFilter.requiredWhen)) {
-                    // todo
-                } else {
-                    throw new Error('Registrations filter in requiredWhen not supported: ' + JSON.stringify(propertyFilter));
-                }
-            }
-            /**
-             * possible solution:
-             * - configure for each group separately,
-             * if groupId in filter then requiredWhen should be {}, else null (if no other filters)
-             */
-            // throw new Error('Registrations filter in requiredWhen not supported: ' + JSON.stringify(propertyFilter));
-        }
-
-        return StamhoofdFilterHelper.hasRegistrationsFilter(propertyFilter.enabledWhen);
+        return [propertyFilter.enabledWhen, propertyFilter.requiredWhen].some(filter => StamhoofdFilterHelper.hasRegistrationsFilter(filter));
     }
 
     /**
@@ -366,7 +462,7 @@ class PropertyFilterHandler {
      * - get propertyFilter for group and set requiredWhen?
      */
 
-    private updateOrganization() {
+    handleOrganization() {
         // property filter handler only can be created if there is a registration filter -> therefore no need to check
         // the organization should always be updated
 
@@ -380,117 +476,10 @@ class PropertyFilterHandler {
         this.setPropertyFilterOnOrganization(null);
     }
 
-    private test(type: 'enabledWhen' | 'requiredWhen', newPropertyFilters: Map<string, PropertyFilter>) {
-        const globalId = 'all';
-        // const newPropertyFilters = new Map<string, PropertyFilter>();
-
-        const filter = this.propertyFilter[type];
-        const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(filter);
-
-        // make sure there are no other $or filters (else the filter possibly cannot be moved)
-        orFilters.forEach((filter) => {
-            // should not contain $or filter on deeper level than root (unless in registrations filter)
-            try {
-                StamhoofdFilterHelper.throwIfHasOrFilter(filter, ['registrations']);
-            } catch (e) {
-                console.error('Error:', e);
-                console.error(`${type}: ${JSON.stringify(filter)}`);
-                throw e;
-            }
-        });
-
-        // todo: if without registrations filters -> set on EVERY group
-        const globalFilters: StamhoofdFilter[] = [];
-        const groupSpecificFilters: StamhoofdFilter[] = [];
-
-        for (const filter of orFilters) {
-            if (StamhoofdFilterHelper.hasRegistrationsFilter(filter)) {
-                groupSpecificFilters.push(filter);
-            } else {
-                globalFilters.push(filter);
-            }
-        }
-
-        if (globalFilters.length > 0) {
-            const globalPropertyFilter = newPropertyFilters.get(globalId) ?? new PropertyFilter(null, null);
-            // newPropertyFilters.set(globalId, new PropertyFilter(globalFilters, null));
-            globalPropertyFilter[type] = globalFilters;
-            // newPropertyFilters.set(globalId, globalPropertyFilter);
-        }
-
-        for (const groupSpecificFilter of groupSpecificFilters) {
-            // todo: check groups where this filter applies
-
-            // todo: use the merge method of PropertyFilter
-        }
-    }
-
-    async handle() {
-        const propertyFilter: PropertyFilter = this.propertyFilter;
-
-        // if group filters and no or filters in parent
-        const enabledWhen = propertyFilter.enabledWhen;
-        if (enabledWhen === null) {
-            throw new Error('Did not expect enabled when to be null');
-        }
-
-        const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(enabledWhen);
-
-        // make sure there are no other $or filters (else the filter possibly cannot be moved)
-        orFilters.forEach((filter) => {
-            // should not contain $or filter on deeper level than root (unless in registrations filter)
-            try {
-                StamhoofdFilterHelper.throwIfHasOrFilter(filter, ['registrations']);
-            } catch (e) {
-                console.error('Error:', e);
-                console.error('enabledWhen:', JSON.stringify(enabledWhen));
-                console.error('filter: ', JSON.stringify(filter));
-                throw e;
-            }
-        });
-
-        // todo: if without registrations filters -> set on EVERY group
-        const withoutRegistrationFilters: StamhoofdFilter[] = [];
-        const withRegistrationFilters: StamhoofdFilter[] = [];
-
-        for (const filter of orFilters) {
-            if (StamhoofdFilterHelper.hasRegistrationsFilter(filter)) {
-                withRegistrationFilters.push(filter);
-            } else {
-                withoutRegistrationFilters.push(filter);
-            }
-        }
-
-        if (withoutRegistrationFilters.length === 0) {
-            // if category -> set defaultEnabled to false
-            if (this.recordCategory) {
-                this.recordCategory.defaultEnabled = false;
-                this.setPropertyFilterOnOrganization(new PropertyFilter(null, propertyFilter.requiredWhen));
-            } else {
-                this.setPropertyFilterOnOrganization(null);
-            }
-        } else {
-            /**
-             * The property filter should remain on the organization.
-             * Only the stamhoofd filters without registration filters should remain on the organization.
-             */
-            const newEnabledWhen: StamhoofdFilter = {
-                $or: withoutRegistrationFilters,
-            };
-            this.setPropertyFilterOnOrganization(new PropertyFilter(newEnabledWhen, propertyFilter.requiredWhen));
-
-            if (withRegistrationFilters.length > 0) {
-                // todo
-                throw new Error('there is a $or filter in the root with a combination of registration filters and other filters -> not sure how to handle yet');
-            }
-        }
-
-        if (withRegistrationFilters.length > 1) {
-            // these filters should be moved to the group
-
-            // todo
-            throw new Error('todo: implement');
-        }
+    handleGroup(group: Group) {
+        // todo
+        const propertyFilter = this.groupPropertyFiltersTracker.getPropertyFilterForGroup(group);
+        this.setPropertyFilterOnGroup(group, propertyFilter);
     }
 }
 
@@ -498,10 +487,24 @@ class OrganizationHandler {
     constructor(readonly organization: Organization) {}
 
     async handle() {
-        const propertyFilterHandlers = this.getAllPropertyFilterWrappers(this.organization);
+        const propertyFilterHandlers = this.getAllPropertyFilterHandlers(this.organization);
+
+        const query = Group.select().where('organizationId', this.organization.id);
+
+        if (!propertyFilterHandlers.some(handler => handler.groupPropertyFiltersTracker.shouldUpdateAllGroups)) {
+            const allGroupIds = new Set<string>(propertyFilterHandlers.flatMap(handler => handler.groupPropertyFiltersTracker.groupIdsToUpdate));
+            query.where('id', [...allGroupIds]);
+        }
 
         for (const propertyFilterHandler of propertyFilterHandlers) {
-            await propertyFilterHandler.handle();
+            propertyFilterHandler.handleOrganization();
+        }
+
+        // todo: take into account cycles (or do this before the registration periods migration for better performance)
+        for await (const group of query.all()) {
+            for (const propertyFilterHandler of propertyFilterHandlers) {
+                propertyFilterHandler.handleGroup(group);
+            }
         }
     }
 
@@ -510,7 +513,7 @@ class OrganizationHandler {
         return [recordCategory, ...childCategories];
     }
 
-    private getAllPropertyFilterWrappers(organization: Organization): PropertyFilterHandler[] {
+    private getAllPropertyFilterHandlers(organization: Organization): PropertyFilterHandler[] {
         const recordsConfig: OrganizationRecordsConfiguration = organization.meta.recordsConfiguration;
 
         const propertyFilterWrappers: PropertyFilterHandler[] = [];
