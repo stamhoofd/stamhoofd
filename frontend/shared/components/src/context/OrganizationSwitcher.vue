@@ -28,6 +28,7 @@ import { useContextOptions } from './hooks/useContextOptions';
 
 import OrganizationLogo from './OrganizationLogo.vue';
 import PlatformLogo from './PlatformLogo.vue';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 
 const organization = useOrganization();
 const app = useAppContext();
@@ -37,7 +38,7 @@ const { hasAdminOption, getDefaultOptions } = useContextOptions();
 
 const options = getDefaultOptions();
 const hasAdmin = hasAdminOption();
-const canSwitch = options.length > 1 || (options.length === 1 && (((options[0].organization?.id ?? null) !== (organization.value?.id ?? null)) || (options[0].app !== app && options[0].app !== 'auto' && app !== 'auto'))) || hasAdmin || (STAMHOOFD.userMode === 'organization' && UrlHelper.initial.url.host === STAMHOOFD.domains.dashboard);
+const canSwitch = options.length > 1 || (options.length === 1 && (((options[0].organization?.id ?? null) !== (organization.value?.id ?? null)) || (options[0].app !== app && options[0].app !== 'auto' && app !== 'auto'))) || hasAdmin || (STAMHOOFD.userMode === 'organization' && AppManager.shared.isOnDashboardDomain);
 
 withDefaults(
     defineProps<{

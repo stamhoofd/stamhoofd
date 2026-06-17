@@ -1,3 +1,4 @@
+import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from './SessionContext';
 
 // TODO: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
@@ -49,6 +50,10 @@ export class AppManager {
 
     get isNative(): boolean {
         return this.platform !== 'web';
+    }
+
+    get isOnDashboardDomain() {
+        return this.isNative || UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard;
     }
 
     setVersion({ version, build }: { version: string; build: string }) {
