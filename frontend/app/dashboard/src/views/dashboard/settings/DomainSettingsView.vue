@@ -35,10 +35,10 @@
             <STInputBox error-fields="mailDomain" :error-box="errorBox" :title="$t(`%NE`)">
                 <input v-model="mailDomain" class="input" type="text" :placeholder="$t('%2o')" @change="domainChanged">
             </STInputBox>
-            <p v-if="mailDomain && enableMemberModule">
+            <p v-if="mailDomain && enableMemberModule" class="style-description-small">
                 {{ $t('%N8', {usedRegisterDomain, mailDomain}) }}
             </p>
-            <p v-else-if="mailDomain">
+            <p v-else-if="mailDomain" class="style-description-small">
                 {{ $t('%N9', {mailDomain}) }}
             </p>
 
@@ -101,8 +101,6 @@ import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-
-
 
 const context = useContext();
 const organization = useRequiredOrganization();
