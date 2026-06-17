@@ -93,6 +93,7 @@ Useful environment variables:
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE` tunes the MySQL container InnoDB buffer pool size (e.g. `512M`, `1G`), defaulting to `4G`.
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container InnoDB buffer pool instances defaulting to `4`.
 - `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
+- `PUBLIC_IP`: Publish DNS records to your computers public IP address, and make Caddy listen on 0.0.0.0 instead of localhost. Useful for testing on local devices. E.g. `PUBLIC_IP=192.168.1.7 stam services restart` `PUBLIC_IP=192.168.1.7 stam dev all`
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
 

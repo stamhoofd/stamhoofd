@@ -31,7 +31,12 @@ export class CorednsService extends SharedDockerService<CorednsPrepared> {
         const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
         await fs.mkdir(path.dirname(corefile), { recursive: true });
         await fs.chmod(path.dirname(corefile), 0o755);
-        await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${localIpv4Host}"\n    }\n    template IN AAAA {\n        answer "{{ .Name }} 300 IN AAAA ${localIpv6Host}"\n    }\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
+
+        if (process.env.PUBLIC_IP) {
+            await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${process.env.PUBLIC_IP}"\n    }\n\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
+        } else {
+            await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${localIpv4Host}"\n    }\n    template IN AAAA {\n        answer "{{ .Name }} 300 IN AAAA ${localIpv6Host}"\n    }\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
+        }
         await fs.chmod(corefile, 0o644);
         return { corefile };
     }

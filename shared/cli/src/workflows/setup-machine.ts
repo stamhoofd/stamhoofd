@@ -420,7 +420,7 @@ async function macosDnsCheck(context: CliContext, domain: string): Promise<Check
         return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
     }
 
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
+    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${process.env.PUBLIC_IP || localIpv4Host}`, manualFix: 'stam setup dns' };
 }
 
 async function directCorednsCheck(domain: string): Promise<boolean> {
@@ -428,7 +428,7 @@ async function directCorednsCheck(domain: string): Promise<boolean> {
     resolver.setServers([localIpv4Host]);
     try {
         const addresses = await resolver.resolve4(`dashboard.${domain}`);
-        return addresses.includes(localIpv4Host);
+        return addresses.includes(process.env.PUBLIC_IP || localIpv4Host);
     } catch {
         return false;
     }

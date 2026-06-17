@@ -94,6 +94,9 @@ export function localhostPort(port: number): string {
 }
 
 export function localhostPortMapping(hostPort: number, containerPort: number): string {
+    if (process.env.PUBLIC_IP) {
+        return `0.0.0.0:${hostPort}:${containerPort}`;
+    }
     return `${localIpv4Host}:${hostPort}:${containerPort}`;
 }
 
