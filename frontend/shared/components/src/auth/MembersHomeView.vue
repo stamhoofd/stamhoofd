@@ -44,7 +44,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie?utm_medium=ledenportaal'" target="_blank" class="button text"><span>Ledenadministratie via</span> <strong class="notranslate">Stamhoofd</strong></a>
+                        <a :href="'https://' + LocalizedDomains.marketing + '/ledenadministratie?utm_medium=ledenportaal'" target="_blank" class="button text"><span>Ledenadministratie via</span> <strong class="notranslate">Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>
@@ -66,6 +66,7 @@ import { defineRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-naviga
 
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
