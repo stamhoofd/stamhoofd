@@ -91,7 +91,9 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         // todo: what should be the start date?
         startDate: previousYearStartDate,
         endDate: new Date(periodSpan.startDate.getTime() - 1),
-        locked: true,
+        // Don't lock the archive period: locking requires an extra manual step
+        // after the migration to make archived work years editable again.
+        locked: false,
         organization,
         previousPeriodId: undefined,
         customName: 'Gearchiveerde periodes',
