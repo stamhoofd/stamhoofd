@@ -10,33 +10,36 @@
                 <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
-            <hr><h2>{{ $t('%dz') }}</h2>
+            <template v-if="$isPlatform">
+                <hr>
+                <h2>{{ $t('%dz') }}</h2>
 
-            <STList class="illustration-list">
-                <STListItem class="left-center">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/communication.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%e0') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%7h') }}
-                    </p>
-                </STListItem>
+                <STList class="illustration-list">
+                    <STListItem class="left-center">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/communication.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%e0') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%7h') }}
+                        </p>
+                    </STListItem>
 
-                <STListItem class="left-center">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%e1') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%e2') }}
-                    </p>
-                </STListItem>
-            </STList>
+                    <STListItem class="left-center">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%e1') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%e2') }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
         </template>
         <component :is="component" v-else :title="title" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
     </SaveView>
@@ -175,12 +178,10 @@ async function save() {
             await props.saveHandler({
                 show, present, dismiss, pop,
             });
-        }
-        else {
+        } else {
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         if (isSimpleError(e) || isSimpleErrors(e)) {
             // security codes are not available for userMode organization
             if (STAMHOOFD.userMode !== 'organization' && e.hasCode('known_member_missing_rights')) {

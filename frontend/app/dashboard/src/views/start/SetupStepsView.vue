@@ -16,7 +16,7 @@
         </TransitionFade>
     </template>
     <template v-else>
-        <p v-if="organization$?.period.period.id !== platform.period.id" class="info-box">
+        <p v-if="$isPlatform && organization$?.period.period.id !== platform.period.id" class="info-box">
             {{ $t('%B') }}
         </p>
     </template>
@@ -24,7 +24,6 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-
 
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
@@ -35,10 +34,6 @@ import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityCh
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed, onActivated, ref } from 'vue';
-
-
-
-
 
 const organization$ = useOrganization();
 const platform = usePlatform();
