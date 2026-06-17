@@ -7,7 +7,7 @@
         <h1>{{ adminRolesTitle }}</h1>
         <p>{{ adminRolesDescription }}</p>
 
-        <p class="info-box">
+        <p v-if="showInternalAdmins" class="info-box">
             {{ $t('%ZG') }}
         </p>
 
@@ -81,6 +81,7 @@ import STList from '../layout/STList.vue';
 import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
+import { useShowInternalAdmins } from './hooks/useShowInternalAdmins.ts';
 
 defineRoute({
     url: 'nieuw',
@@ -147,6 +148,7 @@ const $navigate = useNavigate();
 
 const { getPermissions, getUnloadedPermissions, loading, admins } = useAdmins();
 const { createRolePatchArray, errors, hasChanges, patchRoles, roles, saving, save: rawSave } = usePatchRoles();
+const showInternalAdmins = useShowInternalAdmins();
 const { adminRolesTitle, adminRolesDescription } = useAdminLabels();
 
 const pop = usePop();
