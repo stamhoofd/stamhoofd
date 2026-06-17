@@ -39,7 +39,7 @@ onMounted(async () => {
                 visibleCheck: 'spinner',
                 visibleDownload: true,
                 installAutomatically: true,
-                force: true,
+                force: STAMHOOFD.environment !== 'staging',
                 channel: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
                 checkTimeout: 15 * 1000,
             });
