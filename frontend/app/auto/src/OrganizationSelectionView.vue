@@ -19,7 +19,7 @@
                 </template>
             </STNavigationBar>
 
-            <main class="flex center small organization-selection-view">
+            <main class="center small organization-selection-view">
                 <h1>
                     {{ $t('%5N') }}
                 </h1>
