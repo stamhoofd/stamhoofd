@@ -7,7 +7,7 @@
             </div>
 
             <span>
-                <span class="hide-medium">{{ $user.name || 'Account' }}</span>
+                <span class="hide-medium user-name">{{ $user.firstName || 'Account' }}</span>
                 <span class="icon arrow-down-small" />
             </span>
         </figure>
@@ -124,6 +124,24 @@ const customSiteUrl = computed(() => {
 
     .context-navigation-bar & {
         --block-width: 25px;
+
+        .user-name {
+            display: none;
+        }
+
+        > figure {
+            gap: 5px;
+        }
+    }
+
+    .user-name {
+        text-overflow: ellipsis;
+        max-width: 12vw;
+        overflow: hidden;
+
+        @media (max-width: 1200px) {
+            max-width: 10vw;
+        }
     }
 
     @media (hover: hover) {
@@ -140,7 +158,13 @@ const customSiteUrl = computed(() => {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-wrap: nowrap;
+        white-space: nowrap;
         gap: 15px;
+
+        .icon {
+            flex-shrink: 0;
+        }
 
         @media (max-width: 800px) {
             gap: 5px;

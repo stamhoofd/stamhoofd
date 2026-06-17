@@ -1,10 +1,24 @@
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { onBeforeUnmount, watch } from 'vue';
 
-export function useResizeObserver(elementRef: Ref<HTMLElement | HTMLElement[] | null>, callback: () => void) {
+export function useResizeObserver(elementRef: Ref<HTMLElement | null>, callback: (entry: ResizeObserverEntry | null) => void): void;
+export function useResizeObserver(elementRef: Ref<HTMLElement>, callback: (entry: ResizeObserverEntry) => void): void;
+export function useResizeObserver(elementRef: Ref<HTMLElement[]>, callback: (entries: ResizeObserverEntry[]) => void): void;
+export function useResizeObserver(elementRef: Ref<HTMLElement | HTMLElement[] | null>, callback: (entries: any) => void): void {
     const observing = new Set<HTMLElement>();
     const observer = new ResizeObserver((entries) => {
-        callback();
+        if (Array.isArray(elementRef.value)) {
+            callback(entries);
+        } else {
+            const el = elementRef.value;
+            const entry = entries.find(e => el === e.target);
+
+            if (entry) {
+                callback(entry);
+            } else if (el === null) {
+                callback(null);
+            }
+        }
     });
 
     function observe(el: HTMLElement) {
@@ -29,10 +43,12 @@ export function useResizeObserver(elementRef: Ref<HTMLElement | HTMLElement[] | 
                 for (const e of el) {
                     observe(e);
                 }
-            }
-            else {
+            } else {
                 observe(el);
             }
+        } else {
+            // Signal no size
+            callback(null);
         }
     }, { deep: true });
 

@@ -178,7 +178,7 @@ body.modern.web-iOS {
         > header {
             background: $color-background;
             margin: 
-                calc(-140px) // Bounce animation
+                calc(-100px) // Bounce animation
                 calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)))
                 0 
                 calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px)));

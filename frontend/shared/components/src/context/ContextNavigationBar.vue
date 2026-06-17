@@ -13,7 +13,6 @@
 <script setup lang="ts">
 import InheritComponent from '../containers/InheritComponent.vue';
 
-
 </script>
 
 <style lang="scss">
@@ -24,6 +23,7 @@ import InheritComponent from '../containers/InheritComponent.vue';
     grid-template-columns: 1fr auto;
     height: 100%;
     align-items: center;
+    padding: 20px 0 20px 0;
 
     > .right {
         display: flex;

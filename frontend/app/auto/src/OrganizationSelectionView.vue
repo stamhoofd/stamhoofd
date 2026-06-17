@@ -3,7 +3,7 @@
         <STGradientBackground v-if="$isStamhoofd" />
 
         <div class="st-view" :class="{ transparent: $isStamhoofd }">
-            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`%WJ`)">
+            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`%5N`)">
                 <template #left>
                     <PlatformLogo />
                 </template>
@@ -315,7 +315,7 @@ defineRoutes([
 
 .organization-selection-view {
      > h1 {
-        @media (min-height: 800px) {
+        @media (min-height: 800px) and (min-width: 600px) {
             padding-top: 40px;
         }
 

@@ -1,9 +1,11 @@
 <template>
-    <header class="st-navigation-bar-container" :class="{collapsed: !(hasLeft || hasRight), negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
-        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }">
-            <InheritComponent name="tabbar-replacement" />
+    <header class="st-navigation-bar-container" :class="{collapsed: collaped, negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
+        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }" :style="{height: heightPx}">
+            <div ref="inherited-header" class="inherited-header">
+                <InheritComponent name="tabbar-replacement" />
+            </div>
         </div>
-        <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
+        <div ref="bar" class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
             <div class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
                 <div v-if="hasLeft || hasRight" class="left">
                     <BackButton v-if="canPop && !disablePop" data-testid="close-button" @click="pop()" />
@@ -22,7 +24,7 @@
                     <button v-if="canDismiss && !disableDismiss && !$isAndroid" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
                 </div>
             </div>
-            <div v-if="$slots.default && isValidVnodes($slots.default())" class="footer" :class="{ scrolled }">
+            <div v-if="$slots.default && isValidVnodes($slots.default())" ref="footer" class="footer" :class="{ scrolled }">
                 <slot />
             </div>
 
@@ -36,17 +38,24 @@
 <script setup lang="ts">
 import { ComponentWithProperties, HistoryManager, useCanDismiss, useCanPop, useDismiss, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
 import type { Ref } from 'vue';
-import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots } from 'vue';
+import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots, useTemplateRef, watch } from 'vue';
 
-import InheritComponent from '../containers/InheritComponent.vue';
+import { useElementSize } from '#hooks/useElementSize.ts';
 import { useIsAndroid } from '#hooks/useIsAndroid.ts';
 import { useIsIOS } from '#hooks/useIsIOS.ts';
+import { useParentElement } from '#hooks/useParentElement.ts';
+import InheritComponent from '../containers/InheritComponent.vue';
 import BackButton from './BackButton.vue';
 
 const slots = useSlots();
 const popup = usePopup();
 const url = useUrl();
 const historyIndex = inject('navigation_historyIndex', null) as Ref<number | undefined> | null;
+const scrolled = ref(false);
+
+const barElement = useTemplateRef('bar');
+const footerElement = useTemplateRef('footer');
+const inheritedHeaderElement = useTemplateRef('inherited-header');
 
 const props = withDefaults(defineProps<{
     title?: string;
@@ -66,7 +75,6 @@ const props = withDefaults(defineProps<{
     title: '',
 });
 
-const scrolled = ref(false);
 const scrollElement = ref<HTMLElement | null>(null);
 
 const canDismiss = useCanDismiss();
@@ -105,6 +113,29 @@ const templateColumns = computed(() => {
 
     return '1fr';
 });
+
+// Height
+const { height } = useElementSize(barElement);
+const { height: footerHeight } = useElementSize(footerElement);
+const { height: inheritedHeaderHeight } = useElementSize(inheritedHeaderElement);
+
+const collaped = computed(() => {
+    return !hasLeft.value && !hasRight.value;
+});
+const heightPx = computed(() => {
+    if (collaped.value) {
+        return Math.max(inheritedHeaderHeight.value, Math.min((height.value - footerHeight.value), 50)).toFixed(2) + 'px';
+    }
+    // don't include footer height, as that won't be visible if we did not scroll, so should not be included in padding of main
+    return (height.value - footerHeight.value).toFixed(2) + 'px';
+});
+const parentElement = useParentElement();
+
+watch([parentElement, heightPx], ([el, h]) => {
+    if (el) {
+        el?.style.setProperty('--st-navigation-bar-height', h);
+    }
+}, { immediate: true });
 
 // Helps detect empty nodes
 function isValidVnodes(vnodes: any) {
@@ -147,7 +178,7 @@ function onScroll() {
         return;
     }
     const scroll = scrollElement.value.scrollTop;
-    if (scroll > 25) {
+    if (scroll > Math.max(25, footerHeight.value)) {
         scrolled.value = true;
     } else if (scroll < 20) {
         scrolled.value = false;
@@ -203,59 +234,12 @@ onDeactivated(() => {
         }
     }
 
-    &.collapsed {
-        height: 50px;
-
-        .split-view-controller[data-has-detail="true"] > .master &  {
-            height: 40px;
-        }
-    }
-
-    /*
-
-    height: 0;
-
-    & + main {
-        // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-        --st-navigation-bar-correction: calc(50px + var(--current-view-safe-area-top, 0px));
-    }
-
-    &:has(.context-navigation-bar) + main {
-        --st-navigation-bar-correction: calc(70px + var(--current-view-safe-area-top, 0px));
-    }*/
-
-    body.web-iOS &, body.native-iOS & {
         height: 0;
 
         & + main {
             // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-            --st-navigation-bar-correction: calc(70px + var(--current-view-safe-area-top, 0px));
+            --st-navigation-bar-correction: var(--st-navigation-bar-height, 0px)
         }
-    }
-
-    &.negative {
-        height: 0;
-
-        & + main {
-            // Todo: height should be responsive
-            // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-            --st-navigation-bar-correction: calc(109px + var(--current-view-safe-area-top, 0px));
-
-            @media (min-width: 550px) {
-                --st-navigation-bar-correction:  calc(109px + max(var(--current-view-safe-area-top, 0px), 5px));
-            }
-        }
-
-        body.web-iOS &, body.native-iOS & {
-            & + main {
-                --st-navigation-bar-correction: calc(115px + var(--current-view-safe-area-top, 0px));
-
-                @media (min-width: 550px) {
-                --st-navigation-bar-correction:  calc(115px + max(var(--current-view-safe-area-top, 0px), 5px));
-                }
-            }
-        }
-    }
 
     &+ main {
         > h1:first-child, > *:first-child > h1:first-child {
@@ -278,21 +262,14 @@ onDeactivated(() => {
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
     box-sizing: border-box;
     width: 100%;
-    height: 50px;
+    height: 50px; // default value
     opacity: 1;
     transition: opacity 0.2s;
     z-index: 201;
+    display: grid;
 
-    &.large {
-        height: 80px;
-    }
-
-    body.native-android &, body.web-android & {
-        height: 60px;
-    }
-
-    body.native-iOS &, body.web-iOS & {
-        height: 70px; // 44px - 2 x border width thin
+    .inherited-header {
+        height: fit-content;
     }
 
     &.scrolled {
@@ -309,6 +286,7 @@ onDeactivated(() => {
     z-index: 200;
     position: relative;
     margin-top: -1px;
+    pointer-events: none; // Overwritten by children where required
 
     .debug-overlay {
         position: absolute;
@@ -331,13 +309,14 @@ onDeactivated(() => {
         z-index: -1;
         opacity: 0;
 
-        background: $color-background-shade;
+        background: $color-current-background-shade;
         pointer-events: none;
         border-bottom-color: $color-border-shade;
 
         body.native-android &, body.web-android & {
             //box-shadow: 0px 2px 5px $color-shadow;
             border-bottom: none;
+            background: $color-current-background;
         }
 
         body.web-iOS &, body.native-iOS & {
@@ -386,8 +365,11 @@ onDeactivated(() => {
     .footer {
         transition: opacity 0.3s, transform 0.3s;
         opacity: 0;
-        //transform: translateY(-50px);
         pointer-events: none;
+
+        // Increase pointer-events area nicely to the sides using the negative margin trick
+        padding: 0 max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-right, 0px)) 0 max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-left, 0px));
+        margin: 0 calc(-1 * max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-right, 0px))) 0 calc(-1 * max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-left, 0px)));
 
         &.scrolled {
             opacity: 1;
@@ -398,6 +380,7 @@ onDeactivated(() => {
 
     > .header {
         height: 50px;
+        pointer-events: all;
 
         body.native-android &, body.web-android & {
             height: 60px;
@@ -487,9 +470,13 @@ onDeactivated(() => {
             }
         }
 
-        &.large > .header {
+        &.large {
             height: 80px;
             margin-bottom: 0px;
+
+            body.native-android &, body.web-android & {
+                height: 70px;
+            }
         }
 
     }

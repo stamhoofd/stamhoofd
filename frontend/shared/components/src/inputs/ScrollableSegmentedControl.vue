@@ -11,7 +11,7 @@
         >
             <slot v-if="$slots.item" name="item" :item="item" :index="index" />
             <template v-else>
-                <span v-if="icons && icons[index]" :class="'icon small ' + icons[index]" />
+                <span v-if="icons && icons[index]" :class="'icon tiny ' + icons[index]" />
                 <span>{{ labels ? labels[index] : item }}</span>
             </template>
         </button>

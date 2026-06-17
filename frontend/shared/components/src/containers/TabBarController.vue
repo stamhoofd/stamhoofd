@@ -45,7 +45,6 @@ import { GlobalEventBus } from '../EventBus';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
 import type TabBarController from './TabBarController.vue';
 
-
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
     const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController> | Ref<InstanceType<typeof TabBarController>>;
     return shallowRef(c);
@@ -500,7 +499,7 @@ defineExpose({
 
     > footer {
         height: var(--tab-bar-header-height);
-        //border-top: $border-width-thin solid $color-border;
+        border-top: $border-width-thin solid $color-border;
         background: $color-background-shade;
         background: color-mix(in srgb, $color-background-shade 70%, transparent);
         padding-bottom: var(--st-safe-area-bottom, 0px);

@@ -177,11 +177,11 @@ html, :host {
 
 body.debug-safe-area {
     // Debug helpers
-    --st-safe-area-bottom: 50vh;
+    --st-safe-area-bottom: 10vh;
     --st-safe-area-top: 10vh;
 
-    --st-safe-area-left: 10vw;
-    --st-safe-area-right: 10vw;
+    --st-safe-area-left: 2vw;
+    --st-safe-area-right: 2vw;
 
     &:after {
         content: '';
@@ -191,8 +191,9 @@ body.debug-safe-area {
         left: 0;
         right: 0;
         height: var(--st-safe-area-bottom);
-        opacity: 0.08;
+        opacity: 0.02;
         z-index: 1000000;
+        pointer-events: none;
     }
 
     &:before {
@@ -203,8 +204,9 @@ body.debug-safe-area {
         left: 0;
         right: 0;
         height: var(--st-safe-area-top);
-        opacity: 0.08;
+        opacity: 0.02;
         z-index: 1000000;
+        pointer-events: none;
     }
 
     #app {
@@ -216,8 +218,9 @@ body.debug-safe-area {
             left: 0;
             top: var(--st-safe-area-top);
             width: var(--st-safe-area-left);
-            opacity: 0.08;
+            opacity: 0.02;
             z-index: 1000000;
+            pointer-events: none;
         }
 
         &:before {
@@ -228,8 +231,9 @@ body.debug-safe-area {
             right: 0;
             top: var(--st-safe-area-top);
             width: var(--st-safe-area-right);
-            opacity: 0.08;
+            opacity: 0.02;
             z-index: 1000000;
+            pointer-events: none;
         }
     }
 }

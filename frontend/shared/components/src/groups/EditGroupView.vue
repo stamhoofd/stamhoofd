@@ -5,11 +5,13 @@
                 <button v-if="!isNew && type !== GroupType.EventRegistration" class="button icon history" type="button" @click="viewAudit" />
             </template>
             <template #title>
-                {{ title }}
+                <h1>
+                    {{ title }}
 
-                <span v-if="patchedGroup.settings.period && patchedGroup.settings.period.id !== patchedPeriod.period.id" class="title-suffix">
-                    {{ patchedGroup.settings.period.nameShort }}
-                </span>
+                    <span v-if="patchedGroup.settings.period && patchedGroup.settings.period.id !== patchedPeriod.period.id" class="title-suffix">
+                        {{ patchedGroup.settings.period.nameShort }}
+                    </span>
+                </h1>
             </template>
 
             <STErrorsDefault :error-box="errors.errorBox" />
