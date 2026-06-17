@@ -1,5 +1,5 @@
 <template>
-    <form class="verify-email-view st-view small" data-testid="verify-email-view" :data-token="token" @submit.prevent="submit">
+    <form class="verify-email-view st-view" data-testid="verify-email-view" :data-token="token" @submit.prevent="submit">
         <STNavigationBar>
             <template #right>
                 <LoadingButton :loading="retrying">
@@ -11,16 +11,21 @@
             </template>
         </STNavigationBar>
 
-        <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
-
         <main class="center">
-            <h1>{{ $t('%ZS') }}</h1>
-            <p v-if="email">
+            <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
+
+            <h1 class="style-navigation-title">
+                {{ $t('%ZS') }}
+            </h1>
+            <div><STErrorsDefault :error-box="errorBox" /></div>
+
+            <div class="code-input-container">
+                <CodeInput v-model="codeInput" @complete="submit" />
+            </div>
+
+            <p v-if="email" class="style-description-small">
                 {{ $t('%ZU', { email }) }}
             </p>
-
-            <div><CodeInput v-model="codeInput" @complete="submit" /></div>
-            <div><STErrorsDefault :error-box="errorBox" /></div>
         </main>
 
         <STToolbar>
@@ -50,6 +55,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { AppRoute } from '@stamhoofd/structures';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -154,9 +160,13 @@ async function submit() {
 .verify-email-view {
     text-align: center;
 
+    .code-input-container {
+        padding-bottom: 12px;
+    }
+
     .email-illustration {
-        width: 100px;
-        height: 100px;
+        width: 60px;
+        height: 60px;
         display: block;
         margin: 0 auto;
         margin-bottom: 20px;
