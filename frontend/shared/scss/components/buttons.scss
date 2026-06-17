@@ -127,15 +127,19 @@
         color: $color-primary-contrast;
         background: $color-primary;
 
-        &.focus-visible:not(:disabled) {
-            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
-        }
+        // Focus should be only visible on devices with a keyboard (an enter key to submit a button when focused)
+        // Currently this is missing in the CSS spec
+        @media (any-hover: hover) and (any-pointer: fine) {
+            &.focus-visible:not(:disabled) {
+                // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+                box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
+            }
 
-        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
-        &:focus-visible {
-            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
+            // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+            &:focus-visible {
+                // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+                box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
+            }
         }
 
         .dropdown-text {
@@ -183,15 +187,19 @@
         color: white;
         background: $color-error;
 
-        &.focus-visible:not(:disabled) {
-            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
-        }
+        // Focus should be only visible on devices with a keyboard (an enter key to submit a button when focused)
+        // Currently this is missing in the CSS spec
+        @media (any-hover: hover) and (any-pointer: fine) {
+            &.focus-visible:not(:disabled) {
+                // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+                box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+            }
 
-        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
-        &:focus-visible {
-            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+            // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+            &:focus-visible {
+                // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+                box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+            }
         }
     }
 
@@ -200,15 +208,19 @@
         
         background: $color-gray-3;
 
-        &.focus-visible:not(:disabled) {
-            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
-        }
+        // Focus should be only visible on devices with a keyboard (an enter key to submit a button when focused)
+        // Currently this is missing in the CSS spec
+        @media (any-hover: hover) and (any-pointer: fine) {
+            &.focus-visible:not(:disabled) {
+                // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+                box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+            }
 
-        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
-        &:focus-visible {
-            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+            // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+            &:focus-visible {
+                // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+                box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+            }
         }
 
         &.green {
