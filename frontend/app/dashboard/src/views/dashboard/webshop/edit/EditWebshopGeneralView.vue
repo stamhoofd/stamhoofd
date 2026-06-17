@@ -233,6 +233,7 @@ import userIllustrationSrc from '@stamhoofd/assets/images/illustrations/user.svg
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
@@ -271,6 +272,7 @@ const { isNew, webshop, addPatch, patch: webshopPatch, originalWebshop, errors, 
 const context = useContext();
 const owner = useRequestOwner();
 const organization = useRequiredOrganization();
+const getFeatureFlag = useFeatureFlag();
 
 const viewTitle = computed(() => {
     if (props.forceType) {
@@ -609,10 +611,6 @@ function patchPrivateConfig(patch: PrivatePaymentConfiguration | AutoEncoderPatc
             }),
         }),
     );
-}
-
-function getFeatureFlag(flag: string) {
-    return organization.value?.privateMeta?.featureFlags.includes(flag) ?? false;
 }
 
 const stripeAccounts = ref<StripeAccount[]>([]);

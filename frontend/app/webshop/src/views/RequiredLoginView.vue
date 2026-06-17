@@ -22,8 +22,12 @@
                             {{ $t('%Xi') }}
                         </p>
 
+                        <p v-if="!ssoConfig" class="error-box">
+                            {{ $t('Inloggen is niet correct ingesteld voor deze webshop.') }}
+                        </p>
+
                         <p>
-                            <button type="button" class="button primary" @click="login">
+                            <button type="button" class="button primary" :disabled="!ssoConfig" @click="login">
                                 {{ $t('%Qg') }}
                             </button>
                         </p>
@@ -36,14 +40,15 @@
 
 <script lang="ts" setup>
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
-import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { LoginProviderType } from '@stamhoofd/structures';
+import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 
-import { computed, onMounted, ref } from 'vue';
+import { useLoginMethod } from '@stamhoofd/components/hooks/useLoginMethods.ts';
+import { computed, ref, watch } from 'vue';
 import { useWebshopManager } from '../composables/useWebshopManager';
 
 const webshopManager = useWebshopManager();
@@ -52,23 +57,29 @@ const loading = ref(false);
 const organization = computed(() => webshopManager.organization);
 const webshop = computed(() => webshopManager.webshop);
 const context = useContext();
+const ssoConfig = useLoginMethod(LoginMethod.SSO);
 
-onMounted(() => {
+watch(ssoConfig, () => {
+    if (!ssoConfig.value) {
+        return;
+    }
+
     // Try to log in on first load
     try {
         const search = UrlHelper.initial.getSearchParams();
+        // Only try an automatic login once per session.
         if (!sessionStorage.getItem('triedLogin') && !search.get('error') && !search.get('oid_rt')) {
             sessionStorage.setItem('triedLogin', 'true');
             login().catch(console.error);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
-});
+}, { immediate: true });
 
 async function login() {
-    if (loading.value) {
+    // Don't login if sso is not enabled or we're loading.
+    if (loading.value || !ssoConfig.value) {
         return;
     }
 

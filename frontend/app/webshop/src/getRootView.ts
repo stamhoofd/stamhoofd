@@ -11,8 +11,6 @@ import { markRaw, reactive } from 'vue';
 import { CheckoutManager } from './classes/CheckoutManager';
 import { WebshopManager } from './classes/WebshopManager';
 
-
-
 export async function wrapContext(
     context: SessionContext,
     app: 'webshop',
