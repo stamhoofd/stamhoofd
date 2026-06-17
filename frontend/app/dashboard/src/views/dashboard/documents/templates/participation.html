@@ -225,19 +225,19 @@
     <body>
         <main class="page-container">
             <header>
-                {{#if platform.logo}}
+                {{#if logo}}
                 <div class="logo-container">
                     <img
-                        src="{{src platform.logo height=120}}"
+                        src="{{src logo height=120}}"
                         alt=""
-                        width="{{src-width platform.logo height=120}}"
-                        height="{{src-width platform.logo height=120}}"
+                        width="{{src-width logo height=120}}"
+                        height="{{src-height logo height=120}}"
                     />
                 </div>
                 {{/if}}
 
                 <div class="title-container">
-                    {{#if platform.logo}}
+                    {{#if logo}}
                     <h1>{{name}}</h1>
                     {{else}}
                     <h1>{{organization.name}}</h1>

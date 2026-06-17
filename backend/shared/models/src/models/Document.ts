@@ -100,6 +100,7 @@ export class Document extends QueryableModel {
         };
         const platformLogo = Platform.shared.config.logoDocuments ?? Platform.shared.config.horizontalLogo ?? Platform.shared.config.squareLogo;
         const organizationLogo = organization.meta.horizontalLogo ?? organization.meta.squareLogo;
+        const logo = organizationLogo || platformLogo;
 
         if (organizationLogo) {
             data['organization'] = {
@@ -112,6 +113,10 @@ export class Document extends QueryableModel {
             data['platform'] = {
                 logo: platformLogo.encode({ version: Version }) ?? null,
             };
+        }
+
+        if (logo) {
+            data['logo'] = logo.encode({ version: Version }) ?? null;
         }
 
         for (const field of this.data.fieldAnswers.values()) {
