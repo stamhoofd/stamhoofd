@@ -1,6 +1,8 @@
-import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import type { S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand } from '@aws-sdk/client-s3'; // ES Modules import
 import { Database } from '@simonbackx/simple-database';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { createS3Client } from '@stamhoofd/cli';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
 import chalk from 'chalk';
@@ -70,8 +72,7 @@ export function getHealth(): BackupHealth {
 
     if (!LAST_BINARY_BACKUP || !LAST_BACKUP) {
         status = 'error';
-    }
-    else {
+    } else {
         if (now.getTime() - LAST_BINARY_BACKUP.date.getTime() > 60 * 10 * 1000) {
             status = 'error';
         }
@@ -123,8 +124,7 @@ export async function cleanBackups() {
                     Bucket: STAMHOOFD.SPACES_BUCKET,
                     Key: file.key,
                 }));
-            }
-            else {
+            } else {
                 if (!lastBackup || lastBackup.key < file.key) {
                     lastBackup = file;
                 }
@@ -239,17 +239,6 @@ export async function diskSpace(): Promise<number> {
     }
     const size = parseInt(parts[1].trim());
     return size;
-}
-
-export function getS3Client() {
-    return new S3Client({
-        endpoint: 'https://' + STAMHOOFD.SPACES_ENDPOINT,
-        region: STAMHOOFD.AWS_REGION,
-        credentials: {
-            accessKeyId: STAMHOOFD.SPACES_KEY,
-            secretAccessKey: STAMHOOFD.SPACES_SECRET,
-        },
-    });
 }
 
 export function getBackupBaseFileName(date: Date) {
@@ -406,7 +395,7 @@ export async function backup() {
         // Upload
 
         // Download last backup file
-        const client = getS3Client();
+        const client = createS3Client(STAMHOOFD);
 
         // Create read stream
         const stream = fs.createReadStream(encryptedFile);
@@ -521,8 +510,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
             }));
             console.log('Binary log already exists: ' + uploadedName);
             return;
-        }
-        catch (e) {
+        } catch (e) {
             if (e.name !== 'NotFound') {
                 throw e;
             }
@@ -567,8 +555,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     // Delete encrypted file if it exists
     try {
         await execPromise('rm ' + escapeShellArg(encryptedFile));
-    }
-    catch (e) {
+    } catch (e) {
         if (e.code !== 1) {
             throw e;
         }
@@ -635,8 +622,7 @@ async function deletePartial(client: S3Client, uploadedName: string, binaryLogPa
 
             console.log('Partial binary log deleted');
         }
-    }
-    catch (e) {
+    } catch (e) {
         if (e.name !== 'NotFound') {
             throw e;
         }

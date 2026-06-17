@@ -34,8 +34,7 @@ export async function setupDevelopmentS3Buckets(context: CliContext): Promise<vo
 async function readCaddyRootCertificate(): Promise<Buffer | undefined> {
     try {
         return await fs.readFile(caddyRootCaPath());
-    }
-    catch {
+    } catch {
         return undefined;
     }
 }
@@ -44,8 +43,7 @@ async function bucketExists(client: ReturnType<typeof createS3Client>, bucket: s
     try {
         await client.send(new HeadBucketCommand({ Bucket: bucket }));
         return true;
-    }
-    catch (error) {
+    } catch (error) {
         if (isNotFoundError(error)) {
             return false;
         }
