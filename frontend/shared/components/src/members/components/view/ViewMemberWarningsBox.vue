@@ -145,19 +145,7 @@ const warnings = computed(() => {
                 text: TranslatedString.create($t('%5B')),
                 type: RecordWarningType.Warning,
             }));
-        } else {
-            warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%5C')),
-                type: RecordWarningType.Error,
-            }));
         }
-    }
-
-    if (props.member.membershipStatus === MembershipStatus.Expiring) {
-        warnings.push(RecordWarning.create({
-            text: TranslatedString.create($t('%5B')),
-            type: RecordWarningType.Warning,
-        }));
     }
 
     if (organization.value?.isSGVSyncOrganization && isMemberManaged(props.member.member, organization.value)) {
