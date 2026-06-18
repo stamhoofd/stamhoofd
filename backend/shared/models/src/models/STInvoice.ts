@@ -20,12 +20,14 @@ export class STInvoice extends QueryableModel {
     id!: string;
 
     /**
+     * @deprecated
      * Organization that made the invoice. Can be null if the organization was deleted and for the migration from V1 -> V2
      */
     @column({ type: 'string', nullable: true })
-    organizationId: string | null;
+    protected organizationId: string | null;
 
     /**
+     *
      * Organization that is associated with this invoice (can be null if deleted or unknown)
      */
     @column({ type: 'string', nullable: true })

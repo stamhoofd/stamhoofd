@@ -157,8 +157,8 @@ async function resolvePayment(stInvoice: STInvoice, ctx: ConversionContext): Pro
         payment.organizationId = ctx.membershipOrganization.id;
         changed = true;
     }
-    if (payment.payingOrganizationId === null && stInvoice.organizationId) {
-        payment.payingOrganizationId = stInvoice.organizationId;
+    if (payment.payingOrganizationId === null && stInvoice.payingOrganizationId) {
+        payment.payingOrganizationId = stInvoice.payingOrganizationId;
         changed = true;
     }
     if (changed) {
@@ -186,7 +186,7 @@ export async function convertPaidInvoice(stInvoice: STInvoice, ctx: ConversionCo
     }
 
     const legacyMeta = stInvoice.meta;
-    const payingOrganizationId = stInvoice.organizationId;
+    const payingOrganizationId = stInvoice.payingOrganizationId;
     const invoicedAt = legacyMeta.date ?? stInvoice.paidAt ?? stInvoice.createdAt;
 
     const payment = await resolvePayment(stInvoice, ctx);
@@ -388,7 +388,7 @@ export async function convertInProgressInvoice(stInvoice: STInvoice, payment: Pa
     await resolvePayment(stInvoice, ctx);
 
     const meta = stInvoice.meta;
-    const payingOrganizationId = stInvoice.organizationId;
+    const payingOrganizationId = stInvoice.payingOrganizationId;
     const createdAt = meta.date ?? stInvoice.createdAt;
 
     for (const item of meta.items) {
