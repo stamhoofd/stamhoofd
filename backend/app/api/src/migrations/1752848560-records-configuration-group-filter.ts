@@ -3,7 +3,7 @@ import { cloneObject } from '@simonbackx/simple-encoding';
 import { Group, Organization } from '@stamhoofd/models';
 import type { OrganizationRecordsConfiguration, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';
-import fs from 'fs';
+// import fs from 'fs';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export async function startMigration(dryRun = false) {
@@ -32,9 +32,8 @@ export default new Migration(async () => {
         return;
     }
 
-    const dryRun = true;
+    const dryRun = false;
     await startMigration(dryRun);
-    throw new Error('test');
 });
 
 class StamhoofdFilterHelper {
@@ -818,7 +817,9 @@ class PropertyChangesLoggerHelper {
         if (!PropertyChangesLoggerHelper.didInitOneTime) {
             PropertyChangesLoggerHelper.didInitOneTime = true;
             // clear output
-            fs.writeFileSync(PropertyChangesLoggerHelper.FILE_PATH, '');
+
+            // fs.writeFileSync(PropertyChangesLoggerHelper.FILE_PATH, '');
+            throw new Error('not implemented');
         }
 
         if (!this.shouldLog) {
@@ -850,7 +851,8 @@ class PropertyChangesLoggerHelper {
 
     private logTextToFile(text: string) {
         try {
-            fs.appendFileSync(PropertyChangesLoggerHelper.FILE_PATH, text);
+            // fs.appendFileSync(PropertyChangesLoggerHelper.FILE_PATH, text);
+            throw new Error('not implemented');
         } catch (err) {
             console.error('Error writing file:', err);
         }
@@ -879,7 +881,6 @@ class PropertyChangesLoggerHelper {
                         return {
                             propertyFilter: propertyFilterText,
                             groups: [...groups],
-                            // groups: groups.size < 10 ? [...groups] : groups.size,
                         };
                     }) },
             };
