@@ -173,16 +173,6 @@ defineRoute({
 
 defineRoutes([
     /* {
-        url: 'checklist',
-        name: Routes.Checklist,
-        show: 'detail',
-        component: MembersChecklistView,
-        isDefault: hasFullAccess.value
-            ? { }
-            : undefined,
-    }, */
-
-    /* {
         url: 'berichten',
         name: Routes.Communication,
         show: 'detail',

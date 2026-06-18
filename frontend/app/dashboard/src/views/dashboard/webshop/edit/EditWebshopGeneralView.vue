@@ -173,7 +173,7 @@
                 </STList>
 
                 <NumberInputBox v-if="numberingType === WebshopNumberingType.Continuous" v-model="startNumber" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`%Qt`)" :min="1" :max="100000000 - 100000" :validator="errors.validator" />
-                
+
                 <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
                     {{ $t('%Qe') }}
                 </p>
@@ -364,8 +364,7 @@ const ticketType = computed({
             if (deletedLocation) {
                 new Toast('Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen', 'warning yellow').setHide(null).show();
             }
-        }
-        else {
+        } else {
             let used = false;
             // Update all products to not ticket or voucher if needed
             for (const product of webshop.value.products) {
@@ -442,7 +441,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
             label: 'Geen',
             value: WebshopTicketType.None,
             src: listIllustrationSrc,
-           // tag: 'Meest gekozen',
+            // tag: 'Meest gekozen',
         });
     }
 
@@ -452,7 +451,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
             label: 'Per persoon',
             value: WebshopTicketType.Tickets,
             src: userIllustrationSrc,
-            //tag: list.length === 0 ? 'Meest gekozen' : undefined,
+            // tag: list.length === 0 ? 'Meest gekozen' : undefined,
         },
         {
             label: 'Per bestelling',
@@ -542,8 +541,7 @@ const useAvailableUntil = computed({
         const meta = WebshopMetaData.patch({});
         if (use) {
             meta.availableUntil = new Date();
-        }
-        else {
+        } else {
             meta.availableUntil = null;
         }
         p.meta = meta;
@@ -569,8 +567,7 @@ const useOpenAt = computed({
         const meta = WebshopMetaData.patch({});
         if (use) {
             meta.openAt = new Date();
-        }
-        else {
+        } else {
             meta.openAt = null;
         }
         p.meta = meta;
@@ -655,8 +652,7 @@ async function loadStripeAccounts() {
         nextTick(() => {
             setDefaultSelection();
         }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -676,8 +672,8 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
 
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: {
-            if ((organization.value.privateMeta?.payconiqApiKey ?? '').length == 0) {
-                return 'Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts).';
+            if ((organization.value.privateMeta?.payconiqApiKey ?? '').length === 0) {
+                return $t('Je moet eerst Bancontact Pay | Wero (Payconiq) activeren via de betaalinstellingen (Instellingen > Betaalaccounts).');
             }
             break;
         }
@@ -715,8 +711,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
             return;
         }
         arr.addPut(method);
-    }
-    else {
+    } else {
         if (!force && config.value.paymentMethods.length == 1) {
             new Toast('Je moet minimaal één betaalmethode accepteren', 'error red').show();
             return;

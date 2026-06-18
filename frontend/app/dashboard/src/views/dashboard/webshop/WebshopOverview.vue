@@ -994,7 +994,7 @@ const todoList = computed(() => {
     list.push({
         icon: 'bank',
         title: 'Stel online betalingen in',
-        description: organization.value.address?.country === Country.Netherlands ? 'Zorg dat bestellers via iDEAL of creditcard kunnen betalen.' : 'Zorg dat bestellers via Bancontact, Payconiq of creditcard kunnen betalen.',
+        description: organization.value.address?.country === Country.Netherlands ? $t('Zorg dat bestellers via iDEAL of creditcard kunnen betalen.') : $t('Zorg dat bestellers via Bancontact of creditcard kunnen betalen.'),
         action: () => editPaymentMethods(),
         done: webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard)
             || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.iDEAL)

@@ -76,7 +76,7 @@
                 </h3>
 
                 <div v-if="useMinimumAmount" class="split-inputs option" @click.stop.prevent>
-                    <PriceInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`%JD`)" v-model="minimumAmount" :min="2" :validator="errors.validator" />
+                    <PriceInputBox v-model="minimumAmount" error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`%JD`)" :min="2" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -105,8 +105,8 @@
                     {{ $t('%J3') }}
                 </h3>
 
-                <div v-if="useWarningAmount" class="split-inputs option" @click.stop.prevent>
-                    <PriceInputBox title="" error-fields="warningAmount" :error-box="errors.errorBox" v-model="warningAmount" class="input" type="text" :min="1" :validator="errors.validator" />
+                <div v-if="useWarningAmount" class="option" @click.stop.prevent>
+                    <PriceInputBox v-model="warningAmount" title="" error-fields="warningAmount" :error-box="errors.errorBox" type="text" :min="1" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -156,8 +156,7 @@ function addPatchSettings(patch: PartialWithoutMethods<AutoEncoderPatchType<Paym
 
     if (!patched.value.paymentMethodSettings.get(props.paymentMethod)) {
         p.paymentMethodSettings.set(props.paymentMethod, settings.value.patch(patch));
-    }
-    else {
+    } else {
         p.paymentMethodSettings.set(props.paymentMethod, PaymentMethodSettings.patch(patch));
     }
     addPatch(p);
@@ -173,8 +172,7 @@ const useMinimumAmount = computed({
     set: (useMinimumAmount) => {
         if (useMinimumAmount) {
             minimumAmount.value = 100000;
-        }
-        else {
+        } else {
             minimumAmount.value = 0;
         }
     },
@@ -216,8 +214,7 @@ const useWarningAmount = computed({
 
         if (useWarningAmount) {
             warningAmount.value = 10000;
-        }
-        else {
+        } else {
             warningAmount.value = null;
         }
     },
@@ -339,11 +336,9 @@ async function save() {
     try {
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }

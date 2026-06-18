@@ -63,12 +63,9 @@
 
         <hr><h2>{{ $t('%NR') }}</h2>
 
-        <Checkbox key="payconiq" v-model="forcePayconiq">
-            {{ $t('%1O9') }}
+        <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
+            {{ $t('%15o') }}
         </Checkbox>
-        <p class="style-description-small">
-            {{ $t('%1OH') }}<a :href="$domains.getDocs('payconiq')" class="inline-link" target="_blank">{{ $t('%1Ol') }}</a>{{ $t('%1OF') }}
-        </p>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr><h2>
@@ -149,7 +146,7 @@ import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@simonbackx/sim
 import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -168,7 +165,6 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
-
 
 const context = useContext();
 const baseOrganization = useRequiredOrganization();
@@ -189,10 +185,6 @@ const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEn
 
 const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
 const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
-const forcePayconiq = computed({
-    get: () => getFeatureFlag('forcePayconiq'),
-    set: value => setFeatureFlag('forcePayconiq', value),
-});
 const invoicesEnabled = computed({
     get: () => organization.value.meta.invoicesEnabled ?? false,
     set: (value: boolean) => {

@@ -264,31 +264,29 @@
             </template>
         </template>
 
-        <template v-if="payconiqApiKey || forcePayconiq">
-            <hr>
-            <aside class="style-title-prefix">
-                {{ $t('%1PN') }}
-            </aside>
-            <h2>{{ $t('%Nq') }}</h2>
-            <p>
-                {{ $t('%Nr') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('%19t') }}</a>
-            </p>
+        <hr>
+        <aside class="style-title-prefix">
+            {{ $t('Bancontact Pay | Wero') }}
+        </aside>
+        <h2>{{ $t('Bancontact Pay | Wero (vroeger Payconiq)') }}</h2>
+        <p>
+            {{ $t('Vul hieronder jouw API-key in om betalingen rechtstreeks via Bancontact Pay | Wero te verwerken. ') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('%19t') }}</a>
+        </p>
 
-            <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="$domains.getDocs('oude-payconiq-accounts')" target="_blank">
-                {{ $t('%1Nn') }}
+        <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="$domains.getDocs('oude-payconiq-accounts')" target="_blank">
+            {{ $t('Jouw API-key vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal van Bancontact Pay. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.') }}
 
-                <span class="button text">
-                    {{ $t('%1Ow') }}
-                </span>
-            </a>
+            <span class="button text">
+                {{ $t('%1Ow') }}
+            </span>
+        </a>
 
-            <STInputBox error-fields="payconiqApiKey" :error-box="errors.errorBox" class="max" :title="$t(`%K9`)">
-                <input v-model="payconiqApiKey" class="input" type="text" :placeholder="$t(`%O8`)">
-            </STInputBox>
-            <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
-                {{ $t('%Ns') }} {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
-            </p>
-        </template>
+        <STInputBox error-fields="payconiqApiKey" :error-box="errors.errorBox" class="max" :title="$t(`%K9`)">
+            <input v-model="payconiqApiKey" class="input" type="text" placeholder="00000000-0000-0000-0000-000000000000">
+        </STInputBox>
+        <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
+            {{ $t('%Ns') }} {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
+        </p>
 
         <template v-if="isStamhoofd">
             <hr><h2>
@@ -415,10 +413,6 @@ const payconiqApiKey = computed({
         return patchedOrganization.value.privateMeta?.payconiqApiKey ?? '';
     },
     set: (value: string) => {
-        if (payconiqApiKey.value && value.length === 0) {
-            forcePayconiq.value = true;
-        }
-
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 payconiqAccounts: (value.length === 0 ? [] : [PayconiqAccount.create({ apiKey: value })]) as any,
@@ -461,13 +455,6 @@ const buckarooSecret = computed({
                 }),
             }),
         });
-    },
-});
-
-const forcePayconiq = computed({
-    get: () => featureFlag('forcePayconiq'),
-    set: (forcePayconiq: boolean) => {
-        setFeatureFlag('forcePayconiq', forcePayconiq);
     },
 });
 

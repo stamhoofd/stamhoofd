@@ -52,7 +52,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return $t(`%1S`);
             case PaymentMethod.iDEAL: return $t(`%1n`);
             case PaymentMethod.CreditCard: return $t(`%mi`);
-            case PaymentMethod.Payconiq: return $t(`%1k`);
+            case PaymentMethod.Payconiq: return $t(`Bancontact Pay | Wero`);
         }
     }
 
@@ -68,7 +68,7 @@ export class PaymentMethodHelper {
                 case PaymentMethod.Bancontact: return $t(`%ml`);
                 case PaymentMethod.iDEAL: return $t(`%mm`);
                 case PaymentMethod.CreditCard: return $t(`%mn`);
-                case PaymentMethod.Payconiq: return $t(`%mo`);
+                case PaymentMethod.Payconiq: return $t(`Bancontact Pay betaling`);
             }
         }
 
@@ -94,7 +94,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return $t(`%1S`);
             case PaymentMethod.iDEAL: return $t(`%1n`);
             case PaymentMethod.CreditCard: return $t(`%mi`);
-            case PaymentMethod.Payconiq: return $t(`%1Q`);
+            case PaymentMethod.Payconiq: return $t(`Bancontact Pay`);
         }
     }
 

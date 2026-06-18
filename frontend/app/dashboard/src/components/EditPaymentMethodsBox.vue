@@ -22,20 +22,6 @@
                 </a>
             </p>
 
-            <p v-if="!getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
-                {{ $t("%1Np") }}
-                <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
-                    {{ $t('%19t') }}
-                </a>
-            </p>
-
-            <p v-if="getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
-                {{ $t("%1PB") }}
-                <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
-                    {{ $t('%19t') }}
-                </a>
-            </p>
-
             <STList>
                 <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(getPaymentMethod(method) && (getDescription(method) || getSettingsDescription(method)))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                     <template #left>
@@ -128,8 +114,6 @@ import { AdministrationFeeSettings, PaymentConfiguration, PaymentMethod, Payment
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
-
-
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -324,9 +308,7 @@ const sortedPaymentMethods = computed(() => {
     r.push(PaymentMethod.Bancontact);
 
     // Force a given ordering
-    if ((country.value === Country.Belgium && canEnablePaymentMethod(PaymentMethod.Payconiq)) || getPaymentMethod(PaymentMethod.Payconiq)) {
-        // Disable Payconiq if Bancontact is enabled
-        // Only allowed as legacy fallover
+    if (canEnablePaymentMethod(PaymentMethod.Payconiq)) {
         r.push(PaymentMethod.Payconiq);
     }
 
@@ -364,7 +346,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.Transfer: return $t('%5O');
         case PaymentMethod.Payconiq:
             return providerText(provider, {
-                [PaymentProvider.Payconiq]: '',
+                [PaymentProvider.Payconiq]: $t('Vroeger bekend als Payconiq'),
                 [PaymentProvider.Buckaroo]: $t(`%1F`),
             });
         case PaymentMethod.Bancontact:

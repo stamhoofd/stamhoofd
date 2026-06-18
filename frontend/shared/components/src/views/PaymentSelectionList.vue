@@ -17,7 +17,7 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod === 'Payconiq' && hasNonBancontact" class="style-tag inline-first">{{ $t('%kQ') }}</span>
+                    <span v-if="paymentMethod === PaymentMethod.Bancontact && bancontactInfoMessage" class="style-tag inline-first">{{ bancontactInfoMessage }}</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
@@ -47,40 +47,49 @@ const props = withDefaults(defineProps<{
     context?: null | 'takeout' | 'delivery';
     amount: number;
     customer?: PaymentCustomer | null;
-    forMandate?: boolean
+    forMandate?: boolean;
 }>(), {
     context: null,
     customer: null,
-    forMandate: false
+    forMandate: false,
 });
 
 const selectedPaymentMethod = defineModel<PaymentMethod | null>();
 const paymentMethods = computed(() => props.paymentConfiguration.getAvailablePaymentMethods({
     amount: props.amount,
     customer: props.customer,
-    forMandate: props.forMandate
+    forMandate: props.forMandate,
 }));
+
+const bancontactInfoMessage = computed(() => {
+    if (hasOtherOnlinePaymentMethodBesidesBancontact.value) {
+        if (paymentMethods.value.includes(PaymentMethod.Payconiq)) {
+            return $t('Alternatief');
+        }
+
+        return $t('Meest gebruikt');
+    }
+
+    return null;
+});
 
 const sortedPaymentMethods = computed(() => {
     const methods = paymentMethods.value;
     const r: PaymentMethod[] = [];
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.iDEAL) && props.country == Country.Netherlands) {
+    if (methods.includes(PaymentMethod.iDEAL) && props.country === Country.Netherlands) {
         r.push(PaymentMethod.iDEAL);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.Bancontact) && props.country != Country.Netherlands) {
-        r.push(PaymentMethod.Bancontact);
+    if (methods.includes(PaymentMethod.Payconiq)) {
+        r.push(PaymentMethod.Payconiq);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.Payconiq)) {
-        if (!methods.includes(PaymentMethod.Bancontact)) {
-            // Don't add it
-            r.push(PaymentMethod.Payconiq);
-        }
+    if (methods.includes(PaymentMethod.Bancontact) && props.country !== Country.Netherlands) {
+        r.push(PaymentMethod.Bancontact);
     }
 
     // Force a given ordering
@@ -89,12 +98,12 @@ const sortedPaymentMethods = computed(() => {
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.iDEAL) && props.country != Country.Netherlands) {
+    if (methods.includes(PaymentMethod.iDEAL) && props.country !== Country.Netherlands) {
         r.push(PaymentMethod.iDEAL);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.Bancontact) && props.country == Country.Netherlands) {
+    if (methods.includes(PaymentMethod.Bancontact) && props.country === Country.Netherlands) {
         r.push(PaymentMethod.Bancontact);
     }
 
@@ -115,10 +124,10 @@ onMounted(() => {
     }
 });
 
-const hasNonBancontact = computed(() => {
+const hasOtherOnlinePaymentMethodBesidesBancontact = computed(() => {
     const hasTransfer = paymentMethods.value.includes(PaymentMethod.Transfer) ? 1 : 0;
     const hasPOS = paymentMethods.value.includes(PaymentMethod.PointOfSale) ? 1 : 0;
-    return paymentMethods.value.length > 1 || !!hasTransfer || !!hasPOS;
+    return paymentMethods.value.length > (hasTransfer + hasPOS + 1);
 });
 
 function getName(paymentMethod: PaymentMethod): string {
