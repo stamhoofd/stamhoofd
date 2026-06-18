@@ -206,7 +206,7 @@ function buildStamhoofdDomains(domains: DevelopmentDomains, preset: EnvironmentP
     return {
         dashboard: domains.dashboard,
         registration: preset.userMode === 'organization' ? { '': domains.registration, 'BE': domains.registration, 'NL': domains.registration } : undefined,
-        marketing: { '': domains.dashboard },
+        marketing: { '': 'www.stamhoofd.be' },
         webshop: { '': domains.webshop, 'BE': domains.webshop, 'NL': domains.webshop },
         api: domains.api,
         rendererApi: domains.renderer,

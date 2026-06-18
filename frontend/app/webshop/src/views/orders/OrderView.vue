@@ -9,7 +9,7 @@
 
             <main>
                 <p v-if="!webshop.meta.reduceBranding && STAMHOOFD.platformName === 'stamhoofd'" class="stamhoofd-header">
-                    <a :href="'https://'+$domains.marketing+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('%Y4') }}</span>  <Logo /></a>
+                    <a :href="'https://' + LocalizedDomains.marketing + '?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('%Y4') }}</span>  <Logo /></a>
                 </p>
                 <div class="box">
                     <main>
@@ -364,6 +364,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 import TicketListItem from '../products/TicketListItem.vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(defineProps<{
     orderId?: string | null;
