@@ -4,7 +4,7 @@
             {{ $t('%40') }}
         </h1>
 
-        <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('mollie')" target="_blank">{{ $t('%1Ox') }}</a>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('bancontact')" target="_blank">{{ $t('%19t') }}</a>.</p>
+        <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a><span v-if="mollieEnabled"> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('mollie')" target="_blank">{{ $t('%1Ox') }}</a></span>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('bancontact')" target="_blank">{{ $t('%19t') }}</a>.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
