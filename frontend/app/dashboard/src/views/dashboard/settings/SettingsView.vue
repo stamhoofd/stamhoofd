@@ -417,7 +417,6 @@ defineRoutes([
                             loginMethods,
                         }),
                     }));
-                    Toast.success($t(`%HU`)).show();
                 },
             };
         },

@@ -124,8 +124,7 @@ export class SessionContext implements RequestMiddleware {
                 shouldRetry: false,
             });
             organization = response.data;
-        }
-        else {
+        } else {
             organization = data.organization;
         }
 
@@ -162,8 +161,7 @@ export class SessionContext implements RequestMiddleware {
                     const token = Token.decode(new ObjectData(parsed, { version: Version }));
                     this.setTokenWithoutSaving(token, usePlatformStorage);
                     return;
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
@@ -177,14 +175,12 @@ export class SessionContext implements RequestMiddleware {
                         const parsed = JSON.parse(json2);
                         const token = Token.decode(new ObjectData(parsed, { version: Version }));
                         this.setTokenWithoutSaving(token, usePlatformStorage);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         console.error(e);
                     }
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Localstorage error');
             console.error(e);
         }
@@ -210,14 +206,12 @@ export class SessionContext implements RequestMiddleware {
                             this.clearAuthCache();
                             this.callListeners('user');
                             return;
-                        }
-                        catch (e) {
+                        } catch (e) {
                             console.error(e);
                         }
                     }
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Localstorage error');
                 console.error(e);
             }
@@ -235,8 +229,8 @@ export class SessionContext implements RequestMiddleware {
                 const suffix = (this.user
                     ? (this.user.organizationId ? this.user.organizationId : 'platform')
                     : (
-                        this.usedPlatformStorage ? 'platform' : (this.organization!.id)
-                    ));
+                            this.usedPlatformStorage ? 'platform' : (this.organization!.id)
+                        ));
 
                 if (suffix === 'platform' && this.organization) {
                     await Storage.secure.removeItem('token-' + this.organization.id);
@@ -252,8 +246,7 @@ export class SessionContext implements RequestMiddleware {
 
                 if (this.user) {
                     await Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })));
-                }
-                else {
+                } else {
                     await Storage.secure.removeItem('user-' + suffix);
                 }
 
@@ -262,8 +255,7 @@ export class SessionContext implements RequestMiddleware {
                 }
                 console.log('[SessionContext] Saved token to storage, suffix: ' + suffix);
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Storage error when saving session');
             console.error(e);
         }
@@ -289,8 +281,7 @@ export class SessionContext implements RequestMiddleware {
                 await Storage.secure.removeItem('token-platform');
                 await Storage.secure.removeItem('user-platform');
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Storage error when saving session');
             console.error(e);
         }
@@ -308,8 +299,7 @@ export class SessionContext implements RequestMiddleware {
 
             // Deprecated: but best to delete it for now
             void Storage.secure.removeItem('key-' + this.organizationId);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Storage error when deleting session');
             console.error(e);
         }
@@ -343,8 +333,7 @@ export class SessionContext implements RequestMiddleware {
                     return;
                 }
                 Storage.secure.removeItem('oid-state').catch(console.error);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
 
                 if (!this.canGetCompleted()) {
@@ -362,8 +351,7 @@ export class SessionContext implements RequestMiddleware {
             try {
                 // We successfull logged in, so clear the tried login - will make sure we'll log in automatically next time
                 sessionStorage.removeItem('triedLogin');
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
         }
@@ -384,8 +372,7 @@ export class SessionContext implements RequestMiddleware {
                     return;
                 }
                 Storage.secure.removeItem('oid-state').catch(console.error);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
                 if (!this.canGetCompleted()) {
                     new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
@@ -394,8 +381,7 @@ export class SessionContext implements RequestMiddleware {
             }
 
             new Toast(error, 'error red').setHide(20000).show();
-        }
-        else {
+        } else {
             if (error) {
                 search.delete('error');
 
@@ -418,8 +404,7 @@ export class SessionContext implements RequestMiddleware {
                 }
                 Toast.success(msg).show();
                 Storage.secure.removeItem('oid-state').catch(console.error);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
                 return;
             }
@@ -430,8 +415,7 @@ export class SessionContext implements RequestMiddleware {
         const spaState = generateId(40);
         try {
             await Storage.secure.setItem('oid-state', spaState);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Could not save state in local storage');
             new Toast($t(`%kw`), 'error red').setHide(20000).show();
             return;
@@ -578,7 +562,7 @@ export class SessionContext implements RequestMiddleware {
             console.error('Avoid usage of getAuthenticatedServerForOrganization in organization mode');
 
             if (STAMHOOFD.environment === 'development') {
-                throw new Error('Not supported in organization mode')
+                throw new Error('Not supported in organization mode');
             }
         }
         const server = SessionContext.serverForOrganization(organizationId);
@@ -663,8 +647,7 @@ export class SessionContext implements RequestMiddleware {
 
         if (this.user) {
             this.user.deepSet(response.data);
-        }
-        else {
+        } else {
             this.user = response.data;
             this.clearAuthCache();
         }
@@ -680,8 +663,7 @@ export class SessionContext implements RequestMiddleware {
             if (returnedOrganization) {
                 this._lastFetchedOrganization = new Date();
                 this.updateOrganization(returnedOrganization);
-            }
-            else {
+            } else {
                 console.warn('Did not find organization in user response');
             }
         }
@@ -708,8 +690,7 @@ export class SessionContext implements RequestMiddleware {
             this.setOrganization(organization);
             this.clearAuthCache();
             this.callListeners('organization');
-        }
-        else {
+        } else {
             this.organization.deepSet(organization);
             this.clearAuthCache();
             this.callListeners('organization');
@@ -764,8 +745,7 @@ export class SessionContext implements RequestMiddleware {
     async updateData(force = false, shouldRetry = true, background = false, skipIfNotOutdated = false) {
         if (force) {
             console.log('SessionContext force update data, background: ', background, skipIfNotOutdated);
-        }
-        else {
+        } else {
             console.log('SessionContext update data, background: ', background, skipIfNotOutdated);
         }
 
@@ -805,8 +785,7 @@ export class SessionContext implements RequestMiddleware {
                     console.error('Background session update error', e);
                 });
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while updating session data', e);
             throw e;
         }
@@ -856,8 +835,7 @@ export class SessionContext implements RequestMiddleware {
                     shouldRetry: false,
                     allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
                     // Network access is required for a reliable logout
                     this.isLoggingOut = false;
@@ -915,8 +893,7 @@ export class SessionContext implements RequestMiddleware {
                     shouldRetry: false,
                     allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
                     // Network access is required for a reliable logout
                     this.isLoggingOut = false;
@@ -948,8 +925,7 @@ export class SessionContext implements RequestMiddleware {
                 console.log(this.requestPrefix(request) + 'Request started with expired access token, refreshing before starting request...');
                 try {
                     await this.token.refresh(this.identityServer, () => request.shouldRetry);
-                }
-                catch (e) {
+                } catch (e) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         if (e.hasCode('invalid_refresh_token')) {
                             this.setLoadingError(e);
@@ -1016,8 +992,7 @@ export class SessionContext implements RequestMiddleware {
                     console.log(this.requestPrefix(request) + 'Request failed due to expired access token, refreshing...');
                     await this.token.refresh(this.identityServer, () => request.shouldRetry);
                     console.log(this.requestPrefix(request) + 'Retrying request...');
-                }
-                catch (e) {
+                } catch (e) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         if (e.hasCode('invalid_refresh_token')) {
                             console.log(this.requestPrefix(request) + 'Refresh token is invalid');
@@ -1036,17 +1011,14 @@ export class SessionContext implements RequestMiddleware {
                     return false;
                 }
                 return true;
-            }
-            else {
+            } else {
                 if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
                     console.log(this.requestPrefix(request) + 'This request started with an old token that might not be valid anymore. Retry with new token');
                     return true;
-                }
-                else {
+                } else {
                     if (error.hasCode('invalid_access_token')) {
                         await this.doUnsetToken(true);
-                    }
-                    else {
+                    } else {
                         this.setLoadingError(error);
                     }
                 }

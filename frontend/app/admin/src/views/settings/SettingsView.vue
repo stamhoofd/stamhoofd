@@ -291,7 +291,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { defineRoute, defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import eventNotificationsIllustration from '@stamhoofd/assets/images/illustrations/event-notifications.svg';
 import groupIllustration from '@stamhoofd/assets/images/illustrations/group.svg';
 import houseIllustration from '@stamhoofd/assets/images/illustrations/house.svg';
@@ -312,12 +312,10 @@ import type {
 import {
     DataPermissionsSettings,
     FinancialSupportSettings,
-    LoginProviderType,
     Platform,
     PlatformConfig,
 } from '@stamhoofd/structures';
 import { computed } from 'vue';
-
 
 // todo translations
 enum Routes {
@@ -338,7 +336,6 @@ enum Routes {
     Terms = 'voorwaarden',
     Labs = 'experimenten',
     OrganizationRecordConfiguration = 'organisatie-gegevens',
-    SingleSignOn = 'SingleSignOn',
 }
 
 const platform = usePlatform();
@@ -577,35 +574,6 @@ defineRoutes([
         },
     },
 ]);
-
-defineRoute({
-    name: Routes.SingleSignOn,
-    url: 'sso/@provider',
-    present: 'popup',
-    params: {
-        provider: String,
-    },
-    component: async () => (await import('@stamhoofd/components/auth/SSOSettingsView.vue')).default,
-
-    async paramsToProps(params) {
-        const provider = Object.values(LoginProviderType).includes(params.provider as LoginProviderType) ? params.provider as LoginProviderType : null;
-
-        if (!provider) {
-            throw new Error('provider not found');
-        }
-
-        return {
-            provider,
-        };
-    },
-    propsToParams(props) {
-        return {
-            params: {
-                provider: props.provider,
-            },
-        };
-    },
-});
 
 const $navigate = useNavigate();
 </script>
