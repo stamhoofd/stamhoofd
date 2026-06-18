@@ -11,11 +11,6 @@ export async function startMigration(dryRun = false) {
         batchSize: 100,
         query: Organization.select(),
         action: async (organization: Organization) => {
-            // temporary for testing
-            // todo: remove
-            if (!PropertyChangesLoggerHelper.shouldLog(organization)) {
-                return;
-            }
             const organizationHandler = new OrganizationHandler(organization);
             await organizationHandler.handle(dryRun);
         },
@@ -539,10 +534,6 @@ class GroupsPropertyFiltersTracker {
         const filter = cloneObject(propertyFilter[type]);
         const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(filter);
 
-        console.error('type:', type);
-        console.error('filter:', JSON.stringify(filter));
-        console.error('orFilters:', JSON.stringify(orFilters));
-
         // make sure there are no other $or filters (else the filter possibly cannot be moved)
         orFilters.forEach((filter) => {
             // should not contain $or filter on deeper level than root (unless in registrations filter)
@@ -566,13 +557,8 @@ class GroupsPropertyFiltersTracker {
             }
         }
 
-        let shouldMergeGlobalFiltersWithGroupSpecificFilters = false;
-
-        // let overridGroupSpecificFilters
-
         if (globalFilters.length > 0) {
             if (type === 'enabledWhen') {
-                console.error('set global 2');
                 this.set({
                     key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
                     type,
@@ -584,16 +570,8 @@ class GroupsPropertyFiltersTracker {
                 if (this.hasEnabledWhenFilterOnlyRegistrationFilters === null) {
                     throw new Error('hasEnabledWhenFilterOnlyRegistrationFilters is null, this should be set first');
                 }
-                // this depends on enabledWhen
-                // -> if enabledWhen has registration filters
-                // -> if enabledWhen has no registration filters
-                // should strip group specific filters from requiredWhen and add as globlal filter + add empty filter for all group specific filters
-                // todo
-                // const hasEnabledWhenFilterOnlyRegistrationFilters = false;
 
                 if (this.hasEnabledWhenFilterOnlyRegistrationFilters) {
-                    shouldMergeGlobalFiltersWithGroupSpecificFilters = true;
-
                     // override existing group specific filters
                     for (const [key, value] of this.groupPropertyFiltersMap) {
                         if (key === GroupsPropertyFiltersTracker.GLOBAL_KEY) {
@@ -609,38 +587,11 @@ class GroupsPropertyFiltersTracker {
                     }
 
                     if (groupSpecificFilters.length > 0) {
-                        // todo
                         throw new Error('comination of group specific filters in enabledWhen and requiredWhen is not supported, :' + JSON.stringify(propertyFilter));
                     }
 
-                    // set group specific filters
-                    // for (const groupSpecificFilter of groupSpecificFilters) {
-                    //     const registrationFilterHandler = new RegistrationsFilterHandler(groupSpecificFilter);
-
-                    //     for (const groupId of registrationFilterHandler.groupIds.values()) {
-                    //         let otherFilters: StamhoofdFilter = registrationFilterHandler.otherFilters;
-                    //         console.error('other filters: ', JSON.stringify(otherFilters));
-
-                    //         if (shouldMergeGlobalFiltersWithGroupSpecificFilters) {
-                    //             otherFilters = StamhoofdFilterHelper.mergeFiltersOfPropertyFilter([globalFilters, otherFilters], type, '$or') ?? [];
-                    //             console.error('other filters after merge: ', JSON.stringify(otherFilters));
-                    //         }
-
-                    //         const filter = Array.isArray(otherFilters) && otherFilters.length === 0 ? defaultValue : otherFilters;
-                    //         console.error('group specific filter: ', JSON.stringify(filter));
-
-                    //         this.set({
-                    //             key: groupId,
-                    //             type,
-                    //             filter,
-                    //             isInverted: registrationFilterHandler.isInverted,
-                    //             mergeType: '$or',
-                    //         });
-                    //     }
-                    // }
                     return;
                 } else {
-                    console.error('set global 3');
                     this.set({
                         key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
                         type,
@@ -658,16 +609,8 @@ class GroupsPropertyFiltersTracker {
             const registrationFilterHandler = new RegistrationsFilterHandler(groupSpecificFilter);
 
             for (const groupId of registrationFilterHandler.groupIds.values()) {
-                let otherFilters: StamhoofdFilter = registrationFilterHandler.otherFilters;
-                console.error('other filters: ', JSON.stringify(otherFilters));
-
-                if (shouldMergeGlobalFiltersWithGroupSpecificFilters) {
-                    otherFilters = StamhoofdFilterHelper.mergeFiltersOfPropertyFilter([globalFilters, otherFilters], type, '$or') ?? [];
-                    console.error('other filters after merge: ', JSON.stringify(otherFilters));
-                }
-
+                const otherFilters: StamhoofdFilter = registrationFilterHandler.otherFilters;
                 const filter = Array.isArray(otherFilters) && otherFilters.length === 0 ? defaultValue : otherFilters;
-                console.error('group specific filter: ', JSON.stringify(filter));
 
                 this.set({
                     key: groupId,
@@ -678,8 +621,6 @@ class GroupsPropertyFiltersTracker {
                 });
             }
         }
-
-        console.error('test 4: ', JSON.stringify([...this.groupPropertyFiltersMap.entries()].map(([key, value]) => ({ key, value }))));
 
         if (type === 'enabledWhen') {
             this.hasEnabledWhenFilterOnlyRegistrationFilters = globalFilters.length === 0 && groupSpecificFilters.length > 0;
@@ -757,15 +698,9 @@ class GroupsPropertyFiltersTracker {
         const first = allPropertyFilterTrackers[0];
         let result = first.clone();
 
-        // todo: not sure if merge works as expected -> test
         for (const propertyFilter of allPropertyFilterTrackers.slice(1)) {
             result = PropertyFilterTracker.mergeIntoNew(result, propertyFilter);
         }
-
-        console.error('group: ', group.id);
-        console.error('global: ', JSON.stringify(globalPropertyFilter));
-        console.error('group specific: ', JSON.stringify(groupSpecific));
-        console.error('all: ', JSON.stringify(allPropertyFilterTrackers));
 
         return result.createPropertyFilter();
     }
@@ -821,46 +756,26 @@ class PropertyFilterHandler {
 
         const groupIds = RegistrationsFilterHandler.getGroupIdsFromFilter(propertyFilter.requiredWhen);
         if (groupIds.length === 0) {
+            // should never happen, if this happens there is a bug
             throw new Error('No groupIds found: ' + JSON.stringify(propertyFilter));
         }
 
-        try {
         // if only registration filters in requiredwhen -> check if at least one group exists
-            const groups = await Group.select().where('id', groupIds).where('deletedAt', null).count();
-            console.error(`found ${groups} groups`);
+        const groups = await Group.select().where('id', groupIds).where('deletedAt', null).count();
 
-            const shouldHandleFilter = groups !== 0;
+        const shouldHandleFilter = groups !== 0;
 
-            if (!shouldHandleFilter) {
-                const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(propertyFilter.requiredWhen);
-                if (orFilters.length > 1) {
+        if (!shouldHandleFilter) {
+            const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(propertyFilter.requiredWhen);
+            if (orFilters.length > 1) {
                 // or filters are not supported for now
-                    throw new Error('Only one or filter expected: ' + JSON.stringify(propertyFilter));
-                }
-                propertyFilter.requiredWhen = null;
+                throw new Error('Only one or filter expected: ' + JSON.stringify(propertyFilter));
             }
-
-            return shouldHandleFilter;
-        } catch (e) {
-            console.error('groupIds:', JSON.stringify(groupIds));
-            throw e;
+            propertyFilter.requiredWhen = null;
         }
-    }
 
-    /**
-     * case enabledWhen null but requiredWhen not ->
-     *  - set on EVERY group
-     *  - remove from organization if not a category, else set defaultEnabled to false
-     *
-     * case enabledWhen not null but requiredWhen null ->
-     * - only set on groups in enabledWhen filter
-     * - remove from organization if not a category, else set defaultEnabled to false
-     *
-     * case enabledWhen not null and requiredWhen not null ->
-     * - only set on groups in enabledWhen filter
-     * - set requiredWhen depending on filter (different if groupId in filter or not)
-     * - get propertyFilter for group and set requiredWhen?
-     */
+        return shouldHandleFilter;
+    }
 
     handleOrganization() {
         // property filter handler only can be created if there is a registration filter -> therefore no need to check
@@ -891,10 +806,10 @@ class PropertyFilterHandler {
  * Only for testing purposes
  */
 class PropertyChangesLoggerHelper {
-    private static readonly organizionIdsToLog = new Set(['201b8884-3396-469d-824c-2b8649f64248']);
+    private static readonly organizionIdsToLog = new Set();
     private readonly logInfo = new Map<string, Map<string, Set<string>>>();
     private static readonly FILE_PATH: string = 'property-filter-changes.txt';
-    static readonly SHOULD_LOG = true;
+    static readonly SHOULD_LOG = false;
     private shouldLog = PropertyChangesLoggerHelper.SHOULD_LOG;
 
     static didInitOneTime = false;
@@ -991,7 +906,6 @@ class OrganizationHandler {
             return;
         }
 
-        // todo: add extra filters to limit amount of groups?
         const query = Group.select().where('organizationId', this.organization.id).where('deletedAt', null);
 
         let skipGroups = false;
@@ -1000,7 +914,6 @@ class OrganizationHandler {
             const allGroupIds = new Set<string>(propertyFilterHandlers.flatMap(handler => handler.groupPropertyFiltersTracker.groupIdsToUpdate));
             if (allGroupIds.size === 0) {
                 // can happen if an empty registrations filter
-                // todo: add extra logging to make sure this is ok
                 skipGroups = false;
             } else {
                 query.where('id', [...allGroupIds]);
