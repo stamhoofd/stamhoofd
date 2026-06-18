@@ -68,6 +68,7 @@ import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterIt
 import { useRegistrationsActionBuilder } from '../../classes/RegistrationsActionBuilder';
 import ViewMemberInvitationRow from './ViewMemberInvitationRow.vue';
 import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
+import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -127,8 +128,8 @@ const visibleRegistrations = computed(() => {
     return filteredRegistrations.value;
 });
 
-const filteredInvitations = computed(() =>{
-    return props.member.member.registrationInvitations.filter(i => {
+const filteredInvitations = computed(() => {
+    return props.member.member.registrationInvitations.filter((i) => {
         if (i.group.periodId !== period.value.id) {
             return false;
         }
@@ -186,7 +187,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
         markedRowsAreSelected: true,
     };
 
-    const displayedComponent = AsyncComponent(() => import('../../../tables/TableActionsContextMenu.vue'), {
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.right,
         y: bounds.bottom,
         xPlacement: 'left',
@@ -208,7 +209,7 @@ async function editInvitation(memberRegistrationInvitation: MemberRegistrationIn
             firstName: member.firstName,
             lastName: member.lastName,
             birthDay: member.details.birthDay,
-        })
+        }),
     });
 
     const el = event.currentTarget! as HTMLElement;
@@ -226,8 +227,8 @@ async function editInvitation(memberRegistrationInvitation: MemberRegistrationIn
                 if (indexOfInvitation !== -1) {
                     props.member.member.registrationInvitations.splice(indexOfInvitation, 1);
                 }
-            }
-        })
+            },
+        }),
     ];
 
     const invitationsObjectFetcher = useRegistrationInvitationsObjectFetcher();
@@ -244,13 +245,13 @@ async function editInvitation(memberRegistrationInvitation: MemberRegistrationIn
         markedRowsAreSelected: true,
     };
 
-    const displayedComponent = AsyncComponent(() => import('../../../tables/TableActionsContextMenu.vue'), {
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.right,
         y: bounds.bottom,
         xPlacement: 'left',
         yPlacement: 'bottom',
         actions,
-        selection
+        selection,
     });
     await present(displayedComponent.setDisplayStyle('overlay'));
 }

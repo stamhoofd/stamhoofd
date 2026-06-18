@@ -74,7 +74,7 @@
 <script lang="ts" setup>
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, defineComponent, getCurrentInstance, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
 import { useScrollListener } from '#hooks/useScrollListener.ts';
@@ -274,12 +274,23 @@ watch([visibleCategories, categoryRows], () => {
     seekerHeight.value = height;
 });
 
+const forceVisibleCategory = shallowRef<CategorizedViewCategory | null>(null);
+
 const visibleCategory = computed({
     get: () => {
-        return visibleCategories.value[0] ?? null;
+        return forceVisibleCategory.value ?? visibleCategories.value[0] ?? null;
     },
     set: (c: CategorizedViewCategory | null) => {
         if (c) {
+            // Prevent switching to intermediate visible categories while scrolling
+            // By locking the visible category
+            forceVisibleCategory.value = c;
+
+            setTimeout(() => {
+                forceVisibleCategory.value = null;
+            }, 300);
+
+            // Scroll
             scrollToCategory(c);
         } else {
             const s = scrollElement.value;

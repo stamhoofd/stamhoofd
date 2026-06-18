@@ -18,8 +18,14 @@
         overflow-x: clip; // Same as above, but prevent scrolling
 
         > h1 {
-            @extend %style-title-2-larger;
+            @extend %style-title-1;
+
+            .split-view-controller[data-has-detail="true"] > .master & {
+                @extend %style-title-2-larger;
+            }
         }
+
+        
 
         .footer {
             margin-top: auto;
@@ -78,11 +84,13 @@
             --saved-color-current-background-shade: var(--color-current-background-shade);
             --saved-color-current-background-shade-darker: var(--color-current-background-shade-darker);
 
-            &:hover {
-                background-color: $color-background-shade-darker;
-                --saved-color-current-background: #{$color-background-shade-darker};
-                --saved-color-current-background-shade: #{$color-background-shade-darker-darker};
-                --saved-color-current-background-shade-darker: #{$color-background-shade-4};
+            @media (pointer: fine) {
+                &:hover {
+                    background-color: $color-background-shade-darker;
+                    --saved-color-current-background: #{$color-background-shade-darker};
+                    --saved-color-current-background-shade: #{$color-background-shade-darker-darker};
+                    --saved-color-current-background-shade-darker: #{$color-background-shade-4};
+                }
             }
 
             .split-view-controller[data-has-detail="true"] > .master &.selected, &.active, &.focused, &:active  {

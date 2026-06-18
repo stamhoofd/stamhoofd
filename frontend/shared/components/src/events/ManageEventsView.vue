@@ -2,10 +2,13 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar :title="$t(`%uB`)">
             <template #right>
-                <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
-                    <span class="icon add" />
-                    <span>{{ $t('%1IY') }}</span>
-                </button>
+                <template v-if="canWriteSomeEvent">
+                    <button v-if="$isMobile" type="button" class="button icon add" @click="addEvent()" />
+                    <button v-else type="button" class="button navigation selected" @click="addEvent()">
+                        <span class="icon add" />
+                        <span>{{ $t('Toevoegen') }}</span>
+                    </button>
+                </template>
             </template>
         </STNavigationBar>
 
@@ -78,8 +81,6 @@ import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import EventRow from './components/EventRow.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
-
-
 
 type ObjectType = Event;
 

@@ -24,7 +24,6 @@
     height: 1000px;
     width: 100%;
     z-index: 0;
-
     background: linear-gradient(180deg, rgba($color-primary-original, 0.1), rgba($color-primary-original, 0) 100%);
 
     .pattern {

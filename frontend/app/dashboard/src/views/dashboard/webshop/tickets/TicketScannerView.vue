@@ -1,10 +1,6 @@
 <template>
     <div ref="rootRef" class="st-view scanner-view" data-testid="ticket-scanner-view">
-        <STNavigationBar :show-title="true" :title="$t(`%Vu`)">
-            <template #left>
-                <button class="icon button close" type="button" @click="() => dismiss()" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar :show-title="false" :title="$t(`%Vu`)" />
 
         <div class="video-container" :class="{ native: disableWebVideo }">
             <video v-if="!disableWebVideo" ref="videoRef" />
@@ -59,8 +55,6 @@ import QrScanner from 'qr-scanner';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
-
-
 
 // if you have another AudioContext class use that one, as some browsers have a limit
 // var audioCtx = new (window.AudioContext || (window as any).webkitAudioContext || (window as any).audioContext)();
@@ -194,8 +188,7 @@ function toggleFlash() {
     if (isFlashOn.value) {
         // this.scanner?.turnFlashOff()
         isFlashOn.value = false;
-    }
-    else {
+    } else {
         // this.scanner?.turnFlashOn()
         isFlashOn.value = true;
     }
@@ -215,12 +208,10 @@ async function updateTickets() {
             console.error(e);
             Toast.fromError(e).show();
         });
-    }
-    catch (e: any) {
+    } catch (e: any) {
         if (Request.isNetworkError(e as Error)) {
             hadNetworkError.value = true;
-        }
-        else {
+        } else {
             Toast.fromError(e).show();
         }
     }
@@ -295,16 +286,14 @@ function stopStream() {
         if (stream.value && (stream.value as any).stop) {
             (stream.value as any).stop();
             stream.value = null;
-        }
-        else {
+        } else {
             if (stream.value && stream.value.getTracks) {
                 const track = stream.value.getTracks()[0]; // if only one media track
                 track.stop();
                 stream.value = null;
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -327,8 +316,7 @@ async function setStream(constraints: MediaStreamConstraints, force = false) {
     if (stream.value && stream.value.active && !force) {
         // Keep existing stream
         video.srcObject = stream.value;
-    }
-    else {
+    } else {
         stopStream();
         // Not adding `{ audio: true }` since we only want video now
         const mediaStream = await navigator.mediaDevices
@@ -350,8 +338,7 @@ async function setStream(constraints: MediaStreamConstraints, force = false) {
             cameraIndex.value = index;
             console.log('Found camera index ', index);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -392,8 +379,7 @@ async function checkTicket(result: string) {
             if (!order) {
                 AppManager.shared.hapticError();
                 new Toast('Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.', 'error red').show();
-            }
-            else {
+            } else {
                 if (ticket.itemId !== null) {
                     const item = order.data.cart.items.find(i => i.id === ticket.itemId);
                     if (item) {
@@ -407,21 +393,17 @@ async function checkTicket(result: string) {
 
                 if (ticket.deletedAt || order.status === OrderStatus.Canceled || order.status === OrderStatus.Deleted) {
                     canceledTicket();
-                }
-                else if (ticket.scannedAt !== null) {
+                } else if (ticket.scannedAt !== null) {
                     alreadyScannedTicket(ticket, order);
-                }
-                else {
+                } else {
                     validTicket(ticket, order);
                 }
             }
-        }
-        else {
+        } else {
             console.error('Ticket not found');
             invalidTicket();
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         // database error
         Toast.fromError(e).show();
@@ -484,8 +466,7 @@ async function startScanning() {
         // Start (if still needed)
         try {
             await AppManager.shared.QRScanner.startScanning();
-        }
-        catch (e: any) {
+        } catch (e: any) {
             if (e.message && typeof e.message === 'string' && e.message.includes('Permission')) {
                 new Toast('Geen toegang tot jouw camera. Ga naar de instellingen app om terug toegang te geven.', 'error red').show();
                 return;
@@ -518,8 +499,7 @@ async function startScanning() {
             console.log(torch);
             isFlashOn.value = torch.status;
             hasFlash.value = true;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
 
@@ -657,6 +637,7 @@ onBeforeUnmount(() => stopScanning());
 
 .scanner-view {
     --st-vertical-padding: 0px;
+    --navigation-bar-horizontal-padding: 7px;
 
     .video-container {
         flex-grow: 1;

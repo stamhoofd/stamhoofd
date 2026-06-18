@@ -175,7 +175,7 @@ html, :host {
 }
 
 
-body.debug-safe-area {
+body.debug-safe-area, body.web-iOS {
     // Debug helpers
     --st-safe-area-bottom: 10vh;
     --st-safe-area-top: 10vh;

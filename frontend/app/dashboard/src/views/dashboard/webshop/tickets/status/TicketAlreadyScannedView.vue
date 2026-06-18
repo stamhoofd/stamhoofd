@@ -1,6 +1,6 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view" data-testid="ticket-already-scanned-view">
-        <STNavigationBar :title="$t(`%Vv`)" />
+        <STNavigationBar :title="$t(`%Vv`)" :disable-dismiss="true" />
 
         <main>
             <h1>
@@ -61,7 +61,6 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { ref, watch } from 'vue';
 import type { WebshopManager } from '../../WebshopManager';
-
 
 const props = defineProps<{
     webshopManager: WebshopManager;

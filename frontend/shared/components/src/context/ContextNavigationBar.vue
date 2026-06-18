@@ -23,7 +23,11 @@ import InheritComponent from '../containers/InheritComponent.vue';
     grid-template-columns: 1fr auto;
     height: 100%;
     align-items: center;
-    padding: 20px 0 20px 0;
+    padding: max(5px, calc(20px - var(--st-safe-area-top, 0px))) 0 20px 0;
+
+    @media (max-width: 500px) {
+        padding: max(5px, calc(20px - var(--st-safe-area-top, 0px))) 0 15px 0;
+    }
 
     > .right {
         display: flex;

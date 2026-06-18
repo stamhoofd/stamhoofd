@@ -30,13 +30,14 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { TableActionSelection } from '#tables/classes/TableAction.ts';
-import { useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import type { Group, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { AccessRight, Gender, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
 import { useEditMember } from './composables/useEditMember';
+import TableActionsContextMenu from '#tables/TableActionsContextMenu.vue';
 
 type PropType = {
     initialTab?: number | null;
@@ -138,7 +139,7 @@ async function showContextMenu(event: MouseEvent) {
         markedRowsAreSelected: true,
     };
 
-    const displayedComponent = AsyncComponent(() => import('#tables/TableActionsContextMenu.vue'), {
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.left,
         y: bounds.bottom,
         xPlacement: 'right',

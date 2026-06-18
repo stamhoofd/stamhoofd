@@ -9,7 +9,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="center force">
+        <main class="center">
             <h1>
                 {{ props.period ? props.period.period.name : $t('Ledenadministratie instellingen') }}
             </h1>

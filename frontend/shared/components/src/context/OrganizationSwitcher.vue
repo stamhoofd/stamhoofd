@@ -1,7 +1,7 @@
 <template>
     <PlatformLogo v-if="!organization && (app === 'auto' || (app === 'registration' && !canSwitch))" />
     <OrganizationLogo v-else-if="(!canSwitch && organization)" :organization="organization" />
-    <button v-else v-long-press="($event: MouseEvent) => open($event)" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open($event)">
+    <button v-else class="organization-switcher" :class="{small}" type="button" @click="open">
         <ContextLogo :organization="organization" :app="app" />
         <div>
             <h1>
@@ -84,6 +84,8 @@ const open = async (event: MouseEvent) => {
 
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     user-select: none;
     cursor: pointer;
 

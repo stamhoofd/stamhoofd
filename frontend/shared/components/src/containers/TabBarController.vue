@@ -499,9 +499,9 @@ defineExpose({
 
     > footer {
         height: var(--tab-bar-header-height);
-        border-top: $border-width-thin solid $color-border;
-        background: $color-background-shade;
-        background: color-mix(in srgb, $color-background-shade 70%, transparent);
+        //border-top: $border-width-thin solid $color-border;
+        background: $color-background;
+        background: color-mix(in srgb, $color-background 70%, transparent);
         padding-bottom: var(--st-safe-area-bottom, 0px);
         user-select: none;
 

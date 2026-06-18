@@ -5,8 +5,8 @@
                 <InheritComponent name="tabbar-replacement" />
             </div>
         </div>
-        <div ref="bar" class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
-            <div class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
+        <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
+            <div ref="bar" class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
                 <div v-if="hasLeft || hasRight" class="left">
                     <BackButton v-if="canPop && !disablePop" data-testid="close-button" @click="pop()" />
                     <button v-else-if="canDismiss && !disableDismiss && ($isAndroid)" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
@@ -82,7 +82,6 @@ const canPop = useCanPop();
 const dismiss = useDismiss();
 const pop = usePop();
 const $isAndroid = useIsAndroid();
-const $isIOS = useIsIOS();
 
 const hasLeft = computed(() => {
     return (canPop.value && !props.disablePop) || (canDismiss.value && !props.disableDismiss && $isAndroid) || (!!slots['left'] && isValidVnodes(slots['left']()));
@@ -122,12 +121,16 @@ const { height: inheritedHeaderHeight } = useElementSize(inheritedHeaderElement)
 const collaped = computed(() => {
     return !hasLeft.value && !hasRight.value;
 });
+
+/**
+ * Does not include safe area
+ */
 const heightPx = computed(() => {
     if (collaped.value) {
-        return Math.max(inheritedHeaderHeight.value, Math.min((height.value - footerHeight.value), 50)).toFixed(2) + 'px';
+        return Math.max(50, inheritedHeaderHeight.value, footerHeight.value).toFixed(2) + 'px';
     }
     // don't include footer height, as that won't be visible if we did not scroll, so should not be included in padding of main
-    return (height.value - footerHeight.value).toFixed(2) + 'px';
+    return (height.value).toFixed(2) + 'px';
 });
 const parentElement = useParentElement();
 
@@ -227,19 +230,25 @@ onDeactivated(() => {
     --st-hr-margin: 0px;
     overflow: visible;
     z-index: 200;
+    height: 0;
+
+    & + main {
+        // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
+        --st-navigation-bar-correction: calc(var(--st-navigation-bar-height, 50px) + var(--current-view-safe-area-top, 0px));
+    }
+
+    &.has-sticky-sibling {
+        & + main {
+            // 1px overlap with sticky sibling
+            --st-navigation-bar-correction: calc(var(--st-navigation-bar-height, 50px) - 1px + var(--current-view-safe-area-top, 0px));
+        }
+    }
 
     &.transparent {
         > .st-navigation-bar {
             background: transparent;
         }
     }
-
-        height: 0;
-
-        & + main {
-            // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-            --st-navigation-bar-correction: var(--st-navigation-bar-height, 0px)
-        }
 
     &+ main {
         > h1:first-child, > *:first-child > h1:first-child {
@@ -302,32 +311,48 @@ onDeactivated(() => {
         top: 0;
         bottom: 0;
         content: '';
-        background: transparent;
-        border-bottom: $border-width-thin solid transparent;
+        background: $color-current-background-shade;
+        border-bottom: $border-width-thin solid $color-border-shade;
         transition: opacity 0.3s, transform 0.3s;
         //transform: translateY(-50px);
         z-index: -1;
         opacity: 0;
-
-        background: $color-current-background-shade;
         pointer-events: none;
-        border-bottom-color: $color-border-shade;
+    }
 
-        body.native-android &, body.web-android & {
+    body.native-android &, body.web-android & {
+        &::before {
             //box-shadow: 0px 2px 5px $color-shadow;
             border-bottom: none;
             background: $color-current-background;
         }
-
-        body.web-iOS &, body.native-iOS & {
+    }
+    body.web-iOS &, body.native-iOS & {
+        &::before {
             background: linear-gradient(
                 rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 1) 0%,
-                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.9) var(--st-safe-area-top, 0px),
-                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.9) calc(var(--st-safe-area-top, 0px) + 70px),
+                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.95) calc(var(--st-safe-area-top, 0px) + var(--st-navigation-bar-height) * 0.8),
                 rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0) 100%
             );
             border-bottom: none;
-            bottom: -120px;
+            bottom: -50px;
+        }
+
+        // Disable pointer events on header (transparency)
+        > .header {
+            pointer-events: none;
+        }
+    }
+
+    body.web-iOS .st-navigation-bar-container.has-sticky-sibling &, body.native-iOS .st-navigation-bar-container.has-sticky-sibling {
+        &::before {
+            background: $color-current-background;
+            bottom: 0;
+        }
+
+        // Enable pointer events on header
+        > .header {
+            pointer-events: all;
         }
     }
 
@@ -400,6 +425,10 @@ onDeactivated(() => {
             align-items: center;
 
             &.left{
+                > * {
+                    pointer-events: all;
+                }
+
                 padding-right: 15px;
 
                 &:empty, &.empty {
@@ -431,6 +460,10 @@ onDeactivated(() => {
             }
 
             &.right {
+                > * {
+                    pointer-events: all;
+                }
+
                 padding-left: 15px;
                 &:empty, &.empty {
                     min-width: 0;

@@ -1,6 +1,6 @@
 <template>
     <div ref="root" class="st-view valid-ticket-view" data-testid="valid-ticket-view">
-        <STNavigationBar :title="$t(`%WB`)" />
+        <STNavigationBar :title="$t(`%WB`)" :disable-dismiss="true" />
 
         <main v-if="!publicTicket.isSingle">
             <h1>
@@ -379,7 +379,6 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-
 
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 

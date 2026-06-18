@@ -54,8 +54,7 @@ import { useAdmins } from './hooks/useAdmins';
 import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
 
-
-const { loading } = useAdmins({forceLoadOnMount: true});
+const { loading } = useAdmins({ forceLoadOnMount: true });
 const showInternalAdmins = useShowInternalAdmins();
 
 enum Routes {
