@@ -132,6 +132,10 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 SQL.table('members'),
             );
 
+        if (organization && STAMHOOFD.userMode === 'organization') {
+            query.where('organizationId', organization.id);
+        }
+
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }

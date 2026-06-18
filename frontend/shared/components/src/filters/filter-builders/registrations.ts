@@ -54,7 +54,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             relationFetcher: organizationRelationsFetcher,
         }));
 
-        if (periodId !== undefined) {
+        if (!periodId) {
             all.push(
                 new MultipleChoiceFilterBuilder({
                     name: $t('%7Z'),

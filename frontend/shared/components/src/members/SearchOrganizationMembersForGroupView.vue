@@ -54,14 +54,14 @@ import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import type { Group, Organization, PlatformMember, RegisterCheckout, SortList } from '@stamhoofd/structures';
 import { assertSort, isEmptyFilter, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, RegisterItem, SortItemDirection } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import type { NavigationActions} from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
 
@@ -90,7 +90,7 @@ const saving = ref(false);
 const auth = useAuth();
 
 const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
-const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(auth.hasSomePlatformAccess() ? (contextOrganization.value ?? null) : null))) as Ref<null | UIFilter>;
+const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(auth.hasSomePlatformAccess() || STAMHOOFD.userMode === 'organization' ? (contextOrganization.value ?? null) : null))) as Ref<null | UIFilter>;
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {
@@ -248,8 +248,7 @@ function selectAllResults() {
                 continue;
             }
             props.checkout.add(item);
-        }
-        catch (e) {
+        } catch (e) {
             // prob invalid
             return;
         }
@@ -264,11 +263,9 @@ async function goNext() {
     saving.value = true;
     try {
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }

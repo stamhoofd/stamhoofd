@@ -396,51 +396,59 @@ export class Group extends AutoEncoder {
             }
         }
 
-        if (organization && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(organization.id))) {
-            filter.push({
-                registrations: {
-                    $elemMatch: {
-                        $and: [
-                            periodIdFilter,
-                            {
-                                organizationId: organization.id,
-                            },
-                        ],
-                    },
-                },
-            });
-        } else if (this.settings.requireOrganizationIds.length) {
-            filter.push({
-                registrations: {
-                    $elemMatch: {
-                        $and: [
-                            periodIdFilter,
-                            {
-                                organizationId: {
-                                    $in: this.settings.requireOrganizationIds,
+        if (STAMHOOFD.userMode === 'platform') {
+            if (organization && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(organization.id))) {
+                filter.push({
+                    registrations: {
+                        $elemMatch: {
+                            $and: [
+                                periodIdFilter,
+                                {
+                                    organizationId: organization.id,
                                 },
-                            },
-                        ],
+                            ],
+                        },
                     },
-                },
-            });
-        }
-
-        if (this.settings.requireOrganizationTags.length) {
-            filter.push({
-                registrations: {
-                    $elemMatch: {
-                        $and: [
-                            periodIdFilter,
-                            {
-                                organization: {
-                                    tags: {
-                                        $in: this.settings.requireOrganizationTags,
+                });
+            } else if (this.settings.requireOrganizationIds.length) {
+                filter.push({
+                    registrations: {
+                        $elemMatch: {
+                            $and: [
+                                periodIdFilter,
+                                {
+                                    organizationId: {
+                                        $in: this.settings.requireOrganizationIds,
                                     },
                                 },
-                            },
-                        ],
+                            ],
+                        },
                     },
+                });
+            }
+
+            if (this.settings.requireOrganizationTags.length) {
+                filter.push({
+                    registrations: {
+                        $elemMatch: {
+                            $and: [
+                                periodIdFilter,
+                                {
+                                    organization: {
+                                        tags: {
+                                            $in: this.settings.requireOrganizationTags,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                });
+            }
+        } else {
+            filter.push({
+                registrations: {
+                    $elemMatch: { $and: [periodIdFilter] },
                 },
             });
         }
