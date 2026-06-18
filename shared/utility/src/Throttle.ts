@@ -2,7 +2,7 @@
  * Named incorrectly, is in fact debounce
  */
 export const throttle = (func: any, limit: any) => {
-    let lastFunc: NodeJS.Timeout;
+    let lastFunc: ReturnType<typeof setTimeout>;
     let lastRan: any;
     return function (this: any) {
         const context = this;

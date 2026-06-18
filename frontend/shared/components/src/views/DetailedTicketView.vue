@@ -168,7 +168,7 @@ function formatDateRange(dateRange: ProductDateRange) {
 
 const qrMessage = computed(() => 'https://' + props.webshop.getUrl(props.organization) + '/tickets/' + props.ticket.secret);
 
-let timer: NodeJS.Timeout;
+let timer: ReturnType<typeof setTimeout>;
 
 onMounted(() => {
     generateQRCode().catch(console.error);

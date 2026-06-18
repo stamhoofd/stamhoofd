@@ -3,13 +3,13 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { MollieToken } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';
-
+import { GetMollieDashboardResponse } from '@stamhoofd/structures/endpoints/GetMollieDashboardResponse.js';
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Body = undefined;
 type Query = undefined;
-type ResponseBody = string;
+type ResponseBody = GetMollieDashboardResponse;
 
 export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -46,8 +46,9 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
         try {
             const url = await mollie.getOnboardingLink() as string;
 
-            const response = new Response(url);
-            response.headers['Content-Type'] = 'text/plain';
+            const response = new Response(GetMollieDashboardResponse.create({
+                url,
+            }));
             return response;
         } catch (e) {
             if (isSimpleErrors(e) || isSimpleError(e)) {

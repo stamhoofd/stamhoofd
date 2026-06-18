@@ -83,12 +83,12 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { Category, Order, TicketPrivate} from '@stamhoofd/structures';
+import type { Category, Order, TicketPrivate } from '@stamhoofd/structures';
 import { Graph, GraphData, OrderStatus, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import type { DurationLike } from 'luxon';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 
@@ -185,8 +185,7 @@ async function createGroupedChart(range: DateOption, dataGenerator: (callback: (
         const existing = orderByDate.get(group);
         if (existing) {
             existing.total += total;
-        }
-        else {
+        } else {
             orderByDate.set(group, {
                 total,
                 date,
@@ -284,8 +283,7 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
                     if (!voucherItemMap.has(ticket.itemId)) {
                         return;
                     }
-                }
-                else {
+                } else {
                     if (ticket.itemId && voucherItemMap.has(ticket.itemId)) {
                         return;
                     }
@@ -388,7 +386,7 @@ const totalScannedVouchers = ref(0);
 
 const totalByProduct: Ref<{ amount: number; name: string; description: string; price: number; category: Category | null }[]> = ref([]);
 
-let reviewTimer: NodeJS.Timeout | null = null;
+let reviewTimer: ReturnType<typeof setTimeout> | null = null;
 
 onMounted(() => {
     reload().catch(console.error);
@@ -476,8 +474,7 @@ async function reload() {
                         if (current) {
                             current.amount += item.amount;
                             current.price += item.getPriceWithDiscounts();
-                        }
-                        else {
+                        } else {
                             const productCategory = webshop.value?.categories.find(c => c.productIds.includes(item.product.id));
 
                             productMap.set(code, {
@@ -519,8 +516,7 @@ async function reload() {
                 if (ticket.itemId !== null && voucherItemMap.has(ticket.itemId)) {
                     totalScannedVouchers.value += (ticket.scannedAt ? 1 : 0);
                     totalVouchers.value += 1;
-                }
-                else {
+                } else {
                     totalScannedTickets.value += (ticket.scannedAt ? 1 : 0);
                     totalTickets.value += 1;
                 }
@@ -561,8 +557,7 @@ async function reload() {
             }
             graphConfigurations.value.push(group);
         }
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 

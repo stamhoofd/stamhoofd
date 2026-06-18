@@ -72,7 +72,7 @@ const payment = shallowRef<PaymentGeneral | null>(null);
 const loading = ref(false);
 
 let pollCount = 0;
-let timeout: NodeJS.Timeout | null = null;
+let timeout: ReturnType<typeof setTimeout> | null = null;
 let didFinish = false;
 
 onMounted(() => {
@@ -83,8 +83,7 @@ function retry() {
     if (confirm($t(`%12i`))) {
         if (navigationController.value!.components.length > 1) {
             navigationActions.pop()?.catch(console.error);
-        }
-        else {
+        } else {
             props.finishedHandler({ ...navigationActions, popup }, payment.value);
         }
     }
@@ -127,8 +126,7 @@ function poll() {
             didFinish = true;
             if (props.errorHandler) {
                 props.errorHandler(navigationActions, e)?.catch(console.error);
-            }
-            else {
+            } else {
                 props.finishedHandler({ ...navigationActions, popup }, payment.value);
             }
         });

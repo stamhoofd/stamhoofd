@@ -350,14 +350,15 @@ import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { MollieProfile } from '@stamhoofd/structures';
 import { BuckarooSettings, CheckMollieResponse, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { GetMollieDashboardResponse } from '@stamhoofd/structures/endpoints/GetMollieDashboardResponse.js';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
@@ -470,7 +471,7 @@ const forcePayconiq = computed({
     },
 });
 
-const mollieEnabled = !!STAMHOOFD.MOLLIE_CLIENT_ID
+const mollieEnabled = !!STAMHOOFD.MOLLIE_CLIENT_ID;
 
 function setFeatureFlag(flag: string, value: boolean) {
     const featureFlags = patchedOrganization.value.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
@@ -525,8 +526,7 @@ async function save() {
 
     if (simpleErrors.errors.length > 0) {
         errors.errorBox = new ErrorBox(errors);
-    }
-    else {
+    } else {
         errors.errorBox = null;
         valid = true;
     }
@@ -543,8 +543,7 @@ async function save() {
         resetPatch();
         Toast.success($t('%HA')).show();
         dismiss({ force: true }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -556,8 +555,8 @@ async function shouldNavigateAway() {
         return true;
     }
     return await CenteredMessage.confirm({
-        title: $t('%A0'), 
-        confirmText: $t('%4X')
+        title: $t('%A0'),
+        confirmText: $t('%4X'),
     });
 }
 
@@ -582,7 +581,8 @@ async function linkMollie() {
         new Toast('Mollie wordt momenteel niet ondersteund. Probeer later opnieuw.', 'error red').show();
         return;
     }
-    const state = Buffer.from(crypto.getRandomValues(new Uint32Array(16))).toString('base64');
+    const bytes = crypto.getRandomValues(new Uint8Array(64));
+    const state = btoa(String.fromCharCode(...bytes));
     await Storage.keyValue.setItem('mollie-saved-state', state);
     // Make sure we redirect teh fixed /oauth/mollie to the correct organization url
     const realRedirectUrl = new URL(window.location.href);
@@ -608,8 +608,7 @@ async function disconnectMollie() {
 
             context.value.updateOrganization(response.data);
             new Toast('Mollie is losgekoppeld', 'success green').show();
-        }
-        catch (e) {
+        } catch (e) {
             new Toast('Loskoppelen mislukt', 'error red').show();
         }
     }
@@ -643,8 +642,7 @@ async function doLinkMollie(code: string, state: string) {
         new Toast('Mollie is gekoppeld', 'success green').show();
         await Storage.keyValue.removeItem('mollie-saved-state');
         await Storage.keyValue.removeItem('mollie-saved-redirect-url');
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         toast.hide();
         new Toast('Koppelen mislukt', 'error red').show();
@@ -665,16 +663,14 @@ onMounted(() => {
 
         if (code && state) {
             doLinkMollie(code, state).catch(console.error);
-        }
-        else {
+        } else {
             const error = mollieMatch.query.get('error') ?? '';
             if (error) {
                 new Toast('Koppelen mislukt', 'error red').show();
             }
             updateMollie().catch(console.error);
         }
-    }
-    else {
+    } else {
         if (patchedOrganization.value.privateMeta && patchedOrganization.value.privateMeta.mollieOnboarding) {
             updateMollie().catch(console.error);
         }
@@ -703,8 +699,7 @@ async function loadStripeAccounts(recheckStripeAccount: string | null) {
                     decoder: StripeAccount as Decoder<StripeAccount>,
                     owner,
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
         }
@@ -726,14 +721,12 @@ async function loadStripeAccounts(recheckStripeAccount: string | null) {
                         owner,
                     });
                     account.deepSet(response.data);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     loadingStripeAccounts.value = false;
@@ -749,7 +742,7 @@ const hasDuplicateNames = computed(() => {
 });
 
 function editStripeAccount(account: StripeAccount) {
-    new CenteredMessage('Stripe Dashboard', 'Je kan alle gegevens wijzigen via je Stripe Dashboard. Bovenaan klik je daar op het gebruikersicoontje > Platforminstellingen om gegevens aan te passen.')
+    new CenteredMessage($t('Stripe Dashboard'), $t('Je kan alle gegevens wijzigen via je Stripe Dashboard. Bovenaan klik je daar op het gebruikersicoontje > Platforminstellingen om gegevens aan te passen.'))
         .addButton(
             new CenteredMessageButton('Openen', {
                 action: async () => {
@@ -766,14 +759,14 @@ let didReadStripe = false;
 async function createStripeAccount() {
     if (isBelgium.value) {
         const time = new Date();
-        if ((!await CenteredMessage.confirm('Let op met wat je invult', 'Ja, gelezen', '- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.'))) {
+        if ((!await CenteredMessage.confirm($t('Let op met wat je invult'), $t('Ja, gelezen'), $t('- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.')))) {
             return;
         }
 
         const end = new Date();
 
         if (!didReadStripe && end.getTime() - time.getTime() < 5_000) {
-            new Toast('Koppel Stripe niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen. We doen dit voor je eigen bestwil.', 'error red').setHide(10_000).show();
+            new Toast($t('Koppel Stripe niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen.'), 'error red').setHide(10_000).show();
             return;
         }
         didReadStripe = true;
@@ -795,8 +788,7 @@ async function createStripeAccount() {
 
         // Open connect url
         await openStripeAccountLink(account.id, tab);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
         tab?.close();
@@ -836,12 +828,10 @@ async function openStripeAccountLink(accountId: string, initialTab?: Window | nu
         if (tab) {
             tab.location = response.data.url;
             tab.focus();
-        }
-        else {
+        } else {
             window.location.href = response.data.url;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
         tab?.close();
@@ -849,11 +839,11 @@ async function openStripeAccountLink(accountId: string, initialTab?: Window | nu
 }
 
 async function deleteStripeAccount(accountId: string) {
-    if (!(await CenteredMessage.confirm('Dit account verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
+    if (!(await CenteredMessage.confirm($t('Dit account verwijderen?'), $t('Verwijderen'), $t('Je kan dit niet ongedaan maken.')))) {
         return;
     }
 
-    if (!(await CenteredMessage.confirm('Heel zeker?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
+    if (!(await CenteredMessage.confirm($t('Heel zeker?'), $t('Verwijderen'), $t('Je kan dit niet ongedaan maken.')))) {
         return;
     }
 
@@ -864,8 +854,7 @@ async function deleteStripeAccount(accountId: string) {
             owner,
         });
         stripeAccounts.value = stripeAccounts.value.filter(a => a.id !== accountId);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
     }
@@ -895,12 +884,10 @@ async function loginStripeAccount(accountId: string) {
         if (tab) {
             tab.location = response.data.url;
             tab.focus();
-        }
-        else {
+        } else {
             window.location.href = response.data.url;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
         tab?.close();
@@ -919,8 +906,7 @@ async function updateMollie() {
 
         mollieProfiles.value = response.data.profiles;
         context.value.updateOrganization(response.data.organization);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
     }
@@ -941,23 +927,21 @@ async function mollieDashboard() {
     }
 
     try {
-        const url = await context.value.authenticatedServer.request({
+        const response = await context.value.authenticatedServer.request({
             method: 'GET',
             path: '/mollie/dashboard',
             shouldRetry: false,
             owner,
-            decoder: StringDecoder as Decoder<string>,
+            decoder: GetMollieDashboardResponse as Decoder<GetMollieDashboardResponse>,
         });
 
         if (AppManager.shared.isNative) {
-            window.open(url.data);
-        }
-        else {
-            tab!.location = url.data as any;
+            window.open(response.data.url);
+        } else {
+            tab!.location = response.data.url;
             tab!.focus();
         }
-    }
-    catch (e) {
+    } catch (e) {
         await updateMollie();
         tab?.close();
         errors.errorBox = new ErrorBox(e);

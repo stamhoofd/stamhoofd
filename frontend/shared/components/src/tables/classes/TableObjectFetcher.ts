@@ -46,7 +46,7 @@ export class TableObjectFetcher<O extends { id: string }> {
     minimumLimit = STAMHOOFD.environment === 'development' ? 10 : 10; // To help catch bugs in pagination
     sort: SortList = [];
 
-    retryTimer: NodeJS.Timeout | null = null;
+    retryTimer: ReturnType<typeof setTimeout> | null = null;
     retryCount = 0;
 
     errorState: Error | null = null;

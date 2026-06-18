@@ -62,7 +62,6 @@
         // List the packages that contribute ambient/global declarations the frontend relies on
         // (e.g. the global `PDFKit` namespace from `@types/pdfkit`, used without an explicit import).
         "types": [
-            "node",
             "pdfkit"
         ],
         // For spec compliance.

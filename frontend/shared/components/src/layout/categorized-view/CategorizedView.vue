@@ -195,7 +195,7 @@ function updateVisible() {
  * This is a real throttle. The throttle method in utility is a debounce.
  */
 function throttle(mainFunction: (...args: unknown[]) => unknown, delay: number) {
-    let timerFlag: NodeJS.Timeout | null = null; // Variable to keep track of the timer
+    let timerFlag: ReturnType<typeof setTimeout> | null = null; // Variable to keep track of the timer
     let runAtEnd = false;
 
     // Returning a throttled version

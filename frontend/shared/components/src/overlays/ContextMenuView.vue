@@ -97,9 +97,9 @@ let currentlyHoveredItem: ContextMenuItemApi | null = null;
 // When we hover an item that has a child menu, we need to cancel other hovers if the mouse moves to the child menu
 let ignoreHover = false;
 let ignoreHoverItem: ContextMenuItemApi | null = null;
-let ignoreHoverTimeout: NodeJS.Timeout | null = null;
+let ignoreHoverTimeout: ReturnType<typeof setTimeout> | null = null;
 let ignoreHoverTriangle: { p1: { x: number; y: number }; p2: { x: number; y: number }; p3: { x: number; y: number } } | null = null;
-let hoverTimeout: NodeJS.Timeout | null = null;
+let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
 
 onMounted(() => {
     // Calculate position

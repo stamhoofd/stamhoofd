@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-networking';
-import type { SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';
 import type { ObjectFetcher } from './ObjectFetcher';
@@ -46,7 +46,7 @@ export class InfiniteObjectFetcher<O extends { id: string }> {
      */
     hasMoreObjects = true;
 
-    retryTimer: NodeJS.Timeout | null = null;
+    retryTimer: ReturnType<typeof setTimeout> | null = null;
     retryCount = 0;
 
     errorState: Error | null = null;
@@ -139,8 +139,7 @@ export class InfiniteObjectFetcher<O extends { id: string }> {
         if (this.searchQuery || query) {
             // force debounce for search queries
             this.delayFetchUntil = new Date(new Date().getTime() + 500);
-        }
-        else {
+        } else {
             this.delayFetchUntil = null;
         }
 
@@ -299,8 +298,7 @@ export class InfiniteObjectFetcher<O extends { id: string }> {
                 console.info('Retrying fetching after ' + shorterWaitTime / 1000 + 's: now');
                 this.fetchIfNeeded().catch(console.error);
             }, shorterWaitTime);
-        }
-        catch (e) {
+        } catch (e) {
             if (currentClearIndex === this._clearIndex) {
                 console.error('Stopped fetching due to error');
                 console.error(e);

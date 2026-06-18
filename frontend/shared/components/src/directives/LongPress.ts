@@ -12,8 +12,7 @@ function getScrollElement(element: HTMLElement): HTMLElement {
         || style.overflowY == 'overlay'
     ) {
         return element;
-    }
-    else {
+    } else {
         if (!element.parentElement) {
             return document.documentElement;
         }
@@ -25,7 +24,7 @@ function distance(a: { x: number; y: number }, b: { x: number; y: number }) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 }
 
-const LongPressDirective: ObjectDirective<HTMLElement & { $longPressTimer: NodeJS.Timeout | null; $didTriggerLongPress: boolean }, (event: MouseEvent) => void> = {
+const LongPressDirective: ObjectDirective<HTMLElement & { $longPressTimer: ReturnType<typeof setTimeout> | null; $didTriggerLongPress: boolean }, (event: MouseEvent) => void> = {
     beforeMount(el, binding) {
         // If we are on Android or Desktop, we can ignore this listener
         if (!(binding.instance?.$.proxy?.$isIOS)) {
