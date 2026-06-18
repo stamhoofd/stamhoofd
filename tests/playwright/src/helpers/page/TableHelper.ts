@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 
 type HasTextFilter = string | RegExp | undefined;
 
@@ -43,11 +43,17 @@ export class TableHelper {
             const button = this.page
                 .getByTestId('context-menu-item-title')
                 .filter({ hasText: typeof action === 'string' ? new RegExp('^\\s*' + Formatter.escapeRegex(action) + '\\s*$') : action });
-            await button
-                .click();
+
+            // Animation messes with hover position
+            await waitForAnimationEnd(button);
 
             if (index === actions.length - 1) {
+                await button
+                    .click();
                 await expect(button).not.toBeVisible();
+            } else {
+                await button.hover();
+                await expect(button).toBeVisible();
             }
         }
     }
@@ -59,4 +65,10 @@ export class TableHelper {
     getOfflineIcon() {
         return this.page.getByTestId('offline-icon');
     }
+}
+
+export async function waitForAnimationEnd(locator: Locator) {
+    const handle = await locator.elementHandle();
+    await handle?.waitForElementState('stable');
+    await handle?.dispose();
 }

@@ -7,16 +7,16 @@ export class WebshopOrdersView {
     constructor(public readonly page: Page) {
     }
 
-    async addOrder({firstName, lastName, email, phone, product, amount, paymentMethod}: {firstName: string, lastName: string, email: string, phone?: string, product: Product, amount?: number, paymentMethod?: PaymentMethod}) {
+    async addOrder({ firstName, lastName, email, phone, product, amount, paymentMethod }: { firstName: string; lastName: string; email: string; phone?: string; product: Product; amount?: number; paymentMethod?: PaymentMethod }) {
         // table
         const table = new TableHelper(this.page);
         await table.clickAction('Bestelling toevoegen');
 
         const editOrderView = new EditOrderView(this.page);
-        await editOrderView.fillCustomerData({firstName, lastName, email, phone});
+        await editOrderView.fillCustomerData({ firstName, lastName, email, phone });
         await editOrderView.addProduct({
             product,
-            amount: amount ?? 1
+            amount: amount ?? 1,
         });
 
         if (paymentMethod) {
@@ -43,8 +43,6 @@ export class WebshopOrdersView {
 
         // Marking a transfer as paid may ask for confirmation (it can send an email)
         const confirmButton = this.page.getByRole('button', { name: 'Markeer als betaald' });
-        if (await confirmButton.isVisible().catch(() => false)) {
-            await confirmButton.click();
-        }
+        await confirmButton.click();
     }
 }
