@@ -6,6 +6,11 @@ import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';
 // import fs from 'fs';
 import { SeedTools } from '../helpers/SeedTools.js';
 
+/**
+ * IMPORTANT!
+ * This migration should be run before the groups-registration-periods migration.
+ */
+
 export async function startMigration(dryRun = false) {
     await SeedTools.loop({
         batchSize: 100,
