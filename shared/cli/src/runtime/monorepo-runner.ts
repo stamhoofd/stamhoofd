@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { caddyDataDir, localIpv4Host, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
+import { caddyRootCaPath, localIpv4Host, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
 import { buildBackendEnv } from '../config/build-config.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
@@ -35,7 +35,6 @@ const testMysqlContainer = 'stamhoofd-test-mysql';
 const e2eMysqlContainer = 'stamhoofd-e2e-mysql';
 const e2eMysqlDataVolume = 'stamhoofd-e2e-mysql-data';
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
-const caddyRootCaPath = path.join(caddyDataDir(), 'pki/authorities/local/root.crt');
 
 export async function buildShared(context: CliContext): Promise<void> {
     console.log('\x1B[35m[BUILD]\x1B[0m Building globally shared dependencies...');
@@ -85,7 +84,7 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context);
         shouldRestoreCaddy = true;
         await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
-        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath, PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers) }, verbose: context.verbose });
+        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers) }, verbose: context.verbose });
     }
     finally {
         if (shouldRestoreCaddy) {

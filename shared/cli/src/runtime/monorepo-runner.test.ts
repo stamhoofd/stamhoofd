@@ -1,6 +1,5 @@
-import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { caddyDataDir } from '../config/shared-service-config.js';
+import { caddyRootCaPath } from '../config/shared-service-config.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import * as docker from '../services/docker.js';
 import { startSharedServices } from '../services/shared-services.js';
@@ -44,7 +43,7 @@ describe('monorepo runner', () => {
         expect(playwrightRun).toBeDefined();
         expect(playwrightRun?.[2].env).toMatchObject({
             DB_PORT: '55103',
-            NODE_EXTRA_CA_CERTS: path.join(caddyDataDir(), 'pki/authorities/local/root.crt'),
+            NODE_EXTRA_CA_CERTS: caddyRootCaPath(),
         });
     });
 });

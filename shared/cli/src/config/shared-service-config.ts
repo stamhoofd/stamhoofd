@@ -89,6 +89,10 @@ export function caddyDataDir(): string {
     return path.join(dataHome, 'caddy');
 }
 
+export function caddyRootCaPath(): string {
+    return path.join(caddyDataDir(), 'pki/authorities/local/root.crt');
+}
+
 export function localhostPort(port: number): string {
     return `${localIpv4Host}:${port}`;
 }
