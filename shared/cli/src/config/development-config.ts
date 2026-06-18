@@ -5,6 +5,7 @@ import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { createContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
+import { applyInternalSecrets } from './internal-secrets.js';
 import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
 
 export type AppService
@@ -93,7 +94,8 @@ export async function buildDevelopmentEnvironment(env: string, service: BackendA
 export async function buildDevelopmentEnvironment(env: string, service: FrontendAppService): Promise<FrontendEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<SharedEnvironment> {
     const context = await createContext({ env, verbose: false });
-    return buildDevelopmentConfig(context, service).appEnv;
+    const appEnv = buildDevelopmentConfig(context, service).appEnv;
+    return await applyInternalSecrets(context, service, appEnv);
 }
 
 function buildDevelopmentDomains(context: CliContext) {
