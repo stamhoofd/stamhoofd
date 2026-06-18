@@ -1,6 +1,6 @@
 <template>
     <div ref="root" class="st-view valid-ticket-view" data-testid="valid-ticket-view">
-        <STNavigationBar :title="$t(`%WB`)" :disable-dismiss="true" />
+        <STNavigationBar :title="$t(`%WB`)" :disable-dismiss="canPop" />
 
         <main v-if="!publicTicket.isSingle">
             <h1>
@@ -369,9 +369,9 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -409,6 +409,7 @@ watch(root, (el) => {
 
 const present = usePresent();
 const pop = usePop();
+const canPop = useCanPop();
 const context = useContext();
 const organizationManager = useOrganizationManager();
 

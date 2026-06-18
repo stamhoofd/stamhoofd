@@ -1,6 +1,6 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view" data-testid="ticket-already-scanned-view">
-        <STNavigationBar :title="$t(`%Vv`)" :disable-dismiss="true" />
+        <STNavigationBar :title="$t(`%Vv`)" :disable-dismiss="canPop" />
 
         <main>
             <h1>
@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useCanPop, usePop, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -78,6 +78,7 @@ watch(root, (root) => {
 
 const show = useShow();
 const pop = usePop();
+const canPop = useCanPop();
 
 function formatDateTime(date: Date) {
     return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date));
