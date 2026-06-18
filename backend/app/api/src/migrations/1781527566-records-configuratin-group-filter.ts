@@ -6,16 +6,6 @@ import { mergeFilters, PropertyFilter } from '@stamhoofd/structures';
 import fs from 'fs';
 import { SeedTools } from '../helpers/SeedTools.js';
 
-/**
- *
- * groups to check:
- * - 1f3d1b30-28e6-4bf6-b662-982a097188dd
- * -- Alcohol
- *
- * - 201b8884-3396-469d-824c-2b8649f64248
- * -- parents
- */
-
 export async function startMigration(dryRun = false) {
     await SeedTools.loop({
         batchSize: 100,
@@ -428,10 +418,6 @@ class RegistrationsFilterHandler {
         const all: string[] = [];
 
         for (const [key, value] of Object.entries(filter)) {
-            if (key === '$or') {
-                throw new Error('The $or filter is not supported');
-            }
-
             if (key === 'registrations') {
                 all.push(...this.getGroupIdsFromRegistrationsFilter({ [key]: value }));
                 continue;
@@ -549,38 +535,6 @@ class GroupsPropertyFiltersTracker {
     }
 
     private updateFromFilter(propertyFilter: PropertyFilter, type: 'enabledWhen' | 'requiredWhen') {
-        // if (propertyFilter[type] === null) {
-        //     // // if enabledWhen is null this means there should be a registrationsFilter in the requiredWhen filter -> all groups will need a property filter
-        //     // if (type === 'enabledWhen') {
-        //     //     console.error('did add global filter - 2');
-        //     //     this.set({
-        //     //         key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
-        //     //         type,
-        //     //         filter: null,
-        //     //         isInverted: false,
-        //     //         mergeType: '$or',
-        //     //     });
-        //     //     return;
-        //     // } else {
-        //     //     // null is the default for requiredWhen
-        //     //     return;
-        //     // }
-        //     console.error('set global 1');
-        //     this.set({
-        //         key: GroupsPropertyFiltersTracker.GLOBAL_KEY,
-        //         type,
-        //         filter: null,
-        //         isInverted: false,
-        //         mergeType: '$or',
-        //     });
-
-        //     if (type === 'enabledWhen') {
-        //         this.hasEnabledWhenFilterOnlyRegistrationFilters = false;
-        //     }
-
-        //     return;
-        // }
-
         // clone to prevent side effects
         const filter = cloneObject(propertyFilter[type]);
         const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(filter);
@@ -646,6 +600,11 @@ class GroupsPropertyFiltersTracker {
                             continue;
                         }
 
+                        value.requiredWhen = StamhoofdFilterHelper.mergeFiltersOfPropertyFilter(globalFilters, type, '$or');
+                    }
+
+                    // override existing inverted group specific filters
+                    for (const [, value] of this.invertedGroupPropertyFiltersMap) {
                         value.requiredWhen = StamhoofdFilterHelper.mergeFiltersOfPropertyFilter(globalFilters, type, '$or');
                     }
 
@@ -742,6 +701,29 @@ class GroupsPropertyFiltersTracker {
         return this.groupPropertyFiltersMap.get(GroupsPropertyFiltersTracker.GLOBAL_KEY);
     }
 
+    private groupInvertedFiltersCache: Map<string, { tracker: PropertyFilterTracker; groups: string[] }> | null = null;
+
+    private groupInvertedFilters(): Map<string, { tracker: PropertyFilterTracker; groups: string[] }> {
+        if (this.groupInvertedFiltersCache) {
+            return this.groupInvertedFiltersCache;
+        }
+
+        const result = new Map<string, { tracker: PropertyFilterTracker; groups: string[] }>();
+        for (const [key, value] of this.invertedGroupPropertyFiltersMap) {
+            const stringified = JSON.stringify(value);
+            let data = result.get(stringified);
+            if (!data) {
+                data = { tracker: value, groups: [] };
+                result.set(stringified, data);
+            }
+            data.groups.push(key);
+        }
+
+        this.groupInvertedFiltersCache = result;
+
+        return result;
+    }
+
     /**
      * Merges all property filters for the given group
      * @param group
@@ -759,9 +741,12 @@ class GroupsPropertyFiltersTracker {
             allPropertyFilterTrackers.push(groupSpecific);
         }
 
-        for (const [key, value] of this.invertedGroupPropertyFiltersMap.entries()) {
-            if (key !== group.id) {
-                allPropertyFilterTrackers.push(value);
+        if (this.invertedGroupPropertyFiltersMap.size > 0) {
+            const groupInvertedFilters = this.groupInvertedFilters();
+            for (const [, value] of groupInvertedFilters) {
+                if (!value.groups.includes(group.id)) {
+                    allPropertyFilterTrackers.push(value.tracker);
+                }
             }
         }
 
@@ -839,22 +824,27 @@ class PropertyFilterHandler {
             throw new Error('No groupIds found: ' + JSON.stringify(propertyFilter));
         }
 
+        try {
         // if only registration filters in requiredwhen -> check if at least one group exists
-        const groups = await Group.select().where('id', groupIds).count();
-        console.error(`found ${groups} groups`);
+            const groups = await Group.select().where('id', groupIds).where('deletedAt', null).count();
+            console.error(`found ${groups} groups`);
 
-        const shouldHandleFilter = groups !== 0;
+            const shouldHandleFilter = groups !== 0;
 
-        if (!shouldHandleFilter) {
-            const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(propertyFilter.requiredWhen);
-            if (orFilters.length > 1) {
+            if (!shouldHandleFilter) {
+                const orFilters = StamhoofdFilterHelper.splitOrFilterFromRoot(propertyFilter.requiredWhen);
+                if (orFilters.length > 1) {
                 // or filters are not supported for now
-                throw new Error('Only one or filter expected: ' + JSON.stringify(propertyFilter));
+                    throw new Error('Only one or filter expected: ' + JSON.stringify(propertyFilter));
+                }
+                propertyFilter.requiredWhen = null;
             }
-            propertyFilter.requiredWhen = null;
-        }
 
-        return shouldHandleFilter;
+            return shouldHandleFilter;
+        } catch (e) {
+            console.error('groupIds:', JSON.stringify(groupIds));
+            throw e;
+        }
     }
 
     /**
@@ -904,7 +894,7 @@ class PropertyChangesLoggerHelper {
     private static readonly organizionIdsToLog = new Set(['201b8884-3396-469d-824c-2b8649f64248']);
     private readonly logInfo = new Map<string, Map<string, Set<string>>>();
     private static readonly FILE_PATH: string = 'property-filter-changes.txt';
-    static readonly SHOULD_LOG = false;
+    static readonly SHOULD_LOG = true;
     private shouldLog = PropertyChangesLoggerHelper.SHOULD_LOG;
 
     static didInitOneTime = false;
@@ -1002,11 +992,19 @@ class OrganizationHandler {
         }
 
         // todo: add extra filters to limit amount of groups?
-        const query = Group.select().where('organizationId', this.organization.id);
+        const query = Group.select().where('organizationId', this.organization.id).where('deletedAt', null);
+
+        let skipGroups = false;
 
         if (!propertyFilterHandlers.some(handler => handler.groupPropertyFiltersTracker.shouldUpdateAllGroups)) {
             const allGroupIds = new Set<string>(propertyFilterHandlers.flatMap(handler => handler.groupPropertyFiltersTracker.groupIdsToUpdate));
-            query.where('id', [...allGroupIds]);
+            if (allGroupIds.size === 0) {
+                // can happen if an empty registrations filter
+                // todo: add extra logging to make sure this is ok
+                skipGroups = false;
+            } else {
+                query.where('id', [...allGroupIds]);
+            }
         }
 
         for (const propertyFilterHandler of propertyFilterHandlers) {
@@ -1015,15 +1013,17 @@ class OrganizationHandler {
 
         const changesLogger = new PropertyChangesLoggerHelper(this.organization, propertyFilterHandlers);
 
-        // todo: take into account cycles (or do this before the registration periods migration for better performance)
-        for await (const group of query.all()) {
-            for (const propertyFilterHandler of propertyFilterHandlers) {
-                const propertyFilter = propertyFilterHandler.handleGroup(group);
-                changesLogger.add(propertyFilterHandler.name, group, propertyFilter);
-            }
+        if (!skipGroups) {
+            // todo: take into account cycles (or do this before the registration periods migration for better performance)
+            for await (const group of query.all()) {
+                for (const propertyFilterHandler of propertyFilterHandlers) {
+                    const propertyFilter = propertyFilterHandler.handleGroup(group);
+                    changesLogger.add(propertyFilterHandler.name, group, propertyFilter);
+                }
 
-            if (!dryRun) {
-                await group.save();
+                if (!dryRun) {
+                    await group.save();
+                }
             }
         }
 
