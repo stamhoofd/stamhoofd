@@ -22,6 +22,21 @@ export class RecordConfigurationFactory {
     }
 
     /**
+     * Default built-in field configuration for the platform itself (e.g. Stamhoofd).
+     * Enables the birth date and asks email, phone, parents and emergency contacts based on the member's age.
+     * Record categories are managed separately on the platform, so they are not included here.
+     */
+    static createPlatformDefault(): OrganizationRecordsConfiguration {
+        const configuration = OrganizationRecordsConfiguration.create({});
+
+        this.setDefaultBuiltInFields(configuration, OrganizationType.Youth);
+        this.setDefaultParents(configuration, OrganizationType.Youth);
+        this.setDefaultEmergencyContacts(configuration, OrganizationType.Youth);
+
+        return configuration;
+    }
+
+    /**
      * Set default email, phone, partents, ... configuration
      * Except emergency contacts
      */
