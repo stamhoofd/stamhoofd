@@ -345,7 +345,7 @@
                         </h3>
 
                         <p v-if="useShowStockBelow" class="style-description-small">
-                            {{ $t('%1H3', { showStockBelow: showStockBelow! }) }}
+                            {{ $t('Stamhoofd zal de beschikbare voorraad verbergen als er nog meer dan {showStockBelow} stuks beschikbaar zijn.', { showStockBelow: showStockBelow! }) }}
                         </p>
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
@@ -448,8 +448,6 @@ import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEven
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
-
-
 
 import OptionMenuSection from './OptionMenuSection.vue';
 import ProductPriceBox from './ProductPriceBox.vue';
@@ -882,15 +880,15 @@ function addOptionMenu() {
     p.optionMenus.addPut(optionMenu);
 
     present(AsyncComponent(() => import('./EditOptionMenuView.vue'), {
-            product: patchedProduct.value.patch(p),
-            optionMenu,
-            isNew: true,
-            saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-                // Merge both patches
-                addProductPatch(p.patch(patch));
-                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-            },
-        }).setDisplayStyle('popup'))
+        product: patchedProduct.value.patch(p),
+        optionMenu,
+        isNew: true,
+        saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+            // Merge both patches
+            addProductPatch(p.patch(patch));
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+        },
+    }).setDisplayStyle('popup'))
         .catch(console.error);
 }
 
