@@ -34,8 +34,18 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return [false];
     }
 
-    async putEventGroup(event: Event, putGroup: GroupStruct) {
-        const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
+    async putEventGroup(putEvent: Event, putGroup: GroupStruct) {
+        const event = await Event.getByID(putEvent.id);
+        if (!event) {
+            throw new SimpleError({
+                code: 'invalid_event',
+                message: 'Event does not exist',
+                human: Context.i18n.$t('%DU'),
+                field: 'id',
+            });
+        }
+
+        const period = await RegistrationPeriod.getByDate(putEvent.startDate, event.organizationId);
 
         if (!period) {
             throw new SimpleError({
