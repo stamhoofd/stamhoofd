@@ -14,9 +14,9 @@
         <p>
             {{
                 description ??
-                $t(
-                    "Configureer wie deze loginmethode mag gebruiken en hoe deze wordt weergegeven.",
-                )
+                    $t(
+                        "Configureer wie deze loginmethode mag gebruiken en hoe deze wordt weergegeven.",
+                    )
             }}
         </p>
 
@@ -28,7 +28,7 @@
 
         <template v-if="enabled">
             <template v-if="showDisplaySettings">
-                <hr />
+                <hr>
                 <h2>{{ $t("Weergave") }}</h2>
 
                 <div class="split-inputs">
@@ -44,7 +44,7 @@
                                 type="text"
                                 autocomplete="off"
                                 :placeholder="$t(`%14p`)"
-                            />
+                            >
                         </STInputBox>
                         <p class="style-description-small">
                             {{
@@ -67,7 +67,7 @@
                                 type="text"
                                 autocomplete="off"
                                 :placeholder="$t(`%14p`)"
-                            />
+                            >
                         </STInputBox>
                         <p class="style-description-small">
                             {{
@@ -92,7 +92,7 @@
                                 type="text"
                                 autocomplete="off"
                                 :placeholder="$t(`%14p`)"
-                            />
+                            >
                         </STInputBox>
                         <p class="style-description-small">
                             {{
@@ -116,7 +116,7 @@
             </template>
 
             <template v-if="provider">
-                <hr />
+                <hr>
                 <h2>{{ $t("OpenID-instellingen") }}</h2>
 
                 <p>
@@ -125,8 +125,7 @@
                         href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app"
                         target="_blank"
                         class="inline-link"
-                        >{{ $t("%Zs") }}</a
-                    >
+                    >{{ $t("%Zs") }}</a>
                     {{ $t("%Zt") }}
                 </p>
 
@@ -142,7 +141,7 @@
                         type="text"
                         autocomplete="off"
                         :placeholder="$t(`%Zv`)"
-                    />
+                    >
                 </STInputBox>
 
                 <STInputBox
@@ -157,7 +156,7 @@
                         type="text"
                         autocomplete="off"
                         :placeholder="$t(`%Zw`)"
-                    />
+                    >
                 </STInputBox>
 
                 <STInputBox
@@ -172,7 +171,7 @@
                         type="text"
                         autocomplete="off"
                         :placeholder="$t(`%Zw`)"
-                    />
+                    >
                 </STInputBox>
 
                 <STInputBox
@@ -186,7 +185,7 @@
                         class="input"
                         type="text"
                         autocomplete="off"
-                    /><template #right>
+                    ><template #right>
                         <button
                             v-copyable="redirectUri || defaultRedirectUri"
                             class="button icon copy small"
@@ -212,7 +211,7 @@
                             type="text"
                             readonly
                             autocomplete="off"
-                        /><template #right>
+                        ><template #right>
                             <button
                                 v-copyable="localSsoCommand"
                                 class="button icon copy small"
@@ -223,7 +222,7 @@
                 </div>
             </template>
 
-            <hr />
+            <hr>
             <h2>{{ $t("Domeinen") }}</h2>
 
             <ArrayInput
@@ -243,7 +242,7 @@
                                 ($event.target as HTMLInputElement).value || '',
                             )
                         "
-                    />
+                    >
                 </template>
 
                 <template #empty>
@@ -273,7 +272,7 @@
                                 ($event.target as HTMLInputElement).value || '',
                             )
                         "
-                    />
+                    >
                 </template>
 
                 <template #empty>
@@ -290,32 +289,33 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox } from "#errors/ErrorBox.ts";
-import { useErrors } from "#errors/useErrors.ts";
-import { useContext } from "#hooks/useContext.ts";
-import { useOrganization } from "#hooks/useOrganization.ts";
-import { usePatch } from "#hooks/usePatch.ts";
-import { usePatchMap } from "#hooks/usePatchMap.ts";
-import ArrayInput from "#inputs/ArrayInput.vue";
-import Checkbox from "#inputs/Checkbox.vue";
-import { CenteredMessage } from "#overlays/CenteredMessage.ts";
-import { Toast } from "#overlays/Toast.ts";
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePatchMap } from '#hooks/usePatchMap.ts';
+import ArrayInput from '#inputs/ArrayInput.vue';
+import Checkbox from '#inputs/Checkbox.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
 import type {
     AutoEncoderPatchType,
     ConvertArrayToPatchableArray,
     Decoder,
     PartialWithoutMethods,
-} from "@simonbackx/simple-encoding";
-import { usePop } from "@simonbackx/vue-app-navigation";
-import { useRequestOwner } from "@stamhoofd/networking/hooks/useRequestOwner";
-import type { LoginMethod } from "@stamhoofd/structures";
+} from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { LoginMethod } from '@stamhoofd/structures';
 import {
     LoginMethodConfig,
     LoginProviderType,
     OpenIDClientConfiguration,
-} from "@stamhoofd/structures";
-import { computed, onMounted, ref } from "vue";
-import LoginMethodButton from "./LoginMethodButton.vue";
+} from '@stamhoofd/structures';
+import { computed, onMounted, ref } from 'vue';
+import LoginMethodButton from './LoginMethodButton.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -328,10 +328,12 @@ const props = withDefaults(
                 Map<LoginMethod, LoginMethodConfig>
             >,
         ) => Promise<void>;
-        provider?: LoginProviderType | null;
+        provider?: LoginProviderType;
         showDisplaySettings?: boolean;
     }>(),
     {
+        description: undefined,
+        provider: undefined,
         showDisplaySettings: true,
     },
 );
@@ -367,13 +369,8 @@ const {
 
 const patched = computed(
     () =>
-        patchedConfigs.value.get(props.loginMethod) ??
-        LoginMethodConfig.create({}),
-);
-const hasChanges = computed(
-    () =>
-        hasConfigChanges.value ||
-        (!!props.provider && hasOpenIdConfigurationChanges.value),
+        patchedConfigs.value.get(props.loginMethod)
+        ?? LoginMethodConfig.create({}),
 );
 
 onMounted(async () => {
@@ -395,6 +392,26 @@ const enabled = computed({
     },
 });
 
+const shouldSaveOpenIdConfiguration = computed(
+    () => !!props.provider && enabled.value,
+);
+
+const hasLoginMethodConfigChanges = computed(() => {
+    const wasEnabled = props.configs.has(props.loginMethod);
+
+    if (wasEnabled !== enabled.value) {
+        return true;
+    }
+
+    return enabled.value && hasConfigChanges.value;
+});
+
+const hasChanges = computed(
+    () =>
+        hasLoginMethodConfigChanges.value
+        || (shouldSaveOpenIdConfiguration.value && hasOpenIdConfigurationChanges.value),
+);
+
 function addPatch(
     patch: PartialWithoutMethods<AutoEncoderPatchType<LoginMethodConfig>>,
 ) {
@@ -410,29 +427,29 @@ function addPatch(
 }
 
 const loginButtonText = computed({
-    get: () => patched.value.loginButtonText ?? "",
-    set: (loginButtonText) =>
+    get: () => patched.value.loginButtonText ?? '',
+    set: loginButtonText =>
         addPatch({ loginButtonText: loginButtonText || null }),
 });
 
 const fullName = computed({
-    get: () => patched.value.fullName ?? "",
-    set: (fullName) => addPatch({ fullName: fullName || null }),
+    get: () => patched.value.fullName ?? '',
+    set: fullName => addPatch({ fullName: fullName || null }),
 });
 
 const shortName = computed({
-    get: () => patched.value.shortName ?? "",
-    set: (shortName) => addPatch({ shortName: shortName || null }),
+    get: () => patched.value.shortName ?? '',
+    set: shortName => addPatch({ shortName: shortName || null }),
 });
 
 const allowlist = computed({
     get: () => patched.value.allowlist,
-    set: (allowlist) => addPatch({ allowlist: allowlist as any }),
+    set: allowlist => addPatch({ allowlist: allowlist as any }),
 });
 
 const blocklist = computed({
     get: () => patched.value.blocklist,
-    set: (blocklist) => addPatch({ blocklist: blocklist as any }),
+    set: blocklist => addPatch({ blocklist: blocklist as any }),
 });
 
 const issuer = computed({
@@ -452,7 +469,7 @@ const clientSecret = computed({
 });
 
 const redirectUri = computed({
-    get: () => patchedOpenIdConfiguration.value.redirectUri ?? "",
+    get: () => patchedOpenIdConfiguration.value.redirectUri ?? '',
     set: (value: string | null) =>
         addOpenIdConfigurationPatch({ redirectUri: value ? value : null }),
 });
@@ -460,28 +477,70 @@ const redirectUri = computed({
 const defaultRedirectUri = computed(() => {
     if (organization.value) {
         return (
-            "https://" +
-            organization.value.id +
-            "." +
-            STAMHOOFD.domains.api +
-            "/openid/callback"
+            'https://'
+            + organization.value.id
+            + '.'
+            + STAMHOOFD.domains.api
+            + '/openid/callback'
         );
     }
-    return "https://" + STAMHOOFD.domains.api + "/openid/callback";
+    return 'https://' + STAMHOOFD.domains.api + '/openid/callback';
 });
 
-const isDevelopment = computed(() => STAMHOOFD.environment === "development");
+const isDevelopment = computed(() => STAMHOOFD.environment === 'development');
 const localSsoCommand = computed(
     () => `yarn stam sso start "${defaultRedirectUri.value}"`,
 );
+
+errors.validator.addValidation('openidConfiguration', () => {
+    if (!shouldSaveOpenIdConfiguration.value) {
+        return true;
+    }
+
+    const validationErrors = new SimpleErrors();
+
+    if (issuer.value.trim() === '') {
+        validationErrors.addError(new SimpleError({
+            code: 'invalid_field',
+            message: 'Issuer is required',
+            human: $t('%qt'),
+            field: 'issuer',
+        }));
+    }
+
+    if (clientId.value.trim() === '') {
+        validationErrors.addError(new SimpleError({
+            code: 'invalid_field',
+            message: 'Client ID is required',
+            human: $t('%qt'),
+            field: 'clientId',
+        }));
+    }
+
+    if (clientSecret.value.trim() === '') {
+        validationErrors.addError(new SimpleError({
+            code: 'invalid_field',
+            message: 'Client secret is required',
+            human: $t('%qt'),
+            field: 'clientSecret',
+        }));
+    }
+
+    if (validationErrors.errors.length === 0) {
+        return true;
+    }
+
+    errors.errorBox = new ErrorBox(validationErrors);
+    return false;
+});
 
 async function loadConfiguration() {
     loadingConfiguration.value = true;
 
     try {
         const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/sso",
+            method: 'GET',
+            path: '/sso',
             query: {
                 provider: props.provider ?? LoginProviderType.SSO,
             },
@@ -511,14 +570,14 @@ async function save() {
             return;
         }
 
-        if (hasConfigChanges.value) {
+        if (hasLoginMethodConfigChanges.value) {
             await props.saveHandler(configsPatch.value);
         }
 
-        if (props.provider && hasOpenIdConfigurationChanges.value) {
+        if (shouldSaveOpenIdConfiguration.value && hasOpenIdConfigurationChanges.value) {
             await context.value.authenticatedServer.request({
-                method: "POST",
-                path: "/sso",
+                method: 'POST',
+                path: '/sso',
                 query: {
                     provider: props.provider,
                 },
@@ -530,7 +589,7 @@ async function save() {
             });
         }
 
-        new Toast($t(`%HA`), "success green").show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -543,7 +602,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t("%A0"), $t("%4X"));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({
