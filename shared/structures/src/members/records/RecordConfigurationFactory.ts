@@ -37,7 +37,7 @@ export class RecordConfigurationFactory {
             },
             {
                 age: {
-                    $gt: 17,
+                    $gte: 18,
                 },
             },
         );
@@ -49,7 +49,7 @@ export class RecordConfigurationFactory {
             },
             {
                 age: {
-                    $gt: 17,
+                    $gte: 18,
                 },
             },
         );
@@ -59,7 +59,7 @@ export class RecordConfigurationFactory {
             configuration.address = new PropertyFilter(
                 {
                     age: {
-                        $gt: 17,
+                        $gte: 18,
                     },
                 },
                 {
