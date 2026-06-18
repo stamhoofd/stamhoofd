@@ -213,6 +213,7 @@ import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { useNavigationActions } from '../types/NavigationActions';
+import { usePreventLeave } from '#hooks/usePreventLeave.ts';
 
 const props = withDefaults(defineProps<{
     payment: Payment;
@@ -242,7 +243,6 @@ const navigate = useNavigationActions();
 
 onMounted(() => {
     generateQRCode().catch(e => console.error(e));
-    setLeave();
 });
 
 function getOS(): string {
@@ -286,43 +286,20 @@ function getOS(): string {
     return 'unknown';
 }
 
-const preventLeave = (event: BeforeUnloadEvent) => {
-    // Cancel the event
-    event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-
+usePreventLeave(() => {
     if (props.type === 'registration') {
-        // Chrome requires returnValue to be set
-        event.returnValue = $t(`%12t`);
-
         // This message is not visible on most browsers
         return $t(`%12t`);
     }
 
     if (props.type === 'packages') {
-        // Chrome requires returnValue to be set
-        event.returnValue = $t(`%1Qe`);
-
         // This message is not visible on most browsers
         return $t(`%1Qe`);
     }
 
-    // Chrome requires returnValue to be set
-    event.returnValue = $t(`%12u`);
-
     // This message is not visible on most browsers
     return $t(`%12u`);
-};
-
-onBeforeUnmount(() => {
-    window.removeEventListener('beforeunload', preventLeave);
 });
-
-function setLeave() {
-    if (!props.created) {
-        return;
-    }
-    window.addEventListener('beforeunload', preventLeave);
-}
 
 function shouldNavigateAway() {
     if (!props.created) {

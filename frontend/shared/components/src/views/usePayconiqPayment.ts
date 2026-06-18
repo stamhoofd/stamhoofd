@@ -5,6 +5,7 @@ import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { usePreventLeave } from '#hooks/usePreventLeave.ts';
 
 export interface PayconiqPaymentProps {
     paymentUrl: string;
@@ -41,6 +42,11 @@ export function usePayconiqPayment(props: PayconiqPaymentProps) {
             decoder: Payment as Decoder<Payment>,
         }).catch(console.error);
     }
+
+    usePreventLeave(() => {
+        // This message is not visible on most browsers
+        return $t(`%12e`);
+    });
 
     async function shouldNavigateAway() {
         if (await CenteredMessage.confirm($t(`%12e`), $t(`%12f`))) {
