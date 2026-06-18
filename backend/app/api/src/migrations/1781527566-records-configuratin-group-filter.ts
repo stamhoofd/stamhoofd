@@ -587,7 +587,7 @@ class GroupsPropertyFiltersTracker {
                     }
 
                     if (groupSpecificFilters.length > 0) {
-                        throw new Error('comination of group specific filters in enabledWhen and requiredWhen is not supported, :' + JSON.stringify(propertyFilter));
+                        throw new Error('combination of group specific filters in enabledWhen and requiredWhen is not supported, :' + JSON.stringify(propertyFilter));
                     }
 
                     return;
@@ -957,19 +957,34 @@ class OrganizationHandler {
 
         const propertyFilterWrappers: PropertyFilterHandler[] = [];
 
-        function handlePropertyFilterHandlerError(e: any) {
+        function handlePropertyFilterHandlerError(e: any, name: string) {
+            const test: Record<string, string[]> = {
+                // fixed manually
+                ['da9a913a-feea-4a82-9335-2788babe39a9']: ['nationalRegisterNumber', 'Gegevens Fiscale attesten kinderopvang', 'Rijden naar Bornem'],
+                // fixed manually
+                ['528a4d8e-7347-4483-ab99-07d0ece78d17']: ['Instrument'],
+                // fixed manually
+                ['6b4f8185-05ca-4b03-b244-fb9c7d5c81ae']: ['Privacy'],
+                // fixed manually
+                ['bf4600a6-e308-4e28-adcb-9976216cb73a']: ['Kind'],
+            };
+
+            const testSkip = new Set([...Object.entries(test)].flatMap(([k, v]) => v.map(x => k + x)));
             const messagesToSkip = [
                 // todo: skipped for now but should be handled
-                'Found more than one registrations filter',
+                // 'Found more than one registrations filter',
                 // todo: skipped for now but should be handled
-                'The $and filter is not supported',
+                // 'The $and filter is not supported',
             ];
             // todo: skipped for now but should be handled
-            if (messagesToSkip.some(m => e?.message?.includes?.(m))) {
+            if (messagesToSkip.some(m => e?.message?.includes?.(m)) || testSkip.has(organization.id + name)) {
                 console.error('ignored error:');
                 console.error(e);
                 return;
             }
+
+            console.error('organization:', organization.id);
+            console.error('name:', name);
 
             throw e;
         }
@@ -1000,7 +1015,7 @@ class OrganizationHandler {
                         recordCategory: null,
                     }));
                 } catch (e) {
-                    handlePropertyFilterHandlerError(e);
+                    handlePropertyFilterHandlerError(e, key);
                 }
             }
         }
@@ -1033,7 +1048,7 @@ class OrganizationHandler {
                     recordCategory: category,
                 }));
             } catch (e) {
-                handlePropertyFilterHandlerError(e);
+                handlePropertyFilterHandlerError(e, category.name.toString());
             }
         }
 
