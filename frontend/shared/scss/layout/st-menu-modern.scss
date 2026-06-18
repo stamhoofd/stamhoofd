@@ -7,7 +7,7 @@
     @media (min-width: 300px) {
         --st-horizontal-padding: 18px;
     }
-    
+
     > main {
         --left-offset: 0px;
         --item-padding: 10px;
@@ -25,7 +25,7 @@
             }
         }
 
-        
+
 
         .footer {
             margin-top: auto;
@@ -148,6 +148,7 @@
                 font-size: 11px;
                 color: $color-gray-4;
                 font-weight: 500;
+                text-wrap: nowrap;
             }
         }
 
@@ -166,7 +167,7 @@
             font-weight: 500;
             min-width: 0;
             flex-shrink: 100;
-            
+
             > span {
                 min-width: 0;
                 overflow: hidden;
