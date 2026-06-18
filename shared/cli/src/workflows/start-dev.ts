@@ -155,6 +155,10 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
             : {};
         startedStripe = Object.keys(stripeEnv).length > 0;
 
+        if (startedStripe) {
+            output.log('Stripe Webook Listener started');
+        }
+
         if (options.open) {
             openUrl(`https://${domains.dashboard}`);
             output.log(`${successSymbol} Opened dashboard in your browser`);

@@ -12,7 +12,7 @@ export const servicesOptionFlag = Flags.boolean({
 
 export const stripeFlag = Flags.boolean({
     allowNo: true,
-    default: false,
+    default: true,
     description: 'Start a Stripe listener for the selected instance',
 });
 
