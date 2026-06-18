@@ -61,7 +61,7 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
     const domains = buildDevelopmentDomains(context);
     const ports = buildPorts(context);
     const database = baseDatabase(context.env);
-    const instanceDatabase = context.instance.primary ? database : `${database}-${context.instance.name}`;
+    const instanceDatabase = process.env.DB_NAME ?? (context.instance.primary ? database : `${database}-${context.instance.name}`);
     const bucket = context.instance.name === 'stamhoofd' ? localPrimaryBucket : `${localPrimaryBucket}-${context.instance.name}`;
     const backendEnv = {
         STAMHOOFD_ENV: context.env,
