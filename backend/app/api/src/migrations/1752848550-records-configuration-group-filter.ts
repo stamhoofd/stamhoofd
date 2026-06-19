@@ -1028,7 +1028,8 @@ class OrganizationHandler {
 
         const recordCategoryFilters: PropertyFilterHandler[] = [];
 
-        for (const category of recordsConfig.recordCategories.flatMap(category => this.getAllRecordCategories(category))) {
+        // only loop parent categories because child categories can not be configured on group level
+        for (const category of recordsConfig.recordCategories) {
             const propertyFilter = category.filter;
 
             if (propertyFilter === null) {
