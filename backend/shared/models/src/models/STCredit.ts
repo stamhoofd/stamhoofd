@@ -49,4 +49,36 @@ export class STCredit extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    static async getForOrganization(organizationId: string) {
+        return await STCredit.where({ organizationId }, {
+            sort: [{
+                column: 'createdAt',
+                direction: 'DESC',
+            }],
+        });
+    }
+
+    static async getBalance(organizationId: string) {
+        const now = new Date();
+        const credits = await this.getForOrganization(organizationId);
+        credits.reverse();
+        let balance = 0;
+
+        for (const credit of credits) {
+            if (credit.expireAt !== null && credit.expireAt <= now) {
+                continue;
+            }
+            // TODO: we can expire credits here
+            balance += credit.change;
+            if (balance < 0) {
+                // This is needed to make deleting credit and expiring credit work.
+                // At no point in time, the credits can get negative.
+                // E.g. Getting credits, using them, and later expiring 'getting the credits' won't have impact on future credits
+                balance = 0;
+            }
+        }
+
+        return { balance: balance };
+    }
 }

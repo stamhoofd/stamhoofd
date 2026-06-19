@@ -1,5 +1,5 @@
 import type { Model } from '@simonbackx/simple-database';
-import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Organization, Payment, Platform, STCredit, STInvoice, STPendingInvoice, UsedRegisterCode } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Organization, Payment, Platform, STCredit, STInvoice, STPendingInvoice, StripeAccount, UsedRegisterCode, User } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
@@ -12,7 +12,10 @@ import {
     getPricingTypeName,
     InvoicedBalanceItem as InvoicedBalanceItemStruct,
     PaymentCustomer,
+    PaymentMethod,
+    PaymentProvider,
     PaymentStatus,
+    PaymentType,
     TranslatedString,
     VATExcemptReason,
     VATSubtotal,
@@ -21,6 +24,7 @@ import { InvoiceStruct } from '@stamhoofd/structures/billing/Invoice.js';
 import { STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { SeedTools } from './SeedTools.js';
+import { VATService } from '../services/VATService.js';
 
 /**
  * The seller (Stamhoofd) is a Belgian company, so the standard rate that applies to taxable sales is
@@ -77,14 +81,15 @@ function assertEqual(actual: number, expected: number, label: string, invoiceId:
  * Builds (but does not save) the BalanceItem for one legacy invoice/pending-invoice line.
  * Mirrors STPackageService.chargePackage for the package relations/VAT mapping.
  */
-function buildBalanceItem(item: STInvoiceItem, options: {
+async function buildBalanceItem(item: STInvoiceItem, options: {
+    legacyInvoice: STInvoice | STPendingInvoice;
     legacyMeta: STInvoiceMeta;
     payingOrganizationId: string | null;
     ctx: ConversionContext;
     status: BalanceItemStatus;
     createdAt: Date;
     paidAt: Date | null;
-}): BalanceItem {
+}): Promise<BalanceItem> {
     const { legacyMeta: legacyMeta, payingOrganizationId, ctx, status, createdAt, paidAt } = options;
 
     const balanceItem = new BalanceItem();
@@ -107,6 +112,51 @@ function buildBalanceItem(item: STInvoiceItem, options: {
         balanceItem.endDate = item.package.endDate ?? null;
     } else {
         balanceItem.type = BalanceItemType.Other;
+
+        // If it is credit, try to link to the credit ID instead.
+        if (item.name === 'Gebruikt tegoed' && options.legacyInvoice instanceof STInvoice && payingOrganizationId) {
+            balanceItem.type = BalanceItemType.ReferralDiscount;
+            // Stop here, we need to find the existing one.
+            const creditId = options.legacyInvoice.creditId;
+            if (!creditId) {
+                // This happens sadly because of incorrect data in the v1 database
+                console.error('Missing creditId on invoice ' + options.legacyInvoice.id + ' / ' + options.legacyInvoice.number);
+            } else {
+                const original = await BalanceItem.getByID(creditId);
+                if (!original) {
+                    console.error('Could not find BalanceItem for creditId ' + creditId + ' at invoice ' + options.legacyInvoice.id);
+                } else {
+                    if (original.status !== BalanceItemStatus.Canceled) {
+                        throw new Error('Mismatch in creditId ' + creditId + ' at invoice ' + options.legacyInvoice.id + ' already Due');
+                    }
+
+                    // Set unitPrice = 0 of this item
+                    if (original.unitPrice !== -item.unitPrice * 100) {
+                        throw new Error('Mismatch in creditId ' + creditId + ' at invoice ' + options.legacyInvoice.id + ' expected ' + (-item.unitPrice * 100) + ' received ' + original.unitPrice);
+                    }
+
+                    // Normally this is svaed as a balance item with a positive value
+                    // to reduce a negative balance item that was added earlier as a discount.
+                    // but if we would link a balance item payment, that would remove that offset completely.
+                    // So we need to set that the 'usage' of this balance item was not payable all along, and link the
+                    // negative payment item with it, so we get a positive amount open, leading to the correct behaviour
+                    original.status = status; // Also for pending payments, as we'll need to readd the missed discount when the payment would fail
+                    original.unitPrice = item.unitPrice * 100;
+                    original.type = BalanceItemType.ReferralDiscount;
+
+                    const vatInfo = getVatInfo(legacyMeta);
+                    original.VATIncluded = legacyMeta.areItemsIncludingVAT;
+                    original.VATPercentage = vatInfo.VATPercentage;
+                    original.VATExcempt = vatInfo.VATExcempt;
+
+                    // Don't copy the name, as in the past we would have put a reason why the credit was used
+                    // but that should not be reused
+                    original.description = item.name || item.description || '';
+
+                    return original;
+                }
+            }
+        }
     }
 
     const vatInfo = getVatInfo(legacyMeta);
@@ -143,15 +193,7 @@ function buildCustomer(meta: STInvoiceMeta): PaymentCustomer {
  * organizationId; we set it to the membership organization (the seller) so the new payment flow and
  * cached balances work.
  */
-async function resolvePayment(stInvoice: STInvoice, ctx: ConversionContext): Promise<Payment | null> {
-    if (!stInvoice.paymentId) {
-        return null;
-    }
-    const payment = await Payment.getByID(stInvoice.paymentId);
-    if (!payment) {
-        return null;
-    }
-
+async function resolvePayment(stInvoice: STInvoice, payment: Payment, ctx: ConversionContext): Promise<Payment | null> {
     let changed = false;
     if (payment.organizationId === null) {
         payment.organizationId = ctx.membershipOrganization.id;
@@ -161,6 +203,17 @@ async function resolvePayment(stInvoice: STInvoice, ctx: ConversionContext): Pro
         payment.payingOrganizationId = stInvoice.payingOrganizationId;
         changed = true;
     }
+
+    if (!payment.customer) {
+        payment.customer = buildCustomer(stInvoice.meta);
+        changed = true;
+    }
+
+    if (payment.price === 0 && payment.status !== PaymentStatus.Succeeded && payment.status !== PaymentStatus.Failed && payment.method === PaymentMethod.Unknown) {
+        payment.status = PaymentStatus.Succeeded;
+        changed = true;
+    }
+
     if (changed) {
         await payment.save();
     }
@@ -176,7 +229,7 @@ interface ConversionResult {
  * Full reconstruction of a paid/official invoice: Invoice + per-line BalanceItem (marked paid via a
  * BalanceItemPayment linking the existing legacy Payment) + InvoicedBalanceItem.
  */
-export async function convertPaidInvoice(stInvoice: STInvoice, ctx: ConversionContext): Promise<ConversionResult> {
+export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment, ctx: ConversionContext): Promise<ConversionResult> {
     const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
     const toSaveModels: Model[] = [];
 
@@ -189,7 +242,7 @@ export async function convertPaidInvoice(stInvoice: STInvoice, ctx: ConversionCo
     const payingOrganizationId = stInvoice.payingOrganizationId;
     const invoicedAt = legacyMeta.date ?? stInvoice.paidAt ?? stInvoice.createdAt;
 
-    const payment = await resolvePayment(stInvoice, ctx);
+    await resolvePayment(stInvoice, payment, ctx);
 
     // Verify the legacy invoice is internally consistent before we reproduce it.
     assertEqual(legacyMeta.priceWithoutVAT + legacyMeta.VAT, legacyMeta.priceWithVAT, 'priceWithVAT composition', stInvoice.id);
@@ -215,7 +268,8 @@ export async function convertPaidInvoice(stInvoice: STInvoice, ctx: ConversionCo
             continue;
         }
 
-        const balanceItem = buildBalanceItem(item, {
+        const balanceItem = await buildBalanceItem(item, {
+            legacyInvoice: stInvoice,
             legacyMeta: legacyMeta,
             payingOrganizationId,
             ctx,
@@ -252,14 +306,12 @@ export async function convertPaidInvoice(stInvoice: STInvoice, ctx: ConversionCo
 
         // Mark the balance item paid by linking the existing legacy payment. We pay each item in full
         // (priceWithVAT) so priceOpen becomes 0 regardless of invoice-level rounding.
-        if (payment) {
-            const balanceItemPayment = new BalanceItemPayment();
-            balanceItemPayment.organizationId = ctx.membershipOrganization.id;
-            balanceItemPayment.paymentId = payment.id;
-            balanceItemPayment.balanceItemId = balanceItem.id;
-            balanceItemPayment.price = balanceItem.priceWithVAT;
-            toSaveModels.push(balanceItemPayment);
-        }
+        const balanceItemPayment = new BalanceItemPayment();
+        balanceItemPayment.organizationId = ctx.membershipOrganization.id;
+        balanceItemPayment.paymentId = payment.id;
+        balanceItemPayment.balanceItemId = balanceItem.id;
+        balanceItemPayment.price = balanceItem.priceWithVAT;
+        toSaveModels.push(balanceItemPayment);
 
         invoiceStruct.addItem(invoicedStruct);
     }
@@ -362,6 +414,7 @@ export async function convertPaidInvoice(stInvoice: STInvoice, ctx: ConversionCo
 
     if (payment) {
         payment.customer = invoice.customer;
+        payment.invoiceId = invoice.id;
         await payment.save();
     }
 
@@ -380,23 +433,19 @@ export async function convertInProgressInvoice(stInvoice: STInvoice, payment: Pa
         return result;
     }
 
-    if (await BalanceItem.getByID(stInvoice.meta.items[0].id)) {
-        // Already migrated
-        return result;
-    }
-
-    await resolvePayment(stInvoice, ctx);
+    await resolvePayment(stInvoice, payment, ctx);
 
     const meta = stInvoice.meta;
     const payingOrganizationId = stInvoice.payingOrganizationId;
     const createdAt = meta.date ?? stInvoice.createdAt;
 
     for (const item of meta.items) {
-        const balanceItem = buildBalanceItem(item, {
+        const balanceItem = await buildBalanceItem(item, {
+            legacyInvoice: stInvoice,
             legacyMeta: meta,
             payingOrganizationId,
             ctx,
-            status: BalanceItemStatus.Hidden,
+            status: payment.status === PaymentStatus.Succeeded ? BalanceItemStatus.Due : BalanceItemStatus.Hidden,
             createdAt,
             paidAt: null,
         });
@@ -434,12 +483,8 @@ export async function convertPendingInvoice(pendingInvoice: STPendingInvoice, ct
     const payingOrganizationId = pendingInvoice.organizationId;
 
     for (const item of meta.items) {
-        if (await BalanceItem.getByID(item.id)) {
-            // Already migrated
-            continue;
-        }
-
-        const balanceItem = buildBalanceItem(item, {
+        const balanceItem = await buildBalanceItem(item, {
+            legacyInvoice: pendingInvoice,
             legacyMeta: meta,
             payingOrganizationId,
             ctx,
@@ -477,19 +522,23 @@ export async function convertCredit(credit: STCredit, ctx: ConversionContext): P
         return result;
     }
 
-    const expired = credit.expireAt !== null && credit.expireAt <= new Date();
-
     const balanceItem = new BalanceItem();
     balanceItem.id = credit.id;
     balanceItem.organizationId = ctx.membershipOrganization.id;
     balanceItem.payingOrganizationId = credit.organizationId;
-    balanceItem.type = BalanceItemType.Other;
+    balanceItem.type = BalanceItemType.ReferralDiscount;
     balanceItem.description = credit.description;
     balanceItem.amount = 1;
-    balanceItem.unitPrice = roundToCents(-credit.change);
-    balanceItem.VATPercentage = null;
-    balanceItem.VATIncluded = true;
-    balanceItem.status = expired ? BalanceItemStatus.Canceled : BalanceItemStatus.Due;
+    balanceItem.unitPrice = -credit.change;
+    balanceItem.VATPercentage = 21;
+    balanceItem.VATIncluded = false;
+
+    // ALWAYS CANCELED.
+    // We'll add an extra item for the remaining to fix
+    // that we don't support linking these balance items with payments correctly
+    // and also supportint expiry dates in balance items is not possible
+    // since how they were built in the past
+    balanceItem.status = BalanceItemStatus.Canceled; // We'll set this to due when we link a payment with it later
     balanceItem.dueAt = null;
     balanceItem.createdAt = credit.createdAt;
     await balanceItem.save();
@@ -503,6 +552,40 @@ export async function convertCredit(credit: STCredit, ctx: ConversionContext): P
 
     result.balanceItemIds.push(balanceItem.id);
     result.payingOrganizationIds.push(credit.organizationId);
+
+    return result;
+}
+
+/**
+ * Each legacy credit row becomes a balance item (preserving the ledger). A positive legacy change is
+ * credit we owe the organization, so it becomes a negative balance (priceOpen < 0). Expired credits are
+ * kept as Canceled so they preserve the history without affecting the open balance.
+ */
+export async function convertRemainingCredit(organization: Organization, balance: number, ctx: ConversionContext): Promise<ConversionResult> {
+    const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
+
+    const balanceItem = new BalanceItem();
+    balanceItem.organizationId = ctx.membershipOrganization.id;
+    balanceItem.payingOrganizationId = organization.id;
+    balanceItem.type = BalanceItemType.ReferralDiscount;
+    balanceItem.description = 'Tegoed';
+    balanceItem.amount = 1;
+    balanceItem.unitPrice = -balance;
+    balanceItem.VATPercentage = 21;
+    balanceItem.VATIncluded = false;
+    balanceItem.status = BalanceItemStatus.Due;
+    balanceItem.dueAt = null;
+    balanceItem.createdAt = new Date();
+    balanceItem.VATExcempt = VATService.getVATExcempt({
+        company: organization.defaultCompanies[0] ?? null,
+        sellingOrganization: ctx.membershipOrganization,
+        type: 'services',
+    });
+
+    await balanceItem.save();
+
+    result.balanceItemIds.push(balanceItem.id);
+    result.payingOrganizationIds.push(organization.id);
 
     return result;
 }
@@ -540,22 +623,111 @@ export async function runConversion(): Promise<void> {
         throw new Error('[LegacyBillingConverter] No membership organization configured: cannot migrate legacy billing');
     }
 
-    const membershipOrganization = await Organization.getByID(platform.membershipOrganizationId);
-    if (!membershipOrganization) {
-        throw new Error('[LegacyBillingConverter] Membership organization ' + platform.membershipOrganizationId + ' not found');
-    }
+    const membershipOrganization = await Organization.getByID(platform.membershipOrganizationId, true);
 
     const ctx: ConversionContext = {
         membershipOrganization,
         seller: membershipOrganization.defaultCompanies[0],
     };
 
+    // First credits
+    let results: ConversionResult[] = [];
+
+    // All canceled credits (so we can link them with used referral codes)
+    await SeedTools.loop({
+        query: STCredit.select(),
+        batchSize: 100,
+        useTransactionPerBatch: true,
+        action: async (credit: STCredit) => {
+            results.push(await convertCredit(credit, ctx));
+
+            if (QueryableModel.shutdownMigrations) {
+                throw new Error('Gracefully stopping - migration supports retry');
+            }
+        },
+    });
+
+    // Remaining (because we don't support expiry dates)
+    await SeedTools.loop({
+        query: Organization.select(),
+        batchSize: 100,
+        useTransactionPerBatch: true,
+        action: async (organization: Organization) => {
+            const { balance } = await STCredit.getBalance(organization.id);
+            if (balance > 0) {
+                results.push(await convertRemainingCredit(organization, balance, ctx));
+            }
+
+            if (QueryableModel.shutdownMigrations) {
+                throw new Error('Gracefully stopping - migration supports retry');
+            }
+        },
+    });
+
+    await refreshCaches(membershipOrganization.id, results);
+    const systemUser = await User.getSystem();
+
     // 1. Invoices: paid (full reconstruction) or in-progress (Hidden + linked pending payment).
     async function processInvoice(stInvoice: STInvoice, results: ConversionResult[]) {
-        const payment = stInvoice.paymentId ? (await Payment.getByID(stInvoice.paymentId) ?? null) : null;
+        let payment = stInvoice.paymentId ? (await Payment.getByID(stInvoice.paymentId) ?? null) : null;
         try {
             if (stInvoice.number !== null) {
-                results.push(await convertPaidInvoice(stInvoice, ctx));
+                if (!payment) {
+                    if (stInvoice.meta.stripeAccountId) {
+                    // Create a new unpaid payment
+                        payment = new Payment();
+                        payment.adminUserId = systemUser.id;
+
+                        // Who will receive this money?
+                        payment.organizationId = membershipOrganization.id;
+
+                        // Who paid
+                        payment.payingOrganizationId = stInvoice.payingOrganizationId;
+                        payment.customer = null; // will get filled in later
+
+                        payment.status = PaymentStatus.Succeeded;
+                        payment.price = stInvoice.meta.totalPrice * 100;
+                        payment.roundingAmount = 0;
+                        payment.method = PaymentMethod.Unknown;
+                        payment.type = PaymentType.Payment;
+                        payment.createMandate = null;
+
+                        payment.provider = PaymentProvider.Stripe;
+
+                        const stripeAccountExists = await StripeAccount.select().where('accountId', stInvoice.meta.stripeAccountId).first(false);
+                        if (stripeAccountExists) {
+                            payment.stripeAccountId = stripeAccountExists.id;
+                        }
+                        await payment.save();
+                    } else {
+                        if (stInvoice.meta.totalPrice < 0) {
+                            // Refund
+                            payment = new Payment();
+                            payment.adminUserId = systemUser.id;
+
+                            // Who will receive this money?
+                            payment.organizationId = membershipOrganization.id;
+
+                            // Who paid
+                            payment.payingOrganizationId = stInvoice.payingOrganizationId;
+                            payment.customer = null; // will get filled in later
+
+                            payment.status = PaymentStatus.Succeeded;
+                            payment.price = stInvoice.meta.totalPrice * 100;
+                            payment.roundingAmount = 0;
+                            payment.method = PaymentMethod.Unknown;
+                            payment.type = PaymentType.Refund;
+                            payment.createMandate = null;
+
+                            // payment.provider = PaymentProvider.Mollie;
+                            // We currently don't have an ID stored for these refunds: to complete in the future after migration
+                            await payment.save();
+                        } else {
+                            throw new Error('Unexpected missing payment for invoice that was not for stripe invoice nor refund ' + stInvoice.id);
+                        }
+                    }
+                }
+                results.push(await convertPaidInvoice(stInvoice, payment, ctx));
             } else if (payment) {
                 results.push(await convertInProgressInvoice(stInvoice, payment, ctx));
             }
@@ -565,10 +737,12 @@ export async function runConversion(): Promise<void> {
         }
     }
 
-    let results: ConversionResult[] = [];
+    results = [];
+
     await SeedTools.loop({
         query: STInvoice.select(),
         batchSize: 100,
+        useTransactionPerBatch: true,
         action: async (invoice: STInvoice) => {
             // Make sure any negative invoices exist, because otherwise the foreign key will fail
             if (invoice.negativeInvoiceId) {
@@ -592,6 +766,7 @@ export async function runConversion(): Promise<void> {
     await SeedTools.loop({
         query: STPendingInvoice.select(),
         batchSize: 100,
+        useTransactionPerBatch: true,
         action: async (pendingInvoice: STPendingInvoice) => {
             results.push(await convertPendingInvoice(pendingInvoice, ctx));
 
@@ -602,21 +777,5 @@ export async function runConversion(): Promise<void> {
     });
     await refreshCaches(membershipOrganization.id, results);
 
-    // 3. Credits.
-    results = [];
-
-    await SeedTools.loop({
-        query: STCredit.select(),
-        batchSize: 100,
-        action: async (credit: STCredit) => {
-            results.push(await convertCredit(credit, ctx));
-
-            if (QueryableModel.shutdownMigrations) {
-                throw new Error('Gracefully stopping - migration supports retry');
-            }
-        },
-    });
-
-    await refreshCaches(membershipOrganization.id, results);
     console.log('[LegacyBillingConverter] Conversion finished');
 }
