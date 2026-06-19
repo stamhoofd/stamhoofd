@@ -8,6 +8,10 @@
             <span class="button text">{{ $t('%hP') }}</span>
         </button>
 
+        <p v-if="patchedBalanceItem.status === BalanceItemStatus.Hidden" class="error-box icon disabled">
+            <span>{{ $t('Deze aanrekening is onzichtbaar en telt niet als openstaand bedrag. Pas na betaling wordt het zichtbaar.') }}</span>
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)" class="max">
@@ -302,7 +306,7 @@ const props = withDefaults(defineProps<{
     isNew: boolean;
     saveHandler?: (() => Promise<void>) | null;
 }>(), {
-    saveHandler: null
+    saveHandler: null,
 });
 
 const balanceItemWithPayments = ref<null | BalanceItemWithPayments>(null);
@@ -483,14 +487,13 @@ async function save() {
             arr.addPut(patchedBalanceItem.value);
         } else {
             patch.value.id = patchedBalanceItem.value.id;
-            arr.addPatch(patch.value);    
+            arr.addPatch(patch.value);
         }
 
-        await doPatch(arr)
+        await doPatch(arr);
         await props.saveHandler?.();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -499,9 +502,9 @@ async function save() {
 async function doSinglePatch(patch: AutoEncoderPatchType<BalanceItem>) {
     const arr: PatchableArrayAutoEncoder<BalanceItem> = new PatchableArray();
     patch.id = patchedBalanceItem.value.id;
-    arr.addPatch(patch);    
+    arr.addPatch(patch);
 
-    await doPatch(arr)
+    await doPatch(arr);
 }
 
 async function doPatch(arr: PatchableArrayAutoEncoder<BalanceItem>) {
@@ -543,8 +546,7 @@ async function reload() {
 
         props.balanceItem.deepSet(response.data);
         balanceItemWithPayments.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loadingPayments.value = false;
@@ -570,8 +572,7 @@ async function markDue() {
         }));
 
         Toast.success($t('%1Jr')).show();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -596,8 +597,7 @@ async function doCancel() {
             status: BalanceItemStatus.Canceled,
         }));
         Toast.success($t('%1Js')).show();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -624,8 +624,7 @@ async function doDelete() {
         }));
         Toast.success($t('%1Jt')).show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -645,8 +644,7 @@ async function loadMember() {
             contextOrganization: organization.value,
             platform: platform.value,
         });
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         return;
     }
@@ -676,8 +674,7 @@ async function loadFamilyFromUser() {
             contextOrganization: organization.value,
             platform: platform.value,
         });
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         return;
     }

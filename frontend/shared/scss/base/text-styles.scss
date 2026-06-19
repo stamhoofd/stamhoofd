@@ -1306,17 +1306,18 @@
     figure {
         background: $color-primary-background;
         color: $color-primary-dark;
+        overflow: hidden;
 
-        > img {
+        > img.fill {
             width: var(--block-width, 40px);
             height: var(--block-width, 40px);
             object-fit: contain;
+        }
 
-            &.small {
-                width: 24px;
-                height: 24px;
-                object-fit: contain;
-            }
+        > img.small{
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
         }
     }
 
@@ -1354,6 +1355,14 @@
         figure {
             background: $color-background;
             color: $color-dark;
+
+            box-shadow: 
+                inset 1px 1px 0.5px 0px rgba(255, 255, 255, calc(1 - var(--is-dark-mode) * 0.9)),
+                inset -1px -1px 0.5px 0px rgba(255, 255, 255, calc(1 - var(--is-dark-mode) * 0.9)),
+                inset -5px -5px 20px 0px rgba(0, 0, 0, calc(0.01 - var(--is-dark-mode) * 0.01)),
+                0 0px 0px 1px rgba(0, 0, 0, 0.03),
+                0 0px 10px 0 rgba(0, 0, 0, 0.03),
+                0px 10px 20px 5px rgba(0, 0, 0, 0.03);
         }
     
         >aside {

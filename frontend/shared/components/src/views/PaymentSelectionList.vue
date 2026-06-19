@@ -24,7 +24,7 @@
                 </p>
 
                 <template #right>
-                    <PaymentMethodIcon :method="paymentMethod" :type="PaymentType.Payment" :boxed="false" />
+                    <PaymentMethodSelectionIcon :method="paymentMethod" />
                 </template>
             </STListItem>
         </STList>
@@ -39,7 +39,7 @@ import type { PaymentConfiguration, PaymentCustomer } from '@stamhoofd/structure
 import { PaymentMethod, PaymentMethodHelper, PaymentType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { computed, onMounted } from 'vue';
-import PaymentMethodIcon from '../payments/components/PaymentMethodIcon.vue';
+import PaymentMethodSelectionIcon from '#payments/components/PaymentMethodSelectionIcon.vue';
 
 const props = withDefaults(defineProps<{
     country: Country;

@@ -2,9 +2,11 @@
     <STListItem :selectable="true" :class="'right-stack ' +payment.theme" @click="navigate(Route)">
         <template #left>
             <PaymentMethodIcon :method="payment.method" :type="payment.type" :boxed="true">
-                <span v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'icon small stroke primary ' + PaymentTypeHelper.getIcon(payment.type)" />
-                <span v-if="payment.status === PaymentStatus.Failed" class="icon disabled small error stroke" />
-                <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon hourglass small primary stroke" />
+                <template #aside>
+                    <span v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'icon tiny stroke primary ' + PaymentTypeHelper.getIcon(payment.type)" />
+                    <span v-if="payment.status === PaymentStatus.Failed" class="icon disabled tiny red stroke" />
+                    <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon hourglass tiny primary stroke" />
+                </template>
             </PaymentMethodIcon>
         </template>
 
