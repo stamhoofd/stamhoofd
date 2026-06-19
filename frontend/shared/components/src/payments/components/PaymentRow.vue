@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" :class="'right-stack ' +payment.theme" @click="navigate(Route.Detail)">
+    <STListItem :selectable="true" :class="'right-stack ' +payment.theme" @click="navigate(Route)">
         <template #left>
             <PaymentMethodIcon :method="payment.method" :type="payment.type" :boxed="true">
                 <span v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'icon small stroke primary ' + PaymentTypeHelper.getIcon(payment.type)" />
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { Payment } from '@stamhoofd/structures';
 import { PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 
@@ -55,38 +55,31 @@ const props = withDefaults(
     },
 );
 
-enum Route {
-    Detail = 'Detail',
-}
-
 const navigate = useNavigate();
 
-defineRoutes([
-    {
-        url: props.payment.id,
-        name: Route.Detail,
-        show: true,
-        component: async () => (await import('../AsyncPaymentView.vue')).default,
-        defaultProperties() {
-            return {
-                payment: props.payment,
-                getNext: (payment: PaymentGeneral | Payment) => {
-                    const index = props.payments.findIndex(p => p.id === payment.id);
-                    if (index === -1 || index === props.payments.length - 1) {
-                        return null;
-                    }
-                    return props.payments[index + 1];
-                },
-                getPrevious: (payment: PaymentGeneral | Payment) => {
-                    const index = props.payments.findIndex(p => p.id === payment.id);
-                    if (index === -1 || index === 0) {
-                        return null;
-                    }
-                    return props.payments[index - 1];
-                },
-            };
-        },
+const Route = defineRoute({
+    url: props.payment.id,
+    show: true,
+    component: async () => (await import('../AsyncPaymentView.vue')).default,
+    defaultProperties() {
+        return {
+            payment: props.payment,
+            getNext: (payment: PaymentGeneral | Payment) => {
+                const index = props.payments.findIndex(p => p.id === payment.id);
+                if (index === -1 || index === props.payments.length - 1) {
+                    return null;
+                }
+                return props.payments[index + 1];
+            },
+            getPrevious: (payment: PaymentGeneral | Payment) => {
+                const index = props.payments.findIndex(p => p.id === payment.id);
+                if (index === -1 || index === 0) {
+                    return null;
+                }
+                return props.payments[index - 1];
+            },
+        };
     },
-]);
+});
 
 </script>
