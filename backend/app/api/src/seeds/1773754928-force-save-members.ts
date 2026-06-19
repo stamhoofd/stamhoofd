@@ -4,6 +4,17 @@ import { SeedTools } from '../helpers/SeedTools.js';
 import { QueryableModel } from '@stamhoofd/sql';
 
 export default new Migration(async () => {
+    if (STAMHOOFD.environment === 'test') {
+        // The customer determination is covered directly by PaymentCustomerResolver.test.ts
+        console.log('skipped in tests');
+        return;
+    }
+
+    if (STAMHOOFD.platformName !== 'stamhoofd') {
+        // In v1 only the Stamhoofd platform stored payments without a customer.
+        return;
+    }
+
     process.stdout.write('\n');
 
     await migrateMembers();
