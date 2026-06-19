@@ -18,6 +18,7 @@ enum RrnTypes {
     Member,
 }
 
+// IMPORTANT: should be executed before the records-configuration-group-filter migration
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
         console.log('skipped in tests');
