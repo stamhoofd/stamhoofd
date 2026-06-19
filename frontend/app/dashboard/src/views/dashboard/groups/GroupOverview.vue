@@ -271,7 +271,6 @@ import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import { useEventTypes } from '@stamhoofd/components/hooks/useEventTypes.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useRegistrationInvitationEventListener } from '@stamhoofd/components/registrations/classes/useRegistrationInvitationEventListener';
 import { countAll } from '@stamhoofd/components/tables/classes/ObjectFetcher';
@@ -301,7 +300,6 @@ const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const context = useContext();
 const getGroupsById = useGetGroupsById();
 const getPeriods = useGetPeriods();
-const eventTypes = useEventTypes();
 
 const featureFlag = useFeatureFlag();
 const isDifferentPeriod = computed(() => organization.value && organization.value.period.period.id !== props.group.periodId);
@@ -588,7 +586,10 @@ function checkCanCreateEvent(group: Group) {
         return false;
     }
 
-    if (eventTypes.value.length === 0) {
+    if (// or if no event types (cannot create an event without types, activity tab will also not be visible)
+        getAllowedEventTypes().length === 0
+        // or if disabled
+        || featureFlag('disable-events')) {
         return false;
     }
 
