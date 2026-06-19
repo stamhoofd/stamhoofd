@@ -824,7 +824,7 @@ class PropertyChangesLoggerHelper {
             // clear output
 
             // fs.writeFileSync(PropertyChangesLoggerHelper.FILE_PATH, '');
-            throw new Error('not implemented');
+            // throw new Error('not implemented');
         }
 
         if (!this.shouldLog) {
