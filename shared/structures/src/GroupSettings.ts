@@ -109,6 +109,10 @@ export class GroupPrice extends AutoEncoder {
 
         return true;
     }
+
+    get hasBundleDiscounts(): boolean {
+        return this.bundleDiscounts.size > 0;
+    }
 }
 
 export class GroupOption extends AutoEncoder {
@@ -585,6 +589,10 @@ export class GroupSettings extends AutoEncoder {
             return null;
         }
         return this.maxMembers - this.registeredMembers - (this.reservedMembers ?? 0);
+    }
+
+    get hasBundleDiscounts(): boolean {
+        return this.prices.some(price => price.hasBundleDiscounts);
     }
 
     /**

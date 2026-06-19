@@ -1,11 +1,11 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
@@ -149,6 +149,11 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         }
 
         async function moveToOtherPeriod(otherPeriod: OrganizationRegistrationPeriod, category: GroupCategory) {
+            if (props.group.settings.hasBundleDiscounts) {
+                Toast.error($t('Je kan geen groep met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.')).show();
+                return;
+            }
+
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
                 title: $t('Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’ in {periodName}?', {
@@ -187,8 +192,14 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             });
             otherPeriodPatch.groups.addPatch(groupPatch);
 
-            // order is important here
-            await save([otherPeriodPatch, periodPatch], [props.period, otherPeriod]);
+            try {
+                // order is important here
+                await save([otherPeriodPatch, periodPatch], [props.period, otherPeriod]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
 
             showSuccessToast($t('‘{groupName}’ is verplaatst naar ‘{categoryName}’ in {periodName}', {
                 groupName: props.group.settings.name.toString(),
