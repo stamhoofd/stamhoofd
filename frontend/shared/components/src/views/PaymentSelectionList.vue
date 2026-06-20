@@ -154,6 +154,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.DirectDebit: return $t(`%12o`);
         case PaymentMethod.CreditCard: return '';
         case PaymentMethod.PointOfSale: return '';
+        case PaymentMethod.AccountDeductions: return '';
     }
 }
 

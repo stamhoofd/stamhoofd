@@ -369,6 +369,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.Unknown: return '';
+        case PaymentMethod.AccountDeductions: return '';
         case PaymentMethod.DirectDebit: return $t('%74');
         case PaymentMethod.PointOfSale: return $t('%5Z');
     }
