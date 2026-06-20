@@ -672,6 +672,13 @@ function getAllowedEventTypes() {
 }
 
 async function createEventFromGroup(group: Group, organization: Organization) {
+    if (group.settings.preventGroupIds.length) {
+        throw new SimpleError({
+            code: 'unsupported',
+            message: $t(`Het omzetten van deze groep naar een activiteit in de kalender is nog niet mogelijk door de instelling ‘verhinder als ingeschreven bij’. Verwijder en vervang eerst die instelling.`),
+        });
+    }
+
     function descriptionToRichtText(description: TranslatedString) {
         const text = description.toString();
         const html = text.split('\n').map(split => `<p>${Formatter.escapeHtml(split)}</p>`).join('');
