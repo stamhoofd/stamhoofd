@@ -693,6 +693,8 @@ export async function runConversion(): Promise<void> {
                         payment.createMandate = null;
 
                         payment.provider = PaymentProvider.Stripe;
+                        payment.createdAt = stInvoice.createdAt;
+                        payment.paidAt = stInvoice.createdAt;
 
                         const stripeAccountExists = await StripeAccount.select().where('accountId', stInvoice.meta.stripeAccountId).first(false);
                         if (stripeAccountExists) {
@@ -718,6 +720,8 @@ export async function runConversion(): Promise<void> {
                             payment.method = PaymentMethod.Unknown;
                             payment.type = PaymentType.Refund;
                             payment.createMandate = null;
+                            payment.createdAt = stInvoice.createdAt;
+                            payment.paidAt = stInvoice.createdAt;
 
                             // payment.provider = PaymentProvider.Mollie;
                             // We currently don't have an ID stored for these refunds: to complete in the future after migration
