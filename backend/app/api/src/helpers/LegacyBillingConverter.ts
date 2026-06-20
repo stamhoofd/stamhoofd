@@ -674,7 +674,7 @@ export async function runConversion(): Promise<void> {
             if (stInvoice.number !== null) {
                 if (!payment) {
                     if (stInvoice.meta.stripeAccountId) {
-                    // Create a new unpaid payment
+                        // Create a new unpaid payment
                         payment = new Payment();
                         payment.adminUserId = systemUser.id;
 
@@ -775,6 +775,13 @@ export async function runConversion(): Promise<void> {
         },
     });
     await refreshCaches(membershipOrganization.id, results);
+
+    // Fix bbbaebe0-e749-4d9d-b3d8-327f43741f95 being succeeded but was refunded
+    const payment = await Payment.getByID('bbbaebe0-e749-4d9d-b3d8-327f43741f95');
+    if (payment) {
+        payment.status = PaymentStatus.Failed;
+        await payment.save();
+    }
 
     console.log('[LegacyBillingConverter] Conversion finished');
 }
