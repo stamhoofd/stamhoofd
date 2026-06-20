@@ -51,7 +51,7 @@ export async function migratePrices() {
             if (group.type !== GroupType.Membership || group.deletedAt !== null) {
                 group.settings.prices = [
                     GroupPrice.create({
-                        name: new TranslatedString('Standaard tarief'),
+                        name: new TranslatedString('Standaardtarief'),
                         startDate: null,
                         endDate: null,
                         price: ReduceablePrice.create({
@@ -163,7 +163,7 @@ export async function migratePrices() {
 
                     const groupPrice = GroupPrice.create({
                         name: new TranslatedString(oldPrices.startDate === null
-                            ? 'Standaard tarief'
+                            ? 'Standaardtarief'
                             : `Vanaf ${formatDate(oldPrices.startDate)}`),
                         startDate: oldPrices.startDate ? new Date(oldPrices.startDate) : null,
                         endDate: next?.startDate ? new Date(next.startDate.getTime() - 1) : null,
