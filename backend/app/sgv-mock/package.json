@@ -20,7 +20,7 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.8",
+        "@simonbackx/simple-encoding": "2.26.10",
         "@simonbackx/simple-endpoints": "1.21.1",
         "@simonbackx/simple-errors": "*",
         "@stamhoofd/sgv": "*"
