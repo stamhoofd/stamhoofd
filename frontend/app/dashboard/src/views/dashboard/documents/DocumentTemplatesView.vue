@@ -2,9 +2,10 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar :title="$t(`%tw`)">
             <template #right>
-                <button type="button" class="button text navigation" @click="addDocument()">
+                <button v-if="$isMobile" type="button" class="button icon add" @click="addDocument()" />
+                <button v-else type="button" class="button navigation selected" @click="addDocument()">
                     <span class="icon add" />
-                    <span>{{ $t('%1IY') }}</span>
+                    <span>{{ $t('Toevoegen') }}</span>
                 </button>
             </template>
         </STNavigationBar>
@@ -80,8 +81,6 @@ import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/document-templates.ts';
 import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
-
-
 
 type ObjectType = DocumentTemplatePrivate;
 
