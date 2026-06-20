@@ -136,7 +136,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.endDate = put.endDate;
             event.typeId = put.typeId;
 
+            event.meta = put.meta;
             event.meta.organizationCache = eventOrganization ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name }) : null;
+
+            PatchEventsEndpoint.validateOrCorrectEventMeta(event);
+
             await PatchEventsEndpoint.checkEventLimits(event);
 
             if (put.group) {
@@ -178,34 +182,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 event.organizationId = patch.organizationId;
             }
 
-            if (event.organizationId === null && event.meta.groups !== null) {
-                event.meta.groups = null;
-                console.error('Removed groups because organizationId is null for event', event.id);
-            }
-
-            if (event.meta.groups && event.meta.groups.length === 0) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Empty groups',
-                    human: $t(`%DV`),
-                });
-            }
-
-            if (event.meta.defaultAgeGroupIds && event.meta.defaultAgeGroupIds.length === 0) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Empty default age groups',
-                    human: $t(`%DW`),
-                });
-            }
-
-            if (event.meta.organizationTagIds && event.meta.organizationTagIds.length === 0) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Empty organization tag ids',
-                    human: $t(`%DX`),
-                });
-            }
+            PatchEventsEndpoint.validateOrCorrectEventMeta(event);
 
             const eventOrganization = await Context.auth.checkEventAccess(event);
             if (eventOrganization) {
@@ -354,6 +331,37 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return new Response(
             structures,
         );
+    }
+
+    static validateOrCorrectEventMeta(event: Event) {
+        if (event.organizationId === null && event.meta.groups !== null) {
+            event.meta.groups = null;
+            console.error('Removed groups because organizationId is null for event', event.id);
+        }
+
+        if (event.meta.groups && event.meta.groups.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Empty groups',
+                human: $t(`%DV`),
+            });
+        }
+
+        if (event.meta.defaultAgeGroupIds && event.meta.defaultAgeGroupIds.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Empty default age groups',
+                human: $t(`%DW`),
+            });
+        }
+
+        if (event.meta.organizationTagIds && event.meta.organizationTagIds.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Empty organization tag ids',
+                human: $t(`%DX`),
+            });
+        }
     }
 
     static async getEventType(typeId: string): Promise<OrganizationEventType | PlatformEventType> {
