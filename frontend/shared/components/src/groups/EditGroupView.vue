@@ -373,7 +373,7 @@
                                 <span>{{ $t('Verplichte inschrijving(en)') }}</span>
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Leden kunnen pas zelf inschrijven voor {name} als ze ingeschreven zijn voor een bepaalde inschrijvingsgroep(en).', {name: patchedGroup.settings.name.toString()}) }}
+                                {{ $t('Leden kunnen pas zelf inschrijven voor {name} als ze ingeschreven zijn voor één van deze inschrijvingsgroep(en).', {name: patchedGroup.settings.name.toString()}) }}
                             </p>
 
                             <div v-if="showRequireGroupIds" class="option">
