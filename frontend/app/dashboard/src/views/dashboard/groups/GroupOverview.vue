@@ -238,7 +238,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
@@ -547,10 +547,19 @@ async function closeGroup() {
     }
 }
 
+const show = useShow();
 async function deleteGroup() {
     try {
         if (await groupActions.deleteGroup()) {
-            await navigationController.value?.pop({ force: true });
+            await show({
+                components: [
+                    AsyncComponent(() => import('@stamhoofd/components/containers/EmptyView.vue'), {
+                        title: $t('Deze groep werd verwijderd'),
+                    }),
+                ],
+                force: true,
+                replace: 1,
+            });
         }
     } catch (e) {
         Toast.fromError(e).show();
@@ -621,6 +630,17 @@ async function convertToEvent() {
     }
 
     Toast.success($t('%1NJ')).show();
+
+    await show({
+        components: [
+            AsyncComponent(() => import('@stamhoofd/components/containers/EmptyView.vue'), {
+                title: $t('Deze groep werd omgzet in een activiteit'),
+                description: $t('Je kan de activiteit opzoeken in de kalender'),
+            }),
+        ],
+        force: true,
+        replace: 1,
+    });
 
     // navigate to event
     await GlobalEventBus.sendEvent('selectTabById', 'events');
