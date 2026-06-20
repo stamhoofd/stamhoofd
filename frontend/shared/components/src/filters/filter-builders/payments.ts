@@ -1,3 +1,5 @@
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { FilterWrapperMarker, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -7,11 +9,24 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 
 export class PaymentFilterBuilders {
     static get method() {
+        return new MultipleChoiceFilterBuilder({
+            name: $t(`%M7`),
+            options: Object.values(PaymentMethod).filter(m => m !== PaymentMethod.AccountDeductions).map((method) => {
+                return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
+            }),
+            wrapper: {
+                method: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        });
+    }
+
+    static get methodForMembershipOrganization() {
         return new MultipleChoiceFilterBuilder({
             name: $t(`%M7`),
             options: Object.values(PaymentMethod).map((method) => {
@@ -36,7 +51,7 @@ export class PaymentFilterBuilders {
                     $in: FilterWrapperMarker,
                 },
             },
-        })
+        });
     }
 
     static get invoiced() {
@@ -46,9 +61,9 @@ export class PaymentFilterBuilders {
                 new MultipleChoiceUIFilterOption($t('%1JB'), null),
             ],
             wrapper: {
-                invoiceId: FilterWrapperMarker
+                invoiceId: FilterWrapperMarker,
             },
-        })
+        });
     }
 
     static get type() {
@@ -62,7 +77,7 @@ export class PaymentFilterBuilders {
                     $in: FilterWrapperMarker,
                 },
             },
-        })
+        });
     }
 
     static get price() {
@@ -70,7 +85,7 @@ export class PaymentFilterBuilders {
             name: $t(`%1IP`),
             type: NumberFilterFormat.Currency,
             key: 'price',
-        })
+        });
     }
 
     static get paidAt() {
@@ -91,15 +106,16 @@ export class PaymentFilterBuilders {
         return new StringFilterBuilder({
             name: $t('%ox'),
             key: 'transferDescription',
-        })
+        });
     }
 }
 
 export function usePaymentsUIFilterBuilders() {
-    const organization = useOrganization()
-    
+    const organization = useOrganization();
+    const platform = usePlatform();
+
     const builders: UIFilterBuilders = [
-        PaymentFilterBuilders.method,
+        (!organization.value || organization.value.id === platform.value.membershipOrganizationId) && STAMHOOFD.userMode === 'organization' ? PaymentFilterBuilders.methodForMembershipOrganization : PaymentFilterBuilders.method,
         PaymentFilterBuilders.status,
         PaymentFilterBuilders.type,
         PaymentFilterBuilders.price,
@@ -110,7 +126,7 @@ export function usePaymentsUIFilterBuilders() {
     ];
 
     if (organization.value && organization.value.meta.invoicesEnabled) {
-        builders.push(PaymentFilterBuilders.invoiced)
+        builders.push(PaymentFilterBuilders.invoiced);
     }
 
     builders.unshift(

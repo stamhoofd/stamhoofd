@@ -688,18 +688,13 @@ export async function runConversion(): Promise<void> {
                         payment.status = PaymentStatus.Succeeded;
                         payment.price = stInvoice.meta.totalPrice * 100;
                         payment.roundingAmount = 0;
-                        payment.method = PaymentMethod.Unknown;
+                        payment.method = PaymentMethod.AccountDeductions;
                         payment.type = PaymentType.Payment;
                         payment.createMandate = null;
 
                         payment.provider = PaymentProvider.Stripe;
                         payment.createdAt = stInvoice.createdAt;
                         payment.paidAt = stInvoice.createdAt;
-
-                        const stripeAccountExists = await StripeAccount.select().where('accountId', stInvoice.meta.stripeAccountId).first(false);
-                        if (stripeAccountExists) {
-                            payment.stripeAccountId = stripeAccountExists.id;
-                        }
                         await payment.save();
                     } else {
                         if (stInvoice.meta.totalPrice < 0) {

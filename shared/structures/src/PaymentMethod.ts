@@ -10,6 +10,11 @@ export enum PaymentMethod {
     iDEAL = 'iDEAL',
     Payconiq = 'Payconiq',
     CreditCard = 'CreditCard',
+
+    /**
+     * A wallet to wallet transfer
+     */
+    AccountDeductions = 'AccountDeducations',
 }
 
 export enum PaymentMethodV150 {
@@ -53,6 +58,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.iDEAL: return $t(`%1n`);
             case PaymentMethod.CreditCard: return $t(`%mi`);
             case PaymentMethod.Payconiq: return $t(`Bancontact Pay | Wero`);
+            case PaymentMethod.AccountDeductions: return $t(`afhouding van je balans`);
         }
     }
 
@@ -69,6 +75,7 @@ export class PaymentMethodHelper {
                 case PaymentMethod.iDEAL: return $t(`%mm`);
                 case PaymentMethod.CreditCard: return $t(`%mn`);
                 case PaymentMethod.Payconiq: return $t(`Bancontact Pay betaling`);
+                case PaymentMethod.AccountDeductions: return $t(`afhouding van je balans`);
             }
         }
 
@@ -95,6 +102,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.iDEAL: return $t(`%1n`);
             case PaymentMethod.CreditCard: return $t(`%mi`);
             case PaymentMethod.Payconiq: return $t(`Bancontact Pay`);
+            case PaymentMethod.AccountDeductions: return $t(`afhoudingen`);
         }
     }
 
