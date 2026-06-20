@@ -3,7 +3,7 @@
         <figure>
             <div v-color="$user.memberId" class="letter-logo" :data-length="letters.length">
                 {{ letters }}
-                <span v-if="!letters" class="icon user" />
+                <span v-if="!letters" class="icon tiny user" />
             </div>
 
             <span>
