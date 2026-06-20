@@ -192,7 +192,7 @@ export class OrganizationEventType extends AutoEncoder {
     static createDefault() {
         return OrganizationEventType.create({
             id: OrganizationEventType.DEFAULT_ID,
-            name: 'Standaard activiteit',
+            name: 'Andere activiteit',
         });
     }
 
