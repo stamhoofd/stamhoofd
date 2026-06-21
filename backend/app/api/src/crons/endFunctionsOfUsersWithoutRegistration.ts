@@ -12,6 +12,10 @@ let lastCleanupMonth: number = now.getMonth();
 registerCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);
 
 export async function endFunctionsOfUsersWithoutRegistration() {
+    if (STAMHOOFD.userMode === 'organization') {
+        return;
+    }
+
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
