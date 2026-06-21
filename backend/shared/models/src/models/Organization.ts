@@ -1038,7 +1038,7 @@ export class Organization extends QueryableModel {
      * Assures at least one company at all times
      */
     get defaultCompanies() {
-        return this.meta.companies.length
+        const b = this.meta.companies.length
             ? this.meta.companies
             : [
                     Company.create({
@@ -1046,5 +1046,12 @@ export class Organization extends QueryableModel {
                         address: this.address,
                     }),
                 ];
+
+        // Missing address -> use organization address
+        if (!b[0].address) {
+            b[0].address = this.address;
+        }
+
+        return b;
     }
 }
