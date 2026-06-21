@@ -15,6 +15,10 @@ export default new Migration(async () => {
         return;
     }
 
+    if (STAMHOOFD.environment !== 'production') {
+        return;
+    }
+
     // Replaced with new global admins
     await User.delete().where('email', 'hallo@stamhoofd.be');
     await User.delete().where('email', 'hallo@stamhoofd.nl');
