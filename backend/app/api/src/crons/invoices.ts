@@ -18,8 +18,8 @@ const { iterate, isHoursAgo } = useSavedIterator(() => {
 const bootAt = new Date();
 
 async function invoices() {
-    // Do not run within 30 minutes after boot to avoid creating multiple email models for emails that failed to send
-    if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 30 && STAMHOOFD.environment !== 'development') {
+    // Do not run within 5 hours after boot
+    if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 60 * 5 && STAMHOOFD.environment !== 'development') {
         return;
     }
 
