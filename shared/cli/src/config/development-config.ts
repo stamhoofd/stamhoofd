@@ -138,6 +138,9 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, p
             PORT: frontendPort(service.frontend, ports),
             VERSION: '',
             MOLLIE_CLIENT_ID: '',
+            CHANGELOG_URL: {
+                '': 'https://www.stamhoofd.be/changelog',
+            },
         } as FrontendEnvironment;
     }
 
