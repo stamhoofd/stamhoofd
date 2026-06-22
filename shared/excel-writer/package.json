@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/excel-writer",
-    "version": "2.122.0",
+    "version": "2.122.1",
     "type": "module",
     "main": "./dist/index.d.ts",
     "module": "./dist/index.js",
