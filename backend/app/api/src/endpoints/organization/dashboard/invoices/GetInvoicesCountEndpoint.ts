@@ -28,9 +28,11 @@ export class GetInvoicesCountEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate();
         const query = await GetInvoicesEndpoint.buildQuery(request.query);
+
+        query.where('organizationId', organization.id);
 
         const count = await query
             .count();

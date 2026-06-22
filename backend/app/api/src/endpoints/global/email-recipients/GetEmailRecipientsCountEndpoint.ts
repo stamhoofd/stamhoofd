@@ -36,6 +36,10 @@ export class GetEmailRecipientsCountEndpoint extends Endpoint<Params, Query, Bod
         }
         const query = await GetEmailRecipientsEndpoint.buildQuery(request.query);
 
+        if (organization) {
+            query.where('organizationId', organization.id);
+        }
+
         const count = await query
             .count();
 

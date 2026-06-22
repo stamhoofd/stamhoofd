@@ -28,9 +28,11 @@ export class GetBalanceItemsCountEndpoint extends Endpoint<Params, Query, Body, 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate();
         const query = await GetBalanceItemsEndpoint.buildQuery(request.query);
+
+        query.where('organizationId', organization.id);
 
         const count = await query
             .count();

@@ -28,9 +28,11 @@ export class GetReceivableBalancesCountEndpoint extends Endpoint<Params, Query, 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate();
         const query = await GetReceivableBalancesEndpoint.buildQuery(request.query);
+
+        query.where('organizationId', organization.id);
 
         const count = await query
             .count();

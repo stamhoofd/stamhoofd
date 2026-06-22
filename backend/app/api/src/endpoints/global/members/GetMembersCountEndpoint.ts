@@ -28,9 +28,13 @@ export class GetMembersCountEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
         const query = await GetMembersEndpoint.buildQuery(request.query);
+
+        if (organization && STAMHOOFD.userMode === 'organization') {
+            query.where('organizationId', organization.id);
+        }
 
         const count = await query
             .count();
