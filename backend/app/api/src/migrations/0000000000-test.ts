@@ -1,9 +1,9 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Organization } from '@stamhoofd/models';
 import type { Address, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import fs from 'fs';
 import { SeedTools } from '../helpers/SeedTools.js';
-import { Formatter } from '@stamhoofd/utility';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -44,10 +44,6 @@ type RrnHolderData = {
     email?: string;
 
 };
-
-// based on manually examining the data
-// const relevantChildCategoryNames = new Set<string>(['schuldenaar', 'Rijksregisternummer OUDER', 'Gegevens ouders'].map(x => x.toLowerCase()));
-
 async function start(dryRun: boolean) {
     const organizationResults: { organization: { id: string; name: string }; count: number; results: any[] }[] = [];
 
@@ -56,62 +52,20 @@ async function start(dryRun: boolean) {
         batchSize: 50,
         useTransactionPerBatch: true,
         action: async (organization: Organization) => {
-            // if (group.settings.period !== null) {
-            //     return;
-            // }
-
-            const results: RecordCategory[] = [];
             const categoryWrappers: RecordCategoryWrapper[] = [];
 
             loopAllRecordCatgoriesWithRrn(organization, (category) => {
                 categoryWrappers.push(new RecordCategoryWrapper(category));
-                const categoryWrapper = new RecordCategoryWrapper(category);
-                results.push(category);
             });
 
-            if(categoryWrappers.length === 0) {
+            if (categoryWrappers.length === 0) {
                 return;
-            }
-
-            if (results.length > 0) {
-                organizationResults.push({
-                    organization: {
-                        id: organization.id,
-                        name: organization.name,
-                    },
-                    count: results.length,
-                    results: results.map(c => summarizeCategory(c)),
-                });
             }
         },
 
     });
 
     logTextToFile(JSON.stringify(organizationResults.sort((a, b) => b.count - a.count)));
-}
-
-function summarizeCategory(category: RecordCategory) {
-    const name = category.name.toString();
-    const records = category.records.map((r) => {
-        return r.name.toString();
-    });
-
-    const relevantChildCategoryNames = new Set<string>(['schuldenaar', 'Rijksregisternummer OUDER', 'Gegevens ouders'].map(x => x.toLowerCase()));
-
-    const childCategories = category.childCategories.filter(c => relevantChildCategoryNames.has(c.name.toString().toLowerCase())).map(c => summarizeCategory(c));
-
-    if (childCategories.length > 0) {
-        return {
-            name,
-            records,
-            childCategories,
-        };
-    }
-
-    return {
-        name,
-        records,
-    };
 }
 
 function logTextToFile(text: string) {
@@ -141,7 +95,7 @@ class RecordCategoryWrapper {
     }
 }
 
-class RecordWrapper{
+class RecordWrapper {
     get id() {
         return this.record.id;
     }
@@ -158,48 +112,42 @@ class RecordWrapper{
 }
 
 function getTypeFromName(rawName: string): RrnTypes {
-        const name = Formatter.slug(rawName).replaceAll('-', '');
-    
-        if (['papa', 'vader'].some(x => name.includes(x))) {
-            return RrnTypes.Father;
-        }
-    
-        if (['mama', 'moeder'].some(x => name.includes(x))) {
-            return RrnTypes.Mother;
-        }
-    
-        if (['ouder1', 'parent1', 'voogd1'].some(x => name.includes(x))) {
-            return RrnTypes.Parent1;
-        }
-    
-        if (['ouder2', 'parent2', 'parent2', 'voogd2', 'tweedeouder'].some(x => name.includes(x))) {
-            return RrnTypes.Parent2;
-        }
-    
-        if (['kind', 'lid', 'dochter', 'zoon', 'kampdeelnemer', 'ksaer'].some(x => name.includes(x))) {
-            return RrnTypes.Member;
-        }
-    
-        if (['schuldenaar', 'schuldernaar', 'betaler', 'belastingsplichtige'].some(x => name.includes(x))) {
-            return RrnTypes.Debtor;
-        }
-    
-        if (['ouder', 'voogd'].some(x => name.includes(x))) {
-            return RrnTypes.UnknownParent;
-        }
-    
-        if (name === 'rijksregisternummer') {
-            return RrnTypes.Unknown;
-        }
-    
+    const name = Formatter.slug(rawName).replaceAll('-', '');
+
+    if (['papa', 'vader'].some(x => name.includes(x))) {
+        return RrnTypes.Father;
+    }
+
+    if (['mama', 'moeder'].some(x => name.includes(x))) {
+        return RrnTypes.Mother;
+    }
+
+    if (['ouder1', 'parent1', 'voogd1'].some(x => name.includes(x))) {
+        return RrnTypes.Parent1;
+    }
+
+    if (['ouder2', 'parent2', 'parent2', 'voogd2', 'tweedeouder'].some(x => name.includes(x))) {
+        return RrnTypes.Parent2;
+    }
+
+    if (['kind', 'lid', 'dochter', 'zoon', 'kampdeelnemer', 'ksaer'].some(x => name.includes(x))) {
+        return RrnTypes.Member;
+    }
+
+    if (['schuldenaar', 'schuldernaar', 'betaler', 'belastingsplichtige'].some(x => name.includes(x))) {
+        return RrnTypes.Debtor;
+    }
+
+    if (['ouder', 'voogd'].some(x => name.includes(x))) {
+        return RrnTypes.UnknownParent;
+    }
+
+    if (name === 'rijksregisternummer') {
         return RrnTypes.Unknown;
     }
 
-// function handleRecordCategorWithRrn(organization: Organization, category: RecordCategory) {
-
-// }
-
-function getRrnHoldersForOrganization
+    return RrnTypes.Unknown;
+}
 
 function loopAllRecordCatgoriesWithRrn(organization: Organization, callback: (category: RecordCategory) => void) {
     function isRrnRecord(record: RecordSettings): boolean {
