@@ -16,16 +16,16 @@
 </template>
 
 <script setup lang="ts">
+import { useDataPermissionSettings } from '#groups/hooks/useDataPermissionSettings.ts';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { isMemberManaged } from '@stamhoofd/sgv-frontend/SGVSyncReport';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { MemberPlatformMembership, PlatformMember } from '@stamhoofd/structures';
 import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, SGVSyncStatus, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useDataPermissionSettings } from '#groups/hooks/useDataPermissionSettings.ts';
-import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
@@ -149,7 +149,7 @@ const warnings = computed(() => {
     }
 
     if (organization.value?.isSGVSyncOrganization && isMemberManaged(props.member.member, organization.value)) {
-        const status = props.member.member.getSGVSyncStatus({ periodId: organization.value?.period.period.id ?? null });
+        const status = props.member.member.getSGVSyncStatus({ organization: organization.value });
         const actionText = auth.hasFullAccess() ? $t('%1Z6') : $t('%1b9');
 
         if (status === SGVSyncStatus.Never) {
@@ -195,7 +195,7 @@ function handleWarningClick(warning: RecordWarning) {
         return;
     }
 
-    const status = props.member.member.getSGVSyncStatus({ periodId: organization.value?.period.period.id ?? null });
+    const status = props.member.member.getSGVSyncStatus({ organization: organization.value });
     if (status === SGVSyncStatus.Never || status === SGVSyncStatus.Outdated || status === SGVSyncStatus.Changed) {
         const text = warning.text.toString();
         if (text.includes('groepsadministratie') || text.includes('synchronisatie')) {

@@ -57,4 +57,12 @@ describe('SGVSyncReport.isMemberManaged', () => {
 
         expect(isMemberManaged(createMember({ group: createGroup(GroupType.Membership, 'other-period') }), organization)).toBe(false);
     });
+
+    test('ignores registrations from previous active work years', () => {
+        const organization = createOrganization();
+        organization.period.period.startDate = new Date();
+        organization.period.period.previousPeriodId = 'previous-period';
+
+        expect(isMemberManaged(createMember({ group: createGroup(GroupType.Membership, 'previous-period') }), organization)).toBe(false);
+    });
 });
