@@ -73,7 +73,7 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
         DB_USER: 'root',
         DB_PASS: 'root',
         DB_DATABASE: instanceDatabase,
-        DB_PORT: String(ports.mysql),
+        DB_PORT: process.env.DB_PORT ?? String(ports.mysql),
         SPACES_ENDPOINT: domains.files,
         SPACES_BUCKET: bucket,
         SPACES_KEY: localFilesAccessKey,
