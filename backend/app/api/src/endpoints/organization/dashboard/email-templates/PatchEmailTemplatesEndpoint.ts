@@ -42,7 +42,12 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
         // Get all patches
         for (const patch of request.body.getPatches()) {
-            const template = await EmailTemplate.getByID(patch.id);
+            const template = organization
+                ? await EmailTemplate.select()
+                    .where('id', patch.id)
+                    .where('organizationId', organization.id)
+                    .first(false)
+                : await EmailTemplate.getByID(patch.id);
             if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
                 throw Context.auth.notFoundOrNoAccess($t(`%ES`));
             }
@@ -75,7 +80,12 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.groupId = struct.groupId;
 
             if (struct.groupId) {
-                const group = await Group.getByID(struct.groupId);
+                const group = organization
+                    ? await Group.select()
+                        .where('id', struct.groupId)
+                        .where('organizationId', organization.id)
+                        .first(false)
+                    : await Group.getByID(struct.groupId);
                 if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Full)) {
                     throw Context.auth.error();
                 }
@@ -83,7 +93,12 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             }
 
             if (struct.webshopId) {
-                const webshop = await Webshop.getByID(struct.webshopId);
+                const webshop = organization
+                    ? await Webshop.select()
+                        .where('id', struct.webshopId)
+                        .where('organizationId', organization.id)
+                        .first(false)
+                    : await Webshop.getByID(struct.webshopId);
                 if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
                     throw Context.auth.error();
                 }
@@ -108,7 +123,12 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         for (const id of request.body.getDeletes()) {
-            const template = await EmailTemplate.getByID(id);
+            const template = organization
+                ? await EmailTemplate.select()
+                    .where('id', id)
+                    .where('organizationId', organization.id)
+                    .first(false)
+                : await EmailTemplate.getByID(id);
             if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
                 throw Context.auth.notFoundOrNoAccess($t(`%EU`));
             }

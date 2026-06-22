@@ -2,9 +2,9 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { EmailTemplate, EmailTemplateFactory, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchEmailTemplatesEndpoint } from './PatchEmailTemplatesEndpoint.js';
 
@@ -86,5 +86,27 @@ describe('Endpoint.PatchEmailTemplatesEndpoint', () => {
             const response = await patchEmailTemplates(body, token);
             expect(response.body).toBeDefined();
         });
+    });
+
+    test('should not patch a template from another organization', async () => {
+        const organization = await new OrganizationFactory({ period }).create();
+        const otherOrganization = await new OrganizationFactory({ period }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const token = await Token.createToken(user);
+        const template = await new EmailTemplateFactory({
+            organization: otherOrganization,
+            type: EmailTemplateType.RegistrationConfirmation,
+        }).create();
+
+        const body: PatchableArrayAutoEncoder<EmailTemplateStruct> = new PatchableArray();
+        body.addPatch(EmailTemplateStruct.patch({
+            id: template.id,
+            subject: 'new subject',
+        }));
+
+        await expect(patchEmailTemplates(body, token, organization)).rejects.toThrow(STExpect.errorWithCode('not_found'));
     });
 });

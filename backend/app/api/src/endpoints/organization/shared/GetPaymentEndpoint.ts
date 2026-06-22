@@ -27,10 +27,15 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        const payment = await Payment.getByID(request.params.id);
+        const payment = organization
+            ? await Payment.select()
+                .where('id', request.params.id)
+                .where('organizationId', organization.id)
+                .first(false)
+            : await Payment.getByID(request.params.id);
         if (!payment) {
             throw new SimpleError({
                 code: 'not_found',
