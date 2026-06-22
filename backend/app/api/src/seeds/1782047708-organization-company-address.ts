@@ -22,7 +22,7 @@ export default new Migration(async () => {
 async function migrateOrganizations() {
     console.log('Start updating organizations.');
 
-    const realUpdate = 0;
+    let realUpdate = 0;
     const result = await SeedTools.loop({
         query: Organization.select(),
         batchSize: 200,
@@ -35,6 +35,7 @@ async function migrateOrganizations() {
                     }
                 }
                 await organization.save();
+                realUpdate += 1;
             }
         },
     });
