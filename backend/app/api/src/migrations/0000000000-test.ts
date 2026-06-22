@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Organization } from '@stamhoofd/models';
+import { Member, Organization } from '@stamhoofd/models';
 import type { Address, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import fs from 'fs';
@@ -61,6 +61,18 @@ async function start(dryRun: boolean) {
             if (categoryWrappers.length === 0) {
                 return;
             }
+
+            for await (const member of Member.select().where('organizationId', organization.id).all()) {
+                const trackers = categoryWrappers.map(x => x.createTracker());
+
+                // for (const tracker of trackers) {
+
+                // }
+
+                if (!dryRun) {
+                    await member.save();
+                }
+            }
         },
 
     });
@@ -93,6 +105,19 @@ class RecordCategoryWrapper {
     constructor(readonly category: RecordCategory) {
         this.type = getTypeFromName(this.name);
     }
+
+    createTracker(): RecordCategoryWrapperTracker {
+        return new RecordCategoryWrapperTracker(this.category);
+    }
+}
+
+class RecordCategoryWrapperTracker extends RecordCategoryWrapper {
+    private _trackers: RecordWrapperTracker[] = [];
+
+    constructor(category: RecordCategory) {
+        super(category);
+        this._trackers = category.records.map(x => new RecordWrapperTracker(x));
+    }
 }
 
 class RecordWrapper {
@@ -108,6 +133,14 @@ class RecordWrapper {
 
     constructor(readonly record: RecordSettings) {
         this.type = getTypeFromName(this.name);
+    }
+}
+
+class RecordWrapperTracker extends RecordWrapper {
+    private _isMatched: boolean = false;
+
+    markMatched() {
+        this._isMatched = true;
     }
 }
 
