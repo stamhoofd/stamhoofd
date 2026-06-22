@@ -38,6 +38,8 @@ export class GetWebshopTicketsCountEndpoint extends Endpoint<Params, Query, Body
 
         const query = await GetWebshopTicketsEndpoint.buildQuery(request.query);
 
+        query.where('organizationId', organization.id);
+
         const count = await query.count();
 
         return new Response(

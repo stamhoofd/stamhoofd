@@ -38,6 +38,8 @@ export class GetDocumentsCountEndpoint extends Endpoint<Params, Query, Body, Res
 
         const query = await GetDocumentsEndpoint.buildQuery(request.query);
 
+        query.where('organizationId', organization.id);
+
         const count = await query
             .count();
 

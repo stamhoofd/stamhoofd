@@ -28,8 +28,12 @@ export class GetRegistrationPeriodsCountEndpoint extends Endpoint<Params, Query,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setUserOrganizationScope();
+        const organization = await Context.setUserOrganizationScope();
         const query = await GetRegistrationPeriodsEndpoint.buildQuery(request.query);
+
+        if (organization) {
+            query.where('organizationId', organization.id);
+        }
 
         const count = await query
             .count();

@@ -37,6 +37,8 @@ export class GetDocumentTemplatesCountEndpoint extends Endpoint<Params, Query, B
 
         const query = await GetDocumentTemplatesEndpoint.buildQuery(request.query);
 
+        query.where('organizationId', organization.id);
+
         const count = await query
             .count();
 

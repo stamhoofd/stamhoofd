@@ -28,10 +28,15 @@ export class GetWebshopsCountEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
         const query = await GetWebshopsEndpoint.buildQuery(request.query);
+
+        if (organization) {
+            query.where('organizationId', organization.id);
+        }
+
         const count = await query.count();
 
         return new Response(
