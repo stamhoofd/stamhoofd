@@ -463,6 +463,14 @@
     "original": "{n}e groep",
     "translation": "{n}th group"
   },
+  "%1dY": {
+    "original": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "You are about to create a new empty work year ({name-period-new}), without copying from an existing work year.\n\nOnce {name-period-new} has been fully set up, you can switch over. From that moment on, members can register through 'My account'. Until then, the new period will stay hidden from members."
+  },
+  "%1da": {
+    "original": "Via deze koppeling zet je gegevens van Ravot automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
+    "translation": "Using this connection, you can automatically transfer data from Ravot to the group administration of Scouts en Gidsen Vlaanderen."
+  },
   "%2": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
     "translation": "Affiliation/insurance KSA National*"
@@ -1100,8 +1108,8 @@
     "translation": "You can only create activities for other groups via the administrator portal of that group."
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "For national activities, you need to choose through which group all payments are handled. The payment settings of that group will then be used and all registrations will be recorded in the bookkeeping of that group.\n\nAdditionally, the organizer also sets options that impact data collection and other more subtle details."
+    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "For national activities, you need to choose which group will handle all payments. That group's payment settings will be used, and all registrations will be entered into that group's accounting records.\n\nAdditionally, the organiser sets settings that impact data collection and other finer details."
   },
   "%CS": {
     "original": "Vragenlijst van KSA Nationaal",

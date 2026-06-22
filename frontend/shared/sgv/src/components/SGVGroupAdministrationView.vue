@@ -15,13 +15,13 @@
                 }}
             </h1>
             <p>
-                {{ $t("Via deze koppeling zet je gegevens van Stamhoofd automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.") }}
+                {{ $t("%1da") }}
             </p>
             <p class="warning-box">
-                {{ $t("Controleer na het synchroniseren altijd de gegevens in de groepsadministratie.") }}
+                {{ $t("%1de") }}
             </p>
             <p v-if="isLoggedIn" class="success-box">
-                {{ $t("Je bent ingelogd in de groepsadministratie. Je kan nu beginnen met synchroniseren.") }}
+                {{ $t("%1dW") }}
             </p>
             <template v-else>
                 <p
@@ -65,7 +65,7 @@
                     }}
                 </p>
                 <p class="info-box">
-                    {{ $t("Log eerst in bij de groepsadministratie om te synchroniseren.") }}
+                    {{ $t("%1dZ") }}
                 </p>
             </template>
         </main>

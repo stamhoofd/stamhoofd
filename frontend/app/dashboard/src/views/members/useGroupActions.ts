@@ -218,7 +218,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             // Remove suffix
             duplicated.settings.name = TranslatedString.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
 
-            const suffix = ' (' + $t('kopie') + ')';
+            const suffix = ' (' + $t('%1dX') + ')';
 
             // Count the groups that already have a suffix, and add the number inside the suffix
             const suffixes = subGroups.map(g => g.settings.name.startsWith(duplicated.settings.name + ' (kopie') && g.settings.name.match(/ \(kopie( \d+)?\)$/));

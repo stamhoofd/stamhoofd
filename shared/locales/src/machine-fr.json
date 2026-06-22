@@ -5812,16 +5812,16 @@
     "translation": "Compris"
   },
   "%1Nd": {
-    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
-    "translation": "La commande sera supprimée mais le paiement restera dans le système. De ce fait, le système pensera que ce client a payé trop et pourra ensuite proposer un remboursement dans l’aperçu des montants ouverts.\n\nSi vous souhaitez supprimer toutes les commandes, nous vous conseillons de dupliquer la boutique afin de repartir d’une nouvelle boutique vide. Si l’acheteur veut annuler son achat, il est préférable d’annuler la commande plutôt que de la supprimer."
+    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "La commande sera supprimée, mais le paiement restera dans le système. Cela peut amener le système à penser que ce client a payé trop, et il pourra alors suggérer un remboursement dans l’aperçu des montants en attente.\n\nSi vous souhaitez supprimer toutes les commandes, il est recommandé de dupliquer la boutique en ligne pour repartir de zéro. Si le client souhaite annuler son achat, il vaut mieux annuler la commande plutôt que de la supprimer."
   },
   "%1Ne": {
     "original": "Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven",
     "translation": "Supprimer ces commandes peut fausser l'aperçu financier"
   },
   "%1Nf": {
-    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
-    "translation": "Les commandes seront supprimées mais les paiements resteront dans le système. Le système pensera donc que ces clients ont payé trop et pourra plus tard suggérer un remboursement dans l’aperçu des montants ouverts.\n\nSi vous souhaitez supprimer toutes les commandes, nous vous recommandons de dupliquer la boutique pour démarrer avec une boutique vide. Si l’acheteur souhaite annuler son achat, il est préférable d’annuler la commande plutôt que de la supprimer."
+    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "Les commandes seront supprimées, mais les paiements resteront dans le système. De ce fait, le système croira que ces clients ont payé trop et pourra plus tard suggérer un remboursement dans l'aperçu des montants en attente.\n\nSi vous voulez supprimer toutes les commandes, il est conseillé de dupliquer la boutique en ligne et de recommencer avec une nouvelle boutique vide. Si le client souhaite annuler son achat, il vaut mieux annuler la commande que de la supprimer."
   },
   "%1Ng": {
     "original": "Bestellingen verwijderen?",
@@ -5940,8 +5940,8 @@
     "translation": "Payé"
   },
   "%1OE": {
-    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
-    "translation": "Si tu souhaites recueillir ces informations par ticket (et non par commande), tu peux désactiver le panier et limiter le nombre maximum de tickets à 1 par commande.\n            Si tu as seulement besoin de menus déroulants, il est préférable d'utiliser ceux dans les paramètres du ticket, c'est plus simple à gérer."
+    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
+    "translation": "Si vous souhaitez collecter ces informations par billet (et non par commande), vous pouvez désactiver le panier et limiter le nombre maximum de billets à 1 par billet.\nSi vous n’avez besoin que de menus de choix, il est plus pratique d’utiliser les menus de choix dans les paramètres d’un billet."
   },
   "%1OG": {
     "original": "Het minimum is {min}",
@@ -6196,8 +6196,8 @@
     "translation": "ÉTAPE {current} / {total}"
   },
   "%1PR": {
-    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\n\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
-    "translation": "Parfois, il est nécessaire de télécharger des documents dans Mollie qui ne se trouvent que dans notre documentation. Sans nouveau compte, des frais de transaction plus élevés peuvent aussi s’appliquer.\n\nVeuillez donc d’abord lire la documentation : des erreurs peuvent entraîner le refus de votre affiliation et un délai de traitement considérablement plus long."
+    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\\n\\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
+    "translation": "Il est parfois nécessaire de télécharger dans Mollie des documents que l’on ne trouve que dans notre documentation. Sans nouveau compte, des frais de transaction plus élevés peuvent aussi s’appliquer.\n\nVeuillez donc d’abord lire la documentation : des erreurs peuvent entraîner un refus de votre affiliation et considérablement allonger le délai de traitement."
   },
   "%1PU": {
     "original": "Einde proefperiode",
@@ -6248,8 +6248,8 @@
     "translation": "Événements"
   },
   "%1Pi": {
-    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
-    "translation": "Si vous souhaitez rassembler ces informations pour chaque personne inscrite, vous pouvez désactiver le panier et limiter la quantité maximale d'un article à 1 pièce. Si vous n'avez besoin que de menus déroulants, utilisez de préférence ceux dans les paramètres de l'article, c'est plus simple à gérer."
+    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
+    "translation": "Si vous souhaitez collecter ces informations pour chaque personne inscrite, vous pouvez désactiver le panier et limiter le nombre maximum d’articles à 1 par inscription.\nSi vous n’avez besoin que de menus de choix, il est plus simple d’utiliser les menus dans les paramètres d’un article."
   },
   "%1Pj": {
     "original": "Aanmaken",
@@ -9035,6 +9035,50 @@
     "original": "Bestaande leden kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten.",
     "translation": "Les membres existants peuvent s'inscrire immédiatement. Les nouveaux membres sont d'abord placés sur la liste d'attente et pourront être acceptés plus tard."
   },
+  "%1dV": {
+    "original": "{werkjaar-2025-2026} is nu aangemaakt. Voeg zeker één of meerdere inschrijvingsgroepen toe en kijk alle instelingen grondig na.",
+    "translation": "{werkjaar-2025-2026} est maintenant créé. Veillez à ajouter au moins un groupe d'inscription et à bien vérifier tous les paramètres."
+  },
+  "%1dW": {
+    "original": "Je bent ingelogd in de groepsadministratie. Je kan nu beginnen met synchroniseren.",
+    "translation": "Vous êtes connecté à l’administration de groupe. Vous pouvez maintenant commencer la synchronisation."
+  },
+  "%1dX": {
+    "original": "kopie",
+    "translation": "copie"
+  },
+  "%1dY": {
+    "original": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une nouvelle année associative vide ({name-period-new}), sans faire de copie d’une année existante.\n\nDès que {name-period-new} est entièrement configurée, vous pouvez passer dessus. À partir de ce moment, les membres pourront s’inscrire via le portail des membres. Jusque-là, la nouvelle période restera cachée pour les membres."
+  },
+  "%1dZ": {
+    "original": "Log eerst in bij de groepsadministratie om te synchroniseren.",
+    "translation": "Connectez-vous d'abord à l’administration de groupe pour synchroniser."
+  },
+  "%1da": {
+    "original": "Via deze koppeling zet je gegevens van Stamhoofd automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
+    "translation": "Grâce à ce lien, vous transférez automatiquement les données de Stamhoofd vers l’administration de groupe de Scouts et Guides de Flandre."
+  },
+  "%1db": {
+    "original": "Kopie maken vanaf",
+    "translation": "Faire une copie à partir de"
+  },
+  "%1dc": {
+    "original": "Leeg aanmaken",
+    "translation": "Créer vierge"
+  },
+  "%1dd": {
+    "original": "Geen kopie maken",
+    "translation": "Ne pas faire de copie"
+  },
+  "%1de": {
+    "original": "Controleer na het synchroniseren altijd de gegevens in de groepsadministratie.",
+    "translation": "Après la synchronisation, vérifiez toujours les données dans l’administration de groupe."
+  },
+  "%1df": {
+    "original": "{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie.",
+    "translation": "{werkjaar-2025-2026} est maintenant créé. Vérifiez bien les prix et les paramètres de votre copie."
+  },
   "%1g": {
     "original": "Weekends",
     "translation": "Week-ends"
@@ -11419,10 +11463,6 @@
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar niet actief is.",
     "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année n’est pas active."
   },
-  "%Bu": {
-    "original": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
-    "translation": "Vous ne pouvez pas vous inscrire à {group} car cette année est close."
-  },
   "%Bv": {
     "original": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten.",
     "translation": "Vous ne pouvez pas vous inscrire à {group} car l’année {period} est close."
@@ -11548,8 +11588,8 @@
     "translation": "Choisissez un organisateur pour ces inscriptions"
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke vereniging alle betalingen verlopen. De betaalinstellingen van die vereniging worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die vereniging.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir par quelle association tous les paiements seront gérés. Ce sont alors les paramètres de paiement de cette association qui seront utilisés, et toutes les inscriptions seront comptabilisées dans sa comptabilité.\n\nDe plus, l'organisateur détermine aussi des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
+    "original": "Voor nationale activiteiten moet je kiezen via welke vereniging alle betalingen verlopen. De betaalinstellingen van die vereniging worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die vereniging.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir via quelle association tous les paiements seront effectués. Les paramètres de paiement de cette association seront alors utilisés et toutes les inscriptions seront enregistrées dans la comptabilité de cette association.\n\nDe plus, l'organisateur définit également des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
   },
   "%CR": {
     "original": "Prullenmand",

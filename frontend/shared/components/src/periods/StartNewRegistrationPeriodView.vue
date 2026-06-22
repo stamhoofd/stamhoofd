@@ -8,10 +8,10 @@
 
                 <STErrorsDefault :error-box="errors.errorBox" />
 
-                <STInputBox :title="$t('Kopie maken vanaf')" :error-box="errors.errorBox" error-fields="fromPeriod">
+                <STInputBox :title="$t('%1db')" :error-box="errors.errorBox" error-fields="fromPeriod">
                     <Dropdown v-model="fromPeriod">
                         <option :value="null">
-                            {{ $t('Geen kopie maken') }}
+                            {{ $t('%1dd') }}
                         </option>
 
                         <option v-for="p of periods.organizationPeriods" :key="p.id" :value="p">
@@ -27,7 +27,7 @@
                     })"
                 />
                 <p
-                    v-else-if="!fromPeriod && !$isPlatform" class="pre-wrap style-description-block" v-text="$t('Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.', {
+                    v-else-if="!fromPeriod && !$isPlatform" class="pre-wrap style-description-block" v-text="$t('%1dY', {
                         'name-period-new': period.name
                     })"
                 />
@@ -117,7 +117,7 @@
                         </button>
                         <button v-else class="button primary" type="button" @click="start">
                             <span class="icon tiny add" />
-                            <span>{{ $t('Leeg aanmaken') }}</span>
+                            <span>{{ $t('%1dc') }}</span>
                         </button>
                     </LoadingButton>
                 </template>
@@ -267,11 +267,11 @@ async function start() {
             ).show();
         } else if (currentPeriod) {
             Toast.success(
-                $t('{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie.', { 'werkjaar-2025-2026': newOrganizationPeriod.period.name }),
+                $t('%1df', { 'werkjaar-2025-2026': newOrganizationPeriod.period.name }),
             ).show();
         } else {
             Toast.success(
-                $t('{werkjaar-2025-2026} is nu aangemaakt. Voeg zeker één of meerdere inschrijvingsgroepen toe en kijk alle instelingen grondig na.', { 'werkjaar-2025-2026': newOrganizationPeriod.period.name }),
+                $t('%1dV', { 'werkjaar-2025-2026': newOrganizationPeriod.period.name }),
             ).show();
         }
         await pop({ force: true });

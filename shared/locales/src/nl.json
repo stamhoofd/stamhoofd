@@ -721,7 +721,6 @@
   "%Br": "Zal binnenkort aangerekend worden aan {organization}",
   "%Bs": "Je kan niet inschrijven voor {group} omdat dit werkjaar niet actief is.",
   "%Bt": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar niet actief is.",
-  "%Bu": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
   "%Bv": "Je kan niet inschrijven voor {group} omdat werkjaar {period} is afgesloten.",
   "%Bw": "Jouw #lokale-groep betaalt {price} aan #koepel, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
   "%Bx": "Opgelet, deze beheerders zijn ook niet aangesloten bij #koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
@@ -5963,5 +5962,16 @@
   "%1dO": "Servicekosten achteraf aangerekend (excl. BTW)",
   "%1dQ": "Verwijder en verplaats inhoud naar",
   "%1dT": "{n}e vereniging",
-  "%1dU": "Bestaande leden kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten."
+  "%1dU": "Bestaande leden kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten.",
+  "%1dV": "{werkjaar-2025-2026} is nu aangemaakt. Voeg zeker één of meerdere inschrijvingsgroepen toe en kijk alle instelingen grondig na.",
+  "%1dW": "Je bent ingelogd in de groepsadministratie. Je kan nu beginnen met synchroniseren.",
+  "%1dX": "kopie",
+  "%1dY": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+  "%1dZ": "Log eerst in bij de groepsadministratie om te synchroniseren.",
+  "%1da": "Via deze koppeling zet je gegevens van Stamhoofd automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
+  "%1db": "Kopie maken vanaf",
+  "%1dc": "Leeg aanmaken",
+  "%1dd": "Geen kopie maken",
+  "%1de": "Controleer na het synchroniseren altijd de gegevens in de groepsadministratie.",
+  "%1df": "{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie."
 }

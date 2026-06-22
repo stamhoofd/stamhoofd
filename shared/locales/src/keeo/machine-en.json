@@ -519,6 +519,14 @@
     "original": "{n}e eenheid",
     "translation": "{n}th unit"
   },
+  "%1dY": {
+    "original": "Je staat op het punt om een nieuw leeg scoutsjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand scoutsjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "You are about to create a new empty scouts year ({name-period-new}), without copying from an existing scouts year.\n\nOnce {name-period-new} has been fully set up, you can switch over. From that moment on, members can register via the member portal. Until then, the new period will remain hidden to members."
+  },
+  "%1da": {
+    "original": "Via deze koppeling zet je gegevens van Keeo automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
+    "translation": "With this connection, you automatically transfer data from Keeo to the group administration of Scouts en Gidsen Vlaanderen."
+  },
   "%2": {
     "original": "Aansluiting/verzekering Keeo*",
     "translation": "Keeo connection/insurance*"
@@ -1271,10 +1279,6 @@
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar niet actief is.",
     "translation": "You cannot change registrations for {group} because that scout year is not active."
   },
-  "%Bu": {
-    "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar is afgesloten.",
-    "translation": "You cannot register for {group} because this scout year is closed."
-  },
   "%Bv": {
     "original": "Je kan niet inschrijven voor {group} omdat scoutsjaar {period} is afgesloten.",
     "translation": "You cannot register for {group} because scout year {period} is closed."
@@ -1312,8 +1316,8 @@
     "translation": "You can only create activities for other units via the administrator portal of that unit itself."
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "For national activities, you must choose through which group all payments will be processed. The payment settings of that group will then be used, and all registrations will be recorded in that group's bookkeeping.\n\nIn addition, the organizer can also set options that affect data collection and other more subtle aspects."
+    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "For national activities, you need to choose through which unit all payments will be made. That unit's payment settings will be used, and all registrations will be entered in the accounts of that unit.\n\nThe organiser also sets options that affect the data collection and other more subtle aspects."
   },
   "%CS": {
     "original": "Vragenlijst van FOS Open Scouting",

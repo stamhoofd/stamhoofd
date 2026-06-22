@@ -535,6 +535,14 @@
     "original": "{n}e eenheid",
     "translation": "{n}e unité"
   },
+  "%1dY": {
+    "original": "Je staat op het punt om een nieuw leeg scoutsjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand scoutsjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une nouvelle année scoute vide ({name-period-new}), sans faire de copie d'une année scoute existante.\n\nDès que {name-period-new} est entièrement configurée, vous pouvez passer dessus. À partir de ce moment, les membres pourront s’inscrire via le portail des membres. Jusque-là, la nouvelle période restera cachée pour les membres."
+  },
+  "%1da": {
+    "original": "Via deze koppeling zet je gegevens van Jamboree automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
+    "translation": "Grâce à ce lien, vous transférez automatiquement les données de Jamboree vers l’administration de groupe de Scouts et Guides de Flandre."
+  },
   "%2": {
     "original": "Aansluiting/verzekering Jamboree*",
     "translation": "Affiliation/assurance Jamboree*"
@@ -1291,10 +1299,6 @@
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar niet actief is.",
     "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année scoute n’est pas active."
   },
-  "%Bu": {
-    "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar is afgesloten.",
-    "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute est clôturée."
-  },
   "%Bv": {
     "original": "Je kan niet inschrijven voor {group} omdat scoutsjaar {period} is afgesloten.",
     "translation": "Vous ne pouvez pas vous inscrire pour {group} car l’année scoute {period} est clôturée."
@@ -1332,8 +1336,8 @@
     "translation": "Vous ne pouvez créer des activités pour d’autres unités que via le portail administrateur de cette unité."
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir à travers quelle unité tous les paiements seront traités. Les paramètres de paiement de cette unité seront alors utilisés et toutes les inscriptions seront enregistrées dans sa comptabilité.\n\nDe plus, l'organisateur détermine aussi des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
+    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements seront effectués. Les paramètres de paiement de cette unité seront alors utilisés et toutes les inscriptions seront enregistrées dans la comptabilité de cette unité.\n\nDe plus, l'organisateur définit également des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
   },
   "%CS": {
     "original": "Vragenlijst van GSB",
