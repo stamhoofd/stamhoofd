@@ -55,6 +55,16 @@ export default new Migration(async () => {
         return;
     }
 
+    try {
+        await Admin.select().first(false);
+    } catch (e) {
+        if (e.code === 'ER_NO_SUCH_TABLE') {
+            console.error('Migration skipped: admins table does not exist');
+            return;
+        }
+        throw e;
+    }
+
     for await (const admin of Admin.select().all()) {
         if (!admin.password) {
             continue;
