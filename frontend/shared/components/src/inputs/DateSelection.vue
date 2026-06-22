@@ -155,8 +155,8 @@ const monthTextLong = computed(() => model.value ? Formatter.month(model.value) 
 const yearConfig: InputConfig = {
     type: 'year',
     maxLength: 4,
-    min: props.min.getFullYear(),
-    max: props.max.getFullYear(),
+    min: 1920, // props.min.getFullYear(),
+    max: 2100, // props.max.getFullYear(),
     format: value => value ? Formatter.year(value).toString() : '',
 };
 
