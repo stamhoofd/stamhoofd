@@ -63,7 +63,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         // Read + validate + update stock in one go, to prevent race conditions
         const { webshop, order } = await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
-            const webshopWithoutOrganization = await Webshop.getByID(request.params.id);
+            const webshopWithoutOrganization = await Webshop.select()
+                .where('id', request.params.id)
+                .where('organizationId', organization.id)
+                .first(false);
             if (!webshopWithoutOrganization || webshopWithoutOrganization.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'not_found',

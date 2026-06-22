@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, PrivatePaymentConfiguration, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
@@ -44,6 +44,35 @@ describe('Endpoint.PatchOrganization', () => {
 
         expect(response.body.id).toEqual(organization.id);
         expect(response.body.name).toEqual('My crazy name');
+    });
+
+    test('should not set registration stripe account from another organization', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const otherOrganization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+        const token = await Token.createToken(user);
+        const account = new StripeAccount();
+        account.organizationId = otherOrganization.id;
+        account.accountId = 'acct_test';
+        await account.save();
+
+        await expect(patchOrganization({
+            organization,
+            token,
+            patch: OrganizationStruct.patch({
+                id: organization.id,
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    registrationPaymentConfiguration: PrivatePaymentConfiguration.patch({
+                        stripeAccountId: account.id,
+                    }),
+                }),
+            }),
+        })).rejects.toThrow(STExpect.simpleError(
+            {
+                code: 'invalid_field',
+                field: 'registrationPaymentConfiguration.stripeAccountId',
+            },
+        ));
     });
 
     test("Can't change organization as a normal user", async () => {

@@ -242,7 +242,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (request.body.privateMeta.registrationPaymentConfiguration?.stripeAccountId !== undefined) {
                     if (request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId !== null) {
-                        const account = await StripeAccount.getByID(request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId);
+                        const account = await StripeAccount.select()
+                            .where('id', request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId)
+                            .where('organizationId', organization.id)
+                            .first(false);
                         if (!account || account.organizationId !== organization.id) {
                             throw new SimpleError({
                                 code: 'invalid_field',
@@ -292,9 +295,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     // check payconiq + mollie
                     if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                        let stripe: StripeAccount | undefined = undefined;
+                        let stripe: StripeAccount | null = null;
                         if (organization.privateMeta.registrationPaymentConfiguration.stripeAccountId) {
-                            stripe = await StripeAccount.getByID(organization.privateMeta.registrationPaymentConfiguration.stripeAccountId);
+                            stripe = await StripeAccount.select()
+                                .where('id', organization.privateMeta.registrationPaymentConfiguration.stripeAccountId)
+                                .where('organizationId', organization.id)
+                                .first(false);
                         }
 
                         const i = organization.meta.paymentMethods.findIndex((p) => {
@@ -397,7 +403,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.period) {
-                const organizationPeriod = await OrganizationRegistrationPeriod.getByID(request.body.period.id);
+                const organizationPeriod = await OrganizationRegistrationPeriod.select()
+                    .where('id', request.body.period.id)
+                    .where('organizationId', organization.id)
+                    .first(false);
                 if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                     throw new SimpleError({
                         code: 'invalid_field',
@@ -606,7 +615,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         // Only needed for permissions atm, so no put or delete here
         for (const struct of request.body.webshops.getPatches()) {
-            const model = await Webshop.getByID(struct.id);
+            const model = await Webshop.select()
+                .where('id', struct.id)
+                .where('organizationId', organization.id)
+                .first(false);
 
             if (!model || !await Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
                 errors.addError(

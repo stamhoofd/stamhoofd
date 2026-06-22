@@ -31,7 +31,10 @@ export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope({ willAuthenticate: false });
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || webshop.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'not_found',

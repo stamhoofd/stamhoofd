@@ -46,7 +46,10 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope({ willAuthenticate: false });
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || webshop.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'not_found',
@@ -70,7 +73,11 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 });
             }
 
-            const order = await Order.getByID(ticket.orderId);
+            const order = await Order.select()
+                .where('id', ticket.orderId)
+                .where('organizationId', organization.id)
+                .where('webshopId', request.params.id)
+                .first(false);
             if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
                 console.error('Error: missing order ' + ticket.orderId + ' for ticket ' + ticket.id);
                 throw new SimpleError({
@@ -130,7 +137,11 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 deletedAt: null,
             });
 
-            const order = await Order.getByID(request.query.orderId);
+            const order = await Order.select()
+                .where('id', request.query.orderId)
+                .where('organizationId', organization.id)
+                .where('webshopId', request.params.id)
+                .first(false);
             if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'not_found',

@@ -58,7 +58,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const forceGroupIds: string[] = [];
 
         for (const patch of request.body.getPatches()) {
-            const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
+            const organizationPeriod = await OrganizationRegistrationPeriod.select()
+                .where('id', patch.id)
+                .where('organizationId', organization.id)
+                .first(false);
 
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                 throw new SimpleError({
@@ -288,7 +291,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     }
 
     static async createOrganizationPeriod(organization: Organization, struct: OrganizationRegistrationPeriodStruct) {
-        const period = await RegistrationPeriod.getByID(struct.period.id);
+        const period = STAMHOOFD.userMode === 'organization'
+            ? await RegistrationPeriod.select()
+                .where('id', struct.period.id)
+                .where('organizationId', organization.id)
+                .first(false)
+            : await RegistrationPeriod.getByID(struct.period.id);
 
         if (!period) {
             throw new SimpleError({
@@ -296,14 +304,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 message: 'Period not found',
                 human: $t('%15j'),
                 statusCode: 404,
-            });
-        }
-
-        if (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id) {
-            throw new SimpleError({
-                code: 'invalid_period',
-                message: 'Period has different organization id',
-                statusCode: 400,
             });
         }
 

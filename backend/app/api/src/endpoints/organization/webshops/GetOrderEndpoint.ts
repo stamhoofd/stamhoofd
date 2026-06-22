@@ -27,7 +27,10 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope({ willAuthenticate: false });
-        const order = await Order.getByID(request.params.orderId);
+        const order = await Order.select()
+            .where('id', request.params.orderId)
+            .where('organizationId', organization.id)
+            .first(false);
 
         if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
             throw new SimpleError({
@@ -37,7 +40,10 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             });
         }
 
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || webshop.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'not_found',

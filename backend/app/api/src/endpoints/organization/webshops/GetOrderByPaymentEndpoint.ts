@@ -28,7 +28,10 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope({ willAuthenticate: false });
-        const payment = await Payment.getByID(request.params.paymentId);
+        const payment = await Payment.select()
+            .where('id', request.params.paymentId)
+            .where('organizationId', organization.id)
+            .first(false);
 
         if (!payment || payment.organizationId !== organization.id) {
             throw new SimpleError({
@@ -37,7 +40,11 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                 human: $t(`%FY`),
             });
         }
-        const [order] = await Order.where({ paymentId: payment.id }, { limit: 1 });
+        const order = await Order.select()
+            .where('paymentId', payment.id)
+            .where('organizationId', organization.id)
+            .where('webshopId', request.params.id)
+            .first(false);
         if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'not_found',
@@ -46,7 +53,10 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || webshop.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'not_found',

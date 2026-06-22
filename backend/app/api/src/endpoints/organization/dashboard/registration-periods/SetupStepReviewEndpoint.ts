@@ -55,7 +55,10 @@ export class SetupStepReviewEndpoint extends Endpoint<Params, Query, Body, Respo
         const stepType = request.body.type;
         const isReviewed = request.body.isReviewed;
 
-        const organizationPeriod = await OrganizationRegistrationPeriod.getByID(periodId);
+        const organizationPeriod = await OrganizationRegistrationPeriod.select()
+            .where('id', periodId)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'not_found',

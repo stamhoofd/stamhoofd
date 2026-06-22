@@ -34,7 +34,10 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
             throw Context.auth.error();
         }
 
-        const balanceItem = await BalanceItem.getByID(request.params.id);
+        const balanceItem = await BalanceItem.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
 
         if (!balanceItem || balanceItem.organizationId !== organization.id) {
             throw new SimpleError({

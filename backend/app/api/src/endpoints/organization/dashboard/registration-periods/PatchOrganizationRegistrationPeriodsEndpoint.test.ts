@@ -91,6 +91,28 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             expect(response.body).toBeDefined();
         });
 
+        test('should not patch organization registration period from another organization', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const otherOrganization = await new OrganizationFactory({ }).create();
+            const period = await new RegistrationPeriodFactory({ organization: otherOrganization }).create();
+            const otherOrganizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization: otherOrganization, period }).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(user);
+
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            patch.addPatch(OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationPeriod.id,
+                groups: new PatchableArray(),
+            }));
+
+            await expect(patchOrganizationRegistrationPeriods({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'not_found' }),
+            );
+        });
+
         test('should not be able to create registration periods with global period', async () => {
             const organization = await new OrganizationFactory({ }).create();
 
@@ -115,7 +137,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
 
             // patch organization registration period should fail
             await expect(patchOrganizationRegistrationPeriods({ patch, organization, token })).rejects.toThrow(
-                STExpect.simpleError({ code: 'invalid_period' }),
+                STExpect.simpleError({ code: 'not_found' }),
             );
         });
 
