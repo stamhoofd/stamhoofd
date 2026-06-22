@@ -14,7 +14,7 @@
     <p v-if="sortedMembers.length === 0" class="info-box">
         {{ $t('%Ya') }}
     </p>
-    <p v-if="filteredMembers.length === 0" class="info-box">
+    <p v-else-if="filteredMembers.length === 0" class="info-box">
         {{ $t('%1AX') }}
     </p>
     <STList v-else>
