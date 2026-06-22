@@ -218,7 +218,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             // Remove suffix
             duplicated.settings.name = TranslatedString.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
 
-            const suffix = ' (kopie)';
+            const suffix = ' (' + $t('kopie') + ')';
 
             // Count the groups that already have a suffix, and add the number inside the suffix
             const suffixes = subGroups.map(g => g.settings.name.startsWith(duplicated.settings.name + ' (kopie') && g.settings.name.match(/ \(kopie( \d+)?\)$/));
@@ -370,13 +370,27 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                     });
                 }
                 const menuItems = p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
-                    name: c.getName(props.period),
+                    name: c.getName(p),
                     rightText: c.groupIds.length + '',
                     action: () => {
                         moveToOtherPeriod(p, c).catch(console.error);
                         return true;
                     },
                 }));
+
+                if (menuItems.length === 0 && p.rootCategory && p.rootCategory.categoryIds.length === 0) {
+                    const c = p.rootCategory;
+                    menuItems.push(
+                        new ContextMenuItem({
+                            name: c.getName(p),
+                            rightText: c.groupIds.length + '',
+                            action: () => {
+                                moveToOtherPeriod(p, c).catch(console.error);
+                                return true;
+                            },
+                        }),
+                    );
+                }
 
                 return new ContextMenuItem({
                     name: p.period.name,
