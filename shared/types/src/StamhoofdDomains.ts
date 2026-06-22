@@ -18,12 +18,6 @@ export type StamhoofdDomains = {
      */
     admin?: string;
 
-    /**
-     * @deprecated
-     * Removed in v2
-     */
-    adminApi?: string;
-
     // MX + SPF (both for email) + A record for webshops
     webshopCname?: string;
 

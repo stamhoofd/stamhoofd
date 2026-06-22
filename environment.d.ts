@@ -53,12 +53,6 @@ declare global {
          */
         admin?: string;
 
-        /**
-         * @deprecated
-         * Removed in v2
-         */
-        adminApi?: string;
-
         // MX + SPF (both for email) + A record for webshops
         webshopCname?: string;
 
@@ -269,38 +263,38 @@ declare global {
         readonly platformName: string;
     };
 
-     /**
+    /**
      * The environment that is available everywhere: frontend, backend and shared
      */
-     type BackupEnvironment = {
-         /**
+    type BackupEnvironment = {
+        /**
          * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
          */
-         readonly environment: 'production' | 'development' | 'staging' | 'test';
-         readonly PORT: number;
+        readonly environment: 'production' | 'development' | 'staging' | 'test';
+        readonly PORT: number;
 
-         // Database to backup
-         readonly DB_HOST: string;
-         readonly DB_DATABASE: string;
-         readonly DB_USER: string;
-         readonly DB_PASS: string;
-         readonly CRONS_DISABLED?: boolean;
+        // Database to backup
+        readonly DB_HOST: string;
+        readonly DB_DATABASE: string;
+        readonly DB_USER: string;
+        readonly DB_PASS: string;
+        readonly CRONS_DISABLED?: boolean;
 
-         readonly keyFingerprint: string;
-         readonly objectStoragePath: string;
-         readonly localBackupFolder: string;
+        readonly keyFingerprint: string;
+        readonly objectStoragePath: string;
+        readonly localBackupFolder: string;
 
-         readonly SPACES_ENDPOINT: string;
-         readonly SPACES_BUCKET: string;
-         readonly SPACES_KEY: string;
-         readonly SPACES_SECRET: string;
-         readonly AWS_REGION: 'eu-west-1' | string; // TODO: add others
-         readonly MINIMUM_BACKUP_SIZE?: number; // Expected size (in bytes) of database backup, to detect broken backups
+        readonly SPACES_ENDPOINT: string;
+        readonly SPACES_BUCKET: string;
+        readonly SPACES_KEY: string;
+        readonly SPACES_SECRET: string;
+        readonly AWS_REGION: 'eu-west-1' | string; // TODO: add others
+        readonly MINIMUM_BACKUP_SIZE?: number; // Expected size (in bytes) of database backup, to detect broken backups
 
-         readonly IS_REPLICA?: boolean; // Whether this is a replica server and health checks should also check replica health
+        readonly IS_REPLICA?: boolean; // Whether this is a replica server and health checks should also check replica health
 
-         readonly HEALTH_ACCESS_KEY?: string; // Optional for a little bit of extra security (the health endpoint does not expose any sensitive information)
-     };
+        readonly HEALTH_ACCESS_KEY?: string; // Optional for a little bit of extra security (the health endpoint does not expose any sensitive information)
+    };
 
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment;
 }
