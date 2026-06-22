@@ -146,7 +146,7 @@ export default new Migration(async () => {
             continue;
         }
 
-        await mergeTwoMembers(memberA, memberB);
+        await mergeTwoMembers(memberA, memberB, { updateDocuments: false });
     }
 });
 

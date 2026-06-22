@@ -54,7 +54,7 @@ export async function findEqualMembers({
     });
 }
 
-export async function mergeTwoMembers(base: Member, other: Member): Promise<void> {
+export async function mergeTwoMembers(base: Member, other: Member, options?: { updateDocuments?: boolean }): Promise<void> {
     console.log('Merging two member', base.id, other.id, base.details.name, other.details.name);
 
     if (base.id === other.id) {
@@ -100,7 +100,10 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
 
     await MemberUserSyncer.onChangeMember(base);
     await PlatformMembershipService.updateMembershipsForId(base.id);
-    await Document.updateForMember(base);
+
+    if (options?.updateDocuments !== false) {
+        await Document.updateForMember(base);
+    }
 }
 
 async function mergeRegistrations(base: Member, other: Member) {
@@ -525,8 +528,8 @@ function mergeStringIfBaseNotSet<T, K extends keyof T>(
 function merge<T, K extends keyof T>(
     base: T,
     other: T,
-    key: K &
-        (T[K] extends number | Date | boolean | null | undefined ? K : never),
+    key: K
+        & (T[K] extends number | Date | boolean | null | undefined ? K : never),
 ): boolean {
     const otherValue = other[key] as number | Date | boolean | null | undefined;
     if (otherValue === null || otherValue === undefined) return false;
