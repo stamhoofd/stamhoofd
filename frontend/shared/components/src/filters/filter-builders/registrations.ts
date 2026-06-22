@@ -134,7 +134,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             }));
 
             all.push(new RelationFilterBuilder({
-                name: $t('Wachtlijst'),
+                name: $t('%1IQ'),
                 type: GroupType.WaitingList,
                 key: 'groupId',
                 allowCreation: true,
@@ -144,7 +144,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
         }
 
         all.push(new RelationFilterBuilder({
-            name: $t('Activiteit'),
+            name: $t('%1IR'),
             type: GroupType.EventRegistration,
             key: 'groupId',
             allowCreation: true,

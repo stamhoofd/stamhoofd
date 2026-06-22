@@ -7,7 +7,7 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="balanceTotal >= 0 ? $t('%76') : $t('Tegoed')">
+                    <STInputBox :title="balanceTotal >= 0 ? $t('%76') : $t('%1Xl')">
                         <button class="style-price-big" type="button" @click="payBalance">
                             <span>
                                 {{ formatPrice(Math.abs(balanceTotal)) }}
@@ -16,7 +16,7 @@
                         </button>
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ balanceTotal >= 0 ? $t('%1TU') : $t('Dit bedrag zal bij jouw volgende afrekening in mindering worden gebracht') }}
+                        {{ balanceTotal >= 0 ? $t('%1TU') : $t('%1bT') }}
                     </p>
                 </div>
             </div>
@@ -57,7 +57,7 @@
             </template>
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('%1PL') }}</h2>
+                <hr><h2>{{ $t('%1OL') }}</h2>
                 <p>{{ $t('%h6') }}</p>
 
                 <STList>
@@ -110,10 +110,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Functionaliteiten activeren') }}
+                            {{ $t('%1HV') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Activeer nieuwe fucnties') }}
+                            {{ $t('%1WE') }}
                         </p>
 
                         <template #right>

@@ -1,58 +1,58 @@
 <template>
     <div v-if="organization && !$isPlatform">
         <p v-if="isPaymentFailed && paymentFailedDeactivateDate" class="error-box selectable with-button" @click="openBilling">
-            {{ $t('Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via "Meer → Boekhouding → Openstaand bedrag" voor {date} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.', { date: formatEndDate(paymentFailedDeactivateDate) }) }}
+            {{ $t('%1Ut', { date: formatEndDate(paymentFailedDeactivateDate) }) }}
 
             <button class="button text" type="button">
-                {{ $t('Nakijken') }}
+                {{ $t('%1V8') }}
             </button>
         </p>
 
         <p v-if="!shouldFilter('webshops') && hasExpired(webshopDeactivateDate)" class="error-box selectable with-button" @click="openPackages">
-            {{ $t('Jouw webshops pakket is vervallen. Verleng jouw pakket om jouw webshops te heractiveren en te vermijden dat je gegevens verliest.') }}
+            {{ $t('%1Ud') }}
 
             <button class="button text" type="button">
-                {{ $t('Verlengen') }}
+                {{ $t('%1Lz') }}
             </button>
         </p>
 
         <p v-if="!isPaymentFailed && !shouldFilter('webshops') && isNearing(webshopDeactivateDate) && webshopDeactivateDate" class="warning-box selectable with-button" @click="openPackages">
-            {{ $t('Jouw webshops worden automatisch uitgeschakeld na {date}. Verleng jouw pakket om de webshop module langer in gebruik te houden.', { date: formatEndDate(webshopDeactivateDate) }) }}
+            {{ $t('%1Vk', { date: formatEndDate(webshopDeactivateDate) }) }}
 
             <button class="button text" type="button">
-                {{ $t('Verlengen') }}
+                {{ $t('%1Lz') }}
             </button>
         </p>
 
         <p v-if="!hideTrial && !shouldFilter('webshops') && organization.meta.packages.isWebshopsTrial" class="secundary-box selectable with-button icon trial" @click="openPackages">
-            {{ $t('Je test momenteel de webshops functie. Je webshops staan nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.') }}
+            {{ $t('%1cy') }}
 
             <button class="button text" type="button">
-                {{ $t('Activeren') }}
+                {{ $t('%1Lx') }}
             </button>
         </p>
 
         <p v-if="!hideTrial && !shouldFilter('members') && organization.meta.packages.isMembersTrial" class="secundary-box selectable with-button icon trial" @click="openPackages">
-            {{ $t('Je test momenteel de ledenadministratie functie. Je ledenportaal staat nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.') }}
+            {{ $t('%1Yd') }}
 
             <button class="button text" type="button">
-                {{ $t('Activeren') }}
+                {{ $t('%1Lx') }}
             </button>
         </p>
 
         <p v-if="!shouldFilter('members') && hasExpired(membersDeactivateDate)" class="error-box selectable with-button" @click="openPackages">
-            {{ $t('Het ledenadministratie pakket is vervallen. Verleng jouw pakket om ervoor te zorgen dat leden terug kunnen inschrijven, en om te voorkomen dat gegevens verloren zullen gaan.') }}
+            {{ $t('%1Up') }}
 
             <button class="button text" type="button">
-                {{ $t('Verlengen') }}
+                {{ $t('%1Lz') }}
             </button>
         </p>
 
         <p v-if="!isPaymentFailed && !shouldFilter('members') && isNearing(membersDeactivateDate) && membersDeactivateDate" class="warning-box selectable with-button" @click="openPackages">
-            {{ $t('De ledenadministratie wordt uitgeschakeld na {date}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.', { date: formatEndDate(membersDeactivateDate) }) }}
+            {{ $t('%1bh', { date: formatEndDate(membersDeactivateDate) }) }}
 
             <button class="button text" type="button">
-                {{ $t('Verlengen') }}
+                {{ $t('%1Lz') }}
             </button>
         </p>
     </div>
@@ -196,8 +196,8 @@ function hasExpired(date: Date | null) {
 async function openPackages() {
     if (!auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
         new CenteredMessage(
-            $t('Enkel voor hoofdbeheerders'),
-            $t('Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.'),
+            $t('%1YB'),
+            $t('%1ct'),
         ).addCloseButton().show();
         return;
     }
@@ -217,8 +217,8 @@ async function openBilling() {
     }
     if (!auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
         new CenteredMessage(
-            $t('Enkel voor hoofdbeheerders'),
-            $t('Betalingen zijn enkel beschikbaar voor hoofdbeheerders. Vraag hen om de betaling in orde te brengen.'),
+            $t('%1YB'),
+            $t('%1dC'),
         ).addCloseButton().show();
         return;
     }

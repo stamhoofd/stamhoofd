@@ -214,7 +214,7 @@ async function submit() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'empty_fields',
-                message: $t('Jouw e-mailadres of wachtwoord is te kort. Kijk het even na.'),
+                message: $t('%1Xg'),
             }),
         );
         return;

@@ -20,7 +20,7 @@
             <p v-if="sgvSyncWarning" :class="sgvSyncWarning.status === SGVSyncStatus.Never ? 'error-box icon sync' : 'info-box icon sync'" @click="sgvSyncOpen">
                 {{ sgvSyncWarning.text }}
                 <button v-if="auth.hasFullAccess()" class="button text" type="button">
-                    {{ $t('Synchroniseer') }}
+                    {{ $t('%1XD') }}
                 </button>
             </p>
 
@@ -100,7 +100,7 @@ const title = computed(() => {
         return props.category.settings.name;
     }
 
-    return $t(`Alle leden`);
+    return $t(`%L8`);
 });
 
 const estimatedRows = computed(() => {

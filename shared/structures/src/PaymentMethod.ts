@@ -57,8 +57,8 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return $t(`%1S`);
             case PaymentMethod.iDEAL: return $t(`%1n`);
             case PaymentMethod.CreditCard: return $t(`%mi`);
-            case PaymentMethod.Payconiq: return $t(`Bancontact Pay | Wero`);
-            case PaymentMethod.AccountDeductions: return $t(`afhouding van je balans`);
+            case PaymentMethod.Payconiq: return $t(`%1cA`);
+            case PaymentMethod.AccountDeductions: return $t(`%1cq`);
         }
     }
 
@@ -74,8 +74,8 @@ export class PaymentMethodHelper {
                 case PaymentMethod.Bancontact: return $t(`%ml`);
                 case PaymentMethod.iDEAL: return $t(`%mm`);
                 case PaymentMethod.CreditCard: return $t(`%mn`);
-                case PaymentMethod.Payconiq: return $t(`Bancontact Pay betaling`);
-                case PaymentMethod.AccountDeductions: return $t(`afhouding van je balans`);
+                case PaymentMethod.Payconiq: return $t(`%1VE`);
+                case PaymentMethod.AccountDeductions: return $t(`%1cq`);
             }
         }
 
@@ -101,8 +101,8 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return $t(`%1S`);
             case PaymentMethod.iDEAL: return $t(`%1n`);
             case PaymentMethod.CreditCard: return $t(`%mi`);
-            case PaymentMethod.Payconiq: return $t(`Bancontact Pay`);
-            case PaymentMethod.AccountDeductions: return $t(`afhoudingen`);
+            case PaymentMethod.Payconiq: return $t(`%1P4`);
+            case PaymentMethod.AccountDeductions: return $t(`%1Ym`);
         }
     }
 

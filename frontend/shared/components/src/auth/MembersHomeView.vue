@@ -1,45 +1,45 @@
 <template>
     <div class="st-view members-home-view" data-testid="members-home-view">
-        <STNavigationBar :title="$t('Inschrijven bij {organization}', { organization: organization.name })" />
+        <STNavigationBar :title="$t('%1W0', { organization: organization.name })" />
 
         <main class="limit-width">
             <div class="white-top view">
                 <main>
                     <div class="split-login-view">
                         <div class="container login-view">
-                            <h1>{{ $t('Welkom bij {organization}', {organization: organization.name}) }}</h1>
+                            <h1>{{ $t('%1cs', {organization: organization.name}) }}</h1>
                             <p>Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.</p>
 
                             <p v-if="isTrial" class="secundary-box icon trial">
-                                {{ $t('Dit ledenportaal is in proefperiode. Je kan hier fictieve leden inschrijven om alles uit te proberen.') }}
+                                {{ $t('%1aG') }}
                             </p>
 
                             <div class="button-box">
                                 <button class="button primary full" type="button" data-testid="open-login-button" @click="openLogin()">
                                     <span class="icon lock" />
-                                    <span>{{ $t('Inloggen') }}</span>
+                                    <span>{{ $t('%Qg') }}</span>
                                 </button>
                                 <button class="button secundary full" data-testid="open-signup-button" type="button" @click="openSignup()">
-                                    {{ $t('Account aanmaken') }}
+                                    {{ $t('%ur') }}
                                 </button>
                             </div>
                         </div>
 
                         <aside>
-                            <h1>{{ $t('Hoe schrijf je iemand in?') }}</h1>
+                            <h1>{{ $t('%1Yb') }}</h1>
                             <ol>
-                                <li>{{ $t('Log in, of maak een account aan.') }}</li>
-                                <li>{{ $t('Schrijf je in en vul gegevens aan.') }}</li>
+                                <li>{{ $t('%1dE') }}</li>
+                                <li>{{ $t('%1Zp') }}</li>
                                 <li v-if="hasOnlinePaymentMethod && hasTransfer">
-                                    {{ $t('Betaal online of via overschrijving') }}
+                                    {{ $t('%1Z3') }}
                                 </li>
                                 <li v-if="hasOnlinePaymentMethod">
-                                    {{ $t('Betaal online') }}
+                                    {{ $t('%1VN') }}
                                 </li>
                                 <li v-else-if="hasTransfer">
-                                    {{ $t('Betaal via overschrijving') }}
+                                    {{ $t('%1bA') }}
                                 </li>
-                                <li>{{ $t('Ingeschreven! Pas op elk moment je gegevens aan.') }}</li>
+                                <li>{{ $t('%1ZG') }}</li>
                             </ol>
                         </aside>
                     </div>

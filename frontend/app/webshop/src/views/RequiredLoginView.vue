@@ -23,7 +23,7 @@
                         </p>
 
                         <p v-if="!ssoConfig" class="error-box">
-                            {{ $t('Inloggen is niet correct ingesteld voor deze webshop.') }}
+                            {{ $t('%1VK') }}
                         </p>
 
                         <p>

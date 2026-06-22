@@ -38,7 +38,7 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.GreaterThanOrEqual" @change="onChange" />
             </template>
             <p class="style-title-list">
-                {{ $t('Groter dan of gelijk aan...') }}
+                {{ $t('%1Yo') }}
             </p>
 
             <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.GreaterThanOrEqual" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`%bV`)" />
@@ -60,7 +60,7 @@
                 <Radio v-model="filter.mode" :name="filter.id" :value="UINumberFilterMode.LessThanOrEqual" @change="onChange" />
             </template>
             <p class="style-title-list">
-                {{ $t('Kleiner dan of gelijk aan...') }}
+                {{ $t('%1c4') }}
             </p>
 
             <component :is="inputComponent" v-if="filter.mode === UINumberFilterMode.LessThanOrEqual" ref="input" v-model="filter.value" :min="null" :max="null" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`%bV`)" />

@@ -71,7 +71,7 @@ function getRoot() {
     const onboardingTab = new TabBarItem({
         id: 'onboarding',
         icon: 'home',
-        name: $t(`Start`),
+        name: $t(`%1XI`),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/onboarding/OnboardingStartView.vue'), {}),
         }),
@@ -100,7 +100,7 @@ function getRoot() {
     const webshopsTab = new TabBarItem({
         id: 'webshops',
         icon: 'basket',
-        name: $t(`Verkopen`),
+        name: $t(`%1Yu`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
         }),

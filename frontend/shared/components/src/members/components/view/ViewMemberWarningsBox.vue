@@ -150,21 +150,21 @@ const warnings = computed(() => {
 
     if (organization.value?.isSGVSyncOrganization && isMemberManaged(props.member.member, organization.value)) {
         const status = props.member.member.getSGVSyncStatus({ periodId: organization.value?.period.period.id ?? null });
-        const actionText = auth.hasFullAccess() ? $t('Synchroniseer met de groepsadministratie.') : $t('Vraag je VGA of groepsleiding om te synchroniseren.');
+        const actionText = auth.hasFullAccess() ? $t('%1Z6') : $t('%1b9');
 
         if (status === SGVSyncStatus.Never) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('Dit lid staat nog niet in de groepsadministratie van Scouts en Gidsen Vlaanderen en is mogelijk niet verzekerd. {action}', { action: actionText })),
+                text: TranslatedString.create($t('%1Xa', { action: actionText })),
                 type: RecordWarningType.Error,
             }));
         } else if (status === SGVSyncStatus.Outdated) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('De inschrijving van dit lid is nog niet opnieuw gesynchroniseerd met Scouts en Gidsen Vlaanderen. {action}', { action: actionText })),
+                text: TranslatedString.create($t('%1Us', { action: actionText })),
                 type: RecordWarningType.Warning,
             }));
         } else if (status === SGVSyncStatus.Changed) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('De gegevens van dit lid zijn gewijzigd sinds de laatste synchronisatie met Scouts en Gidsen Vlaanderen. {action}', { action: actionText })),
+                text: TranslatedString.create($t('%1X3', { action: actionText })),
                 type: RecordWarningType.Info,
             }));
         }

@@ -119,7 +119,7 @@ export class InvoiceService {
                 throw new SimpleError({
                     code: 'failed_payment',
                     message: 'You cannot invoice failed payments',
-                    human: $t('Je kan geen factuur maken voor een mislukte of geannuleerde betaling'),
+                    human: $t('%1ZW'),
                 });
             }
         }
@@ -360,8 +360,8 @@ export class InvoiceService {
                     email: d,
                 };
             }),
-            subject: $t('Factuur') + ' ' + invoice.number,
-            text: $t('Factuur in bijlage'),
+            subject: $t('%1Zw') + ' ' + invoice.number,
+            text: $t('%1X5'),
             attachments: [
                 {
                     filename: invoice.generateCustomerFilename('xml'),

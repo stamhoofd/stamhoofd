@@ -4,7 +4,7 @@
         :loading="saving"
         :disabled="!hasChanges"
         :error-box="errors.errorBox"
-        :title="$t('Loginmethode')"
+        :title="$t('%1bP')"
         @save="save"
     >
         <h1>
@@ -23,13 +23,13 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox v-model="enabled">
-            {{ $t("Deze loginmethode inschakelen") }}
+            {{ $t("%1XW") }}
         </Checkbox>
 
         <template v-if="enabled">
             <template v-if="showDisplaySettings">
                 <hr>
-                <h2>{{ $t("Weergave") }}</h2>
+                <h2>{{ $t("%1Zb") }}</h2>
 
                 <div class="split-inputs">
                     <div>
@@ -103,7 +103,7 @@
                         </p>
                     </div>
                     <div v-if="provider" class="login-button-preview">
-                        <STInputBox :title="$t(`Voorbeeld`)">
+                        <STInputBox :title="$t(`%ID`)">
                             <LoginMethodButton
                                 :config="patched"
                                 :provider="provider"
@@ -117,7 +117,7 @@
 
             <template v-if="provider">
                 <hr>
-                <h2>{{ $t("OpenID-instellingen") }}</h2>
+                <h2>{{ $t("%1Xk") }}</h2>
 
                 <p>
                     {{ $t("%Zr") }}
@@ -204,7 +204,7 @@
                             )
                         }}
                     </p>
-                    <STInputBox class="max" :title="$t('Lokaal testcommando')">
+                    <STInputBox class="max" :title="$t('%1c8')">
                         <input
                             :value="localSsoCommand"
                             class="input"
@@ -223,7 +223,7 @@
             </template>
 
             <hr>
-            <h2>{{ $t("Domeinen") }}</h2>
+            <h2>{{ $t("%1Vf") }}</h2>
 
             <ArrayInput
                 v-model="allowlist"

@@ -141,11 +141,11 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         async function moveTo(category: GroupCategory) {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de categorie ‘{categoryName}’ wilt verplaatsen naar ‘{destinationName}’?', {
+                title: $t('%1ZA', {
                     categoryName: props.category.getName(props.period),
                     destinationName: category.getName(props.period),
                 }),
-                confirmText: $t('Ja, verplaatsen'),
+                confirmText: $t('%10t'),
             })) {
                 return;
             }
@@ -162,7 +162,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
 
-            showSuccessToast($t('‘{categoryName}’ is verplaatst naar ‘{destinationName}’', {
+            showSuccessToast($t('%1YP', {
                 categoryName: props.category.getName(props.period),
                 destinationName: category.getName(props.period),
             }));
@@ -170,7 +170,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
         function mergeDisabledWith(category: GroupCategory): boolean | string {
             if (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0) {
-                return $t('Een lege categorie kan je niet samenvoegen met een andere. Dat is hetzelfde als verwijderen.');
+                return $t('%1Zc');
             }
 
             // Ignore own category id
@@ -182,7 +182,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             if (category.groupIds.length > 0) {
                 if (props.category.categoryIds.length > 0) {
-                    return $t('{category} bevat groepen, daarbij kan je de subcategorieën van {other-category} niet samenvoegen.', {
+                    return $t('%1aX', {
                         'category': category.getName(props.period),
                         'other-category': props.category.getName(props.period),
                     });
@@ -191,7 +191,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             }
 
             if (props.category.groupIds.length > 0) {
-                return $t('{category} bevat al categorieën, daarbij kan je de groepen van {other-category} niet samenvoegen.', {
+                return $t('%1af', {
                     'category': category.getName(props.period),
                     'other-category': props.category.getName(props.period),
                 });
@@ -202,8 +202,8 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         async function mergeWith(category: GroupCategory, destinationName: string) {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je deze categorie wilt verwijderen en de inhoud verplaatsen naar ‘{destinationName}’?', { destinationName }),
-                confirmText: $t('Ja, verwijderen'),
+                title: $t('%1WJ', { destinationName }),
+                confirmText: $t('%55'),
                 destructive: true,
             })) {
                 return;
@@ -226,7 +226,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
 
-            showSuccessToast($t('De inhoud van ‘{categoryName}’ is verplaatst naar ‘{destinationName}’', {
+            showSuccessToast($t('%1YI', {
                 categoryName: props.category.getName(props.period),
                 destinationName,
             }));
@@ -235,10 +235,10 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         async function deleteMe() {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de categorie ‘{categoryName}’ wilt verwijderen?', {
+                title: $t('%1aZ', {
                     categoryName: props.category.getName(props.period),
                 }),
-                confirmText: $t('Ja, verwijderen'),
+                confirmText: $t('%55'),
                 destructive: true,
             })) {
                 return;
@@ -251,7 +251,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
 
-            showSuccessToast($t('‘{categoryName}’ is verwijderd', {
+            showSuccessToast($t('%1XK', {
                 categoryName: props.category.getName(props.period),
             }));
         }
@@ -280,7 +280,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 [
                     new ContextMenuItem({
                         icon: 'settings',
-                        name: $t('Categorie instellingen'),
+                        name: $t('%1cI'),
                         action: async () => {
                             await editCategory();
                             return true;
@@ -293,7 +293,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             if (props.category.groupIds.length === 0) {
                 createActions.push(new ContextMenuItem({
                     icon: 'folder-add',
-                    name: $t('Nieuwe categorie'),
+                    name: $t('%LN'),
                     action: async () => {
                         await createCategory();
                         return true;
@@ -303,7 +303,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             if (props.category.categoryIds.length === 0) {
                 createActions.push(new ContextMenuItem({
                     icon: 'add',
-                    name: $t('Nieuwe groep'),
+                    name: $t('%LD'),
                     action: async () => {
                         await createGroup();
                         return true;
@@ -316,7 +316,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             sections.push([
                 new ContextMenuItem({
-                    name: $t('Verplaats omhoog'),
+                    name: $t('%11f'),
                     icon: 'arrow-up',
                     action: async () => {
                         await move(-1);
@@ -324,7 +324,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t('Verplaats omlaag'),
+                    name: $t('%11g'),
                     icon: 'arrow-down',
                     action: async () => {
                         await move(1);
@@ -336,12 +336,12 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             sections.push([
                 new ContextMenuItem({
                     icon: 'folder',
-                    name: $t('Verplaats naar'),
+                    name: $t('%122'),
                     childMenu: new ContextMenu([
                         [
                             new ContextMenuItem({
                                 icon: 'folder',
-                                name: $t('Bovenliggende categorie'),
+                                name: $t('%1cr'),
                                 description: grandParentCategory?.getName(props.period),
                                 disabled: !grandParentCategory,
                                 action: async () => {
@@ -365,7 +365,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 }),
                 new ContextMenuItem({
                     icon: 'unbox',
-                    name: $t('Verwijder en verplaats inhoud naar'),
+                    name: $t('%1dQ'),
                     destructive: true,
                     disabled: !canDeleteOrRename || (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0),
                     childMenu: new ContextMenu([
@@ -376,7 +376,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                     ]),
                 }),
                 new ContextMenuItem({
-                    name: $t('Verwijderen'),
+                    name: $t('%CJ'),
                     destructive: true,
                     icon: 'trash',
                     disabled: !canDeleteOrRename,

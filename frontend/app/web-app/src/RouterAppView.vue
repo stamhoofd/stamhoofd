@@ -26,7 +26,7 @@ async function paramsToRequiredOrganization<T extends { organizationUri: string 
             code: 'invalid_field',
             field: 'organizationUrl',
             message: 'No organization found for the given URI, but required for this route',
-            human: $t('Deze link is niet (meer) geldig omdat de vereniging niet bestaat', { uri: params.organizationUri }),
+            human: $t('%1ck', { uri: params.organizationUri }),
         });
     }
     return org;
@@ -98,7 +98,7 @@ async function loadVerifyEmail(organization: Organization | null, componentPrope
 if (isDashboardDomain) {
     defineRoute({
         name: AppRoute.Admin,
-        url: $t('platform'),
+        url: $t('%1Wn'),
         // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
             await replaceWithSpinner();
@@ -111,7 +111,7 @@ if (isDashboardDomain) {
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.Dashboard,
-        url: $t('beheerders'),
+        url: $t('%1Uh'),
         // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
             await replaceWithSpinner();
@@ -121,7 +121,7 @@ if (orgInDomain) {
 } else {
     defineRoute({
         name: AppRoute.Dashboard,
-        url: $t('beheerders') + '/@organizationUri',
+        url: $t('%1Uh') + '/@organizationUri',
         // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
             await replaceWithSpinner();
@@ -135,7 +135,7 @@ if (orgInDomain) {
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.OrgScopedRegistration,
-        url: $t('leden'),
+        url: $t('%It'),
         // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
             await replaceWithSpinner();
@@ -144,22 +144,22 @@ if (orgInDomain) {
     });
 } else {
     if (STAMHOOFD.userMode === 'platform') {
-        const ignoreUris = [$t('berichten'), $t('start'), $t('mandje'), $t('activiteiten')];
+        const ignoreUris = [$t('%1Ul'), $t('%1cj'), $t('%1Wy'), $t('%1c5')];
         for (const uri of ignoreUris) {
             defineRoute({
                 // no name, because we should not really reference these routes
-                url: $t('leden') + '/' + uri,
+                url: $t('%It') + '/' + uri,
                 // TODO: move to component pattern (see verify-email)
                 handler: async (options) => {
                     await replaceWithSpinner();
-                    await replaceWithRegistration(null, { ...options, url: $t('leden') });
+                    await replaceWithRegistration(null, { ...options, url: $t('%It') });
                 },
             });
         }
     }
     defineRoute({
         name: AppRoute.OrgScopedRegistration,
-        url: $t('leden') + '/@organizationUri',
+        url: $t('%It') + '/@organizationUri',
         // TODO: move to component pattern (see verify-email)
         handler: async (options) => {
             await replaceWithSpinner();
@@ -170,7 +170,7 @@ if (orgInDomain) {
     if (STAMHOOFD.userMode === 'platform') {
         defineRoute({
             name: AppRoute.UnscopedRegistration,
-            url: $t('leden'),
+            url: $t('%It'),
             // TODO: move to component pattern (see verify-email)
             handler: async (options) => {
                 await replaceWithSpinner();
@@ -186,7 +186,7 @@ function parseEmailVerifyQuery(query: URLSearchParams | null | undefined) {
             code: 'missing_field',
             field: 'token',
             message: 'Token or email missing in query parameters for verify-email route',
-            human: $t('Kan je e-mailadres niet verifiëren: ongeldige link'),
+            human: $t('%1Ub'),
         });
     }
     return {
@@ -213,7 +213,7 @@ function getEmailVerifyQuery(props: ReturnType<typeof parseEmailVerifyQuery>) {
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.VerifyEmail,
-        url: $t('verify-email'),
+        url: $t('%1ba'),
         defaultProperties: parseEmailVerifyQuery,
         propsToParams: props => ({
             query: getEmailVerifyQuery(props),
@@ -225,7 +225,7 @@ if (orgInDomain) {
 } else if (STAMHOOFD.userMode === 'platform') {
     defineRoute({
         name: AppRoute.VerifyEmail,
-        url: $t('verify-email'),
+        url: $t('%1ba'),
         defaultProperties: query => ({
             ...parseEmailVerifyQuery(query),
         }),

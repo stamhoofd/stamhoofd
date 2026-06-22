@@ -5,7 +5,7 @@
                 <button v-if="$isMobile" type="button" class="button icon add" @click="addDocument()" />
                 <button v-else type="button" class="button navigation selected" @click="addDocument()">
                     <span class="icon add" />
-                    <span>{{ $t('Toevoegen') }}</span>
+                    <span>{{ $t('%SN') }}</span>
                 </button>
             </template>
         </STNavigationBar>

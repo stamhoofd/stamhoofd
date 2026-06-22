@@ -503,10 +503,6 @@
     "original": "Optioneel bestand",
     "translation": "Fichier facultatif"
   },
-  "%12": {
-    "original": "Sign in with Google",
-    "translation": "Se connecter avec Google"
-  },
   "%120": {
     "original": "Optioneel tekstveld",
     "translation": "Champ de texte facultatif"
@@ -1415,10 +1411,6 @@
     "original": "Je hebt geen toegangsrechten om deze leden te bekijken",
     "translation": "Vous n'avez pas les droits d'accès pour consulter ces membres"
   },
-  "%15e": {
-    "original": "Je hebt geen toegangsrechten om alle leden te bekijken",
-    "translation": "Vous n'avez pas les droits d'accès pour consulter tous les membres"
-  },
   "%15f": {
     "original": "Je hebt geen toegang tot leden uit {groupName}",
     "translation": "Vous n'avez pas accès aux membres de {groupName}"
@@ -1430,10 +1422,6 @@
   "%15h": {
     "original": "De periode die je wilt instellen bestaat niet (meer)",
     "translation": "La période que vous souhaitez définir n'existe plus"
-  },
-  "%15i": {
-    "original": "De periode die je wilt instellen is reeds afgesloten",
-    "translation": "La période que vous souhaitez définir est déjà clôturée"
   },
   "%15j": {
     "original": "Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.",
@@ -1556,8 +1544,8 @@
     "translation": "Le nombre d'inscriptions pour toutes les activités liées est additionné pour déterminer la deuxième, troisième... inscription"
   },
   "%16C": {
-    "original": "Bijvoorbeeld: een lid krijgt korting op activiteit B als hetzelf of een familielid voor activiteit A, B, C... is ingeschreven",
-    "translation": "Par exemple : un membre bénéficie d'une réduction sur l'activité B s'il est lui-même ou un membre de sa famille inscrit à l'activité A, B, C..."
+    "original": "Bijvoorbeeld: een lid krijgt korting op activiteit B als hijzelf of een familielid voor activiteit A, B, C... is ingeschreven",
+    "translation": "Par exemple : un membre reçoit une réduction sur l’activité B si lui-même ou un membre de sa famille est inscrit à l’activité A, B, C…"
   },
   "%16D": {
     "original": "Nee, alleen binnen dezelfde activiteit of inschrijvingsgroep",
@@ -1660,8 +1648,8 @@
     "translation": "Collecter les inscriptions pour cette activité ?"
   },
   "%16c": {
-    "original": "Geen paniek, je inschrijvingen gaan nog niet meteen online staan. Je kan inschrijvinen later terug uitschakelen via de algemene instellingen van de activiteit.",
-    "translation": "Pas de panique, vos inscriptions ne seront pas immédiatement en ligne. Vous pouvez désactiver les inscriptions ultérieurement via les paramètres généraux de l'activité."
+    "original": "Geen paniek, je inschrijvingen gaan nog niet meteen online staan. Je kan inschrijvingen later terug uitschakelen via de algemene instellingen van de activiteit.",
+    "translation": "Pas de panique, vos inscriptions ne seront pas publiées immédiatement. Vous pourrez toujours les désactiver plus tard via les paramètres généraux de l’activité."
   },
   "%16d": {
     "original": "Bijhorend lid",
@@ -1800,8 +1788,8 @@
     "translation": "Réduction pour les membres de la famille qui s'inscrivent à différents groupes d'inscription/activités avec cette réduction."
   },
   "%17A": {
-    "original": "Korting voor hetzelfde lid dat inschrijven voor meerdere inschrijvingsgroepen/activiteiten met deze korting.",
-    "translation": "Réduction pour le même membre qui s'inscrit à plusieurs groupes d'inscription/activités avec cette réduction."
+    "original": "Korting voor hetzelfde lid dat inschrijft voor meerdere inschrijvingsgroepen/activiteiten met deze korting.",
+    "translation": "Réduction pour un même membre qui s'inscrit à plusieurs groupes d'inscription ou activités bénéficiant de cette réduction."
   },
   "%17B": {
     "original": "Geen korting, maar telt mee in aantal",
@@ -1951,14 +1939,6 @@
     "original": "Webshop nog niet geladen",
     "translation": "La boutique en ligne n'a pas encore été chargée"
   },
-  "%17m": {
-    "original": "Schakel over naar {werkjaar-2025-2026}",
-    "translation": "Passer à {werkjaar-2025-2026}"
-  },
-  "%17n": {
-    "original": "Dit werkjaar is niet actief",
-    "translation": "Cette année associative n'est pas active"
-  },
   "%17o": {
     "original": "{name} is nu ingesteld als het huidige werkjaar",
     "translation": "{name} est maintenant défini comme l'année associative en cours"
@@ -1971,14 +1951,6 @@
     "original": "Je kan een kopie maken van de instellingen van je huidige werkjaar (bv. de prijzen en onderverdelingen) als voorbereiding op je nieuwe werkjaar. Je kan daarna op een moment naar keuze overschakelen naar het nieuwe werkjaar (bv. als je al in juli begint met inschrijvingen voor het volgende werkjaar). Maar je kan ook wachten tot het einde van het huidige werkjaar, dan zal je automatisch worden overgeschakeld.",
     "translation": "Vous pouvez préparer votre nouvelle année associative en copiant les paramètres de votre année actuelle (par exemple : prix et subdivisions). Vous pourrez ensuite passer à la nouvelle année associative au moment qui vous convient (par exemple si vous commencez déjà les inscriptions en juillet). Vous pouvez aussi attendre la fin de l'année associative actuelle ; la transition vers la nouvelle année se fera alors automatiquement."
   },
-  "%17r": {
-    "original": "De inschrijvingen van elke inschrijvingsgroep wordt gesloten, je kan deze na controle open zetten.",
-    "translation": "Les inscriptions de chaque groupe d'inscription seront clôturées ; après vérification, vous pourrez les rouvrir si nécessaire."
-  },
-  "%17s": {
-    "original": "Na controle van alle instellingen kan je overschakelen op het nieuwe werkjaar. Dit kan ten vroegste vanaf juli.",
-    "translation": "Après avoir vérifié tous les paramètres, vous pourrez passer à la nouvelle année associative, au plus tôt à partir de juillet."
-  },
   "%17t": {
     "original": "Kopie maken",
     "translation": "Faire une copie"
@@ -1986,10 +1958,6 @@
   "%17u": {
     "original": "{werkjaar-2025-2026} is nu aangemaakt als kopie van je huidige werkjaar. Kijk de prijzen en instellingen goed na van je kopie.",
     "translation": "{werkjaar-2025-2026} a été créé comme copie de votre année associative actuelle. Vérifiez bien les prix et paramètres de cette copie."
-  },
-  "%17v": {
-    "original": "Je kan pas je volgende werkjaar klaarzetten ten vroegste 8 maanden voor de start ervan.",
-    "translation": "Vous ne pouvez préparer la prochaine année associative qu’au plus tôt 8 mois avant son début."
   },
   "%17w": {
     "original": "Geboortedatum",
@@ -2062,10 +2030,6 @@
   "%18D": {
     "original": "Leden importeren",
     "translation": "Importer des membres"
-  },
-  "%18E": {
-    "original": "Webshops koppelen aan activiteiten",
-    "translation": "Lier des boutiques en ligne à des activités"
   },
   "%18F": {
     "original": "Deze cel is leeg",
@@ -2848,8 +2812,8 @@
     "translation": " et "
   },
   "%1BN": {
-    "original": "Jouw UiTPAS-integratie heeft geen toegansrechten tot de geselecteerde UiTPAS-organisator, maar wel tot ",
-    "translation": "Votre intégration UiTPAS n’a pas de droits d’accès à l’organisateur UiTPAS sélectionné, mais bien à "
+    "original": "Jouw UiTPAS-integratie heeft geen toegangsrechten tot de geselecteerde UiTPAS-organisator, maar wel tot ",
+    "translation": "Votre intégration UiTPAS n'a pas de droits d'accès à l'organisateur UiTPAS sélectionné, mais bien à "
   },
   "%1BO": {
     "original": "Jouw UiTPAS-integratie mist de volgende toegangsrechten voor de geselecteerde UiTPAS-organisator: ",
@@ -2952,8 +2916,8 @@
     "translation": "Modifier"
   },
   "%1Bn": {
-    "original": "Configuur UiTPAS-integratie",
-    "translation": "Configurer l'intégration UiTPAS"
+    "original": "Configureer UiTPAS-integratie",
+    "translation": "Configurer l’intégration UiTPAS"
   },
   "%1Bo": {
     "original": "Configureer",
@@ -3212,8 +3176,8 @@
     "translation": "Votre intégration UiTPAS n'est pas (ou plus) configurée"
   },
   "%1Cq": {
-    "original": "Jouw UiTPAS-integratie heeft geen toegansrechten tot de UiTPAS-organisator",
-    "translation": "Votre intégration UiTPAS n'a pas les droits d'accès nécessaires à l'organisateur UiTPAS"
+    "original": "Jouw UiTPAS-integratie heeft geen toegangsrechten tot de UiTPAS-organisator",
+    "translation": "Votre intégration UiTPAS n'a pas de droits d'accès à l'organisateur UiTPAS."
   },
   "%1Cr": {
     "original": "Jouw UiTPAS-integratie heeft onvoldoende toegangsrechten",
@@ -3519,10 +3483,6 @@
     "original": "De ontvanger heeft zich afgemeld voor e-mails",
     "translation": "Le destinataire s’est désinscrit des e-mails"
   },
-  "%1E4": {
-    "original": "Deze ontvanger komt voor op de gedeelde bounce of spamlijst. De ontvanger was eerder permanent onbereikbaar of heeft eerder een e-mail als spam gemarkeerd.",
-    "translation": "Ce destinataire figure sur la liste des bounces ou des spams partagés. Ce destinataire était précédemment injoignable de manière permanente ou avait déjà signalé un e-mail comme indésirable."
-  },
   "%1E5": {
     "original": "Deze e-mail bestaat niet (meer)",
     "translation": "Cet e-mail n’existe pas (ou plus)"
@@ -3614,10 +3574,6 @@
   "%1ER": {
     "original": "Meerdere kortingen op hetzelfde stuk toestaan",
     "translation": "Autoriser plusieurs réductions sur le même article"
-  },
-  "%1ES": {
-    "original": "Alle wachtlijsten worden gedupliceerd in het nieuwe werkjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige werkjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.",
-    "translation": "Toutes les listes d'attente sont dupliquées pour la nouvelle année associative. Si vous souhaitez poursuivre une liste d'attente, vous pouvez revenir à l'année associative précédente et ajouter tous les membres à la nouvelle liste d'attente."
   },
   "%1ET": {
     "original": "Geen berichten gevonden",
@@ -4239,10 +4195,6 @@
     "original": "Deze periode is niet verbonden aan een organisatie",
     "translation": "Cette période n'est pas liée à une association."
   },
-  "%1Gx": {
-    "original": "Verhinder inschrijven als ingeschreven bij",
-    "translation": "Empêcher l'inscription si déjà inscrit dans"
-  },
   "%1Gy": {
     "original": "Voeg bij voorkeur een jaartal achteraan toe aan de naam.",
     "translation": "Il est préférable d'ajouter une année à ce nom."
@@ -4262,10 +4214,6 @@
   "%1H2": {
     "original": "Verberg het beschikbare aantal stuks als voorraad groter is dan...",
     "translation": "Masquer le nombre disponible de pièces si le stock est supérieur à..."
-  },
-  "%1H3": {
-    "original": "Stamhoofd zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
-    "translation": "Stamhoofd masquera le stock disponible s'il reste plus de {showStockBelow } pièces."
   },
   "%1H4": {
     "original": "Nog {x-items}",
@@ -4510,10 +4458,6 @@
   "%1I4": {
     "original": "Een nieuwe automatische saldoverrekening werd aangemaakt",
     "translation": "Un nouveau règlement automatique de solde a été créé"
-  },
-  "%1I5": {
-    "original": "Intracommunautaire (EU) verleggingsregeling",
-    "translation": "Régime d'autoliquidation intracommunautaire (UE)"
   },
   "%1I6": {
     "original": "Afrondingscorrectie",
@@ -5447,10 +5391,6 @@
     "original": "Alle items die werden aangerekend, los van of ze al betaald werden of niet.",
     "translation": "Tous les articles facturés, que le paiement ait été effectué ou non."
   },
-  "%1Lu": {
-    "original": "E-mails verzenden naar betalingen",
-    "translation": "Envoyer des e-mails concernant les paiements"
-  },
   "%1Lv": {
     "original": "Proefperiode geldig tot {dateTime}.",
     "translation": "Période d’essai valable jusqu’à {dateTime}."
@@ -5490,10 +5430,6 @@
   "%1M3": {
     "original": "Even geduld, nog bezig met laden...",
     "translation": "Veuillez patienter, chargement en cours..."
-  },
-  "%1M4": {
-    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.",
-    "translation": "Vous n'avez plus le droit de lancer une période d’essai. Vous pouvez par contre activer le forfait. Contactez Stamhoofd si vous souhaitez tout de même en bénéficier."
   },
   "%1M5": {
     "original": "De proefperiode voor webshops is gestart. Neem je tijd om alles rustig uit te proberen. Als je het daarna definitief in gebruik wilt nemen, kan je het systeem activeren.",
@@ -5768,8 +5704,8 @@
     "translation": "Vous ne pouvez pas ajouter une affiliation qui chevauche une affiliation existante."
   },
   "%1NB": {
-    "original": "Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die al vergendeld is.",
-    "translation": "Vous ne pouvez pas ajouter une affiliation qui chevauche une affiliation existante déjà verrouillée."
+    "original": "Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die al vergrendeld is.",
+    "translation": "Vous ne pouvez pas ajouter d'affiliation qui chevauche une affiliation existante déjà verrouillée."
   },
   "%1NC": {
     "original": "Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die manueel werd aangemaakt.",
@@ -5780,8 +5716,8 @@
     "translation": "Vous ne pouvez pas ajouter une affiliation qui chevauche une affiliation existante moins chère."
   },
   "%1NE": {
-    "original": "Deze groep heeft een korte duur, misschien wil je deze omzetten naar een activiteit? Leden kunnen dan inschrijven voor de activiteit via de kalender. De inschrijvingen en instellingen worden overgezet naar de activiteit.",
-    "translation": "Ce groupe a une courte durée, souhaitez-vous le convertir en activité ? Les membres pourront alors s'inscrire à l'activité via le calendrier. Les inscriptions et les paramètres seront transférés vers l'activité."
+    "original": "Wil je deze groep omzetten naar een activiteit? Leden kunnen dan inschrijven voor de activiteit via de kalender.",
+    "translation": "Voulez-vous convertir ce groupe en activité ? Les membres pourront alors s’inscrire pour l’activité via le calendrier."
   },
   "%1NF": {
     "original": "Maak activiteit",
@@ -5876,16 +5812,16 @@
     "translation": "Compris"
   },
   "%1Nd": {
-    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
-    "translation": "La commande sera supprimée, mais le paiement restera dans le système. Le système considérera dès lors que ce client a payé trop et pourrait plus tard suggérer un remboursement dans l’aperçu des montants en attente.\\n\\nSi vous souhaitez supprimer toutes les commandes, nous vous conseillons de dupliquer la boutique en ligne pour repartir sur une nouvelle boutique vide. Si l'acheteur souhaite annuler son achat, il vaut mieux annuler la commande plutôt que de la supprimer."
+    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "La commande sera supprimée mais le paiement restera dans le système. De ce fait, le système pensera que ce client a payé trop et pourra ensuite proposer un remboursement dans l’aperçu des montants ouverts.\n\nSi vous souhaitez supprimer toutes les commandes, nous vous conseillons de dupliquer la boutique afin de repartir d’une nouvelle boutique vide. Si l’acheteur veut annuler son achat, il est préférable d’annuler la commande plutôt que de la supprimer."
   },
   "%1Ne": {
     "original": "Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven",
     "translation": "Supprimer ces commandes peut fausser l'aperçu financier"
   },
   "%1Nf": {
-    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
-    "translation": "Les commandes seront supprimées, mais les paiements resteront dans le système. Le système considérera alors que ces clients ont payé trop et pourrait plus tard suggérer un remboursement dans l’aperçu des montants en attente.\\n\\nSi vous souhaitez supprimer toutes les commandes, nous vous conseillons de dupliquer la boutique en ligne pour repartir sur une nouvelle boutique vide. Si l'acheteur souhaite annuler son achat, il vaut mieux annuler la commande plutôt que de la supprimer."
+    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "Les commandes seront supprimées mais les paiements resteront dans le système. Le système pensera donc que ces clients ont payé trop et pourra plus tard suggérer un remboursement dans l’aperçu des montants ouverts.\n\nSi vous souhaitez supprimer toutes les commandes, nous vous recommandons de dupliquer la boutique pour démarrer avec une boutique vide. Si l’acheteur souhaite annuler son achat, il est préférable d’annuler la commande plutôt que de la supprimer."
   },
   "%1Ng": {
     "original": "Bestellingen verwijderen?",
@@ -5915,17 +5851,9 @@
     "original": "Prijs zonder korting",
     "translation": "Prix sans réduction"
   },
-  "%1Nn": {
-    "original": "Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.",
-    "translation": "Votre clé API Payconiq requiert votre attention. Votre compte Payconiq n’a pas été migré vers le nouveau portail des commerçants. Il se peut que vous ayez uniquement un contrat Payconiq pour la solution par autocollant, et non pour la solution en ligne. Consultez le guide (cliquez ici) pour résoudre ce problème. Nous ne pouvons pas garantir que votre connexion Payconiq actuelle fonctionnera toujours à l’avenir."
-  },
   "%1No": {
     "original": "?",
     "translation": "?"
-  },
-  "%1Np": {
-    "original": "We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.",
-    "translation": "Nous déconseillons d’utiliser Payconiq. Il est temps de passer à Bancontact, qui est beaucoup plus fiable et pose moins de soucis."
   },
   "%1Nq": {
     "original": "Turnen",
@@ -5999,10 +5927,6 @@
     "original": "Voornaam lid",
     "translation": "Prénom du membre"
   },
-  "%1O9": {
-    "original": "Payconiq API-key gebruiken",
-    "translation": "Utiliser la clé API Payconiq"
-  },
   "%1OB": {
     "original": "Kinderen (kampen, speelpleinwerking, ...)",
     "translation": "Enfants (camps, plaines de jeux, ...)"
@@ -6019,17 +5943,9 @@
     "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
     "translation": "Si tu souhaites recueillir ces informations par ticket (et non par commande), tu peux désactiver le panier et limiter le nombre maximum de tickets à 1 par commande.\n            Si tu as seulement besoin de menus déroulants, il est préférable d'utiliser ceux dans les paramètres du ticket, c'est plus simple à gérer."
   },
-  "%1OF": {
-    "original": " door voor meer informatie.",
-    "translation": " pour plus d'informations."
-  },
   "%1OG": {
     "original": "Het minimum is {min}",
     "translation": "Le minimum est {min}"
-  },
-  "%1OH": {
-    "original": "Lees ",
-    "translation": "Lire "
   },
   "%1OI": {
     "original": "Sport",
@@ -6044,7 +5960,7 @@
     "translation": "Comité des parents"
   },
   "%1OL": {
-    "original": "In vewerking",
+    "original": "In verwerking",
     "translation": "En cours de traitement"
   },
   "%1OM": {
@@ -6130,10 +6046,6 @@
   "%1Ok": {
     "original": "Aangerekende vereniging",
     "translation": "Association facturée"
-  },
-  "%1Ol": {
-    "original": "de gids",
-    "translation": "le guide"
   },
   "%1Om": {
     "original": "Mollie Documentatie",
@@ -6231,17 +6143,13 @@
     "original": "Hierop ontvangen bestellers hun bestelbevestiging. Deze is altijd verplicht per bestelling.",
     "translation": "Les acheteurs reçoivent leur confirmation de commande à cette adresse. Celle-ci est toujours obligatoire par commande."
   },
-  "%1PB": {
-    "original": "Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.",
-    "translation": "Tu ne peux plus combiner Payconiq (maintenant Bancontact Pay | Wero) avec Bancontact. Bancontact suffit désormais."
-  },
   "%1PC": {
     "original": "Type",
     "translation": "Type"
   },
   "%1PD": {
-    "original": "Vereniging waar de aansluiting aan aangrekend is",
-    "translation": "Association à laquelle l'affiliation est facturée"
+    "original": "Vereniging waar de aansluiting aan aangerekend is",
+    "translation": "Association à laquelle l’affiliation est imputée"
   },
   "%1PE": {
     "original": "Er werden nog geen betalingen aangemaakt voor deze aansluiting",
@@ -6271,10 +6179,6 @@
     "original": "Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt.",
     "translation": "Lis d'abord notre guide avant de commencer ! Prends le temps de remplir toutes les informations de manière complète et correcte. En cas d'erreur, le traitement de l'affiliation pourrait prendre beaucoup plus de temps."
   },
-  "%1PL": {
-    "original": "In verwerking",
-    "translation": "En cours de traitement"
-  },
   "%1PM": {
     "original": "Lid",
     "translation": "Membre"
@@ -6292,8 +6196,8 @@
     "translation": "ÉTAPE {current} / {total}"
   },
   "%1PR": {
-    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\\n\\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
-    "translation": "Parfois, tu devras télécharger des documents dans Mollie qui ne se trouvent que dans notre documentation. Sans un nouveau compte, des frais de transaction plus élevés peuvent aussi s'appliquer.\\n\\nLis donc d'abord la documentation : des erreurs peuvent entraîner un refus de ton affiliation et un délai de traitement nettement plus long."
+    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\n\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
+    "translation": "Parfois, il est nécessaire de télécharger des documents dans Mollie qui ne se trouvent que dans notre documentation. Sans nouveau compte, des frais de transaction plus élevés peuvent aussi s’appliquer.\n\nVeuillez donc d’abord lire la documentation : des erreurs peuvent entraîner le refus de votre affiliation et un délai de traitement considérablement plus long."
   },
   "%1PU": {
     "original": "Einde proefperiode",
@@ -6576,7 +6480,7 @@
     "translation": "Inviter"
   },
   "%1Qr": {
-    "original": "Dit lid is is al uitgenodigd voor {group}",
+    "original": "Dit lid is al uitgenodigd voor {group}",
     "translation": "Ce membre a déjà été invité pour {group}"
   },
   "%1Qt": {
@@ -6588,8 +6492,8 @@
     "translation": "Tu ne peux pas supprimer la carte bancaire par défaut. Configure d'abord une autre carte comme carte par défaut, puis supprime celle-ci."
   },
   "%1Qv": {
-    "original": "Je hebt geen toegansrechten om dit lid uit te nodigen.",
-    "translation": "Tu n'as pas les droits d'accès pour inviter ce membre."
+    "original": "Je hebt geen toegangsrechten om dit lid uit te nodigen.",
+    "translation": "Vous n’avez pas les droits nécessaires pour inviter ce membre."
   },
   "%1Qw": {
     "original": "Kosten worden op het einde van de maand afgerekend of wekelijks als het openstaand bedrag hoger dan 50 euro wordt.",
@@ -6636,12 +6540,8 @@
     "translation": "Il n'est pas possible de créditer {a-euro} pour “{name}”. Cet article a déjà été entièrement facturé."
   },
   "%1R8": {
-    "original": "Deze bankkaart bestaat nier (meer). Herlaad de pagina indien nodig.",
-    "translation": "Cette carte bancaire n'existe plus. Recharge la page si nécessaire."
-  },
-  "%1R9": {
-    "original": "Uitnodigen voor een groep",
-    "translation": "Inviter pour un groupe"
+    "original": "Deze bankkaart bestaat niet (meer). Herlaad de pagina indien nodig.",
+    "translation": "Cette carte bancaire n’existe plus. Rechargez la page si besoin."
   },
   "%1RA": {
     "original": "Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Je kan nog maximaal {left-euro} factureren (niet crediteren).",
@@ -6748,7 +6648,7 @@
     "translation": "Date de réinitialisation de la numérotation"
   },
   "%1Rg": {
-    "original": "Uitgaande facutren",
+    "original": "Uitgaande facturen",
     "translation": "Factures sortantes"
   },
   "%1Rh": {
@@ -6788,8 +6688,8 @@
     "translation": "Hourra ! L'affiliation “{name}” pour {count} membres a été payée"
   },
   "%1Rt": {
-    "original": "Je kan de BTW-instellingen niet meer wijzigen na facturatie. Zet het aantal op 0 en maak een nieuw item aan indien nodig.",
-    "translation": "Vous ne pouvez plus modifier les paramètres de TVA après la facturation. Mettez la quantité à 0 et créez un nouvel article si nécessaire."
+    "original": "Je kan de BTW-instellingen niet meer wijzigen na facturatie. Annuleer de aanrekening en maak een nieuwe aan met het juiste bedrag.",
+    "translation": "Vous ne pouvez plus modifier les paramètres de TVA après facturation. Annulez la facturation et créez-en une nouvelle avec le bon montant."
   },
   "%1Ru": {
     "original": "Vaste prefix",
@@ -6912,7 +6812,7 @@
     "translation": "J’accepte les <button>conditions générales</button>"
   },
   "%1ST": {
-    "original": "Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.",
+    "original": "Je hebt geen toegangsrechten om iemand uit te nodigen voor deze groep.",
     "translation": "Vous n’avez pas les droits nécessaires pour inviter quelqu’un dans ce groupe."
   },
   "%1SV": {
@@ -7175,10 +7075,6 @@
     "original": "Ongeldig BTW-nummer: {number}",
     "translation": "Numéro de TVA invalide : {number}"
   },
-  "%1Tp": {
-    "original": "Uitgaande facturen",
-    "translation": "Factures sortantes"
-  },
   "%1Tr": {
     "original": "{name} is uitgenodigd",
     "translation": "{name} a été invité"
@@ -7292,8 +7188,8 @@
     "translation": "{count} membres sont déjà inscrits pour {group}"
   },
   "%1UN": {
-    "original": "Je hebt geen toegansrechten om deze uitnodiging te verwijderen.",
-    "translation": "Vous n'avez pas les droits pour supprimer cette invitation."
+    "original": "Je hebt geen toegangsrechten om deze uitnodiging te verwijderen.",
+    "translation": "Vous n’avez pas les droits nécessaires pour supprimer cette invitation."
   },
   "%1UO": {
     "original": "Uitgenodigd op {date}",
@@ -7312,32 +7208,1832 @@
     "translation": "Montant facturé"
   },
   "%1UT": {
-    "original": "Dit werd afgesplits in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk.",
-    "translation": "Cette ligne a été séparée car, à cause de l’arrondi (à un centime près par ligne, sur les montants hors TVA), il n’était pas possible d’obtenir le montant exact autrement. Cette ligne ne compte pas comme un article supplémentaire."
+    "original": "Dit werd afgesplitst in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk.",
+    "translation": "Cet élément a été mis sur une ligne séparée car, suite à l’arrondi (à 1 cent par ligne hors TVA), le montant exact ne pouvait pas autrement être atteint. Cette ligne ne compte pas comme un article en plus."
+  },
+  "%1UU": {
+    "original": "Jullie ledenadministratie is klaar voor gebruik. Je kan nu meer instellingen aanvullen, leden importeren of het ledenportaal uitproberen.",
+    "translation": "Votre gestion des membres est prête à l’emploi. Vous pouvez maintenant compléter plus de paramètres, importer des membres ou tester le portail des membres."
+  },
+  "%1UV": {
+    "original": "Automatische e-mail die 's ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.",
+    "translation": "E-mail automatique envoyé le matin lorsqu’un solde d’utilisateur a augmenté. Par exemple, quand un montant ouvert a été ajouté à un membre."
+  },
+  "%1UW": {
+    "original": "De inschrijvingen gaan open op {date}",
+    "translation": "Les inscriptions ouvriront le {date}"
+  },
+  "%1UX": {
+    "original": "Servicekosten",
+    "translation": "Frais de service"
+  },
+  "%1UY": {
+    "original": "waarvan {price} gebruikt",
+    "translation": "dont {price} utilisé"
+  },
+  "%1UZ": {
+    "original": "Voor clubs met vaste leden",
+    "translation": "Pour les clubs avec membres fixes"
+  },
+  "%1Ua": {
+    "original": "De doorverwijzingscode die je hebt opgegeven is niet langer geldig",
+    "translation": "Le code de parrainage fourni n’est plus valide"
+  },
+  "%1Ub": {
+    "original": "Kan je e-mailadres niet verifiëren: ongeldige link",
+    "translation": "Impossible de vérifier votre adresse e-mail : lien invalide"
+  },
+  "%1Uc": {
+    "original": "Dit document is vergrendeld en kan niet meer gewijzigd worden.",
+    "translation": "Ce document est verrouillé et ne peut plus être modifié."
+  },
+  "%1Ud": {
+    "original": "Jouw webshops pakket is vervallen. Verleng jouw pakket om jouw webshops te heractiveren en te vermijden dat je gegevens verliest.",
+    "translation": "Votre forfait boutique en ligne a expiré. Renouvelez-le pour réactiver vos boutiques et éviter la perte de données."
+  },
+  "%1Ue": {
+    "original": "Vanaf {x} jaar",
+    "translation": "À partir de {x} ans"
+  },
+  "%1Uf": {
+    "original": "Leden kunnen pas zelf inschrijven voor {name} als ze ingeschreven zijn voor één van deze inschrijvingsgroep(en).",
+    "translation": "Les membres ne peuvent s’inscrire eux-mêmes à {name} que s’ils sont inscrits à l’un de ces groupes d’inscription."
+  },
+  "%1Ug": {
+    "original": "Deze betaling werd intussen terugbetaald of teruggevorderd voor {price} in een andere betaling.",
+    "translation": "Ce paiement a déjà été remboursé ou récupéré pour {price} dans un autre paiement."
+  },
+  "%1Uh": {
+    "original": "beheerders",
+    "translation": "administrateurs"
+  },
+  "%1Ui": {
+    "original": "Jongknapen",
+    "translation": "Jeunes éclaireurs"
+  },
+  "%1Uk": {
+    "original": "Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.",
+    "translation": "Vous connaissez sans doute d’autres associations (ou vous y êtes actif) : un club sportif, une école, un mouvement de jeunesse... Si vous parrainez d’autres associations et qu’elles dépensent au moins 1 euro, vous recevrez également un crédit gratuit. Pour chaque association que vous amenez, vous recevez un peu plus (voir le tableau plus bas). Si vous le faites de manière réfléchie et sérieuse, vous pouvez accumuler pas mal de crédit sans trop d’effort."
+  },
+  "%1Ul": {
+    "original": "berichten",
+    "translation": "messages"
+  },
+  "%1Um": {
+    "original": "Documenten en attesten",
+    "translation": "Documents et attestations"
+  },
+  "%1Un": {
+    "original": "Waarmee wil je starten? Je kan dit later altijd uitbreiden.",
+    "translation": "Avec quoi souhaitez-vous commencer ? Vous pourrez toujours compléter plus tard."
+  },
+  "%1Up": {
+    "original": "Het ledenadministratie pakket is vervallen. Verleng jouw pakket om ervoor te zorgen dat leden terug kunnen inschrijven, en om te voorkomen dat gegevens verloren zullen gaan.",
+    "translation": "Le pack de gestion des membres est expiré. Renouvelez-le afin que les membres puissent à nouveau s’inscrire et pour éviter la perte de données."
+  },
+  "%1Uq": {
+    "original": "Maak hier snel jullie leeftijdsgroepen of onderverdelingen aan. Vul gewoon de namen in, je kan dit later nog verfijnen.",
+    "translation": "Créez rapidement ici vos groupes d’âge ou sous-divisions. Indiquez simplement les noms, vous pourrez toujours les affiner plus tard."
+  },
+  "%1Ur": {
+    "original": "Start synchronisatie",
+    "translation": "Démarrer la synchronisation"
+  },
+  "%1Us": {
+    "original": "De inschrijving van dit lid is nog niet opnieuw gesynchroniseerd met Scouts en Gidsen Vlaanderen. {action}",
+    "translation": "L’inscription de ce membre n’a pas encore été resynchronisée avec Scouts et Guides de Flandre. {action}"
+  },
+  "%1Ut": {
+    "original": "Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via \"Meer → Boekhouding → Openstaand bedrag\" voor {date} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.",
+    "translation": "Votre paiement par domiciliation ou carte de crédit a échoué. Effectuez le paiement manuellement via « Plus → Comptabilité → Montant ouvert » avant {date} pour éviter que certaines fonctions soient temporairement indisponibles."
+  },
+  "%1Uu": {
+    "original": "Creditnota te betalen",
+    "translation": "Note de crédit à payer"
+  },
+  "%1Uv": {
+    "original": "Ledenportaal, inschrijvingen, kalender en lidgeld op één plek.",
+    "translation": "Portail des membres, inscriptions, calendrier et cotisation réunis en un seul endroit."
+  },
+  "%1Uw": {
+    "original": "Naam van het platform (Stamhoofd)",
+    "translation": "Nom de la plateforme (Stamhoofd)"
+  },
+  "%1Ux": {
+    "original": "Werkjaren beheren",
+    "translation": "Gérer les années associatives"
+  },
+  "%1Uy": {
+    "original": "Sla deze kaart op voor latere betalingen",
+    "translation": "Enregistrer cette carte pour de futurs paiements"
+  },
+  "%1Uz": {
+    "original": "Referralkorting",
+    "translation": "Réduction par parrainage"
+  },
+  "%1V0": {
+    "original": "Overzicht van te verdienen tegoed",
+    "translation": "Aperçu du crédit à acquérir"
+  },
+  "%1V1": {
+    "original": "Er ging iets mis bij het inloggen. Probeer opnieuw.",
+    "translation": "Une erreur est survenue lors de la connexion. Veuillez réessayer."
+  },
+  "%1V3": {
+    "original": "Overschakelen",
+    "translation": "Passer à l'autre"
+  },
+  "%1V4": {
+    "original": "Verder",
+    "translation": "Continuer"
+  },
+  "%1V5": {
+    "original": "Er zijn nog geen externe beheerders. Nodig iemand uit om beheerder te worden.",
+    "translation": "Il n'y a pas encore de gestionnaires externes. Invitez quelqu'un à devenir gestionnaire."
+  },
+  "%1V8": {
+    "original": "Nakijken",
+    "translation": "Vérifier"
+  },
+  "%1V9": {
+    "original": "Kies minstens één beheerdersrol voor je een beheerder toevoegt",
+    "translation": "Veuillez sélectionner au moins un rôle de gestionnaire avant d’en ajouter un."
+  },
+  "%1VA": {
+    "original": "We konden deze pagina niet laden. Controleer je internetverbinding en probeer het opnieuw.",
+    "translation": "Impossible de charger cette page. Vérifiez votre connexion internet et réessayez."
+  },
+  "%1VC": {
+    "original": "Iedereen die niet ingeschreven was bij {groups}",
+    "translation": "Toute personne non inscrite auprès de {groups}"
+  },
+  "%1VD": {
+    "original": "Servicekosten ingehouden van uitbetaling (Stripe, incl. BTW)",
+    "translation": "Frais de service déduits du versement (Stripe, TVA incluse)"
+  },
+  "%1VE": {
+    "original": "Bancontact Pay betaling",
+    "translation": "Paiement Bancontact Pay"
+  },
+  "%1VF": {
+    "original": "Activiteiten waar je niet verplicht ingeschreven moet zijn voor een inschrijvingsgroep.",
+    "translation": "Activités pour lesquelles l'inscription à un groupe d'inscription n'est pas obligatoire."
+  },
+  "%1VG": {
+    "original": "Actief maar vervalt binnenkort",
+    "translation": "Actif mais expire bientôt"
+  },
+  "%1VH": {
+    "original": "Open vanaf datum",
+    "translation": "Ouvert à partir de la date"
+  },
+  "%1VJ": {
+    "original": "Ben je zeker dat je de groep ‘{groupName}’ en bijhorende gegevens wilt verwijderen?",
+    "translation": "Êtes-vous sûr(e) de vouloir supprimer le groupe « {groupName} » et toutes les données associées ?"
+  },
+  "%1VK": {
+    "original": "Inloggen is niet correct ingesteld voor deze webshop.",
+    "translation": "La connexion n'est pas correctement configurée pour cette boutique en ligne."
+  },
+  "%1VL": {
+    "original": "Laatst gesynchroniseerd op {date} door {name}",
+    "translation": "Dernière synchronisation le {date} par {name}"
+  },
+  "%1VM": {
+    "original": "referralkorting",
+    "translation": "réduction par parrainage"
+  },
+  "%1VN": {
+    "original": "Betaal online",
+    "translation": "Payer en ligne"
+  },
+  "%1VO": {
+    "original": "Per werkjaar",
+    "translation": "Par année associative"
+  },
+  "%1VP": {
+    "original": "Nieuwe leden toegevoegd in de groepsadministratie",
+    "translation": "Nouveaux membres ajoutés dans l'administration du groupe"
+  },
+  "%1VQ": {
+    "original": "Dit document is vergrendeld en kan niet gedupliceerd worden.",
+    "translation": "Ce document est verrouillé et ne peut pas être dupliqué."
+  },
+  "%1VS": {
+    "original": "Beheerdersrollen beheren",
+    "translation": "Gérer les rôles des gestionnaires"
+  },
+  "%1VT": {
+    "original": "Per lid, per jaar",
+    "translation": "Par membre, par an"
+  },
+  "%1VU": {
+    "original": "Automatische email naar schuldenaar als een betaling werd teruggevorderd, bv. een SEPA domiciliering die is mislukt.",
+    "translation": "Email automatique envoyé au débiteur en cas de paiement rejeté, par exemple un ordre de domiciliation SEPA ayant échoué."
+  },
+  "%1VV": {
+    "original": "geen",
+    "translation": "aucun"
+  },
+  "%1VY": {
+    "original": "Iets verkopen of verzamelen",
+    "translation": "Vendre ou collecter quelque chose"
+  },
+  "%1VZ": {
+    "original": "Givers",
+    "translation": "Givers"
+  },
+  "%1Vc": {
+    "original": "Hieronder kan je zien welke verenigingen jouw link hebben gebruikt.",
+    "translation": "Vous trouverez ci-dessous quelles associations ont utilisé votre lien."
+  },
+  "%1Vd": {
+    "original": "Tickets, webshop, inschrijvingen of een gift.",
+    "translation": "Billets, boutique en ligne, inscriptions ou don."
+  },
+  "%1Ve": {
+    "original": "Gesloten sinds {date}",
+    "translation": "Fermé depuis le {date}"
+  },
+  "%1Vf": {
+    "original": "Domeinen",
+    "translation": "Domaines"
+  },
+  "%1Vh": {
+    "original": "De overige {numNoUpdate} geselecteerde verenigingen hebben deze tag al.",
+    "translation": "Les {numNoUpdate} autres associations sélectionnées ont déjà ce tag."
+  },
+  "%1Vi": {
+    "original": "Inschrijvingen afsluiten",
+    "translation": "Clôturer les inscriptions"
+  },
+  "%1Vj": {
+    "original": "leden hebben gewijzigde inschrijvingen",
+    "translation": "des membres ont modifié leurs inscriptions"
+  },
+  "%1Vk": {
+    "original": "Jouw webshops worden automatisch uitgeschakeld na {date}. Verleng jouw pakket om de webshop module langer in gebruik te houden.",
+    "translation": "Vos boutiques en ligne seront désactivées automatiquement après le {date}. Prolongez votre abonnement pour continuer à utiliser le module boutique en ligne."
+  },
+  "%1Vl": {
+    "original": "Download de QR-code",
+    "translation": "Télécharger le code QR"
+  },
+  "%1Vm": {
+    "original": "Verlengbaar",
+    "translation": "Prolongeable"
+  },
+  "%1Vn": {
+    "original": "Leden logboek",
+    "translation": "Journal des membres"
+  },
+  "%1Vp": {
+    "original": "Synchroniseer leden met Scouts en Gidsen Vlaanderen.",
+    "translation": "Synchroniser les membres avec Scouts et Guides de Flandre."
+  },
+  "%1Vr": {
+    "original": "Beheerder toevoegen",
+    "translation": "Ajouter un gestionnaire"
+  },
+  "%1Vs": {
+    "original": "leden staan",
+    "translation": "les membres sont"
+  },
+  "%1Vt": {
+    "original": "Stamhoofd zal de beschikbare voorraad verbergen als er nog meer dan {showStockBelow} stuks beschikbaar zijn.",
+    "translation": "Stamhoofd masquera le stock disponible tant qu’il reste plus de {showStockBelow} articles disponibles."
+  },
+  "%1Vu": {
+    "original": "leeg",
+    "translation": "vide"
+  },
+  "%1Vv": {
+    "original": "Mannen",
+    "translation": "Hommes"
+  },
+  "%1Vw": {
+    "original": "Welk semester?",
+    "translation": "Quel semestre ?"
+  },
+  "%1Vx": {
+    "original": "Je kan toegang geven aan beheerders via beheerdersrollen.",
+    "translation": "Vous pouvez donner des accès aux gestionnaires via les rôles de gestionnaire."
+  },
+  "%1Vy": {
+    "original": "Verlaagd tarief",
+    "translation": "Tarif réduit"
+  },
+  "%1W0": {
+    "original": "Inschrijven bij {organization}",
+    "translation": "S'inscrire chez {organization}"
+  },
+  "%1W1": {
+    "original": "per lid, per jaar",
+    "translation": "par membre, par an"
+  },
+  "%1W2": {
+    "original": "Wachtlijst (volzet)",
+    "translation": "Liste d'attente (complet)"
+  },
+  "%1W3": {
+    "original": "éénmalig",
+    "translation": "unique"
+  },
+  "%1W4": {
+    "original": "FC De Laatbetalers",
+    "translation": "FC Les Mauvais Payeurs"
+  },
+  "%1W5": {
+    "original": "Wat voor vereniging zijn jullie?",
+    "translation": "Quel type d'association êtes-vous ?"
+  },
+  "%1W6": {
+    "original": "Leiding in Stamhoofd",
+    "translation": "Direction dans Stamhoofd"
+  },
+  "%1W7": {
+    "original": "Groepsnummer: {groupNumber}",
+    "translation": "Numéro de groupe : {groupNumber}"
+  },
+  "%1WB": {
+    "original": "Er zijn nog geen e-mailadressen ingesteld",
+    "translation": "Aucune adresse e-mail n’a encore été ajoutée"
+  },
+  "%1WC": {
+    "original": "Beheerdersrollen",
+    "translation": "Rôles des gestionnaires"
+  },
+  "%1WD": {
+    "original": "Tag verwijderen",
+    "translation": "Supprimer le tag"
+  },
+  "%1WE": {
+    "original": "Activeer nieuwe fucnties",
+    "translation": "Activer de nouvelles fonctionnalités"
+  },
+  "%1WH": {
+    "original": "{orgName} heeft de tag {tagName} niet",
+    "translation": "{orgName} n’a pas le tag {tagName}"
+  },
+  "%1WI": {
+    "original": "{x} tot {y} jaar",
+    "translation": "De {x} à {y} ans"
+  },
+  "%1WJ": {
+    "original": "Ben je zeker dat je deze categorie wilt verwijderen en de inhoud verplaatsen naar ‘{destinationName}’?",
+    "translation": "Êtes-vous sûr(e) de vouloir supprimer cette catégorie et déplacer le contenu vers « {destinationName} » ?"
+  },
+  "%1WK": {
+    "original": "De tag {tagName} zal worden verwijderd van {orgName}.",
+    "translation": "Le tag {tagName} sera supprimé de {orgName}."
+  },
+  "%1WL": {
+    "original": "Voeg een groep toe",
+    "translation": "Ajouter un groupe"
+  },
+  "%1WM": {
+    "original": "De tag {tagName} zal worden verwijderd van {numToUpdate} verenigingen.",
+    "translation": "Le tag {tagName} sera supprimé de {numToUpdate} associations."
+  },
+  "%1WN": {
+    "original": "Zoniet worden de standaard/laatste prijzen gebruikt voor verlengingen",
+    "translation": "Sinon, les prix standard/les derniers prix seront utilisés pour les renouvellements."
+  },
+  "%1WO": {
+    "original": "Ben je zeker dat je de inschrijvingen wilt sluiten?",
+    "translation": "Êtes-vous sûr(e) de vouloir clôturer les inscriptions ?"
+  },
+  "%1WP": {
+    "original": "Stap {current} van {total}",
+    "translation": "Étape {current} sur {total}"
+  },
+  "%1WQ": {
+    "original": "Einddatum toevoegen",
+    "translation": "Ajouter une date de fin"
+  },
+  "%1WS": {
+    "original": "Je kan de activiteit opzoeken in de kalender",
+    "translation": "Vous pouvez retrouver l'activité dans le calendrier"
+  },
+  "%1WT": {
+    "original": "Alle nieuwe leden op de wachtlijst",
+    "translation": "Tous les nouveaux membres sont sur la liste d'attente"
+  },
+  "%1WV": {
+    "original": "De inschrijvingen zijn terug open",
+    "translation": "Les inscriptions sont de nouveau ouvertes"
+  },
+  "%1WW": {
+    "original": "Er ging iets mis bij het aanmaken van de betaling. Neem contact op als het probleem niet is opgelost nadat je de pagina hebt herladen.",
+    "translation": "Une erreur s'est produite lors de la création du paiement. Veuillez nous contacter si le problème persiste après avoir rechargé la page."
+  },
+  "%1WX": {
+    "original": "Beheerders hebben een account waarmee ze toegang krijgen tot Stamhoofd.",
+    "translation": "Les administrateurs disposent d'un compte pour accéder à Stamhoofd."
+  },
+  "%1WY": {
+    "original": "Je kan dit later aanpassen en meerdere werkjaren aanmaken.",
+    "translation": "Vous pourrez ajuster cela plus tard et créer plusieurs années associatives."
+  },
+  "%1Wa": {
+    "original": "Dit is voor alle betalingen die via Stripe verlopen",
+    "translation": "Ceci concerne tous les paiements effectués via Stripe"
+  },
+  "%1Wb": {
+    "original": "transactiekosten",
+    "translation": "frais de transaction"
+  },
+  "%1Wd": {
+    "original": "Servicekosten ingehouden via Stripe tussen {startDate} en {endDate}",
+    "translation": "Frais de service prélevés via Stripe entre {startDate} et {endDate}"
+  },
+  "%1We": {
+    "original": "Zorg dat bestellers via iDEAL of creditcard kunnen betalen.",
+    "translation": "Permettez aux acheteurs de payer via iDEAL ou carte de crédit."
+  },
+  "%1Wf": {
+    "original": "Wouters",
+    "translation": "Dupont"
+  },
+  "%1Wg": {
+    "original": "Leden moeten na wijzigingen opnieuw gesynchroniseerd worden met Scouts en Gidsen Vlaanderen.",
+    "translation": "Les membres doivent être resynchronisés avec Les Scouts et Guides de Flandre après chaque modification."
+  },
+  "%1Wh": {
+    "original": "{orgName} heeft deze tag niet.",
+    "translation": "{orgName} n'a pas cette étiquette."
+  },
+  "%1Wi": {
+    "original": "Geen functies",
+    "translation": "Aucune fonction"
+  },
+  "%1Wj": {
+    "original": "Jouw doorverwijzingslink van {value}",
+    "translation": "Votre lien de parrainage de {value}"
+  },
+  "%1Wk": {
+    "original": "Verplichting toevoegen",
+    "translation": "Ajouter une obligation"
+  },
+  "%1Wl": {
+    "original": "{x} jaar",
+    "translation": "{x} ans"
+  },
+  "%1Wm": {
+    "original": "Wie?",
+    "translation": "Qui ?"
+  },
+  "%1Wn": {
+    "original": "platform",
+    "translation": "plateforme"
+  },
+  "%1Wo": {
+    "original": "Voor evenementen of een actie",
+    "translation": "Pour un événement ou une action"
+  },
+  "%1Wp": {
+    "original": "Welkom bij Stamhoofd",
+    "translation": "Bienvenue sur Stamhoofd"
+  },
+  "%1Wq": {
+    "original": "Prijzen instellen",
+    "translation": "Définir les prix"
+  },
+  "%1Wr": {
+    "original": "Vrouwen",
+    "translation": "Femmes"
+  },
+  "%1Ws": {
+    "original": "Je hebt al een doorverwijzingscode gebruikt",
+    "translation": "Vous avez déjà utilisé un code de parrainage"
+  },
+  "%1Wt": {
+    "original": "Je kan niet terugkeren naar een werkjaar in het verleden",
+    "translation": "Vous ne pouvez pas revenir à une année associative antérieure"
+  },
+  "%1Wv": {
+    "original": "{orgName} heeft deze tag al.",
+    "translation": "{orgName} possède déjà cette étiquette."
+  },
+  "%1Wy": {
+    "original": "mandje",
+    "translation": "panier"
+  },
+  "%1X0": {
+    "original": "Dit is het toekomstig werkjaar. Het is nog niet actief. Leden kunnen nog niet inschrijven. Overschakelen kan ten vroegste vanaf {switchDate}.",
+    "translation": "Ceci est la prochaine année associative. Elle n'est pas encore active. Les membres ne peuvent pas encore s'inscrire. Le passage sera possible à partir du {switchDate} au plus tôt."
+  },
+  "%1X2": {
+    "original": "Naam van de groep",
+    "translation": "Nom du groupe"
+  },
+  "%1X3": {
+    "original": "De gegevens van dit lid zijn gewijzigd sinds de laatste synchronisatie met Scouts en Gidsen Vlaanderen. {action}",
+    "translation": "Les informations de ce membre ont été modifiées depuis la dernière synchronisation avec Les Scouts et Guides de Flandre. {action}"
+  },
+  "%1X5": {
+    "original": "Factuur in bijlage",
+    "translation": "Facture en pièce jointe"
+  },
+  "%1X7": {
+    "original": "Intracommunautaire (EU) verleggingsregeling: export van goederen binnen de EU",
+    "translation": "Régime d’autoliquidation intracommunautaire (UE) : exportation de marchandises au sein de l’UE"
+  },
+  "%1X8": {
+    "original": "Je kan niet (meer) overschakelen naar dit werkjaar omdat het is vergrendeld",
+    "translation": "Vous ne pouvez plus passer à cette année associative car elle est verrouillée"
+  },
+  "%1X9": {
+    "original": "Onze leden beheren",
+    "translation": "Gérer nos membres"
+  },
+  "%1XA": {
+    "original": "In welke maand start jullie werkjaar?",
+    "translation": "Dans quel mois commence votre année associative ?"
+  },
+  "%1XB": {
+    "original": "Geen resultaten",
+    "translation": "Aucun résultat"
+  },
+  "%1XC": {
+    "original": "Datum eerste activiteit",
+    "translation": "Date de la première activité"
+  },
+  "%1XD": {
+    "original": "Synchroniseer",
+    "translation": "Synchroniser"
+  },
+  "%1XE": {
+    "original": "Om andere verenigingen te motiveren om jouw link te gebruiken, krijgen ze zelf ook 25 euro tegoed.",
+    "translation": "Pour encourager d'autres associations à utiliser votre lien, elles recevront aussi un crédit de 25 euros."
+  },
+  "%1XF": {
+    "original": "Online inschrijvingen",
+    "translation": "Inscriptions en ligne"
+  },
+  "%1XG": {
+    "original": "Je kan alle gegevens wijzigen via je Stripe Dashboard. Bovenaan klik je daar op het gebruikersicoontje > Platforminstellingen om gegevens aan te passen.",
+    "translation": "Vous pouvez modifier toutes les informations via votre Tableau de bord Stripe. Cliquez en haut sur l’icône utilisateur > Paramètres de la plateforme pour ajuster les données."
+  },
+  "%1XH": {
+    "original": "Meisjes",
+    "translation": "Filles"
+  },
+  "%1XI": {
+    "original": "Start",
+    "translation": "Début"
+  },
+  "%1XK": {
+    "original": "‘{categoryName}’ is verwijderd",
+    "translation": "‘{categoryName}’ a été supprimé"
+  },
+  "%1XL": {
+    "original": "Bij welke koepel zijn jullie aangesloten?",
+    "translation": "À quelle fédération êtes-vous affilié ?"
+  },
+  "%1XM": {
+    "original": "{count} groepen",
+    "translation": "{count} groupes"
+  },
+  "%1XN": {
+    "original": "Je moet eerst Bancontact Pay | Wero (Payconiq) activeren via de betaalinstellingen (Instellingen > Betaalaccounts).",
+    "translation": "Activez d'abord Bancontact Pay | Wero (Payconiq) via les paramètres de paiement (Paramètres > Comptes de paiement)."
+  },
+  "%1XO": {
+    "original": "Intracommunautaire (EU) verleggingsregeling: export van diensten binnen de EU",
+    "translation": "Régime d’autoliquidation intracommunautaire (UE) : exportation de services au sein de l’UE"
+  },
+  "%1XQ": {
+    "original": "Deze periode is nog niet opgestart",
+    "translation": "Cette période n'a pas encore commencé"
+  },
+  "%1XS": {
+    "original": "Knapen",
+    "translation": "Garçons"
+  },
+  "%1XT": {
+    "original": "Geschrapt in de groepsadministratie",
+    "translation": "Supprimé dans l'administration du groupe"
+  },
+  "%1XU": {
+    "original": "Fout bij {member}",
+    "translation": "Erreur pour {member}"
+  },
+  "%1XV": {
+    "original": "Privacy",
+    "translation": "Confidentialité"
+  },
+  "%1XW": {
+    "original": "Deze loginmethode inschakelen",
+    "translation": "Activer cette méthode de connexion"
+  },
+  "%1XZ": {
+    "original": "Nog nooit gesynchroniseerd",
+    "translation": "Jamais synchronisé"
+  },
+  "%1Xa": {
+    "original": "Dit lid staat nog niet in de groepsadministratie van Scouts en Gidsen Vlaanderen en is mogelijk niet verzekerd. {action}",
+    "translation": "Ce membre n'apparaît pas encore dans l’administration de groupe des Scouts et Guides de Flandre et n’est peut-être pas assuré. {action}"
+  },
+  "%1Xb": {
+    "original": "Er kan een vertraging zijn tussen de betaling en het aanmaken van de facturen.",
+    "translation": "Il peut y avoir un délai entre le paiement et la génération des factures."
+  },
+  "%1Xc": {
+    "original": "Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’?",
+    "translation": "Êtes-vous sûr de vouloir déplacer le groupe ‘{groupName}’ vers ‘{categoryName}’ ?"
+  },
+  "%1Xd": {
+    "original": "Iedereen moet inschrijven op de wachtlijst",
+    "translation": "Tout le monde doit s'inscrire sur la liste d'attente"
+  },
+  "%1Xe": {
+    "original": "De SSO-instellingen konden niet gecontroleerd worden: {message}",
+    "translation": "Impossible de vérifier les paramètres SSO : {message}"
+  },
+  "%1Xg": {
+    "original": "Jouw e-mailadres of wachtwoord is te kort. Kijk het even na.",
+    "translation": "Votre adresse e-mail ou mot de passe est trop court. Veuillez vérifier."
+  },
+  "%1Xh": {
+    "original": "Dit is voor alle betalingen die niet via Stripe verlopen",
+    "translation": "Ceci concerne tous les paiements qui ne sont pas effectués via Stripe"
+  },
+  "%1Xi": {
+    "original": "Verboden combinatie(s)",
+    "translation": "Combinaison(s) interdite(s)"
+  },
+  "%1Xj": {
+    "original": "Bekijk",
+    "translation": "Consulter"
+  },
+  "%1Xk": {
+    "original": "OpenID-instellingen",
+    "translation": "Paramètres OpenID"
+  },
+  "%1Xl": {
+    "original": "Tegoed",
+    "translation": "Crédit"
+  },
+  "%1Xm": {
+    "original": "Eénmalig",
+    "translation": "Unique"
+  },
+  "%1Xn": {
+    "original": "Single-Sign-On werkt momenteel enkel samen met webshop authenticatie.",
+    "translation": "L’authentification Single-Sign-On fonctionne uniquement avec l’authentification boutique pour l’instant."
+  },
+  "%1Xo": {
+    "original": "Berekeningswijze prijzen",
+    "translation": "Méthode de calcul des prix"
+  },
+  "%1Xq": {
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. <button>Meer info</button>",
+    "translation": "Grâce à la période d'essai, tu peux permettre aux nouveaux membres de s'inscrire sans paiement. <button>En savoir plus</button>"
+  },
+  "%1Xr": {
+    "original": "Aangepaste leden in de groepsadministratie",
+    "translation": "Membres modifiés dans l'administration de groupe"
+  },
+  "%1Xs": {
+    "original": "Jin",
+    "translation": "Jin"
+  },
+  "%1Xt": {
+    "original": "lid heeft gewijzigde gegevens",
+    "translation": "Membre dont les données ont changé"
+  },
+  "%1Xu": {
+    "original": "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw.",
+    "translation": "En raison d'une erreur technique, il a été impossible de télécharger le PDF de la facture. Réessaie plus tard."
+  },
+  "%1Xv": {
+    "original": "De inschrijvingen zijn afgelopen",
+    "translation": "Les inscriptions sont terminées"
+  },
+  "%1Xw": {
+    "original": "Geen toegang om facturen te schrijven aan deze organisatie",
+    "translation": "Aucun accès pour générer des factures pour cette organisation"
+  },
+  "%1Xx": {
+    "original": "Transactiekosten ingehouden via Stripe tussen {startDate} en {endDate}",
+    "translation": "Frais de transaction retenus via Stripe entre {startDate} et {endDate}"
+  },
+  "%1Xy": {
+    "original": "Verschillend",
+    "translation": "Différent"
+  },
+  "%1Xz": {
+    "original": "Groepsadministratie",
+    "translation": "Administration de groupe"
   },
   "%1Y": {
     "original": "1 week",
     "translation": "1 semaine"
   },
+  "%1Y0": {
+    "original": "Synchroniseren...",
+    "translation": "Synchronisation..."
+  },
+  "%1Y1": {
+    "original": "De tag {tagName} zal worden toegevoegd aan {numToUpdate} verenigingen.",
+    "translation": "Le tag {tagName} sera ajouté à {numToUpdate} associations."
+  },
+  "%1Y2": {
+    "original": "Welke onderverdelingen heb je?",
+    "translation": "Quelles subdivisions as-tu ?"
+  },
+  "%1Y3": {
+    "original": "Je kan een API-key verschillende rollen geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.",
+    "translation": "Tu peux attribuer différents rôles à une clé API, tout comme à un administrateur. Ceci permet de sécuriser davantage ta clé et de donner juste l'accès nécessaire."
+  },
+  "%1Y4": {
+    "original": "De {numOrganizations} geselecteerde verenigingen hebben al de tag {tagName}",
+    "translation": "Les {numOrganizations} associations sélectionnées ont déjà le tag {tagName}"
+  },
+  "%1Y5": {
+    "original": "De inschrijvingen gaan open op {date}. Bestaande leden en broers/zussen kunnen al inschrijven vanaf {preDate}.",
+    "translation": "Les inscriptions ouvriront le {date}. Les membres existants et les frères/sœurs peuvent déjà s'inscrire dès le {preDate}."
+  },
+  "%1Y6": {
+    "original": "Vervallen op {dateTime}",
+    "translation": "Expire le {dateTime}"
+  },
+  "%1Y7": {
+    "original": "Voorinschrijvingen vanaf {date}",
+    "translation": "Préinscriptions à partir du {date}"
+  },
+  "%1Y8": {
+    "original": "Factuur te betalen",
+    "translation": "Facture à payer"
+  },
+  "%1Y9": {
+    "original": "+16",
+    "translation": "+16"
+  },
+  "%1YB": {
+    "original": "Enkel voor hoofdbeheerders",
+    "translation": "Réservé aux administrateurs principaux"
+  },
+  "%1YF": {
+    "original": "Doorverwijzingscodes zijn momenteel niet beschikbaar",
+    "translation": "Les codes de parrainage ne sont actuellement pas disponibles"
+  },
+  "%1YG": {
+    "original": "Synchroniseren voorbereiden...",
+    "translation": "Préparation de la synchronisation..."
+  },
+  "%1YH": {
+    "original": "Prijstype",
+    "translation": "Type de prix"
+  },
+  "%1YI": {
+    "original": "De inhoud van ‘{categoryName}’ is verplaatst naar ‘{destinationName}’",
+    "translation": "Le contenu de « {categoryName} » a été déplacé vers « {destinationName} »"
+  },
+  "%1YJ": {
+    "original": "Nog steeds geen internetverbinding. Probeer het later opnieuw.",
+    "translation": "Toujours pas de connexion Internet. Veuillez réessayer plus tard."
+  },
+  "%1YK": {
+    "original": "Kan geen factuur aanmaken voor betalingen van verschillende organisaties tegelijk",
+    "translation": "Impossible de créer une facture pour des paiements provenant de plusieurs associations à la fois"
+  },
+  "%1YL": {
+    "original": "Dit werkjaar instellen als huidige werkjaar?",
+    "translation": "Définir cette année associative comme année courante ?"
+  },
+  "%1YM": {
+    "original": "Voeg minstens één groep toe.",
+    "translation": "Ajoute au moins un groupe."
+  },
+  "%1YN": {
+    "original": "Na te kijken",
+    "translation": "À vérifier"
+  },
+  "%1YP": {
+    "original": "‘{categoryName}’ is verplaatst naar ‘{destinationName}’",
+    "translation": "« {categoryName} » a été déplacé vers « {destinationName} »"
+  },
+  "%1YR": {
+    "original": "Behouden",
+    "translation": "Conserver"
+  },
+  "%1YS": {
+    "original": "Zorg dat bestellers via Bancontact of creditcard kunnen betalen.",
+    "translation": "Permets aux acheteurs de payer via Bancontact ou carte de crédit."
+  },
+  "%1YT": {
+    "original": "Ja, sluiten",
+    "translation": "Oui, fermer"
+  },
+  "%1YU": {
+    "original": "Betaling mislukt of geannuleerd",
+    "translation": "Paiement échoué ou annulé"
+  },
+  "%1YV": {
+    "original": "Leiding niet in Stamhoofd",
+    "translation": "Encadrement non présent dans Stamhoofd"
+  },
+  "%1YX": {
+    "original": "Als je fysiek bij iemand bent, dan kan die deze QR-code scannen om de link te gebruiken.",
+    "translation": "Si tu es en présence de quelqu'un, il peut scanner ce QR-code pour utiliser le lien."
+  },
+  "%1YY": {
+    "original": "Jonghernieuwers",
+    "translation": "Jeunes renouvelants"
+  },
+  "%1YZ": {
+    "original": "Factuurnummer",
+    "translation": "Numéro de facture"
+  },
+  "%1Yb": {
+    "original": "Hoe schrijf je iemand in?",
+    "translation": "Comment inscrire quelqu'un ?"
+  },
+  "%1Yd": {
+    "original": "Je test momenteel de ledenadministratie functie. Je ledenportaal staat nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.",
+    "translation": "Tu testes actuellement la fonction d'administration des membres. Ton portail des membres est encore en mode démo. Active la fonction pour l'utiliser réellement."
+  },
+  "%1Ye": {
+    "original": "Waar?",
+    "translation": "Où ?"
+  },
+  "%1Yg": {
+    "original": "Vul hieronder jouw API-key in om betalingen rechtstreeks via Bancontact Pay | Wero te verwerken. ",
+    "translation": "Saisis ci-dessous ta clé API pour traiter les paiements directement via Bancontact Pay | Wero."
+  },
+  "%1Yh": {
+    "original": "Wil je deze leden schrappen in de groepsadministratie?",
+    "translation": "Souhaites-tu supprimer ces membres dans l'administration de groupe ?"
+  },
+  "%1Yi": {
+    "original": "Kies zelf een begin- en einddatum.",
+    "translation": "Choisis toi-même une date de début et de fin."
+  },
+  "%1Yj": {
+    "original": "Inschrijvingen zijn gesloten via het ledenportaal",
+    "translation": "Les inscriptions sont fermées via le portail des membres"
+  },
+  "%1Yk": {
+    "original": "-12",
+    "translation": "-12"
+  },
+  "%1Yl": {
+    "original": "Ben je zeker dat je de inschrijvingen wilt openen?",
+    "translation": "Es-tu sûr de vouloir ouvrir les inscriptions ?"
+  },
+  "%1Ym": {
+    "original": "afhoudingen",
+    "translation": "retenues"
+  },
+  "%1Yn": {
+    "original": "Excl. BTW - Dit bedrag wordt achteraf aangerekend via jouw ingestelde betaalmethode.",
+    "translation": "Hors TVA - Ce montant sera facturé ultérieurement via ta méthode de paiement enregistrée."
+  },
+  "%1Yo": {
+    "original": "Groter dan of gelijk aan...",
+    "translation": "Supérieur ou égal à..."
+  },
+  "%1Yp": {
+    "original": "Gesynchroniseerd",
+    "translation": "Synchronisé"
+  },
+  "%1Yq": {
+    "original": "Transactiekosten op {date}",
+    "translation": "Frais de transaction le {date}"
+  },
+  "%1Yr": {
+    "original": "Er zijn nog geen leden gekoppeld aan je account, voeg ze eerst toe (via ‘Start’) voor je hen probeert in te schrijven.",
+    "translation": "Aucun membre n’est encore lié à ton compte, ajoute-les d’abord (via « Démarrer ») avant d’essayer de les inscrire."
+  },
+  "%1Ys": {
+    "original": "Verbergen",
+    "translation": "Masquer"
+  },
+  "%1Yu": {
+    "original": "Verkopen",
+    "translation": "Ventes"
+  },
+  "%1Yv": {
+    "original": "is na",
+    "translation": "après"
+  },
+  "%1Yw": {
+    "original": "Behoud prijzen bij verlengen",
+    "translation": "Préserver les tarifs en cas de prolongation"
+  },
+  "%1Yx": {
+    "original": "Jouw link werd nog niet gebruikt",
+    "translation": "Ton lien n'a pas encore été utilisé"
+  },
+  "%1Yy": {
+    "original": "Reeds teruggekregen",
+    "translation": "Déjà remboursé"
+  },
   "%1Z": {
     "original": "Webshop footer",
     "translation": "Pied de page de la boutique en ligne"
+  },
+  "%1Z1": {
+    "original": "Servicekosten tussen {startDate} en {endDate}",
+    "translation": "Frais de service entre {startDate} et {endDate}"
+  },
+  "%1Z2": {
+    "original": "Jouw bestelling zal worden geplaatst als je verder gaat. Je hoeft nu niets te betalen.",
+    "translation": "Ta commande sera passée lorsque tu continueras. Tu ne dois rien payer maintenant."
+  },
+  "%1Z3": {
+    "original": "Betaal online of via overschrijving",
+    "translation": "Paye en ligne ou par virement"
+  },
+  "%1Z4": {
+    "original": "Eerste semester (september - januari)",
+    "translation": "Premier semestre (septembre - janvier)"
+  },
+  "%1Z5": {
+    "original": "Verboden combinatie toevoegen",
+    "translation": "Ajouter une combinaison interdite"
+  },
+  "%1Z6": {
+    "original": "Synchroniseer met de groepsadministratie.",
+    "translation": "Synchronise avec l'administration de groupe."
+  },
+  "%1Z7": {
+    "original": "Factuur (na betaling)",
+    "translation": "Facture (après paiement)"
+  },
+  "%1Z8": {
+    "original": "‘{groupName}’ is verwijderd",
+    "translation": "« {groupName} » a été supprimé"
+  },
+  "%1Z9": {
+    "original": "Open vanaf {date}",
+    "translation": "Ouvert à partir du {date}"
+  },
+  "%1ZA": {
+    "original": "Ben je zeker dat je de categorie ‘{categoryName}’ wilt verplaatsen naar ‘{destinationName}’?",
+    "translation": "Es-tu sûr de vouloir déplacer la catégorie « {categoryName} » vers « {destinationName} » ?"
+  },
+  "%1ZD": {
+    "original": "Jonggivers",
+    "translation": "Jeunes donateurs"
+  },
+  "%1ZE": {
+    "original": "{organization-name} doorverwezen 🙌",
+    "translation": "Référé par {organization-name} 🙌"
+  },
+  "%1ZF": {
+    "original": "{orgName} heeft al de tag {tagName}",
+    "translation": "{orgName} a déjà le tag {tagName}"
+  },
+  "%1ZG": {
+    "original": "Ingeschreven! Pas op elk moment je gegevens aan.",
+    "translation": "Inscrit ! Modifiez vos informations à tout moment."
+  },
+  "%1ZH": {
+    "original": "Jouw e-mailadres is nu geverifieerd!",
+    "translation": "Votre adresse e-mail a bien été vérifiée !"
+  },
+  "%1ZI": {
+    "original": "Dit account verwijderen?",
+    "translation": "Supprimer ce compte ?"
+  },
+  "%1ZJ": {
+    "original": "Beheer je eigen vereniging",
+    "translation": "Gérez votre propre association"
+  },
+  "%1ZK": {
+    "original": "Geen van de {numOrganizations} geselecteerde verenigingen heeft de tag {tagName}",
+    "translation": "Aucune des {numOrganizations} associations sélectionnées n'a le tag {tagName}"
+  },
+  "%1ZM": {
+    "original": "excl. BTW",
+    "translation": "hors TVA"
+  },
+  "%1ZN": {
+    "original": "Synchronisatie voltooid",
+    "translation": "Synchronisation terminée"
+  },
+  "%1ZO": {
+    "original": "Het omzetten van deze groep naar een activiteit in de kalender is nog niet mogelijk door de instelling ‘verhinder als ingeschreven bij’. Verwijder en vervang eerst die instelling.",
+    "translation": "La conversion de ce groupe en activité dans le calendrier n’est pas encore possible à cause du paramètre ‘empêcher si déjà inscrit à’. Veuillez d'abord supprimer et remplacer ce paramètre."
+  },
+  "%1ZP": {
+    "original": "Trimester {number} - {year}",
+    "translation": "Trimestre {number} - {year}"
+  },
+  "%1ZQ": {
+    "original": "Synchroniseren met groepsadmin",
+    "translation": "Synchroniser avec l’admin du groupe"
+  },
+  "%1ZR": {
+    "original": "Alle inschrijvingen mee verwijderen",
+    "translation": "Supprimer toutes les inscriptions également"
+  },
+  "%1ZS": {
+    "original": "Synchronisatie-rapport",
+    "translation": "Rapport de synchronisation"
+  },
+  "%1ZT": {
+    "original": "De synchronisatie is nog bezig.",
+    "translation": "La synchronisation est encore en cours."
+  },
+  "%1ZU": {
+    "original": "Wachtlijst geopend",
+    "translation": "Liste d’attente ouverte"
+  },
+  "%1ZW": {
+    "original": "Je kan geen factuur maken voor een mislukte of geannuleerde betaling",
+    "translation": "Vous ne pouvez pas créer de facture pour un paiement échoué ou annulé"
+  },
+  "%1ZZ": {
+    "original": "Delen op Facebook",
+    "translation": "Partager sur Facebook"
+  },
+  "%1Za": {
+    "original": "Voorinschrijvingen vanaf {dateTime}",
+    "translation": "Préinscriptions à partir du {dateTime}"
+  },
+  "%1Zb": {
+    "original": "Weergave",
+    "translation": "Affichage"
+  },
+  "%1Zc": {
+    "original": "Een lege categorie kan je niet samenvoegen met een andere. Dat is hetzelfde als verwijderen.",
+    "translation": "Vous ne pouvez pas fusionner une catégorie vide avec une autre. Cela reviendrait à la supprimer."
+  },
+  "%1Zd": {
+    "original": "Stel je betaalmethodes voor inschrijvingen, onderverdelingen, kortingen, persoonsgegevens en meer in.",
+    "translation": "Configurez vos méthodes de paiement pour les inscriptions, les sous-divisions, les réductions, les données personnelles, et plus encore."
+  },
+  "%1Zf": {
+    "original": "Per semester",
+    "translation": "Par semestre"
+  },
+  "%1Zg": {
+    "original": "Ribbels",
+    "translation": "Ribbels"
+  },
+  "%1Zi": {
+    "original": "Schrappen",
+    "translation": "Supprimer"
+  },
+  "%1Zj": {
+    "original": "Er zijn momenteel geen betaalmethodes ingesteld. Neem contact op of herlaad de pagina en probeer zo meteen opnieuw.",
+    "translation": "Aucune méthode de paiement n’est actuellement configurée. Contactez-nous ou rechargez la page, puis réessayez."
+  },
+  "%1Zn": {
+    "original": "Pagadders",
+    "translation": "Pagadders"
+  },
+  "%1Zo": {
+    "original": "Kies minstens één item om te betalen",
+    "translation": "Sélectionnez au moins un article à payer"
+  },
+  "%1Zp": {
+    "original": "Schrijf je in en vul gegevens aan.",
+    "translation": "Inscrivez-vous et complétez vos informations."
+  },
+  "%1Zr": {
+    "original": "Hernieuwers",
+    "translation": "Renouveleurs"
+  },
+  "%1Zs": {
+    "original": "Heractiveren",
+    "translation": "Réactiver"
+  },
+  "%1Zt": {
+    "original": "Een volledig jaar, met een vaste startmaand.",
+    "translation": "Toute une année, avec un mois de début fixe."
+  },
+  "%1Zu": {
+    "original": "Servicekost",
+    "translation": "Frais de service"
+  },
+  "%1Zv": {
+    "original": "{count} items",
+    "translation": "{count} éléments"
+  },
+  "%1Zw": {
+    "original": "Factuur",
+    "translation": "Facture"
+  },
+  "%1Zx": {
+    "original": "Verplichte inschrijving(en)",
+    "translation": "Inscription(s) obligatoire(s)"
+  },
+  "%1Zy": {
+    "original": "Verstuur de link via SMS, e-mail, WhatsApp...",
+    "translation": "Envoyez le lien par SMS, e-mail, WhatsApp..."
+  },
+  "%1Zz": {
+    "original": "Ledenadministratie instellingen",
+    "translation": "Paramètres d’administration des membres"
   },
   "%1a": {
     "original": "Accounts",
     "translation": "Comptes"
   },
+  "%1a0": {
+    "original": "10e, 11e, 12e... vereniging",
+    "translation": "10e, 11e, 12e... association"
+  },
+  "%1a2": {
+    "original": "De inschrijvingen gaan open op {date}. Bestaande leden kunnen al inschrijven vanaf {preDate}.",
+    "translation": "Les inscriptions ouvriront le {date}. Les membres existants pourront s’inscrire dès le {preDate}."
+  },
+  "%1a4": {
+    "original": "Deze link is gereserveerd voor interne webshoppagina's. Kies een andere link.",
+    "translation": "Ce lien est réservé aux pages internes de la boutique. Choisissez un autre lien."
+  },
+  "%1a5": {
+    "original": "Voor de meeste verenigingen staat dit al goed ingesteld. Controleer het type en eventueel de koepel.",
+    "translation": "Pour la plupart des associations, ce paramètre est déjà bien configuré. Vérifiez le type et éventuellement la fédération."
+  },
+  "%1a6": {
+    "original": "-16",
+    "translation": "-16"
+  },
+  "%1a7": {
+    "original": "Maak rollen aan en stel de toegangsrechten voor elke rol in.",
+    "translation": "Créez des rôles et définissez les droits d’accès pour chaque rôle."
+  },
+  "%1a8": {
+    "original": "Kies een inschrijvingsgroep",
+    "translation": "Choisissez un groupe d'inscription"
+  },
+  "%1a9": {
+    "original": "Tito",
+    "translation": "Tito"
+  },
+  "%1aB": {
+    "original": "Openstaande bedragen",
+    "translation": "Montants en attente"
+  },
+  "%1aC": {
+    "original": "Jouw doorverwijzingslink",
+    "translation": "Votre lien de parrainage"
+  },
+  "%1aE": {
+    "original": "Creditnota",
+    "translation": "Note de crédit"
+  },
+  "%1aG": {
+    "original": "Dit ledenportaal is in proefperiode. Je kan hier fictieve leden inschrijven om alles uit te proberen.",
+    "translation": "Ce portail des membres est en période d'essai. Vous pouvez y inscrire des membres fictifs pour tout essayer."
+  },
+  "%1aI": {
+    "original": "Het bedrag dat je ontvangt stijgt per vereniging tot maximaal 100 euro per vereniging. Dus als je 6 verenigingen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.",
+    "translation": "Le montant que vous recevez augmente par association jusqu'à un maximum de 100 euros par association. Si vous amenez 6 associations, vous gagnez au total 210 € ! Si vous en amenez 10, vous gagnez 550 euros."
+  },
+  "%1aJ": {
+    "original": "{count} plaatsen",
+    "translation": "{count} places"
+  },
+  "%1aL": {
+    "original": "{count} categorieën",
+    "translation": "{count} catégories"
+  },
+  "%1aM": {
+    "original": "Automatische e-mail die 's ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.",
+    "translation": "E-mail automatique envoyé le matin si un groupe a encore un montant en attente."
+  },
+  "%1aO": {
+    "original": "Groepsadministratie synchroniseren",
+    "translation": "Synchroniser l'administration du groupe"
+  },
+  "%1aP": {
+    "original": "leden hebben gewijzigde gegevens",
+    "translation": "des membres ont modifié leurs données"
+  },
+  "%1aQ": {
+    "original": "Speelclub",
+    "translation": "Club de jeux"
+  },
+  "%1aT": {
+    "original": "Per jaar",
+    "translation": "Par an"
+  },
+  "%1aW": {
+    "original": "Persoonsgegevens",
+    "translation": "Données personnelles"
+  },
+  "%1aX": {
+    "original": "{category} bevat groepen, daarbij kan je de subcategorieën van {other-category} niet samenvoegen.",
+    "translation": "{category} contient des groupes, vous ne pouvez donc pas fusionner les sous-catégories de {other-category}."
+  },
+  "%1aY": {
+    "original": "Maak beheerdersrollen aan en ken die vervolgens toe aan je beheerders om hun toegang te bepalen.",
+    "translation": "Créez des rôles d'administration et attribuez-les à vos administrateurs afin de gérer leurs accès."
+  },
+  "%1aZ": {
+    "original": "Ben je zeker dat je de categorie ‘{categoryName}’ wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer la catégorie « {categoryName} » ?"
+  },
+  "%1aa": {
+    "original": "Aangerekend in je openstaande saldo.",
+    "translation": "Déduit de votre solde restant."
+  },
+  "%1ab": {
+    "original": "Bancontact Pay | Wero (vroeger Payconiq)",
+    "translation": "Bancontact Pay | Wero (anciennement Payconiq)"
+  },
+  "%1ad": {
+    "original": "is groter dan of gelijk aan",
+    "translation": "est supérieur ou égal à"
+  },
+  "%1ae": {
+    "original": "per jaar",
+    "translation": "par an"
+  },
+  "%1af": {
+    "original": "{category} bevat al categorieën, daarbij kan je de groepen van {other-category} niet samenvoegen.",
+    "translation": "{category} contient déjà des catégories, vous ne pouvez donc pas fusionner les groupes de {other-category}."
+  },
+  "%1ag": {
+    "original": "Deze groep werd verwijderd",
+    "translation": "Ce groupe a été supprimé"
+  },
+  "%1aj": {
+    "original": "De naam van de groep mag niet leeg zijn.",
+    "translation": "Le nom du groupe ne peut pas être vide."
+  },
+  "%1ak": {
+    "original": "Het kan enkele dagen duren voor we een bevestiging krijgen van je betaling. Je ontvangt een e-mail als de betaling nog zou mislukken.",
+    "translation": "La confirmation de votre paiement peut prendre quelques jours. Vous recevrez un e-mail si jamais le paiement échoue."
+  },
+  "%1al": {
+    "original": "Facturen doorsturen naar boekhoudsoftware en PEPPOL",
+    "translation": "Transférer les factures vers le logiciel de comptabilité et PEPPOL"
+  },
+  "%1am": {
+    "original": "Deze groep werd omgzet in een activiteit",
+    "translation": "Ce groupe a été converti en activité"
+  },
+  "%1an": {
+    "original": "Voorrangsregels",
+    "translation": "Règles de priorité"
+  },
+  "%1ao": {
+    "original": "Recreanten",
+    "translation": "Loisirs"
+  },
+  "%1ap": {
+    "original": "Vervaldatum toevoegen",
+    "translation": "Ajouter une date d’échéance"
+  },
+  "%1aq": {
+    "original": "Opzegbaar",
+    "translation": "Résiliable"
+  },
+  "%1ar": {
+    "original": "lid heeft een gewijzigde inschrijving",
+    "translation": "le membre a modifié son inscription"
+  },
+  "%1as": {
+    "original": "Bekijk, beheer, exporteer of e-mail leden op deze wachtlijst",
+    "translation": "Consultez, gérez, exportez ou envoyez un e-mail aux membres de cette liste d'attente"
+  },
+  "%1at": {
+    "original": "De tag {tagName} zal worden toegevoegd aan {orgName}.",
+    "translation": "Le tag {tagName} sera ajouté à {orgName}."
+  },
+  "%1aw": {
+    "original": "Keti",
+    "translation": "Keti"
+  },
+  "%1ay": {
+    "original": "Online betalingen zijn tijdelijk onbeschikbaar op het platform door een probleem met de berekening van BTW-tarieven op kosten.",
+    "translation": "Les paiements en ligne sont temporairement indisponibles sur la plateforme en raison d’un problème de calcul des taux de TVA sur les frais."
+  },
+  "%1az": {
+    "original": "‘{groupName}’ is verplaatst naar ‘{categoryName}’ in {periodName}",
+    "translation": "‘{groupName}’ a été déplacé vers ‘{categoryName}’ dans {periodName}"
+  },
   "%1b": {
     "original": "Webshop via",
     "translation": "Boutique en ligne via"
+  },
+  "%1b0": {
+    "original": "Dit is je huidige werkjaar",
+    "translation": "Ceci est votre année associative actuelle"
+  },
+  "%1b1": {
+    "original": "Stripe Dashboard",
+    "translation": "Tableau de bord Stripe"
+  },
+  "%1b2": {
+    "original": "is voor",
+    "translation": "est pour"
+  },
+  "%1b3": {
+    "original": "Btw verlegd: Art 21 § 2 van het Belgische btw-wetboek",
+    "translation": "TVA inversée : Art 21 § 2 du code de la TVA belge"
+  },
+  "%1b4": {
+    "original": "Maak het onmogelijk voor leden om in te schrijven voor {name} als ze al zijn ingeschreven voor bepaalde inschrijvingsgroep(en).",
+    "translation": "Empêchez les membres de s'inscrire à {name} s'ils sont déjà inscrits dans certains groupes d'inscription."
+  },
+  "%1b5": {
+    "original": "Enkel facturen van BTW-plichtige bedrijven of bedrijven met een custom PEPPOL Endpoint ID doorsturen naar de boekhoudsoftware",
+    "translation": "Transférez uniquement les factures d'entreprises assujetties à la TVA ou possédant un PEPPOL Endpoint ID personnalisé vers le logiciel de comptabilité"
+  },
+  "%1b6": {
+    "original": "Afronding",
+    "translation": "Arrondi"
+  },
+  "%1b7": {
+    "original": "Registreerde op {date}. Er werd nog niets aangekocht of gefactureerd.",
+    "translation": "Enregistré le {date}. Aucun achat ou facturation n’a encore été effectué."
+  },
+  "%1b8": {
+    "original": "Heel zeker?",
+    "translation": "Vous en êtes sûr ?"
+  },
+  "%1b9": {
+    "original": "Vraag je VGA of groepsleiding om te synchroniseren.",
+    "translation": "Demandez à votre VGA ou chef de groupe de synchroniser."
+  },
+  "%1bA": {
+    "original": "Betaal via overschrijving",
+    "translation": "Payer par virement"
+  },
+  "%1bC": {
+    "original": "Verboden combinatie(s) - in één richting",
+    "translation": "Combinaison(s) interdite(s) – dans un seul sens"
+  },
+  "%1bD": {
+    "original": "Je hebt nog geen facturen ontvangen",
+    "translation": "Vous n’avez pas encore reçu de factures"
+  },
+  "%1bE": {
+    "original": "Jongens",
+    "translation": "Garçons"
+  },
+  "%1bH": {
+    "original": "Configureer Single-Sign-On voor webshop authenticatie. Dit werkt momenteel nog niet voor ledenlogin.",
+    "translation": "Configurez le Single-Sign-On pour l’authentification de la boutique en ligne. Cette fonctionnalité n’est pas encore disponible pour la connexion membres."
+  },
+  "%1bI": {
+    "original": "Sloebers",
+    "translation": "Sloebers"
+  },
+  "%1bJ": {
+    "original": "Betaalprovider waarlangs de transacties verliepen",
+    "translation": "Fournisseur de paiement utilisé pour ces transactions"
+  },
+  "%1bK": {
+    "original": "‘{groupName}’ is gedupliceerd",
+    "translation": "‘{groupName}’ a été dupliqué"
+  },
+  "%1bL": {
+    "original": "Je kan een beheerder verschillende rollen toekennen. Een beheerder zonder rollen heeft geen enkele toegang.",
+    "translation": "Vous pouvez attribuer différents rôles à un administrateur. Un administrateur sans rôle n’aura aucun accès."
+  },
+  "%1bM": {
+    "original": "Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’ in {periodName}?",
+    "translation": "Êtes-vous certain de vouloir déplacer le groupe ‘{groupName}’ vers ‘{categoryName}’ dans {periodName}?"
+  },
+  "%1bP": {
+    "original": "Loginmethode",
+    "translation": "Méthode de connexion"
+  },
+  "%1bS": {
+    "original": "Referentie",
+    "translation": "Référence"
+  },
+  "%1bT": {
+    "original": "Dit bedrag zal bij jouw volgende afrekening in mindering worden gebracht",
+    "translation": "Ce montant sera déduit lors de votre prochain règlement"
+  },
+  "%1bU": {
+    "original": "Competitie",
+    "translation": "Compétition"
+  },
+  "%1bV": {
+    "original": "Wanneer start jullie werkjaar?",
+    "translation": "Quand commence votre année associative ?"
+  },
+  "%1bX": {
+    "original": "{count} items werden betaald",
+    "translation": "{count} articles ont été payés"
+  },
+  "%1bY": {
+    "original": "Door een technische fout was het niet mogelijk om de PDF of XML van de factuur op te halen. Probeer het later opnieuw.",
+    "translation": "En raison d'une erreur technique, il n'a pas été possible de récupérer le PDF ou le XML de la facture. Veuillez réessayer plus tard."
+  },
+  "%1bZ": {
+    "original": "Geschiedenis",
+    "translation": "Historique"
+  },
+  "%1ba": {
+    "original": "verify-email",
+    "translation": "vérifier-email"
+  },
+  "%1bc": {
+    "original": "Aspi",
+    "translation": "Aspi"
+  },
+  "%1bd": {
+    "original": "Transactiekosten tussen {startDate} en {endDate}",
+    "translation": "Frais de transaction entre {startDate} et {endDate}"
+  },
+  "%1be": {
+    "original": "Plaats een knop naar deze link op je website en deel het op je sociale media. Je kan het <button>hier</button> personaliseren.",
+    "translation": "Ajoutez un bouton vers ce lien sur votre site web et partagez-le sur vos réseaux sociaux. Vous pouvez le personnaliser <button>ici</button>."
+  },
+  "%1bf": {
+    "original": "Omslagfoto en icoontje",
+    "translation": "Photo de couverture et icône"
+  },
+  "%1bg": {
+    "original": "Koppel Stripe niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen.",
+    "translation": "N’associez pas Stripe si vous êtes pressé. Vous avez cliqué en moins de 5 secondes, il était impossible de lire tous les avertissements."
+  },
+  "%1bh": {
+    "original": "De ledenadministratie wordt uitgeschakeld na {date}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.",
+    "translation": "L'administration des membres sera désactivée après le {date}. Prolongez votre formule pour éviter toute interruption des inscriptions en ligne et de l’accès aux données."
+  },
+  "%1bi": {
+    "original": "Vervallen",
+    "translation": "Expiré"
+  },
+  "%1bj": {
+    "original": "Leden op deze wachtlijst",
+    "translation": "Membres sur cette liste d’attente"
+  },
+  "%1bk": {
+    "original": "Semester {number} - {year}",
+    "translation": "Semestre {number} - {year}"
+  },
+  "%1bl": {
+    "original": "Keuzemenu's",
+    "translation": "Menus déroulants"
+  },
+  "%1bm": {
+    "original": "Inloggen kan verplicht worden via een nieuwe webshop instelling onder \"Algemene instellingen\".",
+    "translation": "La connexion peut être rendue obligatoire via un nouveau paramètre de la boutique en ligne sous « paramètres généraux »."
+  },
+  "%1bn": {
+    "original": "Geef {value}, krijg tot 100 euro tegoed* per vereniging",
+    "translation": "Donnez {value}, recevez jusqu’à 100 euros de crédit* par association"
+  },
+  "%1bo": {
+    "original": "Deze record is optioneel maar sterk aan te bevelen",
+    "translation": "Cet enregistrement est optionnel mais fortement recommandé"
+  },
+  "%1bp": {
+    "original": "Doorgestuurd naar boekhoudsoftware",
+    "translation": "Transféré vers le logiciel de comptabilité"
+  },
+  "%1bq": {
+    "original": "Er zijn nog geen interne beheerders.",
+    "translation": "Il n’y a pas encore d’administrateurs internes."
+  },
+  "%1br": {
+    "original": "Geen / onafhankelijk",
+    "translation": "Aucun / indépendant"
+  },
+  "%1bs": {
+    "original": "+12",
+    "translation": "+12"
+  },
+  "%1bt": {
+    "original": "Voorinschrijvingen tot {date}",
+    "translation": "Préinscriptions jusqu’au {date}"
+  },
+  "%1bu": {
+    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une copie de {name-period-old} et de l’utiliser comme base pour {name-period-new} (nouveau). Tous les prix et subdivisions seront copiés, mais pourront être adaptés ultérieurement. Les deux périodes fonctionneront ensuite indépendamment : tout changement dans {name-period-new} ne sera pas répercuté automatiquement vers {name-period-old}, et inversement.\\n\\nDès que {name-period-new} est complètement configuré, vous pouvez passer à celle-ci. À partir de ce moment, les membres pourront s’inscrire via le portail des membres. Jusque-là, la nouvelle période restera cachée aux membres."
+  },
+  "%1bv": {
+    "original": "De naam van de groep moet minstens één letter of cijfer bevatten.",
+    "translation": "Le nom du groupe doit contenir au moins une lettre ou un chiffre."
+  },
+  "%1bw": {
+    "original": "{count} meer",
+    "translation": "{count} de plus"
+  },
+  "%1bx": {
+    "original": "Automatische e-mail die 's ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.",
+    "translation": "E-mail automatique envoyée le matin lorsqu'un utilisateur a encore un montant impayé."
+  },
+  "%1by": {
+    "original": "Excl. BTW - Dit bedrag werd reeds aangerekend",
+    "translation": "Hors TVA - Ce montant a déjà été facturé"
+  },
+  "%1bz": {
+    "original": "Creditnota (na betaling)",
+    "translation": "Note de crédit (après paiement)"
   },
   "%1c": {
     "original": "Client ID",
     "translation": "ID client"
   },
+  "%1c0": {
+    "original": "Welke sport?",
+    "translation": "Quel sport ?"
+  },
+  "%1c1": {
+    "original": "Bestaande leden en broers en zussen kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten.",
+    "translation": "Les membres existants et leurs frères et sœurs peuvent s'inscrire immédiatement. Les nouveaux membres sont d'abord placés sur la liste d’attente et pourront être acceptés plus tard."
+  },
+  "%1c2": {
+    "original": "Van {startDate} tot {endDate}",
+    "translation": "Du {startDate} au {endDate}"
+  },
+  "%1c3": {
+    "original": "Doorgestuurd",
+    "translation": "Transmis"
+  },
+  "%1c4": {
+    "original": "Kleiner dan of gelijk aan...",
+    "translation": "Inférieur ou égal à..."
+  },
+  "%1c5": {
+    "original": "activiteiten",
+    "translation": "activités"
+  },
+  "%1c6": {
+    "original": "Tot {x} jaar",
+    "translation": "Jusqu'à {x} ans"
+  },
+  "%1c7": {
+    "original": "Kapoenen",
+    "translation": "Louveteaux"
+  },
+  "%1c8": {
+    "original": "Lokaal testcommando",
+    "translation": "Commande de test locale"
+  },
+  "%1c9": {
+    "original": "* We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Stamhoofd aan te kopen. Je kan je tegoed niet doorgeven aan een andere vereniging. Je kan geen tegoed krijgen voor een vereniging die al Stamhoofd gebruikt of al heeft geregistreerd. Ook als die persoon al een andere vereniging heeft op Stamhoofd kan je er geen tegoed meer voor krijgen. Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen. Meerdere verenigingen zelf aanmaken om zo tegoed te krijgen is niet toegestaan. Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.",
+    "translation": "* Nous ne versons jamais le crédit. Vous ne pouvez l'utiliser que pour acheter des packs sur Stamhoofd. Il n’est pas possible de transférer le crédit à une autre association. Aucun crédit ne peut être octroyé pour une association qui utilise déjà ou s'est déjà inscrite sur Stamhoofd. Si une personne possède déjà une autre association sur Stamhoofd, aucun crédit supplémentaire ne sera octroyé. Le crédit expire s'il n'est pas utilisé pendant un an (la validité est prolongée à chaque utilisation d’au moins 1 cent). Vous ne pouvez pas utiliser le crédit pour payer les frais de transaction des paiements en ligne. Créer intentionnellement plusieurs associations pour obtenir du crédit n'est pas autorisé. En cas de démarchage considéré comme du spam, l'attribution du crédit peut être annulée."
+  },
+  "%1cA": {
+    "original": "Bancontact Pay | Wero",
+    "translation": "Bancontact Pay | Wero"
+  },
+  "%1cB": {
+    "original": "Overgeslagen",
+    "translation": "Ignoré"
+  },
+  "%1cC": {
+    "original": "Beheerder bewerken",
+    "translation": "Modifier administrateur"
+  },
+  "%1cD": {
+    "original": "Alternatief",
+    "translation": "Alternative"
+  },
+  "%1cE": {
+    "original": "Dit werkjaar is niet actief, inschrijvingen via het ledenportaal zijn nog niet mogelijk.",
+    "translation": "Cette année associative n’est pas active, les inscriptions via le portail des membres ne sont pas encore possibles."
+  },
+  "%1cF": {
+    "original": "Om facturen in Stamhoofd ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.",
+    "translation": "Pour transmettre également les factures Stamhoofd à votre logiciel de comptabilité, vous pouvez les transférer par e-mail à votre logiciel comptable. Ce dernier peut lire le fichier XML. Ensuite, votre logiciel peut envoyer la facture à votre client via PEPPOL."
+  },
+  "%1cG": {
+    "original": "Je hoeft nu niets te betalen, maar de gekozen kaart zal gebruikt worden voor de periodieke betalingen.",
+    "translation": "Vous ne devez rien payer pour l’instant, mais la carte choisie sera utilisée pour les paiements récurrents."
+  },
+  "%1cH": {
+    "original": "Rakwi",
+    "translation": "Louveteaux (Rakwi)"
+  },
+  "%1cI": {
+    "original": "Categorie instellingen",
+    "translation": "Paramètres de catégorie"
+  },
+  "%1cJ": {
+    "original": "Servicekosten op {date}",
+    "translation": "Frais de service le {date}"
+  },
+  "%1cK": {
+    "original": "Betaling teruggevorderd",
+    "translation": "Paiement récupéré"
+  },
+  "%1cL": {
+    "original": "is kleiner dan of gelijk aan",
+    "translation": "est inférieur ou égal à"
+  },
+  "%1cM": {
+    "original": "‘{groupName}’ is verplaatst naar ‘{categoryName}’",
+    "translation": "‘{groupName}’ a été déplacé vers ‘{categoryName}’"
+  },
+  "%1cN": {
+    "original": "Automatische email naar schuldenaar als een betaling is mislukt die werd geïniteerd door de schuldeiser (bv. via opgeslagen creditcard)",
+    "translation": "E-mail automatique envoyée au débiteur en cas d'échec d'un paiement initié par le créancier (ex. via carte de crédit enregistrée)"
+  },
+  "%1cO": {
+    "original": "Hoofdcategorie",
+    "translation": "Catégorie principale"
+  },
+  "%1cP": {
+    "original": "Er is al een jaarovergang bezig. Wacht tot deze klaar is.",
+    "translation": "Une transition d’année est déjà en cours. Merci d’attendre qu’elle soit terminée."
+  },
+  "%1cR": {
+    "original": "Registreerde op {date}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.",
+    "translation": "Inscrit le {date}. Vous recevrez votre crédit dès que cette association aura dépensé 1 euro."
+  },
+  "%1cS": {
+    "original": "lid staat",
+    "translation": "statut du membre"
+  },
+  "%1cT": {
+    "original": "De openstaande bedragen werden aangerekend via de standaard bankkaart van elke klant",
+    "translation": "Les montants ouverts ont été débités via la carte bancaire par défaut de chaque client"
+  },
+  "%1cV": {
+    "original": "Stamhoofd",
+    "translation": "Stamhoofd"
+  },
+  "%1cW": {
+    "original": "Jouw API-key vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal van Bancontact Pay. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.",
+    "translation": "Votre clé API nécessite votre attention. Votre compte Payconiq n’a pas été transféré vers le nouveau portail commerçant Bancontact Pay. Il se peut que vous ayez uniquement un contrat Payconiq pour la solution autocollant, et non pour la solution en ligne. Consultez le guide (cliquez ici) pour résoudre ce problème. Nous ne pouvons garantir que votre connexion Payconiq actuelle restera opérationnelle dans le futur."
+  },
+  "%1cY": {
+    "original": "Automatische e-mail die 's ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.",
+    "translation": "E-mail automatique envoyée le matin si le solde d’un groupe a augmenté."
+  },
+  "%1cZ": {
+    "original": "Hoera, gelukt!",
+    "translation": "Bravo, c'est réussi !"
+  },
+  "%1ca": {
+    "original": "Je kan ten vroegste vanaf {date} overschakelen naar dit werkjaar",
+    "translation": "Vous pouvez passer à cette année associative à partir du {date} au plus tôt"
+  },
+  "%1cb": {
+    "original": "Kwartaal {number} - {year}",
+    "translation": "Trimestre {number} - {year}"
+  },
+  "%1ce": {
+    "original": "Vroeger bekend als Payconiq",
+    "translation": "Anciennement connu sous le nom de Payconiq"
+  },
+  "%1cf": {
+    "original": "Volgende aanpassingsdatum",
+    "translation": "Prochaine date d'ajustement"
+  },
+  "%1cg": {
+    "original": "Je hebt jouw tegoed ontvangen!",
+    "translation": "Vous avez reçu votre crédit !"
+  },
+  "%1ch": {
+    "original": "De overige {numNoUpdate} geselecteerde verenigingen hebben deze tag niet.",
+    "translation": "Les {numNoUpdate} autres associations sélectionnées n'ont pas ce tag."
+  },
+  "%1ci": {
+    "original": "Deze categorie is leeg",
+    "translation": "Cette catégorie est vide"
+  },
+  "%1cj": {
+    "original": "start",
+    "translation": "démarrer"
+  },
+  "%1ck": {
+    "original": "Deze link is niet (meer) geldig omdat de vereniging niet bestaat",
+    "translation": "Ce lien n’est plus valide parce que l’association n’existe pas"
+  },
+  "%1cm": {
+    "original": "Geen filter",
+    "translation": "Aucun filtre"
+  },
+  "%1co": {
+    "original": "Tweede semester (februari - mei)",
+    "translation": "Deuxième semestre (février - mai)"
+  },
+  "%1cp": {
+    "original": "Stel per onderverdeling een standaardtarief in. Wil je een groep volledig instellen, gebruik dan de instellingenknop.",
+    "translation": "Définissez un tarif standard par subdivision. Pour paramétrer un groupe entier, utilisez le bouton des paramètres."
+  },
+  "%1cq": {
+    "original": "afhouding van je balans",
+    "translation": "retenue de votre solde"
+  },
+  "%1cr": {
+    "original": "Bovenliggende categorie",
+    "translation": "Catégorie supérieure"
+  },
+  "%1cs": {
+    "original": "Welkom bij {organization}",
+    "translation": "Bienvenue chez {organization}"
+  },
+  "%1ct": {
+    "original": "Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.",
+    "translation": "La modification des packs est réservée aux administrateurs principaux. Contactez-les pour prolonger."
+  },
+  "%1cu": {
+    "original": "Enkel voor gezinnen die in aanmerking komen voor financiële ondersteuning",
+    "translation": "Uniquement pour les familles éligibles au soutien financier"
+  },
+  "%1cv": {
+    "original": "Eén item werd betaald",
+    "translation": "Un article a été payé"
+  },
+  "%1cw": {
+    "original": "De facturatiegegevens die je probeert aan te passen konden niet gevonden worden. Herlaad de pagina en probeer het opnieuw.",
+    "translation": "Les informations de facturation que vous essayez de modifier sont introuvables. Rechargez la page et réessayez."
+  },
+  "%1cy": {
+    "original": "Je test momenteel de webshops functie. Je webshops staan nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.",
+    "translation": "Vous testez actuellement la fonction boutiques en ligne. Vos boutiques sont toujours en mode démo. Activez la fonctionnalité pour l'utiliser réellement."
+  },
+  "%1cz": {
+    "original": "Aangepast",
+    "translation": "Modifié"
+  },
   "%1d": {
     "original": "Gender",
     "translation": "Genre"
+  },
+  "%1d0": {
+    "original": "Verdien tegoed",
+    "translation": "Gagnez du crédit"
+  },
+  "%1d1": {
+    "original": "Maximum bruikbaar van in totaal {price} tegoed",
+    "translation": "Maximum de {price} de crédit utilisable"
+  },
+  "%1d3": {
+    "original": "Sluit op {date}",
+    "translation": "Se termine le {date}"
+  },
+  "%1d5": {
+    "original": "Deze groep heeft meerdere tarieven. Pas ze aan via de instellingen.",
+    "translation": "Ce groupe dispose de plusieurs tarifs. Modifiez-les via les paramètres."
+  },
+  "%1d7": {
+    "original": "Ja, openen",
+    "translation": "Oui, ouvrir"
+  },
+  "%1d8": {
+    "original": "Schooljaar opgedeeld in twee semesters.",
+    "translation": "Année scolaire divisée en deux semestres."
+  },
+  "%1d9": {
+    "original": "Nog {count} plaatsen",
+    "translation": "Encore {count} places"
+  },
+  "%1dA": {
+    "original": "servicekosten",
+    "translation": "frais de service"
+  },
+  "%1dC": {
+    "original": "Betalingen zijn enkel beschikbaar voor hoofdbeheerders. Vraag hen om de betaling in orde te brengen.",
+    "translation": "Les paiements ne sont accessibles qu'aux administrateurs principaux. Demandez-leur de traiter le paiement."
+  },
+  "%1dD": {
+    "original": "Deze aanrekening is onzichtbaar en telt niet als openstaand bedrag. Pas na betaling wordt het zichtbaar.",
+    "translation": "Cette charge est invisible et n'est pas comptabilisée comme montant ouvert. Elle ne devient visible qu'après paiement."
+  },
+  "%1dE": {
+    "original": "Log in, of maak een account aan.",
+    "translation": "Connectez-vous ou créez un compte."
+  },
+  "%1dF": {
+    "original": "Er zijn nog geen beheerders. Nodig iemand uit om beheerder te worden.",
+    "translation": "Il n'y a pas encore d'administrateurs. Invitez quelqu'un à devenir administrateur."
+  },
+  "%1dG": {
+    "original": "Je kan geen groep met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.",
+    "translation": "Vous ne pouvez pas déplacer un groupe avec des réductions pour plusieurs inscriptions vers une autre année associative. Veuillez d'abord supprimer les réductions."
+  },
+  "%1dH": {
+    "original": "Naam vereniging (betaler)",
+    "translation": "Nom de l'association (payeur)"
+  },
+  "%1dJ": {
+    "original": "Geen opties",
+    "translation": "Aucune option"
+  },
+  "%1dK": {
+    "original": "Deze factuur kon niet worden gevonden",
+    "translation": "Cette facture est introuvable"
+  },
+  "%1dM": {
+    "original": "Dit werkjaar wordt zichtbaar in het ledenportaal voor leden om in te schrijven. Inschrijven voor andere werkjaren is dan niet langer mogelijk.",
+    "translation": "Cette année associative sera visible sur le portail des membres pour permettre l'inscription. Il ne sera alors plus possible de s'inscrire pour d'autres années associatives."
+  },
+  "%1dO": {
+    "original": "Servicekosten achteraf aangerekend (excl. BTW)",
+    "translation": "Frais de service facturés ultérieurement (hors TVA)"
+  },
+  "%1dQ": {
+    "original": "Verwijder en verplaats inhoud naar",
+    "translation": "Supprimer et déplacer le contenu vers"
+  },
+  "%1dT": {
+    "original": "{n}e vereniging",
+    "translation": "{n}e association"
+  },
+  "%1dU": {
+    "original": "Bestaande leden kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten.",
+    "translation": "Les membres existants peuvent s'inscrire immédiatement. Les nouveaux membres sont d'abord placés sur la liste d'attente et pourront être acceptés plus tard."
   },
   "%1g": {
     "original": "Weekends",
@@ -7346,10 +9042,6 @@
   "%1j": {
     "original": "Scan tickets",
     "translation": "Scanner les tickets"
-  },
-  "%1k": {
-    "original": "Payconiq",
-    "translation": "Payconiq"
   },
   "%1m": {
     "original": "Account ID",
@@ -7768,8 +9460,8 @@
     "translation": "Rechercher par nom ou code postal"
   },
   "%3v": {
-    "original": "Het bedrag wordt achteraf door KSA Nationaal aan je groep gefactureerd.",
-    "translation": "Le montant sera facturé ultérieurement à votre groupe par KSA National."
+    "original": "Het bedrag wordt achteraf door Stamhoofd aan je groep gefactureerd.",
+    "translation": "Le montant sera facturé ultérieurement par Stamhoofd à votre groupe."
   },
   "%3w": {
     "original": "Tot en met",
@@ -8084,12 +9776,12 @@
     "translation": "Cette adresse de site web est non valide. Vérifiez bien qu’elle ne contient pas de caractères non valides tels que des espaces ou des caractères spéciaux."
   },
   "%5B": {
-    "original": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
-    "translation": "Ce membre n’est plus affilié à KSA National et l’assurance expire bientôt"
+    "original": "Dit lid is niet langer aangesloten bij Stamhoofd, en de verzekering loopt binnenkort af",
+    "translation": "Ce membre n'est plus affilié à Stamhoofd et l'assurance prendra bientôt fin."
   },
   "%5C": {
-    "original": "Dit lid is niet aangesloten bij KSA Nationaal, en is daardoor ook niet verzekerd",
-    "translation": "Ce membre n’est pas affilié à KSA National et n’est donc pas assuré"
+    "original": "Dit lid is niet aangesloten bij Stamhoofd, en is daardoor ook niet verzekerd",
+    "translation": "Ce membre n'est pas affilié à Stamhoofd et n'est donc pas assuré."
   },
   "%5D": {
     "original": "Niet ingeschreven",
@@ -8174,10 +9866,6 @@
   "%5Z": {
     "original": "De betaling loopt niet via Stamhoofd",
     "translation": "Le paiement ne passe pas par Stamhoofd"
-  },
-  "%5a": {
-    "original": "Je kan geen documenten aanmaken in de gratis versie van Stamhoofd",
-    "translation": "Vous ne pouvez pas créer de documents dans la version gratuite de Stamhoofd"
   },
   "%5b": {
     "original": "Dit is geen geldig zaalplan uit Stamhoofd",
@@ -8696,20 +10384,20 @@
     "translation": "Filtrer toutes les associations qui ont un membre qui répond à ces conditions."
   },
   "%7g": {
-    "original": "Aansluiting KSA Nationaal",
-    "translation": "Affiliation KSA National"
+    "original": "Aansluiting Stamhoofd",
+    "translation": "Affiliation Stamhoofd"
   },
   "%7h": {
-    "original": "Jouw leiding kan in Stamhoofd jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
-    "translation": "Votre encadrement peut retrouver votre code de sécurité dans Stamhoofd et vous le transmettre. Si vous faites partie de l'encadrement, demandez-le à vos collègues ou à KSA National."
+    "original": "Jouw leiding kan in Stamhoofd jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of Stamhoofd.",
+    "translation": "Votre encadrement peut retrouver votre code de sécurité dans Stamhoofd et vous le communiquer. Si vous êtes vous-même encadrant, demandez-le à un autre responsable ou à Stamhoofd."
   },
   "%7i": {
-    "original": "Het bedrag zal achteraf door KSA Nationaal aan {name} worden gefactureerd",
-    "translation": "Le montant sera facturé ultérieurement par KSA National à {name}"
+    "original": "Het bedrag zal achteraf door Stamhoofd aan {name} worden gefactureerd",
+    "translation": "Le montant sera ultérieurement facturé par Stamhoofd à {name}."
   },
   "%7j": {
-    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
-    "translation": "Les membres que vous inscrivez dans un groupe d'âge que vous liez à un groupe d'âge standard de KSA National sont automatiquement affiliés. Pour les autres membres, vous pouvez demander une affiliation manuellement ici."
+    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van Stamhoofd worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
+    "translation": "Les membres inscrits dans un groupe d'âge lié à un groupe d'âge standard de Stamhoofd seront automatiquement affiliés. Pour les autres membres, vous pouvez demander ici une affiliation manuelle."
   },
   "%7l": {
     "original": "De link naar deze activiteit in het ledenportaal. Deel deze link met leden.",
@@ -8747,10 +10435,6 @@
     "original": "Stamhoofd raadt een proefperiode van {days} aan.",
     "translation": "Stamhoofd recommande une période d'essai de {days}."
   },
-  "%7u": {
-    "original": "Datum eerste activiteit of vergadering",
-    "translation": "Date de la première activité ou réunion"
-  },
   "%7v": {
     "original": "Als nieuwe leden inschrijven voor deze datum, begint de proefperiode pas te lopen vanaf deze datum. Handig als de activiteiten pas na het begin van de inschrijvingen starten.",
     "translation": "Si de nouveaux membres s'inscrivent avant cette date, la période d'essai ne commence qu'à partir de cette date. Utile si les activités ne commencent qu'après le début des inscriptions."
@@ -8768,16 +10452,16 @@
     "translation": "Arrêté"
   },
   "%7z": {
-    "original": "Dit lid heeft een proefaansluiting bij KSA Nationaal",
-    "translation": "Ce membre a une affiliation d'essai à KSA National"
+    "original": "Dit lid heeft een proefaansluiting bij Stamhoofd",
+    "translation": "Ce membre possède une affiliation d'essai chez Stamhoofd."
   },
   "%8": {
     "original": "Inloggen op Stamhoofd",
     "translation": "Se connecter à Stamhoofd"
   },
   "%80": {
-    "original": "Dit lid is niet aangesloten in {werkjaar} bij KSA Nationaal, en is daardoor ook niet verzekerd.",
-    "translation": "Ce membre n'est pas affilié à KSA National en {werkjaar} et n'est donc pas assuré."
+    "original": "Dit lid is niet aangesloten in {werkjaar} bij Stamhoofd, en is daardoor ook niet verzekerd.",
+    "translation": "Ce membre n'est pas affilié à Stamhoofd en {werkjaar} et n'est donc pas assuré."
   },
   "%81": {
     "original": "Deze aansluiting werd automatisch aangemaakt",
@@ -8887,10 +10571,6 @@
     "original": "Instellen als huidig werkjaar",
     "translation": "Définir comme année associative en cours"
   },
-  "%8S": {
-    "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in",
-    "translation": "Tous les membres doivent s'inscrire à nouveau pour la nouvelle année associative, ou inscrivez-vous vous-même à nouveau"
-  },
   "%8T": {
     "original": "Stappenplan opstart werkjaar",
     "translation": "Mode d'emploi de démarrage de l'année associative"
@@ -8902,10 +10582,6 @@
   "%8V": {
     "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig werkjaar van gelijk welke inschrijvingsgroep.",
     "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année associative précédente de n'importe quel groupe d'inscription."
-  },
-  "%8W": {
-    "original": "Geen verenigingen beschikbaar in dit werkjaar",
-    "translation": "Aucune association disponible pour cette année associative"
   },
   "%8X": {
     "original": "Onbekend werkjaar",
@@ -9300,8 +10976,8 @@
     "translation": "Fonctions au niveau national"
   },
   "%A5": {
-    "original": "Deze functies zijn globaal en gelden enkel op koepelniveau. Enkel een hoofdbeheerder van de koepel kan deze toekennen aan een lid. Sommige functies geven ook toegang het het administratieportaal.",
-    "translation": "Ces fonctions sont globales et ne s'appliquent qu'au niveau de la fédération. Seul un administrateur principal de la fédération peut les attribuer à un membre. Certaines fonctions donnent également accès au portail d'administration."
+    "original": "Deze functies zijn globaal en gelden enkel op koepelniveau. Enkel een hoofdbeheerder van de koepel kan deze toekennen aan een lid. Sommige functies geven ook toegang tot het administratieportaal.",
+    "translation": "Ces fonctions sont globales et ne s'appliquent qu'au niveau de la coupole. Seul un administrateur principal de la coupole peut attribuer ces fonctions à un membre. Certaines fonctions donnent aussi accès au portail d'administration."
   },
   "%A6": {
     "original": "Standaardfuncties op lokaal niveau",
@@ -9350,10 +11026,6 @@
   "%AH": {
     "original": "Alle verenigingen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
     "translation": "Toutes les associations sont transférées vers cette nouvelle année associative. Les administrateurs principaux peuvent encore consulter l’année associative précédente."
-  },
-  "%AI": {
-    "original": "Er zijn geen leden die kunnen inschrijven.",
-    "translation": "Aucun membre ne peut s'inscrire."
   },
   "%AJ": {
     "original": "Deze aansluiting is vergrendeld. Hierdoor kan de prijs niet aangepast worden en kan deze niet verwijderd worden.",
@@ -9528,8 +11200,8 @@
     "translation": "brouillon"
   },
   "%B": {
-    "original": "Jouw vereniging bevindt zich in een ander werkjaar dan KSA Nationaal.",
-    "translation": "Votre association se trouve dans une autre année associative que KSA National."
+    "original": "Jouw vereniging bevindt zich in een ander werkjaar dan Stamhoofd.",
+    "translation": "Votre association se trouve dans une autre année associative que Stamhoofd."
   },
   "%B0": {
     "original": "ingediend",
@@ -9556,8 +11228,8 @@
     "translation": "L’un des numéros de téléphone que vous avez saisis semble incorrect. Pouvez-vous les compléter et soumettre à nouveau la notification de camp ?"
   },
   "%B6": {
-    "original": "Er ging iet mis bij het uploaden van jouw bestand. Probeer het later opnieuw (foutcode: SIGN).",
-    "translation": "Une erreur s’est produite lors du téléchargement de votre fichier. Veuillez réessayer ultérieurement (code d’erreur : SIGN)."
+    "original": "Er ging iets mis bij het uploaden van jouw bestand. Probeer het later opnieuw (foutcode: SIGN).",
+    "translation": "Une erreur s'est produite lors du téléchargement de votre fichier. Veuillez réessayer plus tard (code d'erreur : SIGN)."
   },
   "%B7": {
     "original": "Je probeert een bestand up te loaden dat niet door ons is gegenereerd. Probeer het opnieuw.",
@@ -9640,12 +11312,12 @@
     "translation": "Certaines adhésions passent par Stamhoofd (le membre paie directement la fédération) et ne sont donc pas vraiment facturées à une association individuelle. Vous pouvez les exclure via ce filtre."
   },
   "%BR": {
-    "original": "Lid betaald rechtstreeks aan Stamhoofd",
-    "translation": "Membre paie directement à Stamhoofd"
+    "original": "Lid betaalt rechtstreeks aan Stamhoofd",
+    "translation": "Le membre paie directement à Stamhoofd."
   },
   "%BS": {
-    "original": "Lid betaald aan individuele vereniging",
-    "translation": "Membre paie à l’association individuelle"
+    "original": "Lid betaalt aan individuele vereniging",
+    "translation": "Le membre paie à l'association individuelle."
   },
   "%BT": {
     "original": "Type aansluiting",
@@ -9704,8 +11376,8 @@
     "translation": "Adhésion déverrouillée"
   },
   "%Bh": {
-    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
-    "translation": "La prochaine adhésion de ce membre commence le {date}. Aujourd’hui, ce membre n’est pas affilié à KSA National et n’est donc pas assuré."
+    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij Stamhoofd en daardoor niet verzekerd.",
+    "translation": "La prochaine affiliation de ce membre commencera le {date}. Pour l'instant, ce membre n'est pas affilié à Stamhoofd et n'est donc pas assuré."
   },
   "%Bi": {
     "original": "Uit het archief",
@@ -9768,8 +11440,8 @@
     "translation": "Cette fonction est invalide car {name} n’est pas inscrit. Cette fonction sera automatiquement supprimée à la fin du mois."
   },
   "%Bz": {
-    "original": "Dit is een interne beheerder die ook een externe beheerdersol heeft gekregen.",
-    "translation": "Il s’agit d’un administrateur interne qui a également reçu un rôle d’administrateur externe."
+    "original": "Dit is een interne beheerder die ook een externe beheerdersrol heeft gekregen.",
+    "translation": "Ceci est un administrateur interne qui possède également un rôle d'administrateur externe."
   },
   "%C": {
     "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.",
@@ -9836,7 +11508,7 @@
     "translation": "p. ex. Allez à votre camp dans l’onglet Activités (ou créez-le d’abord) et cliquez sur le bouton pour soumettre votre notification de camp"
   },
   "%CF": {
-    "original": "Als eerstsvolgende deadline",
+    "original": "Als eerstvolgende deadline",
     "translation": "Comme prochaine échéance"
   },
   "%CG": {
@@ -10384,8 +12056,8 @@
     "translation": "Modèle non trouvé"
   },
   "%ER": {
-    "original": "Je kan maar maximaal 1.000 adressen tergelijk controleren.",
-    "translation": "Vous pouvez vérifier au maximum 1.000 adresses à la fois."
+    "original": "Je kan maar maximaal 1.000 adressen tegelijk controleren.",
+    "translation": "Vous pouvez vérifier au maximum 1.000 adresses en même temps."
   },
   "%ES": {
     "original": "Je hebt geen toegang om deze emailtemplate te bewerken",
@@ -10456,8 +12128,8 @@
     "translation": "La date ne peut pas être dans le futur"
   },
   "%Ej": {
-    "original": "Een verschuild moet altijd aan een lid of gebruiker gelinkt zijn",
-    "translation": "Un échelon doit toujours être lié à un membre ou un utilisateur"
+    "original": "Een schuld moet altijd aan een lid of gebruiker gelinkt zijn",
+    "translation": "Une dette doit toujours être liée à un membre ou un utilisateur."
   },
   "%Ek": {
     "original": "Je hebt geen toegang om aanrekeningen te maken verbonden met dit lid",
@@ -10652,8 +12324,8 @@
     "translation": "Vous n'avez pas l'autorisation de modifier les tickets de cette boutique en ligne"
   },
   "%FV": {
-    "original": "Er ging iets mis bij het aanmaken van het document. Probeer later opieuw en neem contact met ons op als het probleem blijft herhalen.",
-    "translation": "Une erreur s'est produite lors de la création du document. Veuillez réessayer plus tard et contactez-nous si le problème persiste."
+    "original": "Er ging iets mis bij het aanmaken van het document. Probeer later opnieuw en neem contact met ons op als het probleem blijft herhalen.",
+    "translation": "Une erreur est survenue lors de la création du document. Réessayez plus tard et contactez-nous si le problème persiste."
   },
   "%FW": {
     "original": "Je hebt geen toegang tot deze betaling",
@@ -10720,10 +12392,6 @@
     "translation": "Caractères inconnus dans le nom de fichier"
   },
   "%Fm": {
-    "original": "Ongelidge datum",
-    "translation": "Date incorrecte"
-  },
-  "%Fn": {
     "original": "Ongeldige datum",
     "translation": "Date invalide"
   },
@@ -11139,14 +12807,6 @@
     "original": "Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.",
     "translation": "Essayez en avant-première de nouvelles fonctions en cours de développement."
   },
-  "%HS": {
-    "original": "Configureer een externe authenticatie server",
-    "translation": "Configurer un serveur d'authentification externe"
-  },
-  "%HT": {
-    "original": "Configureer login via Google",
-    "translation": "Configurer la connexion via Google"
-  },
   "%HU": {
     "original": "De aanpassingen zijn opgeslagen",
     "translation": "Les modifications ont été enregistrées"
@@ -11340,8 +13000,8 @@
     "translation": "Ville Exemple"
   },
   "%IG": {
-    "original": "Tonen bij het registeren",
-    "translation": "Afficher lors de l'inscription"
+    "original": "Tonen bij het registreren",
+    "translation": "Afficher lors de l’inscription"
   },
   "%IH": {
     "original": "Verplicht aanvinkvakje",
@@ -11384,7 +13044,7 @@
     "translation": "Êtes-vous sûr de vouloir supprimer ces conditions ?"
   },
   "%IR": {
-    "original": "Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.",
+    "original": "Voeg voorwaarden toe die bij het registreren staan vermeld of geaccepteerd moeten worden.",
     "translation": "Ajoutez des conditions qui doivent être mentionnées ou acceptées lors de l'inscription."
   },
   "%IS": {
@@ -11414,14 +13074,6 @@
   "%IY": {
     "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken.",
     "translation": "Bienvenue sur le portail d'administration. Vous pouvez ici rechercher tous les membres ou groupes, ou créer des activités nationales/régionales."
-  },
-  "%IZ": {
-    "original": "E-mailadres valideren...",
-    "translation": "Validation de l'adresse e-mail…"
-  },
-  "%Ia": {
-    "original": "E-mailadres is gevalideerd",
-    "translation": "Adresse e-mail validée"
   },
   "%Ib": {
     "original": "Bezig met uitschrijven...",
@@ -11474,10 +13126,6 @@
   "%In": {
     "original": "Feedback systeem openen...",
     "translation": "Ouverture du système de feedback…"
-  },
-  "%Io": {
-    "original": "Deze record is optioneel",
-    "translation": "Ce registre est optionnel"
   },
   "%Ip": {
     "original": "Klik om te kopiëren",
@@ -11668,12 +13316,8 @@
     "translation": "Vous devez accepter au moins un mode de paiement"
   },
   "%Ja": {
-    "original": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts).",
-    "translation": "Vous devez d’abord activer Payconiq dans les paramètres de paiement (Paramètres > Comptes de paiement)."
-  },
-  "%Jb": {
-    "original": "Er ging iets mis: te veel doorverwijzingen.",
-    "translation": "Une erreur s'est produite : trop de redirections."
+    "original": "Je moet eerst Bancontact Pay | Wero activeren via de betaalinstellingen (Instellingen > Betaalaccounts).",
+    "translation": "Vous devez d'abord activer Bancontact Pay | Wero via les paramètres de paiement (Paramètres > Comptes de paiement)."
   },
   "%Je": {
     "original": "Betaling mislukt",
@@ -11736,8 +13380,8 @@
     "translation": "Moyen"
   },
   "%Jt": {
-    "original": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
-    "translation": "Pour une clé API qui doit appeler très régulièrement l'API. Risque de surcharge si l'API n'est pas correctement implémentée et envoie des requêtes lourdes en peu de temps."
+    "original": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geïmplementeerd en zware requests op korte tijd afvuurt.",
+    "translation": "Pour une clé API qui doit appeler l’API très fréquemment. Il y a un risque de surcharge si l’API n’est pas implémentée correctement et envoie des requêtes lourdes en peu de temps."
   },
   "%Ju": {
     "original": "Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag",
@@ -11748,8 +13392,8 @@
     "translation": "Élevé"
   },
   "%Jw": {
-    "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
-    "translation": "Pour une clé API qui doit utiliser l'API de manière très intensive. Risque de surcharge si l'API n'est pas correctement implémentée et envoie des requêtes lourdes en peu de temps."
+    "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geïmplementeerd en zware requests op korte tijd afvuurt.",
+    "translation": "Pour une clé API destinée à une utilisation intensive de l'API. Risque de surcharge si l'API n'est pas correctement implémentée et envoie des requêtes lourdes en peu de temps."
   },
   "%Jx": {
     "original": "Maximaal 25 req/s; 480 requests per 2 minuten; 4.000 requests per uur; 28.800 requests per dag",
@@ -11951,10 +13595,6 @@
     "original": "Verwijder",
     "translation": "Supprimer"
   },
-  "%Kl": {
-    "original": "Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
-    "translation": "Cette fonction n'est pas disponible car votre association utilise encore l'ancien forfait gratuit d'administration des membres. Via les paramètres, les administrateurs principaux peuvent passer à la version payante avec plus de fonctionnalités."
-  },
   "%Km": {
     "original": "Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.",
     "translation": "Créez des documents et partagez-les avec vos membres. Il est possible de remplir automatiquement les données des membres dans les documents, par exemple pour un justificatif fiscal ou un justificatif de participation pour la mutuelle."
@@ -12107,18 +13747,6 @@
     "original": "Opdelen in categorieën",
     "translation": "Diviser en catégories"
   },
-  "%LP": {
-    "original": "Prullenmand inschrijvingsgroepen",
-    "translation": "Corbeille des groupes d'inscriptions"
-  },
-  "%LQ": {
-    "original": "Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.",
-    "translation": "Vous avez supprimé un groupe d'inscriptions par erreur ? Vous pouvez restaurer le groupe d'inscriptions et les membres qui y sont associés."
-  },
-  "%LR": {
-    "original": "Open prullenmand",
-    "translation": "Ouvrir la corbeille"
-  },
   "%LS": {
     "original": "Verwijder deze categorie",
     "translation": "Supprimer cette catégorie"
@@ -12130,14 +13758,6 @@
   "%LU": {
     "original": "Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie",
     "translation": "Ce groupe se trouve dans une catégorie qui n'est visible que pour les administrateurs ou les membres ayant une fonction"
-  },
-  "%LV": {
-    "original": "Inschrijvingen zijn momenteel gesloten via het ledenportaal.",
-    "translation": "Les inscriptions sont actuellement fermées via le portail des membres."
-  },
-  "%LW": {
-    "original": "Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.",
-    "translation": "Définissez une date à laquelle elles doivent ouvrir, ou ouvrez les inscriptions manuellement via les boutons en bas."
   },
   "%LX": {
     "original": "Ingeschreven leden",
@@ -12171,10 +13791,6 @@
     "original": "Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen",
     "translation": "Déterminez qui peut consulter ou modifier les membres et les paramètres de ce groupe"
   },
-  "%Lf": {
-    "original": "Stel een foto en icoontje van deze groep in.",
-    "translation": "Définissez une photo et une icône pour ce groupe."
-  },
   "%Lg": {
     "original": "Wijzig de inhoud van automatische e-mails voor deze groep.",
     "translation": "Modifiez le contenu des e-mails automatiques pour ce groupe."
@@ -12199,10 +13815,6 @@
     "original": "Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.",
     "translation": "Supprimer ce groupe et toutes les informations qui y sont associées. Ce n'est généralement pas nécessaire."
   },
-  "%Ln": {
-    "original": "Foto's en icoontje",
-    "translation": "Photos et icône"
-  },
   "%Lo": {
     "original": "Deze inschrijvingsgroepen werden verwijderd. Je kan ze terugzetten door ze aan te klikken.",
     "translation": "Ces groupes d'inscriptions ont été supprimés. Vous pouvez les restaurer en cliquant dessus."
@@ -12224,8 +13836,8 @@
     "translation": "Photo carrée ou icône"
   },
   "%Lt": {
-    "original": "Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens te uploaden.",
-    "translation": "Cette photo sera affichée dans l'aperçu lors du choix entre tous les groupes. Téléchargez de préférence une photo de plus de 200 x 200 pixels. Si vous ne la téléchargez pas, nous utiliserons simplement la photo de couverture (si elle existe). Vous n'avez donc pas besoin de télécharger à nouveau la même photo."
+    "original": "Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt, gebruiken we gewoon de omslagfoto (als die er is).",
+    "translation": "Cette photo sera affichée dans l’aperçu lors du choix entre tous les groupes. Il est préférable de télécharger une photo de plus de 200 x 200 pixels. Si vous n’en téléchargez pas, nous utiliserons la photo de couverture (si elle existe)."
   },
   "%Lu": {
     "original": "Geen betalingen gevonden",
@@ -12703,14 +14315,6 @@
     "original": "Aansluiten bij Stripe",
     "translation": "Connexion à Stripe"
   },
-  "%Nq": {
-    "original": "Online betalingen via Payconiq",
-    "translation": "Paiements en ligne via Payconiq"
-  },
-  "%Nr": {
-    "original": "Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken.",
-    "translation": "Veuillez saisir votre clé API ci-dessous pour traiter les paiements directement via Payconiq."
-  },
   "%Ns": {
     "original": "Op naam van",
     "translation": "Au nom de"
@@ -12766,10 +14370,6 @@
   "%O7": {
     "original": "Betaalmethodes",
     "translation": "Méthodes de paiement"
-  },
-  "%O8": {
-    "original": "API-key van Payconiq",
-    "translation": "Clé API de Payconiq"
   },
   "%O9": {
     "original": "Standaardprofiel",
@@ -12934,10 +14534,6 @@
   "%On": {
     "original": "Link naar ledenportaal",
     "translation": "Lien vers le portail des membres"
-  },
-  "%Oo": {
-    "original": "Via deze weg kunnen leden zelf online inschrijven",
-    "translation": "Les membres peuvent ainsi s’inscrire en ligne eux-mêmes"
   },
   "%Op": {
     "original": "Inschrijvingsgroepen beheren",
@@ -13940,8 +15536,8 @@
     "translation": "Nom de la livraison"
   },
   "%Sw": {
-    "original": "Hier kan je eventeel leveringsinformatie kwijt (optioneel)",
-    "translation": "Vous pouvez y indiquer des informations de livraison éventuelles (facultatif)"
+    "original": "Hier kan je eventueel leveringsinformatie kwijt (optioneel)",
+    "translation": "Vous pouvez éventuellement indiquer ici des informations de livraison (optionnel)."
   },
   "%Sx": {
     "original": "Keuze uit leveringstijdstip",
@@ -13976,8 +15572,8 @@
     "translation": "p. ex. cantine"
   },
   "%T4": {
-    "original": "Hier kan je eventeel afhaalinstructies kwijt (optioneel)",
-    "translation": "Vous pouvez y indiquer des instructions de retrait éventuelles (facultatif)"
+    "original": "Hier kan je eventueel afhaalinstructies kwijt (optioneel)",
+    "translation": "Vous pouvez éventuellement indiquer ici des instructions pour le retrait (optionnel)."
   },
   "%T5": {
     "original": "Datum en tijd + keuze uit afhaalintervallen",
@@ -14779,34 +16375,6 @@
     "original": "Mijn vereniging staat er niet tussen",
     "translation": "Mon association n'est pas dans la liste"
   },
-  "%WJ": {
-    "original": "Beheer jouw groep",
-    "translation": "Gérer votre groupe"
-  },
-  "%WK": {
-    "original": "Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.",
-    "translation": "Oups, il n'y a pas encore de groupes d'inscription créés. Allez dans les paramètres et configurez vos groupes d'inscription."
-  },
-  "%WL": {
-    "original": "Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is",
-    "translation": "Cette catégorie est invisible pour les membres car les activités ne sont pas activées"
-  },
-  "%WM": {
-    "original": "De structuur van jouw leeftijdsgroepen blijft behouden (er wordt een éénmalige kopie gemaakt), maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.",
-    "translation": "La structure de vos groupes d'âge est conservée (une copie unique est créée), mais vous devrez encore adapter le prix et les dates vous-même. N'oubliez pas de le faire."
-  },
-  "%WN": {
-    "original": "Je kan nog steeds aan de gegevens van vorig jaar",
-    "translation": "Vous pouvez toujours accéder aux données de l'année dernière"
-  },
-  "%WO": {
-    "original": "Deze periode is niet beschikbaar voor jouw vereniging.",
-    "translation": "Cette période n'est pas disponible pour votre association."
-  },
-  "%WP": {
-    "original": "Je bekijkt nu",
-    "translation": "Vous consultez actuellement"
-  },
   "%WQ": {
     "original": "Jouw account",
     "translation": "Votre compte"
@@ -14863,25 +16431,9 @@
     "original": "Via opzoekwerk (bv. Google)",
     "translation": "Via des recherches (par exemple, Google)"
   },
-  "%Wl": {
-    "original": "Kies de functies die je wilt uitproberen",
-    "translation": "Choisissez les fonctions que vous souhaitez essayer"
-  },
-  "%Wm": {
-    "original": "Test de functies eerst rustig uit voor je beslist om een pakket te kopen. Je hoeft geen betaalgegevens in te geven.",
-    "translation": "Testez d'abord les fonctions tranquillement avant de décider d'acheter un forfait. Vous n'avez pas besoin de saisir vos données de paiement."
-  },
-  "%Wn": {
-    "original": "Je kan later deze functies wijzigingen via het instellingen menu.",
-    "translation": "Vous pourrez modifier ces fonctions ultérieurement via le menu des paramètres."
-  },
   "%Wo": {
     "original": "Aan de slag",
     "translation": "Commencer"
-  },
-  "%Wp": {
-    "original": "Functies uitproberen",
-    "translation": "Essayer les fonctions"
   },
   "%Wr": {
     "original": "Er zijn geen ingebouwde functies.",
@@ -15315,10 +16867,6 @@
     "original": "Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.",
     "translation": "Pour ajouter un administrateur, inscrivez un (nouveau) membre et attribuez à ce membre les fonctions appropriées."
   },
-  "%Ya": {
-    "original": "Deze groep heeft nog geen interne beheerders.",
-    "translation": "Ce groupe n'a pas encore d'administrateurs internes."
-  },
   "%Yb": {
     "original": "Hoofdbeheerder",
     "translation": "Administrateur principal"
@@ -15342,10 +16890,6 @@
   "%Yg": {
     "original": "Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).",
     "translation": "Ces administrateurs ont uniquement un compte et ne sont pas membres (ou leur compte n'a pas pu être associé à un membre car ils utilisent une adresse e-mail inconnue)."
-  },
-  "%Yh": {
-    "original": "Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.",
-    "translation": "Ce groupe n'a pas encore d'administrateurs externes. Invitez quelqu'un à devenir administrateur."
   },
   "%Yi": {
     "original": "Account toevoegen",
@@ -15539,10 +17083,6 @@
     "original": "Vul de code uit de e-mail in",
     "translation": "Saisissez le code de l'e-mail"
   },
-  "%ZT": {
-    "original": "Verifieer jouw e-mailadres",
-    "translation": "Vérifiez votre adresse e-mail"
-  },
   "%ZU": {
     "original": "Er werd een e-mail verstuurd naar '{email}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!",
     "translation": "Un e-mail a été envoyé à '{email}'. Saisissez le code de l'e-mail ou cliquez sur le lien de l'e-mail et attendez quelques secondes. Vous n'avez pas reçu d'e-mail ? Vérifiez votre boîte de spam !"
@@ -15663,14 +17203,6 @@
     "original": "Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
     "translation": "Utilisez de préférence une adresse e-mail à laquelle nous vous envoyons déjà des e-mails."
   },
-  "%Zy": {
-    "original": "Geen internetverbinding. Herlaad de applicatie.",
-    "translation": "Pas de connexion internet. Rechargez l'application."
-  },
-  "%Zz": {
-    "original": "Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.",
-    "translation": "Pas de connexion internet. Vérifiez votre connexion et rechargez le site web."
-  },
   "%a": {
     "original": "Extra Stripe account",
     "translation": "Compte Stripe supplémentaire"
@@ -15682,10 +17214,6 @@
   "%a1": {
     "original": "Vul een URL in",
     "translation": "Entrez une URL"
-  },
-  "%a2": {
-    "original": "Ingelogd als {user}",
-    "translation": "Connecté en tant que {user}"
   },
   "%a3": {
     "original": "Andere zoeken",
@@ -16271,14 +17799,6 @@
     "original": "Daarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
     "translation": "En outre, l'organisateur définit également les paramètres qui influent sur la collecte de données et d'autres aspects plus subtils."
   },
-  "%cO": {
-    "original": "Vraag of keuzemenu toevoegen",
-    "translation": "Ajouter une question ou un menu déroulant"
-  },
-  "%cP": {
-    "original": "Inschrijvingen via ledenportaal",
-    "translation": "Inscriptions via le portail des membres"
-  },
   "%cQ": {
     "original": "Leden kunnen zelf inschrijven via het ledenportaal als je deze optie open zet. Ze betalen het opgegeven tarief dan zelf via de betaalmethodes die je hebt ingesteld bij de instellingen van jouw groep.",
     "translation": "Les membres peuvent s'inscrire eux-mêmes via le portail des membres si vous activez cette option. Ils paient alors eux-mêmes le tarif indiqué via les méthodes de paiement que vous avez définies dans les paramètres de votre groupe."
@@ -16319,10 +17839,6 @@
     "original": "Leden moeten een andere aansluiting hebben (manueel aangemaakt of automatisch via een andere inschrijving bij een standaard inschrijvingsgroep) op het moment ze inschrijven, anders kunnen ze niet inschrijven.",
     "translation": "Les membres doivent avoir une autre affiliation (créée manuellement ou générée automatiquement via une autre inscription dans un groupe d'inscription standard) au moment de s'inscrire, sinon l'inscription n'est pas possible."
   },
-  "%cb": {
-    "original": "Verplicht andere inschrijving",
-    "translation": "Autre inscription obligatoire"
-  },
   "%cc": {
     "original": "Groepsinschrijvingen",
     "translation": "Inscriptions de groupe"
@@ -16358,10 +17874,6 @@
   "%ck": {
     "original": "Nieuwe wachtlijst maken",
     "translation": "Créer une nouvelle liste d'attente"
-  },
-  "%cl": {
-    "original": "Voorrangsregeling online inschrijvingen",
-    "translation": "Règlement de priorité des inscriptions en ligne"
   },
   "%cm": {
     "original": "Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).",
@@ -16411,17 +17923,9 @@
     "original": "Ook gezinsleden van bestaande leden vroeger laten inschrijven",
     "translation": "Permettre également aux membres de la famille des membres existants de s'inscrire plus tôt"
   },
-  "%cy": {
-    "original": "Persoonsgegevens verzamelen",
-    "translation": "Collecter des données personnelles"
-  },
   "%cz": {
-    "original": "Deze persoonsgegevens zijn verplicht (soms optioneel) in te vullen voor leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.",
-    "translation": "Ces données personnelles doivent être remplies (parfois facultatif) pour les membres qui s'inscrivent. Veuillez noter que ces données sont partagées avec d'autres inscriptions. Si les mêmes données sont donc collectées pour plusieurs inscriptions, elles ne sont demandées qu'une seule fois (sinon, les membres peuvent toujours vérifier les données si elles ont été saisies il y a longtemps) et vous ne pouvez pas saisir de données différentes pour chaque inscription. Ne les utilisez donc pas pour des questions temporaires."
-  },
-  "%d0": {
-    "original": "Voeg nieuwe persoonsgegevens toe via Instellingen → Persoonsgegevens van leden.",
-    "translation": "Ajouter de nouvelles données personnelles via Paramètres → Données personnelles des membres."
+    "original": "Wijk af van je algemene instellingen om extra gegevens te verzamelen voor inschrijvingen voor {name}. Let op: de antwoorden worden gedeeld tussen inschrijvingen van hetzelfde lid, dus ze zijn niet geschikt voor tijdelijke vragen.",
+    "translation": "Adaptez vos paramètres généraux pour recueillir des informations supplémentaires lors des inscriptions pour {name}. Attention, les réponses sont partagées entre les inscriptions d’un même membre, donc ce n’est pas adapté pour des questions temporaires."
   },
   "%d1": {
     "original": "Eénmalige vragen",
@@ -16802,22 +18306,6 @@
   "%eX": {
     "original": "Betalen",
     "translation": "Payer"
-  },
-  "%eY": {
-    "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.",
-    "translation": "Vous recevrez une confirmation supplémentaire par e-mail. Si des données changent à l’avenir, vous pourrez désormais les gérer via le portail des membres."
-  },
-  "%eZ": {
-    "original": "We houden je op de hoogte van jouw status op de wachtlijst.",
-    "translation": "Nous vous tiendrons informé(e) de votre statut sur la liste d’attente."
-  },
-  "%ea": {
-    "original": "Jouw betaling is gelukt.",
-    "translation": "Votre paiement a réussi."
-  },
-  "%eb": {
-    "original": "Er werden automatische e-mails uitgestuurd als die ingesteld stonden.",
-    "translation": "Des e-mails automatiques ont été envoyés si cela était paramétré."
   },
   "%ec": {
     "original": "We konden de inschrijving niet toevoegen aan je winkelmandje omdat er al andere zaken in staan die niet samen afgerekend kunnen worden. Reken eerst je huidige winkelmandje af, en ga daarna verder met de andere inschrijvingen.",
@@ -18839,10 +20327,6 @@
     "original": "kredietkaart betaling",
     "translation": "paiement par carte de crédit"
   },
-  "%mo": {
-    "original": "Payconiq betaling",
-    "translation": "paiement Payconiq"
-  },
   "%mp": {
     "original": "terugbetaling via",
     "translation": "remboursement via"
@@ -19292,8 +20776,8 @@
     "translation": "Le prénom d'un ou de plusieurs destinataires est manquant dans le système. Le remplacement magique du prénom a donc été supprimé."
   },
   "%ob": {
-    "original": "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald.",
-    "translation": "Le nom de famille d'un ou de plusieurs destinataires est manquant dans le système. Le remplacement magique du nom de famille a donc été supprimé."
+    "original": "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achternaam is daarom weggehaald.",
+    "translation": "Le nom de famille d’un ou plusieurs destinataires manque dans le système. Le remplacement automatique du nom de famille a donc été supprimé."
   },
   "%oc": {
     "original": "E-mailadres ontvanger",
@@ -19354,10 +20838,6 @@
   "%oq": {
     "original": "Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen.",
     "translation": "Ce texte change en fonction de la situation : si le destinataire n'a pas encore de compte, il indique à quelle adresse e-mail le destinataire peut s'inscrire. Sinon, il indique à quelle adresse e-mail le destinataire peut se connecter."
-  },
-  "%or": {
-    "original": "Groepnaam",
-    "translation": "Nom du groupe"
   },
   "%os": {
     "original": "E-maildomeinnaam",
@@ -20819,10 +22299,6 @@
     "original": "volgorde gewijzigd",
     "translation": "ordre modifié"
   },
-  "%uj": {
-    "original": "Je moet minimaal 5 minuten wachten voor je een nieuwe e-mail kan versturen. Kijk jouw inbox goed na!",
-    "translation": "Vous devez attendre au moins 5 minutes avant de pouvoir envoyer un nouvel e-mail. Vérifiez bien votre boîte de réception !"
-  },
   "%uk": {
     "original": "Wil je een nieuwe bevestigingsmail sturen?",
     "translation": "Voulez-vous envoyer un nouvel e-mail de confirmation ?"
@@ -20838,18 +22314,6 @@
   "%un": {
     "original": "Je hebt een nieuwe e-mail ontvangen. Kijk jouw inbox en spambox goed na!",
     "translation": "Vous avez reçu un nouvel e-mail. Vérifiez bien votre boîte de réception et votre boîte de spam !"
-  },
-  "%uo": {
-    "original": "Jouw e-mailadres is geverifieerd!",
-    "translation": "Votre adresse e-mail a été vérifiée !"
-  },
-  "%up": {
-    "original": "Ben je zeker dat je wilt annuleren?",
-    "translation": "Êtes-vous sûr de vouloir annuler ?"
-  },
-  "%uq": {
-    "original": "Sluiten en niet voltooien",
-    "translation": "Fermer et ne pas terminer"
   },
   "%ur": {
     "original": "Account aanmaken",
@@ -21495,10 +22959,6 @@
     "original": "Uitbetalingen",
     "translation": "Paiements"
   },
-  "%xT": {
-    "original": "bestellingen.xlsx",
-    "translation": "commandes.xlsx"
-  },
   "%xU": {
     "original": "Instellingen",
     "translation": "Paramètres"
@@ -21632,8 +23092,8 @@
     "translation": "Exporter vers XML pour Belcotax"
   },
   "%y1": {
-    "original": "De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint.",
-    "translation": "L'exportation XML est complexe et vous devez lire attentivement la documentation avant de commencer."
+    "original": "De XML-export is complex, en je moet zorgvuldig de documentatie doorlezen voor je hier aan begint.",
+    "translation": "L’export XML est complexe, il est donc important de bien lire la documentation avant de commencer."
   },
   "%y2": {
     "original": "Bevestiging",
@@ -22058,10 +23518,6 @@
   "%zl": {
     "original": "Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.",
     "translation": "Ces données de facturation ne sont pas complètes. Modifiez-les et vérifiez-les avant de continuer."
-  },
-  "%zm": {
-    "original": "Hoera!",
-    "translation": "Hourra !"
   },
   "%zn": {
     "original": "andere leden",

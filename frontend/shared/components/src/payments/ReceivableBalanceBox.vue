@@ -96,7 +96,7 @@
             </STList>
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('%1PL') }}</h2>
+                <hr><h2>{{ $t('%1OL') }}</h2>
                 <p>{{ $t('%ha') }}</p>
 
                 <STList>

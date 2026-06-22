@@ -33,7 +33,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
-                        name: $t(`%1PL`),
+                        name: $t(`%1OL`),
                     }),
                 ],
             }),
@@ -98,7 +98,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: $t(`%1PL`),
+                        name: $t(`%1OL`),
                     }),
 
                     new SelectableColumn({

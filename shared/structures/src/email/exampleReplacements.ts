@@ -130,11 +130,11 @@ function getReplacements() {
         }),
         payingOrganizationName: Replacement.create({
             token: 'payingOrganizationName',
-            value: $t('FC De Laatbetalers'),
+            value: $t('%1W4'),
         }),
         platformName: Replacement.create({
             token: 'platformName',
-            value: $t('Stamhoofd'),
+            value: $t('%1cV'),
         }),
         feedbackText: Replacement.create({
             token: 'feedbackText',

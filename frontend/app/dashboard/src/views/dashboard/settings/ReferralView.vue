@@ -1,33 +1,33 @@
 <template>
     <LoadingViewTransition>
         <div v-if="status" id="referral-view" class="st-view background">
-            <STNavigationBar :title="$t('Verdien tegoed')" />
+            <STNavigationBar :title="$t('%1d0')" />
 
             <main>
                 <h1 v-if="!status.invoiceValue">
-                    {{ $t('Geef {value}, krijg tot 100 euro tegoed* per vereniging', {value: formatPrice(status.value)}) }}
+                    {{ $t('%1bn', {value: formatPrice(status.value)}) }}
                 </h1>
                 <h1 v-else>
-                    {{ $t('Jouw doorverwijzingslink van {value}', {value: formatPrice(status.value)}) }}
+                    {{ $t('%1Wj', {value: formatPrice(status.value)}) }}
                 </h1>
 
                 <p v-if="!status.invoiceValue">
-                    {{ $t('Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.') }}
+                    {{ $t('%1Uk') }}
                 </p>
 
                 <hr>
-                <h2>{{ $t('Jouw doorverwijzingslink') }}</h2>
+                <h2>{{ $t('%1aC') }}</h2>
 
-                <input v-copyable="href" v-tooltip="$t('Klik om te kopiëren')" class="input" :value="href" readonly>
+                <input v-copyable="href" v-tooltip="$t('%Ip')" class="input" :value="href" readonly>
 
                 <p class="info-box">
-                    {{ $t('Om andere verenigingen te motiveren om jouw link te gebruiken, krijgen ze zelf ook 25 euro tegoed.') }}
+                    {{ $t('%1XE') }}
                 </p>
 
                 <STList>
                     <STListItem :selectable="true" @click="openFacebookShare">
                         <h2 class="style-title-list">
-                            {{ $t('Delen op Facebook') }}
+                            {{ $t('%1ZZ') }}
                         </h2>
                         <template #left>
                             <span class="icon share" />
@@ -35,7 +35,7 @@
                     </STListItem>
                     <STListItem v-if="canShare" :selectable="true" @click="share">
                         <h2 class="style-title-list">
-                            {{ $t('Verstuur de link via SMS, e-mail, WhatsApp...') }}
+                            {{ $t('%1Zy') }}
                         </h2>
                         <template #left>
                             <span class="icon share" />
@@ -43,10 +43,10 @@
                     </STListItem>
                     <STListItem v-if="!isNative" :selectable="true" @click="downloadQR">
                         <h2 class="style-title-list">
-                            {{ $t('Download de QR-code') }}
+                            {{ $t('%1Vl') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Als je fysiek bij iemand bent, dan kan die deze QR-code scannen om de link te gebruiken.') }}
+                            {{ $t('%1YX') }}
                         </p>
                         <template #left>
                             <span class="icon qr-code" />
@@ -56,12 +56,12 @@
 
                 <template v-if="!status.invoiceValue">
                     <hr>
-                    <h2>{{ $t('Overzicht van te verdienen tegoed') }}</h2>
-                    <p>{{ $t('Het bedrag dat je ontvangt stijgt per vereniging tot maximaal 100 euro per vereniging. Dus als je 6 verenigingen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.') }}</p>
+                    <h2>{{ $t('%1V0') }}</h2>
+                    <p>{{ $t('%1aI') }}</p>
 
                     <STList>
                         <STListItem v-for="n in 9" :key="n">
-                            {{ $t('{n}e vereniging', {n}) }}
+                            {{ $t('%1dT', {n}) }}
 
                             <template #right>
                                 <span class="style-tag large">€ {{ n * 10 }}</span>
@@ -72,7 +72,7 @@
                             </template>
                         </STListItem>
                         <STListItem>
-                            {{ $t('10e, 11e, 12e... vereniging') }}
+                            {{ $t('%1a0') }}
 
                             <template #right>
                                 <span class="style-tag large">€ 100</span>
@@ -86,8 +86,8 @@
                 </template>
 
                 <hr>
-                <h2>{{ $t('Geschiedenis') }}</h2>
-                <p>{{ $t('Hieronder kan je zien welke verenigingen jouw link hebben gebruikt.') }}</p>
+                <h2>{{ $t('%1bZ') }}</h2>
+                <p>{{ $t('%1Vc') }}</p>
 
                 <STList v-if="status.usedCodes.length > 0">
                     <STListItem v-for="used in status.usedCodes" :key="used.id" class="right-description">
@@ -99,16 +99,16 @@
                             {{ used.organizationName }}
                         </h2>
                         <p v-if="used.creditValue" class="style-description">
-                            {{ $t('Je hebt jouw tegoed ontvangen!') }}
+                            {{ $t('%1cg') }}
                         </p>
                         <p v-else-if="used.creditValue !== null && status.invoiceValue" class="style-description">
-                            {{ $t('Aangerekend in je openstaande saldo.') }}
+                            {{ $t('%1aa') }}
                         </p>
                         <p v-else-if="!status.invoiceValue" class="style-description">
-                            {{ $t('Registreerde op {date}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.', {date: formatDate(used.createdAt)}) }}
+                            {{ $t('%1cR', {date: formatDate(used.createdAt)}) }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('Registreerde op {date}. Er werd nog niets aangekocht of gefactureerd.', {date: formatDate(used.createdAt)}) }}
+                            {{ $t('%1b7', {date: formatDate(used.createdAt)}) }}
                         </p>
                         <template #right>
                             <span v-if="used.creditValue" class="style-tag large success">{{ formatPrice(used.creditValue) }}</span>
@@ -117,12 +117,12 @@
                 </STList>
 
                 <p v-else class="info-box">
-                    {{ $t('Jouw link werd nog niet gebruikt') }}
+                    {{ $t('%1Yx') }}
                 </p>
 
                 <hr v-if="!status.invoiceValue">
                 <p v-if="!status.invoiceValue" class="style-description-small">
-                    {{ $t('* We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Stamhoofd aan te kopen. Je kan je tegoed niet doorgeven aan een andere vereniging. Je kan geen tegoed krijgen voor een vereniging die al Stamhoofd gebruikt of al heeft geregistreerd. Ook als die persoon al een andere vereniging heeft op Stamhoofd kan je er geen tegoed meer voor krijgen. Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen. Meerdere verenigingen zelf aanmaken om zo tegoed te krijgen is niet toegestaan. Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.') }}
+                    {{ $t('%1c9') }}
                 </p>
             </main>
         </div>

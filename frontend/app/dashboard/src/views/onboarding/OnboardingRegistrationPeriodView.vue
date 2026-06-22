@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="title" :save-text="$t('Volgende')" save-icon-right="arrow-right" :loading="saving" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :save-text="$t('%19q')" save-icon-right="arrow-right" :loading="saving" :prefer-large-button="true" @save="goNext">
         <aside class="style-title-prefix">
-            {{ $t('Stap {current} van {total}', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
+            {{ $t('%1WP', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
         </aside>
         <h1>
             {{ title }}
         </h1>
         <p>
-            {{ $t('Je kan dit later aanpassen en meerdere werkjaren aanmaken.') }}
+            {{ $t('%1WY') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -18,10 +18,10 @@
                     <Radio v-model="configType" value="year" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Per werkjaar') }}
+                    {{ $t('%1VO') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Een volledig jaar, met een vaste startmaand.') }}
+                    {{ $t('%1Zt') }}
                 </p>
             </STListItem>
 
@@ -30,10 +30,10 @@
                     <Radio v-model="configType" value="semester" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Per semester') }}
+                    {{ $t('%1Zf') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Schooljaar opgedeeld in twee semesters.') }}
+                    {{ $t('%1d8') }}
                 </p>
             </STListItem>
 
@@ -42,15 +42,15 @@
                     <Radio v-model="configType" value="custom" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Aangepast') }}
+                    {{ $t('%1cz') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Kies zelf een begin- en einddatum.') }}
+                    {{ $t('%1Yi') }}
                 </p>
             </STListItem>
         </STList>
 
-        <STInputBox v-if="configType === 'year'" :title="$t('In welke maand start jullie werkjaar?')" class="max">
+        <STInputBox v-if="configType === 'year'" :title="$t('%1XA')" class="max">
             <Dropdown v-model="startMonth">
                 <option v-for="month in 12" :key="month" :value="month - 1">
                     {{ capitalizeFirstLetter(Formatter.month(month)) }}
@@ -58,23 +58,23 @@
             </Dropdown>
         </STInputBox>
 
-        <STInputBox v-if="configType === 'semester'" :title="$t('Welk semester?')" class="max">
+        <STInputBox v-if="configType === 'semester'" :title="$t('%1Vw')" class="max">
             <Dropdown v-model="semester">
                 <option :value="1">
-                    {{ $t('Eerste semester (september - januari)') }}
+                    {{ $t('%1Z4') }}
                 </option>
                 <option :value="2">
-                    {{ $t('Tweede semester (februari - mei)') }}
+                    {{ $t('%1co') }}
                 </option>
             </Dropdown>
         </STInputBox>
 
         <div v-if="configType === 'custom'" class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t('Startdatum')">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t('%1Of')">
                 <DateSelection v-model="customStartDate" :time="{ hours: 0, minutes: 0, seconds: 0 }" />
             </STInputBox>
 
-            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t('Einddatum')">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t('%1P8')">
                 <DateSelection v-model="customEndDate" :time="{ hours: 23, minutes: 59, seconds: 59 }" :min="customStartDate" />
             </STInputBox>
         </div>
@@ -118,7 +118,7 @@ const owner = useRequestOwner();
 const errors = useErrors();
 const saving = ref(false);
 
-const title = $t('Wanneer start jullie werkjaar?');
+const title = $t('%1bV');
 
 const period = props.viewModel.period.period;
 
@@ -203,7 +203,7 @@ const customName = computed<string | null>(() => {
         return null;
     }
     if (configType.value === 'semester') {
-        return $t('Semester {number} - {year}', { number: semester.value.toString(), year: Formatter.luxon(effectiveStart.value).year.toString() });
+        return $t('%1bk', { number: semester.value.toString(), year: Formatter.luxon(effectiveStart.value).year.toString() });
     }
     return guessCustomName(effectiveStart.value, effectiveEnd.value);
 });
@@ -222,12 +222,12 @@ function guessCustomName(start: Date, end: Date): string | null {
         return null;
     }
     if (months >= 5) {
-        return $t('Semester {number} - {year}', { number: (Math.floor(month0 / 6) + 1).toString(), year });
+        return $t('%1bk', { number: (Math.floor(month0 / 6) + 1).toString(), year });
     }
     if (months >= 3.5) {
-        return $t('Trimester {number} - {year}', { number: (Math.floor(month0 / 4) + 1).toString(), year });
+        return $t('%1ZP', { number: (Math.floor(month0 / 4) + 1).toString(), year });
     }
-    return $t('Kwartaal {number} - {year}', { number: (Math.floor(month0 / 3) + 1).toString(), year });
+    return $t('%1cb', { number: (Math.floor(month0 / 3) + 1).toString(), year });
 }
 
 const previewName = computed(() => RegistrationPeriod.create({ startDate: effectiveStart.value, endDate: effectiveEnd.value, customName: customName.value }).name);
@@ -244,7 +244,7 @@ async function goNext() {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'endDate',
-                message: $t('De einddatum moet na de startdatum liggen.'),
+                message: $t('%1Gv'),
             });
         }
 

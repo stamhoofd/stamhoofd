@@ -26,7 +26,7 @@
 
             <STList class="group-info-list">
                 <STListItem class="right-description">
-                    {{ $t('Wanneer?') }}
+                    {{ $t('%Vc') }}
 
                     <template #right>
                         <template v-if="group.settings.displayStartEndTime">
@@ -38,14 +38,14 @@
                     </template>
                 </STListItem>
                 <STListItem v-if="group.settings.location" class="right-description">
-                    {{ $t('Waar?') }}
+                    {{ $t('%1Ye') }}
 
                     <template #right>
                         {{ group.settings.location }}
                     </template>
                 </STListItem>
                 <STListItem v-if="who" class="right-description wrap">
-                    {{ $t('Wie?') }}
+                    {{ $t('%1Wm') }}
 
                     <template #right>
                         <div v-text="who" />
@@ -94,7 +94,7 @@ function formatDate(date: Date) {
 }
 
 function groupName(id: string): string {
-    return organization.value?.period.groups.find(g => g.id === id)?.settings.name.toString() ?? $t('Onbekend');
+    return organization.value?.period.groups.find(g => g.id === id)?.settings.name.toString() ?? $t('%Gr');
 }
 
 const priceList = computed(() => {
@@ -102,15 +102,15 @@ const priceList = computed(() => {
 
     for (const price of props.group.settings.getFilteredPrices()) {
         list.push({
-            text: price.name.toString() || $t('Prijs'),
+            text: price.name.toString() || $t('%1IP'),
             description: '',
             price: Formatter.price(price.price.price),
         });
 
         if (price.price.reducedPrice !== null && price.price.reducedPrice !== price.price.price) {
             list.push({
-                text: $t('Verlaagd tarief'),
-                description: $t('Enkel voor gezinnen die in aanmerking komen voor financiële ondersteuning'),
+                text: $t('%1Vy'),
+                description: $t('%1cu'),
                 price: Formatter.price(price.price.reducedPrice),
             });
         }
@@ -126,17 +126,17 @@ const infoBox = computed(() => {
     if (settings.registrationStartDate && settings.registrationStartDate > now) {
         if (props.group.activePreRegistrationDate) {
             if (settings.priorityForFamily) {
-                return $t('De inschrijvingen gaan open op {date}. Bestaande leden en broers/zussen kunnen al inschrijven vanaf {preDate}.', {
+                return $t('%1Y5', {
                     date: Formatter.startDate(settings.registrationStartDate, true),
                     preDate: Formatter.startDate(settings.preRegistrationsDate!, true),
                 });
             }
-            return $t('De inschrijvingen gaan open op {date}. Bestaande leden kunnen al inschrijven vanaf {preDate}.', {
+            return $t('%1a2', {
                 date: Formatter.startDate(settings.registrationStartDate, true),
                 preDate: Formatter.startDate(settings.preRegistrationsDate!, true),
             });
         }
-        return $t('De inschrijvingen gaan open op {date}', { date: Formatter.dateTime(settings.registrationStartDate, true) });
+        return $t('%1UW', { date: Formatter.dateTime(settings.registrationStartDate, true) });
     }
 
     return null;
@@ -152,13 +152,13 @@ const infoBox2 = computed(() => {
 
     if (settings.waitingListType === WaitingListType.ExistingMembersFirst) {
         if (settings.priorityForFamily) {
-            return $t('Bestaande leden en broers en zussen kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten.');
+            return $t('%1c1');
         }
-        return $t('Bestaande leden kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten.');
+        return $t('%1dU');
     }
 
     if (settings.waitingListType === WaitingListType.All) {
-        return $t('Iedereen moet inschrijven op de wachtlijst');
+        return $t('%1Xd');
     }
 
     return null;
@@ -169,11 +169,11 @@ const errorBox = computed(() => {
     const settings = props.group.settings;
 
     if (settings.registrationEndDate && settings.registrationEndDate < now) {
-        return $t('De inschrijvingen zijn afgelopen');
+        return $t('%1Xv');
     }
 
     if (props.group.closed && !props.group.notYetOpen) {
-        return $t('De inschrijvingen zijn gesloten');
+        return $t('%b4');
     }
 
     return null;
@@ -189,7 +189,7 @@ const who = computed(() => {
     }
 
     if (settings.preventGroupIds.length > 0) {
-        const prefix = $t('Iedereen die niet ingeschreven was bij {groups}', {
+        const prefix = $t('%1VC', {
             groups: Formatter.joinLast(settings.preventGroupIds.map(groupName), ', ', ' of '),
         });
         who = who ? prefix + '\n' + who : prefix;

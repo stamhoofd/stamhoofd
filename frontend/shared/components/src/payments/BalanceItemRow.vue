@@ -25,7 +25,7 @@
             </p>
 
             <p v-if="item.pricePaid < 0 && item.price < 0" class="style-price-base negative small">
-                {{ $t('waarvan {price} gebruikt', {price: formatPrice(-item.pricePaid )}) }}
+                {{ $t('%1UY', {price: formatPrice(-item.pricePaid )}) }}
             </p>
 
             <p v-else-if="item.pricePaid < 0" class="style-price-base negative small">

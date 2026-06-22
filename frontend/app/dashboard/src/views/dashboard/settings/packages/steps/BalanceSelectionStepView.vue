@@ -239,9 +239,9 @@ const priceBreakdown = computed(() => {
 
     if (totalAvailableDiscount.value !== 0) {
         b.push({
-            name: $t(`Tegoed`),
+            name: $t(`%1Xl`),
             price: maximumUsableDiscount.value,
-            description: -totalAvailableDiscount.value > maximumUsableDiscount.value ? $t('Maximum bruikbaar van in totaal {price} tegoed', {price: Formatter.price(-totalAvailableDiscount.value)}) : '',
+            description: -totalAvailableDiscount.value > maximumUsableDiscount.value ? $t('%1d1', {price: Formatter.price(-totalAvailableDiscount.value)}) : '',
             action: {
                 icon: 'info-circle',
                 handler: showDiscountSheet
@@ -251,7 +251,7 @@ const priceBreakdown = computed(() => {
 
     if (b.length) {
         b.unshift({
-            name: $t(`Subtotaal`),
+            name: $t(`%xJ`),
             price: total.value,
         })
     }
@@ -299,7 +299,7 @@ async function goNext() {
             throw new SimpleError({
                 code: 'empty_cart',
                 message: 'Cart is empty',
-                human: $t('Kies minstens één item om te betalen')
+                human: $t('%1Zo')
             })
         }
 

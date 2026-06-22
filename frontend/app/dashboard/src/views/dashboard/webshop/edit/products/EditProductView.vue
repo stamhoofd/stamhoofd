@@ -345,7 +345,7 @@
                         </h3>
 
                         <p v-if="useShowStockBelow" class="style-description-small">
-                            {{ $t('Stamhoofd zal de beschikbare voorraad verbergen als er nog meer dan {showStockBelow} stuks beschikbaar zijn.', { showStockBelow: showStockBelow! }) }}
+                            {{ $t('%1Vt', { showStockBelow: showStockBelow! }) }}
                         </p>
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>

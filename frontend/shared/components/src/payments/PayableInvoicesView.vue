@@ -5,10 +5,10 @@
 
             <main>
                 <h1>{{ title }}</h1>
-                <p>{{ $t('Er kan een vertraging zijn tussen de betaling en het aanmaken van de facturen.') }}</p>
+                <p>{{ $t('%1Xb') }}</p>
 
                 <p v-if="invoices.length === 0" class="info-box">
-                    {{ $t('Je hebt nog geen facturen ontvangen') }}
+                    {{ $t('%1bD') }}
                 </p>
 
                 <STList v-else>
@@ -37,7 +37,7 @@ const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
-const title = $t('Facturen')
+const title = $t('%1JA')
 const invoices = ref(null) as Ref<null | Invoice[]>
 const context = useContext();
 const owner = useRequestOwner();

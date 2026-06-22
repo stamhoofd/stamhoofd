@@ -81,7 +81,7 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     get valuesToString() {
         return Formatter.joinLastLimited(this.values.map(v => v.name), {
             separator: ', ',
-            lastSeparator: ` ${$t('of')} `,
+            lastSeparator: ` ${$t('%GT')} `,
             maxLength: 250,
         });
     }
@@ -93,7 +93,7 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
                 style: '',
             },
             {
-                text: ` ${$t('is')} `,
+                text: ` ${$t('%1G1')} `,
                 style: 'gray',
             },
             {
@@ -260,7 +260,7 @@ export class RelationFetcherSubFilter {
 
     static get emptyOption(): RelationFetcherSubFilterOption {
         return {
-            name: $t('Geen filter'),
+            name: $t('%1cm'),
             filter: null,
         };
     }

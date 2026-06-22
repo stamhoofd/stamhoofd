@@ -17,7 +17,7 @@
             </p>
 
             <p v-if="isLocked" class="info-box">
-                {{ $t('Dit document is vergrendeld en kan niet meer gewijzigd worden.') }}
+                {{ $t('%1Uc') }}
             </p>
 
             <p v-if="isDraft" class="warning-box">

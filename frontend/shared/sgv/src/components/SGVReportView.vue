@@ -1,13 +1,13 @@
 <template>
     <div class="st-view">
         <STNavigationBar
-            :title="$t('Synchronisatie-rapport')"
+            :title="$t('%1ZS')"
             :dismiss="canDismiss"
             :pop="canPop"
         />
 
         <main>
-            <h1>{{ $t("Synchronisatie-rapport") }}</h1>
+            <h1>{{ $t("%1ZS") }}</h1>
             <p :class="report.errors.length === 0 ? 'info-box' : 'error-box'">
                 {{
                     report.errors.length === 0
@@ -26,7 +26,7 @@
                 class="error-box"
             >
                 <strong v-if="getErrorMemberName(error)">{{
-                    $t("Fout bij {member}", {
+                    $t("%1XU", {
                         member: getErrorMemberName(error) ?? "",
                     })
                 }}<br></strong>
@@ -49,27 +49,27 @@
             </STList>
 
             <ReportList
-                :title="$t('Nieuwe leden toegevoegd in de groepsadministratie')"
+                :title="$t('%1VP')"
                 :items="report.created.map((x) => x.member.details.name)"
             />
             <ReportList
-                :title="$t('Aangepaste leden in de groepsadministratie')"
+                :title="$t('%1Xr')"
                 :items="report.synced.map((x) => x.member.details.name)"
             />
             <ReportList
-                :title="$t('Geschrapt in de groepsadministratie')"
+                :title="$t('%1XT')"
                 :items="
                     report.deleted.map((x) => `${x.firstName} ${x.lastName}`)
                 "
             />
             <ReportList
-                :title="$t('Overgeslagen')"
+                :title="$t('%1cB')"
                 :items="report.skipped.map((x) => x.details.name)"
             />
 
             <template v-if="report.unmanagedInStamhoofd.length > 0">
                 <hr>
-                <h2>{{ $t("Leiding in Stamhoofd") }}</h2>
+                <h2>{{ $t("%1W6") }}</h2>
                 <p>
                     {{
                         $t(
@@ -78,14 +78,14 @@
                     }}
                 </p>
                 <ReportList
-                    :title="$t('Na te kijken')"
+                    :title="$t('%1YN')"
                     :items="
                         report.unmanagedInStamhoofd.map(
                             (unmanaged) =>
                                 unmanaged.member.details.name +
                                 ': ' +
                                 (getLidFuncties(unmanaged.lid) ||
-                                    $t('Geen functies')),
+                                    $t('%1Wi')),
                         )
                     "
                 />
@@ -93,7 +93,7 @@
 
             <template v-if="report.unmanagedMissingInStamhoofd.length > 0">
                 <hr>
-                <h2>{{ $t("Leiding niet in Stamhoofd") }}</h2>
+                <h2>{{ $t("%1YV") }}</h2>
                 <p>
                     {{
                         $t(
@@ -102,13 +102,13 @@
                     }}
                 </p>
                 <ReportList
-                    :title="$t('Na te kijken')"
+                    :title="$t('%1YN')"
                     :items="
                         report.unmanagedMissingInStamhoofd.map(
                             (x) =>
                                 getLidName(x) +
                                 ': ' +
-                                (getLidFuncties(x) || $t('Geen functies')),
+                                (getLidFuncties(x) || $t('%1Wi')),
                         )
                     "
                 />
@@ -122,7 +122,7 @@
                     type="button"
                     @click="dismiss({ force: true })"
                 >
-                    {{ $t("Sluiten") }}
+                    {{ $t("%9b") }}
                 </button>
             </template>
         </STToolbar>

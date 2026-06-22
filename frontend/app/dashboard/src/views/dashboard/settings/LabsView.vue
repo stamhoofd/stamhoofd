@@ -107,7 +107,7 @@
                         {{ $t('%1O') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Single-Sign-On werkt momenteel enkel samen met webshop authenticatie.') }}
+                        {{ $t('%1Xn') }}
                     </p>
                 </STListItem>
 
@@ -120,7 +120,7 @@
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('Inloggen kan verplicht worden via een nieuwe webshop instelling onder "Algemene instellingen".') }}
+                        {{ $t('%1bm') }}
                     </p>
                 </STListItem>
 

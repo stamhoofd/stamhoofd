@@ -15,7 +15,7 @@
     <div v-else-if="!isNative && STAMHOOFD.userMode === 'organization' && organization" class="account-swicher-buttons">
         <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
             <span class="icon privacy" />
-            <span>{{ $t('Privacy') }}</span>
+            <span>{{ $t('%1XV') }}</span>
         </a>
         <a v-if="customSiteUrl" class="button text only-icon-smartphone" :href="customSiteUrl" rel="noopener">
             <span class="icon external" />

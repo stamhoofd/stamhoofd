@@ -804,7 +804,7 @@ export class RegistrationActionBuilder {
             this.categories.length === 1
                 ? this.categories[0].settings.name
                 : (this.groups.length === 1 ? this.groups[0].settings.name : null),
-            $t('Inschrijvingen'),
+            $t('%1EI'),
         ];
 
         return parts.filter(Boolean).join(' - ');

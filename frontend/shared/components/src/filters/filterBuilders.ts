@@ -228,13 +228,13 @@ export const getCachedOutstandingBalanceUIFilterBuilders: () => UIFilterBuilders
             key: 'amountPending',
         }),
         new NumberFilterBuilder({
-            name: $t(`Bedrag in verwerking`),
+            name: $t(`%c4`),
             type: NumberFilterFormat.Currency,
             key: 'pricePending',
         }),
 
         new DateFilterBuilder({
-            name: $t(`Volgende aanpassingsdatum`),
+            name: $t(`%1cf`),
             key: 'nextDueAt',
             nullable: true,
         }),
@@ -506,9 +506,9 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
         wrapper: FilterWrapperMarker,
         relationFetcher: groupsRelationFetcher({ type: GroupType.Membership, defaultPeriodId: periodId, isPeriodRequired: true }),
         defaultOptions: [{
-            name: $t('geen'),
+            name: $t('%1VV'),
             value: null,
-            description: $t('Activiteiten waar je niet verplicht ingeschreven moet zijn voor een inschrijvingsgroep.'),
+            description: $t('%1VF'),
         }],
     });
 

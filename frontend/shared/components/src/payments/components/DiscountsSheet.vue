@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar v-if="!popup" :title="$t('Tegoed')" />
+        <STNavigationBar v-if="!popup" :title="$t('%1Xl')" />
 
         <main>
             <STGrid>

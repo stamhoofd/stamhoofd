@@ -459,7 +459,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     throw new SimpleError({
                         code: 'change_period_not_allowed',
                         message: 'This group cannot be moved to another period because it has bundle discounts.',
-                        human: Context.i18n.$t('Je kan geen groep met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.'),
+                        human: Context.i18n.$t('%1dG'),
                     });
                 }
 

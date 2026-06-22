@@ -141,7 +141,7 @@ export class PaymentActionBuilder {
     private getExcelTitle() {
         const parts = [
             this.organization && this.context.value.auth.hasSomePlatformAccess() ? this.organization.name : null,
-            this.methods?.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('Betalingen'),
+            this.methods?.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('%1JH'),
         ];
 
         return parts.filter(Boolean).join(' - ');

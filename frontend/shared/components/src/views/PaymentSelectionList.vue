@@ -5,7 +5,7 @@
         </p>
 
         <p v-if="sortedPaymentMethods.length === 0" class="error-box">
-            {{ $t('Er zijn momenteel geen betaalmethodes ingesteld. Neem contact op of herlaad de pagina en probeer zo meteen opnieuw.') }}
+            {{ $t('%1Zj') }}
         </p>
 
         <STList v-else class="payment-selection-list">
@@ -64,10 +64,10 @@ const paymentMethods = computed(() => props.paymentConfiguration.getAvailablePay
 const bancontactInfoMessage = computed(() => {
     if (hasOtherOnlinePaymentMethodBesidesBancontact.value) {
         if (paymentMethods.value.includes(PaymentMethod.Payconiq)) {
-            return $t('Alternatief');
+            return $t('%1cD');
         }
 
-        return $t('Meest gebruikt');
+        return $t('%kQ');
     }
 
     return null;

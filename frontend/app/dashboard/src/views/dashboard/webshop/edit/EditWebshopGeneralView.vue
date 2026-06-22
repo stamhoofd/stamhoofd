@@ -673,7 +673,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: {
             if ((organization.value.privateMeta?.payconiqApiKey ?? '').length === 0) {
-                return $t('Je moet eerst Bancontact Pay | Wero (Payconiq) activeren via de betaalinstellingen (Instellingen > Betaalaccounts).');
+                return $t('%1XN');
             }
             break;
         }

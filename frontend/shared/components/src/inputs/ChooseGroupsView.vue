@@ -3,7 +3,7 @@
         <STNavigationBar :title="title" />
 
         <main>
-            <h1>{{ $t('Kies een inschrijvingsgroep') }}</h1>
+            <h1>{{ $t('%1a8') }}</h1>
 
             <SegmentedControl v-if="tabs.length > 1" v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 

@@ -135,11 +135,11 @@ export class EditorSmartVariable extends AutoEncoder {
             }),
             EditorSmartVariable.create({
                 id: 'platformName',
-                name: $t(`Naam van het platform (Stamhoofd)`),
+                name: $t(`%1Uw`),
             }),
             EditorSmartVariable.create({
                 id: 'payingOrganizationName',
-                name: $t(`Naam vereniging (betaler)`),
+                name: $t(`%1dH`),
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
@@ -172,7 +172,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
             EditorSmartVariable.create({
                 id: 'groupName',
-                name: $t(`%or`),
+                name: $t(`%CX`),
             }),
             EditorSmartVariable.create({
                 id: 'mailDomain',
@@ -188,7 +188,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'invoiceNumber',
-            name: $t(`Factuurnummer`),
+            name: $t(`%1YZ`),
         }));
 
         variables.push(EditorSmartVariable.create({

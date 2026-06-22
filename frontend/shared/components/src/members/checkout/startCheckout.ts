@@ -172,7 +172,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             });
         }, (payment) => {
             if (payment && payment.status === PaymentStatus.Failed) {
-                Toast.fromError($t('Betaling mislukt of geannuleerd')).show();
+                Toast.fromError($t('%1YU')).show();
             }
             // Silently ignore for now
             console.error('Failure handler for payment', payment);
@@ -201,7 +201,7 @@ function fallback(registrations: RegistrationWithTinyMember[]) {
     const names = Formatter.uniqueArray(registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
     const waitingListNames = Formatter.uniqueArray(registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
 
-    const t = $t(`Hoera, gelukt!`);
+    const t = $t(`%1cZ`);
     let d = '';
 
     if (names.length > 0) {

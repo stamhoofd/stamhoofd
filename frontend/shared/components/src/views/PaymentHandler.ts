@@ -148,7 +148,7 @@ export class PaymentHandler {
             if (payment.status === PaymentStatus.Succeeded) {
                 successHandler(payment, navigate)?.catch(console.error);
             } else {
-                Toast.fromError($t('Er ging iets mis bij het aanmaken van de betaling. Neem contact op als het probleem niet is opgelost nadat je de pagina hebt herladen.')).show()
+                Toast.fromError($t('%1WW')).show()
             }
         }
     }

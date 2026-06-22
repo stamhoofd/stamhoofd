@@ -128,7 +128,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/transfer-outgoing.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%1Tp') }}
+                        {{ $t('%1Rg') }}
                     </h2>
                     <p class="style-description-small">
                         {{ $t('%1Rv') }}
@@ -143,10 +143,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Ledenadministratie') }}
+                        {{ $t('%Om') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('Stel je betaalmethodes voor inschrijvingen, onderverdelingen, kortingen, persoonsgegevens en meer in.') }}
+                        {{ $t('%1Zd') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -214,7 +214,7 @@
                             {{ $t('%2b') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Configureer Single-Sign-On voor webshop authenticatie. Dit werkt momenteel nog niet voor ledenlogin.') }}
+                            {{ $t('%1bH') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -410,7 +410,7 @@ defineRoutes([
                 configs: organization.value.meta.loginMethods,
                 provider: LoginProviderType.SSO,
                 showDisplaySettings: false,
-                description: $t('Configureer Single-Sign-On voor webshop authenticatie. Dit werkt momenteel nog niet voor ledenlogin.'),
+                description: $t('%1bH'),
                 saveHandler: async (loginMethods: ConvertArrayToPatchableArray<Map<LoginMethod, LoginMethodConfig>>) => {
                     await patchOrganization(Organization.patch({
                         meta: OrganizationMetaData.patch({

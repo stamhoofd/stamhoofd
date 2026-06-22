@@ -19,7 +19,7 @@
         </STInputBox>
 
         <STList>
-            <CheckboxListItem v-model="enableValidUntil" :label="$t('Einddatum toevoegen')">
+            <CheckboxListItem v-model="enableValidUntil" :label="$t('%1WQ')">
                 <div v-if="validUntil !== null" class="option">
                     <STInputBox error-fields="settings.validUntil" :error-box="errors.errorBox">
                         <DateSelection v-model="validUntil" :time="{hours: 23, minutes: 59}" />
@@ -27,7 +27,7 @@
                 </div>
             </CheckboxListItem>
 
-            <CheckboxListItem v-model="enableRemoveAt" :label="$t('Vervaldatum toevoegen')">
+            <CheckboxListItem v-model="enableRemoveAt" :label="$t('%1ap')">
                 <p class="style-description-small">
                     Een vervaldatum voorkomt dat gebruikers na afloop van het pakket de proefperiode opnieuw kunnen activeren tot die datum. Indien toegestaan, kunnen ze hun oude pakket tot dan verlengen aan de oorspronkelijke prijzen. Zonder vervaldatum geldt deze onbeperkt: het pakket blijft verlengbaar en de proefperiode kan daarna nooit meer worden geactiveerd.
                 </p>
@@ -38,9 +38,9 @@
                 </div>
             </CheckboxListItem>
 
-            <CheckboxListItem v-model="allowRenew" :label="$t('Verlengbaar')" />
-            <CheckboxListItem v-if="allowRenew" v-model="keepPricesOnRenewal" :label="$t('Behoud prijzen bij verlengen')" :description="$t('Zoniet worden de standaard/laatste prijzen gebruikt voor verlengingen')" />
-            <CheckboxListItem v-model="canDeactivate" :label="$t('Opzegbaar')" />
+            <CheckboxListItem v-model="allowRenew" :label="$t('%1Vm')" />
+            <CheckboxListItem v-if="allowRenew" v-model="keepPricesOnRenewal" :label="$t('%1Yw')" :description="$t('%1WN')" />
+            <CheckboxListItem v-model="canDeactivate" :label="$t('%1aq')" />
         </STList>
 
         <hr>

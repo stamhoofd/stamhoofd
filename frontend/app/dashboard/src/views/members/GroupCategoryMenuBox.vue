@@ -24,7 +24,7 @@
     <STMenuCategory
         v-if="period.waitingLists.length"
         id="waiting-lists"
-        :title="$t('Wachtlijsten')"
+        :title="$t('%eh')"
         type="members"
     >
         <GroupMenuItem

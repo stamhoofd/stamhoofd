@@ -27,10 +27,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Beheerdersrollen beheren') }}
+                            {{ $t('%1VS') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Maak rollen aan en stel de toegangsrechten voor elke rol in.') }}
+                            {{ $t('%1a7') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

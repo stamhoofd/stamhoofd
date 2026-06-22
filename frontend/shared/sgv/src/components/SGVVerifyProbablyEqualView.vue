@@ -1,7 +1,7 @@
 <template>
     <div class="st-view">
         <STNavigationBar
-            :title="$t('Lijken op elkaar')"
+            :title="$t('%1A4')"
             :dismiss="canDismiss"
             :pop="canPop"
         />
@@ -62,10 +62,10 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="cancel">
-                    <span>{{ $t("Annuleren") }}</span>
+                    <span>{{ $t("%1Lh") }}</span>
                 </button>
                 <button class="button primary" type="button" @click="goNext">
-                    {{ $t("Verder") }}
+                    {{ $t("%1V4") }}
                 </button>
             </template>
         </STToolbar>

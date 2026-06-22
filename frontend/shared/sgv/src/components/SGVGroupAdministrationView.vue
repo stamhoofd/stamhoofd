@@ -1,7 +1,7 @@
 <template>
     <div class="st-view background">
         <STNavigationBar
-            :title="$t('Groepsadministratie')"
+            :title="$t('%1Xz')"
             :dismiss="canDismiss"
             :pop="canPop"
         />
@@ -10,8 +10,8 @@
             <h1>
                 {{
                     isLoggedIn
-                        ? $t("Start synchronisatie")
-                        : $t("Groepsadministratie synchroniseren")
+                        ? $t("%1Ur")
+                        : $t("%1aO")
                 }}
             </h1>
             <p>
@@ -51,7 +51,7 @@
                     "
                 >
                     {{
-                        $t("Laatst gesynchroniseerd op {date} door {name}", {
+                        $t("%1VL", {
                             date: formatDate(
                                 organization.privateMeta.externalSyncData
                                     .lastExternalSync,
@@ -63,14 +63,14 @@
                     }}
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t("Nog nooit gesynchroniseerd") }}
+                    {{ $t("%1XZ") }}
                 </p>
                 <p
                     v-if="organization.privateMeta?.externalGroupNumber"
                     class="info-box"
                 >
                     {{
-                        $t("Groepsnummer: {groupNumber}", {
+                        $t("%1W7", {
                             groupNumber:
                                 organization.privateMeta.externalGroupNumber,
                         })
@@ -96,7 +96,7 @@
                         @click="sync"
                     >
                         <span class="icon sync" />
-                        <span>{{ $t("Starten") }}</span>
+                        <span>{{ $t("%Vm") }}</span>
                     </button>
                     <button
                         v-else
@@ -104,7 +104,7 @@
                         type="button"
                         @click="login"
                     >
-                        {{ $t("Inloggen") }}
+                        {{ $t("%Qg") }}
                     </button>
                 </LoadingButton>
             </template>
@@ -194,7 +194,7 @@ async function sync() {
 
     loading.value = true;
     setLeave();
-    const toast = new Toast($t('Synchroniseren voorbereiden...'), 'spinner')
+    const toast = new Toast($t('%1YG'), 'spinner')
         .setHide(null)
         .show();
     try {
@@ -212,7 +212,7 @@ async function sync() {
             report,
             matchedMembers,
         );
-        const syncToast = new Toast($t('Synchroniseren...'), 'spinner')
+        const syncToast = new Toast($t('%1Y0'), 'spinner')
             .setProgress(0)
             .setHide(null)
             .show();
@@ -230,7 +230,7 @@ async function sync() {
         );
         syncToast.hide();
         await saveExternalSyncData(sgv, report);
-        Toast.success($t('Synchronisatie voltooid')).show();
+        Toast.success($t('%1ZN')).show();
         await present({
             components: [
                 AsyncComponent(() => import('./SGVReportView.vue'), { report }),
@@ -298,7 +298,7 @@ function formatDate(date: Date) {
 
 function preventLeave(event: BeforeUnloadEvent) {
     event.preventDefault();
-    event.returnValue = $t('De synchronisatie is nog bezig.');
+    event.returnValue = $t('%1ZT');
 }
 
 function setLeave() {

@@ -126,7 +126,7 @@ export function useMemberAdministrationOnboarding() {
         }
 
         await GlobalEventBus.sendEvent('selectTabById', 'members');
-        Toast.success($t('Jullie ledenadministratie is klaar voor gebruik. Je kan nu meer instellingen aanvullen, leden importeren of het ledenportaal uitproberen.')).show();
+        Toast.success($t('%1UU')).show();
     }
 
     return async function startMemberAdministrationOnboarding({ displayOptions, finishHandler }: {

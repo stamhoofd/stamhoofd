@@ -246,7 +246,7 @@ export class SSOService {
             throw new SimpleError({
                 code: 'invalid_sso_configuration',
                 message: 'Failed to validate SSO configuration: ' + message,
-                human: $t('De SSO-instellingen konden niet gecontroleerd worden: {message}', { message }),
+                human: $t('%1Xe', { message }),
                 statusCode: 400,
             });
         }

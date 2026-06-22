@@ -1,14 +1,14 @@
 <template>
     <div class="st-menu-modern st-view members-menu" data-testid="members-menu">
-        <STNavigationBar :title="props.period ? period.period.name : $t('Leden')" />
+        <STNavigationBar :title="props.period ? period.period.name : $t('%1EH')" />
 
         <main>
             <h1 class="adjusted">
-                <span>{{ props.period ? period.period.name : $t('Leden') }}</span>
+                <span>{{ props.period ? period.period.name : $t('%1EH') }}</span>
             </h1>
 
             <p v-if="period.id !== organization.period.id && period.period.startDate > organization.period.period.startDate && !canSetDefaultPeriod && period.period.switchDate" class="info-box small">
-                {{ $t('Dit is het toekomstig werkjaar. Het is nog niet actief. Leden kunnen nog niet inschrijven. Overschakelen kan ten vroegste vanaf {switchDate}.', {switchDate: Formatter.date(period.period.switchDate)}) }}
+                {{ $t('%1X0', {switchDate: Formatter.date(period.period.switchDate)}) }}
             </p>
 
             <div class="block">
@@ -276,7 +276,7 @@ async function switchPeriod(event: MouseEvent) {
         periods.periods.map((p) => {
             return new ContextMenuItem({
                 name: p.name,
-                disabled: p.id === period.value.period.id ? $t('Dit is je huidige werkjaar') : false,
+                disabled: p.id === period.value.period.id ? $t('%1b0') : false,
                 action: async () => {
                     const existing = periods.organizationPeriods.find(pp => pp.period.id === p.id);
                     if (existing) {
@@ -297,7 +297,7 @@ async function switchPeriod(event: MouseEvent) {
             ? ([
                     [
                         new ContextMenuItem({
-                            name: $t('Werkjaren beheren'),
+                            name: $t('%1Ux'),
                             icon: 'settings',
                             action: async () => {
                                 await $navigate(Routes.OrganizationRegistrationPeriods);
@@ -400,9 +400,9 @@ const allActions = computed(() => {
             title: $t('%8R'),
             action: async () => {
                 if (!await CenteredMessage.confirm({
-                    title: $t('Dit werkjaar instellen als huidige werkjaar?'),
-                    description: $t('Dit werkjaar wordt zichtbaar in het ledenportaal voor leden om in te schrijven. Inschrijven voor andere werkjaren is dan niet langer mogelijk.'),
-                    confirmText: $t('Overschakelen'),
+                    title: $t('%1YL'),
+                    description: $t('%1dM'),
+                    confirmText: $t('%1V3'),
                 })) {
                     return;
                 }
@@ -417,14 +417,14 @@ const allActions = computed(() => {
         if (STAMHOOFD.userMode === 'organization' && !props.period) {
             list.push({
                 icon: 'success',
-                title: $t('Aan de slag'),
+                title: $t('%Wo'),
                 route: Routes.Settings,
                 hidden: hasFeature('disabled-members-onboarding'),
                 buttons: !hasFeature('disabled-members-onboarding')
                     ? [
                             new ActionButton({
                                 icon: 'close',
-                                title: $t('Verbergen'),
+                                title: $t('%1Ys'),
                                 action: async () => {
                                     await setFeature('disabled-members-onboarding', true);
                                 },
@@ -436,13 +436,13 @@ const allActions = computed(() => {
 
         list.push({
             icon: 'settings',
-            title: $t('Ledenadministratie instellingen'),
+            title: $t('%1Zz'),
             route: Routes.Settings,
             hidden: true,
         });
         list.push({
             icon: 'team',
-            title: $t('Alle leden'),
+            title: $t('%L8'),
             route: Routes.All,
         });
     }
@@ -450,35 +450,35 @@ const allActions = computed(() => {
     if (!props.period) {
         /* list.push({
             icon: 'email-filled',
-            title: $t('Berichten'),
+            title: $t('%1DK'),
             route: Routes.Communication,
             hidden: true,
         });
 
         list.push({
             icon: 'file-pdf',
-            title: $t('Documenten en attesten'),
+            title: $t('%1Um'),
             route: Routes.Settings,
             hidden: true,
         });
 
         list.push({
             icon: 'history',
-            title: $t('Leden logboek'),
+            title: $t('%1Vn'),
             route: Routes.Settings,
             hidden: true,
         });
 
         list.push({
             icon: 'upload',
-            title: $t('Leden importeren'),
+            title: $t('%18D'),
             route: Routes.Settings,
             hidden: true,
         });
 
         list.push({
             icon: 'reverse',
-            title: $t('Synchroniseren met groepsadmin'),
+            title: $t('%1ZQ'),
             route: Routes.Settings,
             hidden: true,
         }); */
@@ -488,7 +488,7 @@ const allActions = computed(() => {
         // A root category either holds subcategories or groups directly, never both
         list.push({
             icon: 'folder-add',
-            title: $t('Nieuwe categorie'),
+            title: $t('%LN'),
             hidden: true,
             action: async () => {
                 await createCategoryView(period.value, rootCategory.value!);
@@ -498,7 +498,7 @@ const allActions = computed(() => {
         if (rootCategory.value.categoryIds.length === 0) {
             list.push({
                 icon: 'add',
-                title: $t('Nieuwe groep'),
+                title: $t('%LD'),
                 hidden: true,
                 action: async () => {
                     await createGroupView(period.value, rootCategory.value!);
@@ -509,7 +509,7 @@ const allActions = computed(() => {
 
     list.push({
         icon: 'trash',
-        title: $t('Prullenmand'),
+        title: $t('%CR'),
         route: Routes.Trash,
         hidden: true,
     });
@@ -528,7 +528,7 @@ const visibleActions = computed(() => {
         // Add to more
         base.push({
             icon: 'more',
-            title: $t('Meer'),
+            title: $t('%GZ'),
             action: async (event) => {
                 const menu = new ContextMenu([
                     hiddenActions.value.map((a) => {

@@ -64,11 +64,11 @@ const asideIcon = computed(() => {
 
 const tooltip = computed(() => {
     if (isDifferentPeriod.value) {
-        return $t('Dit werkjaar is niet actief, inschrijvingen via het ledenportaal zijn nog niet mogelijk.');
+        return $t('%1cE');
     }
 
     if (props.group.closed) {
-        return $t('Inschrijvingen zijn gesloten via het ledenportaal');
+        return $t('%1Yj');
     }
 
     return undefined;

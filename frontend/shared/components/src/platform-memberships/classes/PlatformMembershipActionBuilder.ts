@@ -93,7 +93,7 @@ export class PlatformMembershipActionBuilder {
             return [...selection.markedRows.values()][0].member.name;
         }
         const parts = [
-            $t('Aansluitingen'),
+            $t('%1Nt'),
         ];
 
         return parts.filter(Boolean).join(' - ');

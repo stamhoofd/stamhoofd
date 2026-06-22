@@ -184,7 +184,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, number | null>({
             id: 'balanceItem.pricePending',
-            name: $t('%1PL'),
+            name: $t('%1OL'),
             getValue: m => m.balanceItem?.pricePending ?? null,
             format: (p) => Formatter.price(p ?? 0),
             getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),

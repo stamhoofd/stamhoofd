@@ -51,7 +51,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'empty_permissions',
                     message: 'Cannot add an admin without permissions',
-                    human: $t('Kies minstens één beheerdersrol voor je een beheerder toevoegt'),
+                    human: $t('%1V9'),
                     statusCode: 400,
                 });
             }
@@ -60,7 +60,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'empty_permissions',
                     message: 'Cannot add an admin without permissions',
-                    human: $t('Kies minstens één beheerdersrol voor je een beheerder toevoegt'),
+                    human: $t('%1V9'),
                     statusCode: 400,
                 });
             }

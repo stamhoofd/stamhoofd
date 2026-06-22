@@ -183,7 +183,7 @@ const actions: TableAction<ObjectType>[] = [
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
                             configurationId: configurationId.value,
-                            title: [organization.value?.name, $t('Openstaande bedragen')].filter(Boolean).join(' - '),
+                            title: [organization.value?.name, $t('%1aB')].filter(Boolean).join(' - '),
                         }),
                     }),
                 ],
@@ -215,7 +215,7 @@ const actions: TableAction<ObjectType>[] = [
                 search: selection.filter.search,
             }));
 
-            Toast.success($t('De openstaande bedragen werden aangerekend via de standaard bankkaart van elke klant')).show();
+            Toast.success($t('%1cT')).show();
 
             tableObjectFetcher.reset(true, true);
         },

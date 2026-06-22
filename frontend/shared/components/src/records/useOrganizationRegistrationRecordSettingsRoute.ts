@@ -25,7 +25,7 @@ export function useOrganizationRegistrationRecordSettingsRoute(url: string) {
                             recordsConfiguration: patch,
                         }),
                     }));
-                    Toast.success($t('De aanpassingen zijn opgeslagen')).show();
+                    Toast.success($t('%HU')).show();
                 },
             };
         },

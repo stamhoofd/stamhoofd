@@ -160,8 +160,8 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, boolean>({
         id: 'didSendPeppol',
-        name: $t('Doorgestuurd'),
-        description: $t('Doorgestuurd naar boekhoudsoftware'),
+        name: $t('%1c3'),
+        description: $t('%1bp'),
         getValue: object => object.didSendPeppol,
         getStyle: (value) => {
             if (!value) {
@@ -169,7 +169,7 @@ const allColumns: Column<ObjectType, any>[] = [
             }
             return '';
         },
-        format: value => value ? $t('Ja') : $t('Nee'),
+        format: value => value ? $t('%wo') : $t('%18s'),
         minimumWidth: 50,
         recommendedWidth: 400,
         enabled: false,
@@ -180,7 +180,7 @@ const allColumns: Column<ObjectType, any>[] = [
         ? [
                 new Column<ObjectType, string | null>({
                     id: 'reference',
-                    name: $t('Referentie'),
+                    name: $t('%1bS'),
                     getValue: object => object.reference,
                     getStyle: (value) => {
                         if (!value) {
@@ -188,7 +188,7 @@ const allColumns: Column<ObjectType, any>[] = [
                         }
                         return '';
                     },
-                    format: value => value || $t('Geen'),
+                    format: value => value || $t('%1FW'),
                     minimumWidth: 200,
                     recommendedWidth: 300,
                     enabled: false,
@@ -205,7 +205,7 @@ const allColumns: Column<ObjectType, any>[] = [
                         }
                         return '';
                     },
-                    format: value => value || $t('Geen'),
+                    format: value => value || $t('%1FW'),
                     minimumWidth: 200,
                     recommendedWidth: 300,
                     enabled: false,
@@ -254,7 +254,7 @@ const actions: TableAction<ObjectType>[] = [
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
                             configurationId: configurationId.value,
-                            title: [organization.value?.name, $t('Facturen')].filter(Boolean).join(' - '),
+                            title: [organization.value?.name, $t('%1JA')].filter(Boolean).join(' - '),
                         }),
                     }),
                 ],

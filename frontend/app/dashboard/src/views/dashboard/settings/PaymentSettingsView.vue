@@ -266,15 +266,15 @@
 
         <hr>
         <aside class="style-title-prefix">
-            {{ $t('Bancontact Pay | Wero') }}
+            {{ $t('%1cA') }}
         </aside>
-        <h2>{{ $t('Bancontact Pay | Wero (vroeger Payconiq)') }}</h2>
+        <h2>{{ $t('%1ab') }}</h2>
         <p>
-            {{ $t('Vul hieronder jouw API-key in om betalingen rechtstreeks via Bancontact Pay | Wero te verwerken. ') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('%19t') }}</a>
+            {{ $t('%1Yg') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('%19t') }}</a>
         </p>
 
         <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="$domains.getDocs('oude-payconiq-accounts')" target="_blank">
-            {{ $t('Jouw API-key vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal van Bancontact Pay. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.') }}
+            {{ $t('%1cW') }}
 
             <span class="button text">
                 {{ $t('%1Ow') }}
@@ -729,7 +729,7 @@ const hasDuplicateNames = computed(() => {
 });
 
 function editStripeAccount(account: StripeAccount) {
-    new CenteredMessage($t('Stripe Dashboard'), $t('Je kan alle gegevens wijzigen via je Stripe Dashboard. Bovenaan klik je daar op het gebruikersicoontje > Platforminstellingen om gegevens aan te passen.'))
+    new CenteredMessage($t('%1b1'), $t('%1XG'))
         .addButton(
             new CenteredMessageButton('Openen', {
                 action: async () => {
@@ -746,14 +746,14 @@ let didReadStripe = false;
 async function createStripeAccount() {
     if (isBelgium.value) {
         const time = new Date();
-        if ((!await CenteredMessage.confirm($t('Let op met wat je invult'), $t('Ja, gelezen'), $t('- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.')))) {
+        if ((!await CenteredMessage.confirm($t('%1Pe'), $t('%1Oj'), $t('- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.')))) {
             return;
         }
 
         const end = new Date();
 
         if (!didReadStripe && end.getTime() - time.getTime() < 5_000) {
-            new Toast($t('Koppel Stripe niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen.'), 'error red').setHide(10_000).show();
+            new Toast($t('%1bg'), 'error red').setHide(10_000).show();
             return;
         }
         didReadStripe = true;
@@ -826,11 +826,11 @@ async function openStripeAccountLink(accountId: string, initialTab?: Window | nu
 }
 
 async function deleteStripeAccount(accountId: string) {
-    if (!(await CenteredMessage.confirm($t('Dit account verwijderen?'), $t('Verwijderen'), $t('Je kan dit niet ongedaan maken.')))) {
+    if (!(await CenteredMessage.confirm($t('%1ZI'), $t('%CJ'), $t('%1Fc')))) {
         return;
     }
 
-    if (!(await CenteredMessage.confirm($t('Heel zeker?'), $t('Verwijderen'), $t('Je kan dit niet ongedaan maken.')))) {
+    if (!(await CenteredMessage.confirm($t('%1b8'), $t('%CJ'), $t('%1Fc')))) {
         return;
     }
 

@@ -111,7 +111,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`%Fn`),
+                human: $t(`%Fm`),
                 statusCode: 400,
             });
         }

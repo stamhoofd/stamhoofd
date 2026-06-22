@@ -151,9 +151,9 @@ export class GroupCategory extends AutoEncoder {
      */
     getName(period: { settings: { rootCategoryId: string } }): string {
         if (this.isRoot(period) && !this.settings.name) {
-            return this.categoryIds.length > 0 ? $t('Hoofdcategorie') : $t('Leeftijdsgroepen');
+            return this.categoryIds.length > 0 ? $t('%1cO') : $t('%P4');
         }
-        return this.settings.name || $t('Naamloos');
+        return this.settings.name || $t('%CL');
     }
 }
 

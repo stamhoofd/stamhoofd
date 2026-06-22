@@ -375,8 +375,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                         });
 
                         return result;
-                    }
-                    catch (error) {
+                    } catch (error) {
                         const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}):
 ${error}`;
                         console.error(chalk.red(errorMessage));
@@ -529,7 +528,7 @@ ${error}`;
             return false;
         }
 
-        if (original.length > 20 && translation === original) {
+        if (original.length > 30 && translation === original) {
             const errorMessage = `Translation and original are equal: ${original}`;
             console.error(errorMessage);
             promptLogger.error(errorMessage);

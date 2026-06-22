@@ -943,7 +943,7 @@ export class MemberActionBuilder {
             this.categories.length === 1
                 ? this.categories[0].settings.name
                 : (this.groups.length === 1 ? this.groups[0].settings.name : null),
-            $t('Leden'),
+            $t('%1EH'),
         ];
 
         return parts.filter(Boolean).join(' - ');

@@ -328,7 +328,7 @@ async function save() {
                     configurationId: 'configure-payment-export',
                     title: [
                         context.value.auth.hasSomePlatformAccess() ? organization.value.name : null,
-                        methods.value.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(methods.value[0]!) : $t('Betalingen'),
+                        methods.value.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(methods.value[0]!) : $t('%1JH'),
                         Formatter.dateRange(startDate.value, endDate.value, ' tem ', false),
                     ].filter(Boolean).join(' - '),
                 }),

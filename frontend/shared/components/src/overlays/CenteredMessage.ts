@@ -151,7 +151,7 @@ export class CenteredMessage {
                     requireAcceptCheckbox: options.requireCheckbox !== undefined,
                 },
                 {
-                    text: options.cancelText ?? $t(`Annuleren`),
+                    text: options.cancelText ?? $t(`%1Lh`),
                     type: 'secundary',
                     value: false,
                 },

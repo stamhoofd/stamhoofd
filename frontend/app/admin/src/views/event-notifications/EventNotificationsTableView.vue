@@ -224,7 +224,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),
                     configurationId: configurationId.value,
-                    title: $t('Kampmeldingen'),
+                    title: $t('%CV'),
                 }),
             }),
         ],

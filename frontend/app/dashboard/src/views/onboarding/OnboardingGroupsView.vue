@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="title" :save-text="$t('Volgende')" save-icon-right="arrow-right" :loading="saving" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :save-text="$t('%19q')" save-icon-right="arrow-right" :loading="saving" :prefer-large-button="true" @save="goNext">
         <aside class="style-title-prefix">
-            {{ $t('Stap {current} van {total}', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
+            {{ $t('%1WP', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
         </aside>
         <h1>
             {{ title }}
         </h1>
         <p>
-            {{ $t('Maak hier snel jullie leeftijdsgroepen of onderverdelingen aan. Vul gewoon de namen in, je kan dit later nog verfijnen.') }}
+            {{ $t('%1Uq') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -25,7 +25,7 @@
                     autocomplete="off"
                     enterkeyhint="next"
                     class="onboarding-group-row-input"
-                    :placeholder="index === rows.length - 1 ? $t('Voeg een groep toe') : $t('Naam van de groep')"
+                    :placeholder="index === rows.length - 1 ? $t('%1WL') : $t('%1X2')"
                 >
 
                 <template #right>
@@ -66,7 +66,7 @@ const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const errors = useErrors();
 const saving = ref(false);
 
-const title = $t('Welke onderverdelingen heb je?');
+const title = $t('%1Y2');
 
 const viewModel = props.viewModel;
 
@@ -104,8 +104,8 @@ async function deleteRow(row: GroupRow) {
     if (row.groupId) {
         const group = existingGroups.find(g => g.id === row.groupId);
         if (!await CenteredMessage.confirm({
-            title: $t('Ben je zeker dat je de groep ‘{groupName}’ en bijhorende gegevens wilt verwijderen?', { groupName: group?.settings.name.toString() ?? row.name }),
-            confirmText: $t('Ja, verwijderen'),
+            title: $t('%1VJ', { groupName: group?.settings.name.toString() ?? row.name }),
+            confirmText: $t('%55'),
             destructive: true,
         })) {
             return;
@@ -129,7 +129,7 @@ async function goNext() {
         if (namedRows.length === 0 && deletedGroupIds.value.length === 0) {
             throw new SimpleError({
                 code: 'no_groups',
-                message: $t('Voeg minstens één groep toe.'),
+                message: $t('%1YM'),
             });
         }
 

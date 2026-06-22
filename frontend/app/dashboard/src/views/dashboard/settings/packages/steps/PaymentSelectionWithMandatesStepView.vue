@@ -12,7 +12,7 @@
                         {{ $t('%kP') }}
                     </h2>
                     <p v-if="proFormaData?.payment?.price === 0">
-                        {{ $t('Je hoeft nu niets te betalen, maar de gekozen kaart zal gebruikt worden voor de periodieke betalingen.') }}
+                        {{ $t('%1cG') }}
                     </p>
 
                     <template v-if="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
@@ -72,7 +72,7 @@
                                         {{ $t('%1S1') }}
                                     </h3>
                                     <h3 v-else>
-                                        {{ $t('Sla deze kaart op voor latere betalingen') }}
+                                        {{ $t('%1Uy') }}
                                     </h3>
 
                                     <p class="style-description-small">
@@ -94,10 +94,10 @@
 
                 <div v-else class="container categorized-box">
                     <h2>
-                        {{ $t('Bevestiging') }}
+                        {{ $t('%y2') }}
                     </h2>
 
-                    <p>{{ $t('Jouw bestelling zal worden geplaatst als je verder gaat. Je hoeft nu niets te betalen.') }}</p>
+                    <p>{{ $t('%1Z2') }}</p>
                 </div>
 
                 <div v-if="model.requiresMandate && model.packages.length" class="container categorized-box">
@@ -131,7 +131,7 @@
                     <LoadingButton :loading="loadingProForma || loading">
                         <button v-if="proFormaData?.payment?.price === 0" class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
                             <span class="icon success small" />
-                            <span>{{ $t('Bevestigen') }}</span>
+                            <span>{{ $t('%X9') }}</span>
                         </button>
 
                         <button v-else class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">

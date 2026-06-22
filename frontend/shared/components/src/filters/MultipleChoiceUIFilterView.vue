@@ -21,7 +21,7 @@
         </template>
     </STList>
     <p v-else class="info-box">
-        {{ $t('Geen opties') }}
+        {{ $t('%1dJ') }}
     </p>
 </template>
 

@@ -16,9 +16,9 @@
             </template>
 
             <template v-if="sgvSyncIsEnabled">
-                <dt>{{ $t('Gesynchroniseerd') }}</dt>
+                <dt>{{ $t('%1Yp') }}</dt>
                 <dd>
-                    <span v-tooltip="$t('Leden moeten na wijzigingen opnieuw gesynchroniseerd worden met Scouts en Gidsen Vlaanderen.')" class="style-tooltip">
+                    <span v-tooltip="$t('%1Wg')" class="style-tooltip">
                         {{ sgvSyncDate }}
                     </span>
                 </dd>
@@ -115,5 +115,5 @@ const props = defineProps<{
 
 const currentCountry = useCountry();
 const { sgvSyncIsEnabled } = useSGVSync([props.member.member]);
-const sgvSyncDate = computed(() => props.member.patchedMember.details.lastExternalSync ? Formatter.date(props.member.patchedMember.details.lastExternalSync, true) : $t('Nooit'));
+const sgvSyncDate = computed(() => props.member.patchedMember.details.lastExternalSync ? Formatter.date(props.member.patchedMember.details.lastExternalSync, true) : $t('%1Io'));
 </script>

@@ -185,7 +185,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePending',
-        name: $t('%1PL'),
+        name: $t('%1OL'),
         getValue: object => object.pricePending,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -294,7 +294,7 @@ const actions = [
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
                             configurationId: configurationId.value,
-                            title: [organization.value?.name, $t('Aanrekeningen')].filter(Boolean).join(' - '),
+                            title: [organization.value?.name, $t('%1LA')].filter(Boolean).join(' - '),
                         }),
                     }),
                 ],

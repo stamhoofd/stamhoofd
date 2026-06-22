@@ -9,7 +9,7 @@
         </button>
 
         <p v-if="patchedBalanceItem.status === BalanceItemStatus.Hidden" class="error-box icon disabled">
-            <span>{{ $t('Deze aanrekening is onzichtbaar en telt niet als openstaand bedrag. Pas na betaling wordt het zichtbaar.') }}</span>
+            <span>{{ $t('%1dD') }}</span>
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -29,7 +29,7 @@
 
             <STListItem v-if="balanceItem.startDate || balanceItem.endDate">
                 <h3 class="style-definition-label">
-                    {{ $t('Periode') }}
+                    {{ $t('%Ah') }}
                 </h3>
                 <p class="style-definition-text">
                     {{ formatDateRange(balanceItem.startDate ?? balanceItem.endDate!, balanceItem.endDate ?? balanceItem.startDate!) }}

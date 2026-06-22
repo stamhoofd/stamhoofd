@@ -8,7 +8,7 @@
                 {{ $t('%bI') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.Equals" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('Leeg') : $t(`%bM`)" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.Equals" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('%Rs') : $t(`%bM`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -19,7 +19,7 @@
                 {{ $t('%bJ') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.NotEquals" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('Leeg') : $t(`%bM`)" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.NotEquals" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('%Rs') : $t(`%bM`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -30,7 +30,7 @@
                 {{ $t('%bK') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.GreaterThan" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('Leeg') : $t(`%bM`)" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.GreaterThan" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('%Rs') : $t(`%bM`)" />
         </STListItem>
 
         <STListItem :selectable="true" element-name="label">
@@ -41,7 +41,7 @@
                 {{ $t('%bL') }}
             </p>
 
-            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.LessThan" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('Leeg') : $t(`%bM`)" />
+            <component :is="DateSelection" v-if="filter.mode === UIDateFilterMode.LessThan" ref="input" v-model="filter.value" :required="!filter.builder.nullable" class="option" :placeholder="filter.builder.nullable ? $t('%Rs') : $t(`%bM`)" />
         </STListItem>
     </STList>
 </template>

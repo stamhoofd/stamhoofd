@@ -27,7 +27,7 @@
     <template v-if="showPrices">
         <template v-if="paymentStatus === null && item.status !== BalanceItemStatus.Canceled">
             <p v-if="item.unitPriceSuffix && item.unitPrice !== item.unitPriceWithVAT" class="style-description-small">
-                {{ formatPrice(item.unitPrice) }} {{ item.unitPriceSuffix }} {{ $t('excl. BTW') }}
+                {{ formatPrice(item.unitPrice) }} {{ item.unitPriceSuffix }} {{ $t('%1ZM') }}
             </p>
             <p v-else-if="item.unitPriceSuffix" class="style-description-small">
                 {{ formatPrice(item.unitPriceWithVAT) }} {{ item.unitPriceSuffix }}

@@ -279,9 +279,9 @@ async function addTagToOrganizations(organizations: Organization[], tag: Organiz
 
     if (toUpdate.length === 0) {
         if (organizations.length === 1) {
-            Toast.info($t('{orgName} heeft al de tag {tagName}', { orgName: organizations[0].name, tagName: tag.name })).show();
+            Toast.info($t('%1ZF', { orgName: organizations[0].name, tagName: tag.name })).show();
         } else {
-            Toast.info($t('De {numOrganizations} geselecteerde #groepen hebben al de tag {tagName}', { numOrganizations: organizations.length, tagName: tag.name })).show();
+            Toast.info($t('%1Y4', { numOrganizations: organizations.length, tagName: tag.name })).show();
         }
         return;
     }
@@ -289,17 +289,17 @@ async function addTagToOrganizations(organizations: Organization[], tag: Organiz
     const noUpdate = organizations.filter(org => org.meta.tags.includes(tag.id));
     let message = '';
     if (toUpdate.length === 1) {
-        message += $t('De tag {tagName} zal worden toegevoegd aan {orgName}.', { tagName: tag.name, orgName: toUpdate[0].name });
+        message += $t('%1at', { tagName: tag.name, orgName: toUpdate[0].name });
     } else {
-        message += $t('De tag {tagName} zal worden toegevoegd aan {numToUpdate} #groepen.', { tagName: tag.name, numToUpdate: toUpdate.length });
+        message += $t('%1Y1', { tagName: tag.name, numToUpdate: toUpdate.length });
     }
     if (noUpdate.length === 1) {
-        message += ` ${$t('{orgName} heeft deze tag al.', { orgName: noUpdate[0].name })}`;
+        message += ` ${$t('%1Wv', { orgName: noUpdate[0].name })}`;
     } else if (noUpdate.length > 1) {
-        message += ` ${$t('De overige {numNoUpdate} geselecteerde #groepen hebben deze tag al.', { numNoUpdate: noUpdate.length })}`;
+        message += ` ${$t('%1Vh', { numNoUpdate: noUpdate.length })}`;
     }
 
-    const confirmed = await CenteredMessage.confirm(message, $t('Bevestigen'));
+    const confirmed = await CenteredMessage.confirm(message, $t('%X9'));
     if (!confirmed) {
         return;
     }
@@ -319,9 +319,9 @@ async function removeTagFromOrganizations(organizations: Organization[], tag: Or
     const toUpdate = organizations.filter(org => org.meta.tags.some(t => tagsToRemove.includes(t))); // filter out organizations that don't have the tag
     if (toUpdate.length === 0) {
         if (organizations.length === 1) {
-            Toast.info($t('{orgName} heeft de tag {tagName} niet', { orgName: organizations[0].name, tagName: tag.name })).show();
+            Toast.info($t('%1WH', { orgName: organizations[0].name, tagName: tag.name })).show();
         } else {
-            Toast.info($t('Geen van de {numOrganizations} geselecteerde #groepen heeft de tag {tagName}', { numOrganizations: organizations.length, tagName: tag.name })).show();
+            Toast.info($t('%1ZK', { numOrganizations: organizations.length, tagName: tag.name })).show();
         }
         return;
     }
@@ -329,17 +329,17 @@ async function removeTagFromOrganizations(organizations: Organization[], tag: Or
     const noUpdate = organizations.filter(org => !org.meta.tags.some(t => tagsToRemove.includes(t)));
     let message = '';
     if (toUpdate.length === 1) {
-        message += $t('De tag {tagName} zal worden verwijderd van {orgName}.', { tagName: tag.name, orgName: toUpdate[0].name });
+        message += $t('%1WK', { tagName: tag.name, orgName: toUpdate[0].name });
     } else {
-        message += $t('De tag {tagName} zal worden verwijderd van {numToUpdate} #groepen.', { tagName: tag.name, numToUpdate: toUpdate.length });
+        message += $t('%1WM', { tagName: tag.name, numToUpdate: toUpdate.length });
     }
     if (noUpdate.length === 1) {
-        message += ` ${$t('{orgName} heeft deze tag niet.', { orgName: noUpdate[0].name })}`;
+        message += ` ${$t('%1Wh', { orgName: noUpdate[0].name })}`;
     } else if (noUpdate.length > 1) {
-        message += ` ${$t('De overige {numNoUpdate} geselecteerde #groepen hebben deze tag niet.', { numNoUpdate: noUpdate.length })}`;
+        message += ` ${$t('%1ch', { numNoUpdate: noUpdate.length })}`;
     }
 
-    const confirmed = await CenteredMessage.confirm(message, $t('Bevestigen'));
+    const confirmed = await CenteredMessage.confirm(message, $t('%X9'));
     if (!confirmed) {
         return;
     }
@@ -360,7 +360,7 @@ const actions: TableAction<Organization>[] = [];
 
 actions.push(
     new MenuTableAction({
-        name: $t('Tag toevoegen'),
+        name: $t('%73'),
         icon: 'label',
         priority: 2,
         groupIndex: 4,
@@ -376,7 +376,7 @@ actions.push(
 );
 actions.push(
     new MenuTableAction({
-        name: $t('Tag verwijderen'),
+        name: $t('%1WD'),
         icon: 'label_off',
         priority: 1,
         groupIndex: 4,
@@ -469,7 +469,7 @@ function getExcelTitle(selection: TableActionSelection<ObjectType>) {
     }
     const parts = [
         props.tag?.id ? props.tag.name : null,
-        $t('#Groepen'),
+        $t('%83'),
     ];
 
     return parts.filter(Boolean).join(' - ');

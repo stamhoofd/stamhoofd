@@ -171,10 +171,6 @@
     "original": "Inhoud die enkel zichtbaar is in e-mails, niet in ‘Mijn account’",
     "translation": "Contenu visible uniquement dans les e-mails, pas dans « Mon compte »"
   },
-  "%1H3": {
-    "original": "Ravot zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
-    "translation": "Ravot masquera le stock disponible s'il reste plus de {showStockBelow } pièces."
-  },
   "%1HI": {
     "original": "Groepen",
     "translation": "Groupes"
@@ -243,10 +239,6 @@
     "original": "Betalingen van groepen",
     "translation": "Paiements des groupes"
   },
-  "%1M4": {
-    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Ravot als je deze toch wilt gebruiken.",
-    "translation": "Vous n'avez plus le droit de lancer une période d’essai. Vous pouvez par contre activer le forfait. Contactez Ravot si vous souhaitez tout de même en bénéficier."
-  },
   "%1MO": {
     "original": "Filter leden die wel of geen geverifieerd account hebben om de gegevens van leden te wijzigen via ‘Mijn account’.",
     "translation": "Filtrez les membres avec ou sans compte vérifié pour modifier les données membres via ‘Mon compte’."
@@ -280,8 +272,8 @@
     "translation": "Quel type de groupe ?"
   },
   "%1PD": {
-    "original": "Groep waar de aansluiting aan aangrekend is",
-    "translation": "Groupe auquel l'affiliation est facturée"
+    "original": "Groep waar de aansluiting aan aangerekend is",
+    "translation": "Groupe sur lequel l'affiliation est facturée"
   },
   "%1PI": {
     "original": "Groep",
@@ -334,6 +326,142 @@
   "%1UG": {
     "original": "Beheer hoe je betaalt voor Ravot, download jouw facturen en bekijk jouw tegoed",
     "translation": "Gérez comment vous payez pour Ravot, téléchargez vos factures et consultez votre crédit."
+  },
+  "%1UU": {
+    "original": "Jullie ledenadministratie is klaar voor gebruik. Je kan nu meer instellingen aanvullen, leden importeren of ‘Mijn account’ uitproberen.",
+    "translation": "Votre gestion des membres est prête à l’emploi. Vous pouvez maintenant compléter plus de paramètres, importer des membres ou tester « Mon compte »."
+  },
+  "%1Uk": {
+    "original": "Ongetwijfeld ken je nog veel andere groepen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere groepen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per groep die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.",
+    "translation": "Tu connais sans doute plusieurs autres groupes (ou tu y es aussi actif) : un club sportif, l'école, un mouvement de jeunesse... Si tu invites d'autres groupes et qu'ils dépensent au moins 1 euro, tu reçois un crédit gratuit. Pour chaque groupe que tu invites, tu gagnes un peu plus (voir le tableau en bas). Si tu le fais de façon réfléchie, tu peux facilement accumuler beaucoup de crédit sans trop d'efforts."
+  },
+  "%1Uv": {
+    "original": "Mijn account, inschrijvingen, kalender en lidgeld op één plek.",
+    "translation": "Mon compte, inscriptions, calendrier et cotisation réunis en un seul endroit."
+  },
+  "%1Uw": {
+    "original": "Naam van het platform (Ravot)",
+    "translation": "Nom de la plateforme (Ravot)"
+  },
+  "%1Vc": {
+    "original": "Hieronder kan je zien welke groepen jouw link hebben gebruikt.",
+    "translation": "Ci-dessous, tu peux voir quels groupes ont utilisé ton lien."
+  },
+  "%1Vh": {
+    "original": "De overige {numNoUpdate} geselecteerde groepen hebben deze tag al.",
+    "translation": "Les {numNoUpdate} autres groupes sélectionnés ont déjà ce tag."
+  },
+  "%1Vt": {
+    "original": "Ravot zal de beschikbare voorraad verbergen als er nog meer dan {showStockBelow} stuks beschikbaar zijn.",
+    "translation": "Ravot masquera le stock disponible tant qu’il reste plus de {showStockBelow} articles disponibles."
+  },
+  "%1W5": {
+    "original": "Wat voor groep zijn jullie?",
+    "translation": "Quel type de groupe êtes-vous?"
+  },
+  "%1W6": {
+    "original": "Leiding in Ravot",
+    "translation": "Direction dans Ravot"
+  },
+  "%1WM": {
+    "original": "De tag {tagName} zal worden verwijderd van {numToUpdate} groepen.",
+    "translation": "Le tag {tagName} sera supprimé de {numToUpdate} groupes."
+  },
+  "%1WX": {
+    "original": "Beheerders hebben een account waarmee ze toegang krijgen tot Ravot.",
+    "translation": "Les administrateurs disposent d'un compte pour accéder à Ravot."
+  },
+  "%1Wp": {
+    "original": "Welkom bij Ravot",
+    "translation": "Bienvenue sur Ravot"
+  },
+  "%1XE": {
+    "original": "Om andere groepen te motiveren om jouw link te gebruiken, krijgen ze zelf ook 25 euro tegoed.",
+    "translation": "Pour encourager d'autres groupes à utiliser ton lien, ils reçoivent également un crédit de 25 euros."
+  },
+  "%1Y1": {
+    "original": "De tag {tagName} zal worden toegevoegd aan {numToUpdate} groepen.",
+    "translation": "Le tag {tagName} sera ajouté à {numToUpdate} groupes."
+  },
+  "%1Y4": {
+    "original": "De {numOrganizations} geselecteerde groepen hebben al de tag {tagName}",
+    "translation": "Les {numOrganizations} groupes sélectionnés ont déjà le tag {tagName}"
+  },
+  "%1YV": {
+    "original": "Leiding niet in Ravot",
+    "translation": "Encadrement non présent dans Ravot"
+  },
+  "%1Yj": {
+    "original": "Inschrijvingen zijn gesloten via ‘Mijn account’",
+    "translation": "Les inscriptions sont fermées via « Mon compte »"
+  },
+  "%1ZJ": {
+    "original": "Beheer je eigen groep",
+    "translation": "Gère ton propre groupe"
+  },
+  "%1ZK": {
+    "original": "Geen van de {numOrganizations} geselecteerde groepen heeft de tag {tagName}",
+    "translation": "Aucun des {numOrganizations} groupes sélectionnés n'a le tag {tagName}"
+  },
+  "%1a0": {
+    "original": "10e, 11e, 12e... groep",
+    "translation": "10e, 11e, 12e... groupe"
+  },
+  "%1a5": {
+    "original": "Voor de meeste groepen staat dit al goed ingesteld. Controleer het type en eventueel de koepel.",
+    "translation": "Pour la plupart des groupes, ceci est déjà bien configuré. Vérifie le type et éventuellement la fédération."
+  },
+  "%1aI": {
+    "original": "Het bedrag dat je ontvangt stijgt per groep tot maximaal 100 euro per groep. Dus als je 6 groepen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.",
+    "translation": "Le montant que tu reçois augmente par groupe jusqu'à un maximum de 100 euros par groupe. Donc, si tu invites 6 groupes, tu gagnes au total 210 €. Si tu en invites 10, tu gagnes 550 euros."
+  },
+  "%1bn": {
+    "original": "Geef {value}, krijg tot 100 euro tegoed* per groep",
+    "translation": "Invite {value}, reçois jusqu'à 100 euros de crédit* par groupe"
+  },
+  "%1bu": {
+    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une copie de {name-period-old} et de l’utiliser comme base pour {name-period-new} (nouveau). Tous les prix et subdivisions seront copiés, mais pourront ensuite être adaptés. Les deux périodes fonctionneront dès lors séparément : toute modification de {name-period-new} ne sera pas automatiquement appliquée à {name-period-old}, et vice versa.\\n\\nDès que {name-period-new} est entièrement configurée, vous pouvez y basculer. À partir de ce moment, les membres pourront s’inscrire via « Mon compte ». Jusque-là, la nouvelle période restera cachée pour les membres."
+  },
+  "%1c9": {
+    "original": "* We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Ravot aan te kopen. Je kan je tegoed niet doorgeven aan een andere groep. Je kan geen tegoed krijgen voor een groep die al Ravot gebruikt of al heeft geregistreerd. Ook als die persoon al een andere groep heeft op Ravot kan je er geen tegoed meer voor krijgen. Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen. Meerdere groepen zelf aanmaken om zo tegoed te krijgen is niet toegestaan. Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.",
+    "translation": "* Nous ne versons jamais le crédit. Vous pouvez uniquement l’utiliser pour acheter des packs sur Ravot. Il n’est pas possible de transférer votre crédit à un autre groupe. Aucun crédit ne sera accordé pour un groupe qui utilise déjà Ravot ou qui y est déjà inscrit. Si une personne possède déjà un autre groupe sur Ravot, il n’est plus possible d’obtenir du crédit pour cela non plus. Le crédit expire s’il n’est pas utilisé pendant un an (la validité est prolongée dès qu'au moins un centime est dépensé). Vous ne pouvez pas utiliser le crédit pour payer les frais de transaction des paiements en ligne. Créer plusieurs groupes pour obtenir du crédit n’est pas autorisé. Si le parrainage se fait d’une manière considérée comme du spam, nous pouvons décider d’annuler l’octroi du crédit."
+  },
+  "%1cE": {
+    "original": "Dit werkjaar is niet actief, inschrijvingen via ‘Mijn account’ zijn nog niet mogelijk.",
+    "translation": "Cette année associative n’est pas active, les inscriptions via « Mon compte » ne sont pas encore possibles."
+  },
+  "%1cF": {
+    "original": "Om facturen in Ravot ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.",
+    "translation": "Pour transmettre également les factures Ravot à votre logiciel de comptabilité, vous pouvez les transférer par e-mail à votre logiciel comptable. Ce dernier peut lire le fichier XML. Ensuite, votre logiciel peut envoyer la facture à votre client via PEPPOL."
+  },
+  "%1cR": {
+    "original": "Registreerde op {date}. Je ontvangt jouw tegoed zodra deze groep 1 euro heeft besteed.",
+    "translation": "Inscrit le {date}. Tu recevras ton crédit dès que ce groupe aura dépensé 1 euro."
+  },
+  "%1cV": {
+    "original": "Ravot",
+    "translation": "Ravot"
+  },
+  "%1ch": {
+    "original": "De overige {numNoUpdate} geselecteerde groepen hebben deze tag niet.",
+    "translation": "Les {numNoUpdate} autres groupes sélectionnés n'ont pas ce tag."
+  },
+  "%1ck": {
+    "original": "Deze link is niet (meer) geldig omdat de groep niet bestaat",
+    "translation": "Ce lien n'est plus valable car le groupe n'existe pas"
+  },
+  "%1dH": {
+    "original": "Naam groep (betaler)",
+    "translation": "Nom du groupe (payeur)"
+  },
+  "%1dM": {
+    "original": "Dit werkjaar wordt zichtbaar in ‘Mijn account’ voor leden om in te schrijven. Inschrijven voor andere werkjaren is dan niet langer mogelijk.",
+    "translation": "Cette année associative sera visible dans « Mon compte » pour permettre l'inscription des membres. Il ne sera alors plus possible de s'inscrire pour d'autres années associatives."
+  },
+  "%1dT": {
+    "original": "{n}e groep",
+    "translation": "{n}e groupe"
   },
   "%2": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
@@ -455,6 +583,10 @@
     "original": "Sluit eerst aan bij Stripe via de Ravot instellingen > Betaalaccounts, daarna kan je {paymentMethod} activeren.",
     "translation": "Connectez d’abord Stripe via les paramètres Ravot > Comptes de paiement, ensuite vous pourrez activer {paymentMethod}."
   },
+  "%3v": {
+    "original": "Het bedrag wordt achteraf door KSA Nationaal aan je groep gefactureerd.",
+    "translation": "Le montant sera facturé ultérieurement par KSA Nationaal à votre groupe."
+  },
   "%3x": {
     "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
     "translation": "Ce membre n'est inscrit dans aucun groupe pour l'année associative en cours et ne peut donc pas être affilié"
@@ -539,6 +671,14 @@
     "original": "Alle groepen",
     "translation": "Tous les groupes"
   },
+  "%5B": {
+    "original": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
+    "translation": "Ce membre n'est plus affilié à KSA Nationaal et l'assurance prendra bientôt fin."
+  },
+  "%5C": {
+    "original": "Dit lid is niet aangesloten bij KSA Nationaal, en is daardoor ook niet verzekerd",
+    "translation": "Ce membre n'est pas affilié à KSA Nationaal et n'est donc pas assuré."
+  },
   "%5G": {
     "original": "Zoek een groep waar je {firstName} wilt inschrijven",
     "translation": "Cherchez un groupe où vous souhaitez inscrire {firstName}"
@@ -594,10 +734,6 @@
   "%5Z": {
     "original": "De betaling loopt niet via Ravot",
     "translation": "Le paiement ne passe pas par Ravot"
-  },
-  "%5a": {
-    "original": "Je kan geen documenten aanmaken in de gratis versie van Ravot",
-    "translation": "Vous ne pouvez pas créer de documents dans la version gratuite de Ravot"
   },
   "%5b": {
     "original": "Dit is geen geldig zaalplan uit Ravot",
@@ -667,9 +803,21 @@
     "original": "Filter alle groepen die een lid hebben die aan deze voorwaarden voldoet.",
     "translation": "Filtrez tous les groupes qui ont un membre répondant à ces conditions."
   },
+  "%7g": {
+    "original": "Aansluiting KSA Nationaal",
+    "translation": "Affiliation KSA Nationaal"
+  },
   "%7h": {
     "original": "Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
     "translation": "Votre direction peut rechercher votre code de sécurité dans Ravot et vous le communiquer. Si vous êtes vous-même un responsable, demandez-le à vos collègues responsables ou à KSA National."
+  },
+  "%7i": {
+    "original": "Het bedrag zal achteraf door KSA Nationaal aan {name} worden gefactureerd",
+    "translation": "Le montant sera ultérieurement facturé par KSA Nationaal à {name}."
+  },
+  "%7j": {
+    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
+    "translation": "Les membres inscrits dans un groupe d'âge lié à un groupe d'âge standard de KSA Nationaal seront automatiquement affiliés. Pour les autres membres, vous pouvez demander ici une affiliation manuelle."
   },
   "%7l": {
     "original": "De link naar deze activiteit in ‘Mijn account’. Deel deze link met leden.",
@@ -687,9 +835,17 @@
     "original": "KSA Nationaal raadt een proefperiode van {days} aan.",
     "translation": "KSA Nationaal recommande une période d'essai de {days}."
   },
+  "%7z": {
+    "original": "Dit lid heeft een proefaansluiting bij KSA Nationaal",
+    "translation": "Ce membre possède une affiliation d'essai chez KSA Nationaal."
+  },
   "%8": {
     "original": "Inloggen bij KSA",
     "translation": "Connexion à KSA"
+  },
+  "%80": {
+    "original": "Dit lid is niet aangesloten in {werkjaar} bij KSA Nationaal, en is daardoor ook niet verzekerd.",
+    "translation": "Ce membre n'est pas affilié à KSA Nationaal en {werkjaar} et n'est donc pas assuré."
   },
   "%83": {
     "original": "Groepen",
@@ -734,10 +890,6 @@
   "%8P": {
     "original": "Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
     "translation": "Tous les groupes sont en train d'être transférés vers la nouvelle année associative. Cela peut prendre un moment ; vous devrez peut-être recharger la page pour voir les dernières modifications."
-  },
-  "%8W": {
-    "original": "Geen groepen beschikbaar in dit werkjaar",
-    "translation": "Aucun groupe disponible pour cette année associative"
   },
   "%8Z": {
     "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
@@ -904,12 +1056,16 @@
     "translation": "Certaines adhésions passent par KSA National (le membre paie directement à la fédération) et ne sont donc pas vraiment facturées à un groupe individuel. Vous pouvez les exclure via ce filtre."
   },
   "%BR": {
-    "original": "Lid betaald rechtstreeks aan KSA Nationaal",
-    "translation": "Le membre paie directement à KSA National"
+    "original": "Lid betaalt rechtstreeks aan KSA Nationaal",
+    "translation": "Le membre paie directement à KSA Nationaal."
   },
   "%BS": {
-    "original": "Lid betaald aan individuele groep",
-    "translation": "Le membre paie au groupe individuel"
+    "original": "Lid betaalt aan individuele groep",
+    "translation": "Un membre paie à un groupe individuel"
+  },
+  "%Bh": {
+    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
+    "translation": "La prochaine affiliation de ce membre commencera le {date}. Pour l'instant, ce membre n'est pas affilié à KSA Nationaal et n'est donc pas assuré."
   },
   "%Bm": {
     "original": "Aangesloten via KSA Nationaal (niet aangerekend aan een groep)",
@@ -1047,10 +1203,6 @@
     "original": "Je hebt nog geen instellingen toegevoegd.",
     "translation": "Vous n'avez encore ajouté aucun paramètre."
   },
-  "%IG": {
-    "original": "Tonen bij het registeren",
-    "translation": "Afficher lors de l'enregistrement"
-  },
   "%II": {
     "original": "Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.",
     "translation": "La case à cocher doit être cochée lors de l'enregistrement si vous activez cette option. Dans le cas contraire, il ne s'agit que d'une mention implicitement acceptée."
@@ -1063,10 +1215,6 @@
     "original": "Tekst die naast het aanvinkvakje staat",
     "translation": "Texte qui se trouve à côté de la case à cocher"
   },
-  "%IR": {
-    "original": "Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.",
-    "translation": "Voeg voorwaarden toe die bij het registeren staan vermeldt of geaccepteerd moeten worden."
-  },
   "%IV": {
     "original": "Instellen als huidige",
     "translation": "Définir comme actif"
@@ -1078,14 +1226,6 @@
   "%IY": {
     "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken.",
     "translation": "Bienvenue sur le portail d'administration. Ici, vous pouvez rechercher tous les membres ou groupes ou créer des activités nationales/régionales."
-  },
-  "%IZ": {
-    "original": "E-mailadres valideren...",
-    "translation": "Valider l'adresse électronique..."
-  },
-  "%Ia": {
-    "original": "E-mailadres is gevalideerd",
-    "translation": "Adresse électronique validée"
   },
   "%Ib": {
     "original": "Bezig met uitschrijven...",
@@ -1122,10 +1262,6 @@
   "%Im": {
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van groep veranderen als je met een ander account wilt inloggen.",
     "translation": "Vous vous connectez au système de feedback avec ce compte : {email}. Vous pouvez d'abord changer de groupe si vous souhaitez vous connecter avec un autre compte."
-  },
-  "%Io": {
-    "original": "Deze record is optioneel",
-    "translation": "Ce enregistrement est facultatif"
   },
   "%Ix": {
     "original": "Gebruik automatische tekstvervangingen in de mededeling via",
@@ -1183,10 +1319,6 @@
     "original": "Je moet minimaal één betaalmethode accepteren",
     "translation": "Vous devez accepter au moins une méthode de paiement"
   },
-  "%Jb": {
-    "original": "Er ging iets mis: te veel doorverwijzingen.",
-    "translation": "Une erreur s’est produite : trop de redirections."
-  },
   "%Je": {
     "original": "Betaling mislukt",
     "translation": "Paiement échoué"
@@ -1219,10 +1351,6 @@
     "original": "Gemiddeld",
     "translation": "Moyenne"
   },
-  "%Jt": {
-    "original": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
-    "translation": "Pour une API-key qui doit appeler l'API très régulièrement. Risque de surcharge si l'API n'est pas correctement implémentée et déclenche des requêtes lourdes en peu de temps."
-  },
   "%Ju": {
     "original": "Maximaal 10 req/s; 240 requests per 2 minuten; 2.000 requests per uur; 14.400 requests per dag",
     "translation": "Maximum 10 req/s ; 240 requêtes par 2 minutes ; 2 000 requêtes par heure ; 14 400 requêtes par jour"
@@ -1231,21 +1359,9 @@
     "original": "Hoog",
     "translation": "Haut"
   },
-  "%Jw": {
-    "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
-    "translation": "Pour une API-key qui doit faire un usage très intensif de l'API. Risque de surcharge si l'API n'est pas correctement implémentée et déclenche des requêtes lourdes sur une courte période."
-  },
   "%KY": {
     "original": "Dit document is zichtbaar in ‘Mijn account’.",
     "translation": "Ce document est visible dans « Mon compte »."
-  },
-  "%Kl": {
-    "original": "Deze functie is niet beschikbaar omdat jouw groep nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
-    "translation": "Cette fonction n'est pas disponible car votre groupe utilise encore l'ancien forfait gratuit d'administration des membres. Via les paramètres, les administrateurs principaux peuvent passer à la version payante avec plus de fonctionnalités."
-  },
-  "%LV": {
-    "original": "Inschrijvingen zijn momenteel gesloten via ‘Mijn account’.",
-    "translation": "Les inscriptions sont actuellement fermées via « Mon compte »."
   },
   "%Li": {
     "original": "Open inschrijvingen van leden via ‘Mijn account’.",
@@ -1298,10 +1414,6 @@
   "%WI": {
     "original": "Mijn groep staat er niet tussen",
     "translation": "Mon groupe n'y figure pas"
-  },
-  "%WO": {
-    "original": "Deze periode is niet beschikbaar voor jouw groep.",
-    "translation": "Cette période n'est pas disponible pour votre groupe."
   },
   "%Wb": {
     "original": "Je locatie maakt je groep makkelijker vindbaar als je de volgende keer wilt inloggen. Je kan het later nog wijzigen.",
@@ -1378,10 +1490,6 @@
   "%eR": {
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw groep. Stel deze eerst in voor je verder gaat.",
     "translation": "Vous n'avez pas encore ajouté de données de facturation à votre groupe. Veuillez d'abord les configurer avant de continuer."
-  },
-  "%eY": {
-    "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via ‘Mijn account’.",
-    "translation": "Vous recevrez une confirmation supplémentaire par e-mail. Si des données changent à l'avenir, vous pourrez désormais les gérer via ‘Mon compte’."
   },
   "%ey": {
     "original": "Groep",

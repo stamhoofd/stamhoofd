@@ -1,24 +1,24 @@
 <template>
     <div id="members-settings-view" class="st-view background">
-        <STNavigationBar :title="props.period ? props.period.period.name : $t('Ledenadministratie')">
+        <STNavigationBar :title="props.period ? props.period.period.name : $t('%Om')">
             <template #right>
                 <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                     <span class="icon external" />
-                    <span class="hide-small">{{ $t('Ledenportaal') }}</span>
+                    <span class="hide-small">{{ $t('%2g') }}</span>
                 </a>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                {{ props.period ? props.period.period.name : $t('Ledenadministratie instellingen') }}
+                {{ props.period ? props.period.period.name : $t('%1Zz') }}
             </h1>
 
             <BillingWarningBox filter-types="members" />
 
             <template v-if="!props.period && !$isPlatform">
-                <STInputBox class="max" :title="$t('Link naar ledenportaal')">
-                    <div v-copyable="organization.registerUrl" v-tooltip="$t('Kopiëren')" class="input-with-buttons">
+                <STInputBox class="max" :title="$t('%On')">
+                    <div v-copyable="organization.registerUrl" v-tooltip="$t('%R7')" class="input-with-buttons">
                         <div>
                             <form novalidate class="input-icon-container icon earth small">
                                 <input :value="organization.getRegistrationHost()" class="input" readonly="true" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
@@ -27,13 +27,13 @@
                         <div>
                             <button type="button" class="button text">
                                 <span class="icon copy" />
-                                <span class="hide-small">{{ $t('Kopiëren') }}</span>
+                                <span class="hide-small">{{ $t('%R7') }}</span>
                             </button>
                         </div>
                     </div>
                 </STInputBox>
                 <p v-if="false" class="style-description-small">
-                    <I18nComponent :t="$t('Plaats een knop naar deze link op je website en deel het op je sociale media. Je kan het <button>hier</button> personaliseren.')">
+                    <I18nComponent :t="$t('%1be')">
                         <template #button="{content}">
                             <button type="button" class="inline-link" @click="$navigate(Routes.RegistrationPage)">
                                 {{ content }}
@@ -171,7 +171,7 @@
 
             <template v-if="!props.period">
                 <hr>
-                <h2>{{ $t('Acties') }}</h2>
+                <h2>{{ $t('%16X') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.MembersImport)">
@@ -179,7 +179,7 @@
                             <IconContainer icon="upload" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Leden importeren') }}
+                            {{ $t('%18D') }}
                         </h2>
 
                         <p class="style-description-small">
@@ -192,11 +192,11 @@
                             <IconContainer icon="sync" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Groepsadministratie synchroniseren') }}
+                            {{ $t('%1aO') }}
                         </h2>
 
                         <p class="style-description-small">
-                            {{ $t('Synchroniseer leden met Scouts en Gidsen Vlaanderen.') }}
+                            {{ $t('%1Vp') }}
                         </p>
                     </STListItem>
                 </STList>

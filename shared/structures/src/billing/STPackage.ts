@@ -93,16 +93,16 @@ export enum STPricingType {
 
 export function getPricingTypeName(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return $t('Eénmalig');
-        case STPricingType.PerYear: return $t('Per jaar');
-        case STPricingType.PerMember: return $t('Per lid, per jaar');
+        case STPricingType.Fixed: return $t('%1Xm');
+        case STPricingType.PerYear: return $t('%1aT');
+        case STPricingType.PerMember: return $t('%1VT');
     }
 }
 export function getPricingTypeSuffix(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return $t('éénmalig');
-        case STPricingType.PerYear: return $t('per jaar');
-        case STPricingType.PerMember: return $t('per lid, per jaar');
+        case STPricingType.Fixed: return $t('%1W3');
+        case STPricingType.PerYear: return $t('%1ae');
+        case STPricingType.PerMember: return $t('%1W1');
     }
 }
 

@@ -49,7 +49,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'locked',
                     message: 'Document is locked',
-                    human: $t(`Dit document is vergrendeld en kan niet meer gewijzigd worden.`),
+                    human: $t(`%1Uc`),
                 });
             }
 

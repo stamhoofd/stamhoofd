@@ -85,7 +85,7 @@ export class PeriodHelper {
         if (QueueHandler.isRunning(tag)) {
             throw new SimpleError({
                 code: 'move_period_pending',
-                message: $t('Er is al een jaarovergang bezig. Wacht tot deze klaar is.'),
+                message: $t('%1cP'),
             });
         }
 

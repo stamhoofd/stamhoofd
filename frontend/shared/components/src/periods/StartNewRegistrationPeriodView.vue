@@ -5,7 +5,7 @@
         <main>
             <h1>{{ $t('%17p', {'year-2025-2026': period.name}) }}</h1>
             <p
-                v-if="!$isPlatform" class="pre-wrap style-description-block" v-text="$t('Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.', {
+                v-if="!$isPlatform" class="pre-wrap style-description-block" v-text="$t('%1bu', {
                     'name-period-old': organization?.period.period.name ?? '',
                     'name-period-new': period.name
                 })"
@@ -60,7 +60,7 @@
                                         {{ row.old.settings.name }}
                                     </h2>
                                     <p v-if="row.old.getMemberCount() !== null" class="style-description-small">
-                                        {{ pluralText(row.old.getMemberCount()!, $t('lid'), $t('leden')) }}
+                                        {{ pluralText(row.old.getMemberCount()!, $t('%79'), $t('%It')) }}
                                     </p>
                                 </div>
                             </div>
@@ -76,7 +76,7 @@
                                         {{ row.new.settings.name }}
                                     </h2>
                                     <p class="style-description-small">
-                                        {{ pluralText(0, $t('lid'), $t('leden')) }}
+                                        {{ pluralText(0, $t('%79'), $t('%It')) }}
                                     </p>
                                 </div>
                             </div>
@@ -172,7 +172,7 @@ const rows = computed(() => {
             type: 'category',
             key: 'watitinglists',
             depth: 0,
-            name: $t('Wachtlijsten'),
+            name: $t('%eh'),
         });
 
         result.push({

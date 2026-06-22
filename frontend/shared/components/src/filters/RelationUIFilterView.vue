@@ -43,7 +43,7 @@
                         </p>
                     </STListItem>
                 </STList>
-                <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`Geen resultaten`)" />
+                <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`%1XB`)" />
             </template>
         </div>
     </LoadingBoxTransition>

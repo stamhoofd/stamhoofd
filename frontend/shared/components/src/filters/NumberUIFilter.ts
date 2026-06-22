@@ -69,9 +69,9 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
     get combinationWord(): string {
         switch (this.mode) {
             case UINumberFilterMode.GreaterThan: return $t(`%bE`);
-            case UINumberFilterMode.GreaterThanOrEqual: return $t(`is groter dan of gelijk aan`);
+            case UINumberFilterMode.GreaterThanOrEqual: return $t(`%1ad`);
             case UINumberFilterMode.LessThan: return $t(`%bF`);
-            case UINumberFilterMode.LessThanOrEqual: return $t(`is kleiner dan of gelijk aan`);
+            case UINumberFilterMode.LessThanOrEqual: return $t(`%1cL`);
             case UINumberFilterMode.Equals: return $t(`%bG`);
             case UINumberFilterMode.NotEquals: return $t(`%bH`);
         }

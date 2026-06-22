@@ -464,7 +464,7 @@ export class PlatformFamily {
                     $in: [
                         {
                             $: '$rel',
-                            name: $t('geen'),
+                            name: $t('%1VV'),
                             value: null,
                             type: 'Membership',
                         },

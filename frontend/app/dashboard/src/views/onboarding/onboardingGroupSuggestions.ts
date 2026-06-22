@@ -11,21 +11,21 @@ export function getSuggestedGroupNames(type: OrganizationType, umbrella: Umbrell
     if (type === OrganizationType.Youth) {
         switch (umbrella) {
             case UmbrellaOrganization.ScoutsEnGidsenVlaanderen:
-                return [$t('Kapoenen'), $t('Wouters'), $t('Jonggivers'), $t('Givers'), $t('Jin')];
+                return [$t('%1c7'), $t('%1Wf'), $t('%1ZD'), $t('%1VZ'), $t('%1Xs')];
             case UmbrellaOrganization.ChiroNationaal:
-                return [$t('Ribbels'), $t('Speelclub'), $t('Rakwi'), $t('Tito'), $t('Keti'), $t('Aspi')];
+                return [$t('%1Zg'), $t('%1aQ'), $t('%1cH'), $t('%1a9'), $t('%1aw'), $t('%1bc')];
             case UmbrellaOrganization.KSA:
-                return [$t('Sloebers'), $t('Pagadders'), $t('Jonghernieuwers'), $t('Hernieuwers'), $t('Jongknapen'), $t('Knapen')];
+                return [$t('%1bI'), $t('%1Zn'), $t('%1YY'), $t('%1Zr'), $t('%1Ui'), $t('%1XS')];
             case UmbrellaOrganization.KLJ:
-                return [$t('-12'), $t('+12'), $t('-16'), $t('+16')];
+                return [$t('%1Yk'), $t('%1bs'), $t('%1a6'), $t('%1Y9')];
             default:
-                return [$t('Leden')];
+                return [$t('%1EH')];
         }
     }
 
     if (OrganizationTypeHelper.getCategory(type) === OrganizationTypeHelper.getCategory(OrganizationType.Sport)) {
-        return [$t('Recreanten'), $t('Competitie')];
+        return [$t('%1ao'), $t('%1bU')];
     }
 
-    return [$t('Leden')];
+    return [$t('%1EH')];
 }

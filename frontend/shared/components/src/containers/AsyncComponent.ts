@@ -103,7 +103,7 @@ export const importWithRetry: ImportRetryMethod = async <Args extends unknown[],
                         // From the second retry onwards (i.e. after at least two failed attempts),
                         // indicate the network issue to the user with a loading spinner.
                         if (attempt >= 2 && !toast) {
-                            toast = new Toast($t(`Bezig met verbinden met internet...`), 'spinner').setHide(null).show();
+                            toast = new Toast($t(`%ks`), 'spinner').setHide(null).show();
                         }
 
                         // Exponential backoff with a bit of jitter, capped at 10 seconds.
@@ -118,7 +118,7 @@ export const importWithRetry: ImportRetryMethod = async <Args extends unknown[],
                     }
                 }
                 console.error('Failed to load dynamically imported module - not possible to retry', e);
-                toast = new Toast($t(`Bezig met verbinden met internet...`), 'spinner').setHide(null).show();
+                toast = new Toast($t(`%ks`), 'spinner').setHide(null).show();
 
                 // Wait for stable URL before reloading
                 // + also good to give some time for the network to restore

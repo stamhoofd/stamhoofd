@@ -18,7 +18,7 @@ export class ReferralService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid register code',
-                human: $t('Je hebt al een doorverwijzingscode gebruikt'),
+                human: $t('%1Ws'),
                 field: 'registerCode',
             });
         }
@@ -28,7 +28,7 @@ export class ReferralService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid register code',
-                human: $t('De doorverwijzingscode die je hebt opgegeven is niet langer geldig'),
+                human: $t('%1Ua'),
                 field: 'registerCode',
             });
         }
@@ -40,7 +40,7 @@ export class ReferralService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Referral codes unavailable',
-                human: $t('Doorverwijzingscodes zijn momenteel niet beschikbaar'),
+                human: $t('%1YF'),
                 field: 'registerCode',
             });
         }
@@ -150,7 +150,7 @@ export class ReferralService {
 
         const credit = new BalanceItem();
         credit.type = BalanceItemType.ReferralDiscount;
-        credit.description = $t('{organization-name} doorverwezen 🙌', { 'organization-name': organization.name });
+        credit.description = $t('%1ZE', { 'organization-name': organization.name });
         credit.payingOrganizationId = code.organizationId;
         credit.organizationId = (await Platform.getShared()).membershipOrganizationId!; // where do we get this discount from
         credit.VATPercentage = 21;

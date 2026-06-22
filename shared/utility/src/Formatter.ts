@@ -574,7 +574,7 @@ export class Formatter {
             totalLength += item.toString().length;
             if (totalLength > options.maxLength) {
                 const notIncludedCount = array.length - itemsToInclude.length;
-                const lastText = options.textIfOverflow ? options.textIfOverflow(notIncludedCount) : $t('{count} meer', { count: notIncludedCount });
+                const lastText = options.textIfOverflow ? options.textIfOverflow(notIncludedCount) : $t('%1bw', { count: notIncludedCount });
                 itemsToInclude.push(lastText);
                 break;
             }

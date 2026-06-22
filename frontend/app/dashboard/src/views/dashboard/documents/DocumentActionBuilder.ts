@@ -160,7 +160,7 @@ export class DocumentActionBuilder {
 
     async editDocument(document: DocumentStruct) {
         if (document.isLocked) {
-            Toast.error($t('Dit document is vergrendeld en kan niet meer gewijzigd worden.')).show();
+            Toast.error($t('%1Uc')).show();
             return;
         }
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditDocumentView" */ './EditDocumentView.vue'), {
@@ -237,7 +237,7 @@ export class DocumentActionBuilder {
 
     async duplicateDocument(document: DocumentStruct) {
         if (document.isLocked) {
-            Toast.error($t('Dit document is vergrendeld en kan niet gedupliceerd worden.')).show();
+            Toast.error($t('%1VQ')).show();
             return;
         }
 

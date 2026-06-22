@@ -3,7 +3,7 @@
         <dl class="details-grid dns-records" :class="{ success: record.status === 'Valid' }">
             <template v-if="record.optional">
                 <dt>{{ $t('%14p') }}</dt>
-                <dd>{{ $t('Deze record is optioneel maar sterk aan te bevelen') }}</dd>
+                <dd>{{ $t('%1bo') }}</dd>
             </template>
 
             <dt>{{ $t('%1B') }}</dt>

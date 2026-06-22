@@ -860,28 +860,28 @@ export class GroupSettings extends AutoEncoder {
 
         if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
             if (this.forAdults) {
-                who.push($t('Mannen'));
+                who.push($t('%1Vv'));
             } else {
-                who.push($t('Jongens'));
+                who.push($t('%1bE'));
             }
         } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
             if (this.forAdults) {
-                who.push($t('Vrouwen'));
+                who.push($t('%1Wr'));
             } else {
-                who.push($t('Meisjes'));
+                who.push($t('%1XH'));
             }
         }
 
         if (this.minAge && this.maxAge) {
             if (this.minAge === this.maxAge) {
-                who.push($t('{x} jaar', { x: this.minAge.toString() }));
+                who.push($t('%1Wl', { x: this.minAge.toString() }));
             } else {
-                who.push($t('{x} tot {y} jaar', { x: this.minAge.toString(), y: this.maxAge.toString() }));
+                who.push($t('%1WI', { x: this.minAge.toString(), y: this.maxAge.toString() }));
             }
         } else if (this.minAge) {
-            who.push($t('Vanaf {x} jaar', { x: this.minAge.toString() }));
+            who.push($t('%1Ue', { x: this.minAge.toString() }));
         } else if (this.maxAge) {
-            who.push($t('Tot {x} jaar', { x: this.maxAge.toString() }));
+            who.push($t('%1c6', { x: this.maxAge.toString() }));
         }
 
         if (!who.length) {
@@ -937,7 +937,7 @@ export class GroupSettings extends AutoEncoder {
                 code: 'invalid_field',
                 field: 'settings.name',
                 message: 'Group name cannot be empty',
-                human: $t('De naam van de groep mag niet leeg zijn.'),
+                human: $t('%1aj'),
             });
         }
 
@@ -946,7 +946,7 @@ export class GroupSettings extends AutoEncoder {
                 code: 'invalid_field',
                 field: 'settings.name',
                 message: 'Group name must include at least one letter or number',
-                human: $t('De naam van de groep moet minstens één letter of cijfer bevatten.'),
+                human: $t('%1bv'),
             });
         }
 

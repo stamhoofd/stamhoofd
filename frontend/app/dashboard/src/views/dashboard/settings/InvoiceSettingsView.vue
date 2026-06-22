@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%1Tp`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%1Rg`)" @save="save">
         <h1>
             {{ $t('%1Rg') }}
         </h1>
@@ -51,11 +51,11 @@
         </div>-->
 
         <hr>
-        <h2>{{ $t('Facturen doorsturen naar boekhoudsoftware en PEPPOL') }}</h2>
-        <p>{{ $t('Om facturen in Stamhoofd ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.') }}</p>
+        <h2>{{ $t('%1al') }}</h2>
+        <p>{{ $t('%1cF') }}</p>
 
         <STList>
-            <CheckboxListItem v-model="forwardOnlyVAT" :label="$t('Enkel facturen van BTW-plichtige bedrijven of bedrijven met een custom PEPPOL Endpoint ID doorsturen naar de boekhoudsoftware')" />
+            <CheckboxListItem v-model="forwardOnlyVAT" :label="$t('%1b5')" />
         </STList>
 
         <EmailInput v-for="n in emailCount" :key="n" :title="$t(`%1FK`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`%1FK`)" @update:model-value="setEmail(n - 1, $event ?? '')">
@@ -66,12 +66,12 @@
         </EmailInput>
 
         <p v-if="emailCount === 0" class="info-box">
-            {{ $t('Er zijn nog geen e-mailadressen ingesteld') }}
+            {{ $t('%1WB') }}
         </p>
 
         <button class="button text" type="button" @click="addEmail('')">
             <span class="icon add" />
-            <span>{{ $t('E-mailadres') }}</span>
+            <span>{{ $t('%1FK') }}</span>
         </button>
     </SaveView>
 </template>

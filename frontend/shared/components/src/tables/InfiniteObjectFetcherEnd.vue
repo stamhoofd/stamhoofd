@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<{
     fetcher: InfiniteObjectFetcher<ObjectType>;
     emptyMessage?: string;
 }>(), {
-    emptyMessage: $t('Geen resultaten'),
+    emptyMessage: $t('%1XB'),
 });
 
 const el = ref<HTMLElement | null>(null);

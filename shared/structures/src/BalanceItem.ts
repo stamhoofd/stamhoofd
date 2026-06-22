@@ -48,15 +48,15 @@ export enum VATExcemptReason {
 
 export function getVATExcemptReasonName(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return $t('Intracommunautaire (EU) verleggingsregeling: export van goederen binnen de EU');
-        case VATExcemptReason.IntraCommunityServices: return $t('Intracommunautaire (EU) verleggingsregeling: export van diensten binnen de EU');
+        case VATExcemptReason.IntraCommunityGoods: return $t('%1X7');
+        case VATExcemptReason.IntraCommunityServices: return $t('%1XO');
     }
 }
 
 export function getVATExcemptInvoiceNote(reason: VATExcemptReason): string {
     switch (reason) {
         case VATExcemptReason.IntraCommunityGoods: return $t('%1Km');
-        case VATExcemptReason.IntraCommunityServices: return $t('Btw verlegd: Art 21 § 2 van het Belgische btw-wetboek');
+        case VATExcemptReason.IntraCommunityServices: return $t('%1b3');
     }
 }
 
@@ -126,9 +126,9 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.CancellationFee: return $t(`%17G`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
         case BalanceItemType.STPackage: return $t('%1Ms');
-        case BalanceItemType.ServiceFee: return $t('Servicekosten');
-        case BalanceItemType.TransferFee: return $t('Transactiekosten');
-        case BalanceItemType.ReferralDiscount: return $t('Referralkorting');
+        case BalanceItemType.ServiceFee: return $t('%1UX');
+        case BalanceItemType.TransferFee: return $t('%wZ');
+        case BalanceItemType.ReferralDiscount: return $t('%1Uz');
     }
 }
 
@@ -175,8 +175,8 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
-        case BalanceItemRelationType.STPricingType: return $t(`Prijstype`);
-        case BalanceItemRelationType.PaymentProvider: return $t(`Betaalprovider`);
+        case BalanceItemRelationType.STPricingType: return $t(`%1YH`);
+        case BalanceItemRelationType.PaymentProvider: return $t(`%wX`);
     }
 }
 
@@ -191,8 +191,8 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
         case BalanceItemRelationType.Discount: return $t(`%177`);
         case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
-        case BalanceItemRelationType.STPricingType: return $t(`Berekeningswijze prijzen`);
-        case BalanceItemRelationType.PaymentProvider: return $t(`Betaalprovider waarlangs de transacties verliepen`);
+        case BalanceItemRelationType.STPricingType: return $t(`%1Xo`);
+        case BalanceItemRelationType.PaymentProvider: return $t(`%1bJ`);
     }
 }
 
@@ -627,9 +627,9 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
             case BalanceItemType.STPackage: return this.itemTitle;
-            case BalanceItemType.ServiceFee: return $t('servicekosten');
-            case BalanceItemType.TransferFee: return $t('transactiekosten');
-            case BalanceItemType.ReferralDiscount: return $t('referralkorting');
+            case BalanceItemType.ServiceFee: return $t('%1dA');
+            case BalanceItemType.TransferFee: return $t('%1Wb');
+            case BalanceItemType.ReferralDiscount: return $t('%1VM');
         }
     }
 
@@ -652,9 +652,9 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
             case BalanceItemType.STPackage: return $t('%1Mu');
-            case BalanceItemType.ServiceFee: return $t('servicekosten');
-            case BalanceItemType.TransferFee: return $t('transactiekosten');
-            case BalanceItemType.ReferralDiscount: return $t('referralkorting');
+            case BalanceItemType.ServiceFee: return $t('%1dA');
+            case BalanceItemType.TransferFee: return $t('%1Wb');
+            case BalanceItemType.ReferralDiscount: return $t('%1VM');
         }
     }
 
@@ -689,7 +689,7 @@ export class BalanceItem extends AutoEncoder {
                 price: this.pricePaid,
             },
             {
-                name: $t(`%1PL`),
+                name: $t(`%1OL`),
                 price: this.pricePending,
             },
         ].filter(a => a.price !== 0);
@@ -787,8 +787,8 @@ export class BalanceItem extends AutoEncoder {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
             }
-            case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Servicekosten tussen {startDate} en {endDate}`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`Servicekosten op {date}`, { date: Formatter.date(this.startDate, true) })) : $t('Servicekosten');
-            case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Transactiekosten tussen {startDate} en {endDate}`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`Transactiekosten op {date}`, { date: Formatter.date(this.startDate, true) })) : $t('Transactiekosten');
+            case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1Z1`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`%1cJ`, { date: Formatter.date(this.startDate, true) })) : $t('%1UX');
+            case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1bd`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`%1Yq`, { date: Formatter.date(this.startDate, true) })) : $t('%wZ');
         }
         return this.description;
     }
@@ -840,7 +840,7 @@ export class BalanceItem extends AutoEncoder {
             }
             case BalanceItemType.STPackage: {
                 const list: string[] = [];
-                const base = this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Van {startDate} tot {endDate}`, { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) }) : $t(`Voor {date}`, { date: Formatter.date(this.startDate) })) : null;
+                const base = this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1c2`, { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) }) : $t(`Voor {date}`, { date: Formatter.date(this.startDate) })) : null;
 
                 if (base) {
                     list.push(base);
@@ -1056,10 +1056,10 @@ export class GroupedBalanceItems {
         }
 
         if (this.items[0].type === BalanceItemType.ServiceFee) {
-            return $t('Servicekosten');
+            return $t('%1UX');
         }
         if (this.items[0].type === BalanceItemType.TransferFee) {
-            return $t('Transactiekosten');
+            return $t('%wZ');
         }
         return this.items[0].itemTitle;
     }

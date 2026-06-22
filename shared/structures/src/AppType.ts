@@ -77,7 +77,7 @@ export function uriToApp(uri: string) {
 
 export const getAppName = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return STAMHOOFD.userMode === 'organization' ? $t('Beheerdersportaal') : $t('%44');
+        case 'dashboard': return STAMHOOFD.userMode === 'organization' ? $t('%6v') : $t('%44');
         case 'registration': return $t('%2g');
         case 'admin': return $t(`%IW`);
         case 'webshop': return $t(`%2N`);
@@ -87,7 +87,7 @@ export const getAppName = (app: AppType) => {
 
 export const getAppNameDescription = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return $t(`Beheer je eigen vereniging`);
+        case 'dashboard': return $t(`%1ZJ`);
         case 'registration': return $t(`%a5`);
         case 'admin': return $t(`%a6`);
     }

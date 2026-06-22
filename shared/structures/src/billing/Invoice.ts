@@ -491,7 +491,7 @@ export class Invoice extends AutoEncoder {
                     throw new SimpleError({
                         code: 'multiple_organizations',
                         message: 'Cannot create one invoice for multiple organizations',
-                        human: $t('Kan geen factuur aanmaken voor betalingen van verschillende organisaties tegelijk'),
+                        human: $t('%1YK'),
                     });
                 }
                 this.payingOrganizationId = payment.payingOrganizationId;

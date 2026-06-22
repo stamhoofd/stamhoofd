@@ -68,7 +68,7 @@ const { title, description } = (() => {
 
     let t = $t(`%1Tf`);
     if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit || props.payment.method === PaymentMethod.CreditCard)) {
-        t = $t('Betaling in verwerking');
+        t = $t('%kK');
     }
 
     let nameInTitle = false;
@@ -76,7 +76,7 @@ const { title, description } = (() => {
     let d = '';
 
     if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit)) {
-        d = $t('Het kan enkele dagen duren voor we een bevestiging krijgen van je betaling. Je ontvangt een e-mail als de betaling nog zou mislukken.');
+        d = $t('%1ak');
     }
 
     let packages = false;
@@ -229,9 +229,9 @@ const { title, description } = (() => {
             }
         } else {
             if (others > 1) {
-                d = $t('{count} items werden betaald', { count: Formatter.integer(others) });
+                d = $t('%1bX', { count: Formatter.integer(others) });
             } else {
-                d = $t('Eén item werd betaald', { count: Formatter.integer(others) });
+                d = $t('%1cv', { count: Formatter.integer(others) });
             }
         }
     }

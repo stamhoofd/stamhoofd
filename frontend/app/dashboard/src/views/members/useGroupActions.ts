@@ -116,11 +116,11 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         async function moveTo(category: GroupCategory, period: OrganizationRegistrationPeriod) {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’?', {
+                title: $t('%1Xc', {
                     groupName: props.group.settings.name.toString(),
                     categoryName: category.getName(period),
                 }),
-                confirmText: $t('Ja, verplaatsen'),
+                confirmText: $t('%10t'),
             })) {
                 return;
             }
@@ -142,7 +142,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                 }),
             ], [props.period]);
 
-            showSuccessToast($t('‘{groupName}’ is verplaatst naar ‘{categoryName}’', {
+            showSuccessToast($t('%1cM', {
                 groupName: props.group.settings.name.toString(),
                 categoryName: category.getName(period),
             }));
@@ -150,18 +150,18 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
         async function moveToOtherPeriod(otherPeriod: OrganizationRegistrationPeriod, category: GroupCategory) {
             if (props.group.settings.hasBundleDiscounts) {
-                Toast.error($t('Je kan geen groep met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.')).show();
+                Toast.error($t('%1dG')).show();
                 return;
             }
 
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’ in {periodName}?', {
+                title: $t('%1bM', {
                     groupName: props.group.settings.name.toString(),
                     categoryName: category.getName(otherPeriod),
                     periodName: otherPeriod.period.name,
                 }),
-                confirmText: $t('Ja, verplaatsen'),
+                confirmText: $t('%10t'),
             })) {
                 return;
             }
@@ -201,7 +201,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                 return;
             }
 
-            showSuccessToast($t('‘{groupName}’ is verplaatst naar ‘{categoryName}’ in {periodName}', {
+            showSuccessToast($t('%1az', {
                 groupName: props.group.settings.name.toString(),
                 categoryName: category.getName(otherPeriod),
                 periodName: otherPeriod.period.name,
@@ -246,7 +246,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
             await save([periodPatch], [props.period]);
 
-            showSuccessToast($t('‘{groupName}’ is gedupliceerd', {
+            showSuccessToast($t('%1bK', {
                 groupName: props.group.settings.name.toString(),
             }));
         }
@@ -257,10 +257,10 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         async function deleteGroup(): Promise<boolean> {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de groep ‘{groupName}’ en bijhorende gegevens wilt verwijderen?', { groupName: props.group.settings.name.toString() }),
-                confirmText: $t('Ja, verwijderen'),
+                title: $t('%1VJ', { groupName: props.group.settings.name.toString() }),
+                confirmText: $t('%55'),
                 destructive: true,
-                requireCheckbox: $t('Alle inschrijvingen mee verwijderen'),
+                requireCheckbox: $t('%1ZR'),
                 availabilityDelay: 1_000,
             })) {
                 return false;
@@ -284,7 +284,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
             await save([periodPatch], [props.period]);
 
-            showSuccessToast($t('‘{groupName}’ is verwijderd', {
+            showSuccessToast($t('%1Z8', {
                 groupName: props.group.settings.name.toString(),
             }));
 
@@ -297,8 +297,8 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         async function openGroup(): Promise<boolean> {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de inschrijvingen wilt openen?'),
-                confirmText: $t('Ja, openen'),
+                title: $t('%1Yl'),
+                confirmText: $t('%1d7'),
             })) {
                 return false;
             }
@@ -325,7 +325,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
             await save([periodPatch], [props.period]);
 
-            showSuccessToast($t('De inschrijvingen zijn terug open'));
+            showSuccessToast($t('%1WV'));
 
             return true;
         }
@@ -336,8 +336,8 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         async function closeGroup(): Promise<boolean> {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de inschrijvingen wilt sluiten?'),
-                confirmText: $t('Ja, sluiten'),
+                title: $t('%1WO'),
+                confirmText: $t('%1YT'),
             })) {
                 return false;
             }
@@ -350,7 +350,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
             await save([periodPatch], [props.period]);
 
-            showSuccessToast($t('De inschrijvingen zijn gesloten'));
+            showSuccessToast($t('%b4'));
 
             return true;
         }
@@ -390,7 +390,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             const menu = new ContextMenu([
                 [
                     new ContextMenuItem({
-                        name: $t('Bewerken'),
+                        name: $t('%f9'),
                         icon: 'edit',
                         action: () => {
                             editGroup().catch(console.error);
@@ -400,7 +400,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                 ],
                 [
                     new ContextMenuItem({
-                        name: $t('Verplaats omhoog'),
+                        name: $t('%11f'),
                         icon: 'arrow-up',
                         action: async () => {
                             await move(-1);
@@ -408,7 +408,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                         },
                     }),
                     new ContextMenuItem({
-                        name: $t('Verplaats omlaag'),
+                        name: $t('%11g'),
                         icon: 'arrow-down',
                         action: async () => {
                             await move(1);
@@ -419,7 +419,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                 [
                     new ContextMenuItem({
                         icon: 'folder',
-                        name: $t('Verplaats naar'),
+                        name: $t('%122'),
                         childMenu: new ContextMenu([
                             allCategories.map(cat =>
                                 new ContextMenuItem({
@@ -444,7 +444,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                     }),
 
                     new ContextMenuItem({
-                        name: $t('Dupliceren'),
+                        name: $t('%KK'),
                         icon: 'copy',
                         action: async () => {
                             await duplicate();
@@ -453,7 +453,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                     }),
 
                     new ContextMenuItem({
-                        name: props.group.closed ? $t('Inschrijvingen openen') : $t('Inschrijvingen afsluiten'),
+                        name: props.group.closed ? $t('%Lh') : $t('%1Vi'),
                         icon: props.group.closed ? 'unlock' : 'lock',
                         destructive: !props.group.closed,
                         action: async () => {
@@ -467,7 +467,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                     }),
 
                     new ContextMenuItem({
-                        name: $t('Verwijderen'),
+                        name: $t('%CJ'),
                         destructive: true,
                         icon: 'trash',
                         action: async () => {

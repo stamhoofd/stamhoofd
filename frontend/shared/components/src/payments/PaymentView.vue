@@ -18,7 +18,7 @@
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="payment.isPending" v-tooltip="$t('%1PL')" class="icon small hourglass primary" />
+                <span v-if="payment.isPending" v-tooltip="$t('%1OL')" class="icon small hourglass primary" />
                 <span v-if="payment.isFailed" v-tooltip="$t('%1D5')" class="icon small disabled error" />
             </h1>
 
@@ -40,7 +40,7 @@
             </template>
 
             <p v-if="payment.refundedAmount" class="warning-box">
-                {{ $t('Deze betaling werd intussen terugbetaald of teruggevorderd voor {price} in een andere betaling.', {price: formatPrice(payment.refundedAmount)}) }}
+                {{ $t('%1Ug', {price: formatPrice(payment.refundedAmount)}) }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -146,7 +146,7 @@
 
                 <STListItem v-if="payment.serviceFeePayout">
                     <h3 class="style-definition-label">
-                        {{ $t('Servicekost') }}
+                        {{ $t('%1Zu') }}
                     </h3>
 
                     <p class="style-definition-text">
@@ -161,27 +161,27 @@
 
                 <STListItem v-if="payment.serviceFeeManualCharged">
                     <h3 class="style-definition-label">
-                        {{ $t('Servicekost') }}
+                        {{ $t('%1Zu') }}
                     </h3>
 
                     <p class="style-definition-text">
                         {{ formatPrice(payment.serviceFeeManualCharged) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Excl. BTW - Dit bedrag werd reeds aangerekend') }}
+                        {{ $t('%1by') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-else-if="payment.serviceFeeManual">
                     <h3 class="style-definition-label">
-                        {{ $t('Servicekost') }}
+                        {{ $t('%1Zu') }}
                     </h3>
 
                     <p class="style-definition-text">
                         {{ formatPrice(payment.serviceFeeManual) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Excl. BTW - Dit bedrag wordt achteraf aangerekend via jouw ingestelde betaalmethode.') }}
+                        {{ $t('%1Yn') }}
                     </p>
                 </STListItem>
 
@@ -649,7 +649,7 @@ async function openInvoice() {
         } else {
             throw new SimpleError({
                 code: 'not_found',
-                message: $t('Deze factuur kon niet worden gevonden'),
+                message: $t('%1dK'),
             });
         }
     } catch (e) {

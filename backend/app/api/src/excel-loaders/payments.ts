@@ -402,7 +402,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'serviceFeeManual',
-            name: $t(`Servicekosten achteraf aangerekend (excl. BTW)`),
+            name: $t(`%1dO`),
             width: 42,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -417,7 +417,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'serviceFeePayout',
-            name: $t(`Servicekosten ingehouden van uitbetaling (Stripe, incl. BTW)`),
+            name: $t(`%1VD`),
             width: 50,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {

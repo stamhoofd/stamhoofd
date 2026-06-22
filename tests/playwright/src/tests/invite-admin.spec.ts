@@ -131,7 +131,7 @@ async function fillAdminForm(popup: Locator, { firstName, lastName, email, right
  * the role name.
  */
 function expectedRightsLabel(rights: Rights): string {
-    return rights === 'full' ? $t('Hoofdbeheerders') : rights.role;
+    return rights === 'full' ? $t('%uG') : rights.role;
 }
 
 /**
@@ -160,7 +160,7 @@ async function inviteAdminViaUI(page: Page, { adminsUrl, email, rights, expected
     await expect(row).toBeVisible({ timeout: 10_000 });
     await expect(row.locator('h2.style-title-list')).toHaveText(name);
     await expect(row).toContainText(expectedRightsLabel(rights));
-    await expect(row).not.toContainText($t('Geen toegangsrechten'));
+    await expect(row).not.toContainText($t('%uF'));
 }
 
 /**
@@ -280,7 +280,7 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
 
         // An error should be shown, the popup should stay open and no user may be created
         await expect(popup.getByTestId('input-error')).toBeVisible();
-        await expect(popup.getByTestId('input-error')).toHaveText($t('Kies minstens één beheerdersrol voor je een beheerder toevoegt'));
+        await expect(popup.getByTestId('input-error')).toHaveText($t('%1V9'));
         await expect(popup.getByTestId('save-view')).toBeVisible();
         expect(await User.where({ email })).toHaveLength(0);
     });

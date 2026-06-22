@@ -458,7 +458,7 @@ export class RegisterCheckout {
         if (this.showDiscountsSeparately && this.cart.balanceItemDiscountsPrice !== 0) {
             subtotal -= this.cart.balanceItemDiscountsPrice;
             all.push({
-                name: $t(`Tegoed`),
+                name: $t(`%1Xl`),
                 price: this.cart.balanceItemDiscountsPrice,
                 action: options?.balanceItemDiscountsAction,
             });

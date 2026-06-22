@@ -41,24 +41,24 @@ const childGroups = computed(() => props.category.groupIds.map(id => props.perio
 
 const description = computed(() => {
     if (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0) {
-        return $t('Leeg');
+        return $t('%Rs');
     }
 
     if (childGroups.value.length === 0 && childCategories.value.length === 0) {
-        return $t('Leeg');
+        return $t('%Rs');
     }
 
     if (childGroups.value.length > 0) {
         if (childGroups.value.length > 4) {
-            return $t('{count} groepen', { count: childGroups.value.length }) + ` (${childGroups.value.slice(0, 2).map(g => g.settings.name).join(', ')}...)`;
+            return $t('%1XM', { count: childGroups.value.length }) + ` (${childGroups.value.slice(0, 2).map(g => g.settings.name).join(', ')}...)`;
         }
-        return $t('{count} groepen', { count: childGroups.value.length }) + ` (${childGroups.value.map(g => g.settings.name).join(', ')})`;
+        return $t('%1XM', { count: childGroups.value.length }) + ` (${childGroups.value.map(g => g.settings.name).join(', ')})`;
     }
 
     if (childCategories.value.length > 4) {
-        return $t('{count} categorieën', { count: childCategories.value.length }) + ` (${childCategories.value.slice(0, 2).map(g => g.settings.name).join(', ')}...)`;
+        return $t('%1aL', { count: childCategories.value.length }) + ` (${childCategories.value.slice(0, 2).map(g => g.settings.name).join(', ')}...)`;
     }
 
-    return $t('{count} categorieën', { count: childCategories.value.length }) + ` (${childCategories.value.map(g => g.settings.name).join(', ')})`;
+    return $t('%1aL', { count: childCategories.value.length }) + ` (${childCategories.value.map(g => g.settings.name).join(', ')})`;
 });
 </script>

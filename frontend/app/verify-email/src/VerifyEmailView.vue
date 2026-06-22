@@ -147,7 +147,7 @@ async function submit() {
     errorBox.value = null;
     try {
         await LoginHelper.verifyEmail(context.value, codeInput.value, props.token);
-        Toast.success($t('Jouw e-mailadres is nu geverifieerd!')).setTestId('toast-email-verification-succeeded').show();
+        Toast.success($t('%1ZH')).setTestId('toast-email-verification-succeeded').show();
         await navigateAway();
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);

@@ -92,10 +92,10 @@ export class DateUIFilter extends UIFilter<DateFilterBuilder> {
 
     getCombinationWord(mode: UIDateFilterMode): string {
         switch (mode) {
-            case UIDateFilterMode.GreaterThan: return $t(`is na`);
-            case UIDateFilterMode.LessThan: return $t(`is voor`);
-            case UIDateFilterMode.Equals: return $t(`is`);
-            case UIDateFilterMode.NotEquals: return $t(`is niet`);
+            case UIDateFilterMode.GreaterThan: return $t(`%1Yv`);
+            case UIDateFilterMode.LessThan: return $t(`%1b2`);
+            case UIDateFilterMode.Equals: return $t(`%1G1`);
+            case UIDateFilterMode.NotEquals: return $t(`%bT`);
         }
     }
 
@@ -124,7 +124,7 @@ export class DateUIFilter extends UIFilter<DateFilterBuilder> {
                 style: 'gray',
                 choices,
             }, {
-                text: this.value ? Formatter.date(this.value, true) : $t('leeg'),
+                text: this.value ? Formatter.date(this.value, true) : $t('%1Vu'),
                 style: '',
             },
         ];

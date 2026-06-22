@@ -133,8 +133,8 @@ export function getSGVSyncWarning(
             Formatter.capitalizeFirstLetter(
                 Formatter.pluralText(
                     counts[SGVSyncStatus.Never],
-                    $t('lid staat'),
-                    $t('leden staan'),
+                    $t('%1cS'),
+                    $t('%1Vs'),
                 ),
             )
             + ' '
@@ -148,8 +148,8 @@ export function getSGVSyncWarning(
             Formatter.capitalizeFirstLetter(
                 Formatter.pluralText(
                     counts[SGVSyncStatus.Outdated],
-                    $t('lid heeft een gewijzigde inschrijving'),
-                    $t('leden hebben gewijzigde inschrijvingen'),
+                    $t('%1ar'),
+                    $t('%1Vj'),
                 ),
             ) + '.',
         );
@@ -159,8 +159,8 @@ export function getSGVSyncWarning(
             Formatter.capitalizeFirstLetter(
                 Formatter.pluralText(
                     counts[SGVSyncStatus.Changed],
-                    $t('lid heeft gewijzigde gegevens'),
-                    $t('leden hebben gewijzigde gegevens'),
+                    $t('%1Xt'),
+                    $t('%1aP'),
                 ),
             ) + '.',
         );
@@ -172,8 +172,8 @@ export function getSGVSyncWarning(
 
     texts.push(
         hasFullAccess
-            ? $t('Synchroniseer met de groepsadministratie.')
-            : $t('Vraag je VGA of groepsleiding om te synchroniseren.'),
+            ? $t('%1Z6')
+            : $t('%1b9'),
     );
 
     return {

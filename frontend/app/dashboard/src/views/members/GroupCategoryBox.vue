@@ -32,7 +32,7 @@
     />
 
     <STMenuText v-if="category.groups.length == 0 && category.categories.length === 0">
-        {{ $t('Deze categorie is leeg') }}
+        {{ $t('%1ci') }}
     </STMenuText>
 </template>
 

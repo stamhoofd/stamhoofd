@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="title" :save-text="$t('Voltooien')" save-icon-right="success" :loading="saving" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :save-text="$t('%1Pz')" save-icon-right="success" :loading="saving" :prefer-large-button="true" @save="goNext">
         <aside class="style-title-prefix">
-            {{ $t('Stap {current} van {total}', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
+            {{ $t('%1WP', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
         </aside>
         <h1>
             {{ title }}
         </h1>
         <p>
-            {{ $t('Stel per onderverdeling een standaardtarief in. Wil je een groep volledig instellen, gebruik dan de instellingenknop.') }}
+            {{ $t('%1cp') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -23,18 +23,18 @@
                 </h3>
 
                 <template #right>
-                    <span v-if="hasMultiplePrices(group)" v-tooltip="$t('Deze groep heeft meerdere tarieven. Pas ze aan via de instellingen.')" class="style-tag">
-                        {{ $t('Verschillend') }}
+                    <span v-if="hasMultiplePrices(group)" v-tooltip="$t('%1d5')" class="style-tag">
+                        {{ $t('%1Xy') }}
                     </span>
                     <PriceInput
                         v-else
                         :model-value="getPrice(group)"
-                        :placeholder="$t('Gratis')"
+                        :placeholder="$t('%1Mn')"
                         @update:model-value="setPrice(group, $event)"
                     />
 
-                    <button v-tooltip="$t('Instellingen')" class="button icon settings gray small" type="button" @click.stop="openSettings(group)" />
-                    <button v-tooltip="$t('Meer')" class="button icon more gray small" type="button" @click.stop="openMenu($event, group)" />
+                    <button v-tooltip="$t('%xU')" class="button icon settings gray small" type="button" @click.stop="openSettings(group)" />
+                    <button v-tooltip="$t('%GZ')" class="button icon more gray small" type="button" @click.stop="openMenu($event, group)" />
                 </template>
             </STListItem>
         </STList>
@@ -64,7 +64,7 @@ const getGroupActions = useGroupActions();
 const errors = useErrors();
 const saving = ref(false);
 
-const title = $t('Prijzen instellen');
+const title = $t('%1Wq');
 
 const viewModel = props.viewModel;
 const groups = computed(() => viewModel.membershipGroups);

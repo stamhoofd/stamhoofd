@@ -160,6 +160,6 @@ export class Invoice extends QueryableModel {
             return this.id + '.' + ext;
         }
         const date = this.invoicedAt
-        return Formatter.dateIso(date) + ' - ' + (this.totalWithVAT < 0 ? $t('Creditnota') : $t('Factuur')) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
+        return Formatter.dateIso(date) + ' - ' + (this.totalWithVAT < 0 ? $t('%1aE') : $t('%1Zw')) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
     }
 }

@@ -26,7 +26,7 @@
                             <IconContainer :icon="pack.bundle === STPackageBundle.Webshops ? 'basket' : 'group'" :class="{gray: pack.status === PackageStatus.Inactive, 'secundary': pack.status === PackageStatus.Trial, 'error': pack.status === PackageStatus.Expired}">
                                 <template #aside>
                                     <span v-if="pack.status === PackageStatus.Active" v-tooltip="$t('%1TO')" class="icon success small primary" />
-                                    <span v-if="pack.status === PackageStatus.ExpiresSoon" v-tooltip="$t('Actief maar vervalt binnenkort')" class="icon warning small stroke yellow" />
+                                    <span v-if="pack.status === PackageStatus.ExpiresSoon" v-tooltip="$t('%1VG')" class="icon warning small stroke yellow" />
                                     <span v-else-if="pack.status === PackageStatus.Trial" v-tooltip="$t('%1TJ')" class="icon trial small stroke secundary" />
                                 </template>
                             </IconContainer>
@@ -49,7 +49,7 @@
                         </p>
 
                         <p v-if="pack.status === PackageStatus.Expired && pack.package.endDate" class="style-description-small">
-                            {{ $t('Vervallen op {dateTime}', {dateTime: formatEndDate(pack.package.endDate)}) }}
+                            {{ $t('%1Y6', {dateTime: formatEndDate(pack.package.endDate)}) }}
                         </p>
 
                         <p v-else-if="pack.status === PackageStatus.Trial && pack.package.endDate" class="style-description-small">
@@ -153,29 +153,29 @@ class SelectablePackage {
     get statusAction() {
         switch (this.status) {
             case PackageStatus.Inactive: {
-                return $t('Uitproberen');
+                return $t('%1Ly');
             }
 
             case PackageStatus.Trial: {
-                return $t('Activeren');
+                return $t('%1Lx');
             }
 
             case PackageStatus.Active: {
-                return $t('Bekijk');
+                return $t('%1Xj');
             }
 
             case PackageStatus.ExpiresSoon: {
                 if (this.allowRenew) {
-                    return $t('Verlengen');
+                    return $t('%1Lz');
                 }
-                return $t('Verlengen');
+                return $t('%1Lz');
             }
 
             case PackageStatus.Expired: {
                 if (this.allowRenew) {
-                    return $t('Heractiveren');
+                    return $t('%1Zs');
                 }
-                return $t('Heractiveren');
+                return $t('%1Zs');
             }
         }
     }
@@ -187,11 +187,11 @@ class SelectablePackage {
             }
 
             case PackageStatus.Trial: {
-                return $t('In proefperiode');
+                return $t('%1HY');
             }
 
             case PackageStatus.Expired: {
-                return $t('Vervallen');
+                return $t('%1bi');
             }
         }
     }
@@ -219,7 +219,7 @@ class SelectablePackage {
     get suffix() {
         switch (this.status) {
             case PackageStatus.ExpiresSoon: {
-                return $t('Vervalt binnenkort');
+                return $t('%1HZ');
             }
         }
     }

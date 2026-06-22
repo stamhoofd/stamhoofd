@@ -83,7 +83,7 @@ export function getSelectableColumns() {
 
         new SelectableColumn({
             id: 'balanceItem.pricePending',
-            name: $t(`%1PL`),
+            name: $t(`%1OL`),
             category: balanceItemCategory,
             enabled: true,
         }),

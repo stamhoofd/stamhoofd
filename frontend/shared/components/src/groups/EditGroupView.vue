@@ -16,7 +16,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <CategorizedBox icon="flag" :title="$t('Algemeen')">
+            <CategorizedBox icon="flag" :title="$t('%Lb')">
                 <template #summary>
                     <p class="style-description-small">
                         {{ name.toString() }}
@@ -116,7 +116,7 @@
                 </STList>
             </CategorizedBox>
 
-            <CategorizedBox v-if="type === GroupType.Membership || type === GroupType.WaitingList" icon="camera" :title="$t('Omslagfoto en icoontje')">
+            <CategorizedBox v-if="type === GroupType.Membership || type === GroupType.WaitingList" icon="camera" :title="$t('%1bf')">
                 <ImageInput v-model="squarePhoto" :title="$t('%Ls')" :resolutions="hsSquare" :required="false" />
                 <p class="style-description-small">
                     {{ $t('%Lt') }}
@@ -130,7 +130,7 @@
 
             <CategorizedBox
                 icon="earth"
-                :title="$t(`Online inschrijvingen`)"
+                :title="$t(`%1XF`)"
             >
                 <template #summary>
                     <p class="style-description-small">
@@ -208,7 +208,7 @@
             <CategorizedBox
                 v-if="type !== GroupType.WaitingList || patchedGroup.settings.prices.length !== 1 || patchedGroup.settings.prices[0]?.price.price"
                 icon="receive"
-                :title="$t('Tarieven')"
+                :title="$t('%61')"
             >
                 <template #summary>
                     <p v-if="patchedGroup.settings.prices.length > 1" class="style-description-small">
@@ -273,12 +273,12 @@
 
             <CategorizedBox
                 icon="success"
-                :title="$t(`Keuzemenu's`)"
+                :title="$t(`%1bl`)"
             >
                 <template #buttons>
                     <button class="button text only-icon-smartphone" type="button" @click="addGroupOptionMenu">
                         <span class="icon add" />
-                        <span>{{ $t('Keuzemenu') }}</span>
+                        <span>{{ $t('%Tb') }}</span>
                     </button>
                 </template>
 
@@ -306,11 +306,11 @@
                     </p>
 
                     <p v-if="patchedGroup.settings.requireGroupIds.length" class="style-description-small">
-                        {{ $t('Verplichte inschrijving(en)') }}
+                        {{ $t('%1Zx') }}
                     </p>
 
                     <p v-if="patchedGroup.settings.preventGroupIds.length" class="style-description-small">
-                        {{ $t('Verboden combinatie(s)') }}
+                        {{ $t('%1Xi') }}
                     </p>
                 </template>
                 <template v-if="isPropertyEnabled('birthDay')">
@@ -370,14 +370,14 @@
                             </template>
 
                             <h3 class="style-title-list">
-                                <span>{{ $t('Verplichte inschrijving(en)') }}</span>
+                                <span>{{ $t('%1Zx') }}</span>
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Leden kunnen pas zelf inschrijven voor {name} als ze ingeschreven zijn voor één van deze inschrijvingsgroep(en).', {name: patchedGroup.settings.name.toString()}) }}
+                                {{ $t('%1Uf', {name: patchedGroup.settings.name.toString()}) }}
                             </p>
 
                             <div v-if="showRequireGroupIds" class="option">
-                                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :add-button-text="$t('Verplichting toevoegen')" :title="$t(`%dD`)" />
+                                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :add-button-text="$t('%1Wk')" :title="$t(`%dD`)" />
                             </div>
                         </STListItem>
 
@@ -387,14 +387,14 @@
                             </template>
 
                             <h3 class="style-title-list">
-                                <span>{{ $t('Verboden combinatie(s) - in één richting') }}</span>
+                                <span>{{ $t('%1bC') }}</span>
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Maak het onmogelijk voor leden om in te schrijven voor {name} als ze al zijn ingeschreven voor bepaalde inschrijvingsgroep(en).', {name: patchedGroup.settings.name.toString()}) }}
+                                {{ $t('%1b4', {name: patchedGroup.settings.name.toString()}) }}
                             </p>
 
                             <div v-if="showPreventGroupIds" class="option">
-                                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :add-button-text="$t('Verboden combinatie toevoegen')" :title="$t(`%dD`)" />
+                                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :add-button-text="$t('%1Z5')" :title="$t(`%dD`)" />
                             </div>
                         </STListItem>
                     </STList>
@@ -408,7 +408,7 @@
             >
                 <template #summary>
                     <p v-if="maxMembers !== null" class="style-description-small">
-                        {{ $t('{count} plaatsen', {count: maxMembers}) }}
+                        {{ $t('%1aJ', {count: maxMembers}) }}
                     </p>
                 </template>
 
@@ -550,20 +550,20 @@
 
             <CategorizedBox
                 v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership) || waitingList"
-                :title="$t('Voorrangsregels')"
+                :title="$t('%1an')"
                 icon="priority"
             >
                 <template #summary>
                     <p v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="style-description-small">
-                        {{ $t('Alle nieuwe leden op de wachtlijst') }}
+                        {{ $t('%1WT') }}
                     </p>
 
                     <p v-if="waitingListType === WaitingListType.All" class="style-description-small">
-                        {{ $t('Iedereen op wachtlijst') }}
+                        {{ $t('%cs') }}
                     </p>
 
                     <p v-if="patchedGroup.settings.activePreRegistrationDate" class="style-description-small">
-                        {{ $t('Voorinschrijvingen vanaf {dateTime}', {dateTime: formatStartDate(patchedGroup.settings.activePreRegistrationDate) }) }}
+                        {{ $t('%1Za', {dateTime: formatStartDate(patchedGroup.settings.activePreRegistrationDate) }) }}
                     </p>
                 </template>
 
@@ -662,7 +662,7 @@
 
             <CategorizedBox
                 v-if="(!$isPlatform || $feature('member-trials')) && (patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays))"
-                :title="$t('Proefperiode')"
+                :title="$t('%1IH')"
                 icon="trial"
             >
                 <template #summary>
@@ -675,7 +675,7 @@
                     {{ $t('%7s') }}
                 </p>
                 <p v-else>
-                    <I18nComponent :t="$t('Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. <button>Meer info</button>')">
+                    <I18nComponent :t="$t('%1Xq')">
                         <template #button="{content}">
                             <a class="inline-link" :href="LocalizedDomains.getDocs('proefperiodes')" target="_blank">
                                 {{ content }}
@@ -690,7 +690,7 @@
                 </p>
 
                 <template v-if="!hasCustomDates">
-                    <STInputBox :title="$t('Datum eerste activiteit')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('%1XC')" error-fields="settings.startDate" :error-box="errors.errorBox">
                         <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                     </STInputBox>
 
@@ -704,7 +704,7 @@
             </CategorizedBox>
 
             <CategorizedBox
-                :title="$t('Persoonsgegevens')"
+                :title="$t('%1aW')"
                 icon="user"
             >
                 <p>{{ $t('%cz', {name: patchedGroup.settings.name}) }}</p>
@@ -712,7 +712,7 @@
                 <template v-if="auth.hasFullAccess() && RegistrationRecordSettingsRoute" #buttons>
                     <button class="button text only-icon-smartphone" type="button" @click="$navigate(RegistrationRecordSettingsRoute)">
                         <span class="icon settings" />
-                        <span>{{ $t('Algemene instellingen') }}</span>
+                        <span>{{ $t('%10T') }}</span>
                     </button>
                 </template>
                 <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />

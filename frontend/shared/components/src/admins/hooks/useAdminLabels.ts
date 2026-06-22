@@ -13,36 +13,36 @@ export function useAdminLabels() {
 
     return {
         // 'Externe beheerdersrollen' / 'Beheerdersrollen'
-        adminRolesTitle: computed(() => showInternalAdmins.value ? $t('Externe beheerdersrollen') : $t('Beheerdersrollen')),
+        adminRolesTitle: computed(() => showInternalAdmins.value ? $t('%Jm') : $t('%1WC')),
         // 'Externe beheerders' / 'Beheerders'
-        adminsTitle: computed(() => showInternalAdmins.value ? $t('Externe beheerders') : $t('Beheerders')),
+        adminsTitle: computed(() => showInternalAdmins.value ? $t('%Yf') : $t('%K5')),
         // 'Externe beheerder toevoegen' / 'Beheerder toevoegen'
-        addAdminTitle: computed(() => showInternalAdmins.value ? $t('Externe beheerder toevoegen') : $t('Beheerder toevoegen')),
+        addAdminTitle: computed(() => showInternalAdmins.value ? $t('%Yk') : $t('%1Vr')),
         // 'Externe beheerder bewerken' / 'Beheerder bewerken'
-        editAdminTitle: computed(() => showInternalAdmins.value ? $t('Externe beheerder bewerken') : $t('Beheerder bewerken')),
+        editAdminTitle: computed(() => showInternalAdmins.value ? $t('%Yl') : $t('%1cC')),
         // Description shown above the admins list (ExternalAdminsBox)
         adminsDescription: computed(() => showInternalAdmins.value
             ? $t('%Yg')
-            : $t('Beheerders hebben een account waarmee ze toegang krijgen tot Stamhoofd.')),
+            : $t('%1WX')),
         // Empty-state shown when there are no admins yet (ExternalAdminsBox)
         adminsEmptyDescription: computed(() => showInternalAdmins.value
-            ? $t('Er zijn nog geen externe beheerders. Nodig iemand uit om beheerder te worden.')
-            : $t('Er zijn nog geen beheerders. Nodig iemand uit om beheerder te worden.')),
+            ? $t('%1V5')
+            : $t('%1dF')),
         // Description shown above the roles list (RolesView)
         adminRolesDescription: computed(() => showInternalAdmins.value
             ? $t('%3I')
-            : $t('Maak beheerdersrollen aan en ken die vervolgens toe aan je beheerders om hun toegang te bepalen.')),
+            : $t('%1aY')),
         // Description shown above the roles of a single administrator (EditAdminView)
         adminRolesPersonDescription: computed(() => showInternalAdmins.value
             ? $t('%Yq')
-            : $t('Je kan een beheerder verschillende rollen toekennen. Een beheerder zonder rollen heeft geen enkele toegang.')),
+            : $t('%1bL')),
         // Description shown above the roles list of a resource, e.g. a webshop or group (EditResourceRolesView)
         resourceAdminRolesDescription: computed(() => showInternalAdmins.value
             ? $t('%Yw')
-            : $t('Je kan toegang geven aan beheerders via beheerdersrollen.')),
+            : $t('%1Vx')),
         // Description shown above the roles of an API-key (ApiUserView)
         apiUserRolesDescription: computed(() => showInternalAdmins.value
             ? $t('%Jn')
-            : $t('Je kan een API-key verschillende rollen geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.')),
+            : $t('%1Y3')),
     };
 }

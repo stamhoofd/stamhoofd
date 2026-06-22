@@ -28,7 +28,7 @@ const props = defineProps<{
 
 const description = computed(() => {
     if (props.invoice.items.length > 2) {
-        return $t('{count} items', {count: props.invoice.items.length})
+        return $t('%1Zv', {count: props.invoice.items.length})
     }
     return Formatter.uniqueArray(props.invoice.items.map(i => i.name)).join('\n')
 })
@@ -43,7 +43,7 @@ async function downloadInvoice(invoice: Invoice) {
         a.setAttribute("download", (invoice.invoicedAt ? (Formatter.dateIso(invoice.invoicedAt) + " - ") : "") + "Stamhoofd " + (invoice.number?.toString() ?? invoice.id));
         a.click();
     } else {
-        Toast.error($t('Door een technische fout was het niet mogelijk om de PDF of XML van de factuur op te halen. Probeer het later opnieuw.')).show();
+        Toast.error($t('%1bY')).show();
     }
 }
 
@@ -57,7 +57,7 @@ async function downloadInvoicePdf(invoice: Invoice) {
         a.setAttribute("download", (invoice.invoicedAt ? (Formatter.dateIso(invoice.invoicedAt) + " - ") : "") + "Stamhoofd " + (invoice.number ?? invoice.id));
         a.click();
     } else {
-        Toast.error($t('Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw.')).show();
+        Toast.error($t('%1Xu')).show();
     }
 }
 

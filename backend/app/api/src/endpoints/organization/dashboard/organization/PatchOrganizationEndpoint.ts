@@ -432,7 +432,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set is already closed',
-                            human: $t('Je kan niet (meer) overschakelen naar dit werkjaar omdat het is vergrendeld'),
+                            human: $t('%1X8'),
                             field: 'period',
                         });
                     }
@@ -442,7 +442,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set has not started yet',
-                            human: $t('Je kan ten vroegste vanaf {date} overschakelen naar dit werkjaar', { date: Formatter.date(struct.switchDate) }),
+                            human: $t('%1ca', { date: Formatter.date(struct.switchDate) }),
                             field: 'period',
                         });
                     }
@@ -456,7 +456,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                                 throw new SimpleError({
                                     code: 'invalid_field',
                                     message: 'Cannot return to period with a start date before the currently active platform period',
-                                    human: $t('Je kan niet terugkeren naar een werkjaar in het verleden', {}),
+                                    human: $t('%1Wt', {}),
                                     field: 'period',
                                 });
                             }
@@ -670,7 +670,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Company not found',
-                        human: $t('De facturatiegegevens die je probeert aan te passen konden niet gevonden worden. Herlaad de pagina en probeer het opnieuw.'),
+                        human: $t('%1cw'),
                     });
                 }
 

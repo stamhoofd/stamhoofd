@@ -55,10 +55,6 @@
     "original": "Deze eenheid is nog niet actief in dit scoutsjaar, maak dat eerst aan.",
     "translation": "This unit is not yet active in this scouting year; please create it first."
   },
-  "%17n": {
-    "original": "Dit scoutsjaar is niet actief",
-    "translation": "This scouting year is not active"
-  },
   "%17o": {
     "original": "{name} is nu ingesteld als het huidige scoutsjaar",
     "translation": "{name} is now set as the current scouts year"
@@ -67,17 +63,9 @@
     "original": "Je kan een kopie maken van de instellingen van je huidige scoutsjaar (bv. de prijzen en onderverdelingen) als voorbereiding op je nieuwe scoutsjaar. Je kan daarna op een moment naar keuze overschakelen naar het nieuwe scoutsjaar (bv. als je al in juli begint met inschrijvingen voor het volgende scoutsjaar). Maar je kan ook wachten tot het einde van het huidige scoutsjaar, dan zal je automatisch worden overgeschakeld.",
     "translation": "You can copy the settings from your current scouting year (such as prices and subdivisions) to prepare for your new scouting year. You can switch over to the new scouting year at any time, for example if you start registrations for the next scouting year in July. Or, you can wait until the end of the current scouting year and the system will switch over automatically for you."
   },
-  "%17s": {
-    "original": "Na controle van alle instellingen kan je overschakelen op het nieuwe scoutsjaar. Dit kan ten vroegste vanaf juli.",
-    "translation": "Once you’ve reviewed all the settings, you can switch to the new scouting year. This is possible from July at the earliest."
-  },
   "%17u": {
     "original": "{werkjaar-2025-2026} is nu aangemaakt als kopie van je huidige scoutsjaar. Kijk de prijzen en instellingen goed na van je kopie.",
     "translation": "{werkjaar-2025-2026} has now been created as a copy of your current scout year. Please carefully check the prices and settings of your copy."
-  },
-  "%17v": {
-    "original": "Je kan pas je volgende scoutsjaar klaarzetten ten vroegste 8 maanden voor de start ervan.",
-    "translation": "You can only prepare your next scout year starting from 8 months before it begins."
   },
   "%18U": {
     "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Keeo). Zorg dat deze overeenkomt met de namen in Keeo.",
@@ -175,10 +163,6 @@
     "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Keeo kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
     "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Keeo can apply the discount to the same item if that would be more advantageous."
   },
-  "%1ES": {
-    "original": "Alle wachtlijsten worden gedupliceerd in het nieuwe scoutsjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige scoutsjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.",
-    "translation": "All waiting lists are duplicated in the new scout year. If you want to continue a waiting list, you can go back to the previous scout year and add all members from there to the new waiting list."
-  },
   "%1GC": {
     "original": "Andere start eind/datum dan scoutsjaar",
     "translation": "Other start/end date than scout year"
@@ -194,10 +178,6 @@
   "%1Gz": {
     "original": "Hier kan je je inschrijvingen opdelen in verschillende scoutsjaren. Wisselen tussen scoutsjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) scoutsjaar instellen. ",
     "translation": "Here you can split your registrations by different scouting years. You can switch between scouting years in the ‘Members’ tab, where you can also configure the current (active) scouting year."
-  },
-  "%1H3": {
-    "original": "Keeo zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
-    "translation": "Keeo will hide the available stock if there are more than {showStockBelow } pieces available."
   },
   "%1HI": {
     "original": "Eenheden",
@@ -287,10 +267,6 @@
     "original": "Betalingen van eenheden",
     "translation": "Payments from units"
   },
-  "%1M4": {
-    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Keeo als je deze toch wilt gebruiken.",
-    "translation": "You no longer have the right to start a trial period. However, you can activate the package. Contact Keeo if you still want to use this."
-  },
   "%1Mq": {
     "original": "De eenheid {{org}} werd aangemaakt",
     "translation": "The unit {{org}} has been created"
@@ -324,8 +300,8 @@
     "translation": "What kind of unit?"
   },
   "%1PD": {
-    "original": "Eenheid waar de aansluiting aan aangrekend is",
-    "translation": "Unit to which the affiliation is charged"
+    "original": "Eenheid waar de aansluiting aan aangerekend is",
+    "translation": "Unit to which the affiliation has been charged"
   },
   "%1PI": {
     "original": "Eenheid",
@@ -370,6 +346,178 @@
   "%1UG": {
     "original": "Beheer hoe je betaalt voor Keeo, download jouw facturen en bekijk jouw tegoed",
     "translation": "Manage your Keeo payments, download your invoices, and view your credit"
+  },
+  "%1Uk": {
+    "original": "Ongetwijfeld ken je nog veel andere eenheden (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere eenheden aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per eenheid die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.",
+    "translation": "You probably know many other units (or you might even be active in them): sports clubs, schools, youth movements... If you refer other units, and they spend at least 1 euro, you will receive free credit as well. For each unit you refer, you earn a little extra each time (see table below). So if you do this carefully and thoughtfully, you can collect a lot of credit with little effort."
+  },
+  "%1Uw": {
+    "original": "Naam van het platform (Keeo)",
+    "translation": "Platform name (Keeo)"
+  },
+  "%1Ux": {
+    "original": "Scoutsjaren beheren",
+    "translation": "Manage scout years"
+  },
+  "%1VO": {
+    "original": "Per scoutsjaar",
+    "translation": "Per scout year"
+  },
+  "%1Vc": {
+    "original": "Hieronder kan je zien welke eenheden jouw link hebben gebruikt.",
+    "translation": "Below you can see which units have used your link."
+  },
+  "%1Vh": {
+    "original": "De overige {numNoUpdate} geselecteerde eenheden hebben deze tag al.",
+    "translation": "The other {numNoUpdate} selected units already have this tag."
+  },
+  "%1Vt": {
+    "original": "Keeo zal de beschikbare voorraad verbergen als er nog meer dan {showStockBelow} stuks beschikbaar zijn.",
+    "translation": "Keeo will hide the available stock if there are still more than {showStockBelow} items available."
+  },
+  "%1W5": {
+    "original": "Wat voor eenheid zijn jullie?",
+    "translation": "What type of unit are you?"
+  },
+  "%1W6": {
+    "original": "Leiding in Keeo",
+    "translation": "Leaders in Keeo"
+  },
+  "%1W7": {
+    "original": "Eenheidsnummer: {groupNumber}",
+    "translation": "Unit number: {groupNumber}"
+  },
+  "%1WM": {
+    "original": "De tag {tagName} zal worden verwijderd van {numToUpdate} eenheden.",
+    "translation": "The tag {tagName} will be removed from {numToUpdate} units."
+  },
+  "%1WX": {
+    "original": "Beheerders hebben een account waarmee ze toegang krijgen tot Keeo.",
+    "translation": "Administrators have an account that gives them access to Keeo."
+  },
+  "%1WY": {
+    "original": "Je kan dit later aanpassen en meerdere scoutsjaren aanmaken.",
+    "translation": "You can change this later and create multiple scout years."
+  },
+  "%1Wp": {
+    "original": "Welkom bij Keeo",
+    "translation": "Welcome to Keeo"
+  },
+  "%1Wt": {
+    "original": "Je kan niet terugkeren naar een scoutsjaar in het verleden",
+    "translation": "You cannot return to a previous scout year"
+  },
+  "%1X0": {
+    "original": "Dit is het toekomstig scoutsjaar. Het is nog niet actief. Leden kunnen nog niet inschrijven. Overschakelen kan ten vroegste vanaf {switchDate}.",
+    "translation": "This is the upcoming scout year. It is not active yet. Members cannot register yet. You can switch at the earliest from {switchDate}."
+  },
+  "%1X8": {
+    "original": "Je kan niet (meer) overschakelen naar dit scoutsjaar omdat het is vergrendeld",
+    "translation": "You cannot switch to this scouts year because it is locked"
+  },
+  "%1XA": {
+    "original": "In welke maand start jullie scoutsjaar?",
+    "translation": "In which month does your scouts year start?"
+  },
+  "%1XE": {
+    "original": "Om andere eenheden te motiveren om jouw link te gebruiken, krijgen ze zelf ook 25 euro tegoed.",
+    "translation": "To encourage other units to use your link, they'll also receive €25 credit."
+  },
+  "%1Y1": {
+    "original": "De tag {tagName} zal worden toegevoegd aan {numToUpdate} eenheden.",
+    "translation": "The tag {tagName} will be added to {numToUpdate} units."
+  },
+  "%1Y4": {
+    "original": "De {numOrganizations} geselecteerde eenheden hebben al de tag {tagName}",
+    "translation": "The {numOrganizations} selected units already have the tag {tagName}"
+  },
+  "%1YL": {
+    "original": "Dit scoutsjaar instellen als huidige scoutsjaar?",
+    "translation": "Set this scouts year as the current scouts year?"
+  },
+  "%1YV": {
+    "original": "Leiding niet in Keeo",
+    "translation": "Leaders not in Keeo"
+  },
+  "%1ZJ": {
+    "original": "Beheer je eigen eenheid",
+    "translation": "Manage your own unit"
+  },
+  "%1ZK": {
+    "original": "Geen van de {numOrganizations} geselecteerde eenheden heeft de tag {tagName}",
+    "translation": "None of the {numOrganizations} selected units have the tag {tagName}"
+  },
+  "%1a0": {
+    "original": "10e, 11e, 12e... eenheid",
+    "translation": "10th, 11th, 12th... unit"
+  },
+  "%1a5": {
+    "original": "Voor de meeste eenheden staat dit al goed ingesteld. Controleer het type en eventueel de koepel.",
+    "translation": "For most units, this is already set up correctly. Check the type and possibly the umbrella organization."
+  },
+  "%1aI": {
+    "original": "Het bedrag dat je ontvangt stijgt per eenheid tot maximaal 100 euro per eenheid. Dus als je 6 eenheden hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.",
+    "translation": "The amount you receive increases per unit, up to a maximum of 100 euros per unit. So if you refer 6 units, you earn €210 in total! Refer 10 and you'll earn 550 euros."
+  },
+  "%1b0": {
+    "original": "Dit is je huidige scoutsjaar",
+    "translation": "This is your current scouts year"
+  },
+  "%1bV": {
+    "original": "Wanneer start jullie scoutsjaar?",
+    "translation": "When does your scouts year start?"
+  },
+  "%1bn": {
+    "original": "Geef {value}, krijg tot 100 euro tegoed* per eenheid",
+    "translation": "Give {value}, get up to 100 euro credit* per unit"
+  },
+  "%1c9": {
+    "original": "* We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Keeo aan te kopen. Je kan je tegoed niet doorgeven aan een andere eenheid. Je kan geen tegoed krijgen voor een eenheid die al Keeo gebruikt of al heeft geregistreerd. Ook als die persoon al een andere eenheid heeft op Keeo kan je er geen tegoed meer voor krijgen. Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen. Meerdere eenheden zelf aanmaken om zo tegoed te krijgen is niet toegestaan. Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.",
+    "translation": "* We never pay out the balance. You can only use it to purchase packages in Keeo. You cannot transfer your balance to another unit. You cannot receive credit for a unit that already uses or is registered on Keeo. If that person already has another unit on Keeo, you can't receive credit again. Credit expires if not used for one year (the validity is extended each time at least 1 cent is used). You can't use the credit to pay transaction fees for online payments. Creating multiple units yourself to receive extra credit is not allowed. If the referral is considered spam, we may decide to revoke the credit."
+  },
+  "%1cE": {
+    "original": "Dit scoutsjaar is niet actief, inschrijvingen via het ledenportaal zijn nog niet mogelijk.",
+    "translation": "This scouts year is not active; registrations through the member portal are not possible at this time."
+  },
+  "%1cF": {
+    "original": "Om facturen in Keeo ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.",
+    "translation": "To also forward invoices made in Keeo to your accounting software, you can send them by email. Your accounting package can read the XML. It can then send the invoice to your customer via PEPPOL."
+  },
+  "%1cR": {
+    "original": "Registreerde op {date}. Je ontvangt jouw tegoed zodra deze eenheid 1 euro heeft besteed.",
+    "translation": "Registered on {date}. You'll receive your credit as soon as this unit has spent 1 euro."
+  },
+  "%1cV": {
+    "original": "Keeo",
+    "translation": "Keeo"
+  },
+  "%1ca": {
+    "original": "Je kan ten vroegste vanaf {date} overschakelen naar dit scoutsjaar",
+    "translation": "You can switch to this scouts year starting from {date} at the earliest."
+  },
+  "%1ch": {
+    "original": "De overige {numNoUpdate} geselecteerde eenheden hebben deze tag niet.",
+    "translation": "The remaining {numNoUpdate} selected units don't have this tag."
+  },
+  "%1ck": {
+    "original": "Deze link is niet (meer) geldig omdat de eenheid niet bestaat",
+    "translation": "This link is no longer valid because the unit does not exist"
+  },
+  "%1dG": {
+    "original": "Je kan geen groep met bundelkortingen verplaatsen naar een ander scoutsjaar. Verwijder de bundelkortingen eerst.",
+    "translation": "You cannot move a group with bundle discounts to another scouts year. Please remove the bundle discounts first."
+  },
+  "%1dH": {
+    "original": "Naam eenheid (betaler)",
+    "translation": "Unit name (payer)"
+  },
+  "%1dM": {
+    "original": "Dit scoutsjaar wordt zichtbaar in het ledenportaal voor leden om in te schrijven. Inschrijven voor andere scoutsjaren is dan niet langer mogelijk.",
+    "translation": "This scouts year will be visible in the member portal for members to register. Registration for other scouts years will then no longer be possible."
+  },
+  "%1dT": {
+    "original": "{n}e eenheid",
+    "translation": "{n}th unit"
   },
   "%2": {
     "original": "Aansluiting/verzekering Keeo*",
@@ -691,10 +839,6 @@
     "original": "De betaling loopt niet via Keeo",
     "translation": "The payment does not run via Keeo"
   },
-  "%5a": {
-    "original": "Je kan geen documenten aanmaken in de gratis versie van Keeo",
-    "translation": "You cannot create documents in the free version of Keeo"
-  },
   "%5b": {
     "original": "Dit is geen geldig zaalplan uit Keeo",
     "translation": "This is not a valid floor plan from Keeo"
@@ -879,10 +1023,6 @@
     "original": "Instellen als huidig scoutsjaar",
     "translation": "Set as current scout year"
   },
-  "%8S": {
-    "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in",
-    "translation": "All members must re-register for the new scout year, or register yourself again"
-  },
   "%8T": {
     "original": "Stappenplan opstart scoutsjaar",
     "translation": "Step-by-step plan for starting a scout year"
@@ -894,10 +1034,6 @@
   "%8V": {
     "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
     "translation": "Members are considered existing if they are registered for a previous scout year of any registration group."
-  },
-  "%8W": {
-    "original": "Geen eenheden beschikbaar in dit scoutsjaar",
-    "translation": "No units available in this scout year"
   },
   "%8X": {
     "original": "Onbekend scoutsjaar",
@@ -1100,12 +1236,12 @@
     "translation": "Some connections run via FOS Open Scouting (member pays directly to the umbrella organisation) and are therefore not really charged to an individual unit. You can exclude these using this filter."
   },
   "%BR": {
-    "original": "Lid betaald rechtstreeks aan FOS Open Scouting",
-    "translation": "Member pays directly to FOS Open Scouting"
+    "original": "Lid betaalt rechtstreeks aan FOS Open Scouting",
+    "translation": "Member pays directly to FOS Open Scouting."
   },
   "%BS": {
-    "original": "Lid betaald aan individuele eenheid",
-    "translation": "Member pays to individual unit"
+    "original": "Lid betaalt aan individuele eenheid",
+    "translation": "Member pays to the individual unit."
   },
   "%BZ": {
     "original": "Je kan geen aansluitingen aanpassen in een ongeldig scoutsjaar",
@@ -1291,10 +1427,6 @@
     "original": "gelezen en ga hiermee akkoord in naam van mijn eenheid.",
     "translation": "read and agree to this on behalf of my unit."
   },
-  "%Kl": {
-    "original": "Deze functie is niet beschikbaar omdat jouw eenheid nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
-    "translation": "This function is not available because your unit is still using the old free member administration package. Via settings, head administrators can switch to the paid version with more functionalities."
-  },
   "%MS": {
     "original": "Eenheidsnummer betalende groep",
     "translation": "Unit number paying group"
@@ -1342,10 +1474,6 @@
   "%WI": {
     "original": "Mijn eenheid staat er niet tussen",
     "translation": "My unit is not among them"
-  },
-  "%WO": {
-    "original": "Deze periode is niet beschikbaar voor jouw eenheid.",
-    "translation": "This period is not available for your unit."
   },
   "%Wb": {
     "original": "Je locatie maakt je eenheid makkelijker vindbaar als je de volgende keer wilt inloggen. Je kan het later nog wijzigen.",

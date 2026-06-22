@@ -208,7 +208,7 @@ async function handleCheckoutResponse({ response, sellingOrganization, context, 
             AsyncComponent(() => import('@stamhoofd/components/payments/PaymentSuccessView.vue'), {
                 payment,
                 fallback: {
-                    title: $t('Hoera, gelukt!'),
+                    title: $t('%1cZ'),
                 },
             }),
         ],

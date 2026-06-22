@@ -219,7 +219,7 @@ export class StripeReportInvoicer {
         if (applicationFee.serviceFee !== 0) {
             const item = new BalanceItem();
             item.type = BalanceItemType.ServiceFee;
-            item.description = $t('Servicekosten ingehouden via Stripe tussen {startDate} en {endDate}', {
+            item.description = $t('%1Wd', {
                 startDate: Formatter.startDate(this.start, false, true),
                 endDate: Formatter.endDate(this.end, false, true),
             });
@@ -249,7 +249,7 @@ export class StripeReportInvoicer {
         if (applicationFee.transferFee !== 0) {
             const item = new BalanceItem();
             item.type = BalanceItemType.TransferFee;
-            item.description = $t('Transactiekosten ingehouden via Stripe tussen {startDate} en {endDate}', {
+            item.description = $t('%1Xx', {
                 startDate: Formatter.startDate(this.start, false, true),
                 endDate: Formatter.endDate(this.end, false, true),
             });

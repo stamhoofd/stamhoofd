@@ -171,10 +171,6 @@
     "original": "Inhoud die enkel zichtbaar is in e-mails, niet in ‘Mijn account’",
     "translation": "Content that is only visible in emails, not in ‘My account’"
   },
-  "%1H3": {
-    "original": "Ravot zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
-    "translation": "Ravot will hide the available stock if there are more than {showStockBelow } pieces left."
-  },
   "%1HI": {
     "original": "Groepen",
     "translation": "Groups"
@@ -243,10 +239,6 @@
     "original": "Betalingen van groepen",
     "translation": "Payments from groups"
   },
-  "%1M4": {
-    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Ravot als je deze toch wilt gebruiken.",
-    "translation": "You no longer have the right to start a trial period. However, you can activate the package. Contact Ravot if you still want to use this."
-  },
   "%1MO": {
     "original": "Filter leden die wel of geen geverifieerd account hebben om de gegevens van leden te wijzigen via ‘Mijn account’.",
     "translation": "Filter members who do or do not have a verified account to edit members’ data through 'My account'."
@@ -280,8 +272,8 @@
     "translation": "What type of group?"
   },
   "%1PD": {
-    "original": "Groep waar de aansluiting aan aangrekend is",
-    "translation": "Group the affiliation is charged to"
+    "original": "Groep waar de aansluiting aan aangerekend is",
+    "translation": "Group to which the affiliation is charged"
   },
   "%1PI": {
     "original": "Groep",
@@ -334,6 +326,142 @@
   "%1UG": {
     "original": "Beheer hoe je betaalt voor Ravot, download jouw facturen en bekijk jouw tegoed",
     "translation": "Manage your Ravot payments, download your invoices, and view your credit"
+  },
+  "%1UU": {
+    "original": "Jullie ledenadministratie is klaar voor gebruik. Je kan nu meer instellingen aanvullen, leden importeren of ‘Mijn account’ uitproberen.",
+    "translation": "Your member administration is ready to use. You can now complete more settings, import members, or try out ‘My account’."
+  },
+  "%1Uk": {
+    "original": "Ongetwijfeld ken je nog veel andere groepen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere groepen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per groep die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.",
+    "translation": "You probably know lots of other groups (or you're active in some): a sports club, school, youth group... If you refer other groups and they spend at least 1 euro, you’ll also get free credit. For every extra group you bring in, you get a bit more each time (see the table below). If you do this carefully and thoughtfully, you can really collect a lot of credit with little effort."
+  },
+  "%1Uv": {
+    "original": "Mijn account, inschrijvingen, kalender en lidgeld op één plek.",
+    "translation": "My account, registrations, calendar, and membership fee all in one place."
+  },
+  "%1Uw": {
+    "original": "Naam van het platform (Ravot)",
+    "translation": "Platform name (Ravot)"
+  },
+  "%1Vc": {
+    "original": "Hieronder kan je zien welke groepen jouw link hebben gebruikt.",
+    "translation": "Below you can see which groups have used your link."
+  },
+  "%1Vh": {
+    "original": "De overige {numNoUpdate} geselecteerde groepen hebben deze tag al.",
+    "translation": "The other {numNoUpdate} selected groups already have this tag."
+  },
+  "%1Vt": {
+    "original": "Ravot zal de beschikbare voorraad verbergen als er nog meer dan {showStockBelow} stuks beschikbaar zijn.",
+    "translation": "Ravot will hide the available stock if there are still more than {showStockBelow} items available."
+  },
+  "%1W5": {
+    "original": "Wat voor groep zijn jullie?",
+    "translation": "What type of group are you?"
+  },
+  "%1W6": {
+    "original": "Leiding in Ravot",
+    "translation": "Leaders in Ravot"
+  },
+  "%1WM": {
+    "original": "De tag {tagName} zal worden verwijderd van {numToUpdate} groepen.",
+    "translation": "The tag {tagName} will be removed from {numToUpdate} groups."
+  },
+  "%1WX": {
+    "original": "Beheerders hebben een account waarmee ze toegang krijgen tot Ravot.",
+    "translation": "Administrators have an account that gives them access to Ravot."
+  },
+  "%1Wp": {
+    "original": "Welkom bij Ravot",
+    "translation": "Welcome to Ravot"
+  },
+  "%1XE": {
+    "original": "Om andere groepen te motiveren om jouw link te gebruiken, krijgen ze zelf ook 25 euro tegoed.",
+    "translation": "To motivate other groups to use your link, they will also receive €25 in credit."
+  },
+  "%1Y1": {
+    "original": "De tag {tagName} zal worden toegevoegd aan {numToUpdate} groepen.",
+    "translation": "The tag {tagName} will be added to {numToUpdate} groups."
+  },
+  "%1Y4": {
+    "original": "De {numOrganizations} geselecteerde groepen hebben al de tag {tagName}",
+    "translation": "The {numOrganizations} selected groups already have the tag {tagName}"
+  },
+  "%1YV": {
+    "original": "Leiding niet in Ravot",
+    "translation": "Leaders not in Ravot"
+  },
+  "%1Yj": {
+    "original": "Inschrijvingen zijn gesloten via ‘Mijn account’",
+    "translation": "Registrations are closed via ‘My account’"
+  },
+  "%1ZJ": {
+    "original": "Beheer je eigen groep",
+    "translation": "Manage your own group"
+  },
+  "%1ZK": {
+    "original": "Geen van de {numOrganizations} geselecteerde groepen heeft de tag {tagName}",
+    "translation": "None of the {numOrganizations} selected groups have the tag {tagName}"
+  },
+  "%1a0": {
+    "original": "10e, 11e, 12e... groep",
+    "translation": "10th, 11th, 12th... group"
+  },
+  "%1a5": {
+    "original": "Voor de meeste groepen staat dit al goed ingesteld. Controleer het type en eventueel de koepel.",
+    "translation": "For most groups this is already set up correctly. Check the type and, if needed, the umbrella organization."
+  },
+  "%1aI": {
+    "original": "Het bedrag dat je ontvangt stijgt per groep tot maximaal 100 euro per groep. Dus als je 6 groepen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.",
+    "translation": "The amount you receive increases for each group, up to €100 per group. So, if you refer 6 groups, you earn a total of €210! Refer 10 groups, and you earn €550."
+  },
+  "%1bn": {
+    "original": "Geef {value}, krijg tot 100 euro tegoed* per groep",
+    "translation": "Give {value}, get up to €100 in credit* per group"
+  },
+  "%1bu": {
+    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "You are about to make a copy of {name-period-old} and use it as the basis for {name-period-new} (new). All prices and subdivisions will be carried over, but you can still adjust them afterwards. Both periods will then operate independently: changes in {name-period-new} will not be automatically made in {name-period-old}, and vice versa.\n\nOnce {name-period-new} is fully set up, you can switch. From that moment, members can register via 'My account'. Until then, the new period will remain hidden from members."
+  },
+  "%1c9": {
+    "original": "* We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Ravot aan te kopen. Je kan je tegoed niet doorgeven aan een andere groep. Je kan geen tegoed krijgen voor een groep die al Ravot gebruikt of al heeft geregistreerd. Ook als die persoon al een andere groep heeft op Ravot kan je er geen tegoed meer voor krijgen. Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen. Meerdere groepen zelf aanmaken om zo tegoed te krijgen is niet toegestaan. Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.",
+    "translation": "* We never pay out the balance. You can only use it to purchase packages in Ravot. You can't transfer your balance to another group. You cannot receive credit for a group that already uses or is already registered on Ravot. If the person already has another group on Ravot, you can't receive credit again. Credit expires if not used for one year (the validity is renewed each time at least 1 cent is used). You can't use the balance to pay transaction fees for online payments. Creating multiple groups yourself to receive extra credit is not allowed. If the referral is considered spam, we may decide to cancel the credit."
+  },
+  "%1cE": {
+    "original": "Dit werkjaar is niet actief, inschrijvingen via ‘Mijn account’ zijn nog niet mogelijk.",
+    "translation": "This work year is not active; registrations via 'My account' are not yet possible."
+  },
+  "%1cF": {
+    "original": "Om facturen in Ravot ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.",
+    "translation": "To also forward invoices made in Ravot to your accounting software, you can send them by email. Your accounting package can read the XML. It can then send the invoice to your customer via PEPPOL."
+  },
+  "%1cR": {
+    "original": "Registreerde op {date}. Je ontvangt jouw tegoed zodra deze groep 1 euro heeft besteed.",
+    "translation": "Registered on {date}. You'll receive your credit as soon as this group spends 1 euro."
+  },
+  "%1cV": {
+    "original": "Ravot",
+    "translation": "Ravot"
+  },
+  "%1ch": {
+    "original": "De overige {numNoUpdate} geselecteerde groepen hebben deze tag niet.",
+    "translation": "The remaining {numNoUpdate} selected groups don't have this tag."
+  },
+  "%1ck": {
+    "original": "Deze link is niet (meer) geldig omdat de groep niet bestaat",
+    "translation": "This link is no longer valid because the group does not exist"
+  },
+  "%1dH": {
+    "original": "Naam groep (betaler)",
+    "translation": "Group name (payer)"
+  },
+  "%1dM": {
+    "original": "Dit werkjaar wordt zichtbaar in ‘Mijn account’ voor leden om in te schrijven. Inschrijven voor andere werkjaren is dan niet langer mogelijk.",
+    "translation": "This work year will be visible in 'My account' for members to register. Registration for other work years will then no longer be possible."
+  },
+  "%1dT": {
+    "original": "{n}e groep",
+    "translation": "{n}th group"
   },
   "%2": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
@@ -451,6 +579,10 @@
     "original": "Sluit eerst aan bij Stripe via de Ravot instellingen > Betaalaccounts, daarna kan je {paymentMethod} activeren.",
     "translation": "First connect with Stripe via the Ravot settings > Payment accounts, after that you can activate {paymentMethod}."
   },
+  "%3v": {
+    "original": "Het bedrag wordt achteraf door KSA Nationaal aan je groep gefactureerd.",
+    "translation": "The amount will be invoiced to your group by KSA Nationaal afterwards."
+  },
   "%3x": {
     "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
     "translation": "This member is not registered with any group for the current work year and therefore cannot be affiliated."
@@ -535,6 +667,14 @@
     "original": "Alle groepen",
     "translation": "All groups"
   },
+  "%5B": {
+    "original": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
+    "translation": "This member is no longer affiliated with KSA Nationaal, and their insurance will expire soon."
+  },
+  "%5C": {
+    "original": "Dit lid is niet aangesloten bij KSA Nationaal, en is daardoor ook niet verzekerd",
+    "translation": "This member is not affiliated with KSA Nationaal, and therefore is not insured."
+  },
   "%5G": {
     "original": "Zoek een groep waar je {firstName} wilt inschrijven",
     "translation": "Search for a group where you want to register {firstName}"
@@ -590,10 +730,6 @@
   "%5Z": {
     "original": "De betaling loopt niet via Ravot",
     "translation": "The payment does not run via Ravot"
-  },
-  "%5a": {
-    "original": "Je kan geen documenten aanmaken in de gratis versie van Ravot",
-    "translation": "You cannot create documents in the free version of Ravot"
   },
   "%5b": {
     "original": "Dit is geen geldig zaalplan uit Ravot",
@@ -663,9 +799,21 @@
     "original": "Filter alle groepen die een lid hebben die aan deze voorwaarden voldoet.",
     "translation": "Filter all groups that have a member who meets these conditions."
   },
+  "%7g": {
+    "original": "Aansluiting KSA Nationaal",
+    "translation": "Affiliation KSA Nationaal"
+  },
   "%7h": {
     "original": "Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
     "translation": "Your leadership can look up your security code in Ravot and pass it on to you. If you are a leader yourself, ask your co-leader or KSA National."
+  },
+  "%7i": {
+    "original": "Het bedrag zal achteraf door KSA Nationaal aan {name} worden gefactureerd",
+    "translation": "The amount will be invoiced afterwards by KSA Nationaal to {name}."
+  },
+  "%7j": {
+    "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
+    "translation": "Members registered in an age group linked to a default age group of KSA Nationaal are connected automatically. For other members, you can manually request an affiliation here."
   },
   "%7l": {
     "original": "De link naar deze activiteit in ‘Mijn account’. Deel deze link met leden.",
@@ -683,9 +831,17 @@
     "original": "KSA Nationaal raadt een proefperiode van {days} aan.",
     "translation": "KSA Nationaal recommends a trial period of {days}."
   },
+  "%7z": {
+    "original": "Dit lid heeft een proefaansluiting bij KSA Nationaal",
+    "translation": "This member has a trial affiliation with KSA Nationaal."
+  },
   "%8": {
     "original": "Inloggen bij KSA",
     "translation": "Log in to KSA"
+  },
+  "%80": {
+    "original": "Dit lid is niet aangesloten in {werkjaar} bij KSA Nationaal, en is daardoor ook niet verzekerd.",
+    "translation": "This member is not affiliated in {werkjaar} with KSA Nationaal, and is therefore not insured."
   },
   "%83": {
     "original": "Groepen",
@@ -730,10 +886,6 @@
   "%8P": {
     "original": "Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
     "translation": "All groups are now being moved to the new work year. This might take a while; you may need to refresh the page to see all the latest changes."
-  },
-  "%8W": {
-    "original": "Geen groepen beschikbaar in dit werkjaar",
-    "translation": "No groups available in this work year"
   },
   "%8Z": {
     "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
@@ -900,12 +1052,16 @@
     "translation": "Some affiliations run via KSA National (member pays directly to the umbrella organisation) and are therefore not really charged to an individual group. You can exclude these via this filter."
   },
   "%BR": {
-    "original": "Lid betaald rechtstreeks aan KSA Nationaal",
-    "translation": "Member pays directly to KSA National"
+    "original": "Lid betaalt rechtstreeks aan KSA Nationaal",
+    "translation": "Member pays directly to KSA Nationaal."
   },
   "%BS": {
-    "original": "Lid betaald aan individuele groep",
+    "original": "Lid betaalt aan individuele groep",
     "translation": "Member pays to individual group"
+  },
+  "%Bh": {
+    "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
+    "translation": "The next affiliation for this member starts on {date}. As of today, this member is not affiliated with KSA Nationaal and therefore not insured."
   },
   "%Bm": {
     "original": "Aangesloten via KSA Nationaal (niet aangerekend aan een groep)",
@@ -1039,14 +1195,6 @@
     "original": "Dit document is zichtbaar in ‘Mijn account’.",
     "translation": "This document is visible in 'My account'."
   },
-  "%Kl": {
-    "original": "Deze functie is niet beschikbaar omdat jouw groep nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
-    "translation": "This function is not available because your group still uses the old free member administration package. Via settings, main administrators can switch to the paid version with more functionalities."
-  },
-  "%LV": {
-    "original": "Inschrijvingen zijn momenteel gesloten via ‘Mijn account’.",
-    "translation": "Registrations are currently closed via 'My account'."
-  },
   "%Li": {
     "original": "Open inschrijvingen van leden via ‘Mijn account’.",
     "translation": "Open member registrations via 'My account'."
@@ -1098,10 +1246,6 @@
   "%WI": {
     "original": "Mijn groep staat er niet tussen",
     "translation": "My group is not among them"
-  },
-  "%WO": {
-    "original": "Deze periode is niet beschikbaar voor jouw groep.",
-    "translation": "This period is not available for your group."
   },
   "%Wb": {
     "original": "Je locatie maakt je groep makkelijker vindbaar als je de volgende keer wilt inloggen. Je kan het later nog wijzigen.",
@@ -1178,10 +1322,6 @@
   "%eR": {
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw groep. Stel deze eerst in voor je verder gaat.",
     "translation": "You have not yet added billing data to your group. Set this up before continuing."
-  },
-  "%eY": {
-    "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via ‘Mijn account’.",
-    "translation": "You will receive an additional confirmation via email. If data changes in the future, you can now manage it via ‘My account’."
   },
   "%ey": {
     "original": "Groep",

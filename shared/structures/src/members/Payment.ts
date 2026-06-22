@@ -188,7 +188,7 @@ export class Payment extends AutoEncoder {
 
         if (this.roundingAmount !== 0) {
             breakdown.unshift({
-                name: $t('Afronding'),
+                name: $t('%1b6'),
                 price: this.roundingAmount,
             });
         }

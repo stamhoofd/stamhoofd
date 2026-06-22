@@ -1,16 +1,16 @@
 <template>
     <ComponentWithPropertiesInstance v-if="loadedComponent" :key="loadedComponent.key" :component="loadedComponent" v-bind="$attrs" />
     <div v-else class="st-view import-error-view">
-        <STNavigationBar :title="$t(`Geen internetverbinding`)" />
+        <STNavigationBar :title="$t(`%gT`)" />
         <main class="center">
-            <h1>{{ $t('Geen internetverbinding') }}</h1>
-            <p>{{ $t('We konden deze pagina niet laden. Controleer je internetverbinding en probeer het opnieuw.') }}</p>
+            <h1>{{ $t('%gT') }}</h1>
+            <p>{{ $t('%1VA') }}</p>
 
             <p>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="retry">
                         <span class="icon retry" />
-                        <span>{{ $t('Opnieuw proberen') }}</span>
+                        <span>{{ $t('%1EU') }}</span>
                     </button>
                 </LoadingButton>
             </p>
@@ -55,7 +55,7 @@ async function retry() {
         }
     } catch (e) {
         console.error(e);
-        new Toast($t(`Nog steeds geen internetverbinding. Probeer het later opnieuw.`), 'error red').show();
+        new Toast($t(`%1YJ`), 'error red').show();
     } finally {
         loading.value = false;
     }

@@ -46,7 +46,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const { put } of request.body.getPuts()) {
             if (put.payingOrganizationId) {
                 if (!await Context.auth.hasFullAccess(put.payingOrganizationId)) {
-                    Context.auth.error($t('Geen toegang om facturen te schrijven aan deze organisatie'));
+                    Context.auth.error($t('%1Xw'));
                 }
             }
 

@@ -1,13 +1,13 @@
 <template>
     <div class="st-view onboarding-start-view shade" data-testid="onboarding-start-view">
-        <STNavigationBar :title="$t('Welkom bij Stamhoofd')" />
+        <STNavigationBar :title="$t('%1Wp')" />
 
         <main class="center">
             <h1 class="style-navigation-title">
-                {{ $t('Welkom bij Stamhoofd') }}
+                {{ $t('%1Wp') }}
             </h1>
             <p class="style-description-block">
-                {{ $t('Waarmee wil je starten? Je kan dit later altijd uitbreiden.') }}
+                {{ $t('%1Un') }}
             </p>
 
             <div class="onboarding-options">
@@ -15,12 +15,12 @@
                     <figure>
                         <IconContainer icon="team" class="secundary" />
                     </figure>
-                    <h2>{{ $t('Onze leden beheren') }}</h2>
+                    <h2>{{ $t('%1X9') }}</h2>
                     <p class="style-description">
-                        {{ $t('Ledenportaal, inschrijvingen, kalender en lidgeld op één plek.') }}
+                        {{ $t('%1Uv') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Voor clubs met vaste leden') }}
+                        {{ $t('%1UZ') }}
                     </p>
                 </button>
 
@@ -28,12 +28,12 @@
                     <figure>
                         <IconContainer icon="basket" class="success" />
                     </figure>
-                    <h2>{{ $t('Iets verkopen of verzamelen') }}</h2>
+                    <h2>{{ $t('%1VY') }}</h2>
                     <p class="style-description">
-                        {{ $t('Tickets, webshop, inschrijvingen of een gift.') }}
+                        {{ $t('%1Vd') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Voor evenementen of een actie') }}
+                        {{ $t('%1Wo') }}
                     </p>
                 </button>
             </div>

@@ -236,7 +236,7 @@ export class SGVOAuth {
         return new SimpleError({
             code: 'sgv_oauth_state_invalid',
             message: 'SGV OAuth state invalid',
-            human: $t('Er ging iets mis bij het inloggen. Probeer opnieuw.'),
+            human: $t('%1V1'),
         });
     }
 }

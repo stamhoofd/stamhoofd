@@ -313,14 +313,14 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cl');
 
             case EmailTemplateType.InvoiceGenerationErrors: return $t('%1Sm');
-            case EmailTemplateType.InvoicePaid: return $t('Factuur (na betaling)');
-            case EmailTemplateType.CreditNotePaid: return $t('Creditnota (na betaling)');
+            case EmailTemplateType.InvoicePaid: return $t('%1Z7');
+            case EmailTemplateType.CreditNotePaid: return $t('%1bz');
 
-            case EmailTemplateType.InvoiceUnpaid: return $t('Factuur te betalen');
-            case EmailTemplateType.CreditNoteUnpaid: return $t('Creditnota te betalen');
+            case EmailTemplateType.InvoiceUnpaid: return $t('%1Y8');
+            case EmailTemplateType.CreditNoteUnpaid: return $t('%1Uu');
 
-            case EmailTemplateType.ChargebackPayingOrganization: return $t('Betaling teruggevorderd');
-            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('Betaling mislukt');
+            case EmailTemplateType.ChargebackPayingOrganization: return $t('%1cK');
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('%Je');
         }
     }
 
@@ -421,7 +421,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.ChargebackPayingOrganization:
             case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
-                return $t('Betalingen');
+                return $t('%1JH');
         }
     }
 
@@ -574,14 +574,14 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TicketsConfirmationPOS: return $t(`%qN`);
             case EmailTemplateType.TicketsReceivedTransfer: return $t(`%qO`);
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return $t(`Automatische e-mail die 's ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.`);
-            case EmailTemplateType.UserBalanceReminder: return $t(`Automatische e-mail die 's ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.`);
+            case EmailTemplateType.UserBalanceIncreaseNotification: return $t(`%1UV`);
+            case EmailTemplateType.UserBalanceReminder: return $t(`%1bx`);
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t(`Automatische e-mail die 's ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.`);
-            case EmailTemplateType.OrganizationBalanceReminder: return $t(`Automatische e-mail die 's ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.`);
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t(`%1cY`);
+            case EmailTemplateType.OrganizationBalanceReminder: return $t(`%1aM`);
 
-            case EmailTemplateType.ChargebackPayingOrganization: return $t('Automatische email naar schuldenaar als een betaling werd teruggevorderd, bv. een SEPA domiciliering die is mislukt.');
-            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('Automatische email naar schuldenaar als een betaling is mislukt die werd geïniteerd door de schuldeiser (bv. via opgeslagen creditcard)');
+            case EmailTemplateType.ChargebackPayingOrganization: return $t('%1VU');
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('%1cN');
         }
 
         return '';

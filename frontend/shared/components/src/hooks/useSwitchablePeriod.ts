@@ -21,7 +21,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
         });
         const organizationPeriod = list.organizationPeriods.find(o => o.period.id === p.id);
         if (!organizationPeriod) {
-            new CenteredMessage($t(`%10G`), $t(`Deze periode is nog niet opgestart`)).addCloseButton().show();
+            new CenteredMessage($t(`%10G`), $t(`%1XQ`)).addCloseButton().show();
             return false;
         }
 

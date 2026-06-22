@@ -1,7 +1,7 @@
 <template>
     <div class="st-view">
         <STNavigationBar
-            :title="$t('Schrappen')"
+            :title="$t('%1Zi')"
             :dismiss="canDismiss"
             :pop="canPop"
         />
@@ -9,7 +9,7 @@
         <main>
             <h1>
                 {{
-                    $t("Wil je deze leden schrappen in de groepsadministratie?")
+                    $t("%1Yh")
                 }}
             </h1>
             <p>
@@ -47,11 +47,11 @@
                     @click="doDelete"
                 >
                     <span class="icon trash" /><span>{{
-                        $t("Schrappen")
+                        $t("%1Zi")
                     }}</span>
                 </button>
                 <button class="button primary" type="button" @click="doNothing">
-                    {{ $t("Behouden") }}
+                    {{ $t("%1YR") }}
                 </button>
             </template>
         </STToolbar>

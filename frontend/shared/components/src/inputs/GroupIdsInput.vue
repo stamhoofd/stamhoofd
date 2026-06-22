@@ -18,7 +18,7 @@
                     <span class="icon gray add small" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ addButtonText ?? $t('Toevoegen') }}
+                    {{ addButtonText ?? $t('%SN') }}
                 </h3>
             </STListItem>
         </STList>

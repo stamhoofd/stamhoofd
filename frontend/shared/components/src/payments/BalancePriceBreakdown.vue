@@ -38,7 +38,7 @@ const priceBreakdown = computed(() => {
 
     const all = [
         {
-            name: $t(`Tegoed`),
+            name: $t(`%1Xl`),
             price: discountBalance.priceOpen, // only relevant shown
             action: {
                 icon: 'info-circle',
@@ -46,11 +46,11 @@ const priceBreakdown = computed(() => {
             }
         },
         {
-            name: paid >= 0 ? $t(`%ly`) : $t('Reeds teruggekregen'),
+            name: paid >= 0 ? $t(`%ly`) : $t('%1Yy'),
             price: paid, // don't include discounts here
         },
         {
-            name: $t(`%1PL`),
+            name: $t(`%1OL`),
             price: balance.pricePending + laterBalance.pricePending - discountBalance.pricePending, // don't include discounts here
         },
     ].filter(a => a.price !== 0);

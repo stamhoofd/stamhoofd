@@ -40,7 +40,7 @@ export class ServiceFeeHelper {
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'Payments are temporarily unavailable due to a lack of VAT settings',
-                human: $t('Online betalingen zijn tijdelijk onbeschikbaar op het platform door een probleem met de berekening van BTW-tarieven op kosten.'),
+                human: $t('%1ay'),
             });
         }
 

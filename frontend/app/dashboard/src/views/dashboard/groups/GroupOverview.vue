@@ -59,10 +59,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Leden op deze wachtlijst') }}
+                            {{ $t('%1bj') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Bekijk, beheer, exporteer of e-mail leden op deze wachtlijst') }}
+                            {{ $t('%1as') }}
                         </p>
                         <template #right>
                             <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
@@ -554,7 +554,7 @@ async function deleteGroup() {
             await show({
                 components: [
                     AsyncComponent(() => import('@stamhoofd/components/containers/EmptyView.vue'), {
-                        title: $t('Deze groep werd verwijderd'),
+                        title: $t('%1ag'),
                     }),
                 ],
                 force: true,
@@ -634,8 +634,8 @@ async function convertToEvent() {
     await show({
         components: [
             AsyncComponent(() => import('@stamhoofd/components/containers/EmptyView.vue'), {
-                title: $t('Deze groep werd omgzet in een activiteit'),
-                description: $t('Je kan de activiteit opzoeken in de kalender'),
+                title: $t('%1am'),
+                description: $t('%1WS'),
             }),
         ],
         force: true,
@@ -675,7 +675,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
     if (group.settings.preventGroupIds.length) {
         throw new SimpleError({
             code: 'unsupported',
-            message: $t(`Het omzetten van deze groep naar een activiteit in de kalender is nog niet mogelijk door de instelling ‘verhinder als ingeschreven bij’. Verwijder en vervang eerst die instelling.`),
+            message: $t(`%1ZO`),
         });
     }
 

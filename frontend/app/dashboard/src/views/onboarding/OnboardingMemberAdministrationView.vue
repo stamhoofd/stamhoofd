@@ -1,18 +1,18 @@
 <template>
-    <SaveView :title="title" :save-text="$t('Volgende')" save-icon-right="arrow-right" :loading="saving" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :save-text="$t('%19q')" save-icon-right="arrow-right" :loading="saving" :prefer-large-button="true" @save="goNext">
         <aside class="style-title-prefix">
-            {{ $t('Stap {current} van {total}', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
+            {{ $t('%1WP', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
         </aside>
         <h1>
             {{ title }}
         </h1>
         <p>
-            {{ $t('Voor de meeste verenigingen staat dit al goed ingesteld. Controleer het type en eventueel de koepel.') }}
+            {{ $t('%1a5') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="broadType === OrganizationType.Sport" :title="$t('Welke sport?')" error-fields="sport" :error-box="errors.errorBox" class="max">
+        <STInputBox v-if="broadType === OrganizationType.Sport" :title="$t('%1c0')" error-fields="sport" :error-box="errors.errorBox" class="max">
             <Dropdown v-model="sportType">
                 <option v-for="option in sportOptions" :key="option.value" :value="option.value">
                     {{ option.name }}
@@ -20,10 +20,10 @@
             </Dropdown>
         </STInputBox>
 
-        <STInputBox v-if="broadType === OrganizationType.Youth" :title="$t('Bij welke koepel zijn jullie aangesloten?')" error-fields="umbrellaOrganization" :error-box="errors.errorBox" class="max">
+        <STInputBox v-if="broadType === OrganizationType.Youth" :title="$t('%1XL')" error-fields="umbrellaOrganization" :error-box="errors.errorBox" class="max">
             <Dropdown v-model="umbrellaOrganization">
                 <option :value="null">
-                    {{ $t('Geen / onafhankelijk') }}
+                    {{ $t('%1br') }}
                 </option>
                 <option v-for="option in umbrellaOptions" :key="option.value" :value="option.value">
                     {{ option.name }}
@@ -58,7 +58,7 @@ const organizationManager = useOrganizationManager();
 const errors = useErrors();
 const saving = ref(false);
 
-const title = $t('Wat voor vereniging zijn jullie?');
+const title = $t('%1W5');
 
 const organization = props.viewModel.organization;
 

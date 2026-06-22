@@ -346,7 +346,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.Transfer: return $t('%5O');
         case PaymentMethod.Payconiq:
             return providerText(provider, {
-                [PaymentProvider.Payconiq]: $t('Vroeger bekend als Payconiq'),
+                [PaymentProvider.Payconiq]: $t('%1ce'),
                 [PaymentProvider.Buckaroo]: $t(`%1F`),
             });
         case PaymentMethod.Bancontact:
