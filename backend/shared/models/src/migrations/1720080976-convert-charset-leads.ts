@@ -18,15 +18,7 @@ export default new Migration(async () => {
     console.log('Has leads table: ' + hasTable);
 
     if (hasTable) {
-        const sqlStatement: string = [
-            'set foreign_key_checks=0;',
-            'ALTER TABLE `leads` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
-            'ALTER TABLE `leads` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
-            'set foreign_key_checks=1;',
-        ].join('');
-
-        console.log('Start updating charset of leads table.');
-        await Database.statement(sqlStatement);
+        await convertTable('leads');
     }
 
     return Promise.resolve();
@@ -50,4 +42,15 @@ async function tableExists(tableName: string): Promise<boolean> {
     }
 
     return count > 0;
+}
+
+async function convertTable(name: string): Promise<void> {
+    await Database.beginTransaction(async () => {
+        await Database.statement('set foreign_key_checks=0;');
+
+        console.log('Start converting charset of table: ' + name);
+        await Database.statement('ALTER TABLE `' + name + '` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;');
+
+        await Database.statement('set foreign_key_checks=1;');
+    });
 }
