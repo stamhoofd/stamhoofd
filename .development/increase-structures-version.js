@@ -1,12 +1,12 @@
 /**
  * Search all occurrences of @field({*, ...NextVersion}) (multiple lines) in the code
  */
-import fs from 'fs/promises'
-import path from 'path'
-import chalk from 'chalk'
+import fs from 'fs/promises';
+import path from 'path';
+import chalk from 'chalk';
 import util from 'node:util';
-import child_process from 'node:child_process'
-const excludedFolder = ['node_modules', 'dist'];
+import child_process from 'node:child_process';
+const excludedFolder = ['node_modules', 'dist', '.development'];
 
 const exec = util.promisify(child_process.exec);
 
@@ -39,12 +39,12 @@ async function processFile(filePath) {
         parenthesisDepth: 0, // 0 when atStack if not @field, then 1 once first ( is found, 2 if second ( is found, etc.
         curlyBracketsDepth: 0, // 0 when atStack if not @field, then 1 once first { is found, 2 if second { is found, etc.
         contentStack: '', // contents inside @field({ (so atStack is @field, parenthesisDepth is 1 and curlyBracketsDepth is 1)
-        commentLineStack: ''
-    }
+        commentLineStack: '',
+    };
 
     let newContent = null;
     let offset = 0;
-    
+
     // Loop all characters in a simple state machine
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
@@ -58,7 +58,7 @@ async function processFile(filePath) {
         }
 
         if (char === '/') {
-            state.commentLineStack += '/'
+            state.commentLineStack += '/';
         } else {
             state.commentLineStack = '';
         }
@@ -88,31 +88,31 @@ async function processFile(filePath) {
                     state.contentStack = '';
                     break;
                 default:
-                    {
-                        if (state.parenthesisDepth === 1 && state.curlyBracketsDepth === 1) {
-                            state.contentStack += char;
+                {
+                    if (state.parenthesisDepth === 1 && state.curlyBracketsDepth === 1) {
+                        state.contentStack += char;
 
-                            if (state.contentStack.endsWith(needle)) {
-                                // Found!
+                        if (state.contentStack.endsWith(needle)) {
+                            // Found!
 
-                                const startIndex = i - needle.length + 1 + offset;
-                                const endIndex = i + offset; 
+                            const startIndex = i - needle.length + 1 + offset;
+                            const endIndex = i + offset;
 
-                                // Replace
-                                if (!newContent) {
-                                    console.log('Found new field in ' + filePath);
-                                    newContent = content;
-                                }
-                                newContent = newContent.substring(0, startIndex) + replaceBy + newContent.substring(endIndex + 1);
-
-                                offset += replaceBy.length - needle.length;
-
-                                state.contentStack = ''
+                            // Replace
+                            if (!newContent) {
+                                console.log('Found new field in ' + filePath);
+                                newContent = content;
                             }
-                        } else {
+                            newContent = newContent.substring(0, startIndex) + replaceBy + newContent.substring(endIndex + 1);
+
+                            offset += replaceBy.length - needle.length;
+
                             state.contentStack = '';
                         }
+                    } else {
+                        state.contentStack = '';
                     }
+                }
             }
         } else if (state.atStack === '@fie') {
             if (char === 'l') {
@@ -172,7 +172,6 @@ async function readVersion() {
         currentVersion = v;
         nextVersion = v + 1;
         replaceBy = 'version: ' + nextVersion;
-
     } else {
         throw new Error('Failed to read current version');
     }
@@ -181,7 +180,7 @@ async function readVersion() {
 async function loopFolder(folderPath) {
     // Loop all directories and files
     const files = await fs.readdir(folderPath);
-    
+
     for (const file of files) {
         const filePath = path.join(folderPath, file);
         const stat = await fs.stat(filePath);
@@ -191,7 +190,6 @@ async function loopFolder(folderPath) {
             await processFile(filePath);
         }
     }
-
 }
 
 async function run() {
@@ -204,7 +202,7 @@ async function run() {
         await exec('git remote update');
 
         // First check if we are on the main branch and no changes are pending
-        const {stdout} = await exec('git status --porcelain');
+        const { stdout } = await exec('git status --porcelain');
         if (stdout.trim()) {
             console.error(chalk.red('You have pending changes in Git. Please commit to main before releasing a new version.'));
 
@@ -214,7 +212,7 @@ async function run() {
         }
 
         // Check branch + up to date
-        const {stdout: branch} = await exec('git branch --show-current');
+        const { stdout: branch } = await exec('git branch --show-current');
         if (branch.trim() !== 'main') {
             console.error(chalk.red('You are not on the main branch. Please checkout main before releasing a new version.'));
 
@@ -223,8 +221,7 @@ async function run() {
             return;
         }
 
-
-        const {stdout: status} = await exec('git status -uno');
+        const { stdout: status } = await exec('git status -uno');
         if (!status.includes("Your branch is up to date with 'origin/main'")) {
             console.error(chalk.red('Your branch is not up to date with origin/main. Please pull before releasing a new version.'));
 
@@ -248,7 +245,7 @@ async function run() {
             console.error(chalk.red('Failed to update version in Version.ts. Please revert changes using Git.'));
             process.exit(1);
         }
-        
+
         if (!dryRun) {
             await fs.writeFile(versionPath, newContent);
         } else {
