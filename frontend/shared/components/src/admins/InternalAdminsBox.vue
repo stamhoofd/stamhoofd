@@ -12,7 +12,7 @@
     </div>
 
     <p v-if="sortedMembers.length === 0" class="info-box">
-        {{ $t('%Ya') }}
+        {{ $t('Er zijn nog geen interne beheerders.') }}
     </p>
     <p v-else-if="filteredMembers.length === 0" class="info-box">
         {{ $t('%1AX') }}

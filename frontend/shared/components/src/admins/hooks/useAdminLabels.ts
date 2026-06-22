@@ -26,7 +26,7 @@ export function useAdminLabels() {
             : $t('Beheerders hebben een account waarmee ze toegang krijgen tot Stamhoofd.')),
         // Empty-state shown when there are no admins yet (ExternalAdminsBox)
         adminsEmptyDescription: computed(() => showInternalAdmins.value
-            ? $t('%Yh')
+            ? $t('Er zijn nog geen externe beheerders. Nodig iemand uit om beheerder te worden.')
             : $t('Er zijn nog geen beheerders. Nodig iemand uit om beheerder te worden.')),
         // Description shown above the roles list (RolesView)
         adminRolesDescription: computed(() => showInternalAdmins.value
