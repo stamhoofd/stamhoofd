@@ -2,7 +2,6 @@
     <LoadingViewTransition :loading="isLoading">
         <ModernTableView
             v-if="!isLoading"
-            :key="filterPeriodId"
             ref="modernTableView"
             :table-object-fetcher="tableObjectFetcher"
             :filter-builders="filterBuilders"
