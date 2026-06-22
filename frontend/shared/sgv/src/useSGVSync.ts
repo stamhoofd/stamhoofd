@@ -48,27 +48,29 @@ export function useSGVSync(
     const auth = useAuth();
     const organizationScope = useOrganization();
     const organization = computed(() => organizationOverride ? toValue(organizationOverride) : organizationScope.value);
-    const sgvSyncIsEnabled = computed(() => auth.hasFullAccess() && !!organization.value?.isSGVSyncOrganization);
+    const sgvSyncIsEnabled = computed(() => STAMHOOFD.userMode === 'organization' && auth.hasFullAccess() && !!organization.value?.isSGVSyncOrganization);
 
-    defineRoute({
-        url: Routes.SGV,
-        name: Routes.SGV,
-        show: 'detail',
-        present: 'popup',
-        component: async () => (await import('./components/SGVGroupAdministrationView.vue')).default,
-        defaultProperties: query => ({
-            code: query?.get('code') ?? undefined,
-            state: query?.get('state') ?? undefined,
-        }),
-        propsToParams: props => ({
-            query: props.code && props.state
-                ? new URLSearchParams([
-                        ['code', props.code],
-                        ['state', props.state],
-                    ])
-                : null,
-        }),
-    });
+    if (sgvSyncIsEnabled.value) {
+        defineRoute({
+            url: Routes.SGV,
+            name: Routes.SGV,
+            show: 'detail',
+            present: 'popup',
+            component: async () => (await import('./components/SGVGroupAdministrationView.vue')).default,
+            defaultProperties: query => ({
+                code: query?.get('code') ?? undefined,
+                state: query?.get('state') ?? undefined,
+            }),
+            propsToParams: props => ({
+                query: props.code && props.state
+                    ? new URLSearchParams([
+                            ['code', props.code],
+                            ['state', props.state],
+                        ])
+                    : null,
+            }),
+        });
+    }
 
     async function sgvSyncOpen(): Promise<void> {
         if (!sgvSyncIsEnabled.value) {
