@@ -222,19 +222,19 @@ defineRoute({
     name: Routes.All,
     show: 'detail',
     component: async () => (await import('@stamhoofd/components/members/MembersTableView.vue')).default,
-    defaultProperties: () => {
-        return {
-            periodId: period.value.period.id,
-        };
-    },
+    defaultProperties: () => getAllMembersRouteProperties(),
     isDefault: showAll.value
         ? {
-                properties: {
-                    periodId: period.value.period.id,
-                },
+                properties: getAllMembersRouteProperties(),
             }
         : undefined,
 });
+
+function getAllMembersRouteProperties() {
+    return {
+        periodId: computed(() => period.value.period.id),
+    };
+}
 
 const checkRoute = useCheckRoute();
 const fetchPeriods = useFetchOrganizationRegistrationPeriods();
