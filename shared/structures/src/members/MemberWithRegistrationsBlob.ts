@@ -166,17 +166,22 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
      * Determines whether a member still reflects the latest SGV sync.
      * New membership registrations and old sync timestamps become outdated, while local edits after sync become changed.
      */
-    getSGVSyncStatus(options: { now?: Date; periodId?: string | null } = {}): SGVSyncStatus {
+    getSGVSyncStatus(options: {
+        organization: Organization;
+        now?: Date;
+    }): SGVSyncStatus {
+        const activeRegistrations = this.registrations.filter(registration => registration.group.periodId === options.organization.period.period.id);
+
+        if (activeRegistrations.length === 0) {
+            return SGVSyncStatus.Ok;
+        }
+
         const lastExternalSync = this.details.lastExternalSync;
         if (!lastExternalSync) {
             return SGVSyncStatus.Never;
         }
 
-        for (const registration of this.registrations) {
-            if (options.periodId && registration.group.periodId !== options.periodId) {
-                continue;
-            }
-
+        for (const registration of activeRegistrations) {
             if (registration.group.type !== GroupType.Membership || registration.deactivatedAt !== null || registration.registeredAt === null) {
                 continue;
             }

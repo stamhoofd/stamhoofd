@@ -5,9 +5,8 @@ import type {
     RequestResult,
 } from '@simonbackx/simple-networking';
 import { Request, Server } from '@simonbackx/simple-networking';
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { MemberManager } from '@stamhoofd/networking/MemberManager';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -625,7 +624,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
             try {
                 // If updatedAt close to lastsynced at (5 seconds)
                 if (match.stamhoofd.getSGVSyncStatus({
-                    periodId: organization.period.period.id,
+                    organization: organization,
                 }) === SGVSyncStatus.Ok) {
                     // report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
                     report.markSkipped(match.stamhoofd);

@@ -195,4 +195,23 @@ describe('useSGVSync.getSGVSyncWarning', () => {
 
         expect(warning).toBeNull();
     });
+
+    test('ignores registrations from previous active work years', () => {
+        const organization = createOrganization();
+        organization.period.period.startDate = new Date();
+        organization.period.period.previousPeriodId = 'previous-period';
+
+        const warning = getSGVSyncWarning(
+            [
+                createMember({
+                    lastExternalSync: null,
+                    group: createGroup(GroupType.Membership, 'previous-period'),
+                }),
+            ],
+            organization,
+            true,
+        );
+
+        expect(warning).toBeNull();
+    });
 });

@@ -63,9 +63,9 @@ export function useSGVSync(
         propsToParams: props => ({
             query: props.code && props.state
                 ? new URLSearchParams([
-                    ['code', props.code],
-                    ['state', props.state],
-                ])
+                        ['code', props.code],
+                        ['state', props.state],
+                    ])
                 : null,
         }),
     });
@@ -116,7 +116,7 @@ export function getSGVSyncWarning(
         }
 
         const status = member.getSGVSyncStatus({
-            periodId: organization.period.period.id,
+            organization,
         });
         if (
             status === SGVSyncStatus.Never
