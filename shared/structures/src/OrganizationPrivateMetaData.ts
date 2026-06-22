@@ -182,10 +182,10 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 84 })
     pendingRegisterDomain: string | null = null;
 
-    @field({ decoder: ExternalSyncData, nullable: true, optional: true, ...NextVersion })
+    @field({ decoder: ExternalSyncData, nullable: true, optional: true, version: 399 })
     externalSyncData: ExternalSyncData | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, optional: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, optional: true, version: 399 })
     externalGroupNumber: string | null = null;
 
     /**

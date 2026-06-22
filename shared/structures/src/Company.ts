@@ -34,7 +34,7 @@ export class Company extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     administrationEmail: string | null = null;
 
-    @field({ decoder: PeppolEndointId, nullable: true, ...NextVersion })
+    @field({ decoder: PeppolEndointId, nullable: true, version: 399 })
     customPeppolEndpointId: PeppolEndointId | null;
 
     get peppolEndpointId(): PeppolEndointId | null {

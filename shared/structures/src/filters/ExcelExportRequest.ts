@@ -53,7 +53,7 @@ export class ExcelExportRequest extends AutoEncoder {
     /**
      * File name to use for the excel file, without extension.
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 399 })
     title: string | null = null;
 }
 

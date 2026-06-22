@@ -193,7 +193,7 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 354 })
     trialDays = 0;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 399 })
     maximumDays: number | null = null;
 
     @field({ decoder: new ArrayDecoder(PlatformMembershipTypeConfigPrice) })

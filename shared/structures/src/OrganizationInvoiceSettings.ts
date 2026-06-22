@@ -40,12 +40,12 @@ export class OrganizationInvoiceSettings extends AutoEncoder {
      * Send a copy of invoice XML to these email addresses.
      * Generally the go to way for implementing PEPPOL or importing it in your finance system.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 399 })
     forwardEmailHandlers: string[];
 
     /**
      * Only send XML's for customers with a VAT number OR custom peppol endpoint
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion, defaultValue: () => true })
+    @field({ decoder: BooleanDecoder, version: 399, defaultValue: () => true })
     forwardOnlyVAT: boolean;
 }

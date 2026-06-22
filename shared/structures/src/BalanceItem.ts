@@ -473,10 +473,10 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt = new Date();
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 399 })
     startDate: Date | null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 399 })
     endDate: Date | null;
 
     @field({ decoder: new EnumDecoder(BalanceItemStatusV352) })

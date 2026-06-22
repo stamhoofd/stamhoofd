@@ -219,7 +219,7 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type = OrganizationType.Other;
 
-    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), ...NextVersion })
+    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), version: 399 })
     loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[
         LoginMethod.Password,
         LoginMethodConfig.create({}),
@@ -488,7 +488,7 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: DataPermissionsSettings, version: 398, nullable: true })
     dataPermission: DataPermissionsSettings | null = null;
 
-    @field({ decoder: new ArrayDecoder(OrganizationEventType), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(OrganizationEventType), version: 399 })
     eventTypes: OrganizationEventType[] = STAMHOOFD.userMode === 'organization'
         ? [OrganizationEventType.createDefault()]
         : [];
