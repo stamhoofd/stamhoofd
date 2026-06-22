@@ -13,6 +13,8 @@ import { GroupType } from '../../GroupType.js';
 import type { Organization } from '../../Organization.js';
 import { Platform, PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import type { PriceBreakdown } from '../../PriceBreakdown.js';
+import type { RegistrationPeriod } from '../../RegistrationPeriod.js';
+import type { RegistrationPeriodBase } from '../../RegistrationPeriodBase.js';
 import { StockReservation } from '../../StockReservation.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
@@ -1030,17 +1032,22 @@ export class RegisterItem implements ObjectWithRecords {
             }
         }
 
-        const period = periodId === platform.period.id ? platform.period : (periodId === this.organization.period.period.id ? this.organization.period.period : group.settings.period);
+        let period: RegistrationPeriod | RegistrationPeriodBase;
 
-        if (!period) {
+        if (periodId === platform.period.id) {
+            period = platform.period;
+        } else if (periodId === this.organization.period.period.id) {
+            period = this.organization.period.period;
+        } else if (group.settings.period) {
+            period = group.settings.period;
+        } else {
             throw new SimpleError({
-                code: 'locked_period',
-                message: 'Locked period',
-                human: type === 'register' ? $t('%Bu', { group: group.settings.name }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat dit werkjaar is afgesloten.', { group: group.settings.name }),
+                code: 'missing_period',
+                message: 'No cached period on group',
             });
         }
 
-        if (!period || period.locked) {
+        if (period.locked) {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
