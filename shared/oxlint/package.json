@@ -1,6 +1,6 @@
 {
     "name": "oxlint-plugin-stamhoofd",
-    "version": "2.122.1",
+    "version": "2.122.2",
     "type": "module",
     "main": "./src/index.js",
     "sideEffects": false,
