@@ -61,5 +61,8 @@
             "sectionDescription": "white",
             "version": "magenta"
         }
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }
