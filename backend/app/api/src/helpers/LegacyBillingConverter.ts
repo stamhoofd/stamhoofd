@@ -489,7 +489,7 @@ export async function convertPendingInvoice(pendingInvoice: STPendingInvoice, ct
             payingOrganizationId,
             ctx,
             status: BalanceItemStatus.Due,
-            createdAt: pendingInvoice.createdAt,
+            createdAt: item.date ?? pendingInvoice.createdAt,
             paidAt: null,
         });
         await balanceItem.save();
