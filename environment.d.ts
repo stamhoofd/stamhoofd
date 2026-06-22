@@ -47,12 +47,6 @@ declare global {
         sgvLoginUrl?: string;
         sgvAdminUrl?: string;
 
-        /**
-         * @deprecated
-         * Removed in v2
-         */
-        admin?: string;
-
         // MX + SPF (both for email) + A record for webshops
         webshopCname?: string;
 
