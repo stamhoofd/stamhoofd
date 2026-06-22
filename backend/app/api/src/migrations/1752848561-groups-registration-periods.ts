@@ -436,6 +436,7 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
         newWaitingList.periodId = period.id;
         newWaitingList.settings = GroupSettings.create({
             name: TranslatedString.create($t(`%yh`) + ' ' + newGroup.settings.name.toString()),
+            period: period.getBaseStructure(),
         });
 
         const migrationData = new V1WaitingListMigrationData();
@@ -807,6 +808,7 @@ function createPreviousGroup({ originalGroup, period, cycleInformation, index }:
             startDate,
             endDate,
             hasCustomDates: true,
+            period: period.getBaseStructure(),
         });
     newGroup.type = originalGroup.type;
 

@@ -4,7 +4,7 @@ import { BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, Reduceable
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '../models/Group.js';
-import type { RegistrationPeriod } from '../models/index.js';
+import { RegistrationPeriod } from '../models/index.js';
 import type { Organization } from '../models/Organization.js';
 import { OrganizationFactory } from './OrganizationFactory.js';
 
@@ -33,6 +33,8 @@ export class GroupFactory extends Factory<Options, Group> {
         const group = new Group();
         group.organizationId = organization.id;
 
+        let period: RegistrationPeriod | undefined = undefined;
+
         if (this.options.period) {
             if (STAMHOOFD.userMode === 'organization' && this.options.period.organizationId !== group.organizationId) {
                 throw new SimpleError({
@@ -42,8 +44,13 @@ export class GroupFactory extends Factory<Options, Group> {
                 });
             }
             group.periodId = this.options.period.id;
+            period = this.options.period;
         } else {
             group.periodId = organization.periodId;
+            const organizationPeriod = await RegistrationPeriod.getByID(organization.periodId);
+            if (organizationPeriod) {
+                period = organizationPeriod;
+            }
         }
 
         group.waitingListId = this.options.waitingListId ?? null;
@@ -64,6 +71,7 @@ export class GroupFactory extends Factory<Options, Group> {
                 }),
             ],
             maxMembers: this.options.maxMembers === undefined ? null : this.options.maxMembers,
+            period: period ? period.getBaseStructure() : undefined,
         });
 
         if (this.options.bundleDiscount) {
