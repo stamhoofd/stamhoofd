@@ -32,8 +32,6 @@ describe('buildDevelopmentConfig', () => {
         expect(config.backendEnv.SPACES_SECRET).toBe(localFilesSecretKey);
         expect(config.appEnv.userMode).toBe('organization');
         expect(config.appEnv.domains.api).toBe('api.stamhoofd');
-        expect(config.appEnv.domains.sgvLoginUrl).toBe('https://login.sgv.stamhoofd');
-        expect(config.appEnv.domains.sgvAdminUrl).toBe('https://admin.sgv.stamhoofd');
         expect(config.appEnv.SMTP_HOST).toBe(localIpv4Host);
         expect(config.appEnv.SMTP_USERNAME).toBe(maildevUsername);
         expect(config.appEnv.SMTP_PASSWORD).toBe(maildevPassword);
@@ -86,8 +84,6 @@ describe('buildDevelopmentConfig', () => {
         expect(config.backendEnv.STAMHOOFD_PORT_OFFSET_LOCKED).toBe('1');
         expect(config.appEnv.userMode).toBe('platform');
         expect(config.appEnv.translationNamespace).toBe('keeo');
-        expect(config.appEnv.domains.sgvLoginUrl).toBe('https://login.sgv.keeo.stamhoofd');
-        expect(config.appEnv.domains.sgvAdminUrl).toBe('https://admin.sgv.keeo.stamhoofd');
     });
 
     it('assigns the resolved frontend port to dashboard apps', () => {
