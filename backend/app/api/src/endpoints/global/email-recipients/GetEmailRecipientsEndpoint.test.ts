@@ -1,15 +1,17 @@
-import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
-import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { Request } from '@simonbackx/simple-endpoints';
+import { AccessRight, CountFilteredRequest, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetEmailRecipientsCountEndpoint } from './GetEmailRecipientsCountEndpoint.js';
+import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
 
 const baseUrl = `/email-recipients`;
 
 describe('Endpoint.GetEmailRecipients', () => {
     const endpoint = new GetEmailRecipientsEndpoint();
+    const countEndpoint = new GetEmailRecipientsCountEndpoint();
     let period: RegistrationPeriod;
     let organization: Organization;
     let token: Token;
@@ -111,6 +113,57 @@ describe('Endpoint.GetEmailRecipients', () => {
         expect(result.body.results[0]).toMatchObject({
             id: emailRecipient.id,
         });
+    });
+
+    test('It only counts email recipients of the scoped organization', async () => {
+        const otherOrganization = await new OrganizationFactory({ period }).create();
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Draft;
+        email.text = 'test email';
+        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+        await email.save();
+
+        const otherEmail = new Email();
+        otherEmail.subject = 'test subject';
+        otherEmail.status = EmailStatus.Draft;
+        otherEmail.text = 'test email';
+        otherEmail.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        otherEmail.json = {};
+        otherEmail.organizationId = otherOrganization.id;
+        await otherEmail.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.email = 'jan.janssens@geenemail.com';
+        emailRecipient.firstName = 'Jan';
+        emailRecipient.lastName = 'Janssens';
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        await emailRecipient.save();
+
+        const otherEmailRecipient = new EmailRecipient();
+        otherEmailRecipient.email = 'piet.peeters@geenemail.com';
+        otherEmailRecipient.firstName = 'Piet';
+        otherEmailRecipient.lastName = 'Peeters';
+        otherEmailRecipient.emailId = otherEmail.id;
+        otherEmailRecipient.organizationId = otherOrganization.id;
+        await otherEmailRecipient.save();
+
+        const request = Request.get({
+            path: baseUrl + '/count',
+            host: organization.getApiHost(),
+            query: new CountFilteredRequest({
+                filter: {},
+            }),
+            headers: {
+                authorization: 'Bearer ' + token.accessToken,
+            },
+        });
+        const result = await testServer.test(countEndpoint, request);
+        expect(result.body.count).toBe(1);
     });
 
     test('It can not request all email recipients if not read permission for all senders', async () => {
