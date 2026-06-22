@@ -105,6 +105,9 @@ export function getSGVSyncWarning(
     if (!members || !organization || !organization.isSGVSyncOrganization) {
         return null;
     }
+    if (STAMHOOFD.userMode !== 'organization') {
+        return null;
+    }
 
     const counts = {
         [SGVSyncStatus.Never]: 0,
