@@ -116,7 +116,7 @@
                 color: $color-success;
             }
 
-            span:not(.right) {
+            > span:not(.left):not(.right) {
                 min-width: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -140,6 +140,7 @@
                 width: 20px;
                 height: 20px;
                 display: block;
+                flex-shrink: 0;
                 overflow: visible !important;
             }
 
@@ -148,7 +149,8 @@
                 font-size: 11px;
                 color: $color-gray-4;
                 font-weight: 500;
-                text-wrap: nowrap;
+                flex-shrink: 0;
+                white-space: nowrap;
             }
         }
 
