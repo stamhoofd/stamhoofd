@@ -45,7 +45,10 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
             throw Context.auth.error();
         }
 
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
             throw Context.auth.notFoundOrNoAccess();
         }

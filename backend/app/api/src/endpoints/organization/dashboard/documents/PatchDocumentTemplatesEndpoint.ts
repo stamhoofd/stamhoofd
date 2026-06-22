@@ -67,7 +67,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         }
 
         for (const patch of request.body.getPatches()) {
-            const template = await DocumentTemplate.getByID(patch.id);
+            const template = await DocumentTemplate.select()
+                .where('id', patch.id)
+                .where('organizationId', organization.id)
+                .first(false);
             if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
                 throw Context.auth.notFoundOrNoAccess($t(`%EP`));
             }
@@ -121,7 +124,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         }
 
         for (const id of request.body.getDeletes()) {
-            const template = await DocumentTemplate.getByID(id);
+            const template = await DocumentTemplate.select()
+                .where('id', id)
+                .where('organizationId', organization.id)
+                .first(false);
             if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: 'not_found',

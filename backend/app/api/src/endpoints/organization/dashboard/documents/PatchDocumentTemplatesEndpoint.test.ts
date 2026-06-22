@@ -99,6 +99,29 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
     });
 
     describe('patch fiscal document', () => {
+        it('should not patch a document template from another organization', async () => {
+            const otherOrganization = await new OrganizationFactory({ period }).create();
+            const template = await new DocumentTemplateFactory({
+                organizationId: otherOrganization.id,
+                type: 'participation',
+                groups: [],
+                year: 2022,
+            }).create();
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(DocumentTemplatePrivate.patch({
+                id: template.id,
+                status: DocumentStatus.Published,
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('not_found'));
+        });
+
         describe('change type to fiscal', () => {
             it('should throw if already has fiscal document in year', async () => {
                 // create existing fiscal document in same year

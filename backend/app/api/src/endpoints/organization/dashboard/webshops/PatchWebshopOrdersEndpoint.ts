@@ -91,7 +91,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
         // Need to happen in the queue because we are updating the webshop stock
         const orders = await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
-            const webshop = await Webshop.getByID(request.params.id);
+            const webshop = await Webshop.select()
+                .where('id', request.params.id)
+                .where('organizationId', organization.id)
+                .first(false);
             if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
                 throw Context.auth.notFoundOrNoAccess();
             }
@@ -99,6 +102,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             const orders = body.getPatches().length > 0
                 ? await Order.where({
                         webshopId: webshop.id,
+                        organizationId: organization.id,
                         id: {
                             sign: 'IN',
                             value: body.getPatches().map(o => o.id),

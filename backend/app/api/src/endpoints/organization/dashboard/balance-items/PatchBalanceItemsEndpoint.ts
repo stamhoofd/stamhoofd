@@ -121,7 +121,10 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
             for (const patch of request.body.getPatches()) {
                 // Create a new balance item
-                const model = await BalanceItem.getByID(patch.id);
+                const model = await BalanceItem.select()
+                    .where('id', patch.id)
+                    .where('organizationId', organization.id)
+                    .first(false);
                 if (!model || !(await Context.auth.canAccessBalanceItems([model], PermissionLevel.Write))) {
                     throw new SimpleError({
                         code: 'invalid_field',

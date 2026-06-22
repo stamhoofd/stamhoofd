@@ -140,7 +140,10 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             const balanceItemPayments: BalanceItemPayment[] = [];
 
             for (const item of put.balanceItemPayments) {
-                const balanceItem = await BalanceItem.getByID(item.balanceItem.id);
+                const balanceItem = await BalanceItem.select()
+                    .where('id', item.balanceItem.id)
+                    .where('organizationId', organization.id)
+                    .first(false);
                 if (!balanceItem || balanceItem.organizationId !== organization.id) {
                     throw Context.auth.notFoundOrNoAccess($t(`%Eq`));
                 }
@@ -245,7 +248,10 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         // Modify payments
         for (const patch of request.body.getPatches()) {
             await QueueHandler.schedule('payments/' + patch.id, async () => {
-                const payment = await Payment.getByID(patch.id);
+                const payment = await Payment.select()
+                    .where('id', patch.id)
+                    .where('organizationId', organization.id)
+                    .first(false);
                 if (!payment || !(await Context.auth.canAccessPayment(payment, PermissionLevel.Write))) {
                     throw new SimpleError({
                         code: 'not_found',

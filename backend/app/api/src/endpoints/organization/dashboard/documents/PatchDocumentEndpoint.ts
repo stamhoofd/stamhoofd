@@ -40,7 +40,10 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         const updatedDocuments: DocumentStruct[] = [];
 
         for (const patch of request.body.getPatches()) {
-            const document = await Document.getByID(patch.id);
+            const document = await Document.select()
+                .where('id', patch.id)
+                .where('organizationId', organization.id)
+                .first(false);
             if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
                 throw Context.auth.notFoundOrNoAccess($t(`%EK`));
             }
@@ -83,7 +86,10 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
 
         for (const { put } of request.body.getPuts()) {
             // Create a new document
-            const template = await DocumentTemplate.getByID(put.templateId);
+            const template = await DocumentTemplate.select()
+                .where('id', put.templateId)
+                .where('organizationId', organization.id)
+                .first(false);
             if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: 'not_found',

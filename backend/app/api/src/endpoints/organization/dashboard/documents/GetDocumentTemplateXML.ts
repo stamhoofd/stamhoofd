@@ -36,7 +36,10 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
             throw Context.auth.error();
         }
 
-        const template = await DocumentTemplate.getByID(request.params.id);
+        const template = await DocumentTemplate.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!template || !await Context.auth.canAccessDocumentTemplate(template)) {
             throw Context.auth.notFoundOrNoAccess($t(`%EK`));
         }
