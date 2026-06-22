@@ -78,6 +78,11 @@ describe('Endpoint.GetEmailRecipients', () => {
         token2 = await Token.createToken(user2);
     });
 
+    beforeEach(async () => {
+        await EmailRecipient.delete();
+        await Email.delete();
+    });
+
     test('It can request all email recipients if read permission for all senders', async () => {
         const email = new Email();
         email.subject = 'test subject';
