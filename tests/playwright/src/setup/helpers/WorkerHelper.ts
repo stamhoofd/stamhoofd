@@ -141,6 +141,10 @@ class WorkerHelperInstance {
                 registrationCname: {
                     '': CaddyConfigHelper.getDomain('registration', WorkerData.id),
                 },
+                documentation: undefined,
+                legacyWebshop: undefined,
+                sgvLoginUrl: undefined,
+                sgvAdminUrl: undefined,
             },
             translationNamespace: 'stamhoofd',
             platformName: 'stamhoofd',

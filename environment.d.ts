@@ -38,7 +38,7 @@ declare global {
     // Use `field: type | undefined` instead of `field?: type` to require setting
     // each field. This ensures fields are explicitly set to undefined, not
     // forgotten to be added.
-    export type StamhoofdDomains = {
+    type StamhoofdDomains = {
         dashboard: string; // requires both www + non-www DNS record
         registration: LocalizedDomain | undefined; // Optional. Set to undefined for platforms. requires wildcard prefix DNS
         marketing: LocalizedDomain; // main landing page (used for linking back to website, documentation...)

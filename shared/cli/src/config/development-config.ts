@@ -1,6 +1,6 @@
 import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
-import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
+import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { createContext } from '../context/create-context.js';
@@ -203,18 +203,31 @@ function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType
 }
 
 function buildStamhoofdDomains(domains: DevelopmentDomains, preset: EnvironmentPreset): StamhoofdDomains {
+    const sgvDomainPrefix = preset.platformName === 'stamhoofd' ? '' : `${preset.platformName}.`;
+
     return {
         dashboard: domains.dashboard,
         registration: preset.userMode === 'organization' ? { '': domains.registration, 'BE': domains.registration, 'NL': domains.registration } : undefined,
         marketing: { '': 'www.stamhoofd.be' },
+        documentation: preset.documentation ? { '': preset.documentation } : undefined,
         webshop: { '': domains.webshop, 'BE': domains.webshop, 'NL': domains.webshop },
+        legacyWebshop: undefined,
         api: domains.api,
         rendererApi: domains.renderer,
+
+        // Scouts & Gidsen Vlaanderen
+        sgvLoginUrl: `https://login.sgv.${sgvDomainPrefix}stamhoofd`,
+        sgvAdminUrl: `https://admin.sgv.${sgvDomainPrefix}stamhoofd`,
+
+        // MX + SPF (both for email) + A record for webshops
         webshopCname: domains.webshop,
+
+        // MX + SPF (both for email) + A record for registration
         registrationCname: { '': domains.registration },
+
+        // Default email domain for emails sent from organizations
         defaultTransactionalEmail: { '': 'stamhoofd.be', 'NL': 'stamhoofd.nl' },
         defaultBroadcastEmail: { '': 'stamhoofd.email' },
-        documentation: preset.documentation ? { '': preset.documentation } : undefined,
     };
 }
 
