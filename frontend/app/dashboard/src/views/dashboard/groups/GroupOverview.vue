@@ -238,7 +238,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
@@ -570,11 +570,6 @@ function checkCanCreateEvent(group: Group) {
     // not possible for userMode platform
     if (STAMHOOFD.userMode !== 'organization'
         || (!organization.value)) {
-        return false;
-    }
-
-    // not possible if group is in the past
-    if (group.settings.endDate.getTime() < (new Date()).getTime()) {
         return false;
     }
 
