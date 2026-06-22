@@ -42,7 +42,10 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
             return new Response([]);
         }
 
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || !await Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Write)) {
             throw Context.auth.notFoundOrNoAccess($t(`%FU`));
         }
@@ -51,7 +54,10 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
         const errors = new SimpleErrors();
 
         for (const patch of request.body) {
-            const model = await Ticket.getByID(patch.id);
+            const model = await Ticket.select()
+                .where('id', patch.id)
+                .where('webshopId', webshop.id)
+                .first(false);
             if (!model || model.webshopId !== webshop.id) {
                 errors.addError(new SimpleError({
                     code: 'ticket_not_found',

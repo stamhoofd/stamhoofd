@@ -39,7 +39,10 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             throw Context.auth.error();
         }
 
-        const webshop = await Webshop.getByID(request.params.id);
+        const webshop = await Webshop.select()
+            .where('id', request.params.id)
+            .where('organizationId', organization.id)
+            .first(false);
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
             throw Context.auth.notFoundOrNoAccess();
         }
@@ -77,7 +80,10 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             }
 
             for (const patch of request.body.getPatches()) {
-                const model = await WebshopDiscountCode.getByID(patch.id);
+                const model = await WebshopDiscountCode.select()
+                    .where('id', patch.id)
+                    .where('webshopId', webshop.id)
+                    .first(false);
                 if (!model || model.webshopId !== webshop.id) {
                     throw new SimpleError({
                         code: 'not_found',
@@ -108,7 +114,10 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             }
 
             for (const id of request.body.getDeletes()) {
-                const model = await WebshopDiscountCode.getByID(id);
+                const model = await WebshopDiscountCode.select()
+                    .where('id', id)
+                    .where('webshopId', webshop.id)
+                    .first(false);
                 if (!model || model.webshopId !== webshop.id) {
                     throw new SimpleError({
                         code: 'not_found',
