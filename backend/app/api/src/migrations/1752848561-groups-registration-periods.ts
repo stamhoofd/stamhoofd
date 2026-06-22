@@ -46,7 +46,8 @@ async function start(dryRun: boolean) {
             // sort groups by start date
             groups.sort((a, b) => a.settings.startDate.getTime() - b.settings.startDate.getTime());
 
-            const bestCurrentPeriodSpan = await calculateBestCurrentPeriodSpan(groups);
+            const activeGroups = groups.filter(g => g.status !== GroupStatus.Archived && g.deletedAt === null);
+            const bestCurrentPeriodSpan = await calculateBestCurrentPeriodSpan(activeGroups);
 
             const allGroups: Group[] = await migrateGroups({ groups, organization, periodSpan: bestCurrentPeriodSpan }, dryRun);
 
@@ -679,34 +680,9 @@ async function calculateBestCurrentPeriodSpan(groups: Group[]): Promise<{ startD
         }
         periodSpanCounts.set(bestPeriod, groups);
     }
-    // #endregion
 
-    // #region find the best year
-    let topYear = defaultYear;
-    const groupsInTopPeriodSpan = periodSpanCounts.get(topPeriodSpan) ?? [];
-
-    // calculate the number of groups in each year
-    const yearMap = new Map<number, Group[]>();
-    for (const { group, year } of groupsInTopPeriodSpan) {
-        const groups = yearMap.get(year) ?? [];
-        groups.push(group);
-        yearMap.set(year, groups);
-    }
-
-    // get the year with the most groups
-    let topYearCount = 0;
-    for (const [year, groups] of yearMap.entries()) {
-        if (groups.length > topYearCount) {
-            topYearCount = groups.length;
-            topYear = year;
-        }
-    }
-    // #endregion
-
-    const startDate = new Date(topYear, topPeriodSpan.startMonth, 1);
-    const endDate = new Date((new Date(topYear, topPeriodSpan.startMonth + topPeriodSpan.span)).getTime() - 1);
-
-    return { startDate, endDate };
+    const topYear = calculateTopYear(topPeriodSpan, groups);
+    return getTimeSpan(topYear, topPeriodSpan);
 }
 
 // #region helpers
@@ -837,3 +813,144 @@ function createPreviousGroup({ originalGroup, period, cycleInformation, index }:
     return newGroup;
 }
 // #endregion
+
+function calculateTopYear(periodSpan: PeriodSpan, groups: Group[]): number {
+    let topYear = periodSpan.startMonth > 6 ? 2025 : 2026;
+
+    if (groups.length === 0) {
+        return topYear;
+    }
+
+    const calculateTopYearHelper = (groups: Group[]): number => {
+        // most recent groups first (in case of ties)
+        const sortedGroups = [...groups].sort((a, b) => b.settings.startDate.getTime() - a.settings.startDate.getTime());
+
+        for (const group of sortedGroups) {
+            const year = getBestGroupYear(periodSpan, group);
+            if (year === null) {
+                continue;
+            }
+            const count = yearCount.get(year) ?? 0;
+            yearCount.set(year, count + 1);
+        }
+
+        let topYearCount = 0;
+
+        for (const [year, count] of yearCount.entries()) {
+            if (count > topYearCount) {
+                topYearCount = count;
+                topYear = year;
+            }
+        }
+
+        return topYear;
+    };
+
+    const yearCount = new Map<number, number>();
+
+    const areAllGroupsPossibleEvents: boolean = groups.every(group => isGroupShorterThanMonth(group));
+
+    if (areAllGroupsPossibleEvents) {
+        return calculateTopYearHelper(groups);
+    }
+
+    const ifEventsExcluded = calculateTopYearHelper(groups.filter(g => !isGroupShorterThanMonth(g)));
+    const ifEventsIncluded = calculateTopYearHelper(groups);
+    const difference = Math.abs(ifEventsIncluded - ifEventsExcluded);
+
+    // the difference should never be greater than 1
+    if (difference > 1) {
+        const max = Math.max(ifEventsIncluded, ifEventsExcluded);
+        // year cannot be bigger than 2026
+        if (max > 2026) {
+            return Math.min(ifEventsIncluded, ifEventsExcluded, 2026);
+        }
+        return max;
+    }
+
+    // year cannot be bigger than 2026
+    if (ifEventsExcluded > 2026 && ifEventsIncluded < 2026) {
+        return ifEventsIncluded;
+    }
+
+    return Math.min(ifEventsExcluded, 2026);
+}
+
+function isGroupShorterThanMonth(group: Group) {
+    const diffMs = group.settings.endDate.getTime() - group.settings.startDate.getTime();
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diffDays = diffMs / msPerDay;
+
+    return diffDays < 30;
+}
+
+function getTimeSpan(year: number, periodSpan: PeriodSpan): { startDate: Date; endDate: Date } {
+    const startDate = new Date(year, periodSpan.startMonth, 1);
+    const endDate = new Date((new Date(year, periodSpan.startMonth + periodSpan.span)).getTime() - 1);
+    return { startDate, endDate };
+}
+
+function getBestGroupYear(periodSpan: PeriodSpan, group: Group): number | null {
+    const startDate = group.settings.startDate;
+    const endDate = group.settings.endDate;
+    const groupTimeSpan = { startDate, endDate };
+
+    // ignore groups longer than 2 years
+    if (!isYearDifferenceLessThanTwo(startDate, endDate)) {
+        return null;
+    }
+
+    const startYear = startDate.getFullYear();
+
+    const possibleYears: number[] = [startYear + 1, startYear, startYear - 1];
+    let topDaysOverlap = 0;
+    let topYear = periodSpan.startMonth > 6 ? 2025 : 2026;
+
+    for (const possibleYear of possibleYears) {
+        const possibleTimeSpan = getTimeSpan(possibleYear, periodSpan);
+        const result = getDaysMissingAndOverlap(possibleTimeSpan, groupTimeSpan);
+        if (result.daysOverlapping > topDaysOverlap) {
+            topDaysOverlap = result.daysOverlapping;
+            topYear = possibleYear;
+        }
+    }
+
+    return topYear;
+}
+
+/**
+ * Checks if the difference in year between two dates is less than 2.
+ * @param {Date} date1
+ * @param {Date} date2
+ * @returns {boolean}
+ */
+function isYearDifferenceLessThanTwo(date1: Date, date2: Date): boolean {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+
+    // Get the base year difference
+    const yearDiff = d2.getFullYear() - d1.getFullYear();
+
+    // If the absolute difference is 0 or 1, it's definitely less than 2
+    if (Math.abs(yearDiff) < 2) {
+        return true;
+    }
+
+    // If the difference is exactly 2, we need to check the exact time elapsed.
+    // Example: Jan 1, 2022 to Jan 1, 2024 is exactly 2 years (should be false).
+    // Example: Jan 1, 2022 to Dec 31, 2023 is almost 2 years (true, handled above by diff=1 logic? No, 2023-2022=1).
+
+    // Actually, let's re-evaluate:
+    // If d1 = 2022-06-01, d2 = 2024-05-31 -> Year diff = 2. But actual time < 2 years.
+    // If d1 = 2022-06-01, d2 = 2024-06-01 -> Year diff = 2. Actual time = 2 years (not less than).
+
+    // The simplest way to check "less than 2 years" accurately including leap years and days:
+    // Calculate the difference in milliseconds and compare against 2 years worth of ms.
+
+    const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000; // Approximate average year length
+    const LIMIT = 2 * MS_PER_YEAR;
+
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+
+    return diffTime < LIMIT;
+}
