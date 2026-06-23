@@ -3,8 +3,6 @@ import { Group, Organization, OrganizationRegistrationPeriod, Registration, Regi
 import { GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
-const noPreviousGroupFoundSet = new Set<string>();
-
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
         console.log('skipped in tests');
@@ -42,11 +40,6 @@ async function start(dryRun: boolean) {
                 return;
             }
 
-            // if (!organization.meta.packages.useMembers) {
-            //     console.log('Organization does not use members, skipping: ' + organization.id);
-            //     return;
-            // }
-
             const groups: Group[] = await Group.select()
                 .where('organizationId', organization.id)
                 .where('periodId', organization.periodId)
@@ -57,22 +50,12 @@ async function start(dryRun: boolean) {
                     continue;
                 }
 
-                // if (group.status === GroupStatus.Archived) {
-                //     console.log('Group is archived, skipping: ' + group.id);
-                //     continue;
-                // }
-
                 await fixRegistrations(organization, group, dryRun);
-                console.log('Fixed registrations for group: ' + group.id);
                 total += 1;
             }
         },
 
     });
-
-    if (noPreviousGroupFoundSet.size > 0) {
-        console.log('No previous group found for groups: ' + JSON.stringify(Array.from(noPreviousGroupFoundSet)));
-    }
 
     console.log('Fixed registrations for' + total + ' groups');
 }
@@ -103,7 +86,6 @@ async function fixRegistrations(organization: Organization, group: Group, dryRun
     const sortedCycles = Array.from(cycles).filter(c => c !== currentCycle).sort((a, b) => b - a);
 
     const cyclesToMigrate = sortedCycles;
-    console.log('Migrating cycles:', JSON.stringify(cyclesToMigrate));
 
     const archivePeriod = await RegistrationPeriod.select().where('organizationId', group.organizationId).where('customName', 'Gearchiveerde periodes').first(true);
     const archiveOrganizationPeriod = await OrganizationRegistrationPeriod.select().where('organizationId', organization.id).where('periodId', archivePeriod.id).first(true);
@@ -149,12 +131,7 @@ async function fixRegistrations(organization: Organization, group: Group, dryRun
         throw new Error('No new groups for group (unexpected): ' + group.id);
     }
 
-    console.log('start find category for group: ' + group.id);
     const parentCategory = await findCategory(group, archiveOrganizationPeriod);
-
-    if (!parentCategory) {
-        console.log('No parentCategory for group:', group.id);
-    }
 
     for (const newGroup of allNewGroups) {
         if (newGroup.id === undefined && dryRun) {
@@ -194,70 +171,8 @@ async function cleanupGroup(group: Group, dryRun: boolean) {
     }
 }
 
-const defaultNewCategoryName = 'andere (todo)';
-
 async function findCategory(group: Group, archiveOrganizationPeriod: OrganizationRegistrationPeriod) {
     const previousGroups = await V1GroupMigrationData.select().where('oldGroupId', group.id).andWhereNot('newGroupId', group.id).fetch();
-
-    // if (!previousGroups.length) {
-    //     noPreviousGroupFoundSet.add(group.id);
-    //     console.log('No previous group found, create new category for group: ' + group.id);
-    //     const duplicate = archiveOrganizationPeriod.settings.categories.find(c => c.settings.name === defaultNewCategoryName);
-    //     if (duplicate) {
-    //         return duplicate;
-    //     }
-    //     // todo: create new category
-    //     // const period = await RegistrationPeriod.getByID(group.periodId, true);
-    //     // const organizationRegistrationPeriod = await OrganizationRegistrationPeriod.getByID(period.id, true);
-    //     // const allCategories = organizationRegistrationPeriod.settings.categories;
-    //     // const rootCategory = organizationRegistrationPeriod.settings.rootCategory;
-    //     // if (!rootCategory) {
-    //     //     throw new Error('root category not found for current period: ' + organizationRegistrationPeriod.id);
-    //     // }
-    //     // const originalParentCategory = allCategories.find(c => c.groupIds.includes(group.id))
-    //     // if (!originalParentCategory) {
-    //     //     throw new Error('original parent category not found for group: ' + group.id);
-    //     // }
-
-    //     // let parentCategoryToFind = originalParentCategory;
-
-    //     // while(parentCategoryToFind) {
-    //     //     const archivedEquivalent = archiveOrganizationPeriod.settings.categories.find(c => c.id === parentCategoryToFind.id);
-    //     //     if(!archivedEquivalent) {
-    //     //         const clonedCategory = GroupCategory.create({
-    //     //             settings: GroupCategorySettings.create({
-    //     //                 ...originalParentCategory.settings,
-    //     //             }),
-    //     //         });
-    //     //     }
-    //     //     parentCategoryToFind = allCategories.find(c => c.categoryIds.includes(parentCategoryToFind.id));
-    //     // }
-
-    //     // const allParentCategories = originalParentCategory.getParentCategories(allCategories);
-
-    //     //         const clonedCategory = GroupCategory.create({
-    //     //     settings: GroupCategorySettings.create({
-    //     //         ...originalParentCategory.settings,
-    //     //     }),
-    //     // });
-
-    //     // for(const parentCategory of allParentCategories) {
-    //     //     const archivedEquivalent = archiveOrganizationPeriod.settings.categories.find(c => c.)
-    //     // }
-
-    //     // return originalCategory;
-    //     const newCategory = GroupCategory.create({
-
-    //         settings: GroupCategorySettings.create({
-    //             name: defaultNewCategoryName,
-    //         }),
-    //     });
-
-    //     const archivedRootCategory = archiveOrganizationPeriod.settings.rootCategory!;
-    //     archiveOrganizationPeriod.settings.categories.push(newCategory);
-    //     archivedRootCategory.categoryIds.push(newCategory.id);
-    //     return newCategory;
-    // }
 
     for (const previousGroup of previousGroups) {
         const previousGroupId = previousGroup.newGroupId;
