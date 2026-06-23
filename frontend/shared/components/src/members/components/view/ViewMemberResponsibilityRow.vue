@@ -21,7 +21,7 @@
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="platformResponsibility ? $t('%1CT', {name: member.patchedMember.firstName}) : $t('%By', {name: member.patchedMember.firstName})" class="icon warning yellow" />
+            <span v-if="!isValid" v-tooltip="platformResponsibility ? $t('%1CT', {name: member.patchedMember.firstName}) : $t('%By', {name: member.patchedMember.firstName})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>
@@ -68,18 +68,11 @@ const name = computed(() => {
     return (resp.value?.name ?? $t(`%qZ`)) + suffix;
 });
 
-const hasRegistration = computed(() => {
+const isValid = computed(() => {
     if (STAMHOOFD.userMode === 'organization') {
-        if (!organization.value) {
-            return true;
-        }
-
-        return props.member.filterRegistrations({
-            periodId: organization.value.period.period.id,
-            organizationId: responsibilityOrganization.value?.id ?? undefined,
-            types: [GroupType.Membership],
-        }).length > 0;
+        return true;
     }
+
     // If platform period is ending in 30 days, don't show message
     let periodId = platform.value.period.id;
     if (platform.value.period.endDate && platform.value.period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)) {
