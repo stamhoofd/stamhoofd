@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/crons",
-    "version": "2.122.3",
+    "version": "2.122.4",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
