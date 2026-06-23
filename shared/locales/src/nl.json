@@ -2106,7 +2106,7 @@
   "%ZD": "Beheerders met deze rol",
   "%ZE": "Er zijn geen beheerders met deze rol.",
   "%ZF": "Naam van deze rol",
-  "%ZG": "Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).",
+  "%ZG": "Het verschil tussen functies en beheerdersrollen kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Externe beheerdersrollen worden aan individuele accounts toegekend, terwijl je functies enkel kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep). De rechten gekoppeld aan een functie worden toegeken aan alle accounts die verbonden zijn met het lid (bv. als dat lid meerdere e-mailadressen heeft ingesteld).",
   "%ZH": "Ongebruikt",
   "%ZI": "Rollen",
   "%ZJ": "Kan alles bekijken en bewerken",

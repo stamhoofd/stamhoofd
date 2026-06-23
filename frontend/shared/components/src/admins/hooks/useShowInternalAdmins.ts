@@ -15,3 +15,11 @@ export function useShowInternalAdmins() {
         return organization.value ? organization.value.showInternalAdmins : STAMHOOFD.userMode === 'platform';
     });
 }
+
+export function useCanShowInternalAdmins() {
+    const organization = useOrganization();
+
+    return computed(() => {
+        return organization.value ? organization.value.canShowInternalAdmins : STAMHOOFD.userMode === 'platform';
+    });
+}

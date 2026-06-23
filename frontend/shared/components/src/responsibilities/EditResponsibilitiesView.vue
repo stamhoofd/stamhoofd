@@ -7,6 +7,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+        <p>{{ $t('Functies zijn toegangsrechten die je koppelt aan (ingeschreven) leden. Als een lid wordt uitgeschreven, wordt de functie van het lid automatisch op het einde van de maand geschrapt (tenzij je het zelf vroeger schrapt).') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -21,11 +22,13 @@
         </template>
 
         <div v-for="group of groupedDraggableResponsibilites" :key="group.id" class="container">
-            <hr>
-            <h2>{{ group.title }}</h2>
-            <p v-if="group.description">
-                {{ group.description }}
-            </p>
+            <template v-if="groupedDraggableResponsibilites.length > 1">
+                <hr>
+                <h2>{{ group.title }}</h2>
+                <p v-if="group.description">
+                    {{ group.description }}
+                </p>
+            </template>
 
             <p v-if="!group.responsibilities.value.length" class="info-box">
                 {{ $t('%A3') }}
@@ -65,7 +68,6 @@ import { usePatchRoles } from '../admins/hooks/useRoles';
 import InheritedResponsibilityRow from './components/InheritedResponsibilityRow.vue';
 import ResponsibilityRow from './components/ResponsibilityRow.vue';
 
-
 const pop = usePop();
 const present = usePresent();
 
@@ -95,8 +97,7 @@ const groupedDraggableResponsibilites = computed(() => {
     for (const responsibility of draggableResponsibilities.value) {
         if (responsibility.organizationBased) {
             organizationResponsibiities.responsibilities.push(responsibility);
-        }
-        else {
+        } else {
             nationalResponsibilites.responsibilities.push(responsibility);
         }
     }
@@ -181,8 +182,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
                     if (isNew) {
                         const patched = role.patch(patch);
                         arr.addPut(patched);
-                    }
-                    else {
+                    } else {
                         arr.addPatch(patch);
                     }
                     patchInheritedResponsibilityRoles(arr);

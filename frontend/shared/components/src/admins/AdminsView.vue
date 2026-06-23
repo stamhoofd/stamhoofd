@@ -8,21 +8,7 @@
                 <p>{{ $t('%30') }}</p>
 
                 <STList class="illustration-list">
-                    <STListItem v-if="showInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%YW') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%YX') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                    <STListItem v-else :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
+                    <STListItem v-if="showRoles && !showInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
@@ -31,6 +17,44 @@
                         </h2>
                         <p class="style-description">
                             {{ $t('%1a7') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="canShowInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
+                        </template>
+                        <h2 v-if="showInternalAdmins" class="style-title-list">
+                            {{ $t('%YW') }}
+                        </h2>
+                        <h2 v-else class="style-title-list">
+                            {{ $t('Functies van leden') }}
+                        </h2>
+
+                        <p v-if="showInternalAdmins" class="style-description">
+                            {{ $t('%YX') }}
+                        </p>
+                        <p v-else class="style-description">
+                            {{ $t('Functies zijn rechten die gekoppeld worden aan leden in plaats van accounts. Ze zijn een overzichtelijker alternatief voor beheerdersrollen als je ook beheerders laat inschrijven via je ledenportaal.') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="!showRoles && canShowInternalAdmins" :selectable="true" class="left-center" @click="$navigate(Routes.Roles)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Externe beheerdersrollen beheren') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Stel aparte rollen in voor beheerders die niet inschrijven als lid. Deze rechten worden gekoppeld aan individuele accounts die je uitnodigt.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -51,11 +75,19 @@ import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';
-import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
+import { useShowInternalAdmins, useCanShowInternalAdmins } from './hooks/useShowInternalAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
+import { Organization } from '@stamhoofd/structures';
+import { useRoles } from './hooks/useRoles.ts';
+import { computed } from 'vue';
 
 const { loading } = useAdmins({ forceLoadOnMount: true });
 const showInternalAdmins = useShowInternalAdmins();
+const canShowInternalAdmins = useCanShowInternalAdmins();
+const roles = useRoles();
+const showRoles = computed(() => {
+    return !canShowInternalAdmins.value || roles.value.length > 0;
+});
 
 enum Routes {
     Roles = 'rollen',

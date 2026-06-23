@@ -53,14 +53,6 @@ export class BaseOrganization extends AutoEncoder {
     createdAt = new Date();
 
     /**
-     * Whether internal administrators (members with responsibilities/functions) are relevant for this organization.
-     * In platform mode this is always the case. In organization mode it only makes sense when the members package is used.
-     */
-    get showInternalAdmins() {
-        return this.meta.packages.useMembers || STAMHOOFD.userMode === 'platform';
-    }
-
-    /**
      * Return default locale confiruation
      */
     get i18n() {
@@ -265,6 +257,18 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
      */
     periods?: RegistrationPeriodList;
 
+    /**
+     * Whether internal administrators (members with responsibilities/functions) are relevant for this organization.
+     * In platform mode this is always the case. In organization mode it only makes sense when the members package is used.
+     */
+    get showInternalAdmins() {
+        return (this.meta.packages.useMembers && this.privateMeta && (this.privateMeta.responsibilities.length > 0)) || STAMHOOFD.userMode === 'platform';
+    }
+
+    get canShowInternalAdmins() {
+        return this.meta.packages.useMembers || STAMHOOFD.userMode === 'platform';
+    }
+
     isRecordEnabled(_record: RecordSettings): boolean {
         return true;
     }
@@ -316,7 +320,6 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
             && this.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen;
     }
 }
-
 
 export class GetWebshopFromDomainResult extends AutoEncoder {
     @field({ decoder: Organization })
