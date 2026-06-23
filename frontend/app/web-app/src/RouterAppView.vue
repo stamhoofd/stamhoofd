@@ -259,6 +259,14 @@ if (orgInDomain) {
 }
 
 // AUTO (DEFAULT)
+defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
+    name: AppRoute.OrgScopedAuto,
+    url: 'auto/@organizationUri',
+    component: async (properties) => {
+        return await loadAuto(properties.organization, {});
+    },
+    ...orgInUriParams,
+});
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.OrgScopedAuto,
@@ -269,15 +277,6 @@ if (orgInDomain) {
         component: async () => {
             return await loadAuto(await orgInDomain(), {});
         },
-    });
-} else {
-    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
-        name: AppRoute.OrgScopedAuto,
-        url: 'auto/@organizationUri',
-        component: async (properties) => {
-            return await loadAuto(properties.organization, {});
-        },
-        ...orgInUriParams,
     });
 }
 defineRoute({
