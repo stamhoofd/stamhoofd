@@ -75,8 +75,6 @@ async function createWaitingList(originalGroup: Group, period: RegistrationPerio
     newWaitingList.settings = GroupSettings.create({
         name: TranslatedString.create($t(`%yh`) + ' ' + originalGroup.settings.name.toString()),
         period: period.getBaseStructure(),
-        waitingListType: originalGroup.settings.waitingListType,
-        preRegistrationsDate: originalGroup.settings.preRegistrationsDate,
     });
 
     if (!dryRun) {
