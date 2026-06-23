@@ -41,7 +41,7 @@
 
                 <Spinner v-else-if="loadingResults" class="gray center" />
                 <template v-else>
-                    <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" data-testid="organization-button" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
+                    <button v-for="(option, index) in visibleOptions" :key="option.id" ref="resultElements" v-long-press="(e: any) => showContextMenu(e, option)" type="button" class="search-result" data-testid="organization-button" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)" @contextmenu.prevent="(e: any) => showContextMenu(e, option)">
                         <ContextLogo :organization="option.organization" :app="option.app" />
                         <div>
                             <h1>{{ getAppTitle(option.app, option.organization, 'other') }}</h1>
@@ -93,12 +93,14 @@ import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
 import { useAppData } from '@stamhoofd/components/context/appContext.ts';
 import type { Option } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
@@ -121,6 +123,78 @@ const { getAllOptions, getDefaultOptions, selectOption, getOptionForOrganization
 
 defaultOptions.value = getDefaultOptions();
 const $navigate = useNavigate();
+
+const showContextMenu = async (event: MouseEvent, option: Option) => {
+    const isSearching = query.value.length > 0;
+
+    // Options whose id starts with 'org-' come from SessionManager storage and can
+    // be manually added/removed. Permission-derived options (admin, dashboard-*, etc.)
+    // are rebuilt automatically and must not offer a "remove from favorites" action.
+    const isStoredOrg = option.id.startsWith('org-');
+
+    const menuItems: ContextMenuItem[] = [];
+
+    const addToFavorites = (org: Organization) => new ContextMenuItem({
+        name: $t('Voeg toe aan favorieten'),
+        icon: 'star',
+        action() {
+            SessionManager.addOrganizationToStorage(org).then(() => getAllOptions()).then((opts) => {
+                defaultOptions.value = opts;
+            }).catch(e => Toast.fromError(e).show());
+            return true;
+        },
+    });
+
+    const removeFromFavorites = (org: Organization) => new ContextMenuItem({
+        name: $t('Verwijder uit favorieten'),
+        icon: 'star',
+        action() {
+            SessionManager.removeOrganizationFromStorage(org.id).then(() => {
+                defaultOptions.value = defaultOptions.value.filter(o => o.organization?.id !== org.id);
+            }).catch(e => Toast.fromError(e).show());
+            return true;
+        },
+    });
+
+    const logOut = (session: SessionContext) => new ContextMenuItem({
+        name: $t('Uitloggen'),
+        icon: 'logout',
+        action() {
+            session.logout(false).then(() => getAllOptions()).then((opts) => {
+                defaultOptions.value = opts;
+            }).catch(e => Toast.fromError(e).show());
+            return true;
+        },
+    });
+
+    if (!isSearching) {
+        // Load the session from local storage only (no network) to check login state.
+        const session = new SessionContext(option.organization);
+        await session.loadFromStorage();
+
+        if (session.canGetCompleted()) {
+            menuItems.push(logOut(session));
+        }
+
+        if (isStoredOrg && option.organization) {
+            menuItems.push(removeFromFavorites(option.organization));
+        }
+    } else if (option.organization) {
+        const orgId = option.organization.id;
+        const storage = await SessionManager.getSessionStorage(true);
+        const isInFavoritesList = storage.organizations.some(o => o.id === orgId);
+
+        if (isInFavoritesList) {
+            menuItems.push(removeFromFavorites(option.organization));
+        } else {
+            menuItems.push(addToFavorites(option.organization));
+        }
+    }
+
+    if (menuItems.length === 0) return;
+
+    void new ContextMenu([menuItems]).show({ clickEvent: event });
+};
 
 onMounted(async () => {
     // Update options when the default options change
