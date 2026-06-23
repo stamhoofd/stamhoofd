@@ -14,6 +14,14 @@ export default new Migration(async () => {
         return;
     }
 
+    if (STAMHOOFD.userMode !== 'organization') {
+        return;
+    }
+
+    if (STAMHOOFD.environment !== 'production') {
+        return;
+    }
+
     await start();
 });
 
