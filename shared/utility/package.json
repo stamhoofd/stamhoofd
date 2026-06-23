@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/utility",
-    "version": "2.122.5",
+    "version": "2.122.6",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -21,7 +21,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@stamhoofd/types": "2.122.5",
+        "@stamhoofd/types": "2.122.6",
         "ibantools": "4.5.4"
     },
     "devDependencies": {
