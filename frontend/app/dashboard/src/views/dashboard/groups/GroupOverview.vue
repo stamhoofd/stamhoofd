@@ -4,25 +4,28 @@
             <STNavigationBar :title="title" />
 
             <main class="center">
-                <h1 class="style-navigation-title with-icons">
+                <h1 class="style-navigation-title with-block-icon-and-description">
                     <span class="block-icon">
                         <GroupAvatar :group="group" class="inline" :with-aside="false" />
                     </span>
 
                     <div>
-                        <span>
+                        <div>
                             <span>{{ title }}</span>
                             <span v-if="group.settings.period" class="title-suffix">
                                 {{ group.settings.period.nameShort }}
                             </span>
-                        </span>
+                        </div>
 
                         <p class="tags-without-background">
                             <GroupTag :group="group" />
+
+                            <span v-if="!isPublic" v-tooltip="$t('%LU')" :class="['style-tag', 'info']">
+                                <span :class="['icon', 'eye-off', 'text-size']" />
+                                <span>{{ $t('Enkel beheerders') }}</span>
+                            </span>
                         </p>
                     </div>
-
-                    <span v-if="!isPublic" v-tooltip="$t('%LU')" :class="'icon eye-off tiny gray'" />
                 </h1>
 
                 <BillingWarningBox filter-types="members" class="data-table-prefix" />
