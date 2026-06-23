@@ -162,23 +162,25 @@
 
 <script setup lang="ts">
 import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
 import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
 import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
 import { useAddMember } from '@stamhoofd/components/members/hooks/useAddMember.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast';
 import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
 import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions/hooks/useRegistrationQuickActions.ts';
 import { downloadDocument } from '@stamhoofd/document-helper';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { Storage } from '@stamhoofd/networking/Storage';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Document, PlatformMember } from '@stamhoofd/structures';
 import { DocumentStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -186,6 +188,8 @@ enum Routes {
     ViewMember = 'viewMember',
     Payments = 'payments',
 }
+
+const auth = useAuth();
 
 defineRoute({
     name: Routes.RegisterMembers,
@@ -249,6 +253,30 @@ const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers
 const chooseGroupForMember = useChooseGroupForMember();
 const addMember = useAddMember();
 const documentationUrl = STAMHOOFD.userMode === 'platform' ? TranslatedString.create(STAMHOOFD.memberDocumentationPage ?? LocalizedDomains.getDocs('mijn-account')) : undefined;
+const EXPLAIN_KEY = 'did-explain-member-dashboard-difference';
+
+onMounted(async () => {
+    if (STAMHOOFD.userMode === 'organization' && auth.hasSomeAccess()) {
+        const v = await Storage.keyValue.getItem(EXPLAIN_KEY);
+
+        if (!v) {
+            Toast.info(
+                $t('Wissel via de knop links bovenaan tussen het beheerdersportaal en het ledenportaal.'),
+            )
+                .setIcon('sync')
+                .setHide(null)
+                .setButton(
+                    new ToastButton(
+                        $t('Ik snap het'), () => {
+                            Storage.keyValue.setItem(EXPLAIN_KEY, '1').catch(console.error);
+                        },
+                    ),
+                )
+                .setForceButtonClick()
+                .show();
+        }
+    }
+});
 
 async function registerMembers() {
     await $navigate(Routes.RegisterMembers);
