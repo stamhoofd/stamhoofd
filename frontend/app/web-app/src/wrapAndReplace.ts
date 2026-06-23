@@ -1,4 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AccountSwitcher from '@stamhoofd/components/context/AccountSwitcher.vue';
 import ContextNavigationBar from '@stamhoofd/components/context/ContextNavigationBar.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
@@ -24,16 +25,40 @@ export type SharedOptions = { url?: string | null | Ref<string | null>; query?: 
 export async function wrap(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options?: SharedOptions) {
     const onOurDomain = AppManager.shared.isOnDashboardDomain || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
 
-    if ((STAMHOOFD.singleOrganization || organization?.resolvedRegisterDomain) && !onOurDomain) {
-        // redirect to our domain
-        // TODO
-    }
-    if (!STAMHOOFD.singleOrganization && organization?.resolvedRegisterDomain && UrlHelper.shared.url.host.toLowerCase() !== organization.resolvedRegisterDomain.toLowerCase()) {
-        // redirect to org.resolvedRegisterDomain
-        // TODO
-    }
-
     const context = organization ? await sessionFromOrganization(organization) : await sessionGlobal();
+
+    let expectedHost = '';
+    if ((STAMHOOFD.singleOrganization || organization === null || organization.resolvedRegisterDomain === null) && !onOurDomain) {
+        expectedHost = STAMHOOFD.domains.dashboard;
+    }
+    if (!STAMHOOFD.singleOrganization && organization && organization.resolvedRegisterDomain) {
+        expectedHost = organization.resolvedRegisterDomain;
+    }
+    if (expectedHost !== '' && context.canGetCompleted() && AppManager.shared.isOnDashboardDomain) {
+        // if we are already logged in & we are on dashboard domain
+        // (due to userMode platform, or because we are global admin, or because we are in the app)
+        // we do not redirect
+        expectedHost = '';
+    }
+    if (expectedHost !== '' && expectedHost.toLowerCase() !== UrlHelper.shared.url.host.toLowerCase()) {
+        const helper = new UrlHelper(UrlHelper.shared.url.href);
+
+        helper.setDomain(expectedHost); // keep path and query params, but change domain
+        if (options) {
+            if (options.url) {
+                // change path to url
+                if (typeof options.url === 'string') {
+                    helper.setPath(options.url);
+                } else {
+                    helper.setPath(options.url.value ?? '');
+                }
+            }
+        }
+
+        return AsyncComponent(() => import('@stamhoofd/components/auth/RedirectView.vue'), {
+            location: helper.url.href,
+        });
+    }
 
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
