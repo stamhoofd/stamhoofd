@@ -890,11 +890,7 @@ export class GroupSettings extends AutoEncoder {
         return who.join(' • ');
     }
 
-    getMemberCount({ waitingList }: { waitingList?: boolean }) {
-        if (waitingList) {
-            return this.waitingListSize;
-        }
-
+    getMemberCount() {
         return this.registeredMembers;
     }
 

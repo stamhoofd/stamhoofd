@@ -139,8 +139,8 @@ export class Group extends AutoEncoder {
         return 0;
     }
 
-    getMemberCount({ waitingList }: { waitingList?: boolean } = {}) {
-        return this.settings.getMemberCount({ waitingList });
+    getMemberCount() {
+        return this.settings.getMemberCount();
     }
 
     /**

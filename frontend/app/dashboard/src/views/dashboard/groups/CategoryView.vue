@@ -114,15 +114,12 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 
-
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { GroupCategoryTree } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useGroupActions } from '../../members/useGroupActions';
 import { useGroupCategoryActions } from '../../members/useGroupCategoryActions';
 import { useCreateGroupView } from '../settings/hooks/useCreateGroupView';
-
-
 
 const props = defineProps<{
     category: GroupCategory;
@@ -200,8 +197,8 @@ const reactiveCategory = computed(() => {
     return props.category;
 });
 
-function getMemberCount({ waitingList }: { waitingList?: boolean } = {}) {
-    return tree.value.getMemberCount({ waitingList });
+function getMemberCount() {
+    return tree.value.getMemberCount();
 }
 
 const tree = computed(() => {
@@ -243,13 +240,13 @@ function openGroup(group: Group) {
 function openAll(animated = true) {
     const displayedComponent = shouldShowRegistrations.value
         ? AsyncComponent(() => import('@stamhoofd/components/registrations/RegistrationsTableView.vue'), {
-            category: tree.value,
-            periodId: props.period.period.id,
-        })
+                category: tree.value,
+                periodId: props.period.period.id,
+            })
         : AsyncComponent(() => import('@stamhoofd/components/members/MembersTableView.vue'), {
-            category: tree.value,
-            periodId: props.period.period.id,
-        });
+                category: tree.value,
+                periodId: props.period.period.id,
+            });
 
     show({
         components: [

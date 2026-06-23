@@ -183,14 +183,14 @@ export class GroupCategoryTree extends GroupCategory {
         return [...this.categories, ...this.categories.flatMap(c => c.getAllCategories())];
     }
 
-    getMemberCount({ waitingList }: { waitingList?: boolean } = {}) {
-        if (this.getAllGroups().length == 0) {
+    getMemberCount() {
+        if (this.getAllGroups().length === 0) {
             return null;
         }
 
         let count = 0;
         for (const group of this.getAllGroups()) {
-            const c = group.getMemberCount({ waitingList });
+            const c = group.getMemberCount();
             if (c === null) {
                 return null;
             }
