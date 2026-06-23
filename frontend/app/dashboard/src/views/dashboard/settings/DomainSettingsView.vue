@@ -101,6 +101,7 @@ import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 
 const context = useContext();
 const organization = useRequiredOrganization();
@@ -192,7 +193,14 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (saving.value || !confirm('Ben je zeker dat je jouw domeinnaam wilt loskoppelen?')) {
+    if (saving.value) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm({
+        title: 'Ben je zeker dat je jouw domeinnaam wilt loskoppelen?',
+        confirmText: 'Ja',
+    })) {
         return;
     }
     saving.value = true;
