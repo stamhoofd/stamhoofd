@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts" setup>
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import ResponsibilityIcon from '../ResponsibilityIcon.vue';
 
 const props = defineProps<{
@@ -69,14 +69,24 @@ const name = computed(() => {
 });
 
 const hasRegistration = computed(() => {
+    if (STAMHOOFD.userMode === 'organization') {
+        if (!organization.value) {
+            return true;
+        }
+
+        return props.member.filterRegistrations({
+            periodId: organization.value.period.period.id,
+            organizationId: responsibilityOrganization.value?.id ?? undefined,
+            types: [GroupType.Membership],
+        }).length > 0;
+    }
     // If platform period is ending in 30 days, don't show message
     let periodId = platform.value.period.id;
     if (platform.value.period.endDate && platform.value.period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)) {
         if (organization.value && organization.value.period.period.previousPeriodId === platform.value.period.id) {
             // If the organization is in the next period, only show message if member not registered for that period
             periodId = organization.value.period.period.id;
-        }
-        else {
+        } else {
             return true;
         }
     }
