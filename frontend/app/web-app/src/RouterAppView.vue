@@ -95,7 +95,6 @@ async function loadVerifyEmail(organization: Organization | null, componentPrope
 }
 
 // ADMIN
-if (isDashboardDomain) {
     defineRoute({
         name: AppRoute.Admin,
         url: $t('%1Wn'),
@@ -105,7 +104,6 @@ if (isDashboardDomain) {
             await replaceWithAdmin(options);
         },
     });
-}
 
 // DASHBOARD
 if (orgInDomain) {
