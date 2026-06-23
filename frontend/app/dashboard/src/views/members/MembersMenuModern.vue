@@ -447,43 +447,6 @@ const allActions = computed(() => {
         });
     }
 
-    if (!props.period) {
-        /* list.push({
-            icon: 'email-filled',
-            title: $t('%1DK'),
-            route: Routes.Communication,
-            hidden: true,
-        });
-
-        list.push({
-            icon: 'file-pdf',
-            title: $t('%1Um'),
-            route: Routes.Settings,
-            hidden: true,
-        });
-
-        list.push({
-            icon: 'history',
-            title: $t('%1Vn'),
-            route: Routes.Settings,
-            hidden: true,
-        });
-
-        list.push({
-            icon: 'upload',
-            title: $t('%18D'),
-            route: Routes.Settings,
-            hidden: true,
-        });
-
-        list.push({
-            icon: 'reverse',
-            title: $t('%1ZQ'),
-            route: Routes.Settings,
-            hidden: true,
-        }); */
-    }
-
     if (rootCategory.value && auth.canCreateGroupInCategory(rootCategory.value)) {
         // A root category either holds subcategories or groups directly, never both
         list.push({
@@ -507,12 +470,14 @@ const allActions = computed(() => {
         }
     }
 
-    list.push({
-        icon: 'trash',
-        title: $t('%CR'),
-        route: Routes.Trash,
-        hidden: true,
-    });
+    if (auth.hasFullAccess()) {
+        list.push({
+            icon: 'trash',
+            title: $t('%CR'),
+            route: Routes.Trash,
+            hidden: true,
+        });
+    }
 
     return list;
 });
