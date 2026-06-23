@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization, RegistrationPeriod, V1WaitingListMigrationData } from '@stamhoofd/models';
+import { Group, Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupSettings, GroupType, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
@@ -79,13 +79,8 @@ async function createWaitingList(originalGroup: Group, period: RegistrationPerio
         preRegistrationsDate: originalGroup.settings.preRegistrationsDate,
     });
 
-    const migrationData = new V1WaitingListMigrationData();
-    migrationData.oldGroupId = originalGroup.id;
-
     if (!dryRun) {
         await newWaitingList.save();
-        migrationData.newGroupId = newWaitingList.id;
-        await migrationData.save();
     }
 
     return newWaitingList;
