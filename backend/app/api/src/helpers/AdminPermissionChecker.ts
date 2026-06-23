@@ -201,12 +201,38 @@ export class AdminPermissionChecker {
         return p;
     }
 
+    getUnloadedOrganizationPermissions(organizationOrId: string | Organization) {
+        if (!this.user.permissions) {
+            return null;
+        }
+
+        return this.user.permissions.organizationPermissions.get(typeof organizationOrId === 'string' ? organizationOrId : organizationOrId.id) ?? null;
+    }
+
     async canAccessPrivateOrganizationData(organization: Organization) {
         if (!this.checkScope(organization.id)) {
             return false;
         }
 
         if (!await this.hasSomeAccess(organization)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This is required to match the frontend, which expects privateMeta
+     * as soon as the user has unloaded permissions (it cannot load the permissions yet without the private meta).
+     *
+     * If the user expected private meta, but should not be allowed to have private meta (canAccessPrivateOrganizationData) (= meaning permissions resolve to nothing)
+     * then we return a stubbed private meta object
+     */
+    async doesFrontendExpectPrivateMeta(organization: Organization) {
+        if (!this.checkScope(organization.id)) {
+            return false;
+        }
+
+        if (!await this.hasSomeUnloadedAccess(organization)) {
             return false;
         }
         return true;
@@ -1096,6 +1122,14 @@ export class AdminPermissionChecker {
         return !!organizationPermissions && !organizationPermissions.isEmpty;
     }
 
+    /**
+     * Use this as a circuit breaker to avoid queries for non-admin users
+     */
+    async hasSomeUnloadedAccess(organizationOrId: string | Organization): Promise<boolean> {
+        const unloadedPermissions = this.getUnloadedOrganizationPermissions(organizationOrId);
+        return !!unloadedPermissions && !unloadedPermissions.isEmpty;
+    }
+
     async canManageAdmins(organizationId: string) {
         return !this.user.isApiUser && (await this.hasFullAccess(organizationId));
     }
@@ -1363,12 +1397,12 @@ export class AdminPermissionChecker {
     }
 
     private async loopRecordAnswerSettingsAccess<T extends RecordAnswer | AutoEncoderPatchType<RecordAnswer>>({ member, level, recordAnswers, callback }:
-        {
-            member: MemberWithUsersRegistrationsAndGroups;
-            level: PermissionLevel;
-            recordAnswers: PatchMap<string, T | null | undefined> | Map<string, T>;
-            callback: (result: { canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }, entry: [keys: string, value: T | null | undefined]) => void;
-        }): Promise<void> {
+    {
+        member: MemberWithUsersRegistrationsAndGroups;
+        level: PermissionLevel;
+        recordAnswers: PatchMap<string, T | null | undefined> | Map<string, T>;
+        callback: (result: { canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }, entry: [keys: string, value: T | null | undefined]) => void;
+    }): Promise<void> {
         if (STAMHOOFD.userMode !== 'platform') {
             let organization = this.organization;
 

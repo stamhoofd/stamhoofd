@@ -64,6 +64,7 @@ export class ContextPermissions {
     }
 
     _cachedPermissions: LoadedPermissions | null = null;
+
     get permissions() {
         if (this._cachedPermissions) {
             return this._cachedPermissions;
@@ -72,6 +73,10 @@ export class ContextPermissions {
         const c = this._permissions;
         this._cachedPermissions = c;
         return c;
+    }
+
+    get requiresPrivateMeta() {
+        return !!this.unloadedPermissions && !this.unloadedPermissions.isEmpty;
     }
 
     get _permissions() {
@@ -125,7 +130,7 @@ export class ContextPermissions {
     }
 
     canSendEmails() {
-        return this.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false
+        return this.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false;
     }
 
     canReadEmails() {
@@ -202,8 +207,7 @@ export class ContextPermissions {
             if (group.settings.allowRegistrationsByOrganization && !group.closed) {
                 if (this.organization.id !== group.organizationId) {
                     return this.hasFullAccess();
-                }
-                else {
+                } else {
                     return this.hasSomeAccess();
                 }
             }

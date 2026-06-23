@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { BaseOrganization, getAppHost } from '@stamhoofd/structures';
+import { BaseOrganization, getAppHost, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -265,7 +265,7 @@ export class AuthenticatedStructures {
         }
 
         // Get registration period and whether private data can be accessed for each organization
-        const organizationData: Map<string, { organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct; canAccessPrivateData: boolean }> = new Map();
+        const organizationData: Map<string, { organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct; canAccessPrivateData: boolean; doesFrontendExpectPrivateMeta: boolean }> = new Map();
         const allPeriodIds = periodIdOrganizationsMap.keys();
         const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
         const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
@@ -306,10 +306,12 @@ export class AuthenticatedStructures {
 
                     // check if private data can be accessed
                     const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
+                    const doesFrontendExpectPrivateMeta = canAccessPrivateData || (await Context.optionalAuth?.doesFrontendExpectPrivateMeta(organization) ?? false);
+
                     if (canAccessPrivateData) {
                         organizationIdsToGetWebshopsFor.push(organization.id);
                     }
-                    organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData });
+                    organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData, doesFrontendExpectPrivateMeta });
                 } else {
                     // Should never happen
                     throw new Error('Organization registration period model not found for organization id ' + organizationId + ' and period id ' + periodId);
@@ -381,6 +383,7 @@ export class AuthenticatedStructures {
                 result = OrganizationStruct.create({
                     ...baseStruct,
                     period,
+                    privateMeta: data.doesFrontendExpectPrivateMeta ? OrganizationPrivateMetaData.create({}) : undefined,
                 });
             }
 

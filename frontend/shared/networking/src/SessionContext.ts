@@ -503,7 +503,7 @@ export class SessionContext implements RequestMiddleware {
         }
 
         if (this.organization) {
-            if (this.auth.permissions && !this.auth.permissions.isEmpty && !this.organization.privateMeta) {
+            if (this.auth.requiresPrivateMeta && !this.organization.privateMeta) {
                 // Private meta is missing while we have permissions for this organization: requires a refetch
                 return false;
             }
@@ -710,7 +710,7 @@ export class SessionContext implements RequestMiddleware {
             shouldRetry,
         });
 
-        if (this.hasToken() && this.auth.permissions && !this.auth.permissions.isEmpty && !response.data.privateMeta) {
+        if (this.hasToken() && this.auth.requiresPrivateMeta && !response.data.privateMeta) {
             console.error('Missing privateMeta in authenticated organization response');
 
             // Critical issue: log out
@@ -772,7 +772,7 @@ export class SessionContext implements RequestMiddleware {
                 }
             }
 
-            if (this.organization && ((force && !fetchedOrganization) || (this.auth.permissions && !this.auth.permissions.isEmpty && !this.organization.privateMeta))) {
+            if (this.organization && ((force && !fetchedOrganization) || (this.auth.requiresPrivateMeta && !this.organization.privateMeta))) {
                 fetchedOrganization = true;
                 await this.fetchOrganization(shouldRetry);
             }
