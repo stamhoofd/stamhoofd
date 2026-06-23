@@ -573,6 +573,10 @@ function checkCanCreateEvent(group: Group) {
         return false;
     }
 
+    if (group.type !== GroupType.Membership) {
+        return false;
+    }
+
     // not possible if end date is before start date (will fail in backend otherwise)
     if (group.settings.endDate < group.settings.startDate) {
         return false;
