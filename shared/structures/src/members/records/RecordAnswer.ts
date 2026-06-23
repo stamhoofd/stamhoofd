@@ -4,7 +4,6 @@ import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { CellValue } from '@stamhoofd/excel-writer';
 import { Address } from '../../addresses/Address.js';
 import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
@@ -13,7 +12,6 @@ import { Image } from '../../files/Image.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
-
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -70,7 +68,7 @@ export class RecordAnswer extends AutoEncoder {
         return this.settings.excelColumns;
     }
 
-    get excelValues(): CellValue[] {
+    get excelValues(): any[] {
         return [{
             value: this.stringValue,
             style: this.stringValue.includes('\n')
