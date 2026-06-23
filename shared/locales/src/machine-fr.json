@@ -9079,6 +9079,22 @@
     "original": "{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie.",
     "translation": "{werkjaar-2025-2026} est maintenant créé. Vérifiez bien les prix et les paramètres de votre copie."
   },
+  "%1dg": {
+    "original": "Stel aparte rollen in voor beheerders die niet inschrijven als lid. Deze rechten worden gekoppeld aan individuele accounts die je uitnodigt.",
+    "translation": "Attribuez des rôles distincts aux administrateurs qui ne s’inscrivent pas comme membre. Ces droits sont liés aux comptes individuels que vous invitez."
+  },
+  "%1dh": {
+    "original": "Functies zijn rechten die gekoppeld worden aan leden in plaats van accounts. Ze zijn een overzichtelijker alternatief voor beheerdersrollen als je ook beheerders laat inschrijven via je ledenportaal.",
+    "translation": "Les fonctions sont des droits associés aux membres plutôt qu'aux comptes. Elles constituent une solution plus claire que les rôles d’administrateur si vous permettez également aux administrateurs de s’inscrire via votre portail des membres."
+  },
+  "%1di": {
+    "original": "Externe beheerdersrollen beheren",
+    "translation": "Gérer les rôles d’administrateur externes"
+  },
+  "%1dj": {
+    "original": "Functies zijn toegangsrechten die je koppelt aan (ingeschreven) leden. Als een lid wordt uitgeschreven, wordt de functie van het lid automatisch op het einde van de maand geschrapt (tenzij je het zelf vroeger schrapt).",
+    "translation": "Les fonctions sont des droits d’accès que vous liez à des membres inscrits. Lorsqu’un membre se désinscrit, la fonction lui étant attribuée est supprimée automatiquement à la fin du mois (sauf si vous la supprimez vous-même plus tôt)."
+  },
   "%1g": {
     "original": "Weekends",
     "translation": "Week-ends"
@@ -17072,8 +17088,8 @@
     "translation": "Nom de ce rôle"
   },
   "%ZG": {
-    "original": "Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).",
-    "translation": "Le concept de membres, d'administrateurs et de comptes peut être source de confusion. La différence réside dans le fait que les membres peuvent être gérés par plusieurs comptes (= une adresse e-mail avec un mot de passe permettant de se connecter). Les droits et les rôles sont attribués aux comptes, tandis que vous pouvez attribuer des fonctions aux membres (= une personne inscrite à un groupe d'âge)."
+    "original": "Het verschil tussen functies en beheerdersrollen kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Externe beheerdersrollen worden aan individuele accounts toegekend, terwijl je functies enkel kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep). De rechten gekoppeld aan een functie worden toegeken aan alle accounts die verbonden zijn met het lid (bv. als dat lid meerdere e-mailadressen heeft ingesteld).",
+    "translation": "La différence entre les fonctions et les rôles d'administrateur peut prêter à confusion. Cela tient au fait que les membres peuvent être gérés par plusieurs comptes (c’est-à-dire une adresse e-mail et un mot de passe permettant de se connecter). Les rôles d'administrateur externes sont attribués à des comptes individuels, alors que les fonctions ne sont attribuées qu'aux membres (ceux qui sont inscrits dans un groupe d'âge). Les droits liés à une fonction sont octroyés à tous les comptes associés au membre (par exemple si ce membre a plusieurs adresses e-mail configurées)."
   },
   "%ZH": {
     "original": "Ongebruikt",

@@ -5973,5 +5973,9 @@
   "%1dc": "Leeg aanmaken",
   "%1dd": "Geen kopie maken",
   "%1de": "Controleer na het synchroniseren altijd de gegevens in de groepsadministratie.",
-  "%1df": "{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie."
+  "%1df": "{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie.",
+  "%1dg": "Stel aparte rollen in voor beheerders die niet inschrijven als lid. Deze rechten worden gekoppeld aan individuele accounts die je uitnodigt.",
+  "%1dh": "Functies zijn rechten die gekoppeld worden aan leden in plaats van accounts. Ze zijn een overzichtelijker alternatief voor beheerdersrollen als je ook beheerders laat inschrijven via je ledenportaal.",
+  "%1di": "Externe beheerdersrollen beheren",
+  "%1dj": "Functies zijn toegangsrechten die je koppelt aan (ingeschreven) leden. Als een lid wordt uitgeschreven, wordt de functie van het lid automatisch op het einde van de maand geschrapt (tenzij je het zelf vroeger schrapt)."
 }

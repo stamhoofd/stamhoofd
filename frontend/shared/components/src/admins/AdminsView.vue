@@ -31,14 +31,14 @@
                             {{ $t('%YW') }}
                         </h2>
                         <h2 v-else class="style-title-list">
-                            {{ $t('Functies van leden') }}
+                            {{ $t('%3p') }}
                         </h2>
 
                         <p v-if="showInternalAdmins" class="style-description">
                             {{ $t('%YX') }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('Functies zijn rechten die gekoppeld worden aan leden in plaats van accounts. Ze zijn een overzichtelijker alternatief voor beheerdersrollen als je ook beheerders laat inschrijven via je ledenportaal.') }}
+                            {{ $t('%1dh') }}
                         </p>
 
                         <template #right>
@@ -51,10 +51,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Externe beheerdersrollen beheren') }}
+                            {{ $t('%1di') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Stel aparte rollen in voor beheerders die niet inschrijven als lid. Deze rechten worden gekoppeld aan individuele accounts die je uitnodigt.') }}
+                            {{ $t('%1dg') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

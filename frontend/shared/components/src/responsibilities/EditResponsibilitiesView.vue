@@ -7,7 +7,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>{{ $t('Functies zijn toegangsrechten die je koppelt aan (ingeschreven) leden. Als een lid wordt uitgeschreven, wordt de functie van het lid automatisch op het einde van de maand geschrapt (tenzij je het zelf vroeger schrapt).') }}</p>
+        <p>{{ $t('%1dj') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

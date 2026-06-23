@@ -9011,6 +9011,22 @@
     "original": "{werkjaar-2025-2026} is nu aangemaakt. Kijk de prijzen en instellingen goed na van je kopie.",
     "translation": "{werkjaar-2025-2026} has now been created. Double-check the prices and settings of your copy."
   },
+  "%1dg": {
+    "original": "Stel aparte rollen in voor beheerders die niet inschrijven als lid. Deze rechten worden gekoppeld aan individuele accounts die je uitnodigt.",
+    "translation": "Set up separate administrator roles for those who do not register as a member. These rights are linked to individual accounts that you invite."
+  },
+  "%1dh": {
+    "original": "Functies zijn rechten die gekoppeld worden aan leden in plaats van accounts. Ze zijn een overzichtelijker alternatief voor beheerdersrollen als je ook beheerders laat inschrijven via je ledenportaal.",
+    "translation": "Roles are rights connected to members rather than accounts. They offer a clearer alternative to administrator roles if you also allow administrators to register via your member portal."
+  },
+  "%1di": {
+    "original": "Externe beheerdersrollen beheren",
+    "translation": "Manage external administrator roles"
+  },
+  "%1dj": {
+    "original": "Functies zijn toegangsrechten die je koppelt aan (ingeschreven) leden. Als een lid wordt uitgeschreven, wordt de functie van het lid automatisch op het einde van de maand geschrapt (tenzij je het zelf vroeger schrapt).",
+    "translation": "Roles are access rights you assign to (registered) members. If a member is deregistered, their role is automatically removed at the end of the month (unless you remove it yourself sooner)."
+  },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
     "translation": "Affiliation/insurance Stamhoofd*"
@@ -16884,8 +16900,8 @@
     "translation": "Name of this role"
   },
   "%ZG": {
-    "original": "Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).",
-    "translation": "The concept of members, administrators and accounts can be confusing. The difference lies in the fact that members can be managed by multiple accounts (= an email address with a password with which you can log in). Rights and roles are assigned to accounts, while you can assign roles to members (= someone who is registered for an age group)."
+    "original": "Het verschil tussen functies en beheerdersrollen kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Externe beheerdersrollen worden aan individuele accounts toegekend, terwijl je functies enkel kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep). De rechten gekoppeld aan een functie worden toegeken aan alle accounts die verbonden zijn met het lid (bv. als dat lid meerdere e-mailadressen heeft ingesteld).",
+    "translation": "The distinction between roles and administrator roles can be confusing. The difference is that members can be managed by multiple accounts (an email address with a password you use to log in). External administrator roles are assigned to individual accounts, while roles can only be assigned to members (someone registered for an age group). The rights linked to a role are assigned to all accounts connected to the member (for example, if the member has set up multiple email addresses)."
   },
   "%ZH": {
     "original": "Ongebruikt",
