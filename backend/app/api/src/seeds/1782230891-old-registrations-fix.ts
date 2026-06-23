@@ -176,11 +176,19 @@ async function findCategory(group: Group, archiveOrganizationPeriod: Organizatio
             throw new Error('original parent category not found for group: ' + group.id);
         }
 
-        const clonedCategory = GroupCategory.create({
+
+
+        const allParentCategories = originalParentCategory.getParentCategories(allCategories);
+
+                const clonedCategory = GroupCategory.create({
             settings: GroupCategorySettings.create({
                 ...originalParentCategory.settings,
             }),
         });
+
+        for(const parentCategory of allParentCategories) {
+            const archivedEquivalent = archiveOrganizationPeriod.settings.categories.find(c => c.)
+        }
 
         return originalCategory;
     }
@@ -205,6 +213,7 @@ async function findCategory(group: Group, archiveOrganizationPeriod: Organizatio
 }
 
 function findCategoryOfGroup(category: GroupCategory, groupId: string, allCategories: GroupCategory[]): GroupCategory | null {
+    return allCategories.find(c => c.groupIds.includes(groupId)) || null;
     const match = category.groupIds.find(id => id === groupId);
     if (match) {
         return category;
