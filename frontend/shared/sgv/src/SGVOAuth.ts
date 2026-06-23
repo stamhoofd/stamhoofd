@@ -90,7 +90,8 @@ export class SGVOAuth {
             createdAt: Date.now(),
         }));
 
-        const url = new URL(`${this.loginBase}${SGV_LOGIN_AUTHORIZE_PATH}`);
+        // don't use loginBase here!!
+        const url = new URL(`https://login.scoutsengidsenvlaanderen.be${SGV_LOGIN_AUTHORIZE_PATH}`);
         url.searchParams.set('client_id', this.clientId);
         url.searchParams.set('redirect_uri', redirectUri);
         url.searchParams.set('state', state);
