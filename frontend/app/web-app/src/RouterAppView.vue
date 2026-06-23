@@ -95,15 +95,15 @@ async function loadVerifyEmail(organization: Organization | null, componentPrope
 }
 
 // ADMIN
-    defineRoute({
-        name: AppRoute.Admin,
-        url: $t('%1Wn'),
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithAdmin(options);
-        },
-    });
+defineRoute({
+    name: AppRoute.Admin,
+    url: $t('%1Wn'),
+    // TODO: move to component pattern (see verify-email)
+    handler: async (options) => {
+        await replaceWithSpinner();
+        await replaceWithAdmin(options);
+    },
+});
 
 // DASHBOARD
 if (orgInDomain) {
@@ -279,17 +279,17 @@ if (orgInDomain) {
         },
         ...orgInUriParams,
     });
-    defineRoute({
-        name: AppRoute.UnscopedAuto,
-        url: '',
-        isDefault: {},
-        force: true,
-        replace: 100,
-        component: async () => {
-            return await loadAuto(null, {});
-        },
-    });
 }
+defineRoute({
+    name: AppRoute.UnscopedAuto,
+    url: '',
+    isDefault: {},
+    force: true,
+    replace: 100,
+    component: async () => {
+        return await loadAuto(null, {});
+    },
+});
 
 </script>
 
