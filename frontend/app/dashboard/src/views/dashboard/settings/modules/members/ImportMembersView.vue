@@ -100,9 +100,9 @@
 
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
@@ -115,9 +115,9 @@ import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembe
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import type { Address, OrganizationRegistrationPeriod} from '@stamhoofd/structures';
+import type { Address, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
 import XLSX from 'xlsx';
 import { AddressColumnMatcher } from '../../../../../classes/import/AddressColumnMatcher';
@@ -132,8 +132,6 @@ import { ImportMembersBaseResultWithErrors, ImportMembersResultWithErrors } from
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
 import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from '../../../../../classes/import/TextColumnMatcher';
-
-
 
 import RegistrationPeriodSelector from './RegistrationPeriodSelector.vue';
 
@@ -273,18 +271,17 @@ const sheet = computed(() => {
 });
 
 const hasMembers = computed(() => {
-    const count = organization.value.adminCategoryTree.getMemberCount({});
+    const count = organization.value.adminCategoryTree.getMemberCount();
     return organization.value.meta.packages.useMembers && !organization.value.meta.packages.isMembersTrial && count !== null && count > 30;
 });
 
 const matcherCategories = computed(() => {
-    const arr: Record<string, { name: string; matchers: ColumnMatcher[] }> = {}
+    const arr: Record<string, { name: string; matchers: ColumnMatcher[] }> = {};
     for (const matcher of allMatchers.value) {
         const cat = matcher.category.toLowerCase();
         if (arr[cat]) {
             arr[cat].matchers.push(matcher);
-        }
-        else {
+        } else {
             arr[cat] = {
                 name: matcher.category,
                 matchers: [matcher],
@@ -458,13 +455,11 @@ function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
 
                 try {
                     column.baseMatcher!.setBaseValue(valueCell, importBase);
-                }
-                catch (e: any) {
+                } catch (e: any) {
                     console.error(e);
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         errorStack.push(new ImportError(row, column.index, e.getHuman()));
-                    }
-                    else if (typeof e['message'] === 'string') {
+                    } else if (typeof e['message'] === 'string') {
                         errorStack.push(new ImportError(row, column.index, e['message']));
                     }
                 }
@@ -519,13 +514,11 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
 
             try {
                 await column.matcher.setValue(valueCell, importMemberResult);
-            }
-            catch (e: any) {
+            } catch (e: any) {
                 console.error(e);
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     errorStack.push(new ImportError(row, column.index, e.getHuman()));
-                }
-                else if (typeof e['message'] === 'string') {
+                } else if (typeof e['message'] === 'string') {
                     errorStack.push(new ImportError(row, column.index, e['message']));
                 }
             }
@@ -581,8 +574,7 @@ async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], exis
         showCallback(AsyncComponent(() => import('./ImportMembersErrorsView.vue'), {
             importErrors: result.errors,
         })).catch(console.error);
-    }
-    else {
+    } else {
         showCallback(AsyncComponent(() => import('./ImportMembersQuestionsView.vue'), {
             importMemberResults: result.data,
             period: period.value,
@@ -604,8 +596,7 @@ async function goNext() {
             show(AsyncComponent(() => import('./ImportMembersErrorsView.vue'), {
                 importErrors: result.errors,
             })).catch(console.error);
-        }
-        else {
+        } else {
             // find equal members and possible equal members
             const results = await findExistingMembers(result.data);
 
@@ -627,8 +618,7 @@ async function goNext() {
 
             await startImport(sheet.value, columns.value, results, show);
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
