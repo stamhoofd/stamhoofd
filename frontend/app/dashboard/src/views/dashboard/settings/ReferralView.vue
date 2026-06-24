@@ -67,8 +67,8 @@
                                 <span class="style-tag large">€ {{ n * 10 }}</span>
                             </template>
                             <template #left>
-                                <span v-if="referredCount >= n" class="icon star yellow" />
-                                <span v-else class="icon star-line light-gray" />
+                                <span v-if="referredCount >= n" class="icon star small yellow" />
+                                <span v-else class="icon star-line small light-gray" />
                             </template>
                         </STListItem>
                         <STListItem>
@@ -78,8 +78,8 @@
                                 <span class="style-tag large">€ 100</span>
                             </template>
                             <template #left>
-                                <span v-if="referredCount >= 10" class="icon star yellow" />
-                                <span v-else class="icon star-line light-gray" />
+                                <span v-if="referredCount >= 10" class="icon star small yellow" />
+                                <span v-else class="icon star-line small light-gray" />
                             </template>
                         </STListItem>
                     </STList>
@@ -175,8 +175,7 @@ async function downloadQR() {
         anchor.href = url;
         anchor.download = 'qr-code.png';
         anchor.click();
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -191,8 +190,7 @@ async function loadCode() {
         });
         response.data.usedCodes.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt));
         status.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
     }
