@@ -155,8 +155,8 @@ const monthTextLong = computed(() => model.value ? Formatter.month(model.value) 
 const yearConfig: InputConfig = {
     type: 'year',
     maxLength: 4,
-    min: 1920, // props.min.getFullYear(),
-    max: 2100, // props.max.getFullYear(),
+    get min() { return props.min.getFullYear(); },
+    get max() { return props.max.getFullYear(); },
     format: value => value ? Formatter.year(value).toString() : '',
 };
 
@@ -235,7 +235,7 @@ watch(model, (value: Date | null) => {
     onModelChangeYear(value);
 });
 
-const numberConfigs: NumberConfig[] = [
+const numberConfigs = computed((): NumberConfig[] => [
     {
         ...dayConfig,
         model: dayText,
@@ -248,7 +248,7 @@ const numberConfigs: NumberConfig[] = [
         ...yearConfig,
         model: yearText,
     },
-];
+]);
 
 let displayedComponent: ComponentWithProperties | null = null;
 
@@ -268,7 +268,7 @@ const onKey = (event: KeyboardEvent) => {
         return;
     }
 
-    const config = numberConfigs[index];
+    const config = numberConfigs.value[index];
 
     const key = event.key || event.keyCode;
 
@@ -407,7 +407,7 @@ function onTyping() {
 
     if (index !== -1) {
         // Check move to next date
-        if (isFull(focusedInput.value, numberConfigs[index])) {
+        if (isFull(focusedInput.value, numberConfigs.value[index])) {
             selectNext(index + 1);
         }
     }
