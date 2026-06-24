@@ -469,7 +469,7 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     getFilteredPrices() {
-        const base = this.group.settings.getFilteredPrices({ admin: this.checkout.isAdminFromSameOrganization, date: this.calculatedStartDate });
+        const base = this.group.settings.getFilteredPrices({ admin: this.checkout.isAdminFromSameOrganization, date: this.calculatedRegistrationDate });
 
         if (this.groupPrice && !base.some(b => b.id === this.groupPrice.id)) {
             return [this.groupPrice, ...base];
@@ -916,6 +916,18 @@ export class RegisterItem implements ObjectWithRecords {
 
     get calculatedStartDate() {
         return this.customStartDate ?? this.defaultStartDate;
+    }
+
+    /**
+     * Used to calculate what prices a user can choose.
+     * For admins we use the start date that is chosen if it is set. Otherwise the current date is used.
+     */
+    get calculatedRegistrationDate() {
+        if (this.customStartDate && this.customStartDate > this.group.settings.startDate) {
+            // Starting at a later time: use the price at that time
+            return this.customStartDate;
+        }
+        return new Date();
     }
 
     get calculatedEndDate() {
@@ -1377,7 +1389,7 @@ export class RegisterItem implements ObjectWithRecords {
                 }
             }
 
-            if (!this.groupPrice.isInPeriod(this.calculatedStartDate)) {
+            if (!this.groupPrice.isInPeriod(this.calculatedRegistrationDate)) {
                 throw new SimpleError({
                     code: 'invalid_price',
                     message: 'GroupPrice is not valid for this date',
