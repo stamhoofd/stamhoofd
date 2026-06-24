@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/sql",
-    "version": "2.122.7",
+    "version": "2.122.8",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
-        "@stamhoofd/test-utils": "2.122.7",
+        "@stamhoofd/test-utils": "2.122.8",
         "vitest": "4.1.8"
     },
     "peerDependencies": {

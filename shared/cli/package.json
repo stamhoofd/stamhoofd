@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/cli",
-    "version": "2.122.7",
+    "version": "2.122.8",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -30,7 +30,7 @@
     "dependencies": {
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.11.4",
-        "@stamhoofd/types": "2.122.7",
+        "@stamhoofd/types": "2.122.8",
         "chalk": "5.6.2",
         "log-update": "8.0.0",
         "ora": "9.4.0",

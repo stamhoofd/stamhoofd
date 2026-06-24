@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-sgv-mock",
-    "version": "2.122.7",
+    "version": "2.122.8",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
@@ -23,7 +23,7 @@
         "@simonbackx/simple-encoding": "2.26.10",
         "@simonbackx/simple-endpoints": "1.21.1",
         "@simonbackx/simple-errors": "*",
-        "@stamhoofd/sgv": "2.122.7"
+        "@stamhoofd/sgv": "2.122.8"
     },
     "devDependencies": {
         "@types/node": "22.15.34",
