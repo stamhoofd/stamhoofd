@@ -1,18 +1,17 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
-import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 /**
  * Actions for a single group category (edit, create, reorder, move, merge, delete).
@@ -56,6 +55,43 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             return getParentCategory().categoryIds
                 .map(id => props.period.settings.categories.find(c => c.id === id)!)
                 .filter(c => c && c.id !== props.category.id);
+        }
+
+        /**
+         * Collects the category itself, all its (nested) subcategories and every group inside them.
+         * Used when moving the whole category to another period.
+         */
+        function collectDescendants(category: GroupCategory): { categories: GroupCategory[]; groups: Group[] } {
+            const categories: GroupCategory[] = [];
+            const groupIds = new Set<string>();
+            const seen = new Set<string>();
+            const queue: GroupCategory[] = [category];
+
+            while (queue.length > 0) {
+                const current = queue.shift()!;
+                if (seen.has(current.id)) {
+                    continue;
+                }
+                seen.add(current.id);
+                categories.push(current);
+
+                for (const groupId of current.groupIds) {
+                    groupIds.add(groupId);
+                }
+
+                for (const childId of current.categoryIds) {
+                    const child = props.period.settings.categories.find(c => c.id === childId);
+                    if (child) {
+                        queue.push(child);
+                    }
+                }
+            }
+
+            const groups = [...groupIds]
+                .map(id => props.period.groups.find(g => g.id === id))
+                .filter((g): g is Group => g !== undefined);
+
+            return { categories, groups };
         }
 
         const canDeleteOrRename = props.category.settings.locked !== true || isPlatformAdmin;
@@ -168,6 +204,76 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             }));
         }
 
+        async function moveToOtherPeriod(otherPeriod: OrganizationRegistrationPeriod, destinationCategory: GroupCategory) {
+            const { categories, groups } = collectDescendants(props.category);
+
+            // Groups with bundle discounts cannot be moved to another period
+            if (groups.some(g => g.settings.hasBundleDiscounts)) {
+                Toast.error($t('Je kan geen categorie met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.')).show();
+                return;
+            }
+
+            // Only confirm when saving directly to the API, otherwise the change is collected in memory
+            if (!saveHandler && !await CenteredMessage.confirm({
+                title: $t('Ben je zeker dat je de categorie ‘{categoryName}’ wilt verplaatsen naar ‘{destinationName}’ in {periodName}?', {
+                    categoryName: props.category.getName(props.period),
+                    destinationName: destinationCategory.getName(otherPeriod),
+                    periodName: otherPeriod.period.name,
+                }),
+                confirmText: $t('%10t'),
+            })) {
+                return;
+            }
+
+            // Add the category and all its (nested) subcategories to the other period
+            const otherSettings = OrganizationRegistrationPeriodSettings.patch({});
+            for (const category of categories) {
+                otherSettings.categories.addPut(category);
+            }
+
+            // Attach the category to its destination in the other period
+            const destinationPatch = GroupCategory.patch({ id: destinationCategory.id });
+            destinationPatch.categoryIds.addPut(props.category.id);
+            otherSettings.categories.addPatch(destinationPatch);
+
+            const otherPeriodPatch = OrganizationRegistrationPeriod.patch({
+                id: otherPeriod.id,
+                settings: otherSettings,
+            });
+
+            // Move every group inside the category to the other period
+            for (const group of groups) {
+                otherPeriodPatch.groups.addPatch(Group.patch({ id: group.id, periodId: otherPeriod.period.id }));
+            }
+
+            // Remove the category from its parent in the current period.
+            // The server cleans up the now-unreachable categories (the groups are already moved above).
+            const settings = OrganizationRegistrationPeriodSettings.patch({});
+            const parentPatch = GroupCategory.patch({ id: getParentCategory().id });
+            parentPatch.categoryIds.addDelete(props.category.id);
+            settings.categories.addPatch(parentPatch);
+
+            const periodPatch = OrganizationRegistrationPeriod.patch({
+                id: props.period.id,
+                settings,
+            });
+
+            try {
+                // order is important here: move to the other period first, then clean up the current period
+                await save([otherPeriodPatch, periodPatch], [props.period, otherPeriod]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
+
+            showSuccessToast($t('‘{categoryName}’ is verplaatst naar ‘{destinationName}’ in {periodName}', {
+                categoryName: props.category.getName(props.period),
+                destinationName: destinationCategory.getName(otherPeriod),
+                periodName: otherPeriod.period.name,
+            }));
+        }
+
         function mergeDisabledWith(category: GroupCategory): boolean | string {
             if (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0) {
                 return $t('%1Zc');
@@ -276,6 +382,49 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             const grandParentCategory = getGrandParentCategory();
             const subCategories = getSubCategories();
 
+            const periods = props.periods ?? await getPeriods(props.period);
+            const otherPeriods = periods.filter(p => p.id !== props.period.id);
+
+            const moveToPeriodOptions = otherPeriods.map((p) => {
+                if (p.period.locked) {
+                    return new ContextMenuItem({
+                        name: p.period.name,
+                        disabled: true,
+                    });
+                }
+
+                // A category can only be moved into a category that does not directly contain groups
+                const menuItems = p.availableCategories.filter(c => c.groups.length === 0).map(c => new ContextMenuItem({
+                    name: c.getName(p),
+                    rightText: c.categoryIds.length + '',
+                    action: () => {
+                        moveToOtherPeriod(p, c).catch(console.error);
+                        return true;
+                    },
+                }));
+
+                // Always allow moving the category to the top level of the other period
+                if (p.rootCategory && p.rootCategory.groupIds.length === 0) {
+                    const c = p.rootCategory;
+                    menuItems.unshift(new ContextMenuItem({
+                        name: c.getName(p),
+                        rightText: c.categoryIds.length + '',
+                        action: () => {
+                            moveToOtherPeriod(p, c).catch(console.error);
+                            return true;
+                        },
+                    }));
+                }
+
+                return new ContextMenuItem({
+                    name: p.period.name,
+                    disabled: menuItems.length === 0,
+                    childMenu: new ContextMenu([
+                        menuItems,
+                    ]),
+                });
+            });
+
             const sections: ContextMenuItem[][] = [
                 [
                     new ContextMenuItem({
@@ -361,6 +510,15 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                                 },
                             }),
                         ),
+                        [
+                            new ContextMenuItem({
+                                name: $t('%1HU'),
+                                childMenu: new ContextMenu([
+                                    moveToPeriodOptions,
+                                ]),
+                                disabled: !canDeleteOrRename || moveToPeriodOptions.filter(p => !p.disabled).length === 0,
+                            }),
+                        ],
                     ]),
                 }),
                 new ContextMenuItem({
