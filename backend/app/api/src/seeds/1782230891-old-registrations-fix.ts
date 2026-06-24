@@ -3,6 +3,8 @@ import { Group, Organization, OrganizationRegistrationPeriod, Registration, Regi
 import { GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
+const CUTOFF = new Date(1782172800000); // Jun 23 2026 02:00:00 GMT+0200
+
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
         console.log('skipped in tests');
@@ -68,6 +70,7 @@ async function getCurrentCycle(group: Group) {
 async function fixRegistrations(organization: Organization, group: Group, dryRun: boolean) {
     const registrations = await Registration.select()
         .where('groupId', group.id)
+        .andWhere('createdAt', '<', CUTOFF)
         .fetch();
 
     const currentCycle = await getCurrentCycle(group);
@@ -102,6 +105,7 @@ async function fixRegistrations(organization: Organization, group: Group, dryRun
 
         const registrationCount = await Registration.select()
             .where('groupId', group.id)
+            .andWhere('createdAt', '<', CUTOFF)
             .andWhere('cycle', cycle)
             .count();
 
@@ -147,6 +151,10 @@ async function fixRegistrations(organization: Organization, group: Group, dryRun
         }
 
         await cleanupGroup(newGroup, dryRun);
+    }
+
+    if (!parentCategory) {
+        console.error('Could not find parent category to place new groups', allNewGroups.map(i => i.id), 'in');
     }
 
     if (!dryRun) {
@@ -244,6 +252,7 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
     const registrations = await Registration.select()
         .where('groupId', originalGroup.id)
         .andWhere('cycle', cycle)
+        .andWhere('createdAt', '<', CUTOFF)
         .fetch();
 
     for (const registration of registrations) {
