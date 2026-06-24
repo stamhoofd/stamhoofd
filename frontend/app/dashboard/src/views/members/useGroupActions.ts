@@ -149,7 +149,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
         }
 
         async function moveToOtherPeriod(otherPeriod: OrganizationRegistrationPeriod, category: GroupCategory) {
-            if (props.group.settings.hasBundleDiscounts) {
+            if (props.group.settings.hasBundleDiscounts(props.period)) {
                 Toast.error($t('%1dG')).show();
                 return;
             }

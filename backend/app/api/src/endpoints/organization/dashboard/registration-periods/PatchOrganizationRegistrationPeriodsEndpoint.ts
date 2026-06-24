@@ -455,7 +455,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             if (shouldUpdatePeriodIds) {
-                if (model.settings.hasBundleDiscounts) {
+                const oldOrganizationPeriod = await OrganizationRegistrationPeriod.select().where('periodId', model.periodId).where('organizationId', model.organizationId).first(false);
+                if (oldOrganizationPeriod && model.settings.hasBundleDiscounts(oldOrganizationPeriod)) {
                     throw new SimpleError({
                         code: 'change_period_not_allowed',
                         message: 'This group cannot be moved to another period because it has bundle discounts.',

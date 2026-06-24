@@ -208,7 +208,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             const { categories, groups } = collectDescendants(props.category);
 
             // Groups with bundle discounts cannot be moved to another period
-            if (groups.some(g => g.settings.hasBundleDiscounts)) {
+            if (groups.some(g => g.settings.hasBundleDiscounts(props.period))) {
                 Toast.error($t('Je kan geen categorie met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.')).show();
                 return;
             }

@@ -9,6 +9,7 @@ import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
+import type { OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from './RegistrationPeriod.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
@@ -110,8 +111,13 @@ export class GroupPrice extends AutoEncoder {
         return true;
     }
 
-    get hasBundleDiscounts(): boolean {
-        return this.bundleDiscounts.size > 0;
+    hasBundleDiscounts(period: { settings: OrganizationRegistrationPeriodSettings }): boolean {
+        for (const key of this.bundleDiscounts.keys()) {
+            if (period.settings.bundleDiscounts.find(b => b.id === key)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -591,8 +597,8 @@ export class GroupSettings extends AutoEncoder {
         return this.maxMembers - this.registeredMembers - (this.reservedMembers ?? 0);
     }
 
-    get hasBundleDiscounts(): boolean {
-        return this.prices.some(price => price.hasBundleDiscounts);
+    hasBundleDiscounts(period: { settings: OrganizationRegistrationPeriodSettings }): boolean {
+        return this.prices.some(price => price.hasBundleDiscounts(period));
     }
 
     /**
