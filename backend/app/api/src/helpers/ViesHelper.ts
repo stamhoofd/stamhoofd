@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { Company } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import axios from 'axios';
-import jsvat from 'jsvat-next'; // has no default export, so we need the wildcard
+import jsvat from 'jsvat-next';
 
 export class ViesHelperStatic {
     testMode = false;
