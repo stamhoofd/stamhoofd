@@ -466,9 +466,10 @@ export class MemberActionBuilder {
 
         return [new InMemoryTableAction({
             name: $t(`%zu`),
+            icon: 'no-edit',
             destructive: true,
-            priority: 0,
-            groupIndex: 7,
+            priority: 10,
+            groupIndex: 100,
             needsSelection: true,
             allowAutoSelectAll: false,
             enabled: () => this.hasWrite,

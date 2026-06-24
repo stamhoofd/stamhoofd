@@ -7,7 +7,6 @@ import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPe
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-
 import { LoadComponent } from '#containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '#email/EmailView.vue';
 
@@ -278,9 +277,10 @@ export class RegistrationActionBuilder {
     private getUnsubscribeAction(): InMemoryTableAction<PlatformRegistration> | null {
         return new InMemoryTableAction({
             name: $t(`%zu`),
+            icon: 'no-edit',
             destructive: true,
-            priority: 0,
-            groupIndex: 7,
+            priority: 10,
+            groupIndex: 100,
             needsSelection: true,
             allowAutoSelectAll: false,
             enabled: () => this.hasWrite,
