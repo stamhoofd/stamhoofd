@@ -650,11 +650,6 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     isInvited() {
-        const deprecatedLogic = this.member.member.registrations?.some(r => r.groupId === this.group.id && r.registeredAt === null && r.canRegister);
-        if (deprecatedLogic) {
-            return true;
-        }
-
         return this.member.member.registrationInvitations?.some(invitation => invitation.group.id === this.group.id
             // ignore invitation if already registered (for trial period the invitation will be only removed on final registration)
             && !this.member.member.registrations.some(r => r.groupId === invitation.group.id && r.registeredAt === null));
@@ -1034,7 +1029,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         let period: RegistrationPeriod | RegistrationPeriodBase;
 
-        if (periodId === platform.period.id) {
+        if (periodId === platform.period.id && STAMHOOFD.userMode === 'platform') {
             period = platform.period;
         } else if (periodId === this.organization.period.period.id) {
             period = this.organization.period.period;
