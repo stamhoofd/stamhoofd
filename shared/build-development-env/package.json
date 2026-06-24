@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/build-development-env",
-    "version": "2.122.6",
+    "version": "2.122.7",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -23,8 +23,8 @@
         "start": "node dist/init.js"
     },
     "dependencies": {
-        "@stamhoofd/types": "2.122.6",
-        "@stamhoofd/utility": "2.122.6",
+        "@stamhoofd/types": "2.122.7",
+        "@stamhoofd/utility": "2.122.7",
         "chalk": "5.6.2"
     },
     "devDependencies": {

@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/test-utils",
-    "version": "2.122.6",
+    "version": "2.122.7",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
