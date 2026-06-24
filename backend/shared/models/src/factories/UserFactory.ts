@@ -18,6 +18,8 @@ class Options {
     verified?: boolean;
     permissions?: Permissions | null;
     globalPermissions?: Permissions | null;
+
+    apiUser?: boolean;
 }
 
 export class UserFactory extends Factory<Options, User> {
@@ -43,6 +45,11 @@ export class UserFactory extends Factory<Options, User> {
         });
         if (!user) {
             throw new Error('Unexpected failure when creating user in factory');
+        }
+
+        if (this.options.apiUser) {
+            user.email = user.id + '.api';
+            user.password = null;
         }
 
         if (this.options.permissions) {

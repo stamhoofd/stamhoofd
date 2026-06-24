@@ -1,7 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { UserWithMembers } from '@stamhoofd/structures';
-
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../helpers/Context.js';
 
@@ -26,7 +25,7 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate({ allowWithoutAccount: true });
+        const { user } = await Context.authenticate({ allowWithoutAccount: true, allowUnscoped: true });
 
         return new Response(
             await AuthenticatedStructures.userWithMembers(user),

@@ -223,7 +223,7 @@ export class ContextInstance {
         }
     }
 
-    async authenticate({ allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<{ user: User; token: Token }> {
+    async authenticate({ allowWithoutAccount = false, allowUnscoped = false }: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token }> {
         let header = this.request.headers.authorization;
 
         if (!header && this.request.method === 'POST') {
@@ -255,7 +255,7 @@ export class ContextInstance {
 
         const token = await Token.getByAccessToken(accessToken, true);
 
-        if (!token || (this.organization && token.user.organizationId !== null && token.user.organizationId !== this.organization.id) || (!this.organization && token.user.organizationId)) {
+        if (!token || (this.organization && token.user.organizationId !== null && token.user.organizationId !== this.organization.id) || (!this.organization && token.user.organizationId && (!allowUnscoped || !token.user.isApiUser))) {
             if (token?.user) {
                 console.log(
                     'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
@@ -267,6 +267,11 @@ export class ContextInstance {
                 human: $t(`%Fi`),
                 statusCode: 401,
             });
+        }
+
+        if (!this.organization && token.user.organizationId && allowUnscoped) {
+            // Automatically scope full request to the user's scope
+            await this.setManualOrganizationScope(await Organization.getByID(token.user.organizationId, true));
         }
 
         if (token.isAccessTokenExpired()) {
