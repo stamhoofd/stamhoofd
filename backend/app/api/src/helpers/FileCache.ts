@@ -116,9 +116,13 @@ export class FileCache {
             });
         }
 
-        const date = new Date(year, month - 1, day, 0, 0, 0);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
+        const date = Formatter.luxon().set({
+            day,
+            month,
+            year,
+        }).startOf('day').toJSDate();
+
+        const now = Formatter.luxon().startOf('day').toJSDate();
 
         const diff = now.getTime() - date.getTime();
 
