@@ -1,5 +1,4 @@
 import testEnv from './env.json' with {type: 'json'};
-// import { read1PasswordCli } from '@stamhoofd/build-development-env';
 
 export function getGlobalObject() {
     let globalObject: any = null;
