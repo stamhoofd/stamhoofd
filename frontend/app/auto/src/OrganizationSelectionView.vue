@@ -137,10 +137,13 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     const addToFavorites = (org: Organization) => new ContextMenuItem({
         name: $t('Voeg toe aan favorieten'),
         icon: 'star',
-        action() {
-            SessionManager.addOrganizationToStorage(org).then(() => getAllOptions()).then((opts) => {
-                defaultOptions.value = opts;
-            }).catch(e => Toast.fromError(e).show());
+        action: async () => {
+            try {
+                await SessionManager.addOrganizationToStorage(org);
+                await refreshDefaultOptions();
+            } catch (e) {
+                Toast.fromError(e).show();
+            }
             return true;
         },
     });
@@ -148,10 +151,13 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     const removeFromFavorites = (org: Organization) => new ContextMenuItem({
         name: $t('Verwijder uit favorieten'),
         icon: 'star',
-        action() {
-            SessionManager.removeOrganizationFromStorage(org.id).then(() => {
-                defaultOptions.value = defaultOptions.value.filter(o => o.organization?.id !== org.id);
-            }).catch(e => Toast.fromError(e).show());
+        action: async () => {
+            try {
+                await SessionManager.removeOrganizationFromStorage(org.id);
+                await refreshDefaultOptions();
+            } catch (e) {
+                Toast.fromError(e).show();
+            }
             return true;
         },
     });
@@ -159,10 +165,13 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     const logOut = (session: SessionContext) => new ContextMenuItem({
         name: $t('Uitloggen'),
         icon: 'logout',
-        action() {
-            session.logout(false).then(() => getAllOptions()).then((opts) => {
-                defaultOptions.value = opts;
-            }).catch(e => Toast.fromError(e).show());
+        action: async () => {
+            try {
+                await session.logout(false);
+                await refreshDefaultOptions();
+            } catch (e) {
+                Toast.fromError(e).show();
+            }
             return true;
         },
     });
@@ -197,11 +206,7 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
 };
 
 const refreshDefaultOptions = async () => {
-    try {
-        defaultOptions.value = await getAllOptions();
-    } catch (e) {
-        console.error('Failed to load organization options:', e);
-    }
+    defaultOptions.value = await getAllOptions();
 };
 
 onMounted(async () => {
@@ -210,7 +215,7 @@ onMounted(async () => {
     // so newly visited orgs appear in the list without a full page reload.
     SessionManager.addListener(owner, (changed) => {
         if (changed === 'session') {
-            void refreshDefaultOptions();
+            refreshDefaultOptions().catch(e => console.error('Failed to load organization options:', e));
         }
     });
 });
