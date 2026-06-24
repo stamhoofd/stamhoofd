@@ -187,7 +187,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
+                <STListItem v-if="membersPackage" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                     </template>
