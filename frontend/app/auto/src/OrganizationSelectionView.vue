@@ -150,7 +150,7 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
 
     const removeFromFavorites = (org: Organization) => new ContextMenuItem({
         name: $t('Verwijder uit favorieten'),
-        icon: 'star',
+        icon: 'unstar',
         action: async () => {
             try {
                 await SessionManager.removeOrganizationFromStorage(org.id);
