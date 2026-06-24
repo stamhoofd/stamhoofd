@@ -173,6 +173,16 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
                 newGroup.settings.registrationEndDate.setFullYear(newGroup.settings.registrationEndDate.getFullYear() + yearDifference);
             }
 
+            for (const price of newGroup.settings.prices) {
+                if (price.startDate) {
+                    price.startDate.setFullYear(price.startDate.getFullYear() + yearDifference);
+                }
+
+                if (price.endDate) {
+                    price.endDate.setFullYear(price.endDate.getFullYear() + yearDifference);
+                }
+            }
+
             // Force close
             if (group.type !== GroupType.WaitingList) {
                 newGroup.status = GroupStatus.Closed;
