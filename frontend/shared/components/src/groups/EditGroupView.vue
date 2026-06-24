@@ -214,7 +214,7 @@
                     <p v-if="patchedGroup.settings.prices.length > 1" class="style-description-small">
                         {{ patchedGroup.settings.prices.map(p => p.name + ' ('+Formatter.price(p.price.price)+')').join(', ') }}
                     </p>
-                    <p v-if="patchedGroup.settings.prices.length" class="style-description-small">
+                    <p v-else-if="patchedGroup.settings.prices.length" class="style-description-small">
                         {{ patchedGroup.settings.prices.map(p => Formatter.price(p.price.price)).join(', ') }}
                     </p>
                 </template>
