@@ -110,7 +110,6 @@ import { Formatter } from '@stamhoofd/utility';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import { computed } from 'vue';
 
-
 const props = defineProps<{
     discountCode: DiscountCode;
     isNew: boolean;
@@ -168,8 +167,7 @@ const useMaximumUsage = computed({
     set: (useMaximumUsage: boolean) => {
         if (useMaximumUsage) {
             maximumUsage.value = maximumUsage.value ?? props.discountCode.maximumUsage ?? 1;
-        }
-        else {
+        } else {
             maximumUsage.value = null;
         }
     },
@@ -248,13 +246,12 @@ async function save() {
     if (!isValid) {
         return;
     }
-    
+
     errors.errorBox = null;
 
     try {
         validate();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
         return;
     }
