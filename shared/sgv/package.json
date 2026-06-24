@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/sgv",
-    "version": "2.122.8",
+    "version": "2.122.9",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -30,9 +30,9 @@
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.10",
         "@simonbackx/simple-errors": "1.5.0",
-        "@stamhoofd/structures": "2.122.8",
-        "@stamhoofd/types": "2.122.8",
-        "@stamhoofd/utility": "2.122.8"
+        "@stamhoofd/structures": "2.122.9",
+        "@stamhoofd/types": "2.122.9",
+        "@stamhoofd/utility": "2.122.9"
     },
     "devDependencies": {
         "vitest": "4.1.8"
