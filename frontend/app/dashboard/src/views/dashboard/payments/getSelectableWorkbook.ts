@@ -89,6 +89,11 @@ export function getSelectableWorkbook() {
                     }),
 
                     new SelectableColumn({
+                        id: 'balanceItem.title',
+                        name: $t('Titel'),
+                    }),
+
+                    new SelectableColumn({
                         id: 'balanceItem.description',
                         name: $t(`%6o`),
                     }),
@@ -202,20 +207,22 @@ function getPaymentProviderColumns() {
             description: $t(`%MF`),
             category: $t(`%wX`),
         }),
-        ...(STAMHOOFD.userMode === 'organization' ? [
-            new SelectableColumn({
-                id: 'serviceFeeManual',
-                name: $t(`%1dO`),
-                description: $t('%1Xh'),
-                category: $t(`%wX`),
-            }),
-            new SelectableColumn({
-                id: 'serviceFeePayout',
-                name: $t(`%1VD`),
-                description: $t('%1Wa'),
-                category: $t(`%wX`),
-            }),
-        ] : []),
+        ...(STAMHOOFD.userMode === 'organization'
+            ? [
+                    new SelectableColumn({
+                        id: 'serviceFeeManual',
+                        name: $t(`%1dO`),
+                        description: $t('%1Xh'),
+                        category: $t(`%wX`),
+                    }),
+                    new SelectableColumn({
+                        id: 'serviceFeePayout',
+                        name: $t(`%1VD`),
+                        description: $t('%1Wa'),
+                        category: $t(`%wX`),
+                    }),
+                ]
+            : []),
         new SelectableColumn({
             id: 'stripeAccountId',
             name: $t(`%1m`),
