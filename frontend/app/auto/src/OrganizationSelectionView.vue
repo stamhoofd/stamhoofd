@@ -105,7 +105,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue';
 
 const isNative = ref(AppManager.shared.isNative);
 const loadingResults = ref(false);
@@ -196,13 +196,27 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     void new ContextMenu([menuItems]).show({ clickEvent: event });
 };
 
-onMounted(async () => {
-    // Update options when the default options change
+const refreshDefaultOptions = async () => {
     try {
         defaultOptions.value = await getAllOptions();
     } catch (e) {
         console.error('Failed to load organization options:', e);
     }
+};
+
+onMounted(async () => {
+    await refreshDefaultOptions();
+    // Refresh when a session is prepared (e.g. after navigating to an org and back),
+    // so newly visited orgs appear in the list without a full page reload.
+    SessionManager.addListener(owner, (changed) => {
+        if (changed === 'session') {
+            void refreshDefaultOptions();
+        }
+    });
+});
+
+onUnmounted(() => {
+    SessionManager.removeListener(owner);
 });
 
 let lastQuery = '';
