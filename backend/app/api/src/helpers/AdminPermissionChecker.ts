@@ -209,6 +209,14 @@ export class AdminPermissionChecker {
         return this.user.permissions.organizationPermissions.get(typeof organizationOrId === 'string' ? organizationOrId : organizationOrId.id) ?? null;
     }
 
+    getUnloadedPlatformPermissions() {
+        if (!this.user.permissions) {
+            return null;
+        }
+
+        return this.user.permissions.globalPermissions;
+    }
+
     async canAccessPrivateOrganizationData(organization: Organization) {
         if (!this.checkScope(organization.id)) {
             return false;
@@ -232,7 +240,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!await this.hasSomeUnloadedAccess(organization)) {
+        if (!await this.hasSomeUnloadedAccess(organization) && !this.hasSomeUnloadedPlatformAccess()) {
             return false;
         }
         return true;
@@ -1127,6 +1135,11 @@ export class AdminPermissionChecker {
      */
     async hasSomeUnloadedAccess(organizationOrId: string | Organization): Promise<boolean> {
         const unloadedPermissions = this.getUnloadedOrganizationPermissions(organizationOrId);
+        return !!unloadedPermissions && !unloadedPermissions.isEmpty;
+    }
+
+    hasSomeUnloadedPlatformAccess(): boolean {
+        const unloadedPermissions = this.getUnloadedPlatformPermissions();
         return !!unloadedPermissions && !unloadedPermissions.isEmpty;
     }
 

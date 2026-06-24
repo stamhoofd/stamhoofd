@@ -76,7 +76,7 @@ export class ContextPermissions {
     }
 
     get requiresPrivateMeta() {
-        return !!this.unloadedPermissions && !this.unloadedPermissions.isEmpty;
+        return (!!this.unloadedPermissions && !this.unloadedPermissions.isEmpty) || (!!this.unloadedPlatformPermissions && !this.unloadedPlatformPermissions.isEmpty);
     }
 
     get _permissions() {
@@ -92,9 +92,13 @@ export class ContextPermissions {
 
     get unloadedPermissions(): Permissions | null {
         if (!this.organization) {
-            return unref(this.userPermissions)?.globalPermissions ?? null;
+            return this.unloadedPlatformPermissions;
         }
         return unref(this.userPermissions)?.organizationPermissions.get(this.organization.id) ?? null;
+    }
+
+    get unloadedPlatformPermissions(): Permissions | null {
+        return unref(this.userPermissions)?.globalPermissions ?? null;
     }
 
     hasFullAccess() {
