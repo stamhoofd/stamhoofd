@@ -691,6 +691,47 @@ jobs:
           spaces-region: ams3
           state-key: incidents/${{ github.ref_name }}.json
 
+  # When every CI job succeeds on a PR, check whether the PR carries the
+  # "ready if CI succeeds" label. If it does and the PR is still a draft,
+  # convert it to ready-for-review automatically.
+  job_auto_ready:
+    name: 'Auto ready for review'
+    runs-on: ubuntu-latest
+    needs:
+      - job_setup
+      - job_build_shared
+      - job_test_structures
+      - job_test_sql
+      - job_test_lint_typecheck_checking
+      - job_test_models
+      - job_test_backend
+      - job_test_components_vitest
+      - job_boot
+      - job_test_playwright
+    if: |
+      !cancelled() &&
+      github.event_name == 'pull_request' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Mark ready if labelled
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          IS_DRAFT=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json isDraft --jq '.isDraft')
+          HAS_LABEL=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name] | contains(["ready if CI succeeds"])')
+          if [ "$IS_DRAFT" = "true" ] && [ "$HAS_LABEL" = "true" ]; then
+            gh pr ready "$PR_NUMBER" --repo "$REPO"
+            echo "Marked PR #$PR_NUMBER as ready for review"
+          else
+            echo "No action (isDraft=$IS_DRAFT, hasLabel=$HAS_LABEL)"
+          fi
+
   # Recovery: runs after every job. When the run is fully green (no failures and
   # at least one job actually ran) and an incident is open, post ✅ and close it.
   job_notify_recovery:
