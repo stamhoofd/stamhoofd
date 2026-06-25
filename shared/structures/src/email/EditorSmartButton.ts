@@ -74,6 +74,13 @@ export class EditorSmartButton extends AutoEncoder {
         }));
 
         buttons.push(EditorSmartButton.create({
+            id: 'discountUrl',
+            name: $t(`Kortingscode-knop`),
+            text: $t(`Bestel met je kortingscode`),
+            hint: $t(`De knop opent de webshop en past automatisch de kortingscode toe.`),
+        }));
+
+        buttons.push(EditorSmartButton.create({
             id: 'unsubscribeUrl',
             name: $t(`%oU`),
             text: $t(`%zu`),

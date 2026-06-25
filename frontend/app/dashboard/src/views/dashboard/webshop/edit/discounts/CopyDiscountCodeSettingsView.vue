@@ -3,19 +3,10 @@
         <h1>{{ $t('Instellingen kopiëren') }}</h1>
         <p>{{ $t('Selecteer naar welke kortingscodes je de instellingen van {code} wilt kopiëren. De codes zelf blijven ongewijzigd.', { code: discountCode.code }) }}</p>
 
-        <div v-if="candidates.length > 5" class="input-with-buttons">
-            <div>
-                <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
-                </form>
-            </div>
-            <div>
-                <button type="button" class="button text" @click="editFilter">
-                    <span class="icon filter" />
-                    <span class="hide-small">{{ $t('Filter') }}</span>
-                    <span v-if="hasActiveFilter" class="icon dot primary" />
-                </button>
-            </div>
+        <div v-if="candidates.length > 5">
+            <form class="input-icon-container icon search gray" @submit.prevent>
+                <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
+            </form>
         </div>
 
         <STList v-if="filteredCandidates.length">
@@ -64,7 +55,6 @@ import type { Discount } from '@stamhoofd/structures';
 import { DiscountCode } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
-import { useDiscountCodeFilter } from './useDiscountCodeFilter';
 
 const props = defineProps<{
     discountCode: DiscountCode;
@@ -74,11 +64,21 @@ const props = defineProps<{
 
 const pop = usePop();
 const selectedIds = ref<Set<string>>(new Set());
-
-const { searchQuery, hasActiveFilter, filterCodes, editFilter } = useDiscountCodeFilter();
+const searchQuery = ref('');
 
 const candidates = computed(() => props.discountCodes.filter(c => c.id !== props.discountCode.id));
-const filteredCandidates = computed(() => filterCodes(candidates.value));
+const filteredCandidates = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase();
+    if (!query) {
+        return candidates.value;
+    }
+
+    return candidates.value.filter(c =>
+        c.code.toLowerCase().includes(query)
+        || c.description.toLowerCase().includes(query)
+        || (c.email ?? '').toLowerCase().includes(query),
+    );
+});
 
 const allSelected = computed(() => filteredCandidates.value.length > 0 && filteredCandidates.value.every(c => selectedIds.value.has(c.id)));
 const someSelected = computed(() => filteredCandidates.value.some(c => selectedIds.value.has(c.id)));

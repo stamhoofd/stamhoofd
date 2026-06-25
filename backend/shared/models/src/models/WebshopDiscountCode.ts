@@ -27,6 +27,13 @@ export class WebshopDiscountCode extends QueryableModel {
     @column({ type: 'string' })
     description = '';
 
+    /**
+     * Optional email address this code is associated with. Used to send the code to a recipient and to
+     * upsert codes by email on import. Not unique.
+     */
+    @column({ type: 'string', nullable: true })
+    email: string | null = null;
+
     @column({ type: 'json', decoder: new ArrayDecoder(Discount) })
     discounts: Discount[] = [];
 

@@ -117,6 +117,31 @@ export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
+export const getDiscountCodesUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new StringFilterBuilder({
+            name: $t('Kortingscode'),
+            key: 'code',
+        }),
+        new StringFilterBuilder({
+            name: $t('E-mailadres'),
+            key: 'email',
+        }),
+        new NumberFilterBuilder({
+            name: $t('Aantal keer gebruikt'),
+            key: 'usageCount',
+        }),
+    ];
+
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            builders,
+        }),
+    );
+
+    return builders;
+};
+
 export function useRegisterItemFilterBuilders() {
     return (group: Group) => {
         const all: UIFilterBuilders = [
