@@ -7,6 +7,7 @@ import { createContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { applyInternalSecrets } from './internal-secrets.js';
 import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
+import type { Language } from '@stamhoofd/types/Language';
 
 export type AppService
     = | BackendAppService
@@ -248,6 +249,7 @@ function environmentPreset(env: string): EnvironmentPreset {
             translationNamespace: env,
             platformName: env,
             fixedCountry: 'BE' as SharedEnvironment['fixedCountry'],
+            locales: { BE: ['nl', 'en', 'fr'] } as SharedEnvironment['locales'],
             memberNumberAlgorithm: MemberNumberAlgorithm.Incremental,
             memberNumberAlgorithmLength: 10,
             documentation: 'docs.keeo.fos.be',
@@ -259,6 +261,7 @@ function environmentPreset(env: string): EnvironmentPreset {
             translationNamespace: 'digit',
             platformName: 'ravot',
             fixedCountry: 'BE' as SharedEnvironment['fixedCountry'],
+            locales: { BE: ['nl', 'en', 'fr'] } as SharedEnvironment['locales'],
             memberNumberAlgorithm: MemberNumberAlgorithm.KSA,
             documentation: 'docs.ravot.ksa.be',
         };
@@ -279,6 +282,10 @@ function environmentPreset(env: string): EnvironmentPreset {
         userMode: 'organization' as const,
         translationNamespace: 'stamhoofd',
         platformName: 'stamhoofd',
+        locales: {
+            BE: ['nl', 'fr', 'en'] as Language[],
+            NL: ['nl'] as Language[],
+        },
         stripeConnectMethod: 'express' as const,
         documentation: 'www.stamhoofd.be/docs-v2',
     };
