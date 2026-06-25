@@ -5,12 +5,8 @@
         </h1>
         <p>{{ $t('%Rk') }}</p>
 
-        <p v-if="webshop.meta.isTicketBased" class="info-box">
-            {{ $t(`%1OE`) }}
-        </p>
-        <p v-else-if="webshop.meta.isRegistrations" class="info-box">
-            {{ $t(`%1Pi`) }}
-        </p>
+        <p v-if="webshop.meta.isTicketBased" class="info-box pre-wrap" v-text="$t(`%1OE`)" />
+        <p v-else-if="webshop.meta.isRegistrations" class="info-box pre-wrap" v-text="$t(`%1Pi`)" />
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

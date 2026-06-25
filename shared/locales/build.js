@@ -231,6 +231,11 @@ for (const country of Object.keys(validLocales)) {
 
         for (const namespace of namespaces) {
             const json = await build(country, language, namespace);
+            // Normalize literal \r\n or \r or \n to real newlines
+            replaceValues(json, (value) => {
+                if (typeof value !== 'string') return value;
+                return value.replace(/\\r\\n|\\r|\\n/g, '\n');
+            });
             const data = JSON.stringify(json);
 
             try {
