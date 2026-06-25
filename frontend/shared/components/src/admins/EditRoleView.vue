@@ -26,7 +26,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-if="basePermission === PermissionLevel.Read" :selectable="true" element-name="label">
+            <STListItem v-if="basePermission === PermissionLevel.Read || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
                 <template #left>
                     <Radio v-model="basePermission" :value="PermissionLevel.Read" />
                 </template>
@@ -35,7 +35,7 @@
                 </h3>
             </STListItem>
 
-            <STListItem v-if="basePermission === PermissionLevel.Write" :selectable="true" element-name="label">
+            <STListItem v-if="basePermission === PermissionLevel.Write || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
                 <template #left>
                     <Radio v-model="basePermission" :value="PermissionLevel.Write" />
                 </template>

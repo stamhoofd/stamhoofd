@@ -125,7 +125,7 @@ export class WebshopPreview extends AutoEncoder {
      * For non-archived webshops, this links directly to the webshop detail page.
      */
     getDashboardUrl(organization: { uri: string }): string {
-        const base = '/' + appToUri('dashboard') + '/' + organization.uri + '/verkoop';
+        const base = '/' + appToUri('dashboard') + '/' + organization.uri + '/webshops';
         if (this.meta.status === WebshopStatus.Archived) {
             return base + '/archief/' + Formatter.slug(this.id);
         }
