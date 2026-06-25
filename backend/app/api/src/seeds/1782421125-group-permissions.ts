@@ -35,10 +35,6 @@ async function start(dryRun: boolean) {
                 .where('periodId', organization.periodId)
                 .fetch();
 
-            if (groups.length === 0) {
-                return;
-            }
-
             // handle group permissions
             for (const group of groups) {
                 const groupPermissions = group.privateSettings.permissions;
