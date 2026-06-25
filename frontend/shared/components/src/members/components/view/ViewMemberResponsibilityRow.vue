@@ -69,18 +69,28 @@ const name = computed(() => {
 });
 
 const isValid = computed(() => {
-    if (STAMHOOFD.userMode === 'organization') {
-        return true;
-    }
+    let periodId: string | undefined;
 
-    // If platform period is ending in 30 days, don't show message
-    let periodId = platform.value.period.id;
-    if (platform.value.period.endDate && platform.value.period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)) {
-        if (organization.value && organization.value.period.period.previousPeriodId === platform.value.period.id) {
-            // If the organization is in the next period, only show message if member not registered for that period
-            periodId = organization.value.period.period.id;
-        } else {
+    if (STAMHOOFD.userMode === 'organization') {
+        const orgPeriod = responsibilityOrganization.value?.period.period;
+        if (!orgPeriod) return true;
+
+        // If org period is ending in 30 days, don't show message
+        if (orgPeriod.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)) {
             return true;
+        }
+
+        periodId = orgPeriod.id;
+    } else {
+        // If platform period is ending in 30 days, don't show message
+        periodId = platform.value.period.id;
+        if (platform.value.period.endDate && platform.value.period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)) {
+            if (organization.value && organization.value.period.period.previousPeriodId === platform.value.period.id) {
+                // If the organization is in the next period, only show message if member not registered for that period
+                periodId = organization.value.period.period.id;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -97,7 +107,6 @@ const isValid = computed(() => {
         periodId,
         organizationId: responsibilityOrganization.value?.id ?? undefined,
         types: [GroupType.Membership],
-
     }).length > 0;
 });
 </script>
