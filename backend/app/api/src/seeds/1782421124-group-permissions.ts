@@ -157,7 +157,7 @@ function handlePermissionRoleForGroup(organization: Organization, group: Group, 
         return;
     }
 
-    specificGroupPermissions.merge(convertedRessourcePermissions);
+    specificGroupPermissions.add(convertedRessourcePermissions);
     return;
 }
 
@@ -209,7 +209,7 @@ function handlePermissionRoleForGroupCategory(organization: Organization, oldCat
         return;
     }
 
-    specificGroupCategoryPermissions.merge(convertedRessourcePermissions);
+    specificGroupCategoryPermissions.add(convertedRessourcePermissions);
     return;
 }
 
@@ -261,7 +261,7 @@ function handlePermissionRoleForWebshop(organization: Organization, webshop: Web
         return;
     }
 
-    specificWebshopPermissions.merge(convertedRessourcePermissions);
+    specificWebshopPermissions.add(convertedRessourcePermissions);
     return;
 }
 

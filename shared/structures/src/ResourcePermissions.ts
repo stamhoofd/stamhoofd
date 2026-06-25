@@ -83,6 +83,18 @@ export class ResourcePermissions extends AutoEncoder {
         return p;
     }
 
+    add(other: ResourcePermissions) {
+        if (getPermissionLevelNumber(other.level) > getPermissionLevelNumber(this.level)) {
+            this.level = other.level;
+        }
+
+        for (const right of other.accessRights) {
+            if (!this.accessRights.includes(right)) {
+                this.accessRights.push(right);
+            }
+        }
+    }
+
     removeAccessRights(rights: AccessRight[]) {
         this.accessRights = this.accessRights.filter(r => !rights.includes(r));
     }
