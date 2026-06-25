@@ -30,6 +30,11 @@ export const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
             type: SQLValueType.String,
             nullable: true,
         }),
+        type: createColumnFilter({
+            expression: SQL.column('balance_items', 'type'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
         registration: createExistsFilter(
             SQL.select()
                 .from(SQL.table('registrations'))

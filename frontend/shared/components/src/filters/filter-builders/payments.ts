@@ -1,7 +1,7 @@
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import type { WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, GroupType, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
+import { BalanceItemType, FilterWrapperMarker, GroupType, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { getCustomerUIFilterBuilders } from '../filterBuilders';
@@ -129,6 +129,17 @@ export function usePaymentsUIFilterBuilders() {
     };
 
     const balanceItemBuilders: UIFilterBuilders = [
+        new MultipleChoiceFilterBuilder({
+            name: $t('%1B'),
+            options: Object.values(BalanceItemType).map(type => new MultipleChoiceUIFilterOption(getBalanceItemTypeName(type), type)),
+            wrapper: {
+                balanceItem: {
+                    type: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            },
+        }),
         new RelationFilterBuilder({
             name: $t('%14Z'),
             type: GroupType.Membership,
