@@ -1,0 +1,33 @@
+name: Auto-ready on label
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  check_and_ready:
+    name: 'Mark ready if CI already passed'
+    runs-on: ubuntu-latest
+    # Only act when the specific label was just added to a draft PR
+    if: github.event.label.name == 'ready if CI succeeds' && github.event.pull_request.draft == true
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    steps:
+      - name: Check if CI passed and mark ready
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          STATUS=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&status=completed&per_page=1" \
+            --jq '.workflow_runs[0].conclusion // empty')
+
+          if [ "$STATUS" = "success" ]; then
+            gh pr ready "$PR_NUMBER"
+            echo "CI already passed — marked PR #$PR_NUMBER as ready for review"
+          else
+            echo "CI has not passed yet for $SHA (conclusion: ${STATUS:-none}). Will convert when CI completes."
+          fi
