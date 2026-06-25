@@ -93,8 +93,26 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
                 style: '',
             },
             {
-                text: ` ${$t('%1G1')} `,
-                style: 'gray',
+                text: '',
+                style: '',
+                choices: [
+                    {
+                        id: 'is',
+                        text: $t('%1q'),
+                        action: () => {
+                            this.isInverted = false;
+                        },
+                        isSelected: () => !this.isInverted,
+                    },
+                    {
+                        id: 'is not',
+                        text: $t('%bT'),
+                        action: () => {
+                            this.isInverted = true;
+                        },
+                        isSelected: () => this.isInverted,
+                    },
+                ],
             },
             {
                 text: this.valuesToString,
@@ -179,7 +197,7 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const { markerValue: unwrapped, isInverted } = unwrapFilterForBuilder(this, filter);
+        const { markerValue: unwrapped, isInverted } = unwrapFilterForBuilder(this, filter, true);
         if (!unwrapped || typeof unwrapped !== 'object') {
             return null;
         }
