@@ -1,22 +1,34 @@
 import { field } from '@simonbackx/simple-encoding';
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import { StripeAccount } from '@stamhoofd/models';
-import type { BalanceItemPaymentDetailed } from '@stamhoofd/structures';
-import { BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { Order, StripeAccount } from '@stamhoofd/models';
+import type { OrderData } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 type PaymentWithItem = {
-    payment: PaymentGeneral;
-    balanceItemPayment: BalanceItemPaymentDetailed;
+    payment: PaymentGeneralWithStripeAccount;
+    balanceItemPayment: PaymentExportBalanceItemPayment;
+};
+
+type PaymentExportOrder = {
+    id: string;
+    number: number | null;
+    data: OrderData;
+};
+
+export type PaymentExportBalanceItemPayment = BalanceItemPaymentDetailed & {
+    customTitle: string | null;
 };
 
 export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
     @field({ decoder: StripeAccountStruct, nullable: true })
     stripeAccount: StripeAccountStruct | null = null;
+
+    expandedBalanceItemPayments: PaymentExportBalanceItemPayment[] = [];
 }
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
@@ -31,11 +43,21 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             accounts = (await StripeAccount.getByIDs(...stripeAccountIds)).map(s => StripeAccountStruct.create(s));
         }
 
+        const orderIds = Formatter.uniqueArray(
+            data.results.flatMap(payment => payment.balanceItemPayments.flatMap((item) => {
+                return item.balanceItem.orderId ? [item.balanceItem.orderId] : [];
+            })),
+        );
+        const orders = orderIds.length > 0 ? await Order.getByIDs(...orderIds) : [];
+        const orderMap = new Map<string, PaymentExportOrder>(orders.map(order => [order.id, order]));
+        const addedOrderIds = new Set<string>();
+
         return new PaginatedResponse({
             ...data,
             results: data.results.map((p) => {
                 const payment = PaymentGeneralWithStripeAccount.create(p);
                 payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
+                payment.expandedBalanceItemPayments = expandPaymentBalanceItemPayments(payment, orderMap, addedOrderIds);
                 return payment;
             }),
         });
@@ -56,7 +78,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         {
             id: 'balanceItemPayments',
             name: $t(`%Ly`),
-            transform: (data: PaymentGeneral): PaymentWithItem[] => data.balanceItemPayments.map(p => ({
+            transform: (data: PaymentGeneralWithStripeAccount): PaymentWithItem[] => data.expandedBalanceItemPayments.map(p => ({
                 payment: data,
                 balanceItemPayment: p,
             })),
@@ -99,6 +121,177 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         },
     ],
 });
+
+export function expandPaymentBalanceItemPayments(
+    payment: PaymentGeneral,
+    orderMap: Map<string, PaymentExportOrder>,
+    addedOrderIds = new Set<string>(),
+): PaymentExportBalanceItemPayment[] {
+    return payment.balanceItemPayments.flatMap((item) => {
+        const orderId = item.balanceItem.orderId;
+        if (!orderId) {
+            return [createExportBalanceItemPayment(item, null)];
+        }
+
+        const order = orderMap.get(orderId);
+        if (!order) {
+            return [createExportBalanceItemPayment(item, null)];
+        }
+
+        if (!addedOrderIds.has(order.id) && item.price === order.data.totalPrice) {
+            addedOrderIds.add(order.id);
+            return createOrderItemPaymentRows(item, order);
+        }
+
+        return [
+            createSyntheticBalanceItemPayment({
+                source: item,
+                description: getPartialOrderPaymentDescription(order),
+                amount: 1,
+                price: item.price,
+            }),
+        ];
+    });
+}
+
+function createOrderItemPaymentRows(
+    item: BalanceItemPaymentDetailed,
+    order: PaymentExportOrder,
+): PaymentExportBalanceItemPayment[] {
+    const rows: PaymentExportBalanceItemPayment[] = [];
+
+    for (const orderItem of order.data.cart.items) {
+        rows.push(
+            createSyntheticBalanceItemPayment({
+                source: item,
+                customTitle: orderItem.product.name,
+                description: orderItem.description,
+                amount: orderItem.amount,
+                price: orderItem.getPrice(),
+            }),
+        );
+    }
+
+    addOrderDiscountRows(rows, item, order);
+
+    if (order.data.deliveryPrice) {
+        rows.push(
+            createSyntheticBalanceItemPayment({
+                source: item,
+                customTitle: $t('Leveringskosten'),
+                description: $t('Leveringskosten'),
+                amount: 1,
+                price: order.data.deliveryPrice,
+            }),
+        );
+    }
+
+    if (order.data.administrationFee) {
+        rows.push(
+            createSyntheticBalanceItemPayment({
+                source: item,
+                customTitle: $t('Administratiekosten'),
+                description: $t('Administratiekosten'),
+                amount: 1,
+                price: order.data.administrationFee,
+            }),
+        );
+    }
+
+    const difference = item.price - rows.reduce((sum, row) => sum + row.price, 0);
+    if (difference !== 0) {
+        rows.push(
+            createSyntheticBalanceItemPayment({
+                source: item,
+                customTitle: $t('Correctie bestelling'),
+                description: $t('Correctie bestelling'),
+                amount: 1,
+                price: difference,
+            }),
+        );
+    }
+
+    return rows;
+}
+
+function addOrderDiscountRows(
+    rows: PaymentExportBalanceItemPayment[],
+    item: BalanceItemPaymentDetailed,
+    order: PaymentExportOrder,
+) {
+    let remainingDiscountablePrice = order.data.cart.price;
+
+    const appliedPercentageDiscount = Math.min(order.data.appliedPercentageDiscount, remainingDiscountablePrice);
+    if (appliedPercentageDiscount > 0) {
+        rows.push(
+            createSyntheticBalanceItemPayment({
+                source: item,
+                customTitle: $t('Korting ({percentage})', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
+                description: $t('Korting ({percentage})', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
+                amount: 1,
+                price: -appliedPercentageDiscount,
+            }),
+        );
+        remainingDiscountablePrice -= appliedPercentageDiscount;
+    }
+
+    const fixedDiscount = Math.min(order.data.fixedDiscount, remainingDiscountablePrice);
+    if (fixedDiscount > 0) {
+        rows.push(
+            createSyntheticBalanceItemPayment({
+                source: item,
+                customTitle: $t('Korting'),
+                description: $t('Vaste korting'),
+                amount: 1,
+                price: -fixedDiscount,
+            }),
+        );
+    }
+}
+
+function getPartialOrderPaymentDescription(order: PaymentExportOrder): string {
+    if (order.number !== null) {
+        return $t('Gedeeltelijke betaling/terugbetaling voor bestelling #{number}', { number: order.number.toString() });
+    }
+
+    return $t('Gedeeltelijke betaling/terugbetaling voor bestelling');
+}
+
+function createSyntheticBalanceItemPayment({
+    source,
+    customTitle = null,
+    description,
+    amount,
+    price,
+}: {
+    source: BalanceItemPaymentDetailed;
+    customTitle?: string | null;
+    description: string;
+    amount: number;
+    price: number;
+}): PaymentExportBalanceItemPayment {
+    return createExportBalanceItemPayment(BalanceItemPaymentDetailed.create({
+        ...source,
+        price,
+        balanceItem: BalanceItem.create({
+            ...source.balanceItem,
+            type: BalanceItemType.Order,
+            relations: new Map(source.balanceItem.relations),
+            description,
+            amount,
+            unitPrice: amount === 0 ? 0 : price / amount,
+        }),
+    }), customTitle);
+}
+
+function createExportBalanceItemPayment(
+    item: BalanceItemPaymentDetailed,
+    customTitle: string | null,
+): PaymentExportBalanceItemPayment {
+    return Object.assign(item, {
+        customTitle,
+    });
+}
 
 function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
     return [
@@ -150,11 +343,24 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             },
         },
         {
-            id: 'balanceItem.description',
-            name: $t(`%6o`),
+            id: 'balanceItem.title',
+            name: $t('Titel'),
             width: 40,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.balanceItem.description,
+                value: object.balanceItemPayment.customTitle || object.balanceItemPayment.balanceItem.itemTitle,
+            }),
+        },
+        {
+            id: 'balanceItem.description',
+            name: $t(`%6o`),
+            width: 50,
+            getValue: (object: PaymentWithItem) => ({
+                value: object.balanceItemPayment.balanceItem.itemDescription || object.balanceItemPayment.balanceItem.description,
+                style: {
+                    alignment: {
+                        wrapText: true,
+                    },
+                },
             }),
         },
         {
