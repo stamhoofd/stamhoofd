@@ -166,6 +166,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
+    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
     amountToPay: createInMemoryFilterCompiler('amountToPay'),
     payments: createInMemoryFilterCompiler('payments', paymentFilterCompilers),
 };
