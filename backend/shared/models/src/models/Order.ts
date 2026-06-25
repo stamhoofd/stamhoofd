@@ -731,6 +731,9 @@ export class Order extends QueryableModel {
      * Only call this once! Make sure you use the queues correctly
      */
     async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+        if (!this.id) {
+            await this.save();
+        }
         console.log('Marking order ' + this.id + ' as paid');
 
         const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
