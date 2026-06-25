@@ -5900,8 +5900,8 @@
     "translation": "Paid"
   },
   "%1OE": {
-    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
-    "translation": "If you want to collect this information per ticket (not per order), you can disable the cart and limit the maximum number of tickets to 1 per person.\\n            If you only need dropdown choices, it's best to use the selection menus in the ticket settings; that's a bit easier to use."
+    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
+    "translation": "If you want to collect this information per ticket (not per order), you can disable the cart and limit the maximum number of tickets to 1 per person.\\nIf you only need dropdown choices, it's best to use the selection menus in the ticket settings; that's a bit easier to use."
   },
   "%1OG": {
     "original": "Het minimum is {min}",
@@ -6208,8 +6208,8 @@
     "translation": "Events"
   },
   "%1Pi": {
-    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
-    "translation": "If you want to collect this info per registered person, you can disable the cart and limit the maximum number of each item to one.\\n            If you only need dropdown menus, it's best to use the dropdowns in the item settings—that's a bit easier to use."
+    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
+    "translation": "If you want to collect this info per registered person, you can disable the cart and limit the maximum number of each item to one.\\nIf you only need dropdown menus, it's best to use the dropdowns in the item settings—that's a bit easier to use."
   },
   "%1Pj": {
     "original": "Aanmaken",
