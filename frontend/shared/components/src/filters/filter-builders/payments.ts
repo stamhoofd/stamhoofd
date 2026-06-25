@@ -1,14 +1,19 @@
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { FilterWrapperMarker, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
+import type { WrapperFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, GroupType, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { getCustomerUIFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from '../NumberUIFilter';
+import { RelationFilterBuilder } from '../RelationUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
+import { useEventGroupsRelationFetcher } from '../relation-fetchers/event-groups';
+import { useGroupsRelationFetcher } from '../relation-fetchers/groups';
+import { useWebshopsRelationFetcher } from '../relation-fetchers/webshops';
 import { usePlatform } from '#hooks/usePlatform.ts';
 
 export class PaymentFilterBuilders {
@@ -113,6 +118,17 @@ export class PaymentFilterBuilders {
 export function usePaymentsUIFilterBuilders() {
     const organization = useOrganization();
     const platform = usePlatform();
+    const groupsRelationFetcher = useGroupsRelationFetcher();
+    const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
+    const webshopsRelationFetcher = useWebshopsRelationFetcher();
+
+    const balanceItemRegistrationWrapper: WrapperFilter = {
+        balanceItemPayments: {
+            balanceItem: {
+                registration: FilterWrapperMarker,
+            },
+        },
+    };
 
     const builders: UIFilterBuilders = [
         (!organization.value || organization.value.id === platform.value.membershipOrganizationId) && STAMHOOFD.userMode === 'organization' ? PaymentFilterBuilders.methodForMembershipOrganization : PaymentFilterBuilders.method,
@@ -123,6 +139,32 @@ export function usePaymentsUIFilterBuilders() {
         PaymentFilterBuilders.createdAt,
         PaymentFilterBuilders.transferDescription,
         getCustomerUIFilterBuilders()[0],
+        new RelationFilterBuilder({
+            name: $t('%14Z'),
+            type: GroupType.Membership,
+            key: 'groupId',
+            wrapper: balanceItemRegistrationWrapper,
+            relationFetcher: groupsRelationFetcher({ type: GroupType.Membership }),
+        }),
+        new RelationFilterBuilder({
+            name: $t('%1IR'),
+            type: GroupType.EventRegistration,
+            key: 'groupId',
+            wrapper: balanceItemRegistrationWrapper,
+            relationFetcher: eventGroupsRelationFetcher(),
+        }),
+        new RelationFilterBuilder({
+            name: $t('Webshop'),
+            key: 'webshopId',
+            wrapper: {
+                balanceItemPayments: {
+                    balanceItem: {
+                        order: FilterWrapperMarker,
+                    },
+                },
+            },
+            relationFetcher: webshopsRelationFetcher,
+        }),
     ];
 
     if (organization.value && organization.value.meta.invoicesEnabled) {
