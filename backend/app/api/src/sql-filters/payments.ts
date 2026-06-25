@@ -1,7 +1,8 @@
 import { Payment } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 /**
  * Defines how to filter payments in the database from StamhoofdFilter objects
@@ -38,6 +39,10 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    payingOrganization: createJoinedRelationFilter(
+        SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column(Payment.table, 'payingOrganizationId')),
+        organizationFilterCompilers,
+    ),
     invoiceId: createColumnFilter({
         expression: SQL.column('invoiceId'),
         type: SQLValueType.String,
