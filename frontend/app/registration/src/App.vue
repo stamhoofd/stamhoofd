@@ -14,12 +14,17 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useEventTypes } from '@stamhoofd/components/hooks/useEventTypes.ts';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
 import { computed } from 'vue';
+import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
+import { AppRoute } from '@stamhoofd/structures';
 
 const context = useContext();
 const memberManager = useMemberManager();
 const getLoginRoot = useLoginRoot();
 const eventTypes = useEventTypes();
+const membersPackage = useMembersPackage();
+const appNavigate = useAppNavigate();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
@@ -39,6 +44,15 @@ function areEventsEnabled(): boolean {
 }
 
 function getRoot() {
+    if (STAMHOOFD.userMode === 'organization' && !membersPackage.value) {
+        console.warn('No members package found for org ' + context.value.organization?.name + ', navigating to dashboard');
+        return new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                await appNavigate(AppRoute.Dashboard, { properties: { organization: context.value.organization } });
+                throw new Error('Should have been navigated away');
+            },
+        });
+    }
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('./views/start/StartView.vue'), {}),
     });
