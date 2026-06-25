@@ -26,6 +26,24 @@
                 </p>
             </STListItem>
 
+            <STListItem v-if="basePermission === PermissionLevel.Read" :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="basePermission" :value="PermissionLevel.Read" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Alles lezen') }}
+                </h3>
+            </STListItem>
+
+            <STListItem v-if="basePermission === PermissionLevel.Write" :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="basePermission" :value="PermissionLevel.Write" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Alles lezen en bewerken') }}
+                </h3>
+            </STListItem>
+
             <STListItem :selectable="true" element-name="label">
                 <template #left>
                     <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
