@@ -33,129 +33,68 @@
 
         <h2 class="style-with-button">
             <div>{{ $t('%QM') }}</div>
-            <div>
-                <button class="button text only-icon-smartphone" type="button" @click="addDiscountCode">
-                    <span class="icon add" />
-                    <span>{{ $t('Nieuw') }}</span>
-                </button>
-            </div>
         </h2>
         <p>{{ $t('%QN') }}</p>
 
-        <Spinner v-if="fetchingDiscountCodes" />
-        <div v-else>
-            <div v-if="patchedDiscountCodes.length > 5" class="input-with-buttons">
-                <div>
-                    <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
-                    </form>
-                </div>
-                <div>
-                    <button type="button" class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">{{ $t('Filter') }}</span>
-                        <span v-if="hasActiveFilter" class="icon dot primary" />
-                    </button>
-                </div>
-            </div>
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="allowDiscountCodeEntry" />
+                </template>
 
-            <STList v-if="patchedDiscountCodes.length || allowDiscountCodeEntry">
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="allowDiscountCodeEntry" />
-                    </template>
+                <h3 class="style-title-list">
+                    {{ $t('%QO') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('%QP') }}
+                </p>
+            </STListItem>
 
-                    <h3 class="style-title-list">
-                        {{ $t('%QO') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('%QP') }}
-                    </p>
-                </STListItem>
+            <STListItem :selectable="true" class="left-center" @click="openDiscountCodes">
+                <template #left>
+                    <span class="icon label" />
+                </template>
 
-                <DiscountCodeRow v-for="discountCode of filteredDiscountCodes" :key="discountCode.id" :discount-code="discountCode" :discount-codes="patchedDiscountCodes" :visible-discount-codes="filteredDiscountCodes" :is-filtering="isFiltering" :webshop="webshop" @patch:discount-codes="onDiscountCodesPatch" />
-            </STList>
-            <p v-else class="info-box">
-                {{ $t('%QR') }}
-            </p>
-            <p v-if="patchedDiscountCodes.length > 5 && filteredDiscountCodes.length === 0" class="info-box">
-                {{ $t('Geen kortingscodes gevonden voor deze zoekopdracht.') }}
-            </p>
-        </div>
+                <h3 class="style-title-list">
+                    {{ $t('Kortingscodes beheren') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Voeg persoonlijke kortingscodes toe, filter de lijst en verstuur ze per e-mail.') }}
+                </p>
+
+                <template #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import { usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import Spinner from '@stamhoofd/components/Spinner.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
-import { Discount, DiscountCode, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
+import { Discount, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 
-import { computed, nextTick, onMounted, ref } from 'vue';
-import DiscountCodeRow from './discounts/DiscountCodeRow.vue';
-import { MAX_DISCOUNT_CODES } from './discounts/useDiscountCodeActions';
-import { useDiscountCodeFilter } from './discounts/useDiscountCodeFilter';
+import { computed } from 'vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 
 const present = usePresent();
+const show = useShow();
 const viewTitle = 'Kortingen';
 
-const { webshop, addPatch, errors, saving, save, hasChanges: hasWebshopChanges, shouldNavigateAway } = useEditWebshop({
-    afterSave,
-    validate: () => {
-        if (patchedDiscountCodes.value.length > MAX_DISCOUNT_CODES) {
-            throw new SimpleError({
-                code: 'too_many_discount_codes',
-                message: 'Too many discount codes',
-                human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }),
-            });
-        }
-    },
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
-
-const context = useContext();
-const fetchingDiscountCodes = ref(false);
-const discountCodes = ref<DiscountCode[]>([]);
-
-const { patch: patchDiscountCodes, patched: patchedDiscountCodes, hasChanges: hasDiscountCodeChanges, addArrayPatch: addDiscountCodesPatch } = usePatchArray<DiscountCode>(discountCodes);
-const hasChanges = computed(() => hasWebshopChanges.value || hasDiscountCodeChanges.value);
-
-onMounted(() => {
-    fetchDiscountCodes().catch(console.error);
-});
-
-async function fetchDiscountCodes() {
-    fetchingDiscountCodes.value = true;
-    try {
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: `/webshop/${webshop.value.id}/discount-codes`,
-            decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
-        });
-        discountCodes.value = response.data;
-    } catch (e) {
-        Toast.fromError(e).show();
-    }
-    fetchingDiscountCodes.value = false;
-}
-
-const { searchQuery, hasActiveFilter, isFiltering, filterCodes, editFilter } = useDiscountCodeFilter();
-const filteredDiscountCodes = computed(() => filterCodes(patchedDiscountCodes.value));
 
 const defaultDiscounts = computed(() => webshop.value.meta.defaultDiscounts);
 
@@ -217,71 +156,15 @@ function editDiscount(discount: Discount) {
     }).catch(console.error);
 }
 
-// Apply a discount codes patch and keep allowDiscountCodeEntry in sync: enable it when the first code is
-// added, disable it when the last code is removed.
-function onDiscountCodesPatch(patch: PatchableArrayAutoEncoder<DiscountCode>) {
-    const wasEmpty = patchedDiscountCodes.value.length === 0;
-    addDiscountCodesPatch(patch);
-
-    nextTick(() => {
-        const count = patchedDiscountCodes.value.length;
-        if (count === 0) {
-            allowDiscountCodeEntry.value = false;
-        } else if (wasEmpty) {
-            allowDiscountCodeEntry.value = true;
-        }
-    }).catch(console.error);
-}
-
-function addDiscountCode() {
-    if (patchedDiscountCodes.value.length >= MAX_DISCOUNT_CODES) {
-        new Toast($t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }), 'error red').show();
-        return;
-    }
-
-    const discountCode = DiscountCode.create({
-        code: '',
-    });
-    const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
-    arr.addPut(discountCode);
-
-    present({
+function openDiscountCodes() {
+    show({
         components: [
-            AsyncComponent(() => import('./discounts/EditDiscountCodeView.vue'), {
-                isNew: true,
-                discountCode,
+            AsyncComponent(() => import('./discounts/WebshopDiscountCodesTableView.vue'), {
                 webshop: webshop.value,
-                saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
-                    arr.merge(patch);
-                    onDiscountCodesPatch(arr);
-                },
             }),
         ],
-        modalDisplayStyle: 'popup',
+        adjustHistory: false,
     }).catch(console.error);
-}
-
-async function afterSave() {
-    if (patchDiscountCodes.value.changes.length === 0) {
-        return;
-    }
-
-    const response = await context.value.authenticatedServer.request({
-        method: 'PATCH',
-        path: `/webshop/${webshop.value.id}/discount-codes`,
-        body: patchDiscountCodes.value,
-        decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
-    });
-
-    patchDiscountCodes.value = new PatchableArray();
-    for (const d of response.data) {
-        const existing = discountCodes.value.find(dd => dd.id === d.id);
-        if (existing) {
-            existing.deepSet(d);
-        } else {
-            discountCodes.value.push(d);
-        }
-    }
 }
 
 defineExpose({

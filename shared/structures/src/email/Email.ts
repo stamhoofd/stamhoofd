@@ -28,6 +28,7 @@ export enum EmailRecipientFilterType {
     Orders = 'Orders',
     ReceivableBalances = 'ReceivableBalances',
     Documents = 'Documents',
+    WebshopDiscountCodes = 'WebshopDiscountCodes',
 }
 
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {

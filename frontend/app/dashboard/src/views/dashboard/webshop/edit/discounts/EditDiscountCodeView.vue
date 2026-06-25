@@ -21,6 +21,11 @@
             {{ $t('%S1') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
         </p>
 
+        <EmailInput v-model="email" :required="false" error-fields="email" :error-box="errors.errorBox" :title="$t('E-mailadres')" :placeholder="$t('Optioneel')" />
+        <p class="style-description-small">
+            {{ $t('Gebruik dit e-mailadres om de kortingscode later persoonlijk te versturen. De besteller kan nog steeds een ander e-mailadres opgeven bij het bestellen. De code wordt ook niet automatisch toegepast als iemand met dit e-mailadres probeert te bestellen. Het e-mailadres is enkel voor communicatie van de code.') }}
+        </p>
+
         <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)">
             <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`%14p`)" />
         </STInputBox>
@@ -105,10 +110,11 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PrivateWebshop } from '@stamhoofd/structures';
 import { Discount, DiscountCode } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import { computed } from 'vue';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 
 const props = defineProps<{
     discountCode: DiscountCode;
@@ -149,6 +155,15 @@ const description = computed({
     set: (description: string) => {
         addPatch(DiscountCode.patch({
             description,
+        }));
+    },
+});
+
+const email = computed({
+    get: () => patchedDiscountCode.value.email ?? '',
+    set: (email: string) => {
+        addPatch(DiscountCode.patch({
+            email: email.length > 0 ? email : null,
         }));
     },
 });
@@ -221,12 +236,24 @@ function cleanCode() {
     code.value = Formatter.slug(code.value).toUpperCase();
 }
 
+function cleanEmail() {
+    email.value = email.value.trim().toLowerCase();
+}
+
 function validate() {
     if (code.value.length === 0) {
         throw new SimpleError({
             code: 'required_field',
             field: 'code',
             message: 'Vul een code in',
+        });
+    }
+
+    if (email.value.length > 0 && !DataValidator.isEmailValid(email.value)) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            field: 'email',
+            message: 'Vul een geldig e-mailadres in',
         });
     }
 
@@ -241,6 +268,7 @@ function validate() {
 
 async function save() {
     cleanCode();
+    cleanEmail();
 
     const isValid = await errors.validator.validate();
     if (!isValid) {
