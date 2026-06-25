@@ -95,17 +95,15 @@ async function loadVerifyEmail(organization: Organization | null, componentPrope
 }
 
 // ADMIN
-if (isDashboardDomain) {
-    defineRoute({
-        name: AppRoute.Admin,
-        url: $t('%1Wn'),
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithAdmin(options);
-        },
-    });
-}
+defineRoute({
+    name: AppRoute.Admin,
+    url: $t('%1Wn'),
+    // TODO: move to component pattern (see verify-email)
+    handler: async (options) => {
+        await replaceWithSpinner();
+        await replaceWithAdmin(options);
+    },
+});
 
 // DASHBOARD
 if (orgInDomain) {
@@ -261,6 +259,14 @@ if (orgInDomain) {
 }
 
 // AUTO (DEFAULT)
+defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
+    name: AppRoute.OrgScopedAuto,
+    url: 'auto/@organizationUri',
+    component: async (properties) => {
+        return await loadAuto(properties.organization, {});
+    },
+    ...orgInUriParams,
+});
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.OrgScopedAuto,
@@ -272,26 +278,17 @@ if (orgInDomain) {
             return await loadAuto(await orgInDomain(), {});
         },
     });
-} else {
-    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
-        name: AppRoute.OrgScopedAuto,
-        url: 'auto/@organizationUri',
-        component: async (properties) => {
-            return await loadAuto(properties.organization, {});
-        },
-        ...orgInUriParams,
-    });
-    defineRoute({
-        name: AppRoute.UnscopedAuto,
-        url: '',
-        isDefault: {},
-        force: true,
-        replace: 100,
-        component: async () => {
-            return await loadAuto(null, {});
-        },
-    });
 }
+defineRoute({
+    name: AppRoute.UnscopedAuto,
+    url: '',
+    isDefault: {},
+    force: true,
+    replace: 100,
+    component: async () => {
+        return await loadAuto(null, {});
+    },
+});
 
 </script>
 
