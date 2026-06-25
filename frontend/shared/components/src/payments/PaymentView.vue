@@ -76,7 +76,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="isManualMethod">
+                <STListItem v-if="isManualMethod || !(payment.paidAt && (payment.type === PaymentType.Payment || payment.type === PaymentType.Refund))">
                     <h3 class="style-definition-label">
                         {{ $t('%1JJ') }}
                     </h3>
@@ -445,8 +445,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
-
-
 
 import PaymentItemsBox from './PaymentItemsBox.vue';
 
