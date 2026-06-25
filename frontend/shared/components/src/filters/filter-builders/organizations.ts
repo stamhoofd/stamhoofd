@@ -31,7 +31,30 @@ const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
-export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: boolean} = {onlyBaseFilters: false}) {
+const getOrganizationAdminUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new StringFilterBuilder({
+            name: $t(`Naam`),
+            key: 'name',
+        }),
+        new StringFilterBuilder({
+            name: $t(`Voornaam`),
+            key: 'firstName',
+        }),
+        new StringFilterBuilder({
+            name: $t(`Achternaam`),
+            key: 'lastName',
+        }),
+        new StringFilterBuilder({
+            name: $t(`E-mailadres`),
+            key: 'email',
+        }),
+    ];
+
+    return builders;
+};
+
+export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: boolean } = { onlyBaseFilters: false }) {
     const platform = usePlatform();
     const _user = useUser();
 
@@ -45,8 +68,24 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
         [SetupStepType.Registrations]: $t('%1EI'),
     };
 
-    function ifNotBase(filter: UIFilterBuilder) {
+    function ifNotBase(filter: UIFilterBuilder | null) {
         if (options.onlyBaseFilters) {
+            return null;
+        }
+
+        return filter;
+    }
+
+    function ifNotPlatform(filter: UIFilterBuilder | null) {
+        if (STAMHOOFD.userMode === 'platform') {
+            return null;
+        }
+
+        return filter;
+    }
+
+    function ifPlatform(filter: UIFilterBuilder | null) {
+        if (STAMHOOFD.userMode === 'organization') {
             return null;
         }
 
@@ -86,6 +125,16 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
                     },
                 },
             })),
+            ifNotPlatform(ifNotBase(new GroupUIFilterBuilder({
+                name: $t(`Beheerders`),
+                description: $t('Filter alle verenigingen die een beheerder hebben die aan deze voorwaarden voldoet.'),
+                builders: getOrganizationAdminUIFilterBuilders(),
+                wrapper: {
+                    admins: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }))),
             new MultipleChoiceFilterBuilder({
                 name: $t(`%1H0`),
                 options: [
@@ -99,7 +148,7 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
                 },
             }),
 
-            ifNotBase(new MultipleChoiceFilterBuilder({
+            ifPlatform(ifNotBase(new MultipleChoiceFilterBuilder({
                 name: $t(`%c6`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
@@ -165,12 +214,10 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
                         if (enumValues.includes(key as SetupStepType)) {
                             if (JSON.stringify(value) === stringifiedValueToMatch) {
                                 results.push(key as SetupStepType);
-                            }
-                            else {
+                            } else {
                                 return null;
                             }
-                        }
-                        else if (key !== 'periodId') {
+                        } else if (key !== 'periodId') {
                             return null;
                         }
                     }
@@ -181,7 +228,7 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
 
                     return null;
                 },
-            })),
+            }))),
             ifNotBase(new GroupUIFilterBuilder({
                 name: $t(`%1Ke`),
                 description: $t('%1CI'),
@@ -213,12 +260,12 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
             );
         }
 
-        const builders  = all.filter(b => b !== null);
+        const builders = all.filter(b => b !== null);
 
         // Recursive: self referencing groups
         builders.unshift(
             new GroupUIFilterBuilder({
-                builders
+                builders,
             }),
         );
 

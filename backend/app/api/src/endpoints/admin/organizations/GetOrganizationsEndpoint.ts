@@ -72,25 +72,47 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         if (q.search) {
-            let searchFilter: StamhoofdFilter | null = null;
+            let searchFilter: StamhoofdFilter;
 
-            // todo: auto detect e-mailaddresses and search on admins
-            searchFilter = {
-                $or: [
-                    {
-                        name: {
-                            $contains: q.search,
+            if (q.search.includes('@')) {
+                // Automatically search in the email addresses of admins instead of the organization name
+                searchFilter = {
+                    $or: [
+                        {
+                            name: {
+                                $contains: q.search,
+                            },
                         },
-                    },
-                    {
-                        uri: q.search,
-                    },
-                ],
-            };
-
-            if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                        {
+                            uri: q.search,
+                        },
+                        {
+                            admins: {
+                                $elemMatch: {
+                                    email: {
+                                        $contains: q.search,
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                };
+            } else {
+                searchFilter = {
+                    $or: [
+                        {
+                            name: {
+                                $contains: q.search,
+                            },
+                        },
+                        {
+                            uri: q.search,
+                        },
+                    ],
+                };
             }
+
+            query.where(await compileToSQLFilter(searchFilter, filterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {

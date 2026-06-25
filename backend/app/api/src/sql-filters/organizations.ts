@@ -188,6 +188,42 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             }),
         },
     ),
+    admins: createExistsFilter(
+        SQL.select()
+            .from(SQL.table('users'))
+            .where(
+                SQL.column('users', 'organizationId'),
+                SQL.column('organizations', 'id'),
+            )
+            .where(SQL.column('users', 'permissions'), SQLWhereSign.NotEqual, new SQLNull()),
+        {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({
+                expression: new SQLConcat(
+                    SQL.coalesce(SQL.column('users', 'firstName'), new SQLScalar('')),
+                    new SQLScalar(' '),
+                    SQL.coalesce(SQL.column('users', 'lastName'), new SQLScalar('')),
+                ),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+            firstName: createColumnFilter({
+                expression: SQL.column('users', 'firstName'),
+                type: SQLValueType.String,
+                nullable: true,
+            }),
+            lastName: createColumnFilter({
+                expression: SQL.column('users', 'lastName'),
+                type: SQLValueType.String,
+                nullable: true,
+            }),
+            email: createColumnFilter({
+                expression: SQL.column('users', 'email'),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+        },
+    ),
     companies: createExistsFilter(
         /**
          * There is a bug in MySQL 8 that is fixed in 9.3
