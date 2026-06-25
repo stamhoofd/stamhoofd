@@ -1,7 +1,7 @@
 // i18n-setup.js
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
-import type {SessionContext} from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { countryToCode } from '@stamhoofd/structures';
@@ -40,6 +40,8 @@ export class I18nController {
      * -> affects the generated SEO meta tags
      */
     static fixedCountry = false;
+
+    usingStoredLanguage = false;
 
     namespace = '';
     language = Language.Dutch;
@@ -111,12 +113,10 @@ export class I18nController {
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== locale)) {
             if (I18nController.fixedCountry || STAMHOOFD.fixedCountry) {
                 return '/' + language + prefix + url;
-            }
-            else {
+            } else {
                 return '/' + language + '-' + country + prefix + url;
             }
-        }
-        else {
+        } else {
             return prefix + url;
         }
     }
@@ -125,20 +125,27 @@ export class I18nController {
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             if (I18nController.fixedCountry || STAMHOOFD.fixedCountry) {
                 UrlHelper.localePrefix = I18nController.shared.language;
-            }
-            else {
+            } else {
                 UrlHelper.localePrefix = I18nController.shared.locale;
             }
-        }
-        else {
+        } else {
             UrlHelper.localePrefix = '';
         }
         await HistoryManager.updateUrl();
     }
 
+    static #manualLocales: typeof STAMHOOFD.locales;
+
+    static get manualLocales() {
+        return this.#manualLocales;
+    }
+
+    static set manualLocales(locales) {
+        this.#manualLocales = locales;
+    }
+
     get validLocales() {
-        // todo: make platform specific
-        return (STAMHOOFD.locales ?? {
+        return (I18nController.manualLocales ?? STAMHOOFD.locales ?? {
             [STAMHOOFD.fixedCountry ?? Country.Belgium]: [Language.Dutch],
         }) as Partial<Record<Country, Language[]>>;
     }
@@ -194,8 +201,7 @@ export class I18nController {
             const messages = await import(`../../../shared/locales/dist/locales/${namespace}/${locale}.json`);
             i18n.loadLocale(namespace, locale, messages.default);
             console.log('[I18n] Successfully loaded locale', namespace, locale);
-        }
-        else {
+        } else {
             console.info('[I18n] Loading locale from memory ' + locale);
         }
 
@@ -218,16 +224,20 @@ export class I18nController {
     static async getLocaleFromStorage(): Promise<{ language?: Language; country?: Country }> {
         const country = await Storage.keyValue.getItem('country');
         const language = await Storage.keyValue.getItem('language');
+        const version = await Storage.keyValue.getItem('i18n-version');
 
         return {
-            country: country && this.isValidCountry(country) ? country : undefined,
-            language: language && this.isValidLanguage(language) ? language : undefined,
+            country: country && version !== null && this.isValidCountry(country) ? country : undefined,
+            language: language && version !== null && this.isValidLanguage(language) ? language : undefined,
         };
     }
 
     async saveLocaleToStorage() {
         await Storage.keyValue.setItem('language', this.language);
         await Storage.keyValue.setItem('country', this.countryCode);
+        await Storage.keyValue.setItem('i18n-version', '2');
+
+        this.usingStoredLanguage = true;
 
         console.info('[I18n] Saved locale to storage', this.locale);
     }
@@ -250,10 +260,26 @@ export class I18nController {
         return STAMHOOFD.fixedCountry ? ((country as any) === STAMHOOFD.fixedCountry) : countries.includes(country as Country);
     }
 
-    static async loadDefault($context: SessionContext | null | undefined, defaultCountry?: Country, defaultLanguage?: Language, country?: Country) {
+    static async loadDefault({ $context, defaultCountry, defaultLanguage, country, locales }: {
+        $context: SessionContext | null | undefined;
+        defaultCountry?: Country;
+        defaultLanguage?: Language;
+        country?: Country;
+        locales?: typeof STAMHOOFD.locales;
+    }) {
         const namespace = STAMHOOFD.translationNamespace;
         let language: Language | undefined = undefined;
-        let needsSave = false;
+
+        if (locales) {
+            this.manualLocales = locales;
+        }
+
+        /**
+         * We only save the locale on user actions: when the user manually switches to a different language.
+         * In other cases, we never store. As soon as a language or locale is stored, it is preferred over anything else.
+         */
+        const needsSave = false;
+        let usingStoredLanguage = false;
 
         // Check country if passed
         if (country && !this.isValidCountry(country)) {
@@ -273,6 +299,7 @@ export class I18nController {
                 if (!language && storage.language) {
                     console.info('Using stored language', storage.language);
                     language = storage.language;
+                    usingStoredLanguage = true;
                 }
 
                 if (!country && storage.country) {
@@ -291,9 +318,7 @@ export class I18nController {
             if (!language && this.isValidLanguage(l)) {
                 console.info('[I18n] Using language from url', l);
                 language = l;
-                needsSave = true;
-            }
-            else {
+            } else {
                 if (language?.toString() !== l) {
                     console.warn('[I18n] Ignored language from url', l);
                 }
@@ -302,21 +327,17 @@ export class I18nController {
             if (!country && this.isValidCountry(c)) {
                 console.info('[I18n] Using country from url', c);
                 country = c;
-                needsSave = true;
-            }
-            else {
+            } else {
                 if (country as string !== c) {
                     console.warn('[I18n] Ignored country from url', c);
                 }
             }
-        }
-        else if (parts.length >= 1 && (this.fixedCountry || STAMHOOFD.fixedCountry) && parts[0].length === 2) {
+        } else if (parts.length >= 1 && (this.fixedCountry || STAMHOOFD.fixedCountry) && parts[0].length === 2) {
             const l = parts[0].substr(0, 2).toLowerCase();
 
             if (!language && this.isValidLanguage(l)) {
                 console.info('[I18n] Using language from url', l);
                 language = l;
-                needsSave = true;
             }
         }
 
@@ -358,8 +379,7 @@ export class I18nController {
                 if (country) {
                     console.info('Using country from referrer TLD', '.' + tld, country);
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 // Invalid referrer URL
                 console.error('Failed to get country from referrer', e);
             }
@@ -372,8 +392,7 @@ export class I18nController {
                 if (this.isValidLanguage(l)) {
                     language = l;
                     console.info('[I18n] Using browser language', l);
-                }
-                else {
+                } else {
                     console.warn('[I18n] Browser language ' + language + ' is not supported');
                 }
             }
@@ -384,8 +403,7 @@ export class I18nController {
                 if (this.isValidCountry(c)) {
                     console.info('[I18n] Using browser country', c);
                     country = c;
-                }
-                else {
+                } else {
                     console.warn('[I18n] Browser country ' + c + ' is not supported');
                 }
             }
@@ -411,13 +429,11 @@ export class I18nController {
 
                 if (language) {
                     console.info('[I18n] Using default language from TLD', '.' + tld, language);
-                }
-                else {
+                } else {
                     console.info('[I18n] Using fallback language nl');
                     language = Language.Dutch;
                 }
-            }
-            else {
+            } else {
                 console.info('[I18n] Using default language', defaultLanguage);
                 language = defaultLanguage;
             }
@@ -440,6 +456,7 @@ export class I18nController {
         }
 
         const def = new I18nController($context, language ?? defaultLanguage ?? Language.Dutch, country, namespace);
+        def.usingStoredLanguage = usingStoredLanguage;
         def.defaultCountryCode = defaultCountry ? countryToCode({ country: defaultCountry, defaultCountryCode: def.defaultCountryCode }) : def.defaultCountryCode;
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage;
         I18nController.shared = def;
@@ -470,9 +487,9 @@ export class I18nController {
         //     I18nController.shared?.updateUrl()
         // })
 
-        if (needsSave) {
-            def.saveLocaleToStorage().catch(console.error);
-        }
+        // if (needsSave) {
+        //     def.saveLocaleToStorage().catch(console.error);
+        // }
 
         // Update meta data
         def.updateMetaData();

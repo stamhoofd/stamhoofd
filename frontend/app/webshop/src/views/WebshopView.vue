@@ -21,39 +21,41 @@
             </template>
         </STNavigationBar>
 
-        <main>
-            <div class="webshop-layout" :class="webshopLayout + ' ' + (webshopLayout === 'Default' ? 'enable-grid' : '')">
-                <header class="webshop-header">
-                    <figure v-if="bannerImageSrc" class="webshop-banner">
-                        <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
-                    </figure>
-                    <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
+        <main class="flex">
+            <div class="container">
+                <div class="webshop-layout" :class="webshopLayout + ' ' + (webshopLayout === 'Default' ? 'enable-grid' : '')">
+                    <header class="webshop-header">
+                        <figure v-if="bannerImageSrc" class="webshop-banner">
+                            <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
+                        </figure>
+                        <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
 
-                    <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
-                    <div v-if="webshop.meta.description.html" class="style-wysiwyg gray" v-html="webshop.meta.description.html" />
-                    <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
+                        <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
+                        <div v-if="webshop.meta.description.html" class="style-wysiwyg gray" v-html="webshop.meta.description.html" />
+                        <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
-                    <p v-if="showOpenAt" class="info-box">
-                        {{ $t('%Xj') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
-                    </p>
-                    <p v-else-if="closed" class="info-box">
-                        {{ $t('%Xk') }}
-                    </p>
-                    <p v-else-if="almostClosed" class="info-box">
-                        {{ $t('%Xl') }} {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
-                    </p>
-                    <p v-if="categories.length === 0 && products.length === 0" class="info-box">
-                        {{ $t('%Xm') }}
-                    </p>
-                </header>
+                        <p v-if="showOpenAt" class="info-box">
+                            {{ $t('%Xj') }} {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
+                        </p>
+                        <p v-else-if="closed" class="info-box">
+                            {{ $t('%Xk') }}
+                        </p>
+                        <p v-else-if="almostClosed" class="info-box">
+                            {{ $t('%Xl') }} {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
+                        </p>
+                        <p v-if="categories.length === 0 && products.length === 0" class="info-box">
+                            {{ $t('%Xm') }}
+                        </p>
+                    </header>
 
-                <template v-if="(!closed || showOpenAt) && (categories.length > 0 || products.length > 0)">
-                    <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
-                    <div v-else class="products">
-                        <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
-                        <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
-                    </div>
-                </template>
+                    <template v-if="(!closed || showOpenAt) && (categories.length > 0 || products.length > 0)">
+                        <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
+                        <div v-else class="products">
+                            <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
+                            <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
+                        </div>
+                    </template>
+                </div>
             </div>
 
             <LegalFooter :organization="organization" :webshop="webshop" />
@@ -90,8 +92,6 @@ import { useWebshopManager } from '../composables/useWebshopManager';
 
 import type { CheckoutStep } from './checkout/CheckoutStepsManager';
 import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
-
-
 
 import FullPageProduct from './FullPageProduct.vue';
 
@@ -198,8 +198,7 @@ async function openCheckout(animated = true) {
             ],
             modalDisplayStyle: 'popup',
         }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
     }
@@ -258,15 +257,13 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
 
         if (oldItem) {
             checkoutManager.cart.replaceItem(oldItem, cartItem);
-        }
-        else {
+        } else {
             checkoutManager.cart.addItem(cartItem);
         }
         checkoutManager.saveCart();
 
         openCart(true);
-    }
-    else {
+    } else {
         checkoutManager.cart.clear();
         if (args) {
             args.dismiss({ force: true }).catch(console.error);
@@ -283,16 +280,14 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
 async function check() {
     try {
         cart.value.validate(webshopManager.webshop);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     checkoutManager.saveCart();
 
     try {
         await checkoutManager.validateCodes();
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -311,8 +306,7 @@ onMounted(() => {
 
         const code = path[1];
         checkoutManager.applyCode(code).catch(console.error);
-    }
-    else if (path.length === 2 && path[0] === 'order') {
+    } else if (path.length === 2 && path[0] === 'order') {
         const orderId = path[1];
         present({
             animated: false,
@@ -322,8 +316,7 @@ onMounted(() => {
             ],
             url: path.join('/'),
         }).catch(console.error);
-    }
-    else if (path.length === 2 && path[0] === 'tickets') {
+    } else if (path.length === 2 && path[0] === 'tickets') {
         const secret = path[1];
         present({
             animated: false,
@@ -333,8 +326,7 @@ onMounted(() => {
             ],
             url: path.join('/'),
         }).catch(console.error);
-    }
-    else if (path.length === 1 && path[0] === 'payment' && params.get('id')) {
+    } else if (path.length === 1 && path[0] === 'payment' && params.get('id')) {
         const paymentId = params.get('id');
         const cancel = params.get('cancel') === 'true';
 
@@ -361,8 +353,7 @@ onMounted(() => {
                                     replace: 1,
                                     force: true,
                                 }).catch(console.error);
-                            }
-                            else {
+                            } else {
                                 // In popup/sheet on desktop
                                 // Desktop: push
                                 navigationActions.dismiss({ force: true, animated: true }).catch(console.error);
@@ -372,8 +363,7 @@ onMounted(() => {
                                     ],
                                 }).catch(console.error);
                             }
-                        }
-                        else {
+                        } else {
                             navigationActions.dismiss({ force: true }).catch(console.error);
 
                             // Force reload webshop (stock will have changed: prevent invalidating the cart)
@@ -392,13 +382,11 @@ onMounted(() => {
             modalDisplayStyle: 'sheet', // warning: if changing to popup: present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
             url: path.join('/'),
         }).catch(console.error);
-    }
-    else if (path.length === 2 && path[0] === 'checkout') {
+    } else if (path.length === 2 && path[0] === 'checkout') {
         resumeStep('/' + path.join('/'), false).catch((e) => {
             console.error(e);
         });
-    }
-    else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
+    } else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
         openCart(false);
     }
 });
@@ -423,8 +411,7 @@ async function resumeStep(destination: string, animated = true) {
 
             waitingComponents.push(getComponentAndSetUrl());
             step = nextStep;
-        }
-        catch (e) {
+        } catch (e) {
             // Possible invalid checkout -> stop here
             break;
         }
@@ -486,9 +473,10 @@ onActivated(() => {
     }
 
     .webshop-layout {
+        align-self: stretch;
         max-width: 800px;
         margin: 0 auto;
-        padding-bottom: 100px;
+        padding-bottom: 30px;
 
         .full-product-box {
             background: $color-background;

@@ -1,6 +1,6 @@
 <template>
     <div class="legal-footer" :class="{customPlatform: STAMHOOFD.platformName !== 'stamhoofd'}">
-        <hr class="style-hr"><div>
+        <div>
             <aside>
                 <div>
                     <button v-if="!$isNative && hasLanguages" type="button" class="button text" @click.prevent="switchLanguage">

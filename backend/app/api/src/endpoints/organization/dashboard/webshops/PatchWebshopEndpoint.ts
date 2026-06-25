@@ -146,7 +146,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'domainUri is reserved for internal webshop routes',
-                            human: $t("%1a4"),
+                            human: $t('%1a4'),
                             field: 'customUrl',
                         });
                     }
@@ -194,7 +194,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri is reserved for internal webshop routes',
-                        human: $t("%1a4"),
+                        human: $t('%1a4'),
                         field: 'uri',
                     });
                 }

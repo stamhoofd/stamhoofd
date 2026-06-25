@@ -96,7 +96,17 @@ const root = new ComponentWithProperties(PromiseView, {
             const session = new SessionContext(response.data.organization);
             await session.loadFromStorage();
 
-            await I18nController.loadDefault(session, response.data.organization.address.country, Language.Dutch, response.data.organization.address.country);
+            await I18nController.loadDefault({
+                $context: session,
+                defaultCountry: response.data.organization.address.country,
+                defaultLanguage: Language.Dutch,
+                country: response.data.organization.address.country,
+                locales: {
+                    // For now always force the default locale
+                    // if we add translations to webshops, we should add all the setup languages here
+                    [response.data.organization.address.country]: [Language.Dutch],
+                },
+            });
 
             await session.checkSSO();
             await SessionManager.prepareSessionForUsage(session);
@@ -121,7 +131,10 @@ const root = new ComponentWithProperties(PromiseView, {
             // Check if we have an organization on this domain
             if (!I18nController.shared) {
                 try {
-                    await I18nController.loadDefault(null, undefined, Language.Dutch);
+                    await I18nController.loadDefault({
+                        $context: null,
+                        defaultLanguage: Language.Dutch,
+                    });
                 } catch (e) {
                     console.error(e);
                 }

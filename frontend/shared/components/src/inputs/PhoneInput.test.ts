@@ -27,7 +27,12 @@ function renderPhoneInput() {
 }
 
 test('Automatically formats the phone number on blur', async () => {
-    await I18nController.loadDefault(null, Country.Belgium, Language.Dutch, Country.Belgium);
+    await I18nController.loadDefault({
+        $context: null,
+        defaultCountry: Country.Belgium,
+        defaultLanguage: Language.Dutch,
+        country: Country.Belgium,
+    });
 
     renderPhoneInput();
 
@@ -48,7 +53,12 @@ test('Automatically formats the phone number on blur', async () => {
 });
 
 test('Automatically formats the phone number as you type', async () => {
-    await I18nController.loadDefault(null, Country.Belgium, Language.Dutch, Country.Belgium);
+    await I18nController.loadDefault({
+        $context: null,
+        defaultCountry: Country.Belgium,
+        defaultLanguage: Language.Dutch,
+        country: Country.Belgium,
+    });
 
     renderPhoneInput();
 
@@ -96,7 +106,12 @@ test('Automatically formats the phone number as you type', async () => {
 
 test('Automatically formats phone numbers using configured locale on blur', async () => {
     TestUtils.setEnvironment('fixedCountry', Country.Netherlands);
-    await I18nController.loadDefault(null, Country.Netherlands, Language.Dutch, Country.Netherlands);
+    await I18nController.loadDefault({
+        $context: null,
+        defaultCountry: Country.Netherlands,
+        defaultLanguage: Language.Dutch,
+        country: Country.Netherlands,
+    });
     expect(STAMHOOFD.fixedCountry).toEqual(Country.Netherlands);
     expect(I18nController.shared?.countryCode).toEqual(Country.Netherlands);
 

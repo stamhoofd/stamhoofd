@@ -15,5 +15,10 @@ TestUtils.loadEnvironment();
 Error.stackTraceLimit = Infinity;
 
 beforeAll(async () => {
-    await I18nController.loadDefault(null, Country.Belgium, Language.Dutch, Country.Belgium);
+    await I18nController.loadDefault({
+        $context: null,
+        defaultCountry: Country.Belgium,
+        defaultLanguage: Language.Dutch,
+        country: Country.Belgium,
+    });
 });

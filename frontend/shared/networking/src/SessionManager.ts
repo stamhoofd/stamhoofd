@@ -1,4 +1,4 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
@@ -40,8 +40,7 @@ export class SessionManagerStatic {
             const session = await this.getContextForOrganization(id);
             if (session && session.canGetCompleted()) {
                 return session;
-            }
-            else {
+            } else {
                 console.log('session can not get completed, no autosignin');
                 console.log(session);
             }
@@ -81,8 +80,7 @@ export class SessionManagerStatic {
 
         if (index !== -1) {
             storage.organizations.splice(index, 1);
-        }
-        else {
+        } else {
             if (options.updateOnly) {
                 return;
             }
@@ -134,8 +132,7 @@ export class SessionManagerStatic {
 
             try {
                 await session.updateData(true, shouldRetry, true);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to update data in preparation of session', e);
 
                 if (isSimpleErrors(e) || isSimpleError(e)) {
@@ -164,8 +161,7 @@ export class SessionManagerStatic {
                 // still set the current session, but logout that session
                 throw e;
             }
-        }
-        else {
+        } else {
             // Already complete
             // Initiate a slow background update without retry
             // = we don't need to block the UI for this ;)
@@ -215,8 +211,7 @@ export class SessionManagerStatic {
             if (session.organization) {
                 if (session.loadingError && (isSimpleErrors(session.loadingError) || isSimpleError(session.loadingError)) && (session.loadingError.hasCode('invalid_organization') || session.loadingError.hasCode('archived'))) {
                     this.removeOrganizationFromStorage(session.organization.id).catch(console.error);
-                }
-                else {
+                } else {
                     this.addOrganizationToStorage(session.organization).catch(console.error);
                 }
             }
@@ -224,7 +219,12 @@ export class SessionManagerStatic {
         });
 
         await session.saveToStorage();
-        await I18nController.loadDefault(session, Country.Belgium, Language.Dutch, session?.organization?.address?.country);
+        await I18nController.loadDefault({
+            $context: session,
+            defaultCountry: Country.Belgium,
+            defaultLanguage: Language.Dutch,
+            country: session?.organization?.address?.country,
+        });
         return session;
     }
 
@@ -252,8 +252,7 @@ export class SessionManagerStatic {
 
             // keep this method fast, we don't need to wait because we use cached storage
             Storage.keyValue.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version }))).catch(console.error);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
 
             // Possible out of storage: delete one organization and try again
@@ -277,13 +276,11 @@ export class SessionManagerStatic {
                     const cache = new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data;
                     this.cachedStorage = cache;
                     return cache;
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
         const cache = SessionStorage.create({});
@@ -315,8 +312,7 @@ export class SessionManagerStatic {
             session.updateOrganization(organization);
             await this.prepareSessionForUsage(session, false);
             return session;
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) && e.hasCode('invalid_organization')) {
                 // Clear from session storage
                 await this.removeOrganizationFromStorage(organization.id);

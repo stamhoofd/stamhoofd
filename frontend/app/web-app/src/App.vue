@@ -34,7 +34,11 @@ const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {
         // Load locales first
         try {
-            await I18nController.loadDefault(null, Country.Belgium, Language.Dutch);
+            await I18nController.loadDefault({
+                $context: null,
+                defaultCountry: Country.Belgium,
+                defaultLanguage: Language.Dutch,
+            });
         } catch (e) {
             console.error('Failed to load default locale', e);
         }
