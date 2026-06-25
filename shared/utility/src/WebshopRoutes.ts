@@ -13,5 +13,5 @@ export const reservedWebshopPathSegments = [
 ] as const;
 
 export function isReservedWebshopPathSegment(segment: string): boolean {
-    return reservedWebshopPathSegments.includes(Formatter.slug(segment) as typeof reservedWebshopPathSegments[number]);
+    return segment.length <= 2 || reservedWebshopPathSegments.includes(Formatter.slug(segment) as typeof reservedWebshopPathSegments[number]);
 }
