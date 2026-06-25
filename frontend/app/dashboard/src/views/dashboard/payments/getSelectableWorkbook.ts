@@ -90,7 +90,7 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'balanceItem.title',
-                        name: $t('Titel'),
+                        name: $t('%vC'),
                     }),
 
                     new SelectableColumn({

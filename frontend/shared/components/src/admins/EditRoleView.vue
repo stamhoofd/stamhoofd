@@ -31,7 +31,7 @@
                     <Radio v-model="basePermission" :value="PermissionLevel.Read" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Alles lezen') }}
+                    {{ $t('%1eW') }}
                 </h3>
             </STListItem>
 
@@ -40,7 +40,7 @@
                     <Radio v-model="basePermission" :value="PermissionLevel.Write" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Alles lezen en bewerken') }}
+                    {{ $t('%1eL') }}
                 </h3>
             </STListItem>
 
@@ -66,7 +66,7 @@
                 <p>{{ $t('%Z4') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('Alle verenigingen'), type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('%53'), type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="tag in tags" :key="tag.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
 
@@ -164,7 +164,7 @@
 
                     <AccessRightPermissionRow :access-right="AccessRight.MemberManageNRN" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('Alle vragenlijsten'), type: PermissionsResourceType.RecordCategories }" :inherited-roles="inheritedRoles" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :resource="{id: '', name: $t('%1eC'), type: PermissionsResourceType.RecordCategories }" :inherited-roles="inheritedRoles" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !organization ? $t('%CS') : $t('%CT') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 

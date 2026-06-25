@@ -1,18 +1,18 @@
 <template>
-    <SaveView :title="$t('Instellingen kopiëren')" :save-text="$t('Kopiëren')" :disabled="selectedIds.size === 0" @save="save">
-        <h1>{{ $t('Instellingen kopiëren') }}</h1>
-        <p>{{ $t('Selecteer naar welke kortingscodes je de instellingen van {code} wilt kopiëren. De codes zelf blijven ongewijzigd.', { code: discountCode.code }) }}</p>
+    <SaveView :title="$t('%1dm')" :save-text="$t('%R7')" :disabled="selectedIds.size === 0" @save="save">
+        <h1>{{ $t('%1dm') }}</h1>
+        <p>{{ $t('%1dv', { code: discountCode.code }) }}</p>
 
         <div v-if="candidates.length > 5" class="input-with-buttons">
             <div>
                 <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
+                    <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                 </form>
             </div>
             <div>
                 <button type="button" class="button text" @click="editFilter">
                     <span class="icon filter" />
-                    <span class="hide-small">{{ $t('Filter') }}</span>
+                    <span class="hide-small">{{ $t('%1e1') }}</span>
                     <span v-if="hasActiveFilter" class="icon dot primary" />
                 </button>
             </div>
@@ -25,7 +25,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Alles selecteren') }}
+                    {{ $t('%17d') }}
                 </h3>
             </STListItem>
 
@@ -44,10 +44,10 @@
         </STList>
 
         <p v-else-if="candidates.length === 0" class="info-box">
-            {{ $t('Er zijn geen andere kortingscodes om de instellingen naar te kopiëren.') }}
+            {{ $t('%1ed') }}
         </p>
         <p v-else class="info-box">
-            {{ $t('Geen kortingscodes gevonden voor deze zoekopdracht.') }}
+            {{ $t('%1eF') }}
         </p>
     </SaveView>
 </template>

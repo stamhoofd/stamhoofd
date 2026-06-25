@@ -178,8 +178,8 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
-                customTitle: $t('Leveringskosten'),
-                description: $t('Leveringskosten'),
+                customTitle: $t('%1eU'),
+                description: $t('%1eU'),
                 amount: 1,
                 price: order.data.deliveryPrice,
             }),
@@ -190,8 +190,8 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
-                customTitle: $t('Administratiekosten'),
-                description: $t('Administratiekosten'),
+                customTitle: $t('%xK'),
+                description: $t('%xK'),
                 amount: 1,
                 price: order.data.administrationFee,
             }),
@@ -203,8 +203,8 @@ function createOrderItemPaymentRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
-                customTitle: $t('Correctie bestelling'),
-                description: $t('Correctie bestelling'),
+                customTitle: $t('%1eE'),
+                description: $t('%1eE'),
                 amount: 1,
                 price: difference,
             }),
@@ -226,8 +226,8 @@ function addOrderDiscountRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
-                customTitle: $t('Korting ({percentage})', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
-                description: $t('Korting ({percentage})', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
+                customTitle: $t('%1ei', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
+                description: $t('%1ei', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
                 amount: 1,
                 price: -appliedPercentageDiscount,
             }),
@@ -240,8 +240,8 @@ function addOrderDiscountRows(
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
-                customTitle: $t('Korting'),
-                description: $t('Vaste korting'),
+                customTitle: $t('%176'),
+                description: $t('%1eM'),
                 amount: 1,
                 price: -fixedDiscount,
             }),
@@ -251,10 +251,10 @@ function addOrderDiscountRows(
 
 function getPartialOrderPaymentDescription(order: PaymentExportOrder): string {
     if (order.number !== null) {
-        return $t('Gedeeltelijke betaling/terugbetaling voor bestelling #{number}', { number: order.number.toString() });
+        return $t('%1eO', { number: order.number.toString() });
     }
 
-    return $t('Gedeeltelijke betaling/terugbetaling voor bestelling');
+    return $t('%1eH');
 }
 
 function createSyntheticBalanceItemPayment({
@@ -344,7 +344,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'balanceItem.title',
-            name: $t('Titel'),
+            name: $t('%vC'),
             width: 40,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.customTitle || object.balanceItemPayment.balanceItem.itemTitle,

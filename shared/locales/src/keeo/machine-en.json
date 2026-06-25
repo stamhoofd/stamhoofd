@@ -520,12 +520,20 @@
     "translation": "{n}th unit"
   },
   "%1dY": {
-    "original": "Je staat op het punt om een nieuw leeg scoutsjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand scoutsjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
-    "translation": "You are about to create a new empty scouts year ({name-period-new}), without copying from an existing scouts year.\n\nOnce {name-period-new} has been fully set up, you can switch over. From that moment on, members can register via the member portal. Until then, the new period will remain hidden to members."
+    "original": "Je staat op het punt om een nieuw leeg scoutsjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand scoutsjaar.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "You are about to create a new empty scouting year ({name-period-new}), without copying an existing scouting year.\n\nOnce {name-period-new} is fully set up, you can switch over. From that moment, members will be able to register via the member portal. Until then, the new period remains hidden for members."
   },
   "%1da": {
     "original": "Via deze koppeling zet je gegevens van Keeo automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
     "translation": "With this connection, you automatically transfer data from Keeo to the group administration of Scouts en Gidsen Vlaanderen."
+  },
+  "%1dr": {
+    "original": "Filter alle eenheden die een beheerder hebben die aan deze voorwaarden voldoet.",
+    "translation": "Filter all units that have an administrator meeting these criteria."
+  },
+  "%1e6": {
+    "original": "Je kan geen categorie met bundelkortingen verplaatsen naar een ander scoutsjaar. Verwijder de bundelkortingen eerst.",
+    "translation": "You cannot move a category with bundle discounts to another scouting year. Please remove the bundle discounts first."
   },
   "%2": {
     "original": "Aansluiting/verzekering Keeo*",
@@ -1316,8 +1324,8 @@
     "translation": "You can only create activities for other units via the administrator portal of that unit itself."
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "For national activities, you need to choose through which unit all payments will be made. That unit's payment settings will be used, and all registrations will be entered in the accounts of that unit.\n\nThe organiser also sets options that affect the data collection and other more subtle aspects."
+    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "For national activities, you need to choose which unit will handle all payments. The payment settings of that unit will be used, and all registrations will be recorded in that unit's bookkeeping.\n\nAdditionally, the organizer sets options that affect the collection of data and some other, more subtle details."
   },
   "%CS": {
     "original": "Vragenlijst van FOS Open Scouting",

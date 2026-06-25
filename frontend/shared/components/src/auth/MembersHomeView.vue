@@ -8,7 +8,7 @@
                     <div class="split-login-view">
                         <div class="container login-view">
                             <h1>{{ $t('%1cs', {organization: organization.name}) }}</h1>
-                            <p>{{ $t('Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.') }}</p>
+                            <p>{{ $t('%1dy') }}</p>
 
                             <p v-if="isTrial" class="secundary-box icon trial">
                                 {{ $t('%1aG') }}

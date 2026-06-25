@@ -261,13 +261,13 @@ onMounted(async () => {
 
         if (!v) {
             Toast.info(
-                $t('Wissel via de knop links bovenaan tussen het beheerdersportaal en het ledenportaal.'),
+                $t('%1e9'),
             )
                 .setIcon('sync')
                 .setHide(null)
                 .setButton(
                     new ToastButton(
-                        $t('Ik snap het'), () => {
+                        $t('%1eP'), () => {
                             Storage.keyValue.setItem(EXPLAIN_KEY, '1').catch(console.error);
                         },
                     ),

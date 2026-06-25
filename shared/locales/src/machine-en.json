@@ -3223,10 +3223,6 @@
     "original": "Beheer wie berichten mag versturen, vanaf welke afzenders, en wie reeds verzonden berichten kan bekijken.",
     "translation": "Manage who is allowed to send messages, from which senders, and who can view already sent messages."
   },
-  "%1D7": {
-    "original": "De functie om verzonden berichten te bekijken is nog niet beschikbaar maar komt er binnenkort aan. Je stelt best dus al meteen alle rechten goed in.",
-    "translation": "The feature to view sent messages is not yet available but will be added soon. It's best to already set all the permissions correctly."
-  },
   "%1D8": {
     "original": "Alle afzenders",
     "translation": "All senders"
@@ -5776,16 +5772,16 @@
     "translation": "Understood"
   },
   "%1Nd": {
-    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
-    "translation": "The order will be deleted, but the payment will remain in the system. As a result, the system will consider this customer as having overpaid and may later suggest a refund in the summary of open amounts.\\n\\nIf you want to delete all orders, we recommend duplicating the webshop to start fresh with an empty shop. If the person who placed the order wants to cancel the purchase, it is better to cancel the order than to delete it."
+    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "The order will be deleted, but the payment remains in the system. As a result, the system will consider this customer as having overpaid and may later suggest a refund in the list of open amounts.\n\nIf you want to remove all orders, we recommend duplicating the webshop to start with a new, empty shop. If the customer wants to cancel the purchase, it is better to cancel the order instead of deleting it."
   },
   "%1Ne": {
     "original": "Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven",
     "translation": "Deleting these orders may give a distorted overview of the finances"
   },
   "%1Nf": {
-    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
-    "translation": "The orders will be deleted, but the payments will stay in the system. This means the system will consider these customers as having overpaid and may later suggest a refund in the list of open amounts.\\n\\nIf you want to delete all orders, we recommend duplicating the webshop to start with a new empty shop. If the buyer wants to cancel the purchase, it's better to cancel the order instead of deleting it."
+    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "Orders will be deleted, but the payments remain in the system. This means the system will think these customers have overpaid and may later suggest a refund in the overview of open amounts.\n\nIf you want to remove all orders, it is best to duplicate the webshop to start with a new, empty shop. If the customer wishes to cancel their purchase, it is better to cancel the order instead of deleting it."
   },
   "%1Ng": {
     "original": "Bestellingen verwijderen?",
@@ -5860,8 +5856,8 @@
     "translation": "The member associated with the affiliation was not found."
   },
   "%1O1": {
-    "original": "Groepsnummer",
-    "translation": "Group number"
+    "original": "Verenigings-URI",
+    "translation": "Association URI"
   },
   "%1O2": {
     "original": "Unieke identificatie van de aansluiting",
@@ -5900,8 +5896,8 @@
     "translation": "Paid"
   },
   "%1OE": {
-    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
-    "translation": "If you want to collect this information per ticket (not per order), you can disable the cart and limit the maximum number of tickets to 1 per person.\\nIf you only need dropdown choices, it's best to use the selection menus in the ticket settings; that's a bit easier to use."
+    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
+    "translation": "If you want to collect this information per ticket (not per order), you can disable the shopping cart and limit the maximum number of tickets to 1 each.\nIf you only need drop-down menus, it's easier to use the drop-down menus in the ticket settings."
   },
   "%1OG": {
     "original": "Het minimum is {min}",
@@ -6156,8 +6152,8 @@
     "translation": "STEP {current} / {total}"
   },
   "%1PR": {
-    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\\n\\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
-    "translation": "Sometimes you need to upload documents to Mollie that can only be found in our documentation. Without a new account, higher transaction fees may apply.\\n\\nSo please read the documentation first: mistakes can lead to your affiliation being rejected and a much longer processing time."
+    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\n\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
+    "translation": "Sometimes you need to upload documents to Mollie that are only available in our documentation. Without a new account, higher transaction fees may also apply.\n\nPlease read the documentation first: mistakes can lead to your affiliation being rejected and a much longer processing time."
   },
   "%1PU": {
     "original": "Einde proefperiode",
@@ -6208,8 +6204,8 @@
     "translation": "Events"
   },
   "%1Pi": {
-    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
-    "translation": "If you want to collect this info per registered person, you can disable the cart and limit the maximum number of each item to one.\\nIf you only need dropdown menus, it's best to use the dropdowns in the item settings—that's a bit easier to use."
+    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
+    "translation": "If you want to collect this info per registered person, you can disable the shopping cart and limit the maximum number of items to 1 per person.\nIf you only need drop-down menus, use the drop-down menus in the item settings—it's a bit easier that way."
   },
   "%1Pj": {
     "original": "Aanmaken",
@@ -7235,10 +7231,6 @@
     "original": "berichten",
     "translation": "messages"
   },
-  "%1Um": {
-    "original": "Documenten en attesten",
-    "translation": "Documents and certificates"
-  },
   "%1Un": {
     "original": "Waarmee wil je starten? Je kan dit later altijd uitbreiden.",
     "translation": "How would you like to begin? You can always expand this later."
@@ -7438,10 +7430,6 @@
   "%1Vm": {
     "original": "Verlengbaar",
     "translation": "Renewable"
-  },
-  "%1Vn": {
-    "original": "Leden logboek",
-    "translation": "Member logbook"
   },
   "%1Vp": {
     "original": "Synchroniseer leden met Scouts en Gidsen Vlaanderen.",
@@ -8171,10 +8159,6 @@
     "original": "Trimester {number} - {year}",
     "translation": "Trimester {number} - {year}"
   },
-  "%1ZQ": {
-    "original": "Synchroniseren met groepsadmin",
-    "translation": "Synchronize with group admin"
-  },
   "%1ZR": {
     "original": "Alle inschrijvingen mee verwijderen",
     "translation": "Remove all related registrations"
@@ -8644,8 +8628,8 @@
     "translation": "Pre-registrations until {date}"
   },
   "%1bu": {
-    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
-    "translation": "You are about to make a copy of {name-period-old} and use it as the basis for {name-period-new} (new). All prices and subdivisions will be carried over, but can be adjusted afterwards. Both periods will then operate independently: changes in {name-period-new} will not be automatically made in {name-period-old}, and vice versa.\\n\\nOnce {name-period-new} is fully set up, you can switch. From that moment, members can register through the member portal. Until then, the new period will remain hidden from members."
+    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "You are about to create a copy of {name-period-old} and use it as the basis for {name-period-new} (new). All prices and subdivisions will be copied, but can be changed afterwards. Both periods will operate independently: changes in {name-period-new} will not be applied automatically to {name-period-old}, and vice versa.\n\nOnce {name-period-new} is fully configured, you can switch over. From then on, members can register via the member portal. Until that point, the new period will remain hidden from members."
   },
   "%1bv": {
     "original": "De naam van de groep moet minstens één letter of cijfer bevatten.",
@@ -8980,8 +8964,8 @@
     "translation": "copy"
   },
   "%1dY": {
-    "original": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
-    "translation": "You are about to create a new empty work year ({name-period-new}), without copying from an existing work year.\\n\\nOnce {name-period-new} has been fully set up, you can switch over. From that moment on, members can register via the member portal. Until then, the new period will remain hidden to members."
+    "original": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "You are about to create a new empty work year ({name-period-new}), without copying an existing work year.\n\nOnce {name-period-new} is fully set up, you can switch over. From that moment, members will be able to register via the member portal. Until then, the new period remains hidden for members."
   },
   "%1dZ": {
     "original": "Log eerst in bij de groepsadministratie om te synchroniseren.",
@@ -9026,6 +9010,162 @@
   "%1dj": {
     "original": "Functies zijn toegangsrechten die je koppelt aan (ingeschreven) leden. Als een lid wordt uitgeschreven, wordt de functie van het lid automatisch op het einde van de maand geschrapt (tenzij je het zelf vroeger schrapt).",
     "translation": "Roles are access rights you assign to (registered) members. If a member is deregistered, their role is automatically removed at the end of the month (unless you remove it yourself sooner)."
+  },
+  "%1dk": {
+    "original": "Een betaling kan voor meerdere items tegelijk zijn. Filter op betalingen die een item hebben die aan deze voorwaarden voldoet.",
+    "translation": "A payment may cover multiple items at once. Filter payments containing at least one item matching these criteria."
+  },
+  "%1dm": {
+    "original": "Instellingen kopiëren",
+    "translation": "Copy settings"
+  },
+  "%1dn": {
+    "original": "Meerdere keren",
+    "translation": "Multiple times"
+  },
+  "%1do": {
+    "original": "‘{categoryName}’ is verplaatst naar ‘{destinationName}’ in {periodName}",
+    "translation": "‘{categoryName}’ has been moved to ‘{destinationName}’ in {periodName}"
+  },
+  "%1dq": {
+    "original": "Enkel beheerders",
+    "translation": "Administrators only"
+  },
+  "%1dr": {
+    "original": "Filter alle verenigingen die een beheerder hebben die aan deze voorwaarden voldoet.",
+    "translation": "Filter all associations that have an administrator meeting these criteria."
+  },
+  "%1dv": {
+    "original": "Selecteer naar welke kortingscodes je de instellingen van {code} wilt kopiëren. De codes zelf blijven ongewijzigd.",
+    "translation": "Select which discount codes you want to copy the settings from {code} to. The codes themselves will remain unchanged."
+  },
+  "%1dy": {
+    "original": "Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.",
+    "translation": "Log in to edit your data, view documents, or register."
+  },
+  "%1dz": {
+    "original": "Ben je zeker dat je alle zichtbare kortingscodes wilt verwijderen?",
+    "translation": "Are you sure you want to delete all visible discount codes?"
+  },
+  "%1e1": {
+    "original": "Filter",
+    "translation": "Filter"
+  },
+  "%1e4": {
+    "original": "Je kan maximaal {max} kortingscodes hebben.",
+    "translation": "You can have a maximum of {max} discount codes."
+  },
+  "%1e5": {
+    "original": "Kortingscode dupliceren",
+    "translation": "Duplicate discount code"
+  },
+  "%1e6": {
+    "original": "Je kan geen categorie met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.",
+    "translation": "You cannot move a category with bundle discounts to another work year. Please remove the bundle discounts first."
+  },
+  "%1e8": {
+    "original": "Aantal keer gebruikt",
+    "translation": "Times used"
+  },
+  "%1e9": {
+    "original": "Wissel via de knop links bovenaan tussen het beheerdersportaal en het ledenportaal.",
+    "translation": "Switch between the administrators portal and the member portal using the button at the top left."
+  },
+  "%1eA": {
+    "original": "Alle zichtbare kortingscodes verwijderen",
+    "translation": "Delete all visible discount codes"
+  },
+  "%1eC": {
+    "original": "Alle vragenlijsten",
+    "translation": "All forms"
+  },
+  "%1eE": {
+    "original": "Correctie bestelling",
+    "translation": "Order correction"
+  },
+  "%1eF": {
+    "original": "Geen kortingscodes gevonden voor deze zoekopdracht.",
+    "translation": "No discount codes found for this search."
+  },
+  "%1eG": {
+    "original": "Voeg toe aan favorieten",
+    "translation": "Add to favorites"
+  },
+  "%1eH": {
+    "original": "Gedeeltelijke betaling/terugbetaling voor bestelling",
+    "translation": "Partial payment/refund for order"
+  },
+  "%1eI": {
+    "original": "Alle kortingscodes verwijderen",
+    "translation": "Remove all discount codes"
+  },
+  "%1eK": {
+    "original": "Kopieer instellingen naar...",
+    "translation": "Copy settings to..."
+  },
+  "%1eL": {
+    "original": "Alles lezen en bewerken",
+    "translation": "Read and edit everything"
+  },
+  "%1eM": {
+    "original": "Vaste korting",
+    "translation": "Fixed discount"
+  },
+  "%1eO": {
+    "original": "Gedeeltelijke betaling/terugbetaling voor bestelling #{number}",
+    "translation": "Partial payment/refund for order #{number}"
+  },
+  "%1eP": {
+    "original": "Ik snap het",
+    "translation": "Got it"
+  },
+  "%1eS": {
+    "original": "Ben je zeker dat je alle kortingscodes wilt verwijderen?",
+    "translation": "Are you sure you want to remove all discount codes?"
+  },
+  "%1eT": {
+    "original": "Ben je zeker dat je de categorie ‘{categoryName}’ wilt verplaatsen naar ‘{destinationName}’ in {periodName}?",
+    "translation": "Are you sure you want to move the category '{categoryName}' to '{destinationName}' in {periodName}?"
+  },
+  "%1eU": {
+    "original": "Leveringskosten",
+    "translation": "Delivery costs"
+  },
+  "%1eW": {
+    "original": "Alles lezen",
+    "translation": "Read everything"
+  },
+  "%1eX": {
+    "original": "Hoeveel kopieën wil je aanmaken? Voor elke kopie genereren we automatisch een willekeurige code.",
+    "translation": "How many copies would you like to create? Each copy will generate a random code automatically."
+  },
+  "%1eZ": {
+    "original": "Verwijder uit favorieten",
+    "translation": "Remove from favorites"
+  },
+  "%1eb": {
+    "original": "Ben je zeker dat je deze kortingscode wilt verwijderen?",
+    "translation": "Are you sure you want to delete this discount code?"
+  },
+  "%1ec": {
+    "original": "Kortingscode verwijderen",
+    "translation": "Delete discount code"
+  },
+  "%1ed": {
+    "original": "Er zijn geen andere kortingscodes om de instellingen naar te kopiëren.",
+    "translation": "There are no other discount codes to copy the settings to."
+  },
+  "%1ef": {
+    "original": "Aantal kopieën",
+    "translation": "Number of copies"
+  },
+  "%1eg": {
+    "original": "Code",
+    "translation": "Code"
+  },
+  "%1ei": {
+    "original": "Korting ({percentage})",
+    "translation": "Discount ({percentage})"
   },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
@@ -11472,8 +11612,8 @@
     "translation": "Choose an organiser for these registrations"
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke vereniging alle betalingen verlopen. De betaalinstellingen van die vereniging worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die vereniging.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "For national activities, you need to choose through which association all payments will be made. That association's payment settings will be used, and all registrations will be entered in the accounts of that association.\\n\\nThe organiser also sets options that affect the data collection and other more subtle aspects."
+    "original": "Voor nationale activiteiten moet je kiezen via welke vereniging alle betalingen verlopen. De betaalinstellingen van die vereniging worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die vereniging.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "For national activities, you need to choose which association will handle all payments. The payment settings of that association will be used, and all registrations will be recorded in that association's bookkeeping.\n\nAdditionally, the organizer sets options that affect the collection of data and some other more subtle details."
   },
   "%CR": {
     "original": "Prullenmand",
@@ -11908,8 +12048,8 @@
     "translation": "[Limit] Limit reached for number of security codes"
   },
   "%EA": {
-    "original": "Beste, \\nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \\nNaam lid:",
-    "translation": "Dear,\nThe limit has been reached for the number of security codes per day.\nMember name:"
+    "original": "Beste, \nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \nNaam lid:",
+    "translation": "Dear,\nThe daily limit for security codes has been reached.\nMember name:"
   },
   "%EB": {
     "original": "Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.",
@@ -14466,10 +14606,6 @@
   "%Oy": {
     "original": "Exporteren",
     "translation": "Export"
-  },
-  "%Oz": {
-    "original": "Betalingen exporteren",
-    "translation": "Export figures"
   },
   "%P0": {
     "original": "Snel selecteren",

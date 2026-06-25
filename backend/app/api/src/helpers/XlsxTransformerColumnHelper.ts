@@ -264,7 +264,7 @@ export class XlsxTransformerColumnHelper {
                 return [
                     {
                         id: `${matchId}.${categoryId}`,
-                        name: $t(`Categorie`),
+                        name: $t(`%M2`),
                         width: 40,
                         getValue: (object: T) => {
                             const member = getMember(object);

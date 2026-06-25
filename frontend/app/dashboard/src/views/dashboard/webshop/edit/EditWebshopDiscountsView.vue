@@ -36,7 +36,7 @@
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addDiscountCode">
                     <span class="icon add" />
-                    <span>{{ $t('Nieuw') }}</span>
+                    <span>{{ $t('%1IY') }}</span>
                 </button>
             </div>
         </h2>
@@ -47,13 +47,13 @@
             <div v-if="patchedDiscountCodes.length > 5" class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`Zoeken`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('Filter') }}</span>
+                        <span class="hide-small">{{ $t('%1e1') }}</span>
                         <span v-if="hasActiveFilter" class="icon dot primary" />
                     </button>
                 </div>
@@ -79,7 +79,7 @@
                 {{ $t('%QR') }}
             </p>
             <p v-if="patchedDiscountCodes.length > 5 && filteredDiscountCodes.length === 0" class="info-box">
-                {{ $t('Geen kortingscodes gevonden voor deze zoekopdracht.') }}
+                {{ $t('%1eF') }}
             </p>
         </div>
     </SaveView>
@@ -121,7 +121,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges: hasWebshopChanges, 
             throw new SimpleError({
                 code: 'too_many_discount_codes',
                 message: 'Too many discount codes',
-                human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }),
+                human: $t('%1e4', { max: MAX_DISCOUNT_CODES }),
             });
         }
     },
@@ -235,7 +235,7 @@ function onDiscountCodesPatch(patch: PatchableArrayAutoEncoder<DiscountCode>) {
 
 function addDiscountCode() {
     if (patchedDiscountCodes.value.length >= MAX_DISCOUNT_CODES) {
-        new Toast($t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }), 'error red').show();
+        new Toast($t('%1e4', { max: MAX_DISCOUNT_CODES }), 'error red').show();
         return;
     }
 

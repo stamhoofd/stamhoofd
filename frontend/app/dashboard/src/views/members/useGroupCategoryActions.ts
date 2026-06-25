@@ -209,13 +209,13 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
 
             // Groups with bundle discounts cannot be moved to another period
             if (groups.some(g => g.settings.hasBundleDiscounts(props.period))) {
-                Toast.error($t('Je kan geen categorie met bundelkortingen verplaatsen naar een ander werkjaar. Verwijder de bundelkortingen eerst.')).show();
+                Toast.error($t('%1e6')).show();
                 return;
             }
 
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je de categorie ‘{categoryName}’ wilt verplaatsen naar ‘{destinationName}’ in {periodName}?', {
+                title: $t('%1eT', {
                     categoryName: props.category.getName(props.period),
                     destinationName: destinationCategory.getName(otherPeriod),
                     periodName: otherPeriod.period.name,
@@ -267,7 +267,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 return;
             }
 
-            showSuccessToast($t('‘{categoryName}’ is verplaatst naar ‘{destinationName}’ in {periodName}', {
+            showSuccessToast($t('%1do', {
                 categoryName: props.category.getName(props.period),
                 destinationName: destinationCategory.getName(otherPeriod),
                 periodName: otherPeriod.period.name,

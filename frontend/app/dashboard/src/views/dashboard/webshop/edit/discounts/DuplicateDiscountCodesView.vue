@@ -1,11 +1,11 @@
 <template>
-    <SaveView :title="$t('Kortingscode dupliceren')" :save-text="$t('Dupliceren')" @save="save">
-        <h1>{{ $t('Kortingscode dupliceren') }}</h1>
-        <p>{{ $t('Hoeveel kopieën wil je aanmaken? Voor elke kopie genereren we automatisch een willekeurige code.') }}</p>
+    <SaveView :title="$t('%1e5')" :save-text="$t('%KK')" @save="save">
+        <h1>{{ $t('%1e5') }}</h1>
+        <p>{{ $t('%1eX') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <NumberInputBox v-model="count" :title="$t('Aantal kopieën')" :validator="errors.validator" :min="1" :max="maxCount" />
+        <NumberInputBox v-model="count" :title="$t('%1ef')" :validator="errors.validator" :min="1" :max="maxCount" />
     </SaveView>
 </template>
 

@@ -357,7 +357,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     .map(category => new SelectableColumn({
                         id: `groupCategory.${category.id}`,
                         name: category.settings.name,
-                        category: $t(`Inschrijvingen`),
+                        category: $t(`%1EI`),
                         enabled: false,
                     }))
             : []),

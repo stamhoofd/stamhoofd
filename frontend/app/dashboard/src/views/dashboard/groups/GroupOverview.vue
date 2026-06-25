@@ -22,7 +22,7 @@
 
                             <span v-if="!isPublic" v-tooltip="$t('%LU')" :class="['style-tag', 'info']">
                                 <span :class="['icon', 'eye-off', 'text-size']" />
-                                <span>{{ $t('Enkel beheerders') }}</span>
+                                <span>{{ $t('%1dq') }}</span>
                             </span>
                         </p>
                     </div>

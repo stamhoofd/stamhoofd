@@ -84,7 +84,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
         // Duplicate once: open the edit view as if creating a new code, with all settings prefilled except the code itself.
         function duplicateOnce() {
             if (remainingCapacity() <= 0) {
-                new Toast($t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }), 'error red').show();
+                new Toast($t('%1e4', { max: MAX_DISCOUNT_CODES }), 'error red').show();
                 return;
             }
 
@@ -112,7 +112,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
         function duplicateMultiple() {
             const remaining = remainingCapacity();
             if (remaining <= 0) {
-                new Toast($t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }), 'error red').show();
+                new Toast($t('%1e4', { max: MAX_DISCOUNT_CODES }), 'error red').show();
                 return;
             }
 
@@ -158,7 +158,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
         }
 
         async function deleteDiscountCode() {
-            if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze kortingscode wilt verwijderen?'), $t('Verwijderen'))) {
+            if (!await CenteredMessage.confirm($t('%1eb'), $t('%CJ'))) {
                 return;
             }
 
@@ -171,10 +171,10 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
             // When a search or filter is active, only delete the currently visible codes.
             const codes = props.isFiltering ? props.visibleDiscountCodes : props.discountCodes;
             const confirmText = props.isFiltering
-                ? $t('Ben je zeker dat je alle zichtbare kortingscodes wilt verwijderen?')
-                : $t('Ben je zeker dat je alle kortingscodes wilt verwijderen?');
+                ? $t('%1dz')
+                : $t('%1eS');
 
-            if (!await CenteredMessage.confirm(confirmText, $t('Verwijderen'))) {
+            if (!await CenteredMessage.confirm(confirmText, $t('%CJ'))) {
                 return;
             }
 
@@ -189,7 +189,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
             const menu = new ContextMenu([
                 [
                     new ContextMenuItem({
-                        name: $t('Bewerken'),
+                        name: $t('%f9'),
                         icon: 'edit',
                         action: () => {
                             editDiscountCode();
@@ -197,19 +197,19 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
                         },
                     }),
                     new ContextMenuItem({
-                        name: $t('Dupliceren'),
+                        name: $t('%KK'),
                         icon: 'copy',
                         childMenu: new ContextMenu([
                             [
                                 new ContextMenuItem({
-                                    name: $t('Eén keer'),
+                                    name: $t('%sw'),
                                     action: () => {
                                         duplicateOnce();
                                         return true;
                                     },
                                 }),
                                 new ContextMenuItem({
-                                    name: $t('Meerdere keren'),
+                                    name: $t('%1dn'),
                                     action: () => {
                                         duplicateMultiple();
                                         return true;
@@ -219,7 +219,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
                         ]),
                     }),
                     new ContextMenuItem({
-                        name: $t('Kopieer instellingen naar...'),
+                        name: $t('%1eK'),
                         icon: 'sync',
                         disabled: props.discountCodes.length < 2,
                         action: () => {
@@ -230,7 +230,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
                 ],
                 [
                     new ContextMenuItem({
-                        name: $t('Kortingscode verwijderen'),
+                        name: $t('%1ec'),
                         icon: 'trash',
                         destructive: true,
                         action: () => {
@@ -239,7 +239,7 @@ export function useDiscountCodeActions(saveHandler: (patch: PatchableArrayAutoEn
                         },
                     }),
                     new ContextMenuItem({
-                        name: props.isFiltering ? $t('Alle zichtbare kortingscodes verwijderen') : $t('Alle kortingscodes verwijderen'),
+                        name: props.isFiltering ? $t('%1eA') : $t('%1eI'),
                         icon: 'trash',
                         destructive: true,
                         action: () => {

@@ -34,19 +34,19 @@ const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
 const getOrganizationAdminUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`Naam`),
+            name: $t(`%1Os`),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`Voornaam`),
+            name: $t(`%1MT`),
             key: 'firstName',
         }),
         new StringFilterBuilder({
-            name: $t(`Achternaam`),
+            name: $t(`%1MU`),
             key: 'lastName',
         }),
         new StringFilterBuilder({
-            name: $t(`E-mailadres`),
+            name: $t(`%1FK`),
             key: 'email',
         }),
     ];
@@ -126,8 +126,8 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 },
             })),
             ifNotPlatform(ifNotBase(new GroupUIFilterBuilder({
-                name: $t(`Beheerders`),
-                description: $t('Filter alle verenigingen die een beheerder hebben die aan deze voorwaarden voldoet.'),
+                name: $t(`%K5`),
+                description: $t('%1dr'),
                 builders: getOrganizationAdminUIFilterBuilders(),
                 wrapper: {
                     admins: {

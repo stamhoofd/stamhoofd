@@ -255,6 +255,10 @@
     "original": "Er ging iets mis bij het ophalen van de groep",
     "translation": "Une erreur s'est produite lors du chargement du groupe"
   },
+  "%1O1": {
+    "original": "Groepsnummer",
+    "translation": "Numéro de groupe"
+  },
   "%1OX": {
     "original": "De groep die bij de aansluiting hoort is niet gevonden.",
     "translation": "Le groupe lié à l'affiliation n'a pas été trouvé."
@@ -420,8 +424,8 @@
     "translation": "Invite {value}, reçois jusqu'à 100 euros de crédit* par groupe"
   },
   "%1bu": {
-    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
-    "translation": "Vous êtes sur le point de créer une copie de {name-period-old} et de l’utiliser comme base pour {name-period-new} (nouveau). Tous les prix et subdivisions seront copiés, mais pourront ensuite être adaptés. Les deux périodes fonctionneront dès lors séparément : toute modification de {name-period-new} ne sera pas automatiquement appliquée à {name-period-old}, et vice versa.\\n\\nDès que {name-period-new} est entièrement configurée, vous pouvez y basculer. À partir de ce moment, les membres pourront s’inscrire via « Mon compte ». Jusque-là, la nouvelle période restera cachée pour les membres."
+    "original": "Je staat op het punt om een kopie te maken van {name-period-old} en die te gebruiken als basis voor {name-period-new} (nieuw). Alle prijzen en onderverdelingen worden overgenomen, maar kunnen daarna aangepast worden. Beide periodes werken daarna onafhankelijk: wijzigingen in {name-period-new} worden niet automatisch doorgevoerd naar {name-period-old}, en omgekeerd.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une copie de {name-period-old} et de l'utiliser comme base pour {name-period-new} (nouvelle). Tous les prix et subdivisions seront repris, mais pourront être modifiés par la suite. Les deux périodes fonctionneront ensuite indépendamment : les modifications apportées dans {name-period-new} ne seront pas automatiquement appliquées à {name-period-old}, et vice-versa.\n\nDès que {name-period-new} est entièrement configurée, vous pourrez passer à la nouvelle période. À partir de ce moment, les membres pourront s'inscrire via « Mon compte ». Jusqu'à ce moment, la nouvelle période restera cachée pour les membres."
   },
   "%1c9": {
     "original": "* We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Ravot aan te kopen. Je kan je tegoed niet doorgeven aan een andere groep. Je kan geen tegoed krijgen voor een groep die al Ravot gebruikt of al heeft geregistreerd. Ook als die persoon al een andere groep heeft op Ravot kan je er geen tegoed meer voor krijgen. Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen. Meerdere groepen zelf aanmaken om zo tegoed te krijgen is niet toegestaan. Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.",
@@ -464,12 +468,20 @@
     "translation": "{n}e groupe"
   },
   "%1dY": {
-    "original": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
-    "translation": "Vous êtes sur le point de créer une nouvelle année associative vide ({name-period-new}), sans faire de copie d’une année existante.\n\nDès que {name-period-new} est entièrement configurée, vous pouvez passer dessus. À partir de ce moment, les membres pourront s’inscrire via « Mon compte ». Jusque-là, la nouvelle période restera cachée pour les membres."
+    "original": "Je staat op het punt om een nieuw leeg werkjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand werkjaar.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via ‘Mijn account’ inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une nouvelle année associative vide ({name-period-new}), sans copier une année associative existante.\n\nDès que {name-period-new} est entièrement paramétrée, vous pourrez basculer. À partir de ce moment, les membres pourront s'inscrire via « Mon compte ». Jusqu'à ce moment, la nouvelle période reste invisible pour les membres."
   },
   "%1da": {
     "original": "Via deze koppeling zet je gegevens van Ravot automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
     "translation": "Grâce à ce lien, vous transférez automatiquement les données de Ravot vers l’administration de groupe de Scouts et Guides de Flandre."
+  },
+  "%1dr": {
+    "original": "Filter alle groepen die een beheerder hebben die aan deze voorwaarden voldoet.",
+    "translation": "Filtre tous les groupes ayant un gestionnaire qui répond à ces critères."
+  },
+  "%1e9": {
+    "original": "Wissel via de knop links bovenaan tussen het beheerdersportaal en ‘Mijn account’.",
+    "translation": "Utilisez le bouton en haut à gauche pour basculer entre le portail des administrateurs et « Mon compte »."
   },
   "%2": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
@@ -1112,8 +1124,8 @@
     "translation": "Vous ne pouvez créer des activités pour d'autres groupes que via le portail d'administration propre à ces groupes."
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir via quel groupe tous les paiements seront effectués. Les paramètres de paiement de ce groupe seront alors utilisés et toutes les inscriptions seront enregistrées dans la comptabilité de ce groupe.\n\nDe plus, l'organisateur définit également des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
+    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir via quel groupe tous les paiements seront traités. Les paramètres de paiement de ce groupe seront alors utilisés et toutes les inscriptions seront comptabilisées dans la comptabilité de ce groupe.\n\nEn outre, l'organisateur définit également les paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
   },
   "%CS": {
     "original": "Vragenlijst van KSA Nationaal",

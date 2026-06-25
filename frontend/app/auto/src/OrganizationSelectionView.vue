@@ -135,7 +135,7 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     const menuItems: ContextMenuItem[] = [];
 
     const addToFavorites = (org: Organization) => new ContextMenuItem({
-        name: $t('Voeg toe aan favorieten'),
+        name: $t('%1eG'),
         icon: 'star',
         action: async () => {
             try {
@@ -149,7 +149,7 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     });
 
     const removeFromFavorites = (org: Organization) => new ContextMenuItem({
-        name: $t('Verwijder uit favorieten'),
+        name: $t('%1eZ'),
         icon: 'unstar',
         action: async () => {
             try {
@@ -163,7 +163,7 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
     });
 
     const logOut = (session: SessionContext) => new ContextMenuItem({
-        name: $t('Uitloggen'),
+        name: $t('%12N'),
         icon: 'logout',
         action: async () => {
             try {

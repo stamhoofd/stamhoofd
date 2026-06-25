@@ -231,7 +231,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     .map(category => new SelectableColumn({
                         id: `groupCategory.${category.id}`,
                         name: category.settings.name,
-                        category: $t(`Inschrijvingen`),
+                        category: $t(`%1EI`),
                         enabled: false,
                     }))
             : []),

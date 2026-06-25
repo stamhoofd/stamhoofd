@@ -155,7 +155,7 @@ export function usePaymentsUIFilterBuilders() {
             relationFetcher: eventGroupsRelationFetcher(),
         }),
         new RelationFilterBuilder({
-            name: $t('Webshop'),
+            name: $t('%1AV'),
             key: 'webshopId',
             wrapper: { balanceItem: { order: FilterWrapperMarker } } as WrapperFilter,
             relationFetcher: webshopsRelationFetcher,
@@ -174,8 +174,8 @@ export function usePaymentsUIFilterBuilders() {
         PaymentFilterBuilders.transferDescription,
         getCustomerUIFilterBuilders()[0],
         new GroupUIFilterBuilder({
-            name: $t('Betaallijnen'),
-            description: $t('Een betaling kan voor meerdere items tegelijk zijn. Filter op betalingen die een item hebben die aan deze voorwaarden voldoet.'),
+            name: $t('%Ly'),
+            description: $t('%1dk'),
             builders: balanceItemBuilders,
             wrapper: { balanceItemPayments: FilterWrapperMarker } as WrapperFilter,
         }),

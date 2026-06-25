@@ -20,11 +20,11 @@ const discountCodeInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 function getDiscountCodeUIFilterBuilders(): UIFilterBuilders {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t('Code'),
+            name: $t('%1eg'),
             key: 'code',
         }),
         new NumberFilterBuilder({
-            name: $t('Aantal keer gebruikt'),
+            name: $t('%1e8'),
             key: 'usageCount',
         }),
     ];

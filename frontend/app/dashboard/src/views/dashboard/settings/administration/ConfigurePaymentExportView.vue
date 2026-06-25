@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%Oy')" :title="$t(`%Oy`)" @save="save">
         <h1>
-            {{ $t('%Oz') }}
+            {{ $t('%95') }}
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />

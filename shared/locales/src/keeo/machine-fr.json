@@ -528,12 +528,20 @@
     "translation": "{n}e unité"
   },
   "%1dY": {
-    "original": "Je staat op het punt om een nieuw leeg scoutsjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand scoutsjaar.\\n\\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
-    "translation": "Vous êtes sur le point de créer une nouvelle année scoute vide ({name-period-new}), sans faire de copie d’une année scoute existante.\n\nDès que {name-period-new} est entièrement configurée, vous pourrez y basculer. À partir de ce moment, les membres pourront s’inscrire via le portail des membres. D’ici là, la nouvelle période restera cachée pour les membres."
+    "original": "Je staat op het punt om een nieuw leeg scoutsjaar aan te maken ({name-period-new}), zonder een kopie te maken van een bestaand scoutsjaar.\n\nZodra {name-period-new} volledig is ingesteld, kan je overschakelen. Vanaf dat moment kunnen leden zich via het ledenportaal inschrijven. Tot die tijd blijft de nieuwe periode verborgen voor leden.",
+    "translation": "Vous êtes sur le point de créer une nouvelle année scoute vide ({name-period-new}), sans copier une année scoute existante.\n\nDès que {name-period-new} est entièrement paramétrée, vous pourrez basculer. À partir de ce moment, les membres pourront s'inscrire via le portail des membres. Jusque-là, la nouvelle période reste invisible pour les membres."
   },
   "%1da": {
     "original": "Via deze koppeling zet je gegevens van Keeo automatisch over naar de groepsadministratie van Scouts en Gidsen Vlaanderen.",
     "translation": "Grâce à ce lien, vous transférez automatiquement les données de Keeo vers l’administration de groupe de Scouts et Guides de Flandre."
+  },
+  "%1dr": {
+    "original": "Filter alle eenheden die een beheerder hebben die aan deze voorwaarden voldoet.",
+    "translation": "Filtrez toutes les unités dont un administrateur correspond à ces critères."
+  },
+  "%1e6": {
+    "original": "Je kan geen categorie met bundelkortingen verplaatsen naar een ander scoutsjaar. Verwijder de bundelkortingen eerst.",
+    "translation": "Vous ne pouvez pas déplacer une catégorie incluant des réductions pour plusieurs inscriptions vers une autre année scoute. Veuillez d'abord supprimer les réductions pour plusieurs inscriptions."
   },
   "%2": {
     "original": "Aansluiting/verzekering Keeo*",
@@ -1328,8 +1336,8 @@
     "translation": "Vous ne pouvez créer des activités pour d’autres unités que via le portail administrateur de cette unité."
   },
   "%CP": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements passeront. Les paramètres de paiement de cette unité seront alors utilisés et toutes les inscriptions seront enregistrées dans la comptabilité de cette unité.\n\nDe plus, l'organisateur définit aussi des paramètres qui influencent la collecte des données et d’autres aspects plus subtils."
+    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements seront traités. Les paramètres de paiement de cette unité seront alors utilisés et toutes les inscriptions seront comptabilisées dans la comptabilité de cette unité.\n\nEn outre, l'organisateur définit également des paramètres qui ont une influence sur la collecte de données et d'autres aspects plus subtils."
   },
   "%CS": {
     "original": "Vragenlijst van FOS Open Scouting",
