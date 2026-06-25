@@ -187,11 +187,6 @@ export class Group extends QueryableModel {
     }
 
     static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {
-        if (STAMHOOFD.userMode === 'organization') {
-            // temporary
-            return;
-        }
-
         const reachable = new Map<string, boolean>();
 
         const visited = new Map<string, boolean>();
