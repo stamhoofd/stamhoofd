@@ -1,5 +1,5 @@
 <template>
-    <div v-if="platform.config.footerText.html" class="legal-footer">
+    <div v-if="!$isNative" class="legal-footer">
         <div>
             <aside class="style-wysiwyg gray subtle-links" v-html="platform.config.footerText.html" />
             <div>

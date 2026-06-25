@@ -36,6 +36,7 @@
         align-items: center;
         flex-wrap: wrap-reverse;
         min-width: 0;
+        gap: 15px;
 
         .stamhoofd-logo-container {            
             svg {
@@ -51,12 +52,27 @@
              }
          }
 
-         >div,
-         >aside {
+        > div,
+        > aside {
             min-width: 0;
 
             &:first-child {
                 padding-right: 15px;
+            }
+
+            > div {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 7px;
+                
+                &:first-child {
+                    padding-bottom: 5px;
+
+                    &:last-child {
+                        padding-bottom: 0;
+                    }
+                }
             }
 
              &:last-child {

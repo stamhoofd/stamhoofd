@@ -8,7 +8,7 @@
                     <div class="split-login-view">
                         <div class="container login-view">
                             <h1>{{ $t('%1cs', {organization: organization.name}) }}</h1>
-                            <p>Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.</p>
+                            <p>{{ $t('Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.') }}</p>
 
                             <p v-if="isTrial" class="secundary-box icon trial">
                                 {{ $t('%1aG') }}
@@ -55,7 +55,7 @@
                 </main>
             </div>
 
-            <LegalFooter v-if="customDomain" :organization="organization" class="shade" />
+            <LegalFooter :organization="organization" class="shade" />
         </main>
     </div>
 </template>

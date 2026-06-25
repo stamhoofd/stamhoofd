@@ -2,38 +2,32 @@
     <div class="legal-footer" :class="{customPlatform: STAMHOOFD.platformName !== 'stamhoofd'}">
         <hr class="style-hr"><div>
             <aside>
-                {{ company.name || organization.name }}{{ company.VATNumber || company.companyNumber ? (", "+(company.VATNumber || company.companyNumber)) : "" }}
-                <template v-if="organization.website">
-                    -
-                </template>
-                <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('%G') }}
-                </a>
+                <div>
+                    <button v-if="!$isNative && hasLanguages" type="button" class="button text" @click.prevent="switchLanguage">
+                        <span class="icon language" />
+                        <span> {{ LanguageHelper.getNativeName(I18nController.shared.language) }}</span>
+                        <span class="icon arrow-down-small" />
+                    </button>
+                </div>
+                <div>
+                    <span>{{ company.name || organization.name }}{{ company.VATNumber || company.companyNumber ? (", "+(company.VATNumber || company.companyNumber)) : "" }}</span>
 
-                <template v-for="policy in policies" :key="policy.id">
-                    -
-                    <a :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                    <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                        {{ $t('%G') }}
+                    </a>
+
+                    <a v-for="policy in policies" :key="policy.id" :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
                         {{ policy.name }}
                     </a>
-                </template>
 
-                <template v-if="privacyUrl">
-                    -
-                </template>
+                    <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                        {{ $t('%Oj') }}
+                    </a>
 
-                <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('%Oj') }}
-                </a>
-
-                <template v-if="isLoggedIn">
-                    -
-                </template>
-
-                <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
-                    {{ $t('%12N') }}
-                </button>
-
-                <br>
+                    <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
+                        {{ $t('%12N') }}
+                    </button>
+                </div>
             </aside>
             <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
             <div v-else>
@@ -47,7 +41,7 @@
 
 <script lang="ts" setup>
 import type { Company, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
-import { WebshopTicketType } from '@stamhoofd/structures';
+import { LanguageHelper, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useContext } from '#hooks/useContext.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
@@ -55,6 +49,9 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { computed } from 'vue';
 import Logo from '../icons/Logo.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { useSwitchLanguage } from '#views/hooks/useSwitchLanguage.ts';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import FlagIcon from '#icons/FlagIcon.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -97,4 +94,6 @@ const policies = computed(() => props.webshop?.meta.policies ?? []);
 const hasTickets = computed(() => props.webshop?.meta.ticketType === WebshopTicketType.Tickets);
 
 const isWebshop = computed(() => !!props.webshop);
+const { hasLanguages, switchLanguage } = useSwitchLanguage();
+
 </script>
