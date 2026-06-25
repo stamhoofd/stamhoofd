@@ -123,22 +123,12 @@ export function usePaymentsUIFilterBuilders() {
     const webshopsRelationFetcher = useWebshopsRelationFetcher();
 
     const balanceItemRegistrationWrapper: WrapperFilter = {
-        balanceItemPayments: {
-            balanceItem: {
-                registration: FilterWrapperMarker,
-            },
+        balanceItem: {
+            registration: FilterWrapperMarker,
         },
     };
 
-    const builders: UIFilterBuilders = [
-        (!organization.value || organization.value.id === platform.value.membershipOrganizationId) && STAMHOOFD.userMode === 'organization' ? PaymentFilterBuilders.methodForMembershipOrganization : PaymentFilterBuilders.method,
-        PaymentFilterBuilders.status,
-        PaymentFilterBuilders.type,
-        PaymentFilterBuilders.price,
-        PaymentFilterBuilders.paidAt,
-        PaymentFilterBuilders.createdAt,
-        PaymentFilterBuilders.transferDescription,
-        getCustomerUIFilterBuilders()[0],
+    const balanceItemBuilders: UIFilterBuilders = [
         new RelationFilterBuilder({
             name: $t('%14Z'),
             type: GroupType.Membership,
@@ -156,14 +146,27 @@ export function usePaymentsUIFilterBuilders() {
         new RelationFilterBuilder({
             name: $t('Webshop'),
             key: 'webshopId',
-            wrapper: {
-                balanceItemPayments: {
-                    balanceItem: {
-                        order: FilterWrapperMarker,
-                    },
-                },
-            },
+            wrapper: { balanceItem: { order: FilterWrapperMarker } } as WrapperFilter,
             relationFetcher: webshopsRelationFetcher,
+        }),
+    ];
+
+    balanceItemBuilders.unshift(new GroupUIFilterBuilder({ builders: balanceItemBuilders }));
+
+    const builders: UIFilterBuilders = [
+        (!organization.value || organization.value.id === platform.value.membershipOrganizationId) && STAMHOOFD.userMode === 'organization' ? PaymentFilterBuilders.methodForMembershipOrganization : PaymentFilterBuilders.method,
+        PaymentFilterBuilders.status,
+        PaymentFilterBuilders.type,
+        PaymentFilterBuilders.price,
+        PaymentFilterBuilders.paidAt,
+        PaymentFilterBuilders.createdAt,
+        PaymentFilterBuilders.transferDescription,
+        getCustomerUIFilterBuilders()[0],
+        new GroupUIFilterBuilder({
+            name: $t('Betaallijnen'),
+            description: $t('Een betaling kan voor meerdere items tegelijk zijn. Filter op betalingen die een item hebben die aan deze voorwaarden voldoet.'),
+            builders: balanceItemBuilders,
+            wrapper: { balanceItemPayments: FilterWrapperMarker } as WrapperFilter,
         }),
     ];
 
