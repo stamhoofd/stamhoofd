@@ -10,7 +10,7 @@ export enum DashboardTab {
 
 const dashboardTabLabels: Record<DashboardTab, string> = {
     [DashboardTab.Events]: 'Activiteiten',
-    [DashboardTab.Webshops]: 'Verkopen',
+    [DashboardTab.Webshops]: 'Webshops',
 };
 
 export class DashboardPage {
