@@ -10,6 +10,7 @@ export enum EmailRecipientFilterType {
     ReceivableBalances = 'ReceivableBalances',
     Documents = 'Documents',
     Organizations = 'Organizations',
+    WebshopDiscountCodes = 'WebshopDiscountCodes',
 
     // These naming should have been in plural:
     // Please don't add new enum values not in plural.

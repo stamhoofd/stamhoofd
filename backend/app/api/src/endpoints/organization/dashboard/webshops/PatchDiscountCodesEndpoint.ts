@@ -8,6 +8,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { DiscountCode, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
+import { MAX_DISCOUNT_CODES } from '../../../../helpers/discountCodeLimits.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -45,15 +46,31 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
         }
 
         const discountCodes: WebshopDiscountCode[] = [];
+        const puts = request.body.getPuts();
 
         // Updating discoutn codes should happen in the stock queue (because they are also edited when placing orders)
         await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
+            if (puts.length > 0) {
+                const existingDiscountCodes = await WebshopDiscountCode.select()
+                    .where('webshopId', webshop.id)
+                    .count();
+
+                if (existingDiscountCodes + puts.length > MAX_DISCOUNT_CODES) {
+                    throw new SimpleError({
+                        code: 'too_many_discount_codes',
+                        message: 'Too many discount codes',
+                        human: $t('Je kan maximaal {max} kortingscodes hebben.', { max: MAX_DISCOUNT_CODES }),
+                    });
+                }
+            }
+
             // TODO: handle order creation here
-            for (const put of request.body.getPuts()) {
+            for (const put of puts) {
                 const struct = put.put;
                 const model = new WebshopDiscountCode();
                 model.code = struct.code;
                 model.description = struct.description;
+                model.email = struct.email;
                 model.webshopId = webshop.id;
                 model.organizationId = webshop.organizationId;
                 model.discounts = struct.discounts;
@@ -87,6 +104,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
 
                 model.code = patchObject(model.code, patch.code);
                 model.description = patchObject(model.description, patch.description);
+                model.email = patchObject(model.email, patch.email);
                 model.discounts = patchObject(model.discounts, patch.discounts);
                 model.maximumUsage = patchObject(model.maximumUsage, patch.maximumUsage);
 
