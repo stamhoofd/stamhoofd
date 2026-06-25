@@ -261,6 +261,11 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 ];
             },
         },
+        // Group categories
+        XlsxTransformerColumnHelper.createGroupCategoryColumns<PlatformRegistration>({
+            matchId: 'groupCategory',
+            getMember: registration => registration.member,
+        }),
         // recordAnswers
         {
             match(id) {

@@ -125,11 +125,11 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // will always be 0 if organization is null
         organization !== null
             ? new SelectableColumn({
-                id: 'outstandingBalance',
-                name: $t(`%76`),
-                description: $t('%184'),
-                enabled: false,
-            })
+                    id: 'outstandingBalance',
+                    name: $t(`%76`),
+                    description: $t('%184'),
+                    enabled: false,
+                })
             : null,
         new SelectableColumn({
             id: 'createdAt',
@@ -223,6 +223,18 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                 });
             });
         }),
+
+        // group categories: a column per category, listing the groups the member is registered for in that category
+        ...(organization
+            ? organization.period.adminCategoryTree.getAllCategories()
+                    .filter(category => category.settings.name && category.getAllGroups().length > 0)
+                    .map(category => new SelectableColumn({
+                        id: `groupCategory.${category.id}`,
+                        name: category.settings.name,
+                        category: $t(`Inschrijvingen`),
+                        enabled: false,
+                    }))
+            : []),
     ].filter(column => column !== null);
 
     return columns;

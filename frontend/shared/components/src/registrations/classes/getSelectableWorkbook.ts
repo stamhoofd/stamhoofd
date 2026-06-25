@@ -149,17 +149,17 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
             ? new SelectableColumn({
-                id: 'groupRegistration',
-                name: $t('%8t'),
-                enabled: false,
-            })
+                    id: 'groupRegistration',
+                    name: $t('%8t'),
+                    enabled: false,
+                })
             : null,
         groups.some(group => group.settings.trialDays)
             ? new SelectableColumn({
-                id: 'trialUntil',
-                name: $t(`%1IH`),
-                enabled: false,
-            })
+                    id: 'trialUntil',
+                    name: $t(`%1IH`),
+                    enabled: false,
+                })
             : null,
         // group
         ...groupColumns,
@@ -205,21 +205,21 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
                     groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
                         ? new SelectableColumn({
-                            id: 'group.type',
-                            name: $t('%1LP'),
-                            enabled: false,
-                        })
+                                id: 'group.type',
+                                name: $t('%1LP'),
+                                enabled: false,
+                            })
                         : null,
                 ]
             : [],
         // will always be 0 if organization is null
         organization !== null
             ? new SelectableColumn({
-                id: 'outstandingBalance',
-                name: $t(`%76`),
-                description: $t('%184'),
-                enabled: false,
-            })
+                    id: 'outstandingBalance',
+                    name: $t(`%76`),
+                    description: $t('%184'),
+                    enabled: false,
+                })
             : null,
         // price
         new SelectableColumn({
@@ -349,6 +349,18 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                 });
             });
         }),
+
+        // group categories: a column per category, listing the groups the member is registered for in that category
+        ...(organization
+            ? organization.period.adminCategoryTree.getAllCategories()
+                    .filter(category => category.settings.name && category.getAllGroups().length > 0)
+                    .map(category => new SelectableColumn({
+                        id: `groupCategory.${category.id}`,
+                        name: category.settings.name,
+                        category: $t(`Inschrijvingen`),
+                        enabled: false,
+                    }))
+            : []),
     ].filter(column => column !== null);
 
     return new SelectableWorkbook({

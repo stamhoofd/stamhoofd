@@ -1,7 +1,8 @@
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import type { Address, Parent, PlatformMember, RecordAnswer, RecordSettings } from '@stamhoofd/structures';
+import type { Address, GroupCategory, Parent, PlatformMember, RecordAnswer, RecordSettings } from '@stamhoofd/structures';
 import { CountryHelper, ParentTypeHelper, RecordCategory, RecordType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 export class XlsxTransformerColumnHelper {
     static formatBoolean(value: boolean | undefined | null): string {
@@ -240,6 +241,77 @@ export class XlsxTransformerColumnHelper {
                 }
             },
         };
+    }
+
+    /**
+     * Creates a dynamic column for a group category. The matched id is `${matchId}.${categoryId}`, where categoryId
+     * refers to a category in the current period of the organization the member is registered at. The value is a
+     * comma separated list of all the groups the member is registered for in the current period that belong to that
+     * category (including its subcategories).
+     */
+    static createGroupCategoryColumns<T>({ matchId, getMember }: { matchId: string; getMember: (object: T) => PlatformMember }): XlsxTransformerColumn<T> {
+        return {
+            match(id) {
+                if (!id.startsWith(matchId + '.')) {
+                    return;
+                }
+
+                const categoryId = id.substring(matchId.length + 1);
+                if (!categoryId) {
+                    return;
+                }
+
+                return [
+                    {
+                        id: `${matchId}.${categoryId}`,
+                        name: $t(`Categorie`),
+                        width: 40,
+                        getValue: (object: T) => {
+                            const member = getMember(object);
+
+                            for (const organization of member.organizations) {
+                                const categories = organization.period.settings.categories;
+                                if (!categories.find(c => c.id === categoryId)) {
+                                    continue;
+                                }
+
+                                const groupIds = XlsxTransformerColumnHelper.collectGroupIdsForCategory(categoryId, categories);
+                                const registrations = member.filterRegistrations({ groupIds, organizationId: organization.id });
+                                const names = Formatter.uniqueArray(registrations.map(r => r.group.settings.name.toString())).sort();
+
+                                return {
+                                    value: names.join(', '),
+                                };
+                            }
+
+                            return {
+                                value: '',
+                            };
+                        },
+                    },
+                ];
+            },
+        };
+    }
+
+    /**
+     * Recursively collects all group ids that belong to a category and its subcategories.
+     */
+    private static collectGroupIdsForCategory(categoryId: string, categories: GroupCategory[], seen = new Set<string>()): string[] {
+        if (seen.has(categoryId)) {
+            return [];
+        }
+        seen.add(categoryId);
+
+        const category = categories.find(c => c.id === categoryId);
+        if (!category) {
+            return [];
+        }
+
+        return [
+            ...category.groupIds,
+            ...category.categoryIds.flatMap(id => XlsxTransformerColumnHelper.collectGroupIdsForCategory(id, categories, seen)),
+        ];
     }
 
     /**

@@ -302,6 +302,12 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
             }),
         },
 
+        // Group categories
+        XlsxTransformerColumnHelper.createGroupCategoryColumns<PlatformMember>({
+            matchId: 'groupCategory',
+            getMember: member => member,
+        }),
+
         // Registration records
         {
             match(id) {
