@@ -51,11 +51,15 @@ function applyContentChange(change: () => void) {
         return;
     }
 
+    console.log('Applying content change');
+
     change();
     // Wait for the real content to render before signaling so the controller can measure it.
-    nextTick(() => {
-        console.info('Promise view setting has content', true);
-        setHasContent(true);
+    nextTick(async () => {
+        requestAnimationFrame(() => {
+            console.info('Promise view setting has content', true);
+            setHasContent(true);
+        });
     }).catch(console.error);
 }
 
