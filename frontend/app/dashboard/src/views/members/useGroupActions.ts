@@ -2,13 +2,13 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void> | void) {
     const present = usePresent();
+    const auth = useAuth();
     const patchOrganizationPeriods = usePatchOrganizationPeriods();
     const getPeriods = useLoadRecentPeriods();
 
@@ -30,6 +31,9 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
          */
         periods?: OrganizationRegistrationPeriod[];
     }) {
+        const canManage = auth.hasFullAccess();
+        const canEdit = canManage || auth.canAccessGroup(props.group, PermissionLevel.Write);
+
         function getParentCategory() {
             return props.group.getParentCategories(props.period.settings.categories)[0];
         }
@@ -110,7 +114,12 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             const settings = OrganizationRegistrationPeriodSettings.patch({});
             settings.categories.addPatch(GroupCategory.patch({ id: parentCategory.id, groupIds: reorder }));
 
-            await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            try {
+                await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+            }
         }
 
         async function moveTo(category: GroupCategory, period: OrganizationRegistrationPeriod) {
@@ -135,12 +144,18 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             pp.groupIds.addDelete(props.group.id);
             settings.categories.addPatch(pp);
 
-            await save([
-                OrganizationRegistrationPeriod.patch({
-                    id: props.period.id,
-                    settings,
-                }),
-            ], [props.period]);
+            try {
+                await save([
+                    OrganizationRegistrationPeriod.patch({
+                        id: props.period.id,
+                        settings,
+                    }),
+                ], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
 
             showSuccessToast($t('%1cM', {
                 groupName: props.group.settings.name.toString(),
@@ -244,7 +259,13 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             });
             periodPatch.groups.addPut(duplicated);
 
-            await save([periodPatch], [props.period]);
+            try {
+                await save([periodPatch], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
 
             showSuccessToast($t('%1bK', {
                 groupName: props.group.settings.name.toString(),
@@ -282,7 +303,13 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             });
             periodPatch.groups.addDelete(props.group.id);
 
-            await save([periodPatch], [props.period]);
+            try {
+                await save([periodPatch], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return false;
+            }
 
             showSuccessToast($t('%1Z8', {
                 groupName: props.group.settings.name.toString(),
@@ -323,7 +350,13 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             const periodPatch = OrganizationRegistrationPeriod.patch({ id: props.period.id });
             periodPatch.groups.addPatch(groupPatch);
 
-            await save([periodPatch], [props.period]);
+            try {
+                await save([periodPatch], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return false;
+            }
 
             showSuccessToast($t('%1WV'));
 
@@ -348,7 +381,13 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                 status: GroupStatus.Closed,
             }));
 
-            await save([periodPatch], [props.period]);
+            try {
+                await save([periodPatch], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return false;
+            }
 
             showSuccessToast($t('%b4'));
 
@@ -401,7 +440,11 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                 });
             });
 
-            const menu = new ContextMenu([
+            if (!canEdit) {
+                return;
+            }
+
+            const sections: ContextMenuItem[][] = [
                 [
                     new ContextMenuItem({
                         name: $t('%f9'),
@@ -412,7 +455,10 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                         },
                     }),
                 ],
-                [
+            ];
+
+            if (canManage) {
+                sections.push([
                     new ContextMenuItem({
                         name: $t('%11f'),
                         icon: 'arrow-up',
@@ -429,8 +475,12 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                             return true;
                         },
                     }),
-                ],
-                [
+                ]);
+            }
+
+            const managementActions: ContextMenuItem[] = [];
+            if (canManage) {
+                managementActions.push(
                     new ContextMenuItem({
                         icon: 'folder',
                         name: $t('%122'),
@@ -456,7 +506,6 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                             ],
                         ]),
                     }),
-
                     new ContextMenuItem({
                         name: $t('%KK'),
                         icon: 'copy',
@@ -465,21 +514,27 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                             return true;
                         },
                     }),
+                );
+            }
 
-                    new ContextMenuItem({
-                        name: props.group.closed ? $t('%Lh') : $t('%1Vi'),
-                        icon: props.group.closed ? 'unlock' : 'lock',
-                        destructive: !props.group.closed,
-                        action: async () => {
-                            if (props.group.closed) {
-                                await openGroup();
-                            } else {
-                                await closeGroup();
-                            }
-                            return true;
-                        },
-                    }),
+            managementActions.push(
+                new ContextMenuItem({
+                    name: props.group.closed ? $t('%Lh') : $t('%1Vi'),
+                    icon: props.group.closed ? 'unlock' : 'lock',
+                    destructive: !props.group.closed,
+                    action: async () => {
+                        if (props.group.closed) {
+                            await openGroup();
+                        } else {
+                            await closeGroup();
+                        }
+                        return true;
+                    },
+                }),
+            );
 
+            if (canManage) {
+                managementActions.push(
                     new ContextMenuItem({
                         name: $t('%CJ'),
                         destructive: true,
@@ -489,8 +544,12 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                             return true;
                         },
                     }),
-                ],
-            ]);
+                );
+            }
+
+            sections.push(managementActions);
+
+            const menu = new ContextMenu(sections);
 
             if (event.type === 'contextmenu') {
                 // show at mouse
@@ -505,6 +564,6 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             });
         }
 
-        return { showMenu, editGroup, openGroup, closeGroup, deleteGroup };
+        return { showMenu, editGroup, openGroup, closeGroup, deleteGroup, canShowMenu: canEdit };
     };
 }

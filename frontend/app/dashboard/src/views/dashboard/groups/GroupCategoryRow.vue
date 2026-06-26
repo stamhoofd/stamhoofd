@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e: any) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editCategory()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: any) => canShowMenu && showContextMenu(e)" :selectable="true" class="right-stack" @click="canManage && editCategory()" @contextmenu.prevent="canShowMenu && showContextMenu($event)">
         <h2 class="style-title-list">
             {{ category.settings.name }}
         </h2>
@@ -8,7 +8,7 @@
         </p>
 
         <template #right>
-            <button type="button" class="button icon more gray hide-smartphone" @click.stop.prevent="showContextMenu" @contextmenu.stop />
+            <button v-if="canShowMenu" type="button" class="button icon more gray hide-smartphone" @click.stop.prevent="showContextMenu" @contextmenu.stop />
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
@@ -32,7 +32,7 @@ const emit = defineEmits<{
     (e: 'patch:periods', value: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>): void;
 }>();
 
-const { showMenu: showContextMenu, editCategory } = useGroupCategoryActions(
+const { showMenu: showContextMenu, editCategory, canShowMenu, canManage } = useGroupCategoryActions(
     (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => emit('patch:periods', patch),
 )(props);
 

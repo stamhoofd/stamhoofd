@@ -1,5 +1,5 @@
 <template>
-    <span class="icon button small right more-in-circle" @click.stop="showMenu" />
+    <span v-if="canShowMenu" class="icon button small right more-in-circle" @click.stop="showMenu" />
 </template>
 
 <script setup lang="ts">
@@ -16,6 +16,6 @@ const props = withDefaults(
     },
 );
 
-const { showMenu } = useGroupCategoryActions()(props);
+const { showMenu, canShowMenu } = useGroupCategoryActions()(props);
 
 </script>
