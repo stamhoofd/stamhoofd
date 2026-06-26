@@ -20,7 +20,7 @@
                     @change="updateModelValue()"
                     @input="updateModelValue({ final: false })"
                 >
-                 <div v-if="!text.length" class="placeholder">
+                <div v-if="!text.length" class="placeholder">
                     {{ placeholder }}
                 </div>
                 <div v-else>
@@ -103,17 +103,17 @@ watch(() => model.value, (value) => {
 function setModelValue(value: number | null, {final}: {final: boolean} = { final: true }) {
     if (value !== model.value) {
         model.value = value;
-        return
+        
     }
-    else if (final) {
+    if (final) {
         updateText(value);
     }
 }
 
 function updateText(value: number | null) {
-    text.value = numberInput.numberToString(value, { valueIfNaN: 
-            props.autoFix ? '' : text.value
-         });
+    text.value = numberInput.numberToString(value, { valueIfNaN:
+            props.autoFix ? '' : text.value,
+    });
 }
 
 function step(add: number) {
@@ -124,11 +124,11 @@ function step(add: number) {
     updateText(newValue);
 }
 
-function updateModelValue(options: {final: boolean} = { final: true }) {
+function updateModelValue(options: { final: boolean } = { final: true }) {
     validate(text.value, options);
 }
 
-function validate(value: string, {final}: {final: boolean} = { final: true }) {
+function validate(value: string, { final }: { final: boolean } = { final: true }) {
     let number = numberInput.stringToNumber(value, { valueIfNaN: props.autoFix ? null : NaN });
 
     if (final) {
@@ -144,9 +144,9 @@ function validate(value: string, {final}: {final: boolean} = { final: true }) {
         return;
     }
 
-    const {isValid} = numberInput.validateNumber(number);
+    const { isValid } = numberInput.validateNumber(number);
     if (isValid) {
-        setModelValue(number, {final});
+        setModelValue(number, { final });
     }
 }
 

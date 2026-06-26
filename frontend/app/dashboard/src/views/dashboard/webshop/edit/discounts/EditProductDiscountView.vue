@@ -207,15 +207,14 @@ function setDiscountType(d: ProductDiscount, type: 'percentageDiscount' | 'disco
     if (type === 'percentageDiscount') {
         p.discounts.addPatch(ProductDiscount.patch({
             id: d.id,
-            percentageDiscount: Math.min(100, getDiscountDiscountPerPiece(d)),
+            percentageDiscount: getDiscountDiscountPerPiece(d) / 100,
             discountPerPiece: 0,
         }));
-    }
-    else {
+    } else {
         p.discounts.addPatch(ProductDiscount.patch({
             id: d.id,
             percentageDiscount: 0,
-            discountPerPiece: Math.max(1, getDiscountPercentageDiscount(d)),
+            discountPerPiece: getDiscountPercentageDiscount(d) * 100,
         }));
     }
     addPatch(p);
