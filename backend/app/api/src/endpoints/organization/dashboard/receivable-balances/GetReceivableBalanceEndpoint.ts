@@ -1,8 +1,8 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { DetailedReceivableBalance, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { DetailedReceivableBalance, PaymentStatus, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
 
-import { BalanceItem, BalanceItemPayment, CachedBalance, MemberUser, Payment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Member, MemberUser, Payment, Registration } from '@stamhoofd/models';
 import { Context } from '../../../../helpers/Context.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { SQL } from '@stamhoofd/sql';
@@ -35,9 +35,23 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        // If the user has permission, we'll also search if he has access to the organization's key
         if (!await Context.auth.canManageFinances(organization.id)) {
-            throw Context.auth.error();
+            // Group-level financial access is sufficient for member and registration balance views
+            if (request.params.type === ReceivableBalanceType.member) {
+                const member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
+                if (!member || !await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, organization.id)) {
+                    throw Context.auth.error();
+                }
+            } else if (request.params.type === ReceivableBalanceType.registration) {
+                const registration = await Registration.select().where('id', request.params.id).first(false);
+                if (!registration) throw Context.auth.error();
+                const member = await Member.getByIdWithUsersAndRegistrations(registration.memberId);
+                if (!member || !await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, organization.id)) {
+                    throw Context.auth.error();
+                }
+            } else {
+                throw Context.auth.error();
+            }
         }
 
         let paymentModels: Payment[] = [];
