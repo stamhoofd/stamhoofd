@@ -100,7 +100,7 @@ function getRoot() {
     const webshopsTab = new TabBarItem({
         id: 'webshops',
         icon: 'basket',
-        name: STAMHOOFD.userMode === 'platform' ? $t(`%1Yu`) : $t('Webshops'),
+        name: $t('Webshops'),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
         }),
