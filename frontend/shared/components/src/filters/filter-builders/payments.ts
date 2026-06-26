@@ -13,6 +13,7 @@ import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { useEventGroupsRelationFetcher } from '../relation-fetchers/event-groups';
 import { useGroupsRelationFetcher } from '../relation-fetchers/groups';
+import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
 import { useWebshopsRelationFetcher } from '../relation-fetchers/webshops';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { usePlatform } from '#hooks/usePlatform.ts';
@@ -122,6 +123,7 @@ export function usePaymentsUIFilterBuilders() {
     const groupsRelationFetcher = useGroupsRelationFetcher();
     const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
     const webshopsRelationFetcher = useWebshopsRelationFetcher();
+    const organizationsRelationFetcher = useOrganizationsRelationFetcher();
     const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
 
     const balanceItemRegistrationWrapper: WrapperFilter = {
@@ -184,9 +186,20 @@ export function usePaymentsUIFilterBuilders() {
     ];
 
     if (!organization.value || organization.value.id === platform.value.membershipOrganizationId) {
+        const payingOrganizationBuilders = getOrganizationUIFilterBuilders();
+
+        // Also allow to specifically select organizations
+        const organizationRelationFilter = new RelationFilterBuilder({
+            name: $t('Vereniging'),
+            key: 'id',
+            wrapper: FilterWrapperMarker,
+            relationFetcher: organizationsRelationFetcher,
+        });
+        payingOrganizationBuilders.splice(1, 0, organizationRelationFilter);
+
         builders.push(new GroupUIFilterBuilder({
             name: $t('Betalende vereniging'),
-            builders: getOrganizationUIFilterBuilders(),
+            builders: payingOrganizationBuilders,
             wrapper: { payingOrganization: FilterWrapperMarker } as WrapperFilter,
         }));
     }
