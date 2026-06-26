@@ -35,7 +35,7 @@ export class StripePayoutChecker {
     async checkSettlements(checkAll = false) {
         // Check last 2 weeks + 3 day margin, unless we check them all
         const d = new Date();
-        d.setDate(d.getDate() - 17);
+        d.setDate(d.getDate() - 20);
 
         if (checkAll) {
             d.setFullYear(2022, 11, 1);
