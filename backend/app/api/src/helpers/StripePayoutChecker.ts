@@ -154,9 +154,10 @@ export class StripePayoutChecker {
             return;
         }
 
-        const applicationFee = balanceItem.source.application_fee_amount;
-        const otherFees = balanceItem.fee;
-        const totalFees = otherFees + (applicationFee ?? 0);
+        // balanceItem.fee is the total fee withheld from the connected account for this charge.
+        // It already includes the application fee (Stripe lists it in fee_details), so we must
+        // NOT add application_fee_amount on top of it again — doing so double-counts the fee.
+        const totalFees = balanceItem.fee;
 
         // Cool, we can store this in the database now.
 
