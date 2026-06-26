@@ -71,12 +71,14 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             name: $t(`%Cn`),
             description: $t(`%ew`),
         }),
-        new SelectableColumn({
-            id: 'securityCode',
-            name: $t(`%wE`),
-            enabled: false,
-            description: $t(`%ex`),
-        }),
+        ...(STAMHOOFD.userMode === 'platform'
+            ? [new SelectableColumn({
+                    id: 'securityCode',
+                    name: $t(`%wE`),
+                    enabled: false,
+                    description: $t(`%ex`),
+                })]
+            : []),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'requiresFinancialSupport',
             name: financialSupportTitle,
@@ -112,11 +114,13 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     }),
                 ]
             : []),
-        new SelectableColumn({
-            id: 'defaultAgeGroup',
-            name: $t(`%wI`),
-            enabled: false,
-        }),
+        ...(platform.config.defaultAgeGroups.length > 0
+            ? [new SelectableColumn({
+                    id: 'defaultAgeGroup',
+                    name: $t(`%wI`),
+                    enabled: false,
+                })]
+            : []),
         new SelectableColumn({
             id: 'group',
             name: $t(`%wH`),

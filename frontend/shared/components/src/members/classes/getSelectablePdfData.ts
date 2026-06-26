@@ -95,13 +95,15 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             // todo: check if this is correct?
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.address?.toString(),
         }),
-        new SelectablePdfData<PlatformMember>({
-            id: 'securityCode',
-            name: $t(`%wE`),
-            enabled: false,
-            description: $t(`%ex`),
-            getValue: ({ patchedMember: object }: PlatformMember) => object.details.securityCode,
-        }),
+        ...(STAMHOOFD.userMode === 'platform'
+            ? [new SelectablePdfData<PlatformMember>({
+                    id: 'securityCode',
+                    name: $t(`%wE`),
+                    enabled: false,
+                    description: $t(`%ex`),
+                    getValue: ({ patchedMember: object }: PlatformMember) => object.details.securityCode,
+                })]
+            : []),
 
         returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
             id: 'requiresFinancialSupport',
@@ -172,37 +174,39 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                             return str;
                         },
                     }),
-                    new SelectablePdfData<PlatformMember>({
-                        id: 'defaultAgeGroup',
-                        name: $t(`%wI`),
-                        enabled: false,
-                        getValue: (member: PlatformMember) => {
-                            const groups = member.filterRegistrations({
-                                currentPeriod: true,
-                                types: [GroupType.Membership],
-                                // todo: check if this is correct
-                                organizationId: undefined,
-                            });
-                            const defaultAgeGroupIds = Formatter.uniqueArray(
-                                groups.filter(o => o.group.defaultAgeGroupId),
-                            );
-                            const defaultAgeGroups = defaultAgeGroupIds.map(
-                                o =>
-                                    Platform.shared.config.defaultAgeGroups.find(
-                                        g => g.id === o.group.defaultAgeGroupId,
-                                    )?.name ?? $t(`%wJ`),
-                            );
-                            const str
-                    = Formatter.joinLast(
-                        Formatter.uniqueArray(defaultAgeGroups).sort(),
-                        ', ',
-                        ' ' + $t(`%M1`) + ' ',
-                    )
-                    || $t('%5D');
+                    ...(platform.config.defaultAgeGroups.length > 0
+                        ? [new SelectablePdfData<PlatformMember>({
+                                id: 'defaultAgeGroup',
+                                name: $t(`%wI`),
+                                enabled: false,
+                                getValue: (member: PlatformMember) => {
+                                    const groups = member.filterRegistrations({
+                                        currentPeriod: true,
+                                        types: [GroupType.Membership],
+                                        // todo: check if this is correct
+                                        organizationId: undefined,
+                                    });
+                                    const defaultAgeGroupIds = Formatter.uniqueArray(
+                                        groups.filter(o => o.group.defaultAgeGroupId),
+                                    );
+                                    const defaultAgeGroups = defaultAgeGroupIds.map(
+                                        o =>
+                                            Platform.shared.config.defaultAgeGroups.find(
+                                                g => g.id === o.group.defaultAgeGroupId,
+                                            )?.name ?? $t(`%wJ`),
+                                    );
+                                    const str
+                            = Formatter.joinLast(
+                                Formatter.uniqueArray(defaultAgeGroups).sort(),
+                                ', ',
+                                ' ' + $t(`%M1`) + ' ',
+                            )
+                            || $t('%5D');
 
-                            return str;
-                        },
-                    }),
+                                    return str;
+                                },
+                            })]
+                        : []),
                 ]
             : []),
 
