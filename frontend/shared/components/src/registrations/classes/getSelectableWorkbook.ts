@@ -116,12 +116,14 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             description: $t(`%ew`),
             enabled: false,
         }),
-        new SelectableColumn({
-            id: 'member.securityCode',
-            name: $t(`%wE`),
-            enabled: false,
-            description: $t(`%ex`),
-        }),
+        ...(STAMHOOFD.userMode === 'platform'
+            ? [new SelectableColumn({
+                    id: 'member.securityCode',
+                    name: $t(`%wE`),
+                    enabled: false,
+                    description: $t(`%ex`),
+                })]
+            : []),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.requiresFinancialSupport',
             name: financialSupportTitle,
@@ -193,11 +195,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             : []),
         ...organization === null || groups.length > 1
             ? [
-                    new SelectableColumn({
-                        id: 'defaultAgeGroup',
-                        name: $t(`%wI`),
-                        enabled: false,
-                    }),
+                    ...(platform.config.defaultAgeGroups.length > 0
+                        ? [new SelectableColumn({
+                                id: 'defaultAgeGroup',
+                                name: $t(`%wI`),
+                                enabled: false,
+                            })]
+                        : []),
                     new SelectableColumn({
                         id: 'group',
                         name: $t(`%wH`),
