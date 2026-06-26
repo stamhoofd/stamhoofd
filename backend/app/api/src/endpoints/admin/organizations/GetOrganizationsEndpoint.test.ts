@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
-import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { LimitedFilteredRequest, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { OrganizationFactory, STPackageFactory, UserFactory } from '@stamhoofd/models';
+import { LimitedFilteredRequest, PermissionLevel, Permissions, STPackageBundle, type StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initPlatformAdmin } from '../../../../tests/init/index.js';
@@ -27,6 +27,22 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
             host: '',
             query: new LimitedFilteredRequest({
                 search: searchTerm,
+                limit: 100,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token.accessToken,
+            },
+        });
+        const response = await testServer.test(endpoint, request);
+        return response.body.results.map(o => o.id);
+    };
+
+    const filter = async (filter: StamhoofdFilter, token: Token): Promise<string[]> => {
+        const request = Request.get({
+            path: baseUrl,
+            host: '',
+            query: new LimitedFilteredRequest({
+                filter,
                 limit: 100,
             }),
             headers: {
@@ -103,5 +119,52 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const results = await search('unique-owner@admin-search-test.com', adminToken);
         expect(results).toContain(organization.id);
         expect(results).not.toContain(otherOrganization.id);
+    });
+
+    test('Filters organizations by active package type', async () => {
+        const { adminToken } = await initPlatformAdmin();
+
+        const membersOrg = await new OrganizationFactory({ name: 'Packaged Members Club' }).create();
+        await new STPackageFactory({ organization: membersOrg, bundle: STPackageBundle.Members }).create();
+
+        const webshopsOrg = await new OrganizationFactory({ name: 'Packaged Webshops Club' }).create();
+        await new STPackageFactory({ organization: webshopsOrg, bundle: STPackageBundle.Webshops }).create();
+
+        const results = await filter({
+            packages: {
+                $elemMatch: {
+                    type: {
+                        $in: ['Members'],
+                    },
+                },
+            },
+        }, adminToken);
+
+        expect(results).toContain(membersOrg.id);
+        expect(results).not.toContain(webshopsOrg.id);
+    });
+
+    test('Does not match organizations whose package is no longer valid', async () => {
+        const { adminToken } = await initPlatformAdmin();
+
+        const expiredOrg = await new OrganizationFactory({ name: 'Expired Members Club' }).create();
+        // removeAt in the past => package is no longer active
+        await new STPackageFactory({
+            organization: expiredOrg,
+            bundle: STPackageBundle.Members,
+            removeAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+        }).create();
+
+        const results = await filter({
+            packages: {
+                $elemMatch: {
+                    type: {
+                        $in: ['Members'],
+                    },
+                },
+            },
+        }, adminToken);
+
+        expect(results).not.toContain(expiredOrg.id);
     });
 });

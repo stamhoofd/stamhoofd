@@ -1,5 +1,5 @@
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, SetupStepType } from '@stamhoofd/structures';
+import { FilterWrapperMarker, SetupStepType, STPackageType, STPackageTypeHelper } from '@stamhoofd/structures';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
@@ -147,6 +147,30 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                     },
                 },
             }),
+
+            ifNotPlatform(new MultipleChoiceFilterBuilder({
+                name: $t(`Pakketten`),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: [
+                    STPackageType.Members,
+                    STPackageType.Webshops,
+                    STPackageType.SingleWebshop,
+                    STPackageType.TrialMembers,
+                    STPackageType.TrialWebshops,
+                    STPackageType.LegacyMembers,
+                ].map(type => new MultipleChoiceUIFilterOption(STPackageTypeHelper.getName(type), type)),
+                wrapper: {
+                    packages: {
+                        $elemMatch: {
+                            type: {
+                                $in: FilterWrapperMarker,
+                            },
+                        },
+                    },
+                },
+            })),
 
             ifPlatform(ifNotBase(new MultipleChoiceFilterBuilder({
                 name: $t(`%c6`),
