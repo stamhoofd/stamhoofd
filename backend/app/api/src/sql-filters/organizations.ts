@@ -29,6 +29,16 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Boolean,
         nullable: false,
     }),
+    createdAt: createColumnFilter({
+        expression: SQL.column('organizations', 'createdAt'),
+        type: SQLValueType.Datetime,
+        nullable: false,
+    }),
+    street: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.street'),
+        type: SQLValueType.JSONString,
+        nullable: false,
+    }),
     city: createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.city'),
         type: SQLValueType.JSONString,

@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { OrganizationFactory, STPackageFactory, UserFactory } from '@stamhoofd/models';
-import { LimitedFilteredRequest, PermissionLevel, Permissions, STPackageBundle, type StamhoofdFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, OrganizationMetaData, OrganizationType, PermissionLevel, Permissions, STPackageBundle, type StamhoofdFilter, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initPlatformAdmin } from '../../../../tests/init/index.js';
@@ -166,5 +167,66 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         }, adminToken);
 
         expect(results).not.toContain(expiredOrg.id);
+    });
+
+    // Creates an organization with a specific type and/or umbrella organization
+    const createOrganizationWithMeta = async (name: string, metaPatch: { type?: OrganizationType; umbrellaOrganization?: UmbrellaOrganization | null }) => {
+        const meta = OrganizationMetaData.create({
+            type: metaPatch.type ?? OrganizationType.Other,
+            umbrellaOrganization: metaPatch.umbrellaOrganization ?? null,
+            defaultEndDate: new Date(),
+            defaultStartDate: new Date(),
+            defaultPrices: [],
+        });
+        return await new OrganizationFactory({ name, meta }).create();
+    };
+
+    test('Filters organizations by type', async () => {
+        const { adminToken } = await initPlatformAdmin();
+        const youthOrg = await createOrganizationWithMeta('Youthful Club', { type: OrganizationType.Youth });
+        const sportOrg = await createOrganizationWithMeta('Sporty Club', { type: OrganizationType.Sport });
+
+        const results = await filter({ type: { $in: [OrganizationType.Youth] } }, adminToken);
+        expect(results).toContain(youthOrg.id);
+        expect(results).not.toContain(sportOrg.id);
+    });
+
+    test('Filters organizations by umbrella organization', async () => {
+        const { adminToken } = await initPlatformAdmin();
+        const scoutsOrg = await createOrganizationWithMeta('Scouts Club', { umbrellaOrganization: UmbrellaOrganization.ScoutsEnGidsenVlaanderen });
+        const otherOrg = await createOrganizationWithMeta('No Umbrella Club', { umbrellaOrganization: null });
+
+        const results = await filter({ umbrellaOrganization: { $in: [UmbrellaOrganization.ScoutsEnGidsenVlaanderen] } }, adminToken);
+        expect(results).toContain(scoutsOrg.id);
+        expect(results).not.toContain(otherOrg.id);
+    });
+
+    test('Filters organizations by country', async () => {
+        const { adminToken } = await initPlatformAdmin();
+        // OrganizationFactory creates organizations in Belgium by default
+        const org = await new OrganizationFactory({ name: 'Belgian Club' }).create();
+
+        expect(await filter({ country: { $in: [Country.Belgium] } }, adminToken)).toContain(org.id);
+        expect(await filter({ country: { $in: [Country.Netherlands] } }, adminToken)).not.toContain(org.id);
+    });
+
+    test('Filters organizations by street', async () => {
+        const { adminToken } = await initPlatformAdmin();
+        // OrganizationFactory uses 'Demostraat' as the street
+        const org = await new OrganizationFactory({ name: 'Streeted Club' }).create();
+
+        expect(await filter({ street: { $contains: 'Demostraat' } }, adminToken)).toContain(org.id);
+        expect(await filter({ street: { $contains: 'Nonexistentstreet' } }, adminToken)).not.toContain(org.id);
+    });
+
+    test('Filters organizations by creation date', async () => {
+        const { adminToken } = await initPlatformAdmin();
+        const org = await new OrganizationFactory({ name: 'Freshly Created Club' }).create();
+
+        const anHourAgo = new Date(Date.now() - 1000 * 60 * 60);
+        const inAnHour = new Date(Date.now() + 1000 * 60 * 60);
+
+        expect(await filter({ createdAt: { $gt: anHourAgo } }, adminToken)).toContain(org.id);
+        expect(await filter({ createdAt: { $gt: inAnHour } }, adminToken)).not.toContain(org.id);
     });
 });

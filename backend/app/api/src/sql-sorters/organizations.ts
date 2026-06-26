@@ -88,4 +88,26 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
             });
         },
     },
+    umbrellaOrganization: {
+        getValue(a) {
+            return a.meta.umbrellaOrganization;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.jsonValue(SQL.column('meta'), '$.value.umbrellaOrganization', 'CHAR'),
+                direction,
+            });
+        },
+    },
+    createdAt: {
+        getValue(a) {
+            return a.createdAt;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('createdAt'),
+                direction,
+            });
+        },
+    },
 };

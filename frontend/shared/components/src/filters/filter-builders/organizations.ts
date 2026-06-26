@@ -1,8 +1,10 @@
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, SetupStepType, STPackageType, STPackageTypeHelper } from '@stamhoofd/structures';
+import { CountryHelper, FilterWrapperMarker, OrganizationType, OrganizationTypeHelper, SetupStepType, STPackageType, STPackageTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
+import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
@@ -101,6 +103,11 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             new StringFilterBuilder({
+                name: $t(`Straat`),
+                key: 'street',
+            }),
+
+            new StringFilterBuilder({
                 name: $t(`%1PP`),
                 key: 'city',
             }),
@@ -110,9 +117,27 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 key: 'postalCode',
             }),
 
+            new MultipleChoiceFilterBuilder({
+                name: $t(`Land`),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: Object.values(Country).map(country => new MultipleChoiceUIFilterOption(CountryHelper.getName(country), country)),
+                wrapper: {
+                    country: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+
             new StringFilterBuilder({
                 name: $t('%1O1'),
                 key: 'uri',
+            }),
+
+            new DateFilterBuilder({
+                name: $t(`Aanmaakdatum`),
+                key: 'createdAt',
             }),
 
             ifNotBase(new GroupUIFilterBuilder({
@@ -168,6 +193,32 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                                 $in: FilterWrapperMarker,
                             },
                         },
+                    },
+                },
+            })),
+
+            ifNotPlatform(new MultipleChoiceFilterBuilder({
+                name: $t(`Type`),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: Object.values(OrganizationType).map(type => new MultipleChoiceUIFilterOption(OrganizationTypeHelper.getName(type), type)),
+                wrapper: {
+                    type: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            })),
+
+            ifNotPlatform(new MultipleChoiceFilterBuilder({
+                name: $t(`Koepelorganisatie`),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                },
+                options: Object.values(UmbrellaOrganization).map(umbrella => new MultipleChoiceUIFilterOption(UmbrellaOrganizationHelper.getName(umbrella), umbrella)),
+                wrapper: {
+                    umbrellaOrganization: {
+                        $in: FilterWrapperMarker,
                     },
                 },
             })),

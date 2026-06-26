@@ -40,8 +40,10 @@ import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/Tabl
 
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
-import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, TagHelper } from '@stamhoofd/structures';
+import type { OrganizationTag, OrganizationType, StamhoofdFilter, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Address, CountryHelper, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
+import type { Country } from '@stamhoofd/types/Country';
+import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
@@ -127,6 +129,8 @@ const objectFetcher = useOrganizationsObjectFetcher({
 
 const tableObjectFetcher = useTableObjectFetcher<Organization>(objectFetcher);
 
+const isPlatform = STAMHOOFD.userMode === 'platform';
+
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, Organization>({
         id: 'uriPadded',
@@ -168,6 +172,39 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 200,
     }),
+    new Column<ObjectType, Country>({
+        id: 'country',
+        name: $t(`Land`),
+        getValue: organization => organization.address.country,
+        format: country => CountryHelper.getName(country),
+        minimumWidth: 100,
+        recommendedWidth: 150,
+        enabled: false,
+    }),
+
+    // Organization mode only: type and umbrella organization
+    ...(isPlatform
+        ? []
+        : [
+                new Column<ObjectType, OrganizationType>({
+                    id: 'type',
+                    name: $t(`Type`),
+                    getValue: organization => organization.meta.type,
+                    format: type => OrganizationTypeHelper.getName(type),
+                    minimumWidth: 100,
+                    recommendedWidth: 200,
+                }),
+                new Column<ObjectType, UmbrellaOrganization | null>({
+                    id: 'umbrellaOrganization',
+                    name: $t(`Koepelorganisatie`),
+                    getValue: organization => organization.meta.umbrellaOrganization,
+                    format: umbrella => umbrella ? UmbrellaOrganizationHelper.getName(umbrella) : $t(`%1FW`),
+                    getStyle: umbrella => umbrella ? '' : 'gray',
+                    minimumWidth: 100,
+                    recommendedWidth: 200,
+                    enabled: false,
+                }),
+            ]),
     new Column<ObjectType, string[]>({
         id: 'tags',
         name: $t(`%13`),
@@ -178,34 +215,66 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 300,
     }),
-    new Column<ObjectType, { completed: number; total: number }>({
-        id: 'setupSteps',
-        name: $t(`%Gs`),
-        allowSorting: false,
-        getValue: organization => organization.period.setupSteps.getProgress(),
-        format: (progress) => {
-            const { completed, total } = progress;
-            if (total === 0) {
-                return $t(`%1FW`);
-            }
-            if (completed >= total) {
-                return $t(`%Gt`);
-            }
-            return `${progress.completed}/${progress.total}`;
-        },
-        getStyle: (progress) => {
-            const { completed, total } = progress;
-            if (total === 0) {
-                return 'gray';
-            }
-            if (completed >= total) {
-                return 'success';
-            }
-            return 'gray';
-        },
-        minimumWidth: 50,
-        recommendedWidth: 100,
 
+    // Organization mode only: active packages
+    ...(isPlatform
+        ? []
+        : [
+                new Column<ObjectType, string[]>({
+                    id: 'activePackages',
+                    name: $t(`Actieve pakketten`),
+                    allowSorting: false,
+                    getValue: organization => Object.values(STPackageType)
+                        .filter(type => organization.meta.packages.isActive(type))
+                        .map(type => STPackageTypeHelper.getName(type)),
+                    format: packages => packages.length === 0 ? $t(`%1FW`) : packages.join(', '),
+                    getStyle: packages => packages.length === 0 ? 'gray' : '',
+                    minimumWidth: 100,
+                    recommendedWidth: 250,
+                }),
+            ]),
+
+    // Platform mode only: setup steps (vlagmoment)
+    ...(isPlatform
+        ? [
+                new Column<ObjectType, { completed: number; total: number }>({
+                    id: 'setupSteps',
+                    name: $t(`%Gs`),
+                    allowSorting: false,
+                    getValue: organization => organization.period.setupSteps.getProgress(),
+                    format: (progress) => {
+                        const { completed, total } = progress;
+                        if (total === 0) {
+                            return $t(`%1FW`);
+                        }
+                        if (completed >= total) {
+                            return $t(`%Gt`);
+                        }
+                        return `${progress.completed}/${progress.total}`;
+                    },
+                    getStyle: (progress) => {
+                        const { completed, total } = progress;
+                        if (total === 0) {
+                            return 'gray';
+                        }
+                        if (completed >= total) {
+                            return 'success';
+                        }
+                        return 'gray';
+                    },
+                    minimumWidth: 50,
+                    recommendedWidth: 100,
+                }),
+            ]
+        : []),
+    new Column<ObjectType, Date>({
+        id: 'createdAt',
+        name: $t(`Aanmaakdatum`),
+        getValue: organization => organization.createdAt,
+        format: (v, width) => width < 200 ? Formatter.dateNumber(v, true) : Formatter.date(v, true),
+        minimumWidth: 80,
+        recommendedWidth: 160,
+        enabled: false,
     }),
 ];
 
