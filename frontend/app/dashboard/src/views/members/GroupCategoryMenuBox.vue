@@ -7,7 +7,7 @@
         type="members"
         :selected="checkRoute(Routes.Category, {properties: {category, period}})"
         @open="$navigate(Routes.Category, {properties: {category, period}})"
-        @contextmenu.prevent="getCategoryActions({period, category}).showMenu($event)"
+        @contextmenu="getCategoryActions({period, category}).showMenu($event)"
     >
         <GroupCategoryBox
             :category="category"

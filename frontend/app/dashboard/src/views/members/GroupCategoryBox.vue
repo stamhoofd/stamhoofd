@@ -7,7 +7,7 @@
         :title="subcategory.settings.name"
         :selected="checkRoute(Routes.Category, {properties: {category: subcategory, period}})"
         @open="navigate(Routes.Category, {properties: {category: subcategory, period}})"
-        @contextmenu.prevent="getCategoryActions({period, category: subcategory}).showMenu($event)"
+        @contextmenu="getCategoryActions({period, category: subcategory}).showMenu($event)"
     >
         <GroupCategoryBox
             :category="subcategory"

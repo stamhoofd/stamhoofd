@@ -403,6 +403,11 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         }
 
         async function showMenu(event: MouseEvent) {
+            if (!canShowMenu) {
+                return;
+            }
+            event.preventDefault();
+
             const parentCategory = getParentCategory();
             const grandParentCategory = getGrandParentCategory();
             const subCategories = getSubCategories();
@@ -593,6 +598,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             });
         }
 
-        return { showMenu, editCategory, canManage, canShowMenu: canManage || canCreate };
+        const canShowMenu = canManage || (canCreate && props.category.categoryIds.length === 0);
+        return { showMenu, editCategory, canManage, canShowMenu };
     };
 }
