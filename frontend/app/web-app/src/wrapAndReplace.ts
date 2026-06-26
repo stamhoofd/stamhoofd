@@ -44,14 +44,21 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
         const helper = new UrlHelper(UrlHelper.shared.url.href);
 
         helper.setDomain(expectedHost); // keep path and query params, but change domain
-        if (options) {
-            if (options.url) {
-                // change path to url
-                if (typeof options.url === 'string') {
-                    helper.setPath(options.url);
-                } else {
-                    helper.setPath(options.url.value ?? '');
-                }
+        if (options?.url) {
+            const routeUrl = typeof options.url === 'string' ? options.url : (options.url.value ?? '');
+            if (routeUrl) {
+                // The target domain identifies the org by domain/subdomain, not by path.
+                // Strip the org URI from the path and keep only the app-type prefix (e.g.
+                // 'beheerders') plus any sub-paths beyond the outer route match (e.g. 'reset-password').
+                const currentParts = UrlHelper.shared.getParts();
+                const routeParts = routeUrl.split('/').filter(Boolean);
+                // Sub-paths are the parts beyond the outer route match (current URL may have more path
+                // than what the outer route matched, e.g. /reset-password after /beheerders/{org-uri}).
+                const subParts = routeParts.every((part, i) => currentParts[i] === part)
+                    ? currentParts.slice(routeParts.length)
+                    : [];
+                const appPrefix = routeParts[0] ?? '';
+                helper.setPath(UrlHelper.transformUrl([appPrefix, ...subParts].filter(Boolean).join('/')));
             }
         }
 
