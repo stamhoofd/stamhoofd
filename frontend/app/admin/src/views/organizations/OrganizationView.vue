@@ -126,6 +126,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Admins)">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Beheerders') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Beheer wie toegang heeft tot deze groep') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/' + appToUri('dashboard') + '/' + organization.uri + '/instellingen'" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
@@ -213,7 +228,7 @@ import { appToUri, Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
-
+import { useWrapOrganization } from '../../useWrapOrganization';
 
 const props = defineProps<{
     organization: Organization;
@@ -224,7 +239,10 @@ const navigate = useNavigate();
 
 enum Routes {
     Invoices = 'invoices',
+    Admins = 'beheerders',
 }
+
+const wrapOrganizationContext = useWrapOrganization();
 
 defineRoutes([
     {
@@ -235,6 +253,14 @@ defineRoutes([
                 organization: props.organization,
             };
         },
+    },
+    {
+        url: Routes.Admins,
+        component: async () => {
+            const AdminsView = (await import('@stamhoofd/components/admins/AdminsView.vue')).default;
+            return await wrapOrganizationContext(props.organization, new ComponentWithProperties(AdminsView, {}));
+        },
+        present: 'popup',
     },
 ]);
 
