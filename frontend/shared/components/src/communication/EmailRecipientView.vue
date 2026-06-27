@@ -143,7 +143,7 @@
                             <template #left>
                                 <IconContainer icon="email" class="error">
                                     <template #aside>
-                                        <span class="icon unlock small stroke" />
+                                        <span class="icon unlock tiny stroke" />
                                     </template>
                                 </IconContainer>
                             </template>
@@ -164,7 +164,7 @@
                             <template #left>
                                 <IconContainer icon="email" class="theme-success">
                                     <template #aside>
-                                        <span class="icon success small stroke" />
+                                        <span class="icon success tiny stroke" />
                                     </template>
                                 </IconContainer>
                             </template>
@@ -180,7 +180,7 @@
                             <template #left>
                                 <IconContainer icon="email" class="theme-secundary">
                                     <template #aside>
-                                        <span class="icon retry small stroke" />
+                                        <span class="icon retry tiny stroke" />
                                     </template>
                                 </IconContainer>
                             </template>
