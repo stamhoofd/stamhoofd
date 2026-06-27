@@ -118,10 +118,10 @@ import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonback
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { EmailRecipientSubfilter, File} from '@stamhoofd/structures';
+import type { EmailRecipientSubfilter, File } from '@stamhoofd/structures';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailStatus, EmailTemplate, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, sleep, throttle } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
@@ -133,7 +133,6 @@ import { useErrors } from '../errors/useErrors';
 import { GlobalEventBus } from '../EventBus';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
-import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useHoldValueForMinimumDuration } from '#hooks/useHoldValueForMinimumDuration.ts';
 import { useInterval } from '#hooks/useInterval.ts';
 import { useIsMobile } from '#hooks/useIsMobile.ts';
@@ -145,7 +144,6 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 
 import ProgressRing from '../icons/ProgressRing.vue';
-
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -211,7 +209,7 @@ const selectedRecipientOptions = ref(props.recipientFilterOptions.map((o) => {
         }
         return o.defaultSelection;
     }
-    return [o.options[0].id];
+    return o.options.length ? [o.options[0].id] : [];
 }));
 
 const editorView = ref(null) as Ref<typeof EditorView | null>;
@@ -348,13 +346,11 @@ async function doDelete() {
             deletedAt: new Date(),
         }));
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         // Handled by the hook
         Toast.fromError(e).show();
         return false;
-    }
-    finally {
+    } finally {
         isDeletingEmail.value = false;
     }
 }
@@ -472,8 +468,7 @@ async function createEmail() {
         if (response.data.json) {
             editor.value?.commands.setContent(response.data.json);
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
         return;
     }
@@ -510,8 +505,7 @@ async function patchEmail(async = false) {
             text,
             html,
         });
-    }
-    catch (e) {
+    } catch (e) {
         console.error('failed to set text and html', e);
     }
 
@@ -527,22 +521,19 @@ async function patchEmail(async = false) {
             // do again
             patchEmail().catch(console.error);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).setHide(20000).show();
         if (!async) {
             // Keep patch
             if (patch.value) {
                 patch.value = _savingPatch.patch(patch.value);
-            }
-            else {
+            } else {
                 patch.value = _savingPatch;
             }
             throw e;
         }
-    }
-    finally {
+    } finally {
         savingPatch.value = null;
     }
 }
@@ -572,8 +563,7 @@ async function updateEmail() {
         });
 
         email.value.deepSet(response.data);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.fromError(e).setHide(2000).show();
     }
@@ -622,8 +612,7 @@ async function send() {
         try {
             await patchEmail(false);
             await pop({ force: true });
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
         return;
@@ -648,8 +637,7 @@ async function send() {
         // Just save the patch
         try {
             await patchEmail(false);
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
             return;
         }
@@ -711,8 +699,7 @@ async function send() {
         email.value.deepSet(response.data);
         if (email.value.sendAsEmail) {
             Toast.success($t(`%vJ`)).show();
-        }
-        else {
+        } else {
             Toast.success($t('%1Fn')).show();
         }
 
@@ -721,8 +708,7 @@ async function send() {
 
         // Mark review moment
         AppManager.shared.markReviewMoment(context.value);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }
@@ -752,8 +738,7 @@ function getContextMenuForOption(option: RecipientChooseOneOption | RecipientMul
                 action: () => {
                     if (selectedIds.includes(o.id)) {
                         selectedRecipientOptions.value[index] = selectedIds.filter(id => id !== o.id);
-                    }
-                    else {
+                    } else {
                         selectedRecipientOptions.value[index] = [...selectedIds, o.id];
                     }
                 },
