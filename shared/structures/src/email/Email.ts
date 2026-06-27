@@ -13,22 +13,7 @@ import type { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData
 import type { Platform } from '../Platform.js';
 import { User } from '../User.js';
 import { EmailTemplate } from './EmailTemplate.js';
-
-export enum EmailRecipientFilterType {
-    RegistrationMembers = 'RegistrationMembers',
-    RegistrationParents = 'RegistrationParents',
-    RegistrationUnverified = 'RegistrationUnverified',
-    // todo: rename to PaymentOther
-    Payment = 'Payment',
-    // distinction between payment is useful to be able to not show these in the member portal?
-    PaymentOrganization = 'PaymentOrganization',
-    Members = 'Members',
-    MemberParents = 'MemberParents',
-    MemberUnverified = 'MemberUnverified',
-    Orders = 'Orders',
-    ReceivableBalances = 'ReceivableBalances',
-    Documents = 'Documents',
-}
+import { EmailRecipientFilterType } from './EmailRecipientFilterType.js';
 
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
     return MemberWithRegistrationsBlob.create({

@@ -5,6 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, Organization as OrganizationStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import { UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -130,7 +131,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>> {
+    static async buildModels(requestQuery: LimitedFilteredRequest): Promise<UnencodeablePaginatedResponse<Organization[], LimitedFilteredRequest>> {
         const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
 
         if (requestQuery.limit > maxLimit) {
@@ -187,8 +188,17 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
+        return new UnencodeablePaginatedResponse<Organization[], LimitedFilteredRequest>({
+            results: organizations,
+            next,
+        });
+    }
+
+    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>> {
+        const { results, next } = await this.buildModels(requestQuery);
+
         return new PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.organizations(organizations),
+            results: await AuthenticatedStructures.organizations(results),
             next,
         });
     }

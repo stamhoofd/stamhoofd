@@ -1,8 +1,8 @@
 import { column } from '@simonbackx/simple-database';
-import type { BaseOrganization, EmailRecipientFilterType, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
+import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
 import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-
+import type { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';

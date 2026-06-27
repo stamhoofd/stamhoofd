@@ -137,6 +137,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 if (email.organizationId === null || (organization && email.organizationId !== organization.id)) {
                     if (Context.auth.hasPlatformFullAccess()) {
                         // Only allowed as platform admins
+                        // This is important, otherwise an individual organization can resubscribe to platform emails
                         email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
                         email.unsubscribedMarketing = request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
                     }

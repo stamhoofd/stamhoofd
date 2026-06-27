@@ -1,13 +1,14 @@
 import type { RecipientLoader } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Order, Organization, Payment, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Organization, Payment, User } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { LimitedFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
-import { CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, PaginatedResponse, PaymentMethod } from '@stamhoofd/structures';
+import { CountFilteredRequest, EmailRecipient, PaginatedResponse, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
 import { memberResponsibilityRecordFilterCompilers } from '../sql-filters/member-responsibility-records.js';
 import type { ReplacementsOptions } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 type BeforeFetchAllResult = {
     doesIncludePaymentWithoutOrders: boolean;

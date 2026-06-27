@@ -1,8 +1,9 @@
 import { CachedBalance, Email } from '@stamhoofd/models';
 import type { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint.js';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) {
     const result = await GetReceivableBalancesEndpoint.buildData(query);

@@ -1,8 +1,9 @@
 import { Email } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { EmailRecipient, LimitedFilteredRequest, MembersBlob } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
+import { PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 async function getRecipients(result: PaginatedResponse<MembersBlob, LimitedFilteredRequest>, type: 'member' | 'parents' | 'unverified') {
     const recipients: EmailRecipient[] = [];

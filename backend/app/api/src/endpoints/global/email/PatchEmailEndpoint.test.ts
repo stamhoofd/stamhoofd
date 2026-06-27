@@ -2,10 +2,11 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
+import { AccessRight, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEmailEndpoint } from './PatchEmailEndpoint.js';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 // Import recipient loaders to initialize them
 import { Formatter } from '@stamhoofd/utility';

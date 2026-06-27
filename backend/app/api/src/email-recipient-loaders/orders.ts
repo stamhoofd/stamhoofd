@@ -1,9 +1,10 @@
 import { Email, Webshop } from '@stamhoofd/models';
 import type { EmailRecipient, LimitedFilteredRequest, WebshopPreview } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
+import { mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
 import { GetWebshopOrdersEndpoint } from '../endpoints/organization/dashboard/webshops/GetWebshopOrdersEndpoint.js';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { Context } from '../helpers/Context.js';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
     fetch: async (query: LimitedFilteredRequest) => {
