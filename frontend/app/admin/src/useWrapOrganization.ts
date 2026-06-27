@@ -3,7 +3,7 @@ import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vu
 import { useAppContext } from '@stamhoofd/components/context/appContext';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { PlatformManager, usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { Organization } from '@stamhoofd/structures';
@@ -45,20 +45,18 @@ async function sessionForOrganization(organization: Organization) {
  * ```
  */
 export function useWrapOrganization() {
-    const app = useAppContext();
+    const platformManager = usePlatformManager();
 
     return async (organization: Organization, component: ComponentWithProperties): Promise<ComponentWithProperties> => {
         const context = await sessionForOrganization(organization);
-        const platformManager = await PlatformManager.createFromCache(context, app, true);
-        const memberManager = new MemberManager(context, platformManager.$platform);
+        const memberManager = new MemberManager(context, platformManager.value.$platform);
 
         return new ComponentWithProperties(ContextProvider, {
             context: markRaw({
                 $context: context,
-                $platformManager: platformManager,
                 $memberManager: memberManager,
                 $organizationManager: new OrganizationManager(context),
-                stamhoofd_app: app,
+                stamhoofd_app: 'dashboard',
             }),
             // Wrap in a ModalStackComponent so that toasts, context menus and popups
             // presented from within are scoped to this organization's context.
