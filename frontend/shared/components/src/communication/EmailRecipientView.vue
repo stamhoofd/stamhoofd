@@ -160,7 +160,7 @@
                             </template>
                         </STListItem>
 
-                        <STListItem v-if="emailAddresSettings && !(emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce)">
+                        <STListItem v-if="emailAddresSettings && !(emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce || emailAddresSettings.unsubscribedAll)">
                             <template #left>
                                 <IconContainer icon="email" class="theme-success">
                                     <template #aside>
@@ -176,7 +176,7 @@
                             </p>
                         </STListItem>
 
-                        <STListItem v-if="!recipient.sentAt && email && email.status === EmailStatus.Sent && (!emailAddresSettings || !(emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce))" :selectable="true" element-name="button" @click="retrySending">
+                        <STListItem v-if="!recipient.sentAt && email && email.status === EmailStatus.Sent && (!emailAddresSettings || !(emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce || emailAddresSettings.unsubscribedAll))" :selectable="true" element-name="button" @click="retrySending">
                             <template #left>
                                 <IconContainer icon="email" class="theme-secundary">
                                     <template #aside>
@@ -377,12 +377,15 @@ async function unblockEmailAddress() {
                 email: props.recipient.email,
                 markedAsSpam: false,
                 hardBounce: false,
+                unsubscribedAll: false,
             },
             owner,
             shouldRetry: false,
         });
         emailAddresSettings.value.markedAsSpam = false;
         emailAddresSettings.value.hardBounce = false;
+        emailAddresSettings.value.unsubscribedAll = false;
+
         Toast.success(
             $t('%1Gu', { email: props.recipient.email || '' }),
         ).setIcon('unlock green').show();

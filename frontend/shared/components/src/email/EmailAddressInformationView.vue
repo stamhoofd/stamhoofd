@@ -137,7 +137,7 @@ const title = $t('%1MG');
 const context = useContext();
 const owner = useRequestOwner();
 
-const isBlocked = computed(() => props.emailInformation.markedAsSpam || props.emailInformation.hardBounce);
+const isBlocked = computed(() => props.emailInformation.markedAsSpam || props.emailInformation.hardBounce || props.emailInformation.unsubscribedAll);
 const wasBlocked = isBlocked.value;
 
 const auth = useAuth();
@@ -166,6 +166,7 @@ async function unblockEmailAddress() {
                 email: props.emailInformation.email,
                 markedAsSpam: false,
                 hardBounce: false,
+                unsubscribedAll: false,
             },
             owner,
             shouldRetry: false,
@@ -173,16 +174,15 @@ async function unblockEmailAddress() {
 
         props.emailInformation.markedAsSpam = false;
         props.emailInformation.hardBounce = false;
+        props.emailInformation.unsubscribedAll = false;
 
         Toast.success(
             $t('%1Gu', { email: props.emailInformation.email || '' }),
         ).setIcon('unlock green').show();
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to unblock email address', e);
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         isUnblockingEmailAddress.value = false;
     }
 }

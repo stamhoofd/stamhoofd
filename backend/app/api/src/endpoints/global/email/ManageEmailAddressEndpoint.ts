@@ -44,9 +44,14 @@ class Body extends AutoEncoder {
 export const unblockLimiter = new RateLimiter({
     limits: [
         {
-            // Max 10 per week
-            limit: 10,
+            // Max 25 per week
+            limit: 25,
             duration: 24 * 60 * 1000 * 60 * 7,
+        },
+        {
+            // Max 50 per month
+            limit: 50,
+            duration: 24 * 60 * 1000 * 60 * 30,
         },
     ],
 });
@@ -129,12 +134,15 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
             for (const email of emails) {
                 const wasBlocked = email.unsubscribedAll || email.unsubscribedMarketing || email.hardBounce || email.markedAsSpam;
 
-                if (email.organizationId === null || (organization && email.organizationId === organization.id)) {
+                if (email.organizationId === null || (organization && email.organizationId !== organization.id)) {
                     if (Context.auth.hasPlatformFullAccess()) {
                         // Only allowed as platform admins
                         email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
                         email.unsubscribedMarketing = request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
                     }
+                } else {
+                    email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
+                    // unsubscribed marketing not allowed for now
                 }
 
                 email.hardBounce = request.body.hardBounce ?? email.hardBounce;
