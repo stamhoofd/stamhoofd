@@ -134,12 +134,12 @@
 
                 <EmailPreviewBox v-if="email && recipient.sentAt" :email="email" :recipient="recipient" />
 
-                <template v-if="email && email.status === EmailStatus.Sent && (!recipient.sentAt || (emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce))) && auth.hasPlatformFullAccess()">
+                <template v-if="email && email.status === EmailStatus.Sent && (!recipient.sentAt || (emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce || emailAddresSettings.unsubscribedAll))) && auth.hasPlatformFullAccess()">
                     <hr>
                     <h2>{{ $t('%16X') }}</h2>
 
                     <STList>
-                        <STListItem v-if="emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce)" :selectable="true" element-name="button" @click="unblockEmailAddress">
+                        <STListItem v-if="emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce || emailAddresSettings.unsubscribedAll)" :selectable="true" element-name="button" @click="unblockEmailAddress">
                             <template #left>
                                 <IconContainer icon="email" class="error">
                                     <template #aside>
