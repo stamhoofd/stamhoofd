@@ -131,7 +131,7 @@ export class BaseOrganization extends AutoEncoder {
 }
 
 export class Organization extends BaseOrganization implements ObjectWithRecords {
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 400 })
     hasFutureEvents = true;
 
     /**
