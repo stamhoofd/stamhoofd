@@ -158,6 +158,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         PaymentService.roundPayment(payment);
                         payment.paidAt = null;
                         payment.adminUserId = user.id;
+                        payment.customer = order.data.customer.toPaymentCustomer();
 
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null;
