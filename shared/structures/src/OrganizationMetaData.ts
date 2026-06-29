@@ -285,6 +285,13 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     expandLogo = false;
 
+    /**
+     * Hide the calendar in the member portal
+     * Null = enable if events in ±the future or last 2 months
+     */
+    @field({ decoder: BooleanDecoder, nullable: true, ...NextVersion, defaultValue: () => null })
+    enableCalendar: boolean | null;
+
     @field({ decoder: Image, nullable: true, version: 185 })
     horizontalLogoDark: Image | null = null;
 

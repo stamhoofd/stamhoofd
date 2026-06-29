@@ -1,8 +1,9 @@
+import { Database } from '@simonbackx/simple-database';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, User } from '@stamhoofd/models';
-import { EventFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { User } from '@stamhoofd/models';
+import { EventFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, Event, Group, GroupSettings, GroupType, OrganizationEventType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -87,6 +88,67 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             organizationId: newEvent.organizationId,
             typeId: newEvent.typeId,
             name: newEvent.name,
+        });
+    });
+
+    describe('hasFutureEvents recomputation', () => {
+        // A global event (organizationId === null) counts towards every organization,
+        // so make sure leftover events from other tests don't influence these assertions.
+        beforeEach(async () => {
+            await Database.delete('DELETE FROM `events`');
+        });
+
+        test('Creating a future event sets hasFutureEvents to true on the organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            organization.hasFutureEvents = false;
+            await organization.save();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: 'test event',
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            }));
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+
+            const updated = await Organization.getByID(organization.id, true);
+            expect(updated.hasFutureEvents).toBe(true);
+        });
+
+        test('Creating an event that already ended does not set hasFutureEvents to true', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            organization.hasFutureEvents = false;
+            await organization.save();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const body: Body = new PatchableArray();
+            // Ended well before the future-events cutoff (~2 months ago), so it should not count.
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: 'test event',
+                startDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+            }));
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+
+            const updated = await Organization.getByID(organization.id, true);
+            expect(updated.hasFutureEvents).toBe(false);
         });
     });
 

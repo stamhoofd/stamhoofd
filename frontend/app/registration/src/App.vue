@@ -18,6 +18,7 @@ import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage
 import { computed } from 'vue';
 import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
 import { AppRoute } from '@stamhoofd/structures';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 
 const context = useContext();
 const memberManager = useMemberManager();
@@ -25,6 +26,7 @@ const getLoginRoot = useLoginRoot();
 const eventTypes = useEventTypes();
 const membersPackage = useMembersPackage();
 const appNavigate = useAppNavigate();
+const organization = useOrganization();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
@@ -40,7 +42,7 @@ if (component?.checkRoutes) {
 }
 
 function areEventsEnabled(): boolean {
-    return eventTypes.value.length > 0 && !manualFeatureFlag('disable-events', context.value);
+    return eventTypes.value.length > 0 && !manualFeatureFlag('disable-events', context.value) && (!organization.value || STAMHOOFD.userMode === 'platform' || organization.value.meta.enableCalendar === true || (organization.value.meta.enableCalendar === null && organization.value.hasFutureEvents));
 }
 
 function getRoot() {

@@ -43,6 +43,8 @@ yarn clear && yarn clear-vite-cache && yarn && yarn build:shared
 
 From repo root: `yarn lint` · `yarn typecheck` · `yarn test` (all unit tests, excludes Playwright; `yarn stam test unit` provisions an isolated MySQL). Prefer these scripts over your own commands — they do required setup and teardown.
 
+**Never hand-roll test infrastructure.** The isolated MySQL, migrations, and env are already provisioned by `yarn stam test unit` (and per-package `yarn test`) — don't spin up Docker, create databases, or set `DB_PORT`/env vars yourself. Run a single file via the existing scripts (`yarn stam test unit path/to/Foo.test.ts`). If they don't work, STOP and ask the user.
+
 Tests use **Vitest**, run scoped per package: `cd backend/app/api && yarn test`, or `yarn vitest run path/to/Foo.test.ts` / `yarn vitest run -t 'partial name'`. Backend tests run against a real MySQL test database. The frontend dashboard "test" is a `vue-tsc` typecheck only; UI behavior is covered by Playwright.
 
 ### Playwright
