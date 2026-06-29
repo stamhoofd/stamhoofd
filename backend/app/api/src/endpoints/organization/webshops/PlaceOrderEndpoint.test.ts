@@ -1,12 +1,15 @@
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Response } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, StripeAccount, User } from '@stamhoofd/models';
-import { OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import { Order, OrganizationFactory, Payment, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
-import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import sinon from 'sinon';
+import { v4 as uuidv4 } from 'uuid';
 
 import { StripeMocker } from '../../../../tests/helpers/StripeMocker.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -516,6 +519,58 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 expect(order.data.customer.firstName).toEqual(user.firstName);
                 expect(order.data.customer.lastName).toEqual(user.lastName);
             }
+        });
+    });
+
+    describe('Manually created orders', () => {
+        async function createManualOrder(paymentMethod: PaymentMethod): Promise<PrivateOrder> {
+            const orderData = OrderData.create({
+                paymentMethod,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 2,
+                        }),
+                    ],
+                }),
+                customer,
+            });
+
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+            patchArray.addPut(PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id,
+            }));
+
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const response = await testServer.test(patchWebshopOrdersEndpoint, r);
+            expect(response.body).toHaveLength(1);
+            return response.body[0];
+        }
+
+        test.each([PaymentMethod.Transfer, PaymentMethod.PointOfSale])('Stores the payment customer for a manually added %s order', async (paymentMethod) => {
+            const order = await createManualOrder(paymentMethod);
+
+            // The persisted payment should contain the billing details of the customer
+            const orderModel = (await Order.getByID(order.id))!;
+            expect(orderModel.paymentId).not.toBeNull();
+
+            const payment = (await Payment.getByID(orderModel.paymentId!))!;
+            expect(payment.customer).not.toBeNull();
+            expect(payment.customer!.firstName).toEqual(customer.firstName);
+            expect(payment.customer!.lastName).toEqual(customer.lastName);
+            expect(payment.customer!.email).toEqual(customer.email);
+            expect(payment.customer!.phone).toEqual(customer.phone);
+
+            // The payment customer should match the order's customer billing details
+            expect(payment.customer!.equals(orderModel.data.customer.toPaymentCustomer())).toBe(true);
         });
     });
 });
