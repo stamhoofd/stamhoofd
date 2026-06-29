@@ -1,7 +1,7 @@
 <template>
     <div class="segmented-view">
         <!-- The v-if="root" fixes animation on initial load, so there is no animation for the first selected tab -->
-        <SegmentedControl v-if="root" v-model="segmentedControlItem" :items="segmentedControlItems" :labels="segmentedControlLabels" />
+        <SegmentedControl v-if="root && (segmentedControlItems.length > 1 || (segmentedControlItems.length === 1 && segmentedControlItem !== segmentedControlItems[0]))" v-model="segmentedControlItem" :items="segmentedControlItems" :labels="segmentedControlLabels" />
         <div class="content">
             <FramedComponent v-if="root" :key="root.key" :root="root" v-bind="$attrs" />
         </div>
