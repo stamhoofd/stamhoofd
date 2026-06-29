@@ -24,7 +24,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 
-import type { RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
+import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher.ts';
 import { useGetOrganizationUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/organizations.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -32,25 +32,25 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationTag, OrganizationType, StamhoofdFilter, UmbrellaOrganization } from '@stamhoofd/structures';
-import { Address, CountryHelper, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
+import { AccessRight, Address, CountryHelper, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTypeHelper, PermissionLevel, STPackageType, STPackageTypeHelper, TagHelper, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
-import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
-import { getSelectableWorkbook } from './getSelectableWorkbook';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
+import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = Organization;
 
@@ -502,9 +502,68 @@ async function openMail(selection: TableActionSelection<Organization>) {
         );
     }
 
+    const adminSelector: RecipientChooseOneOption = {
+        type: 'ChooseOne',
+        options: [
+            {
+                id: 'full',
+                name: $t('Alle hoofdbeheerders'),
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.Organizations,
+                        filter,
+                        search,
+                        subfilter: {
+                            permissions: {
+                                level: PermissionLevel.Full,
+                            },
+                        },
+                    }),
+                ],
+            },
+            {
+                id: 'finance',
+                name: $t('Beheerders volledige boekhouding'),
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.Organizations,
+                        filter,
+                        search,
+                        subfilter: {
+                            permissions: {
+                                $or: [
+                                    {
+                                        level: PermissionLevel.Full,
+                                    },
+                                    {
+
+                                        accessRights: {
+                                            $elemMatch: AccessRight.OrganizationFinanceDirector,
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    }),
+                ],
+            },
+            {
+                id: 'all',
+                name: $t('Alle beheerders'),
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.Organizations,
+                        filter,
+                        search,
+                    }),
+                ],
+            },
+        ],
+    };
+
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
-            recipientFilterOptions: [option],
+            recipientFilterOptions: option.options.length && STAMHOOFD.userMode === 'platform' ? [option] : [adminSelector],
         }),
     });
     await present({

@@ -3,8 +3,9 @@ import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamh
 import type { IterableSQLSelect } from '@stamhoofd/sql';
 import { readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, StamhoofdFilter } from '@stamhoofd/structures';
-import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailTemplateType, ReceivableBalanceType } from '@stamhoofd/structures';
+import { EmailRecipientFilter, EmailRecipientSubfilter, EmailTemplateType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 registerCron('balanceEmails', balanceEmails);
 

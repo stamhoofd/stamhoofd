@@ -1,10 +1,8 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
-
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -13,7 +11,8 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { DocumentTemplatePrivate } from '@stamhoofd/structures';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, EmailRecipientSubfilter } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentActionBuilder {

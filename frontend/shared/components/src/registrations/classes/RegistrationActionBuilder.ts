@@ -1,27 +1,24 @@
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
-
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-
 import { LoadComponent } from '#containers/AsyncComponent';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption } from '#email/EmailView.vue';
-
 import { useContext } from '#hooks/useContext.ts';
-import { manualFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { PlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
+import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, getEventGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
-import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
-import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
-import { Toast } from '../../overlays/Toast';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { Formatter } from '@stamhoofd/utility';
+import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
+import { Toast } from '../../overlays/Toast';
 
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 

@@ -1,5 +1,5 @@
-import type { LimitedFilteredRequest} from '@stamhoofd/structures';
-import { BalanceItemType, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest } from '@stamhoofd/structures';
+import { BalanceItemType, EmailRecipientFilter, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
 import { Email } from './Email.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailMocker } from '@stamhoofd/email';
@@ -9,6 +9,7 @@ import { Platform } from './Platform.js';
 import { BalanceItemFactory, MemberFactory, UserFactory } from '../factories/index.js';
 import { CachedBalance } from './CachedBalance.js';
 import { Formatter } from '@stamhoofd/utility';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 async function buildEmail(data: {
     recipients: EmailRecipientStruct[];
