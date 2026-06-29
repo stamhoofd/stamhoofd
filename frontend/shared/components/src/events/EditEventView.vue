@@ -73,6 +73,19 @@
                     {{ $t('%7U') }}
                 </h3>
             </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="allowNonMembers" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Toegankelijk voor niet-leden') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Deelnemers hoeven geen actieve inschrijving te hebben om zich in te schrijven voor deze activiteit.') }}
+                </p>
+            </STListItem>
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
@@ -559,6 +572,15 @@ const visible = computed({
     set: visible => addPatch({
         meta: EventMeta.patch({
             visible,
+        }),
+    }),
+});
+
+const allowNonMembers = computed({
+    get: () => patched.value.meta.allowNonMembers,
+    set: allowNonMembers => addPatch({
+        meta: EventMeta.patch({
+            allowNonMembers,
         }),
     }),
 });
