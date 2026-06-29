@@ -34,6 +34,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         }
         : undefined);
     const isPlatformAdmin = auth.hasFullPlatformAccess();
+    const canManage = auth.hasFullAccess();
 
     return function getFor(props: {
         period: OrganizationRegistrationPeriod;
@@ -95,6 +96,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         }
 
         const canDeleteOrRename = props.category.settings.locked !== true || isPlatformAdmin;
+        const canCreate = auth.canCreateGroupInCategory(props.category);
 
         async function save(patches: AutoEncoderPatchType<OrganizationRegistrationPeriod>[], periods: OrganizationRegistrationPeriod[]) {
             const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
@@ -171,7 +173,12 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             const settings = OrganizationRegistrationPeriodSettings.patch({});
             settings.categories.addPatch(GroupCategory.patch({ id: parentCategory.id, categoryIds: reorder }));
 
-            await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            try {
+                await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+            }
         }
 
         async function moveTo(category: GroupCategory) {
@@ -196,7 +203,13 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             pp.categoryIds.addDelete(props.category.id);
             settings.categories.addPatch(pp);
 
-            await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            try {
+                await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
 
             showSuccessToast($t('%1YP', {
                 categoryName: props.category.getName(props.period),
@@ -330,7 +343,13 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             pp.categoryIds.addDelete(props.category.id);
             settings.categories.addPatch(pp);
 
-            await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            try {
+                await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
 
             showSuccessToast($t('%1YI', {
                 categoryName: props.category.getName(props.period),
@@ -355,7 +374,13 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             pp.categoryIds.addDelete(props.category.id);
             settings.categories.addPatch(pp);
 
-            await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            try {
+                await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
+            } catch (e) {
+                console.error(e);
+                Toast.fromError(e).show();
+                return;
+            }
 
             showSuccessToast($t('%1XK', {
                 categoryName: props.category.getName(props.period),
@@ -378,6 +403,11 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
         }
 
         async function showMenu(event: MouseEvent) {
+            if (!canShowMenu) {
+                return;
+            }
+            event.preventDefault();
+
             const parentCategory = getParentCategory();
             const grandParentCategory = getGrandParentCategory();
             const subCategories = getSubCategories();
@@ -425,8 +455,10 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 });
             });
 
-            const sections: ContextMenuItem[][] = [
-                [
+            const sections: ContextMenuItem[][] = [];
+
+            if (canManage) {
+                sections.push([
                     new ContextMenuItem({
                         icon: 'settings',
                         name: $t('%1cI'),
@@ -435,11 +467,11 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                             return true;
                         },
                     }),
-                ],
-            ];
+                ]);
+            }
 
             const createActions: ContextMenuItem[] = [];
-            if (props.category.groupIds.length === 0) {
+            if (canManage && props.category.groupIds.length === 0) {
                 createActions.push(new ContextMenuItem({
                     icon: 'folder-add',
                     name: $t('%LN'),
@@ -449,7 +481,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                     },
                 }));
             }
-            if (props.category.categoryIds.length === 0) {
+            if (canCreate && props.category.categoryIds.length === 0) {
                 createActions.push(new ContextMenuItem({
                     icon: 'add',
                     name: $t('%LD'),
@@ -463,87 +495,93 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
                 sections.push(createActions);
             }
 
-            sections.push([
-                new ContextMenuItem({
-                    name: $t('%11f'),
-                    icon: 'arrow-up',
-                    action: async () => {
-                        await move(-1);
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: $t('%11g'),
-                    icon: 'arrow-down',
-                    action: async () => {
-                        await move(1);
-                        return true;
-                    },
-                }),
-            ]);
+            if (canManage) {
+                sections.push([
+                    new ContextMenuItem({
+                        name: $t('%11f'),
+                        icon: 'arrow-up',
+                        action: async () => {
+                            await move(-1);
+                            return true;
+                        },
+                    }),
+                    new ContextMenuItem({
+                        name: $t('%11g'),
+                        icon: 'arrow-down',
+                        action: async () => {
+                            await move(1);
+                            return true;
+                        },
+                    }),
+                ]);
 
-            sections.push([
-                new ContextMenuItem({
-                    icon: 'folder',
-                    name: $t('%122'),
-                    childMenu: new ContextMenu([
-                        [
-                            new ContextMenuItem({
-                                icon: 'folder',
-                                name: $t('%1cr'),
-                                description: grandParentCategory?.getName(props.period),
-                                disabled: !grandParentCategory,
-                                action: async () => {
-                                    await moveTo(grandParentCategory!);
-                                    return true;
-                                },
-                            }),
-                        ],
-                        subCategories.map(cat =>
-                            new ContextMenuItem({
-                                icon: 'folder',
-                                name: cat.getName(props.period),
-                                disabled: cat.groupIds.length > 0,
-                                action: async () => {
-                                    await moveTo(cat);
-                                    return true;
-                                },
-                            }),
-                        ),
-                        [
-                            new ContextMenuItem({
-                                name: $t('%1HU'),
-                                childMenu: new ContextMenu([
-                                    moveToPeriodOptions,
-                                ]),
-                                disabled: !canDeleteOrRename || moveToPeriodOptions.filter(p => !p.disabled).length === 0,
-                            }),
-                        ],
-                    ]),
-                }),
-                new ContextMenuItem({
-                    icon: 'unbox',
-                    name: $t('%1dQ'),
-                    destructive: true,
-                    disabled: !canDeleteOrRename || (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0),
-                    childMenu: new ContextMenu([
-                        [
-                            createMergeContextMenuItem(parentCategory),
-                        ],
-                        subCategories.map(cat => createMergeContextMenuItem(cat)),
-                    ]),
-                }),
-                new ContextMenuItem({
-                    name: $t('%CJ'),
-                    destructive: true,
-                    icon: 'trash',
-                    disabled: !canDeleteOrRename,
-                    action: async () => {
-                        await deleteMe();
-                        return true;
-                    },
-                }),
-            ]);
+                sections.push([
+                    new ContextMenuItem({
+                        icon: 'folder',
+                        name: $t('%122'),
+                        childMenu: new ContextMenu([
+                            [
+                                new ContextMenuItem({
+                                    icon: 'folder',
+                                    name: $t('%1cr'),
+                                    description: grandParentCategory?.getName(props.period),
+                                    disabled: !grandParentCategory,
+                                    action: async () => {
+                                        await moveTo(grandParentCategory!);
+                                        return true;
+                                    },
+                                }),
+                            ],
+                            subCategories.map(cat =>
+                                new ContextMenuItem({
+                                    icon: 'folder',
+                                    name: cat.getName(props.period),
+                                    disabled: cat.groupIds.length > 0,
+                                    action: async () => {
+                                        await moveTo(cat);
+                                        return true;
+                                    },
+                                }),
+                            ),
+                            [
+                                new ContextMenuItem({
+                                    name: $t('%1HU'),
+                                    childMenu: new ContextMenu([
+                                        moveToPeriodOptions,
+                                    ]),
+                                    disabled: !canDeleteOrRename || moveToPeriodOptions.filter(p => !p.disabled).length === 0,
+                                }),
+                            ],
+                        ]),
+                    }),
+                    new ContextMenuItem({
+                        icon: 'unbox',
+                        name: $t('%1dQ'),
+                        destructive: true,
+                        disabled: !canDeleteOrRename || (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0),
+                        childMenu: new ContextMenu([
+                            [
+                                createMergeContextMenuItem(parentCategory),
+                            ],
+                            subCategories.map(cat => createMergeContextMenuItem(cat)),
+                        ]),
+                    }),
+                    new ContextMenuItem({
+                        name: $t('%CJ'),
+                        destructive: true,
+                        icon: 'trash',
+                        disabled: !canDeleteOrRename,
+                        action: async () => {
+                            await deleteMe();
+                            return true;
+                        },
+                    }),
+                ]);
+            }
+
+            if (sections.length === 0) {
+                return;
+            }
 
             const menu = new ContextMenu(sections);
 
@@ -560,6 +598,7 @@ export function useGroupCategoryActions(saveHandler?: (patch: PatchableArrayAuto
             });
         }
 
-        return { showMenu, editCategory };
+        const canShowMenu = canManage || (canCreate && props.category.categoryIds.length === 0);
+        return { showMenu, editCategory, canManage, canShowMenu };
     };
 }
