@@ -131,6 +131,9 @@ export class BaseOrganization extends AutoEncoder {
 }
 
 export class Organization extends BaseOrganization implements ObjectWithRecords {
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    hasFutureEvents = true;
+
     /**
      * @deprecated
      * Please use period instead now

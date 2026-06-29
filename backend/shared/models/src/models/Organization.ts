@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLWhereExists } from '@stamhoofd/sql';
 import type { AppType, OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AccessRight, Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, getAppHost, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
@@ -21,6 +21,7 @@ import { Registration } from './Registration.js';
 import { StripeAccount } from './StripeAccount.js';
 import { Token } from './Token.js';
 import type { User } from './User.js';
+import { Event } from './Event.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -52,6 +53,9 @@ export class Organization extends QueryableModel {
 
     @column({ type: 'string' })
     periodId: string;
+
+    @column({ type: 'boolean' })
+    hasFutureEvents: boolean = true;
 
     /**
      * Public meta data
@@ -118,6 +122,58 @@ export class Organization extends QueryableModel {
      */
     get mappedTransferSettings(): TransferSettings {
         return this.meta.transferSettings.fillMissing(TransferSettings.create({ creditor: this.name }));
+    }
+
+    static getFutureEventsCutoffDate(): Date {
+        return new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 2);
+    }
+
+    async updateFutureEvents() {
+        const firstEvent = await Event.select('id')
+            .where(
+                STAMHOOFD.userMode === 'platform'
+                    ? SQL.where('organizationId', this.id).or('organizationId', null)
+                    : SQL.where('organizationId', this.id),
+
+            )
+            .where('endDate', '>', Organization.getFutureEventsCutoffDate())
+            .first(false);
+        if (firstEvent) {
+            this.hasFutureEvents = true;
+        } else {
+            this.hasFutureEvents = false;
+        }
+    }
+
+    /**
+     * Update the hasFutureEvents column for multiple organizations (or all organizations) in a single query,
+     * instead of fetching and saving every organization individually.
+     */
+    static async updateFutureEventsForOrganizations(organizationIds: string[] | 'all') {
+        if (organizationIds !== 'all' && organizationIds.length === 0) {
+            return;
+        }
+
+        const query = Organization.update()
+            .set(
+                'hasFutureEvents',
+                new SQLWhereExists(
+                    SQL.select(SQL.scalar(1))
+                        .from(Event.table)
+                        .where(
+                            STAMHOOFD.userMode === 'platform'
+                                ? SQL.where('organizationId', SQL.column(Organization.table, 'id')).or('organizationId', null)
+                                : SQL.where('organizationId', SQL.column(Organization.table, 'id')),
+                        )
+                        .where('endDate', '>', Organization.getFutureEventsCutoffDate()),
+                ),
+            );
+
+        if (organizationIds !== 'all') {
+            query.where('id', organizationIds);
+        }
+
+        await query.update();
     }
 
     // Methods
@@ -279,6 +335,7 @@ export class Organization extends QueryableModel {
             uri: this.uri,
             website: this.website,
             createdAt: this.createdAt,
+            hasFutureEvents: this.hasFutureEvents,
         });
     }
 
@@ -294,6 +351,7 @@ export class Organization extends QueryableModel {
             uri: this.uri,
             website: this.website,
             createdAt: this.createdAt,
+            hasFutureEvents: this.hasFutureEvents,
         });
     }
 

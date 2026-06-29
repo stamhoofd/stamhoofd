@@ -282,6 +282,9 @@ async function addEvent(template?: Event) {
                 callback: () => {
                     fetcher.reset();
                     onClickEvent(event).catch(console.error);
+                    if (organization.value) {
+                        organization.value.hasFutureEvents = true;
+                    }
                 },
             }),
         ],

@@ -113,8 +113,7 @@ export function useRegistrationQuickActions(): QuickActions {
             });
 
             outstandingBalance.value = response.data;
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
     }
@@ -191,7 +190,7 @@ export function useRegistrationQuickActions(): QuickActions {
             }
 
             for (const member of memberManager.family.members) {
-                const invitationData: {invitation: MemberRegistrationInvitation, group: Group, organization: Organization}[] = member.member.registrationInvitations
+                const invitationData: { invitation: MemberRegistrationInvitation; group: Group; organization: Organization }[] = member.member.registrationInvitations
                     .filter(i => i.group.type === GroupType.Membership)
                     .sort((a, b) => a.group.name.toString().localeCompare(b.group.name.toString()))
                     .flatMap((invitation) => {
@@ -208,12 +207,12 @@ export function useRegistrationQuickActions(): QuickActions {
                         return [{
                             invitation,
                             group,
-                            organization
+                            organization,
                         }];
                     })
-                    .filter(({group, organization}) => {
+                    .filter(({ group, organization }) => {
                         return member.canRegister(group, organization);
-                    })
+                    });
 
                 if (invitationData.length === 0) {
                     continue;
@@ -221,7 +220,7 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
 
-                const invitationDataForIcon = invitationData.find(({group}) => group.squareImage !== null) ?? invitationData[0];
+                const invitationDataForIcon = invitationData.find(({ group }) => group.squareImage !== null) ?? invitationData[0];
 
                 if (!invitationDataForIcon) {
                     continue;
@@ -234,10 +233,10 @@ export function useRegistrationQuickActions(): QuickActions {
                         organization: invitationDataForIcon.organization,
                     },
                     prefix: $t('%1S3'),
-                    title: $t('%1UP', {firstName: member.member.firstName, groups: groupsText}),
-                    description: $t('%1T4', {firstName: member.member.firstName, groups: groupsText}),
+                    title: $t('%1UP', { firstName: member.member.firstName, groups: groupsText }),
+                    description: $t('%1T4', { firstName: member.member.firstName, groups: groupsText }),
                     action: () => {
-                        chooseGroupForMember({member, defaultOrganization: invitationDataForIcon.organization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
+                        chooseGroupForMember({ member, defaultOrganization: invitationDataForIcon.organization, displayOptions: { action: 'present', modalDisplayStyle: 'popup' } }).catch(console.error);
                     },
                 });
             }
@@ -247,7 +246,7 @@ export function useRegistrationQuickActions(): QuickActions {
                 let suggestionCount = 0;
 
                 // first get the events where members are invited for
-                const {invited, notInvited} = getEventsWhereInvited({events: featuredEvents.value, memberManager});
+                const { invited, notInvited } = getEventsWhereInvited({ events: featuredEvents.value, memberManager });
 
                 // first create actions for events where members are invited
                 for (const event of invited) {
@@ -256,10 +255,10 @@ export function useRegistrationQuickActions(): QuickActions {
                         continue;
                     }
 
-                    if (!canRegisterForEvent({event, memberManager})) {
+                    if (!canRegisterForEvent({ event, memberManager })) {
                         continue;
                     }
-                    
+
                     const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
                     suggestionCount += 1;
                     arr.push({
@@ -268,7 +267,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         prefix: $t('%1S3'),
                         title: $t('%1Mp', { event: event.name }),
                         description,
-                        action: () => openEvent({event, show}),
+                        action: () => openEvent({ event, show }),
                     });
                 }
 
@@ -278,7 +277,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         break;
                     }
 
-                    if (!canRegisterForEvent({event, memberManager})) {
+                    if (!canRegisterForEvent({ event, memberManager })) {
                         continue;
                     }
 
@@ -289,7 +288,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         prefix: $t('%1SL'),
                         title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
                         description: Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate)),
-                        action: () => openEvent({event, show}),
+                        action: () => openEvent({ event, show }),
                     });
                 }
             }
@@ -305,7 +304,7 @@ export function useRegistrationQuickActions(): QuickActions {
     };
 }
 
-function getEventsWhereInvited({events, memberManager}: {events: Event[], memberManager: MemberManager}): {notInvited: Event[], invited: Event[]} {
+function getEventsWhereInvited({ events, memberManager }: { events: Event[]; memberManager: MemberManager }): { notInvited: Event[]; invited: Event[] } {
     const groupInvites = new Set(memberManager.family.members.flatMap(m => m.member.registrationInvitations.map(r => r.group.id)));
 
     const invited: Event[] = [];
@@ -321,11 +320,11 @@ function getEventsWhereInvited({events, memberManager}: {events: Event[], member
 
     return {
         invited,
-        notInvited
-    }
+        notInvited,
+    };
 }
 
-function openEvent({event, show}: {event: Event, show: ReturnType<typeof useShow>} ) {
+function openEvent({ event, show }: { event: Event; show: ReturnType<typeof useShow> }) {
     const component = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('#events/EventView.vue'), {
             event,
@@ -337,7 +336,7 @@ function openEvent({event, show}: {event: Event, show: ReturnType<typeof useShow
     }).catch(console.error);
 }
 
-function canRegisterForEvent({event, memberManager}: {event: Event, memberManager: MemberManager}): boolean {
+function canRegisterForEvent({ event, memberManager }: { event: Event; memberManager: MemberManager }): boolean {
     const group = event.group;
 
     if (group) {
@@ -362,8 +361,7 @@ function canRegisterForEvent({event, memberManager}: {event: Event, memberManage
         if (!canSomeMemberRegister) {
             return false;
         }
-    }
-    else if (!event.webshopId) {
+    } else if (!event.webshopId) {
         // event should have webshop or group
         return false;
     }
@@ -373,6 +371,10 @@ function canRegisterForEvent({event, memberManager}: {event: Event, memberManage
 
 export async function getFeaturedEventsForFamily({ context, family, owner }: { context: SessionContext; family: PlatformFamily; owner?: object }) {
     if (family.members.length === 0) {
+        return [];
+    }
+
+    if (context.organization && !context.organization.hasFutureEvents) {
         return [];
     }
 
@@ -419,7 +421,7 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                 if (invitation.group.type !== GroupType.EventRegistration) {
                     continue;
                 }
-                
+
                 eventGroupIds.add(invitation.group.id);
                 organizationIds.add(invitation.organizationId);
             }
@@ -459,8 +461,8 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
             eventGroupsFilter = {
                 groupId: {
                     $in: [...eventGroupIds],
-                }
-            }
+                },
+            };
         }
 
         const uniqueOrganizationIds = [...organizationIds];
@@ -512,18 +514,18 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                     {
                         $and: [
                             {
-                                'groupIds': {
+                                groupIds: {
                                     $in: [null, ...groupIds.values()],
                                 },
-                                'defaultAgeGroupIds': {
+                                defaultAgeGroupIds: {
                                     $in: [null, ...defaultGroupIds.values()],
-                                }
+                                },
                             },
                             ...(ageFilter ? [ageFilter] : []),
-                        ]
+                        ],
                     },
-                    ...eventGroupsFilter ? [eventGroupsFilter] : []
-                ]
+                    ...eventGroupsFilter ? [eventGroupsFilter] : [],
+                ],
             },
             {
             // add this filter last because it is more expensive (exists filter)
@@ -568,23 +570,23 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                     ...eventGroupsFilter ? [eventGroupsFilter] : [],
                     {
                         group: [
-                                {
-                                    status: GroupStatus.Open,
-                                },
-                                {
-                                    $or: [
-                                        { registrationStartDate: null },
-                                        { registrationStartDate: { $lte: currentTime } },
-                                        { preRegistrationsDate: { $lte: currentTime } },
-                                    ],
-                                },
-                                {
-                                    $or: [
-                                        { registrationEndDate: null },
-                                        { registrationEndDate: { $gt: currentTime } },
-                                    ],
-                                },
-                            ],
+                            {
+                                status: GroupStatus.Open,
+                            },
+                            {
+                                $or: [
+                                    { registrationStartDate: null },
+                                    { registrationStartDate: { $lte: currentTime } },
+                                    { preRegistrationsDate: { $lte: currentTime } },
+                                ],
+                            },
+                            {
+                                $or: [
+                                    { registrationEndDate: null },
+                                    { registrationEndDate: { $gt: currentTime } },
+                                ],
+                            },
+                        ],
                     },
                 ],
             },
@@ -619,8 +621,7 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
         });
 
         return response.data.results;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to fetch suggested activities, filter: ', JSON.stringify(filter));
         console.error(e);
     }

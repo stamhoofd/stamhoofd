@@ -61,11 +61,32 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('%NR') }}</h2>
+        <hr>
+        <h2>{{ $t('%NR') }}</h2>
 
-        <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
-            {{ $t('%15o') }}
-        </Checkbox>
+        <STList>
+            <STListItem v-if="!!STAMHOOFD.domains.webshop" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('%15o') }}
+                </h3>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="disableCalendar" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Kalender uitschakelen') }}
+                </h3>
+
+                <p class="style-description-small">
+                    {{ $t('Schakel de kalender functionaliteit uit in Stamhoofd.') }}
+                </p>
+            </STListItem>
+        </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr><h2>
@@ -233,6 +254,17 @@ function setFeatureFlag(flag: string, value: boolean) {
         }),
     });
 }
+
+const disableCalendar = computed({
+    get: () => organization.value.meta.enableCalendar === false,
+    set: (disabled: boolean) => {
+        organizationPatch.value = organizationPatch.value.patch({
+            meta: OrganizationMetaData.patch({
+                enableCalendar: disabled ? false : null,
+            }),
+        });
+    },
+});
 
 async function save() {
     if (saving.value) {

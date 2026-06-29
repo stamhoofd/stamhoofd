@@ -149,6 +149,14 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 await event.save();
             }
 
+            // Creating an event can only add a future event, so it can only flip
+            // hasFutureEvents from false to true. Only recompute when it is still false.
+            // Best effort only
+            if (eventOrganization && !eventOrganization.hasFutureEvents) {
+                await eventOrganization.updateFutureEvents();
+                await eventOrganization.save();
+            }
+
             events.push(event);
         }
 
@@ -325,6 +333,12 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             await event.delete();
+        }
+
+        if (request.body.getDeletes().length && organization && organization.hasFutureEvents) {
+            // Best effort only
+            await organization.updateFutureEvents();
+            await organization.save();
         }
 
         const structures = await AuthenticatedStructures.events(events);
