@@ -25,7 +25,7 @@ export function buildShellSnippet(): string {
         '                echo "stam: building CLI in $dir/shared/cli (first run)…" >&2',
         '                yarn --cwd "$dir/shared/cli" -s build || return $?',
         '            fi',
-        '            node "$dir/shared/cli/bin/stam.js" "$@"',
+        '            "$dir/shared/cli/bin/stam.js" "$@"',
         '            return $?',
         '        fi',
         '        dir="${dir%/*}"',
@@ -67,8 +67,7 @@ export async function installShellFunction(rcFile: string): Promise<InstallShell
     let fileExists = true;
     try {
         existing = await fs.readFile(rcFile, 'utf8');
-    }
-    catch (error) {
+    } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
             throw error;
         }
@@ -110,8 +109,7 @@ export async function setupShellShortcut(options: { dryRun?: boolean; shell?: Sh
 
     if (result.action === 'unchanged') {
         success(`\`stam\` shortcut is already installed in ${result.rcFile}`);
-    }
-    else {
+    } else {
         success(`${result.action === 'created' ? 'Created' : 'Updated'} ${result.rcFile} with the \`stam\` shell function`);
     }
 

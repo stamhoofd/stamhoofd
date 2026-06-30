@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --use-system-ca
 import { run } from '@oclif/core';
 
 async function main() {
