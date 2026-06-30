@@ -37,4 +37,10 @@ function setColumnEnabled(column: Column<any, any>, enabled: boolean) {
 }
 
 const sortedColumns = computed(() => props.columns.slice().sort((a, b) => a.index - b.index));
+
+function pop(popParents = false) {
+    contextMenuView.value?.pop(popParents);
+}
+
+defineExpose({ pop });
 </script>

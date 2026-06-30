@@ -15,7 +15,7 @@
 <script lang="ts" setup>
 import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
-import { SortItemDirection } from "@stamhoofd/structures";
+import { SortItemDirection } from '@stamhoofd/structures';
 import { computed, useTemplateRef } from 'vue';
 
 import type { Column } from '#tables/classes/Column.ts';
@@ -32,8 +32,7 @@ const contextMenuView = useTemplateRef('contextMenuView');
 function setSortByColumn(column: Column<any, any>) {
     if (props.sortBy.id === column.id) {
         props.setSort(column, props.sortDirection === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC);
-    }
-    else {
+    } else {
         props.setSort(column, props.sortDirection);
     }
 }
@@ -43,8 +42,14 @@ function getSortByColumn(column: Column<any, any>) {
 }
 
 function getSortDirectionIcon() {
-    return props.sortDirection === SortItemDirection.ASC ? "arrow-up-small" : "arrow-down-small";
+    return props.sortDirection === SortItemDirection.ASC ? 'arrow-up-small' : 'arrow-down-small';
 }
 
 const sortedColumns = computed(() => props.columns.filter(c => c.allowSorting).sort((a, b) => a.index - b.index));
+
+function pop(popParents = false) {
+    contextMenuView.value?.pop(popParents);
+}
+
+defineExpose({ pop });
 </script>
