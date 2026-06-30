@@ -456,7 +456,7 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date }): GroupTagItem[] {
+    getTags(options: { app: AppType; now?: Date; blockRegisteringNewMembers?: boolean }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPrices(this);
@@ -514,6 +514,13 @@ export class Group extends AutoEncoder {
                 icon: 'earth',
                 title: $t('%1EN'),
                 style: 'success',
+            });
+        }
+        if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockRegisteringNewMembers) {
+            tags.push({
+                icon: 'disabled',
+                title: $t('Nieuwe leden kunnen zich niet zelf registreren'),
+                style: 'warn',
             });
         }
 

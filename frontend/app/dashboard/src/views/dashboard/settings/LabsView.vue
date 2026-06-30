@@ -88,6 +88,20 @@
             </STListItem>
         </STList>
 
+        <STList>
+            <STListItem v-if="STAMHOOFD.userMode === 'organization'" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="blockRegisteringNewMembers" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Blokkeer registratie van nieuwe leden') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Wanneer ingeschakeld kunnen leden die nog nooit zijn aangemaakt, zich niet zelf registreren.') }}
+                </p>
+            </STListItem>
+        </STList>
+
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr><h2>
                 {{ $t('%NU') }}
@@ -206,6 +220,16 @@ const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEn
 
 const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
 const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
+const blockRegisteringNewMembers = computed({
+    get: () => organization.value.meta.blockRegisteringNewMembers,
+    set: (value: boolean) => {
+        organizationPatch.value = organizationPatch.value.patch({
+            meta: OrganizationMetaData.patch({
+                blockRegisteringNewMembers: value,
+            }),
+        });
+    },
+});
 const invoicesEnabled = computed({
     get: () => organization.value.meta.invoicesEnabled ?? false,
     set: (value: boolean) => {
