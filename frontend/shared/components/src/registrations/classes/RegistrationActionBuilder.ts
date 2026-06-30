@@ -12,6 +12,7 @@ import type { TableAction, TableActionSelection } from '#tables/classes/TableAct
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
@@ -19,7 +20,6 @@ import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecip
 import { Formatter } from '@stamhoofd/utility';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { Toast } from '../../overlays/Toast';
-
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectRegistrationActions(options?: {
@@ -37,6 +37,7 @@ export function useRegistrationActions() {
     const owner = useRequestOwner();
     const organization = useOrganization();
     const platform = usePlatform();
+    const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
 
     return (options?: { groups?: Group[];
         organizations?: Organization[];
@@ -52,6 +53,7 @@ export function useRegistrationActions() {
             forceWriteAccess: options?.forceWriteAccess,
             owner,
             categories: options?.categories ?? [],
+            fetchOrganizationPeriods,
         });
     };
 }
@@ -69,6 +71,10 @@ export class RegistrationActionBuilder {
     private eventGroupsLinkedToWaitingList: Group[] | null = null;
     private _allGroupsLinkedToWaitingList: Group[] | null = null;
     private categories: GroupCategoryTree[];
+    private fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
+
+    /** Cache of periods, loadResolvedPeriods fills in */
+    private resolvedPeriods: OrganizationRegistrationPeriod[] | null = null;
 
     get allGroupsLinkedToWaitingList() {
         return this._allGroupsLinkedToWaitingList?.slice() ?? [];
@@ -98,6 +104,7 @@ export class RegistrationActionBuilder {
         forceWriteAccess?: boolean | null;
         owner: any;
         categories: GroupCategoryTree[];
+        fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
     }) {
         this.present = settings.present;
         this.context = settings.context;
@@ -109,9 +116,50 @@ export class RegistrationActionBuilder {
         this.platform = settings.platform;
         this.isWaitingList = this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
         this.categories = settings.categories;
+        this.fetchOrganizationPeriods = settings.fetchOrganizationPeriods;
+    }
+
+    /** Resolve (and cache) the organization periods */
+    private async loadResolvedPeriods(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): Promise<void> {
+        if (this.organizations.length !== 1) {
+            this.resolvedPeriods = [];
+            return;
+        }
+
+        const organization = this.organizations[0];
+        const fallback = [selectedOrganizationRegistrationPeriod ?? organization.period];
+
+        // Only the context organization's periods can be fetched, and only full-access users may switch periods.
+        if (!this.context.auth.hasFullAccess() || !this.fetchOrganizationPeriods || this.context.organization?.id !== organization.id) {
+            this.resolvedPeriods = fallback;
+            return;
+        }
+
+        try {
+            const list = await this.fetchOrganizationPeriods({ shouldRetry: true });
+            const periods = list.organizationPeriods.filter(p => !p.period.locked);
+            this.resolvedPeriods = periods.length > 0 ? periods : fallback;
+        } catch (e) {
+            console.error('Failed to load organization registration periods', e);
+            this.resolvedPeriods = fallback;
+        }
+    }
+
+    /**
+     * Returns the periods to offer for the given organization. The resolved multi-period list
+     * only applies to the single context organization; any other organization falls back to its
+     * own current period (or the provided fallback).
+     */
+    private getResolvedPeriods(organization: Organization, fallbackPeriod?: OrganizationRegistrationPeriod): OrganizationRegistrationPeriod[] {
+        if (this.organizations.length === 1 && this.organizations[0].id === organization.id && this.resolvedPeriods && this.resolvedPeriods.length > 0) {
+            return this.resolvedPeriods;
+        }
+        return [fallbackPeriod ?? organization.period];
     }
 
     async getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
+        await this.loadResolvedPeriods(options.selectedOrganizationRegistrationPeriod);
+
         const allActions: TableAction<PlatformRegistration>[] = [
             ...this.getMemberActions(),
             this.getEmailAction(),
@@ -207,30 +255,48 @@ export class RegistrationActionBuilder {
             });
         }
 
-        return [
-            new MenuTableAction({
-                name: $t(`%eh`),
-                groupIndex: 0,
-                enabled: () => organization.period.waitingLists.length > 0,
-                childActions: () => [
-                    ...organization.period.waitingLists.map((g) => {
-                        return new InMemoryTableAction({
-                            name: g.settings.name.toString(),
-                            needsSelection: true,
-                            allowAutoSelectAll: false,
-                            handler: async (registrations: PlatformRegistration[]) => {
-                                const members = getUniqueMembersFromRegistrations(registrations);
-                                await this.register(members, g);
-                            },
-                        });
-                    }),
-                ],
-            }),
-            ...getActionsForCategory<PlatformRegistration>(organization.period.adminCategoryTree, async (registrations, group) => await this.register(getUniqueMembersFromRegistrations(registrations), group)).map((r) => {
-                r.description = organization.period.period.name;
-                return r;
-            }),
-        ];
+        const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false): TableAction<PlatformRegistration>[] => {
+            return [
+                new MenuTableAction({
+                    name: $t(`%eh`),
+                    groupIndex: 0,
+                    description: addPeriodDescription ? period.period.name : undefined,
+                    enabled: () => period.waitingLists.length > 0,
+                    childActions: () => [
+                        ...period.waitingLists.map((g) => {
+                            return new InMemoryTableAction({
+                                name: g.settings.name.toString(),
+                                needsSelection: true,
+                                allowAutoSelectAll: false,
+                                handler: async (registrations: PlatformRegistration[]) => {
+                                    const members = getUniqueMembersFromRegistrations(registrations);
+                                    await this.register(members, g);
+                                },
+                            });
+                        }),
+                    ],
+                }),
+                ...getActionsForCategory<PlatformRegistration>(period.adminCategoryTree, async (registrations, group) => await this.register(getUniqueMembersFromRegistrations(registrations), group)).map((r) => {
+                    if (addPeriodDescription) {
+                        r.description = period.period.name;
+                    }
+                    return r;
+                }),
+            ];
+        };
+
+        const periods = this.getResolvedPeriods(organization);
+
+        if (periods.length > 1) {
+            return periods.map((period) => {
+                return new MenuTableAction({
+                    name: period.period.name,
+                    groupIndex: 0,
+                    childActions: () => getForPeriod(period, false),
+                });
+            });
+        }
+        return getForPeriod(periods[0], true);
     }
 
     private async register(members: PlatformMember[], group: Group) {
@@ -407,7 +473,7 @@ export class RegistrationActionBuilder {
         }
 
         const organization = this.organizations[0];
-        const period = selectedOrganizationRegistrationPeriod ?? organization.period;
+        const periods = this.getResolvedPeriods(organization, selectedOrganizationRegistrationPeriod);
 
         let suggestedGroups = this.groups.map(g => g.waitingList).filter(g => g !== null);
 
@@ -425,31 +491,15 @@ export class RegistrationActionBuilder {
 
         suggestedGroups = suggestedGroups.filter(g => this.groups.find(gg => gg.id === g.id) === undefined); // Remove groups that are already selected
 
-        return new MenuTableAction({
-            name: $t(`%HB`),
-            priority: 1,
-            groupIndex: 5,
-            needsSelection: true,
-            allowAutoSelectAll: false,
-            enabled: () => this.hasWrite,
-            childActions: () => [
-                ...suggestedGroups.map((g) => {
-                    return new InMemoryTableAction({
-                        name: g.settings.name.toString(),
-                        needsSelection: true,
-                        groupIndex: 0,
-                        allowAutoSelectAll: false,
-                        handler: async (members: PlatformRegistration[]) => {
-                            await this.moveRegistrations(members, g);
-                        },
-                    });
-                }),
+        const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false): TableAction<PlatformRegistration>[] => {
+            return [
                 new MenuTableAction({
                     name: $t(`%eh`),
-                    groupIndex: 0,
-                    enabled: () => organization.period.waitingLists.length > 0,
+                    groupIndex: 1,
+                    description: addPeriodDescription ? period.period.name : undefined,
+                    enabled: () => period.waitingLists.length > 0,
                     childActions: () => [
-                        ...organization.period.waitingLists.map((g) => {
+                        ...period.waitingLists.map((g) => {
                             return new InMemoryTableAction({
                                 name: g.settings.name.toString(),
                                 needsSelection: true,
@@ -462,10 +512,52 @@ export class RegistrationActionBuilder {
                     ],
                 }),
                 ...getActionsForCategory<PlatformRegistration>(period.adminCategoryTree, (registrations, group) => this.moveRegistrations(registrations, group)).map((r) => {
-                    r.description = period.period.name;
+                    if (addPeriodDescription) {
+                        r.description = period.period.name;
+                    }
                     return r;
                 }),
-            ],
+            ];
+        };
+
+        return new MenuTableAction({
+            name: $t(`%HB`),
+            priority: 1,
+            groupIndex: 5,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            enabled: () => this.hasWrite,
+            childActions: () => {
+                const base = suggestedGroups.map((g) => {
+                    return new InMemoryTableAction({
+                        name: g.settings.name.toString(),
+                        needsSelection: true,
+                        groupIndex: 0,
+                        allowAutoSelectAll: false,
+                        handler: async (members: PlatformRegistration[]) => {
+                            await this.moveRegistrations(members, g);
+                        },
+                    });
+                });
+
+                if (periods.length > 1) {
+                    return [
+                        ...periods.map((period) => {
+                            return new MenuTableAction({
+                                name: period.period.name,
+                                groupIndex: 1,
+                                childActions: () => getForPeriod(period, false),
+                            });
+                        }),
+                        ...base,
+                    ];
+                }
+
+                return [
+                    ...base,
+                    ...getForPeriod(periods[0], true),
+                ];
+            },
         });
     }
 
@@ -852,20 +944,26 @@ export class RegistrationActionBuilder {
             return [];
         }
 
-        let categoryTree: null | GroupCategoryTree = null;
+        // Each entry is a period (null for waiting lists) and the category tree to invite into.
+        const periodTrees: { period: OrganizationRegistrationPeriod | null; categoryTree: GroupCategoryTree }[] = [];
 
         if (this.isWaitingList) {
             await this.fetchEventGroupsLinkedToWaitingList();
-            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess() });
+            const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
+            if (tree) {
+                periodTrees.push({ period: null, categoryTree: tree });
+            }
         } else if (this.organizations.length === 1) {
-            categoryTree = this.organizations[0].period.adminCategoryTree;
+            for (const period of this.getResolvedPeriods(this.organizations[0])) {
+                periodTrees.push({ period, categoryTree: period.adminCategoryTree });
+            }
         }
 
-        if (!categoryTree) {
+        if (periodTrees.length === 0) {
             return [];
         }
 
-        const allGroups = categoryTree.getAllGroups().concat(this.eventGroupsLinkedToWaitingList ?? []);
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.eventGroupsLinkedToWaitingList ?? []);
         this._allGroupsLinkedToWaitingList = allGroups;
 
         if (allGroups.length === 0) {
@@ -913,7 +1011,9 @@ export class RegistrationActionBuilder {
         }
 
         const getChildActions = ({ action, disableIfAll }: { action: (items: PlatformRegistration[], group: Group, wereItemsFetched: boolean) => void | Promise<void>; disableIfAll: (item: PlatformRegistration, group: Group) => boolean }) => {
-            const childActions = [];
+            const buildForTree = (categoryTree: GroupCategoryTree) => getActionsForCategory<PlatformRegistration>(categoryTree, action, disableIfAll);
+
+            const childActions: TableAction<PlatformRegistration>[] = [];
 
             if (eventGroups.length > 0) {
                 childActions.push(new MenuTableAction({
@@ -934,7 +1034,21 @@ export class RegistrationActionBuilder {
                 }));
             }
 
-            return childActions.concat(getActionsForCategory<PlatformRegistration>(categoryTree, action, disableIfAll));
+            // Group by period when more than one period is available, otherwise show a flat list.
+            if (periodTrees.length > 1) {
+                return childActions.concat(periodTrees.map((entry) => {
+                    return new MenuTableAction({
+                        name: entry.period?.period.name ?? '',
+                        groupIndex: 1,
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        enabled,
+                        childActions: () => buildForTree(entry.categoryTree),
+                    });
+                }));
+            }
+
+            return childActions.concat(buildForTree(periodTrees[0].categoryTree));
         };
 
         const actions = [
