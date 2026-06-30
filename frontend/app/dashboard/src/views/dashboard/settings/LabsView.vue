@@ -74,7 +74,7 @@
                 </h3>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label">
+            <STListItem v-if="!$isPlatform" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="disableCalendar" />
                 </template>
