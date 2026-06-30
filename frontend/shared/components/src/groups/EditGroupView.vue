@@ -141,7 +141,7 @@
                 <p>{{ $t('%cQ') }}</p>
 
                 <p v-if="blockCreatingNewMembers" class="warning-box">
-                    {{ $t('Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.') }}
+                    {{ $t('Leden of ouders kunnen geen nieuwe gezinsleden toevoegen en ook nieuwe accounts kunnen geen leden toevoegen. Je kan dit aanpassen via Instellingen > Experimenten.') }}
                 </p>
 
                 <STList>
