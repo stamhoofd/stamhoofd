@@ -94,7 +94,7 @@
                     <Checkbox v-model="blockRegisteringNewMembers" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Blokkeer registratie van nieuwe leden') }}
+                    {{ $t('Blokkeer aanmaken van nieuwe leden') }}
                 </h3>
                 <p class="style-description-small">
                     {{ $t('Wanneer ingeschakeld kunnen leden of ouders geen nieuwe gezinsleden toevoegen. Ook nieuwe accounts kunnen hierdoor geen leden toevoegen.') }}
