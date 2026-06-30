@@ -174,7 +174,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, Country>({
         id: 'country',
-        name: $t(`Land`),
+        name: $t(`%Cp`),
         getValue: organization => organization.address.country,
         format: country => CountryHelper.getName(country),
         minimumWidth: 100,
@@ -188,7 +188,7 @@ const allColumns: Column<ObjectType, any>[] = [
         : [
                 new Column<ObjectType, OrganizationType>({
                     id: 'type',
-                    name: $t(`Type`),
+                    name: $t(`%1LP`),
                     getValue: organization => organization.meta.type,
                     format: type => OrganizationTypeHelper.getName(type),
                     minimumWidth: 100,
@@ -196,7 +196,7 @@ const allColumns: Column<ObjectType, any>[] = [
                 }),
                 new Column<ObjectType, UmbrellaOrganization | null>({
                     id: 'umbrellaOrganization',
-                    name: $t(`Koepelorganisatie`),
+                    name: $t(`%ZZd`),
                     getValue: organization => organization.meta.umbrellaOrganization,
                     format: umbrella => umbrella ? UmbrellaOrganizationHelper.getName(umbrella) : $t(`%1FW`),
                     getStyle: umbrella => umbrella ? '' : 'gray',
@@ -222,7 +222,7 @@ const allColumns: Column<ObjectType, any>[] = [
         : [
                 new Column<ObjectType, string[]>({
                     id: 'activePackages',
-                    name: $t(`Actieve pakketten`),
+                    name: $t(`%ZZl`),
                     allowSorting: false,
                     getValue: organization => Object.values(STPackageType)
                         .filter(type => organization.meta.packages.isActive(type))
@@ -269,7 +269,7 @@ const allColumns: Column<ObjectType, any>[] = [
         : []),
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: $t(`Aanmaakdatum`),
+        name: $t(`%1Jc`),
         getValue: organization => organization.createdAt,
         format: (v, width) => width < 200 ? Formatter.dateNumber(v, true) : Formatter.date(v, true),
         minimumWidth: 80,
@@ -507,7 +507,7 @@ async function openMail(selection: TableActionSelection<Organization>) {
         options: [
             {
                 id: 'full',
-                name: $t('Alle hoofdbeheerders'),
+                name: $t('%ZZm'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.Organizations,
@@ -523,7 +523,7 @@ async function openMail(selection: TableActionSelection<Organization>) {
             },
             {
                 id: 'finance',
-                name: $t('Beheerders volledige boekhouding'),
+                name: $t('%ZZs'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.Organizations,
@@ -549,7 +549,7 @@ async function openMail(selection: TableActionSelection<Organization>) {
             },
             {
                 id: 'all',
-                name: $t('Alle beheerders'),
+                name: $t('%ZZh'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.Organizations,

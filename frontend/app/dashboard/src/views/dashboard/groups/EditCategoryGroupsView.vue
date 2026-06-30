@@ -262,7 +262,7 @@ async function createCategory() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(groups.value.length ? $t('Ben je zeker dat je deze categorie en groepen wilt verwijderen?') : $t('Ben je zeker dat je deze categorie wilt verwijderen?'), $t('Verwijderen'))) {
+    if (!await CenteredMessage.confirm(groups.value.length ? $t('%ZZr') : $t('%ZZk'), $t('%CJ'))) {
         return;
     }
     const settings = OrganizationRegistrationPeriodSettings.patch({});

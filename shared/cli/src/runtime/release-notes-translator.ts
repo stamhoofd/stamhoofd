@@ -118,7 +118,7 @@ export async function grepCodebase(cwd: string, input: Record<string, unknown>):
 }
 
 /**
- * Finds every `$t('%KEY')` reference in a diff and resolves it against nl.json, so the model
+ * Finds every `$t` reference in a diff and resolves it against nl.json, so the model
  * translates from the actual Dutch source string instead of the opaque key.
  */
 async function collectTranslationsForDiff(cwd: string, diff: string): Promise<string> {

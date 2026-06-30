@@ -79,11 +79,11 @@
                     <Checkbox v-model="disableCalendar" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Kalender uitschakelen') }}
+                    {{ $t('%ZZi') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t('Schakel de kalender functionaliteit uit in Stamhoofd.') }}
+                    {{ $t('%ZZt') }}
                 </p>
             </STListItem>
         </STList>

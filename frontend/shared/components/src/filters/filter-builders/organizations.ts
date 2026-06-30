@@ -103,7 +103,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             new StringFilterBuilder({
-                name: $t(`Straat`),
+                name: $t(`%Co`),
                 key: 'street',
             }),
 
@@ -118,7 +118,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             new MultipleChoiceFilterBuilder({
-                name: $t(`Land`),
+                name: $t(`%Cp`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -136,7 +136,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             new DateFilterBuilder({
-                name: $t(`Aanmaakdatum`),
+                name: $t(`%1Jc`),
                 key: 'createdAt',
             }),
 
@@ -174,7 +174,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             ifNotPlatform(new MultipleChoiceFilterBuilder({
-                name: $t(`Pakketten`),
+                name: $t(`%1Qj`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -198,7 +198,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             })),
 
             ifNotPlatform(new MultipleChoiceFilterBuilder({
-                name: $t(`Type`),
+                name: $t(`%1LP`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -211,7 +211,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             })),
 
             ifNotPlatform(new MultipleChoiceFilterBuilder({
-                name: $t(`Koepelorganisatie`),
+                name: $t(`%ZZd`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },

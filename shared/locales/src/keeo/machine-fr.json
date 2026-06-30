@@ -1523,6 +1523,10 @@
     "original": "Je kan een beheerder volledige toegang geven tot alle eenheden (en dus ook de leden van die eenheid), of per tag de toegang regelen.",
     "translation": "Vous pouvez donner à un administrateur un accès complet à toutes les unités (et donc aussi aux membres de cette unité), ou gérer l'accès par tag."
   },
+  "%ZZt": {
+    "original": "Schakel de kalender functionaliteit uit in Keeo.",
+    "translation": "Désactivez la fonctionnalité du calendrier dans Keeo."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

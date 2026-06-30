@@ -100,7 +100,7 @@ function getRoot() {
     const webshopsTab = new TabBarItem({
         id: 'webshops',
         icon: 'basket',
-        name: STAMHOOFD.platformName.toLowerCase() === 'ravot' ? $t('Verkoop') : $t('Webshops'),
+        name: STAMHOOFD.platformName.toLowerCase() === 'ravot' ? $t('%ZZe') : $t('%1Pd'),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
         }),

@@ -604,7 +604,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         code: 'invalid_waiting_list',
                         field: 'waitingList',
                         message: 'Waiting list not found',
-                        human: $t('De wachtlijst die je wilt koppelen bestaat niet (meer)'),
+                        human: $t('%ZZb'),
                         statusCode: 404,
                     });
                 }
@@ -747,7 +747,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     code: 'invalid_waiting_list',
                     field: 'waitingList',
                     message: 'Waiting list not found',
-                    human: $t('De wachtlijst die je wilt koppelen bestaat niet (meer)'),
+                    human: $t('%ZZb'),
                     statusCode: 404,
                 });
             }

@@ -8099,10 +8099,6 @@
     "original": "Verbergen",
     "translation": "Masquer"
   },
-  "%1Yu": {
-    "original": "Verkopen",
-    "translation": "Ventes"
-  },
   "%1Yv": {
     "original": "is na",
     "translation": "après"
@@ -11303,6 +11299,10 @@
     "original": "Op niveau van de koepel moet de melding worden nagekeken. Standaard zal iedere koepelbeheerder die toegang heeft tot de ingediende melding een e-mail krijgen, hiervoor moet je een expliciet toegangsrecht toekennen aan die beheerders (behalve voor beheerders met volledige toegang). Afmelden voor deze e-mails is momenteel niet mogelijk, maar zal op termijn worden toegevoegd op accountniveau.",
     "translation": "Au niveau de la fédération, le message doit être vérifié. Par défaut, chaque gestionnaire de fédération ayant accès à la notification soumise recevra un e-mail ; pour cela, vous devez accorder un droit d’accès explicite à ces gestionnaires (sauf pour les gestionnaires disposant d’un accès complet). Il n’est actuellement pas possible de se désinscrire de ces e-mails, mais cette option sera ajoutée ultérieurement au niveau du compte."
   },
+  "%AbC": {
+    "original": "todo",
+    "translation": "à faire"
+  },
   "%Ac": {
     "original": "Je hebt geen toegangsrechten om de facturatiegegevens van deze vereniging te bewerken.",
     "translation": "Vous n’avez pas les droits d’accès nécessaires pour modifier les données de facturation de cette association."
@@ -13663,6 +13663,10 @@
     "original": "{count} documenten verwijderen?",
     "translation": "{count} documents à supprimer ?"
   },
+  "%KEY": {
+    "original": "todo",
+    "translation": "à faire"
+  },
   "%KF": {
     "original": "{count} documenten verwijderd",
     "translation": "{count} documents supprimés"
@@ -14702,10 +14706,6 @@
   "%Og": {
     "original": "Kies je eigen logo en kleur",
     "translation": "Choisissez votre propre logo et couleur"
-  },
-  "%Oh": {
-    "original": "Toegangsrechten en functies",
-    "translation": "Droits d’accès et fonctions"
   },
   "%Oi": {
     "original": "Beheer wie toegang heeft tot welk onderdeel van het beheerdersportaal",
@@ -17298,6 +17298,58 @@
   "%ZZ": {
     "original": "Bepaal de voorwaarden en benaming van deze login methode.",
     "translation": "Définissez les conditions et le nom de cette méthode de connexion."
+  },
+  "%ZZZ": {
+    "original": "todo",
+    "translation": "à faire"
+  },
+  "%ZZa": {
+    "original": "Beheer wie toegang heeft tot deze groep",
+    "translation": "Gérez qui a accès à ce groupe"
+  },
+  "%ZZb": {
+    "original": "De wachtlijst die je wilt koppelen bestaat niet (meer)",
+    "translation": "La liste d'attente que vous souhaitez lier n'existe plus"
+  },
+  "%ZZd": {
+    "original": "Koepelorganisatie",
+    "translation": "Organisation faîtière"
+  },
+  "%ZZe": {
+    "original": "Verkoop",
+    "translation": "Vente"
+  },
+  "%ZZh": {
+    "original": "Alle beheerders",
+    "translation": "Tous les gestionnaires"
+  },
+  "%ZZi": {
+    "original": "Kalender uitschakelen",
+    "translation": "Désactiver le calendrier"
+  },
+  "%ZZk": {
+    "original": "Ben je zeker dat je deze categorie wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer cette catégorie ?"
+  },
+  "%ZZl": {
+    "original": "Actieve pakketten",
+    "translation": "Forfaits actifs"
+  },
+  "%ZZm": {
+    "original": "Alle hoofdbeheerders",
+    "translation": "Tous les administrateurs principaux"
+  },
+  "%ZZr": {
+    "original": "Ben je zeker dat je deze categorie en groepen wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer cette catégorie ainsi que les groupes ?"
+  },
+  "%ZZs": {
+    "original": "Beheerders volledige boekhouding",
+    "translation": "Gestionnaires ayant accès à toute la comptabilité"
+  },
+  "%ZZt": {
+    "original": "Schakel de kalender functionaliteit uit in Stamhoofd.",
+    "translation": "Désactivez la fonctionnalité du calendrier dans Stamhoofd."
   },
   "%Za": {
     "original": "Alle emaildomeinnamen zijn toegestaan",

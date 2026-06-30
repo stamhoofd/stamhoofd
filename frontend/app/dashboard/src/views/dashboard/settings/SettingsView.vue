@@ -53,7 +53,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Beheerders') }}
+                        {{ $t('%K5') }}
                     </h2>
                     <p class="style-description-small">
                         {{ $t('%Oi') }}

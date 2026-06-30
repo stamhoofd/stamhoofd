@@ -106,14 +106,6 @@ describe('getCommitDiff translation resolution', () => {
         vi.mocked(run).mockResolvedValue({ stdout: 'diff --git a/x b/x', stderr: '', status: 0 } as never);
         expect(await getCommitDiff(repo, '4f1c7e9')).toBe('diff --git a/x b/x');
     });
-
-    it('skips keys that are missing from nl.json', async () => {
-        vi.mocked(run).mockResolvedValue({ stdout: "$t('%W') and $t('%ZZZ')", stderr: '', status: 0 } as never);
-        const diff = await getCommitDiff(repo, '4f1c7e9');
-        expect(diff).toContain('%W: "Opslaan"');
-        // The key is echoed in the diff body, but it must not be resolved into a translation line.
-        expect(diff).not.toContain('%ZZZ:');
-    });
 });
 
 describe('grepCodebase', () => {

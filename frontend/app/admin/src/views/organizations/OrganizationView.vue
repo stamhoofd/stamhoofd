@@ -131,10 +131,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Beheerders') }}
+                        {{ $t('%K5') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Beheer wie toegang heeft tot deze groep') }}
+                        {{ $t('%ZZa') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

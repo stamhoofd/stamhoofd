@@ -1463,6 +1463,10 @@
     "original": "Je kan een beheerder volledige toegang geven tot alle groepen (en dus ook de leden van die groep), of per tag de toegang regelen.",
     "translation": "Vous pouvez donner à un administrateur un accès complet à tous les groupes (et donc aussi aux membres de ce groupe), ou gérer l'accès par balise."
   },
+  "%ZZt": {
+    "original": "Schakel de kalender functionaliteit uit in Ravot.",
+    "translation": "Désactivez la fonctionnalité du calendrier dans Ravot."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."
