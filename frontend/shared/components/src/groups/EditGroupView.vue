@@ -137,7 +137,12 @@
                         {{ getGroupStatusName(virtualOpenStatus, registrationStartDate) }}
                     </p>
                 </template>
+
                 <p>{{ $t('%cQ') }}</p>
+
+                <p v-if="blockRegisteringNewMembers" class="error-box">
+                    {{ $t('Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.') }}
+                </p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -803,6 +808,8 @@ const props = withDefaults(
 
 const platform = usePlatform();
 const organization = useOrganization();
+const blockRegisteringNewMembers = computed(() => organization.value?.meta.blockRegisteringNewMembers ?? false);
+
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
 const nonPatchedGroup = props.period.groups.find(group => group.id === props.groupId)!;
 const patchedGroup = computed(() => patchedPeriod.value.groups.find(group => group.id === props.groupId)!);

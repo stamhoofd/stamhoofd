@@ -201,7 +201,7 @@ export class MemberManager {
     }
 
     get isAcceptingNewMembers() {
-        return STAMHOOFD.userMode === 'platform' ? true : (this.$context.organization?.isAcceptingNewMembers(this.$context.hasPermissions()) ?? true);
+        return STAMHOOFD.userMode === 'platform' ? true : (this.$context.organization?.isAcceptingNewMembers() ?? true);
     }
 
     async loadMembers() {

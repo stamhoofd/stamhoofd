@@ -78,6 +78,9 @@ export class EventMeta extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 382 })
     maxAge: number | null = null;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    allowNonMembers = false;
 }
 
 export class Event extends AutoEncoder {

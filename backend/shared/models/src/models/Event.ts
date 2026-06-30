@@ -101,18 +101,22 @@ export class Event extends QueryableModel {
         }
 
         if (this.organizationId) {
-            // This is a not-national event, so require the organization
-            group.settings.requireOrganizationIds = [this.organizationId];
+            // This is a not-national event, so require the organization (unless non-members are allowed)
+            group.settings.requireOrganizationIds = this.meta.allowNonMembers ? [] : [this.organizationId];
             group.settings.requireOrganizationTags = [];
             group.settings.requirePlatformMembershipOn = null;
         } else {
-            group.settings.requireOrganizationTags = this.meta.organizationTagIds ?? [];
-
             // Everyone can register
             group.settings.requireOrganizationIds = [];
 
-            // But they need a valid platform membership
-            group.settings.requirePlatformMembershipOn = this.endDate;
+            if (this.meta.allowNonMembers) {
+                group.settings.requireOrganizationTags = [];
+                group.settings.requirePlatformMembershipOn = null;
+            } else {
+                group.settings.requireOrganizationTags = this.meta.organizationTagIds ?? [];
+                // But they need a valid platform membership
+                group.settings.requirePlatformMembershipOn = this.endDate;
+            }
         }
         await group.save();
 
