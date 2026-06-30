@@ -190,7 +190,7 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     }
 
     isAcceptingNewMembers() {
-        return !this.meta.blockRegisteringNewMembers;
+        return !this.meta.blockCreatingNewMembers;
     }
 
     isAcceptingExistingMembers(admin: boolean) {

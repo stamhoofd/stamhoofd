@@ -412,7 +412,7 @@ export class OrganizationMetaData extends AutoEncoder {
     invoicesEnabled: boolean;
 
     @field({ decoder: BooleanDecoder, ...NextVersion })
-    blockRegisteringNewMembers = false;
+    blockCreatingNewMembers = false;
 
     /**
      * @deprecated Moved to companies

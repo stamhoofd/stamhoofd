@@ -91,7 +91,7 @@
         <STList>
             <STListItem v-if="STAMHOOFD.userMode === 'organization'" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="blockRegisteringNewMembers" />
+                    <Checkbox v-model="blockCreatingNewMembers" />
                 </template>
                 <h3 class="style-title-list">
                     {{ $t('Blokkeer aanmaken van nieuwe leden') }}
@@ -220,12 +220,12 @@ const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEn
 
 const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
 const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
-const blockRegisteringNewMembers = computed({
-    get: () => organization.value.meta.blockRegisteringNewMembers,
+const blockCreatingNewMembers = computed({
+    get: () => organization.value.meta.blockCreatingNewMembers,
     set: (value: boolean) => {
         organizationPatch.value = organizationPatch.value.patch({
             meta: OrganizationMetaData.patch({
-                blockRegisteringNewMembers: value,
+                blockCreatingNewMembers: value,
             }),
         });
     },

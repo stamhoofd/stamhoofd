@@ -456,7 +456,7 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date; blockRegisteringNewMembers?: boolean }): GroupTagItem[] {
+    getTags(options: { app: AppType; now?: Date; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPrices(this);
@@ -516,7 +516,7 @@ export class Group extends AutoEncoder {
                 style: 'success',
             });
         }
-        if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockRegisteringNewMembers) {
+        if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockCreatingNewMembers) {
             tags.push({
                 icon: 'disabled',
                 title: $t('Nieuwe leden zijn uitgeschakeld'),

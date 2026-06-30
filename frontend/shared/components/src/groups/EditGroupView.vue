@@ -140,7 +140,7 @@
 
                 <p>{{ $t('%cQ') }}</p>
 
-                <p v-if="blockRegisteringNewMembers" class="warning-box">
+                <p v-if="blockCreatingNewMembers" class="warning-box">
                     {{ $t('Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.') }}
                 </p>
 
@@ -808,7 +808,7 @@ const props = withDefaults(
 
 const platform = usePlatform();
 const organization = useOrganization();
-const blockRegisteringNewMembers = computed(() => organization.value?.meta.blockRegisteringNewMembers ?? false);
+const blockCreatingNewMembers = computed(() => organization.value?.meta.blockCreatingNewMembers ?? false);
 
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
 const nonPatchedGroup = props.period.groups.find(group => group.id === props.groupId)!;
