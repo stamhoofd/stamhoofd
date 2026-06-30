@@ -1199,7 +1199,8 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (!await this.canAccessMember(member, level)) {
+        // If you can't read the member, you can't have financial access
+        if (!await this.canAccessMember(member, PermissionLevel.Read)) {
             return false;
         }
 
