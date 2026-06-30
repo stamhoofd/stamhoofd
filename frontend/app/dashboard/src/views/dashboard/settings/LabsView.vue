@@ -97,7 +97,7 @@
                     {{ $t('Blokkeer registratie van nieuwe leden') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Wanneer ingeschakeld kunnen leden die nog nooit zijn aangemaakt, zich niet zelf registreren.') }}
+                    {{ $t('Wanneer ingeschakeld kunnen leden of ouders geen nieuwe gezinsleden toevoegen. Ook nieuwe accounts kunnen hierdoor geen leden toevoegen.') }}
                 </p>
             </STListItem>
         </STList>
