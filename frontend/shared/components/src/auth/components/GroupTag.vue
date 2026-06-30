@@ -21,5 +21,5 @@ const props = defineProps<{
 const now = useNow();
 const app = useAppContext();
 const organization = useOrganization();
-const tags = computed(() => props.group.getTags({ now: now.value, app, organization: organization.value }));
+const tags = computed(() => props.group.getTags({ now: now.value, app, organization: organization.value, blockCreatingNewMembers: organization.value?.meta.blockCreatingNewMembers }));
 </script>

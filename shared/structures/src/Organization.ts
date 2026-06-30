@@ -167,24 +167,8 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
         return this.getCategoryTree({ admin: true });
     }
 
-    isAcceptingNewMembers(admin: boolean) {
-        const allGroups = this.adminAvailableGroups; // we need to check admin groups because required groups could be restricted to internal groups
-        const groups = this.getCategoryTree({ admin }).getAllGroups();
-
-        for (const group of groups) {
-            if (group.closed && !group.notYetOpen) {
-                continue;
-            }
-            if (group.settings.requireGroupIds.length > 0 && group.settings.requireGroupIds.find(id => !!allGroups.find(g => g.id === id))) {
-                continue;
-            }
-
-            if (group.settings.availableMembers === 0 && !group.waitingList) {
-                continue;
-            }
-            return true;
-        }
-        return false;
+    isAcceptingNewMembers() {
+        return !this.meta.blockCreatingNewMembers;
     }
 
     isAcceptingExistingMembers(admin: boolean) {

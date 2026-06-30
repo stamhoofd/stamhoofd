@@ -456,7 +456,7 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date; organization: Organization | null }): GroupTagItem[] {
+    getTags(options: { app: AppType; now?: Date; organization: Organization | null; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPrices(this);
@@ -528,6 +528,13 @@ export class Group extends AutoEncoder {
                 icon: 'earth',
                 title: $t('%1EN'),
                 style: 'success',
+            });
+        }
+        if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockCreatingNewMembers) {
+            tags.push({
+                icon: 'disabled',
+                title: $t('Nieuwe leden zijn uitgeschakeld'),
+                style: 'warn',
             });
         }
 
