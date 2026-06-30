@@ -19,7 +19,7 @@
         "package.json"
     ],
     "bin": {
-        "stam": "./bin/stam.js"
+        "stam": "NODE_OPTIONS=--use-system-ca ./bin/stam.js"
     },
     "scripts": {
         "build": "rm -rf dist && tsc --build tsconfig.build.json --force",
@@ -29,6 +29,7 @@
     },
     "dependencies": {
         "@anthropic-ai/sdk": "0.104.2",
+        "@aws-sdk/client-s3": "3.1068.0",
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.11.4",
         "@stamhoofd/types": "2.125.1",
