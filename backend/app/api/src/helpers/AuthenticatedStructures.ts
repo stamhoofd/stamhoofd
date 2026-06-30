@@ -32,10 +32,8 @@ export class AuthenticatedStructures {
         const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
 
         if (checkPermissions) {
-            const { registrations, orders } = await Payment.loadBalanceItemRelations(balanceItems);
-
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
-            if (!(await Context.optionalAuth?.canAccessBalanceItems(balanceItems, PermissionLevel.Read, { registrations, orders }))) {
+            if (!(await Context.optionalAuth?.canAccessBalanceItems(balanceItems, PermissionLevel.Read))) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
