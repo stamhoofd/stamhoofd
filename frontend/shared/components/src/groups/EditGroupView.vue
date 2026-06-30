@@ -793,20 +793,27 @@ const props = withDefaults(
         saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
         showToasts?: boolean;
         organizationHint?: Organization | null;
+        initialPatch?: AutoEncoderPatchType<OrganizationRegistrationPeriod> | null;
     }>(),
     {
         showToasts: true,
         isMultiOrganization: false,
         organizationHint: null,
+        initialPatch: null,
     },
 );
 
 const platform = usePlatform();
 const organization = useOrganization();
-const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
-const nonPatchedGroup = props.period.groups.find(group => group.id === props.groupId)!;
+const { patched: patchedPeriod, hasChanges, addPatch, addDependingPatch, patch } = usePatch(props.period);
+if (props.initialPatch) {
+    addPatch(props.initialPatch);
+}
+// Create a snapshot moment with the initial patch
+const initialPeriod = patchedPeriod.value;
+const nonPatchedGroup = initialPeriod.groups.find(group => group.id === props.groupId)!;
 const patchedGroup = computed(() => patchedPeriod.value.groups.find(group => group.id === props.groupId)!);
-const groupBeforePatch = computed(() => props.period.groups.find(group => group.id === props.groupId)!);
+const groupBeforePatch = computed(() => initialPeriod.groups.find(group => group.id === props.groupId)!);
 if (!groupBeforePatch.value) {
     console.error(`Group with id ${props.groupId} not found in OrganizationRegistrationPeriod`);
 }
@@ -823,14 +830,6 @@ const forceShowRequireGroupIds = ref(false);
 const forceShowPreventGroupIds = ref(false);
 const usedStock = computed(() => patchedGroup.value.settings.getUsedStock(patchedGroup.value) || 0);
 const auth = useAuth();
-
-function addRequireGroupIds() {
-    forceShowRequireGroupIds.value = true;
-}
-
-function addPreventGroupIds() {
-    forceShowPreventGroupIds.value = true;
-}
 
 const showRequireGroupIds = computed({
     get: () => forceShowRequireGroupIds.value || !!patchedGroup.value.settings.requireGroupIds.length,
@@ -1578,13 +1577,17 @@ async function addWaitingList() {
     await present({
         components: [
             AsyncComponent(() => import('./EditGroupView.vue'), {
-                period: patchedPeriod.value.patch(basePatch),
+                initialPatch: basePatch,
+                period: patchedPeriod.value,
                 groupId: waitingList.id,
                 isNew: true,
                 showToasts: false,
                 organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(basePatch.patch(patch));
+                    addDependingPatch(patch);
+                    addGroupPatch({
+                        waitingList: waitingList,
+                    });
                 },
             }),
         ],
@@ -1621,7 +1624,7 @@ async function editWaitingList(waitingList: Group) {
                 showToasts: false,
                 organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(patch);
+                    addDependingPatch(patch);
                 },
             }),
         ],

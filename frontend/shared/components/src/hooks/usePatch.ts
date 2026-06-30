@@ -1,19 +1,20 @@
 import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { Version } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';
 
 export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>, options?: {
     postProcess?: (obj: T) => T;
 }): {
-        createPatch: () => AutoEncoderPatchType<T>;
-        patched: Ref<T>;
-        patch: Ref<AutoEncoderPatchType<T>>;
-        addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void;
-        hasChanges: Ref<boolean>;
-        reset: () => void;
-    } {
+    createPatch: () => AutoEncoderPatchType<T>;
+    patched: Ref<T>;
+    patch: Ref<AutoEncoderPatchType<T>>;
+    addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void;
+    addDependingPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void;
+    hasChanges: Ref<boolean>;
+    reset: () => void;
+} {
     const initialValue = unref(obj);
     if (!initialValue) {
         throw new Error('Expected a reference with an initial value at usePatch');
@@ -38,6 +39,9 @@ export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>, options?: {
         }),
         addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
             patch.value = patch.value.patch(unref(obj).static.patch(newPatch));
+        },
+        addDependingPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
+            patch.value = (unref(obj).static.patch(newPatch) as AutoEncoderPatchType<T>).patch(patch.value);
         },
         hasChanges: computed(() => {
             return patchContainsChanges(patch.value as PatchType<T>, unref(obj), { version: Version });

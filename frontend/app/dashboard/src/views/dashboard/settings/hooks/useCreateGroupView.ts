@@ -35,16 +35,17 @@ export function useCreateGroupView(saveHandler?: (patch: AutoEncoderPatchType<Or
         const basePatch = OrganizationRegistrationPeriod.patch({ groups, settings, id: period.id });
 
         const displayedComponent = AsyncComponent(() => import('@stamhoofd/components/groups/EditGroupView.vue'), {
-            period: period.patch(basePatch),
+            initialPatch: basePatch,
+            period: period,
             groupId: group.id,
             isNew: true,
             saveHandler: (saveHandler
                 ? async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    await saveHandler(basePatch.patch(patch));
+                    await saveHandler(patch);
                 }
                 : null)
             ?? (async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                await patchOrganizationPeriod(period, basePatch.patch(patch));
+                await patchOrganizationPeriod(period, patch);
             }),
         });
 

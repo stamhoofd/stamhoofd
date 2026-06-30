@@ -42,7 +42,7 @@
             <hr><h2>{{ $t('%LL') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
-                    <GroupCategoryRow :category="category" :periods="patchedPeriods" :period="period" :organization="organization" @patch:periods="addPeriodsArrayPatch" />
+                    <GroupCategoryRow :category="category" :periods="patchedPeriods" :period="patchedPeriod" :organization="organization" @patch:periods="addPeriodsArrayPatch" />
                 </template>
             </STList>
         </template>
@@ -250,7 +250,7 @@ const createGroupView = useCreateGroupView((patch: AutoEncoderPatchType<Organiza
 });
 
 async function createGroup() {
-    await createGroupView(props.period, props.category);
+    await createGroupView(patchedPeriod.value, patchedCategory.value);
 }
 
 const createCategoryView = useCreateCategoryView((patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
@@ -258,11 +258,11 @@ const createCategoryView = useCreateCategoryView((patch: PatchableArrayAutoEncod
 });
 
 async function createCategory() {
-    await createCategoryView(props.period, props.category, props.periods);
+    await createCategoryView(patchedPeriod.value, patchedCategory.value, props.periods);
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(groups.value.length ? 'Ben je zeker dat je deze categorie en groepen wilt verwijderen?' : 'Ben je zeker dat je deze categorie wilt verwijderen?', 'Verwijderen')) {
+    if (!await CenteredMessage.confirm(groups.value.length ? $t('Ben je zeker dat je deze categorie en groepen wilt verwijderen?') : $t('Ben je zeker dat je deze categorie wilt verwijderen?'), $t('Verwijderen'))) {
         return;
     }
     const settings = OrganizationRegistrationPeriodSettings.patch({});

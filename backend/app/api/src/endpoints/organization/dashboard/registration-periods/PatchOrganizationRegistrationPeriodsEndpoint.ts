@@ -565,29 +565,16 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             if (patch.waitingList === null) {
                 // delete
                 if (model.waitingListId) {
-                    // for now don't delete, as waiting lists can be shared between multiple groups
-                    // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
                     model.waitingListId = null;
                 }
             } else if (patch.waitingList.isPatch()) {
-                if (!model.waitingListId) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        field: 'waitingList',
-                        message: 'Cannot patch waiting list before it is created',
-                    });
-                }
-                patch.waitingList.id = model.waitingListId;
-                patch.waitingList.type = GroupType.WaitingList;
-                await throwIfUpdateWaitingListPeriodWithMultipleGroups(patch.waitingList.id);
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period, {
-                    allowPatchWaitingListPeriod: shouldUpdatePeriodIds,
-                    isPatchingEvent,
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    field: 'waitingList',
+                    message: 'Cannot patch waitingList',
                 });
             } else {
                 if (model.waitingListId) {
-                    // for now don't delete, as waiting lists can be shared between multiple groups
-                    // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
                     model.waitingListId = null;
                 }
                 patch.waitingList.type = GroupType.WaitingList;
@@ -613,29 +600,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
                     model.waitingListId = existing.id;
                 } else {
-                    const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId);
-
-                    if (!requiredPeriod) {
-                        throw new Error('Unexpected missing period when creating waiting list');
-                    }
-
-                    if (STAMHOOFD.userMode === 'organization' && requiredPeriod.organizationId !== model.organizationId) {
-                        throw new SimpleError({
-                            code: 'invalid_period',
-                            message: 'Period has different organization id',
-                            statusCode: 400,
-                        });
-                    }
-
-                    const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
-                        patch.waitingList,
-                        model.organizationId,
-                        requiredPeriod,
-                        {
-                            allowedIds: [patch.waitingList.id],
-                        },
-                    );
-                    model.waitingListId = group.id;
+                    throw new SimpleError({
+                        code: 'invalid_waiting_list',
+                        field: 'waitingList',
+                        message: 'Waiting list not found',
+                        human: $t('De wachtlijst die je wilt koppelen bestaat niet (meer)'),
+                        statusCode: 404,
+                    });
                 }
             }
         } else if (shouldUpdatePeriodIds && model.waitingListId && period) {
@@ -761,16 +732,24 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     });
                 }
 
+                if (existing.periodId !== model.periodId) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'waitingList',
+                        message: 'Waiting list group is already used in another period',
+                        human: $t(`%F9`),
+                    });
+                }
+
                 model.waitingListId = existing.id;
             } else {
-                struct.waitingList.type = GroupType.WaitingList;
-                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
-                    struct.waitingList,
-                    model.organizationId,
-                    period,
-                    { allowedIds: [struct.waitingList.id] },
-                );
-                model.waitingListId = group.id;
+                throw new SimpleError({
+                    code: 'invalid_waiting_list',
+                    field: 'waitingList',
+                    message: 'Waiting list not found',
+                    human: $t('De wachtlijst die je wilt koppelen bestaat niet (meer)'),
+                    statusCode: 404,
+                });
             }
         }
 
