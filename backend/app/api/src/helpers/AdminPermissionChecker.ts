@@ -702,12 +702,6 @@ export class AdminPermissionChecker {
 
         if (this.user.permissions) {
             // We grant permission for a whole payment when the user has at least permission for a part of that payment.
-            for (const registration of registrations) {
-                if (await this.canAccessRegistration(registration, permissionLevel)) {
-                    return true;
-                }
-            }
-
             const webshopCache: Map<string, Webshop> = new Map();
 
             for (const order of orders) {
@@ -718,6 +712,23 @@ export class AdminPermissionChecker {
                     if (await this.canAccessWebshop(webshop, permissionLevel)) {
                         return true;
                     }
+                }
+            }
+
+            for (const registration of registrations) {
+                if (await this.canAccessRegistration(registration, permissionLevel)) {
+                    return true;
+                }
+            }
+
+            const seenMemberIds = new Set<string>();
+
+            for (const balanceItem of balanceItems) {
+                if (!balanceItem.memberId || seenMemberIds.has(balanceItem.memberId)) continue;
+                seenMemberIds.add(balanceItem.memberId);
+                const member = await Member.getByIdWithUsersAndRegistrations(balanceItem.memberId);
+                if (member && await this.hasFinancialMemberAccess(member, permissionLevel)) {
+                    return true;
                 }
             }
         }

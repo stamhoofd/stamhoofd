@@ -3,7 +3,7 @@
         <div v-if="detailedItem" class="container">
             <template v-if="detailedItem.filteredBalanceItems.length">
                 <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['grouped', 'individual']" :labels="[$t(`%10j`), $t(`%10i`)]" />
-                <ReceivableBalanceList v-if="selectedTab === 'individual'" :item="detailedItem" />
+                <ReceivableBalanceList v-if="selectedTab === 'individual'" :item="detailedItem" :has-write="hasWrite" />
                 <GroupedBalanceList v-else :item="detailedItem" />
                 <BalancePriceBreakdown :item="detailedItem" />
             </template>
@@ -151,7 +151,6 @@ import { Toast } from '#overlays/Toast.ts';
 import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 
-
 import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
@@ -159,12 +158,13 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BaseOrganization, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
-import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 import EmailAddress from '../email/EmailAddress.vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
+import { useAuth } from '#hooks/useAuth.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -184,7 +184,8 @@ const detailedItem = ref(null) as Ref<null | DetailedReceivableBalance>;
 const context = useContext();
 const selectedTab = ref(props.hideSegmentedControl ? 'individual' : 'grouped') as Ref<'grouped' | 'individual'>;
 const owner = useRequestOwner();
-const hasWrite = true;
+const auth = useAuth();
+const hasWrite = auth.hasAccessRight(AccessRight.MemberWriteFinancialData);
 const present = usePresent();
 const loadFamily = useLoadFamily();
 
@@ -216,8 +217,7 @@ async function reload() {
             if (detailedItem.value.filteredBalanceItems.length <= 4) {
                 selectedTab.value = 'individual';
             }
-        }
-        else {
+        } else {
             const lastPayment = detailedItem.value.payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))[0];
             detailedItem.value.deepSet(response.data);
             const newLastPayment = detailedItem.value.payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))[0];
@@ -234,8 +234,7 @@ async function reload() {
         if (response.data.id === props.item.id) {
             props.item.deepSet(response.data);
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

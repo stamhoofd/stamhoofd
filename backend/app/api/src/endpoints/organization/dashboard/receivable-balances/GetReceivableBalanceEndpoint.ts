@@ -2,6 +2,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { DetailedReceivableBalance, PaymentStatus, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
 
+import type { MemberWithUsersAndRegistrations } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, CachedBalance, Member, MemberUser, Payment, Registration } from '@stamhoofd/models';
 import { Context } from '../../../../helpers/Context.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
@@ -36,20 +37,18 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         await Context.authenticate();
 
         if (!await Context.auth.canManageFinances(organization.id)) {
-            // Group-level financial access is sufficient for member and registration balance views
-            if (request.params.type === ReceivableBalanceType.member) {
-                const member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
-                if (!member || !await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, organization.id)) {
-                    throw Context.auth.error();
-                }
-            } else if (request.params.type === ReceivableBalanceType.registration) {
+            let member: MemberWithUsersAndRegistrations | null = null;
+            if (request.params.type === ReceivableBalanceType.registration) {
                 const registration = await Registration.select().where('id', request.params.id).first(false);
                 if (!registration) throw Context.auth.error();
-                const member = await Member.getByIdWithUsersAndRegistrations(registration.memberId);
+                member = await Member.getByIdWithUsersAndRegistrations(registration.memberId);
+            } else if (request.params.type === ReceivableBalanceType.member) {
+                member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
                 if (!member || !await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, organization.id)) {
                     throw Context.auth.error();
                 }
-            } else {
+            }
+            if (!member || !await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, organization.id)) {
                 throw Context.auth.error();
             }
         }
