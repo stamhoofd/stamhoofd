@@ -2,7 +2,7 @@
     <template v-if="paymentStatus === null">
         <p v-if="item.status === BalanceItemStatus.Canceled && (price === null || price < 0)" class="style-title-prefix-list error">
             <span>{{ $t('%gg') }}</span>
-            <span class="icon disabled small" />
+            <span class="icon disabled tiny" />
         </p>
         <p v-else-if="item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0" class="style-title-prefix-list">
             <span>{{ $t('%gh') }}</span>
