@@ -85,7 +85,7 @@
                 <p class="style-description-small">
                     {{ $t('Deelnemers hoeven geen actieve inschrijving te hebben om zich in te schrijven voor deze activiteit.') }}
                 </p>
-                <p v-if="allowNonMembers && organization?.meta.blockRegisteringNewMembers" class="error-box">
+                <p v-if="allowNonMembers && organization?.meta.blockRegisteringNewMembers" class="warning-box">
                     {{ $t('Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.') }}
                 </p>
             </STListItem>

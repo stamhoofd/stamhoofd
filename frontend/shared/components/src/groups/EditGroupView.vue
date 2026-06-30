@@ -140,7 +140,7 @@
 
                 <p>{{ $t('%cQ') }}</p>
 
-                <p v-if="blockRegisteringNewMembers" class="error-box">
+                <p v-if="blockRegisteringNewMembers" class="warning-box">
                     {{ $t('Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.') }}
                 </p>
 
