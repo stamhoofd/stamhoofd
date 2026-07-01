@@ -31,10 +31,7 @@
                         'name-period-new': period.name
                     })"
                 />
-                <p v-else>
-                    {{ $t('%17q') }}
-                </p>
-
+                <p v-else class="pre-wrap style-description-block" v-text="$t('%17q')" />
                 <hr v-if="rows.length > 0 && fromPeriod">
 
                 <STGrid v-if="rows.length > 0 && fromPeriod" class="split">
