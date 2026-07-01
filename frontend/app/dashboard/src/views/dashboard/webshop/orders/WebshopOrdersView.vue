@@ -8,7 +8,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
-        :default-sort-column="allColumns.find(c => c.id === 'number')"
+        :default-sort-column="preview.privateMeta.numberingType === WebshopNumberingType.Random ? allColumns.find(c => c.id === 'validAt') : allColumns.find(c => c.id === 'number')"
         :default-sort-direction="SortItemDirection.DESC"
         @click="$event => openOrder($event)"
     >
@@ -30,7 +30,7 @@ import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableA
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
-import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -48,7 +48,6 @@ import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
 const title = $t('%1JX');
-const configurationId = 'WebshopOrdersRepo';
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
@@ -65,6 +64,7 @@ const requestOwner = useRequestOwner();
 const preview = computed(() => props.webshopManager.preview);
 const hasSingleTickets = computed(() => preview.value.hasSingleTickets);
 const hasTickets = computed(() => preview.value.hasTickets);
+const configurationId = 'WebshopOrdersRepo-' + preview.value.privateMeta.numberingType;
 
 const actions = computed(() => {
     const builder = new OrderActionBuilder({
