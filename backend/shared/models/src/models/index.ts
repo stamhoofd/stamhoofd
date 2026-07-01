@@ -7,6 +7,12 @@ export { User } from './User.js';
 
 export * from './EmailVerificationCode.js';
 
+export * from './MFAToken.js';
+export * from './MFATOTP.js';
+export * from './MFARecoveryCode.js';
+export * from './WebauthnCredential.js';
+export * from './WebauthnChallenge.js';
+
 export { BalanceItem } from './BalanceItem.js';
 export { BalanceItemPayment } from './BalanceItemPayment.js';
 export * from './BuckarooPayment.js';

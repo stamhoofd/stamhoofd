@@ -1,31 +1,31 @@
 <template>
-    <div class="code-input">
-        <div :class="{small: codeLength > 6}" data-testId="code-input">
-            <!-- Name incluses 'search' to disable safari autocomplete, who tries to autocomplete an email in a number input?! -->
-            <template v-for="index in codeLength" :key="index">
-                <input
-                    ref="numberInput"
-                    :inputmode="numbersOnly ? 'numeric' : undefined"
-                    class="input"
-                    :class="{small: codeLength > 6}"
-                    autocomplete="one-time-code"
-                    :name="'search-code_'+index"
-                    @input="onInput(index - 1)"
-                    @click="selectNext(index - 1)"
-                    @keyup.delete="clearInput(index - 1)"
-                    @keyup.left="selectNext(index - 2)"
-                    @keyup.right="selectNext(index)"
-                    @change="updateValue"
-                >
-                <span v-if="index%spaceLength === 0 && index !== codeLength" class="bump">-</span>
-                <span v-if="index%(spaceLength*2) === 0 && index !== codeLength" class="break" />
-            </template>
+    <div class="code-input input" data-testid="code-input">
+        <!--
+                We use type = text because we need the raw string value for the mask logic.
+                Name includes 'search' to disable Safari autocomplete, who tries to autocomplete an email in a code input?!
+            -->
+        <input
+            ref="inputElement"
+            v-model="text"
+            v-format-input="inputFormatter"
+            type="text"
+            :inputmode="numbersOnly ? 'numeric' : undefined"
+            :pattern="numbersOnly ? '[0-9]*' : undefined"
+            autocomplete="one-time-code"
+            spellcheck="false"
+            name="one-time-code"
+            @input="onInput"
+        >
+        <div aria-hidden="true">
+            <span class="filled">{{ text }}</span>
+            <span v-for="(key, index) of suffix" :key="index" class="suffix" :class="key == '-' ? 'separator' : ''">{{ key }}</span>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const model = defineModel<string>({ default: '' });
 
@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<{
     numbersOnly?: boolean;
 }>(), {
     codeLength: 6,
-    spaceLength: 3,
+    spaceLength: 6,
     numbersOnly: true,
 });
 
@@ -43,203 +43,125 @@ const emit = defineEmits<{
     (e: 'complete'): void;
 }>();
 
-const numberInput = ref<HTMLInputElement[]>([]);
+const inputElement = useTemplateRef<HTMLInputElement>('inputElement');
 
-function hasInputs() {
-    return Array.isArray(numberInput.value) && numberInput.value.length > 0;
+function clean(value: string): string {
+    const cleaned = props.numbersOnly ? value.replace(/\D+/g, '') : value.toLocaleUpperCase().replace(/[^0-9A-Z]+/g, '');
+    return cleaned.substring(0, props.codeLength);
 }
 
-watch(model, (value, oldValue) => {
-    if (value === oldValue) {
-        return;
+const pattern = computed(() => {
+    const spaceLength = Math.max(1, props.spaceLength);
+    const parts: (string | { length: number })[] = [];
+    for (let i = 0; i < props.codeLength; i += spaceLength) {
+        if (i > 0) {
+            parts.push(' ');
+        }
+        parts.push({ length: Math.min(spaceLength, props.codeLength - i) });
     }
-    if (value === getInternalValue()) {
-        return;
-    }
-    if (!hasInputs()) {
-        return;
-    }
-    for (let index = 0; index < props.codeLength; index++) {
-        const element = numberInput.value[index];
+    return parts;
+});
 
-        if (index < value.length) {
-            const letter = value[index];
-            element.value = letter;
-        }
-        else {
-            element.value = '';
-        }
+function format(cleanedValue: string): string {
+    return Formatter.injectPattern(cleanedValue, pattern.value);
+}
+
+const inputFormatter = computed(() => ({ cleaner: clean, formatter: format }));
+
+const text = ref(format(clean(model.value)));
+const mask = computed(() => format('_'.repeat(props.codeLength)));
+const suffix = computed(() => mask.value.substring(text.value.length));
+
+watch(model, (value) => {
+    const cleaned = clean(value);
+    if (cleaned === clean(text.value)) {
+        return;
     }
+    text.value = format(cleaned);
 });
 
 onMounted(() => {
     setTimeout(() => {
-        selectNext(0);
+        inputElement.value?.focus();
     }, 300);
 });
 
-function onInput(index: number) {
-    if (!hasInputs()) {
-        return;
-    }
-
-    const input = numberInput.value[index];
-    input.value = props.numbersOnly ? input.value.replace(/\D/g, '') : input.value.toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
-    if (input.value.length >= 1) {
-        // Sometimes the input element might be delayed (on CI, so only focus the next if the current input is still focused)
-        selectNext(index + 1, document.activeElement === input);
-    }
+function onInput(event: Event) {
+    // The format directive already reformatted the value, but the v-model listener order is not guaranteed: sync manually before deriving the model value
+    text.value = (event.currentTarget as HTMLInputElement).value;
+    updateModelValue();
 }
 
-function clearInput(index: number, select = true) {
-    if (!hasInputs()) {
+function updateModelValue() {
+    const cleaned = clean(text.value);
+    if (cleaned === model.value) {
         return;
     }
+    model.value = cleaned;
 
-    // Move everything one to the left
-    const input = numberInput.value[index];
-    if (input.value.length === 0 && index < props.codeLength - 1) {
-        input.value = numberInput.value[index + 1].value;
-        numberInput.value[index + 1].value = '';
-        clearInput(index + 1, false);
+    if (cleaned.length === props.codeLength) {
+        inputElement.value?.blur();
+        emit('complete');
     }
-
-    if (select) {
-        if (index > 0) {
-            selectNext(index - 1);
-        }
-        else {
-            // reselect
-            selectNext(index);
-        }
-        updateValue();
-    }
-}
-
-function selectNext(index: number, focus = true) {
-    if (index < 0) {
-        return;
-    }
-
-    if (!hasInputs()) {
-        return;
-    }
-
-    console.log('select next ', index);
-    if (index >= props.codeLength) {
-        const prev = numberInput.value[index - 1];
-        const val = prev.value;
-        if (val.length > 1) {
-            prev.value = val.substr(0, 1);
-        }
-        for (let i = 0; i < props.codeLength; i++) {
-            const element = numberInput.value[i];
-            element.blur();
-        }
-        updateValue();
-
-        if (getInternalValue().length === props.codeLength) {
-            emit('complete');
-        }
-        return;
-    }
-    if (index >= 1) {
-        const prev = numberInput.value[index - 1];
-        const val = prev.value;
-        if (val.length > 1) {
-            prev.value = val.substr(0, 1);
-            numberInput.value[index].value = val.substr(1);
-            selectNext(index + 1);
-            return;
-        }
-    }
-    if (!numberInput.value[index]) {
-        console.warn('CodeInput: No input found for index', index);
-        return;
-    }
-
-    if (focus) {
-        numberInput.value[index].focus();
-
-        if (numberInput.value[index].value.length > 0) {
-            // iOS fix
-            numberInput.value[index].select();
-        }
-    }
-    updateValue();
-}
-
-function getInternalValue() {
-    if (!hasInputs()) {
-        return '';
-    }
-
-    let val = '';
-    for (let index = 0; index < props.codeLength; index++) {
-        const element = numberInput.value[index];
-        const letter = element.value.substr(0, 1).toUpperCase();
-        val += letter;
-        if (letter.length === 0) {
-            break;
-        }
-    }
-    return val;
-}
-
-function updateValue() {
-    model.value = getInternalValue();
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .code-input {
-    -webkit-touch-callout: none !important;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    //width: auto;
+    height: $input-height;
+    font-family: monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.3em;
 
-    > div {
-        display: inline-flex;
-        flex-direction: row;
+    // Clear any padding: the overlay div and input define their own
+    padding: 0 !important;
 
-        .input {
-            margin: 0 2px;
-            max-width: 32px;
-            padding-left: 0;
-            padding-right: 0;
-            text-align: center;
-            font-size: 20px;
-            caret-color: transparent;
-            text-transform: uppercase;
-            -webkit-touch-callout: none !important;
-        }
+    > input {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 15px;
+        height: calc(#{$input-height} - 2 * #{$border-width});
+        line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
 
-        .bump {
-            width: 15px;
-            align-self: center;
-            text-align: center;
-            font-size: 20px;
-            line-height: 1;
-            font-weight: $font-weight-default;
-            color: $color-gray-text;
-        }
+        &:focus {
+            opacity: 1;
 
-        &.small {
-            flex-wrap: wrap;
-            row-gap: 5px;
-
-            @media (max-width: 600px) {
-                .break {
-                    width: auto;
-                    flex-basis: 100%;
-                    opacity: 0;
-                    height: 0;
-                }
+            & + div > .filled {
+                visibility: hidden;
             }
         }
+    }
 
+    > div {
+        pointer-events: none;
+        user-select: none;
+        padding: 5px 15px;
+        white-space: nowrap;
+        white-space: preserve nowrap;
+        display: flex;
+
+        > .suffix {
+            color: $color-gray-5;
+            opacity: 0.4;
+            display: block;
+
+            &.separator {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     }
 }
-
 </style>

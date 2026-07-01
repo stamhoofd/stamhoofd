@@ -6,6 +6,7 @@ import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
 import { Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { BalanceItemService } from '../../services/BalanceItemService.js';
 
 type Params = Record<string, never>;
@@ -104,6 +105,10 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
             throw e;
         }
+
+        // Verifying an email is a single primary credential: if this user already has a
+        // second factor (or must enroll one), don't hand out a session without it.
+        await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion());
 
         const token = await Token.createToken(user);
         const st = new TokenStruct(token);

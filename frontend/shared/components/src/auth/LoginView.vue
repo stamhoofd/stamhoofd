@@ -72,7 +72,8 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { computed, ref } from 'vue';
@@ -90,6 +91,7 @@ import EmailInput from '../inputs/EmailInput.vue';
 
 import LoginMethodButton from './LoginMethodButton.vue';
 import PlatformFooter from './PlatformFooter.vue';
+import { useForgotPassword } from './useForgotPassword.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -106,17 +108,7 @@ enum Routes {
     Signup = 'signup',
 }
 
-defineRoutes([
-    {
-        name: Routes.ForgotPassword,
-        url: 'wachtwoord-vergeten',
-        component: async () => (await import('./ForgotPasswordView.vue')).default,
-        defaultProperties() {
-            return {
-                initialEmail: email.value,
-            };
-        },
-    },
+defineRoute(
     {
         name: Routes.Signup,
         url: 'account-aanmaken',
@@ -127,19 +119,18 @@ defineRoutes([
             };
         },
     },
-]);
+);
 
 const errors = useErrors();
 const $context = useContext();
 const dismiss = useDismiss();
+const present = usePresent();
 const $navigate = useNavigate();
 const appNavigate = useAppNavigate();
 
 const loading = ref(false);
 const email = ref(props.initialEmail);
 const password = ref('');
-const animating = ref(true);
-const emailInput = ref<InstanceType<typeof EmailInput> | null>(null);
 const showVersionFooter = computed(() => {
     return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev';
 });
@@ -148,6 +139,7 @@ const context = useContext();
 const passwordConfig = useLoginMethod(LoginMethod.Password);
 const ssoConfig = useLoginMethod(LoginMethod.SSO);
 const googleConfig = useLoginMethod(LoginMethod.Google);
+const { gotoPasswordForgot } = useForgotPassword({ email });
 
 onCheckRoutes(() => {
     // Try to log in on first load
@@ -247,6 +239,37 @@ async function submit() {
                     organization: $context.value.organization,
                 },
             });
+        } else if (result.mfaChallenge) {
+            // Password was correct, but a second factor is required.
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: AsyncComponent(() => import('./ChooseMFAMethodView.vue'), {
+                            mfaChallenge: result.mfaChallenge,
+                            onCompleted: async () => {
+                                // The session now has a fresh token: close the login flow.
+                                await dismiss({ force: true });
+                            },
+                        }),
+                    }),
+                ],
+                modalDisplayStyle: 'sheet',
+            });
+        } else if (result.mfaSetupToken) {
+            // Password was correct, but the user must enroll a second factor first.
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: AsyncComponent(() => import('./SetupMFAView.vue'), {
+                            setupToken: result.mfaSetupToken,
+                            onCompleted: async () => {
+                                await dismiss({ force: true });
+                            },
+                        }),
+                    }),
+                ],
+                modalDisplayStyle: 'sheet',
+            });
         } else {
             await dismiss({ force: true });
         }
@@ -254,10 +277,6 @@ async function submit() {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
-}
-
-async function gotoPasswordForgot() {
-    await $navigate(Routes.ForgotPassword);
 }
 
 async function openSignup() {

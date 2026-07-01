@@ -42,7 +42,7 @@
             <STList>
                 <STListItem v-if="hasLanguages" :selectable="true" @click.prevent="switchLanguage">
                     <template #left>
-                        <span class="icon language" />
+                        <IconContainer icon="translate" aside-icon="arrow-down reverse" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -59,7 +59,7 @@
 
                 <STListItem v-if="passwordEnabled" :selectable="true" @click.prevent="openChangePassword">
                     <template #left>
-                        <span class="icon key" />
+                        <IconContainer icon="key" aside-icon="retry" />
                     </template>
 
                     <h3 v-if="usesPassword" class="style-title-list">
@@ -68,6 +68,20 @@
                     <h3 v-else class="style-title-list">
                         {{ $t('%jl') }}
                     </h3>
+                </STListItem>
+
+                <STListItem v-if="passwordEnabled" :selectable="true" data-testid="open-mfa-settings" @click.prevent="openMFASettings">
+                    <template #left>
+                        <IconContainer icon="privacy" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ $t('Tweestapsverificatie') }}
+                    </h3>
+
+                    <template #right>
+                        <span class="icon arrow-right-small" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="!usesGoogle && googleEnabled" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
@@ -85,7 +99,7 @@
 
                 <STListItem v-if="ssoEnabled && !usesSSO" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
                     <template #left>
-                        <span class="icon lock" />
+                        <IconContainer icon="lock" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -95,7 +109,7 @@
 
                 <STListItem :selectable="true" @click.prevent="logout">
                     <template #left>
-                        <span class="icon logout" />
+                        <IconContainer icon="logout" class="error" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -106,11 +120,11 @@
                 <STListItem :selectable="true" @click.prevent="deleteRequest">
                     <template #left>
                         <LoadingButton>
-                            <span class="icon trash red" />
+                            <IconContainer icon="trash" class="error" />
                         </LoadingButton>
                     </template>
 
-                    <h3 class="style-title-list red">
+                    <h3 class="style-title-list">
                         {{ $t('%jp') }}
                     </h3>
                 </STListItem>
@@ -226,6 +240,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useAppNavigate } from '../hooks/useAppNavigate.ts';
 
 import { useSwitchLanguage } from './hooks/useSwitchLanguage';
+import IconContainer from '#icons/IconContainer.vue';
 
 const $context = useContext();
 const $platform = usePlatform();
@@ -367,6 +382,10 @@ async function deleteRequest() {
 
 async function openChangePassword() {
     await present(AsyncComponent(() => import('#views/ChangePasswordView.vue'), {}).setDisplayStyle('sheet'));
+}
+
+async function openMFASettings() {
+    await present(AsyncComponent(() => import('#auth/MFASettingsView.vue'), {}).setDisplayStyle('sheet'));
 }
 
 let disconnecting = false;

@@ -1,13 +1,17 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { startAuthentication } from '@simplewebauthn/browser';
+import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
+import type { AutoEncoderPatchType, Decoder, EncodableObject } from '@simonbackx/simple-encoding';
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
-import type { Organization} from '@stamhoofd/structures';
-import { CreateOrganization, CreateOrganizationResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
+import { CreateOrganization, CreateOrganizationResponse, MFAChallengeResponse, MFAMethodType, MFASetupResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
-import type {SessionContext} from './SessionContext';
+import type { SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
+
+export type LoginResult = { verificationToken?: string; mfaChallenge?: MFAChallengeResponse; mfaSetupToken?: string };
 
 export class LoginHelper {
     /**
@@ -77,12 +81,10 @@ export class LoginHelper {
                 session.preventComplete = true;
                 await session.setToken(response.data);
                 await SessionManager.prepareSessionForUsage(session, false);
-            }
-            finally {
+            } finally {
                 session.preventComplete = false;
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 if (e.hasCode('invalid_code')) {
                     // Check if we are now logged in (link might have been opened in a new tab)
@@ -102,7 +104,7 @@ export class LoginHelper {
         session: SessionContext,
         email: string,
         password: string,
-    ): Promise<{ verificationToken?: string }> {
+    ): Promise<LoginResult> {
         let tokenResponse: RequestResult<Token>;
         try {
             session.setLoadingError(null);
@@ -113,8 +115,7 @@ export class LoginHelper {
                 decoder: Token as Decoder<Token>,
                 shouldRetry: false,
             });
-        }
-        catch (e) {
+        } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
                 const error = e.getCode('verify_email');
                 if (error) {
@@ -124,22 +125,103 @@ export class LoginHelper {
                         verificationToken: meta.token,
                     };
                 }
+
+                // Password was correct, but a second factor is required.
+                const mfaError = e.getCode('require_mfa');
+                if (mfaError) {
+                    return {
+                        mfaChallenge: MFAChallengeResponse.decode(new ObjectData(mfaError.meta, { version: Version })),
+                    };
+                }
+
+                // Password was correct, but the user must first enroll a second factor.
+                const setupError = e.getCode('require_mfa_setup');
+                if (setupError) {
+                    return {
+                        mfaSetupToken: MFASetupResponse.decode(new ObjectData(setupError.meta, { version: Version })).setupToken,
+                    };
+                }
             }
             throw e;
         }
 
-        session.preventComplete = true;
+        await this.applyToken(session, tokenResponse.data);
+        return {};
+    }
+
+    /**
+     * Apply a freshly obtained token to the session and prepare it for usage.
+     */
+    private static async applyToken(session: SessionContext, token: Token): Promise<void> {
+        if (!session.isComplete()) {
+            // Only start loading until finished if we are not displaying a logged in user yet
+            // otherwise we lose the current state of the app / navigation
+            session.preventComplete = true;
+        }
         try {
-            await session.setToken(tokenResponse.data);
+            await session.setToken(token);
             await SessionManager.prepareSessionForUsage(session);
+        } finally {
             session.preventComplete = false;
         }
-        catch (e) {
-            session.preventComplete = false;
-            throw e;
+    }
+
+    /**
+     * Post an `mfa` grant to complete a login that requires a second factor.
+     */
+    private static async postMfaGrant(session: SessionContext, body: EncodableObject): Promise<void> {
+        const response = await session.identityServer.request({
+            method: 'POST',
+            path: '/oauth/token',
+            body,
+            decoder: Token as Decoder<Token>,
+            shouldRetry: false,
+        });
+        await this.applyToken(session, response.data);
+    }
+
+    static async verifyMfaTotp(session: SessionContext, mfaToken: string, code: string): Promise<void> {
+        await this.postMfaGrant(session, { grant_type: 'mfa', mfa_token: mfaToken, method: MFAMethodType.TOTP, code });
+    }
+
+    static async verifyMfaRecoveryCode(session: SessionContext, mfaToken: string, code: string): Promise<void> {
+        await this.postMfaGrant(session, { grant_type: 'mfa', mfa_token: mfaToken, method: MFAMethodType.RecoveryCode, code });
+    }
+
+    static async verifyMfaPasskey(session: SessionContext, mfaToken: string, webauthnAuthenticationOptions: unknown): Promise<boolean> {
+        // These options are opaque JSON generated by our own server (@simplewebauthn) and
+        // handed straight to the browser API, so we assert the concrete type here.
+        let a: Awaited<ReturnType<typeof startAuthentication>>;
+        try {
+            a = await startAuthentication({ optionsJSON: webauthnAuthenticationOptions as PublicKeyCredentialRequestOptionsJSON });
+        } catch (error) {
+            if (
+                error instanceof Error
+                && error.name === 'NotAllowedError'
+            ) {
+                // Cancellation, timeout, denied interaction, invalid context, etc.
+                return false;
+            }
+            throw error;
         }
 
-        return {};
+        await this.postMfaGrant(session, {
+            grant_type: 'mfa',
+            mfa_token: mfaToken,
+            method: MFAMethodType.Passkey,
+            assertion: {
+                id: a.id,
+                rawId: a.rawId,
+                type: a.type,
+                response: {
+                    clientDataJSON: a.response.clientDataJSON,
+                    authenticatorData: a.response.authenticatorData,
+                    signature: a.response.signature,
+                    userHandle: a.response.userHandle ?? null,
+                },
+            },
+        });
+        return true;
     }
 
     static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null): Promise<string> {
@@ -163,7 +245,7 @@ export class LoginHelper {
             decoder: CreateOrganizationResponse as Decoder<CreateOrganizationResponse>,
         });
         organization.id = response.data.organization.id;
-        organization.deepSet(response.data.organization)
+        organization.deepSet(response.data.organization);
 
         return response.data.token;
     }
@@ -190,8 +272,7 @@ export class LoginHelper {
                 decoder: User,
                 shouldRetry: false,
             });
-        }
-        catch (e) {
+        } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
                 const error = e.getCode('verify_email');
                 if (error) {

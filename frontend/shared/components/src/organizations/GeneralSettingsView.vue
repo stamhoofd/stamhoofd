@@ -57,6 +57,22 @@
             </button>
         </p>
 
+        <hr><h2>{{ $t('Beveiliging') }}</h2>
+
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="requireTwoFactor" data-testid="require-two-factor" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Tweestapsverificatie verplichten') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Beheerders van deze organisatie moeten tweestapsverificatie instellen om aan te melden.') }}
+                </p>
+            </STListItem>
+        </STList>
+
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
         </div>
@@ -145,6 +161,15 @@ const website = computed({
     set: (website) => {
         addPatch({
             website,
+        });
+    },
+});
+
+const requireTwoFactor = computed({
+    get: () => patched.value.privateMeta?.requireTwoFactor ?? false,
+    set: (requireTwoFactor) => {
+        addPatch({
+            privateMeta: OrganizationPrivateMetaData.patch({ requireTwoFactor }),
         });
     },
 });
