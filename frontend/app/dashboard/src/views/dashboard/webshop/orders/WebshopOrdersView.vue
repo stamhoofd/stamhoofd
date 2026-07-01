@@ -8,6 +8,8 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
+        :default-sort-column="allColumns.find(c => c.id === 'number')"
+        :default-sort-direction="SortItemDirection.DESC"
         @click="$event => openOrder($event)"
     >
         <template #empty>
@@ -28,7 +30,7 @@ import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableA
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
-import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -103,8 +105,7 @@ const actions = computed(() => {
                 if (await props.webshopManager.reload()) {
                     objectFetcher.reset();
                     tableObjectFetcher.reset(true, true);
-                }
-                else {
+                } else {
                     Toast.fromError(new Error($t('%1M7'))).show();
                 }
             },
@@ -553,8 +554,7 @@ function openOrder(order: PrivateOrder) {
 
     if (isMobile) {
         show(component).catch(console.error);
-    }
-    else {
+    } else {
         component.modalDisplayStyle = 'popup';
         present(component).catch(console.error);
     }
