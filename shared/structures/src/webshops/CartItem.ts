@@ -126,7 +126,7 @@ export class CartItem extends AutoEncoder {
             const seatPrice = unitPrice + seat.price;
 
             prices.push(CartItemPrice.create({
-                price: seatPrice,
+                price: seatPrice * 100,
             }));
         }
 
@@ -135,7 +135,7 @@ export class CartItem extends AutoEncoder {
         if (remaining > 0) {
             for (let index = 0; index < remaining; index++) {
                 prices.push(CartItemPrice.create({
-                    price: unitPrice,
+                    price: unitPrice * 100,
                 }));
             }
         }
