@@ -145,7 +145,7 @@ import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/h
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import type { Group, GroupCategoryTree, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
 import { GroupStatus, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, shallowRef } from 'vue';
 
 const props = defineProps<{
     period: RegistrationPeriod;
@@ -159,7 +159,7 @@ type Row
 const loading = ref(false);
 const organization = useRequiredOrganization();
 
-const fromPeriod = ref<OrganizationRegistrationPeriod | null>(organization.value.period);
+const fromPeriod = shallowRef<OrganizationRegistrationPeriod | null>(organization.value.period);
 if (props.period.startDate < organization.value.period.period.startDate) {
     fromPeriod.value = null;
 }
