@@ -74,6 +74,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
 
             let shouldCheckIfAlreadyHasFiscalDocument = false;
 
+            if (patch.isLocked !== undefined) {
+                template.isLocked = patch.isLocked;
+            }
+
             if (patch.privateSettings) {
                 const patchType = patch.privateSettings.templateDefinition?.type;
 

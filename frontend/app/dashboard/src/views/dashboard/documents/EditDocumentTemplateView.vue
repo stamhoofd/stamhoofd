@@ -54,7 +54,7 @@
             <p>{{ $t('%Ks') }}</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
-                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.group.id" :selectable="true" @click="updateGroupAnswers(group)">
+                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.group.id" :selectable="false">
                     <h2 class="style-list-title">
                         {{ group.group.name }}
                     </h2>
@@ -121,7 +121,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
@@ -152,7 +152,7 @@ import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { DocumentTemplateGroup, PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
 import { CountFilteredRequest, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -164,13 +164,18 @@ import { participation } from './definitions/participation';
 const props = withDefaults(defineProps<{
     isNew: boolean;
     document: DocumentTemplatePrivate;
+    initialPatch?: AutoEncoderPatchType<DocumentTemplatePrivate> | null;
     callback?: ((template: DocumentTemplatePrivate) => void) | null;
 }>(), {
     callback: null,
+    initialPatch: null,
 });
 
 const errors = useErrors();
 const { patch: patchDocument, patched: patchedDocument, addPatch, hasChanges } = usePatch(props.document);
+if (props.initialPatch) {
+    addPatch(props.initialPatch);
+}
 const saving = ref(false);
 const loadingHtml = ref(false);
 const loadingXml = ref(false);
@@ -411,8 +416,7 @@ watch(() => [year.value, editingType.value] as [number, string | null], async ([
     const yearError = await validateYearAsync(value);
     if (yearError) {
         errors.errorBox = new ErrorBox(yearError);
-    }
-    else {
+    } else {
         errors.errorBox = null;
     }
 });
@@ -468,8 +472,7 @@ function setLinkedFields(linkedField: RecordSettings, recordIds: string[]) {
     const linkedFields = new PatchMap<string, string[]>(patchedDocument.value.settings.linkedFields);
     if (recordIds) {
         linkedFields.set(linkedField.id, recordIds);
-    }
-    else {
+    } else {
         linkedFields.delete(linkedField.id);
     }
 
@@ -898,43 +901,9 @@ async function shouldNavigateAway() {
     return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
 }
 
-async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: NavigationActions, index: number) {
-    // Check already added this group
-    if (patchedDocument.value.privateSettings.groups.find(g => g.group.id === group.group.id)) {
-        throw new SimpleError({
-            code: 'already_added',
-            message: 'Deze inschrijvingen werden al toegevoegd',
-        });
-    }
-
-    if (index >= patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length) {
-        addPatch({
-            privateSettings: DocumentPrivateSettings.patch({
-                groups: patchedDocument.value.privateSettings.groups.concat(group),
-            }),
-        });
-        await actions.dismiss({ force: true }).catch(console.error);
-        return;
-    }
-    const category = patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories[index];
-    await actions.show({
-        components: [
-            AsyncComponent(() => import('@stamhoofd/components/records/FillRecordCategoryView.vue'), {
-                category,
-                value: group,
-                forceMarkReviewed: true,
-                saveHandler: (fieldAnswers: PatchAnswers, actions: NavigationActions) => {
-                    const g = group.patch({
-                        fieldAnswers,
-                    });
-                    gotoGroupRecordCategory(g, actions, index + 1).catch(console.error);
-                },
-            }),
-        ],
-    });
-}
-
 async function addGroup() {
+    const patchableArray = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplateGroup>;
+
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
@@ -942,7 +911,15 @@ async function addGroup() {
                     year: year.value,
                     documentType: editingType.value,
                     addGroup: async (group: DocumentTemplateGroup, actions: NavigationActions) => {
-                        await gotoGroupRecordCategory(group, actions, 0);
+                        patchableArray.addPut(group);
+
+                        addPatch({
+                            privateSettings: DocumentPrivateSettings.patch({
+                                groups: patchableArray,
+                            }),
+                        });
+
+                        await actions.dismiss({ force: true }).catch(console.error);
                     },
                 }),
             }),
@@ -951,58 +928,13 @@ async function addGroup() {
     });
 }
 
-function updateGroupAnswers(group: DocumentTemplateGroup) {
-    const c = gotoRecordCategory(group, 0);
-    if (!c) {
-        return;
-    }
-    return present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: c,
-            }),
-        ],
-        modalDisplayStyle: 'sheet',
-    });
-}
-
-function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
-    if (index >= patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length) {
-        const groups = patchedDocument.value.privateSettings.groups.filter(g => g.group.id !== group.group.id);
-        groups.push(group);
-
-        addPatch({
-            privateSettings: DocumentPrivateSettings.patch({
-                groups,
-            }),
-        });
-
-        return;
-    }
-
-    const category = patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories[index];
-    return AsyncComponent(() => import('@stamhoofd/components/records/FillRecordCategoryView.vue'), {
-        category,
-        forceMarkReviewed: true,
-        value: group,
-        saveHandler: (fieldAnswers: PatchAnswers, actions: NavigationActions) => {
-            const g = group.patch({
-                fieldAnswers,
-            });
-            const c = gotoRecordCategory(g, index + 1);
-            if (!c) {
-                actions.dismiss({ force: true }).catch(console.error);
-                return;
-            }
-            actions.show(c).catch(console.error);
-        },
-    });
-}
-
 function removeGroup(group: DocumentTemplateGroup) {
+    const patchableArray = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplateGroup>;
+    patchableArray.addDelete(group.id);
+
     addPatch({
         privateSettings: DocumentPrivateSettings.patch({
-            groups: patchedDocument.value.privateSettings.groups.filter(g => g !== group),
+            groups: patchableArray,
         }),
     });
 }
@@ -1046,8 +978,7 @@ async function save() {
 
         if (props.isNew) {
             patch.addPut(patchedDocument.value);
-        }
-        else {
+        } else {
             patchDocument.value.id = patchedDocument.value.id;
             patch.addPatch(patchDocument.value);
         }
@@ -1072,8 +1003,7 @@ async function save() {
         if (props.callback) {
             props.callback(props.document);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }

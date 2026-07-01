@@ -134,6 +134,9 @@ export class DocumentTemplateDefinition extends AutoEncoder {
 }
 
 export class DocumentTemplateGroup extends AutoEncoder implements ObjectWithRecords {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
     @field({ decoder: StringDecoder, field: 'groupId' })
     @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: $t(`%Gr`) }) })
     group: NamedObject;

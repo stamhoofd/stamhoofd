@@ -76,6 +76,22 @@
             <hr><h2>{{ $t('%16X') }}</h2>
 
             <STList>
+                <STListItem v-if="isLocked && template.privateSettings.templateDefinition.type !== 'fiscal'" :selectable="true" class="left-center" @click="migrateDocumentTemplateFromV1">
+                    <template #left>
+                        <IconContainer class="" icon="unlock" />
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Ontgrendelen') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t("Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd.") }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="!isDraft && !isLocked && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
                     <template #left>
                         <IconContainer class="" icon="government">
@@ -162,7 +178,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -177,8 +193,8 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { PatchAnswers } from '@stamhoofd/structures';
-import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate } from '@stamhoofd/structures';
+import type { PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
+import { DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCheckboxAnswer, RecordType } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
@@ -187,8 +203,8 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
-
 import { fiscal } from './definitions/fiscal';
+import { participation } from './definitions/participation.ts';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;
@@ -486,4 +502,178 @@ function gotoRecordCategory(index: number) {
 }
 
 const xmlExportDescription = computed(() => props.template.privateSettings.templateDefinition.xmlExportDescription);
+
+async function migrateDocumentTemplateFromV1() {
+    if (!await CenteredMessage.confirm({
+        title: $t('Controleer de instellingen'),
+        description: $t('Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document kan de layout van het document wijzigen.'),
+        confirmText: $t('Doorgaan'),
+    })) {
+        return;
+    }
+
+    const documentTemplate: DocumentTemplatePrivate = props.template;
+
+    const linkedFields = new PatchMap<string, string[]>(documentTemplate.settings.linkedFields);
+
+    for (const [linkedFieldId, recordIds] of documentTemplate.settings.linkedFields) {
+        if (linkedFieldId === 'member.nationalRegistryNumber' && recordIds.length > 0) {
+            linkedFields.set(linkedFieldId, ['member.nationalRegistryNumber', ...recordIds.filter(id => id !== 'member.nationalRegistryNumber')]);
+        }
+    }
+
+    const { fieldAnswers, groups } = createDocumentTemplateGroupPatches(documentTemplate);
+
+    const patch = DocumentTemplatePrivate.patch({
+        id: documentTemplate.id,
+        isLocked: false,
+        settings: DocumentSettings.patch({
+            linkedFields,
+            fieldAnswers,
+        }),
+        privateSettings: DocumentPrivateSettings.patch({
+            templateDefinition: participation,
+            groups,
+        }),
+    });
+
+    const editView = (await import('./EditDocumentTemplateView.vue')).default;
+
+    const patched = documentTemplate.patch(patch);
+
+    console.error('before:');
+    console.error(Array.from(Object.entries(documentTemplate.settings.linkedFields)).map(([k, v]) => [k, JSON.stringify(v)]));
+    console.error('after:');
+    console.error(Array.from(Object.entries(patched.settings.linkedFields)).map(([k, v]) => [k, JSON.stringify(v)]));
+
+    await present({
+        components: [
+            new ComponentWithProperties(editView, {
+                isNew: false,
+                document: documentTemplate,
+                initialPatch: patch,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+function createDocumentTemplateGroupPatches(documentTemplate: DocumentTemplatePrivate) {
+    const fieldAnswersPatch = new PatchMap<string, RecordAnswer>(documentTemplate.settings.fieldAnswers);
+    const groupsPatches = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplateGroup>;
+
+    const newCategory = participation.fieldCategories.find(c => c.id === 'visible-data');
+    if (!newCategory) {
+        throw new Error('Category with id visible-date not found on participation document template definition.');
+    }
+
+    const groupFieldAnswerPatchesMap = new Map<string, PatchMap<string, RecordAnswer>>();
+
+    for (const category of documentTemplate.privateSettings.templateDefinition.groupFieldCategories) {
+        for (const record of category.records) {
+            const newRecord = newCategory.records.find(r => r.id === record.id);
+            if (!newRecord || newRecord.type !== RecordType.Checkbox) {
+                // todo
+                continue;
+            }
+
+            let newSelected = false;
+
+            for (const documentTemplateGroup of documentTemplate.privateSettings.groups) {
+                const answer = documentTemplateGroup.fieldAnswers.get(record.id);
+                if (!answer) {
+                    continue;
+                }
+
+                const objectValue = answer.objectValue;
+                if (typeof objectValue !== 'boolean') {
+                    continue;
+                }
+
+                let groupfieldAnswersPatch = groupFieldAnswerPatchesMap.get(documentTemplateGroup.id);
+                if (!groupfieldAnswersPatch) {
+                    groupfieldAnswersPatch = new PatchMap<string, RecordAnswer>(documentTemplateGroup.fieldAnswers);
+                    groupFieldAnswerPatchesMap.set(documentTemplateGroup.id, groupfieldAnswersPatch);
+                }
+
+                groupfieldAnswersPatch.delete(record.id);
+
+                // set value to true if selected is true for some group
+                if (objectValue) {
+                    newSelected = true;
+                }
+            }
+
+            const newAnswer = RecordCheckboxAnswer.create({
+                settings: newRecord,
+                selected: newSelected,
+            });
+
+            fieldAnswersPatch.set(newRecord.id, newAnswer);
+        }
+    }
+
+    for (const documentTemplateGroup of documentTemplate.privateSettings.groups) {
+        const groupFieldAnswerPatches = groupFieldAnswerPatchesMap.get(documentTemplateGroup.id);
+
+        if (groupFieldAnswerPatches) {
+            // todo: does not work
+            groupsPatches.addPatch(DocumentTemplateGroup.patch({
+                id: documentTemplateGroup.id,
+                fieldAnswers: groupFieldAnswerPatches,
+            }));
+        }
+    }
+
+    const addFieldAnswerIfHasLinkedField = ({ linkedFieldId, recordId }: { linkedFieldId: string; recordId: string }) => {
+        const linkedFields = documentTemplate.settings.linkedFields;
+
+        const linkedField = linkedFields.get(linkedFieldId);
+        if (!linkedField || !linkedField.length) {
+            return;
+        }
+
+        const settings = newCategory.records.find(r => r.id === recordId);
+        if (!settings) {
+            return;
+        }
+
+        const fieldAnswer = RecordCheckboxAnswer.create({
+            settings,
+            selected: true,
+        });
+
+        fieldAnswersPatch.set(settings.id, fieldAnswer);
+    };
+
+    addFieldAnswerIfHasLinkedField({
+        linkedFieldId: 'registration.price',
+        recordId: 'enable[registration.price]',
+    });
+
+    addFieldAnswerIfHasLinkedField({
+        linkedFieldId: 'member.birthDay',
+        recordId: 'enable[member.birthDay]',
+    });
+
+    addFieldAnswerIfHasLinkedField({
+        linkedFieldId: 'member.nationalRegistryNumber',
+        recordId: 'enable[member.nationalRegisterNumber]',
+    });
+
+    addFieldAnswerIfHasLinkedField({
+        linkedFieldId: 'member.email',
+        recordId: 'enable[member.email]',
+    });
+
+    addFieldAnswerIfHasLinkedField({
+        linkedFieldId: 'member.address',
+        recordId: 'enable[member.address]',
+    });
+
+    return {
+        fieldAnswers: fieldAnswersPatch,
+        groups: groupsPatches,
+    };
+}
 </script>
