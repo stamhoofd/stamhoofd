@@ -48,7 +48,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="button" class="left-center" data-testid="app-switcher-search-others" @click="searchOrganizations">
+                <STListItem v-if="!STAMHOOFD.singleOrganization" :selectable="true" element-name="button" class="left-center" data-testid="app-switcher-search-others" @click="searchOrganizations">
                     <template #left>
                         <IconContainer icon="search" class="transparent" />
                     </template>

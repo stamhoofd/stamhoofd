@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Language } from '@stamhoofd/types/Language';
 import { Address } from './addresses/Address.js';
-import { appToUri } from './AppType.js';
+import { appToUri, getAppHost } from './AppType.js';
 import { Company } from './Company.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
@@ -63,29 +63,7 @@ export class BaseOrganization extends AutoEncoder {
      * Potentially includes a path
      */
     getRegistrationHost(i18n?: { language: Language; locale: string }): string {
-        if (this.registerDomain) {
-            let d = this.registerDomain;
-
-            if (i18n && i18n.language !== this.i18n.language) {
-                d += '/' + i18n.language;
-            }
-
-            return d + '/' + appToUri('registration');
-        }
-        return this.getDefaultRegistrationHost(i18n);
-    }
-
-    getDefaultRegistrationHost(i18n?: { language: Language; locale: string }): string {
-        if (!STAMHOOFD.domains.registration) {
-            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('registration') + '/' + this.uri;
-        }
-        let defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[''];
-
-        if (i18n && i18n.language !== this.i18n.language) {
-            defaultDomain += '/' + i18n.language;
-        }
-
-        return this.uri + '.' + defaultDomain + '/' + appToUri('registration');
+        return getAppHost('registration', this, false, i18n);
     }
 
     /**

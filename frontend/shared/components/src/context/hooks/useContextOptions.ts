@@ -66,7 +66,7 @@ export function useContextOptions() {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            opts.push(getRegistrationOption(null, user));
+            opts.push(getRegistrationOption(STAMHOOFD.singleOrganization && STAMHOOFD.singleOrganization === $organization.value?.id ? $organization.value : null, user));
         }
 
         let organizationIds = [...user?.permissions?.organizationPermissions.keys() ?? []];
