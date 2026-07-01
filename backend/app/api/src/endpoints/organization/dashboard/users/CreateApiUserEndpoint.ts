@@ -29,7 +29,10 @@ export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate();
+        // An API key is a long-lived credential that is not covered by two-factor
+        // authentication, so creating one requires a recent authentication: a stolen
+        // session should not be enough to mint a permanent way back in.
+        await Context.authenticateFresh();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canManageAdmins(organization.id)) {

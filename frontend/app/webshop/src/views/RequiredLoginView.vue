@@ -47,6 +47,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 
+import { useSSOTwoFactor } from '@stamhoofd/components/auth/useSSOTwoFactor.ts';
 import { useLoginMethod } from '@stamhoofd/components/hooks/useLoginMethods.ts';
 import { computed, ref, watch } from 'vue';
 import { useWebshopManager } from '../composables/useWebshopManager';
@@ -58,9 +59,17 @@ const organization = computed(() => webshopManager.organization);
 const webshop = computed(() => webshopManager.webshop);
 const context = useContext();
 const ssoConfig = useLoginMethod(LoginMethod.SSO);
+const { hasPendingSSOTwoFactor, continuePendingSSOTwoFactor } = useSSOTwoFactor();
 
 watch(ssoConfig, () => {
     if (!ssoConfig.value) {
+        return;
+    }
+
+    // The identity provider signed the user in, but the login still needs a second factor:
+    // continue that instead of starting the whole flow over again.
+    if (hasPendingSSOTwoFactor()) {
+        continuePendingSSOTwoFactor().catch(console.error);
         return;
     }
 

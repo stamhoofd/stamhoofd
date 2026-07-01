@@ -6,6 +6,7 @@ import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
 import { Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { BalanceItemService } from '../../services/BalanceItemService.js';
 
 type Params = Record<string, never>;
@@ -49,6 +50,11 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 message: 'Code field missing in request',
             });
         }
+
+        // Read the (optional) session of the caller before consuming the code: a user that
+        // is already signed in is verifying a new email address from their account
+        // settings, and already passed their second factor for that session.
+        const authenticatedUser = await Context.optionalAuthenticatedUser();
 
         const code = await EmailVerificationCode.verify(organization?.id ?? null, request.body.token, request.body.code);
 
@@ -105,7 +111,17 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw e;
         }
 
+        // Verifying an email is a single primary credential: if this user already has a
+        // second factor (or must enroll one), don't hand out a session without it. Unless
+        // the request already comes from a session of that same user (changing your email
+        // address while signed in): the second factor was checked when it was created.
+        if (authenticatedUser?.id !== user.id) {
+            await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion());
+        }
+
         const token = await Token.createToken(user);
+        await user.markActive();
+
         const st = new TokenStruct(token);
         return new Response(st);
     }

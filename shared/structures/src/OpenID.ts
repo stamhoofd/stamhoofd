@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { LoginProviderType } from './User.js';
 
@@ -56,4 +56,12 @@ export class StartOpenIDFlowStruct extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, optional: true, nullable: true })
     authToken: string | null = null;
+
+    /**
+     * Confirm the identity of the currently logged in user instead of linking the provider:
+     * the session the authToken was requested with counts as freshly authenticated again
+     * when the provider returns the same user. Requires an authToken.
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    reauthenticate = false;
 }

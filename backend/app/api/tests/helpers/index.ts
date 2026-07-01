@@ -1,3 +1,4 @@
+export * from './MFATestHelper.js';
 export * from './MollieMocker.js';
 export * from './PayconiqMocker.js';
 export * from './StripeMocker.js';

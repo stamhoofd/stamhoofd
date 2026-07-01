@@ -82,6 +82,14 @@ export class PatchPlatformEndpoint extends Endpoint<
                     request.body.privateConfig.emails,
                 );
             }
+
+            if (request.body.privateConfig.requireTwoFactor !== undefined) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error();
+                }
+
+                platform.privateConfig.requireTwoFactor = request.body.privateConfig.requireTwoFactor;
+            }
         }
 
         let shouldUpdateSetupSteps = false;

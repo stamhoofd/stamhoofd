@@ -78,6 +78,14 @@ export class User extends QueryableModel {
     })
     updatedAt: Date;
 
+    /**
+     * The last time this user signed in or refreshed their session. Only set once a full
+     * session is handed out, so a login that is still waiting for its second factor does
+     * not count as activity.
+     */
+    @column({ type: 'datetime', nullable: true })
+    lastActiveAt: Date | null = null;
+
     get name() {
         if (this.firstName && this.lastName) {
             return this.firstName + ' ' + this.lastName;
@@ -320,6 +328,19 @@ export class User extends QueryableModel {
         return false;
     }
 
+    /**
+     * Whether this account may use passkeys as a second factor.
+     *
+     * A passkey is bound to one domain (the dashboard domain, see getWebauthnRpId), and it
+     * cannot be moved to another one: the authenticator will simply not hand it over. Users
+     * that belong to a single organization are expected to move to a per-organization
+     * authentication domain, which would strand every passkey they enrolled here, so they
+     * are kept on the factors that survive such a move (authenticator apps, recovery codes).
+     */
+    canUsePasskeys(): boolean {
+        return this.organizationId === null && !this.isApiUser;
+    }
+
     protected hasKeys() {
         if (this.password) {
             // Users with a password are 'real' users. Always.
@@ -549,6 +570,21 @@ export class User extends QueryableModel {
         this.password = await User.hash(password);
     }
 
+    /**
+     * Remember that the user was active right now: they signed in, or refreshed their
+     * session.
+     *
+     * Written with a direct query instead of save(): this runs on every token refresh, so
+     * it should not bump updatedAt or write out other (possibly stale) properties of the
+     * model.
+     */
+    async markActive() {
+        const date = new Date();
+        date.setMilliseconds(0);
+        await User.update().set('lastActiveAt', date).where('id', this.id).update();
+        this.lastActiveAt = date;
+    }
+
     getStructure() {
         return UserStruct.create({
             firstName: this.firstName,
@@ -561,6 +597,7 @@ export class User extends QueryableModel {
             hasPassword: this.hasPasswordBasedAccount(),
             memberId: this.memberId,
             organizationId: this.organizationId,
+            lastActiveAt: this.lastActiveAt,
         });
     }
 

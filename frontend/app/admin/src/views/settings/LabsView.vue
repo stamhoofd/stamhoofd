@@ -8,6 +8,78 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <hr>
+        <h2>{{ $t('Beveiliging') }}</h2>
+
+        <p>{{ $t('Bepaal wie tweestapsverificatie kan instellen, en of het verplicht is voor beheerders van het platform.') }}</p>
+
+        <STList>
+            <STListItem :selectable="true" element-name="label" data-testid="mfa-enabled">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('mfa')" @update:model-value="setFeatureFlag('mfa', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Tweestapsverificatie inschakelen voor iedereen') }}
+                </h3>
+                <p v-if="!getFeatureFlag('mfa')" class="style-description-small">
+                    {{ $t('Als dit uit staat, kan niemand tweestapsverificatie instellen (tenzij hieronder ingeschakeld voor beheerders).') }}
+                </p>
+            </STListItem>
+
+            <STListItem v-if="!getFeatureFlag('mfa')" :selectable="true" element-name="label" data-testid="mfa-admins-enabled">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('mfa-admins')" @update:model-value="setFeatureFlag('mfa-admins', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Tweestapsverificatie inschakelen voor beheerders van het platform') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Enkel gebruikers met rechten op het platform kunnen tweestapsverificatie instellen.') }}
+                </p>
+            </STListItem>
+
+            <STListItem v-if="getFeatureFlag('mfa') || requireTwoFactor || getFeatureFlag('mfa-admins')" :selectable="true" element-name="label" data-testid="mfa-required">
+                <template #left>
+                    <Checkbox v-model="requireTwoFactor" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Tweestapsverificatie verplichten voor beheerders van het platform') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Gebruikers met rechten op het platform moeten tweestapsverificatie instellen om aan te melden.') }}
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" data-testid="mfa-sign-out-admins" @click.prevent="signOutAdmins">
+                <template #left>
+                    <IconContainer icon="logout" aside-icon="power" class="error" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Alle beheerders van het platform afmelden') }}
+                </h3>
+            </STListItem>
+        </STList>
+
+        <hr><h2>{{ $t('%HJ') }}</h2>
+
+        <STList>
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`%HK`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
+                <template #right>
+                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Password)" />
+                </template>
+            </CheckboxListItem>
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" :label="$t(`%1p`)" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
+                <template #right>
+                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Google)" />
+                </template>
+            </CheckboxListItem>
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" :label="$t(`%2b`)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
+                <template #right>
+                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.SSO)" />
+                </template>
+            </CheckboxListItem>
+        </STList>
+
         <hr><h2>
             {{ $t('%HF') }}
         </h2>
@@ -34,26 +106,6 @@
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
             {{ $t('%15o') }}
         </Checkbox>
-
-        <hr><h2>{{ $t('%HJ') }}</h2>
-
-        <STList>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`%HK`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
-                <template #right>
-                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Password)" />
-                </template>
-            </CheckboxListItem>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" :label="$t(`%1p`)" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
-                <template #right>
-                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Google)" />
-                </template>
-            </CheckboxListItem>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" :label="$t(`%2b`)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
-                <template #right>
-                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.SSO)" />
-                </template>
-            </CheckboxListItem>
-        </STList>
     </SaveView>
 </template>
 
@@ -64,17 +116,22 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { LoginMethod, LoginMethodConfig, LoginProviderType, PlatformConfig } from '@stamhoofd/structures';
-import { ref } from 'vue';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { LoginMethod, LoginMethodConfig, LoginProviderType, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
 
 const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
+const context = useContext();
+const requestOwner = useRequestOwner();
 const errors = useErrors();
 const pop = usePop();
 
@@ -98,6 +155,67 @@ function setFeatureFlag(flag: string, value: boolean) {
             featureFlags: featureFlags as any,
         }),
     });
+}
+
+const requireTwoFactor = computed({
+    get: () => patched.value.privateConfig?.requireTwoFactor ?? false,
+    set: (requireTwoFactor: boolean) => {
+        addPatch({
+            privateConfig: PlatformPrivateConfig.patch({
+                requireTwoFactor,
+            }),
+        });
+    },
+});
+
+/**
+ * Requiring two-factor authentication is only enforced when a session is created, so admins
+ * that are already signed in keep their session and are never asked to enroll. Ending those
+ * sessions forces them through the login flow, and with that through the enrollment.
+ */
+async function signOutAdmins() {
+    if (!await CenteredMessage.confirm({
+        title: $t('Alle beheerders van het platform afmelden?'),
+        confirmText: $t('Afmelden'),
+        description: hasChanges.value
+            ? $t('Ze moeten zich daarna opnieuw aanmelden. Jouw wijzigingen hierboven worden nog niet opgeslagen.')
+            : $t('Ze moeten zich daarna opnieuw aanmelden.'),
+    })) {
+        return;
+    }
+
+    await doSignOutAdmins();
+}
+
+/**
+ * Ask to sign out the other admins right after two-factor authentication became required:
+ * without it the requirement only applies to admins that sign in again on their own.
+ */
+async function askToSignOutAdmins() {
+    if (!await CenteredMessage.confirm({
+        title: $t('Alle beheerders van het platform afmelden?'),
+        confirmText: $t('Afmelden'),
+        description: $t('Beheerders die nu aangemeld zijn, blijven aangemeld zonder tweestapsverificatie. We raden aan om ze af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.'),
+        cancelText: $t('Niet afmelden'),
+        destructive: false,
+    })) {
+        return;
+    }
+
+    await doSignOutAdmins();
+}
+
+async function doSignOutAdmins() {
+    try {
+        await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/platform/admins/sign-out',
+            owner: requestOwner,
+        });
+        new Toast($t('Alle beheerders zijn afgemeld'), 'success green').show();
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
 }
 
 function getLoginMethod(method: LoginMethod) {
@@ -183,8 +301,17 @@ async function save() {
             return;
         }
 
+        // Read before saving, because saving updates the platform we compare against
+        const startedRequiringTwoFactor = !platform.value.privateConfig?.requireTwoFactor && requireTwoFactor.value;
+
         await patchPlatform(patch.value);
         new Toast($t(`%HA`), 'success green').show();
+
+        if (startedRequiringTwoFactor) {
+            // After the patch, so the admins that sign in again already meet the new requirement
+            await askToSignOutAdmins();
+        }
+
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);

@@ -88,6 +88,11 @@ export enum AuditLogType {
     UserEdited = 'UserEdited',
     UserDeleted = 'UserDeleted',
 
+    // Two-factor authentication
+    UserTwoFactorMethodAdded = 'UserTwoFactorMethodAdded',
+    UserTwoFactorMethodDeleted = 'UserTwoFactorMethodDeleted',
+    UserRecoveryCodesRegenerated = 'UserRecoveryCodesRegenerated',
+
     // MemberResponsibilityRecord
     MemberResponsibilityRecordAdded = 'MemberResponsibilityRecordAdded',
     MemberResponsibilityRecordEdited = 'MemberResponsibilityRecordEdited',
@@ -212,6 +217,14 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Wijzigingen aan accounts`;
         case AuditLogType.UserDeleted:
             return `Verwijderde accounts`;
+
+        case AuditLogType.UserTwoFactorMethodAdded:
+            return $t(`Nieuwe tweestapsverificatie`);
+        case AuditLogType.UserTwoFactorMethodDeleted:
+            return $t(`Verwijderde tweestapsverificatie`);
+        case AuditLogType.UserRecoveryCodesRegenerated:
+            return $t(`Opnieuw gegenereerde herstelcodes`);
+
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Nieuwe toegekende functies`;
         case AuditLogType.MemberResponsibilityRecordEdited:
@@ -368,6 +381,13 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`user`, `edit stroke`];
         case AuditLogType.UserDeleted:
             return [`user`, `trash red stroke`];
+
+        case AuditLogType.UserTwoFactorMethodAdded:
+            return [`key`, `add green`];
+        case AuditLogType.UserTwoFactorMethodDeleted:
+            return [`key`, `trash red stroke`];
+        case AuditLogType.UserRecoveryCodesRegenerated:
+            return [`recovery-keys`, `sync stroke`];
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return [`star`, `add green`];
@@ -535,6 +555,13 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.UserDeleted:
             return `Account {{u}} werd verwijderd`;
 
+        case AuditLogType.UserTwoFactorMethodAdded:
+            return $t(`{{method}}{{if name ' ‘' name '’'}} werd toegevoegd als tweestapsverificatie van {{u}}`);
+        case AuditLogType.UserTwoFactorMethodDeleted:
+            return $t(`{{method}}{{if name ' ‘' name '’'}} werd verwijderd als tweestapsverificatie van {{u}}`);
+        case AuditLogType.UserRecoveryCodesRegenerated:
+            return $t(`De herstelcodes van {{u}} werden opnieuw gegenereerd`);
+
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}`;
         case AuditLogType.MemberResponsibilityRecordEdited:
@@ -694,7 +721,12 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.UserAdded:
         case AuditLogType.UserEdited:
         case AuditLogType.UserDeleted:
+        case AuditLogType.UserRecoveryCodesRegenerated:
             return ['u'];
+
+        case AuditLogType.UserTwoFactorMethodAdded:
+        case AuditLogType.UserTwoFactorMethodDeleted:
+            return ['u', 'method'];
 
         case AuditLogType.MemberResponsibilityRecordAdded:
         case AuditLogType.MemberResponsibilityRecordEdited:

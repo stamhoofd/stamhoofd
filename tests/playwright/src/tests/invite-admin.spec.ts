@@ -7,12 +7,14 @@ import type { Browser, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
-import { OrganizationFactory, PasswordToken, Platform, Token, User, UserFactory } from '@stamhoofd/models';
+import { MFARecoveryCode, MFATOTP, OrganizationFactory, PasswordToken, Platform, Token, User, UserFactory } from '@stamhoofd/models';
 import { PasswordForgotService } from '@stamhoofd/backend/services/PasswordForgotService';
-import { STPackageService } from '@stamhoofd/backend/tests/helpers';
+import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { PermissionLevel, PermissionRoleDetailed, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { WorkerData } from '../helpers/index.js';
+import { setPlatformRequiresTwoFactor } from '../init/setPlatformRequiresTwoFactor.js';
 
 /**
  * These tests cover the admin invite flow, which uses password tokens under the hood:
@@ -21,7 +23,10 @@ import { WorkerData } from '../helpers/index.js';
  *  2. In a new browser session (clean localstorage) the invited user opens the
  *     PasswordToken link that normally would be sent via email.
  *  3. The invited user gets the option to choose a password.
- *  4. After choosing a password the invited user is signed in.
+ *  4. When two-factor authentication is required for the invited admin (for platform
+ *     admins when the platform requires it, for organization admins when the organization
+ *     requires it), they enroll a second factor right after choosing a password.
+ *  5. After that the invited user is signed in.
  *
  * The invited email address can belong to an existing user (with or without an account
  * or permissions) or to a nobody: in that case a new user is created by the invite.
@@ -178,8 +183,13 @@ async function getSingleUserByEmail(email: string): Promise<User> {
  * Find the PasswordToken created by the invite, open the link that would normally be
  * sent via email in a new browser session, choose a password and check that the user
  * is signed in and the password is set in the database.
+ *
+ * When the invited admin is required to have two-factor authentication (platform admins
+ * when the platform requires it, organization admins when the organization requires it),
+ * they also have to enroll a second factor - after choosing a password - before they are
+ * signed in.
  */
-async function openInviteAndChoosePassword(browser: Browser, { userId, organization }: { userId: string; organization: Organization | null }) {
+async function openInviteAndChoosePassword(browser: Browser, { userId, organization, requiresTwoFactor = false }: { userId: string; organization: Organization | null; requiresTwoFactor?: boolean }) {
     const invitedUser = await User.getByID(userId);
     const oldPassword = invitedUser?.password ?? null;
 
@@ -214,6 +224,11 @@ async function openInviteAndChoosePassword(browser: Browser, { userId, organizat
 
             await form.locator('#submit').click();
 
+            if (requiresTwoFactor) {
+                // Only now, with a password chosen, the second factor is set up
+                await new TwoFactorFlow({ page }).completeForcedSetup();
+            }
+
             // The user is now signed in
             await expect(form).toBeHidden({ timeout: 20_000 });
             await expect(page.locator('[data-testid="login-view"]')).toBeHidden();
@@ -230,6 +245,12 @@ async function openInviteAndChoosePassword(browser: Browser, { userId, organizat
     const updatedUser = await User.getByID(userId);
     expect(updatedUser?.password).toBeTruthy();
     expect(updatedUser?.password).not.toBe(oldPassword);
+
+    if (requiresTwoFactor) {
+        // The enrolled authenticator + the recovery codes that were shown are stored
+        expect(await MFATOTP.getConfirmedForUser(userId)).toHaveLength(1);
+        expect(await MFARecoveryCode.getUnusedForUser(userId)).toHaveLength(10);
+    }
 }
 
 function organizationPermissionsFor(user: User, organization: Organization) {
@@ -240,7 +261,7 @@ function organizationPermissionsFor(user: User, organization: Organization) {
  * The scenarios that are identical in all three environments. The context getter is
  * evaluated inside the tests, after the beforeAll hooks of the environment have run.
  */
-function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrganization }: { includeOtherOrganization: boolean }) {
+function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrganization, includeOrganizationTwoFactor }: { includeOtherOrganization: boolean; includeOrganizationTwoFactor: boolean }) {
     test('invite a new user with full access to the organization', async ({ page, browser }) => {
         const ctx = getContext();
         const email = randomEmail('invite-new-full');
@@ -304,7 +325,8 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         expect(organizationPermissionsFor(merged, ctx.organization)?.level).toBe(PermissionLevel.Full);
         expect(merged.permissions?.globalPermissions?.level).toBe(PermissionLevel.Full);
 
-        await openInviteAndChoosePassword(browser, { userId: existing.id, organization: ctx.organization });
+        // This user has platform permissions, so 2FA is required for them
+        await openInviteAndChoosePassword(browser, { userId: existing.id, organization: ctx.organization, requiresTwoFactor: true });
     });
 
     test('invite an existing admin of the organization again', async ({ page, browser }) => {
@@ -383,8 +405,8 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         expect(invited.password).toBeNull(); // no account yet
         expect(invited.permissions?.globalPermissions?.level).toBe(PermissionLevel.Full);
 
-        // Platform admins are not scoped to an organization
-        await openInviteAndChoosePassword(browser, { userId: invited.id, organization: null });
+        // Platform admins are not scoped to an organization, and the platform requires 2FA
+        await openInviteAndChoosePassword(browser, { userId: invited.id, organization: null, requiresTwoFactor: true });
     });
 
     test('invite a new user with a specific role to the platform', async ({ page, browser }) => {
@@ -398,8 +420,45 @@ function defineCommonScenarios(getContext: () => EnvContext, { includeOtherOrgan
         expect(invited.permissions?.globalPermissions?.level).toBe(PermissionLevel.None);
         expect(invited.permissions?.globalPermissions?.roles.map(r => r.name)).toContain(PLATFORM_ROLE);
 
-        await openInviteAndChoosePassword(browser, { userId: invited.id, organization: null });
+        await openInviteAndChoosePassword(browser, { userId: invited.id, organization: null, requiresTwoFactor: true });
     });
+
+    if (includeOrganizationTwoFactor) {
+        test('invite a new admin to an organization that requires two-factor authentication', async ({ page, browser }) => {
+            const ctx = getContext();
+            const email = randomEmail('invite-new-2fa');
+
+            await withTwoFactorRequired(ctx.organization, async () => {
+                await loginAs({ page, user: ctx.organizationAdmin });
+                await inviteAdminViaUI(page, { adminsUrl: ctx.adminsUrl, email, rights: 'full' });
+
+                const invited = await getSingleUserByEmail(email);
+                expect(invited.password).toBeNull(); // no account yet
+                expect(organizationPermissionsFor(invited, ctx.organization)?.level).toBe(PermissionLevel.Full);
+
+                // The invited admin chooses a password and has to enroll a second factor
+                // before the account can be used.
+                await openInviteAndChoosePassword(browser, { userId: invited.id, organization: ctx.organization, requiresTwoFactor: true });
+            });
+        });
+    }
+}
+
+/**
+ * Require two-factor authentication for the admins of this organization while running the
+ * given scenario. Other tests in this file share the organization, so the setting is
+ * always restored.
+ */
+async function withTwoFactorRequired(organization: Organization, run: () => Promise<void>) {
+    organization.privateMeta.requireTwoFactor = true;
+    await organization.save();
+
+    try {
+        await run();
+    } finally {
+        organization.privateMeta.requireTwoFactor = false;
+        await organization.save();
+    }
 }
 
 test.describe('Admin invites @invite-admin', () => {
@@ -449,10 +508,15 @@ test.describe('Admin invites @invite-admin', () => {
             }).create();
             await STPackageService.updateOrganizationPackages(organization.id);
             await createPlatformRole();
+
+            // The invited platform admins below are expected to enroll a second factor
+            await setPlatformRequiresTwoFactor(true);
+
             ({ organizationAdmin, platformAdmin } = await createAdmins(organization));
         });
 
         test.afterAll(async () => {
+            await setPlatformRequiresTwoFactor(false);
             await WorkerData.resetDatabase();
         });
 
@@ -463,7 +527,85 @@ test.describe('Admin invites @invite-admin', () => {
             platformAdmin,
             adminsUrl: domain + '/beheerders/' + organization.uri + '/instellingen/beheerders',
             platformAdminsUrl: domain + '/platform/instellingen/beheerders',
-        }), { includeOtherOrganization: false });
+            // Only in organization mode the login is scoped to the organization, so only
+            // there an organization can require two-factor authentication for its admins.
+        }), { includeOtherOrganization: false, includeOrganizationTwoFactor: true });
+
+        /**
+         * An admin account that is not used anymore is an unnecessary risk, so the list
+         * shows when every admin last signed in and warns about the ones that stopped.
+         */
+        test('an admin who did not sign in for months is flagged in the list', async ({ page }) => {
+            // A dedicated organization, so the list contains exactly these two admins and
+            // is never truncated by the 'show more' button.
+            const ownOrganization = await new OrganizationFactory({
+                packages: [STPackageBundle.Webshops, STPackageBundle.Members],
+            }).create();
+            await STPackageService.updateOrganizationPackages(ownOrganization.id);
+
+            const activeAdmin = await new UserFactory({
+                organization: ownOrganization,
+                password: PASSWORD,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            activeAdmin.lastActiveAt = new Date();
+            await activeAdmin.save();
+
+            const inactiveAdmin = await new UserFactory({
+                organization: ownOrganization,
+                password: PASSWORD,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            inactiveAdmin.lastActiveAt = new Date(Date.now() - 100 * 24 * 60 * 60 * 1000);
+            await inactiveAdmin.save();
+
+            await loginAs({ page, user: activeAdmin });
+            await page.goto(domain + '/beheerders/' + ownOrganization.uri + '/instellingen/beheerders');
+
+            const inactiveRow = page.locator('.st-list-item', { hasText: inactiveAdmin.email });
+            await expect(inactiveRow).toBeVisible({ timeout: 20_000 });
+            await expect(inactiveRow).toContainText('Laatst actief op');
+            await expect(inactiveRow.locator('.icon.warning')).toBeVisible();
+
+            const activeRow = page.locator('.st-list-item', { hasText: activeAdmin.email });
+            await expect(activeRow).toContainText('Laatst actief op');
+            await expect(activeRow.locator('.icon.warning')).toHaveCount(0);
+        });
+
+        /**
+         * The list marks the admins that protected their account with a second factor.
+         */
+        test('an admin with two-factor authentication is marked in the list', async ({ page }) => {
+            // A dedicated organization, so the list contains exactly these two admins and
+            // is never truncated by the 'show more' button.
+            const ownOrganization = await new OrganizationFactory({
+                packages: [STPackageBundle.Webshops, STPackageBundle.Members],
+            }).create();
+            await STPackageService.updateOrganizationPackages(ownOrganization.id);
+
+            const protectedAdmin = await new UserFactory({
+                organization: ownOrganization,
+                password: PASSWORD,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            await MFATestHelper.addConfirmedTOTP(protectedAdmin);
+
+            const unprotectedAdmin = await new UserFactory({
+                organization: ownOrganization,
+                password: PASSWORD,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            await loginAs({ page, user: unprotectedAdmin });
+            await page.goto(domain + '/beheerders/' + ownOrganization.uri + '/instellingen/beheerders');
+
+            const protectedRow = page.locator('.st-list-item', { hasText: protectedAdmin.email });
+            await expect(protectedRow).toBeVisible({ timeout: 20_000 });
+            await expect(protectedRow.locator('.icon.privacy')).toBeVisible();
+
+            const unprotectedRow = page.locator('.st-list-item', { hasText: unprotectedAdmin.email });
+            await expect(unprotectedRow.locator('.icon.privacy')).toHaveCount(0);
+        });
     });
 
     test.describe('Platform mode', () => {
@@ -480,10 +622,15 @@ test.describe('Admin invites @invite-admin', () => {
             }).create();
             otherOrganization = await new OrganizationFactory({}).create();
             await createPlatformRole();
+
+            // The invited platform admins below are expected to enroll a second factor
+            await setPlatformRequiresTwoFactor(true);
+
             ({ organizationAdmin, platformAdmin } = await createAdmins(organization));
         });
 
         test.afterAll(async () => {
+            await setPlatformRequiresTwoFactor(false);
             await WorkerData.resetDatabase();
         });
 
@@ -494,7 +641,7 @@ test.describe('Admin invites @invite-admin', () => {
             platformAdmin,
             adminsUrl: domain + '/beheerders/' + organization.uri + '/instellingen/beheerders',
             platformAdminsUrl: domain + '/platform/instellingen/beheerders',
-        }), { includeOtherOrganization: true });
+        }), { includeOtherOrganization: true, includeOrganizationTwoFactor: false });
     });
 
     test.describe('Single organization mode', () => {
@@ -509,10 +656,15 @@ test.describe('Admin invites @invite-admin', () => {
             }).create();
             TestUtils.setPermanentEnvironment('singleOrganization', organization.id);
             await createPlatformRole();
+
+            // The invited platform admins below are expected to enroll a second factor
+            await setPlatformRequiresTwoFactor(true);
+
             ({ organizationAdmin, platformAdmin } = await createAdmins(organization));
         });
 
         test.afterAll(async () => {
+            await setPlatformRequiresTwoFactor(false);
             await WorkerData.resetDatabase();
         });
 
@@ -524,6 +676,6 @@ test.describe('Admin invites @invite-admin', () => {
             // In single organization mode the dashboard urls don't contain the organization uri
             adminsUrl: domain + '/beheerders/instellingen/beheerders',
             platformAdminsUrl: domain + '/platform/instellingen/beheerders',
-        }), { includeOtherOrganization: false });
+        }), { includeOtherOrganization: false, includeOrganizationTwoFactor: false });
     });
 });

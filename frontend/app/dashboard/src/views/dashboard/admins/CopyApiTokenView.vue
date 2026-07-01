@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="copy-api-token-view">
         <STNavigationBar :title="$t(`%1r`)" />
 
         <main>

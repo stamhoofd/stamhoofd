@@ -1,14 +1,14 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import type { User } from '@stamhoofd/models';
-import { Organization, Platform, RateLimiter, Token } from '@stamhoofd/models';
+import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { ApiUserRateLimits } from '@stamhoofd/structures';
 import { AdminPermissionChecker } from './AdminPermissionChecker.js';
+import { TwoFactorHelper } from './TwoFactorHelper.js';
 
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
@@ -180,7 +180,7 @@ export class ContextInstance {
         if (STAMHOOFD.userMode === 'platform') {
             return null;
         }
-        return await this.setOrganizationScope(options);
+        return await this.setOptionalOrganizationScope(options);
     }
 
     async setOrganizationScope(options?: { willAuthenticate?: boolean }) {
@@ -223,7 +223,24 @@ export class ContextInstance {
         }
     }
 
-    async authenticate({ allowWithoutAccount = false, allowUnscoped = false }: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token }> {
+    /**
+     * Identify the caller from the Authorization header without ever throwing: returns
+     * null when the request is unauthenticated or carries an invalid/expired token.
+     * Use this to give an already signed in user a smoother experience, never to grant
+     * access (there is no error to react to).
+     */
+    async optionalAuthenticatedUser(): Promise<User | null> {
+        try {
+            const { user } = await this.authenticate({ allowWithoutAccount: true });
+            return user;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async authenticate(options: { allowMFASetupToken: true; allowWithoutAccount?: boolean; allowUnscoped?: boolean }): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }>;
+    async authenticate(options?: { allowMFASetupToken?: false | undefined; allowWithoutAccount?: boolean; allowUnscoped?: boolean }): Promise<{ user: User; token: Token }>;
+    async authenticate({ allowWithoutAccount = false, allowUnscoped = false, allowMFASetupToken = false }: { allowMFASetupToken?: boolean; allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }> {
         let header = this.request.headers.authorization;
 
         if (!header && this.request.method === 'POST') {
@@ -244,6 +261,12 @@ export class ContextInstance {
         }
 
         if (!header.startsWith('Bearer ')) {
+            if (allowMFASetupToken) {
+                const result = await this.authenticateMFASetup();
+                if (result) {
+                    return result;
+                }
+            }
             throw new SimpleError({
                 code: 'not_supported_authentication',
                 message: 'Authentication method not supported. Please authenticate with OAuth2',
@@ -318,6 +341,93 @@ export class ContextInstance {
         await this.insecurelyAuthenticateAs(user);
 
         return { user, token };
+    }
+
+    /**
+     * Like authenticate(), but additionally requires the access token to be "fresh"
+     * (minted by a real authentication within the FRESH_WINDOW, not via a refresh).
+     * Used to gate sensitive actions such as managing 2FA methods.
+     */
+    async authenticateFresh(options: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token }> {
+        const result = await this.authenticate(options);
+        if (!result.token.isFresh()) {
+            throw new SimpleError({
+                code: 'require_fresh_auth',
+                message: 'A recent authentication is required for this action',
+                human: $t('Bevestig je identiteit opnieuw om deze actie uit te voeren.'),
+                statusCode: 403,
+            });
+        }
+        return result;
+    }
+
+    /**
+     * Authorize a 2FA enrollment/management action. Accepts either a fresh full session
+     * (Bearer access token) or a setup token (Authorization: MFASetup <token>) issued
+     * during forced enrollment, before a session exists.
+     */
+    async authenticateMFASetup(): Promise<{ user: User; setupToken: MFAToken } | null> {
+        const header = this.request.headers.authorization;
+        if (header && header.startsWith('MFASetup ')) {
+            const raw = header.substring('MFASetup '.length);
+            const setupToken = await MFAToken.getValid(raw, 'setup');
+            if (!setupToken) {
+                throw new SimpleError({
+                    code: 'mfa_setup_expired',
+                    message: 'The MFA setup session is invalid or expired',
+                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    statusCode: 401,
+                });
+            }
+            const user = await User.getByID(setupToken.userId);
+            if (!user) {
+                throw new SimpleError({
+                    code: 'mfa_setup_expired',
+                    message: 'The MFA setup session is invalid or expired',
+                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    statusCode: 401,
+                });
+            }
+
+            // A setup token is issued on the strength of a password alone, to bootstrap a
+            // *first* factor. If the user enrolled one in the meantime (e.g. from another
+            // device), it must stop being worth a session: otherwise someone who only
+            // knows the password keeps a 15 minute window in which they can enroll a
+            // factor of their own and sign in, even though the account is now protected.
+            if (await TwoFactorHelper.userHasFactors(user.id)) {
+                await setupToken.consume();
+                throw new SimpleError({
+                    code: 'mfa_setup_expired',
+                    message: 'The MFA setup session is no longer valid: the user already has a second factor',
+                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    statusCode: 401,
+                });
+            }
+
+            this.user = user;
+            await this.insecurelyAuthenticateAs(user);
+            return { user, setupToken };
+        }
+
+        return null;
+    }
+
+    /**
+     * Authorize a 2FA enrollment/management action. Accepts either a fresh full session
+     * (Bearer access token) or a setup token (Authorization: MFASetup <token>) issued
+     * during forced enrollment, before a session exists.
+     *
+     * Exactly one of `setupToken` / `token` is set: `token` is the session the request was
+     * made with, which enrollment keeps alive while signing out the user's other sessions.
+     */
+    async authenticateMFAEnrollment(): Promise<{ user: User; setupToken: MFAToken | null; token: Token | null }> {
+        const mfa = await this.authenticateMFASetup();
+        if (mfa) {
+            return { ...mfa, token: null };
+        }
+
+        const { user, token } = await this.authenticateFresh();
+        return { user, setupToken: null, token };
     }
 
     async insecurelyAuthenticateAs(user: User) {

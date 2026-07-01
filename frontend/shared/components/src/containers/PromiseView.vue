@@ -67,7 +67,7 @@ function run() {
     errorBox.value = null;
     props.promise().then(async (value) => {
         if (!value) {
-            console.error('Promise view did not return a component.');
+            console.error('Promise view did not return a component.', props.promise);
             throw new Error('Missing component in promise');
         }
 

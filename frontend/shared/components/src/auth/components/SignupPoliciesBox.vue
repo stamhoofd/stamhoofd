@@ -9,7 +9,7 @@
         <slot />
     </footer>
 
-    <div v-if="policies.filter(p => !p.checkbox).length > 0" class="signup-policy-footer-suffix">
+    <div v-if="policies.filter(p => !p.checkbox).length > 0" class="signup-policies-footer-suffix">
         <p v-for="policy of policies.filter(p => !p.checkbox)" :key="policy.id" class="style-description-block">
             <span v-if="policy.richText.html" class="style-wysiwyg gray" v-html="policy.richText.html" />
             <span v-else>{{ policy.name }}</span>
@@ -69,8 +69,7 @@ function isAccepted(policy: PlatformPolicy) {
 function setAccepted(policy: PlatformPolicy, value: boolean) {
     if (value) {
         acceptPrivacy.value.add(policy.id);
-    }
-    else {
+    } else {
         acceptPrivacy.value.delete(policy.id);
     }
 }
@@ -92,11 +91,11 @@ useValidation(props.validator, () => {
 </script>
 
 <style lang="scss">
-.signup-policy-footer-suffix {
+.signup-policies-footer-suffix {
     padding-top: 15px;
 }
 
-.signup-policy-footer {
+.signup-policies-footer {
     padding-top: 15px;
 }
 </style>

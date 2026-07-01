@@ -42,6 +42,8 @@
 </template>
 
 <script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
@@ -49,10 +51,12 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import CodeInput from '@stamhoofd/components/inputs/CodeInput.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import type { MFAChallengeResponse, MFASetupResponse } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
 import { onDeactivated, onMounted, onUnmounted, ref } from 'vue';
 
@@ -69,6 +73,7 @@ const props = withDefaults(
 
 const context = useContext();
 const appNavigate = useAppNavigate();
+const show = useShow();
 
 const codeInput = ref('');
 const loading = ref(false);
@@ -153,13 +158,47 @@ async function submit() {
     loading.value = true;
     errorBox.value = null;
     try {
-        await LoginHelper.verifyEmail(context.value, codeInput.value, props.token);
+        const result = await LoginHelper.verifyEmail(context.value, codeInput.value, props.token);
+
+        if (result.mfaChallenge || result.mfaSetup) {
+            // The email address is verified, but this user needs a second factor before we
+            // can sign them in.
+            stopTimer();
+            await presentMFAFlow(result);
+            loading.value = false;
+            return;
+        }
+
         Toast.success($t('%1ZH')).setTestId('toast-email-verification-succeeded').show();
         await navigateAway();
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);
     }
     loading.value = false;
+}
+
+async function presentMFAFlow(result: { mfaChallenge?: MFAChallengeResponse; mfaSetup?: MFASetupResponse }) {
+    // We opened this flow in a sheet, so we close it again before navigating away.
+    const onCompleted = async (navigation: NavigationActions) => {
+        Toast.success($t('%1ZH')).setTestId('toast-email-verification-succeeded').show();
+        await navigateAway();
+    };
+
+    await show({
+        components: [
+            result.mfaChallenge
+                ? AsyncComponent(() => import('@stamhoofd/components/auth/ChooseMFAMethodView.vue'), {
+                        mfaChallenge: result.mfaChallenge,
+                        onCompleted,
+                    })
+                : AsyncComponent(() => import('@stamhoofd/components/auth/SetupMFAView.vue'), {
+                        setupToken: result.mfaSetup?.setupToken,
+                        canUsePasskeys: result.mfaSetup?.canUsePasskeys ?? false,
+                        onCompleted,
+                    }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
 }
 </script>
 

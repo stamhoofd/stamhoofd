@@ -42,7 +42,7 @@
             <STList>
                 <STListItem v-if="hasLanguages" :selectable="true" @click.prevent="switchLanguage">
                     <template #left>
-                        <span class="icon language" />
+                        <IconContainer icon="translate" aside-icon="arrow-down reverse" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -59,7 +59,7 @@
 
                 <STListItem v-if="passwordEnabled" :selectable="true" @click.prevent="openChangePassword">
                     <template #left>
-                        <span class="icon key" />
+                        <IconContainer icon="key" aside-icon="retry" />
                     </template>
 
                     <h3 v-if="usesPassword" class="style-title-list">
@@ -68,6 +68,20 @@
                     <h3 v-else class="style-title-list">
                         {{ $t('%jl') }}
                     </h3>
+                </STListItem>
+
+                <STListItem v-if="twoFactorEnabled || $user?.hasTwoFactor" :selectable="true" data-testid="open-mfa-settings" @click.prevent="openMFASettings">
+                    <template #left>
+                        <IconContainer icon="privacy" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ $t('Tweestapsverificatie') }}
+                    </h3>
+
+                    <template #right>
+                        <span class="icon arrow-right-small" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="!usesGoogle && googleEnabled" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
@@ -85,7 +99,7 @@
 
                 <STListItem v-if="ssoEnabled && !usesSSO" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
                     <template #left>
-                        <span class="icon lock" />
+                        <IconContainer icon="lock" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -95,7 +109,7 @@
 
                 <STListItem :selectable="true" @click.prevent="logout">
                     <template #left>
-                        <span class="icon logout" />
+                        <IconContainer icon="logout" class="error" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -106,11 +120,11 @@
                 <STListItem :selectable="true" @click.prevent="deleteRequest">
                     <template #left>
                         <LoadingButton>
-                            <span class="icon trash red" />
+                            <IconContainer icon="trash" class="error" />
                         </LoadingButton>
                     </template>
 
-                    <h3 class="style-title-list red">
+                    <h3 class="style-title-list">
                         {{ $t('%jp') }}
                     </h3>
                 </STListItem>
@@ -208,6 +222,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { useLoginMethod, useLoginMethodEnabled } from '#hooks/useLoginMethods.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useTwoFactorEnabled } from '#hooks/useTwoFactorEnabled.ts';
 import { useUser } from '#hooks/useUser.ts';
 import EmailInput from '#inputs/EmailInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
@@ -217,7 +232,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
@@ -226,6 +241,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useAppNavigate } from '../hooks/useAppNavigate.ts';
 
 import { useSwitchLanguage } from './hooks/useSwitchLanguage';
+import IconContainer from '#icons/IconContainer.vue';
 
 const $context = useContext();
 const $platform = usePlatform();
@@ -247,6 +263,7 @@ const email = computed({
 const passwordEnabled = useLoginMethodEnabled(email, LoginMethod.Password);
 const ssoEnabled = useLoginMethodEnabled(email, LoginMethod.SSO);
 const googleEnabled = useLoginMethodEnabled(email, LoginMethod.Google);
+const twoFactorEnabled = useTwoFactorEnabled();
 const { hasLanguages, switchLanguage } = useSwitchLanguage();
 
 const ssoConfig = useLoginMethod(LoginMethod.SSO);
@@ -369,6 +386,11 @@ async function openChangePassword() {
     await present(AsyncComponent(() => import('#views/ChangePasswordView.vue'), {}).setDisplayStyle('sheet'));
 }
 
+const show = useShow();
+async function openMFASettings() {
+    await show(AsyncComponent(() => import('#auth/MFASettingsView.vue'), {}));
+}
+
 let disconnecting = false;
 
 async function disconnectProvider(provider: LoginProviderType) {
@@ -443,7 +465,6 @@ async function logout() {
             console.error(e);
         }
         await $context.value.logout();
-        await pop({ force: true });
     }
 }
 

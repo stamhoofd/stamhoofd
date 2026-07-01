@@ -5,9 +5,9 @@ setup();
 // other imports
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { STPackageService } from '@stamhoofd/backend/tests/helpers';
-import { EmailVerificationCode, Organization, OrganizationFactory, User, UserFactory } from '@stamhoofd/models';
-import { AcquisitionType, STPackageBundle } from '@stamhoofd/structures';
+import { MFATestHelper, STPackageService } from '@stamhoofd/backend/tests/helpers';
+import { EmailVerificationCode, Organization, OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AcquisitionType, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { OnboardingScenario } from '../flows/OnboardingScenario.js';
 import { WorkerData } from '../helpers/index.js';
@@ -17,8 +17,9 @@ import { WorkerData } from '../helpers/index.js';
  *  1. After logging in as an unverified user
  *  2. After signing up at an existing organization
  *  3. After signing up a new organization (organization mode only)
- *  4. Opening the verification link from the email directly (token + code)
- *  5. Reloading the verify email page (token, but no code)
+ *  4. After changing the email address of a user with two-factor authentication
+ *  5. Opening the verification link from the email directly (token + code)
+ *  6. Reloading the verify email page (token, but no code)
  *
  * In every scenario we also check:
  *  - the url of the verify email view (/verify-email or /verify-email/<organization-uri>)
@@ -181,6 +182,28 @@ async function loginViaUI(page: Page, { email, password }: { email: string; pass
 }
 
 /**
+ * Sign in by setting the token in local storage (same as routing.spec.ts).
+ */
+async function loginAs({ page, user }: { page: Page; user: User }) {
+    const token = await Token.createToken(user);
+    const tokenString = JSON.stringify(
+        new TokenStruct(token).encode({ version: Version }),
+    );
+
+    const organizationId = user.organizationId;
+    await page.addInitScript(({ organizationId, tokenString }) => {
+        window.localStorage.removeItem('user-platform');
+
+        if (organizationId) {
+            window.localStorage.removeItem('user-' + organizationId);
+            window.localStorage.setItem('token-' + organizationId, tokenString);
+        } else {
+            window.localStorage.setItem('token-platform', tokenString);
+        }
+    }, { organizationId, tokenString });
+}
+
+/**
  * Fill in the login form (the login view should already be visible) and submit.
  */
 async function openSignupOnMembersLogin(page: Page) {
@@ -290,6 +313,43 @@ function defineCommonScenarios(getContext: () => EnvContext) {
         await expectVerifiedToast(page);
         await expectMemberPortal(page, ctx.memberPortalUrl);
         await expectUserVerified(verificationCode.userId);
+    });
+
+    test('after changing the email address as a user with two-factor authentication', async ({ page }) => {
+        const ctx = getContext();
+        const email = randomEmail('verify-change-2fa');
+        const newEmail = randomEmail('verify-changed-2fa');
+
+        const user = await new UserFactory({
+            organization: ctx.userOrganization,
+            email,
+            password: PASSWORD,
+        }).create();
+        await MFATestHelper.addConfirmedTOTP(user);
+
+        await loginAs({ page, user });
+        await page.goto(ctx.loginUrl);
+
+        await test.step('Change the email address in the account settings', async () => {
+            await page.locator('.account-switcher').click({ timeout: 20_000 });
+
+            const accountView = page.locator('#account-view');
+            await expect(accountView).toBeVisible({ timeout: 20_000 });
+            await accountView.getByTestId('email-input').fill(newEmail);
+            await accountView.locator('#submit').click();
+        });
+
+        await expectVerifyEmailView(page);
+
+        const verificationCode = await getVerificationCode(newEmail);
+        await fillCode(page, verificationCode.code);
+
+        // The user already passed their second factor when they signed in: verifying a new
+        // email address may not ask for it again.
+        await expectVerifiedToast(page);
+        await expect(page.getByTestId('choose-mfa-method-view')).toBeHidden();
+
+        expect((await User.getByID(user.id))?.email).toBe(newEmail);
     });
 
     test('opening the verification link with token and code verifies automatically', async ({ page }) => {

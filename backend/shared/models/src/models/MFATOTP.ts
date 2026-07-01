@@ -1,0 +1,112 @@
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel, SQL, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * A single TOTP authenticator enrolled by a user. A user may have multiple.
+ * The `secret` is stored encrypted at rest (see EncryptionHelper).
+ */
+export class MFATOTP extends QueryableModel {
+    static table = 'mfa_totp';
+
+    @column({
+        primary: true, type: 'string', beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
+    id!: string;
+
+    @column({ type: 'string' })
+    userId: string;
+
+    @column({ type: 'string' })
+    name = '';
+
+    /**
+     * The encrypted base32 TOTP secret.
+     */
+    @column({ type: 'string' })
+    secret: string;
+
+    /**
+     * Null until the user has verified their first code. Unconfirmed rows do not count
+     * as an enrolled factor.
+     */
+    @column({ type: 'datetime', nullable: true })
+    confirmedAt: Date | null = null;
+
+    @column({ type: 'datetime', nullable: true })
+    lastUsedAt: Date | null = null;
+
+    /**
+     * The last accepted TOTP step counter. A code may only be accepted if its counter is
+     * strictly greater than this, so a still-valid code cannot be replayed (RFC 6238 §5.2).
+     */
+    @column({ type: 'integer', nullable: true })
+    lastUsedCounter: number | null = null;
+
+    @column({
+        type: 'datetime', beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
+    })
+    createdAt: Date;
+
+    @column({
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
+        skipUpdate: true,
+    })
+    updatedAt: Date;
+
+    /**
+     * Record `counter` as the last accepted step, but only when no other request claimed
+     * the same or a newer one first. Returns false when it was already claimed: two logins
+     * that submit the same still-valid code at the same time must not both succeed
+     * (RFC 6238 §5.2), so the claim has to happen in a single conditional UPDATE instead of
+     * a read followed by a write.
+     */
+    async claimCounter(counter: number): Promise<boolean> {
+        const { changedRows } = await MFATOTP.update()
+            .set('lastUsedCounter', counter)
+            .set('lastUsedAt', new Date())
+            .where('id', this.id)
+            .where(new SQLWhereOr([
+                new SQLWhereEqual(SQL.column('lastUsedCounter'), SQLWhereSign.Equal, new SQLNull()),
+                new SQLWhereEqual(SQL.column('lastUsedCounter'), SQLWhereSign.Less, new SQLScalar(counter)),
+            ]))
+            .update();
+
+        if (changedRows !== 1) {
+            return false;
+        }
+
+        this.lastUsedCounter = counter;
+        return true;
+    }
+
+    static async getForUser(userId: string): Promise<MFATOTP[]> {
+        return await this.select().where('userId', userId).fetch();
+    }
+
+    static async getConfirmedForUser(userId: string): Promise<MFATOTP[]> {
+        const all = await this.getForUser(userId);
+        return all.filter(t => t.confirmedAt !== null);
+    }
+
+    /**
+     * Remove abandoned, never-confirmed authenticators (e.g. from earlier setup attempts
+     * that were never completed) so they don't accumulate as orphaned rows.
+     */
+    static async deleteUnconfirmedForUser(userId: string): Promise<void> {
+        await this.delete().where('userId', userId).where('confirmedAt', null);
+    }
+}

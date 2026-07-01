@@ -8,10 +8,35 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <hr><h2>{{ $t('%NN') }}</h2>
+        <template v-if="twoFactorEnabled || requireTwoFactor">
+            <hr><h2>{{ $t('Beveiliging') }}</h2>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="requireTwoFactor" data-testid="require-two-factor" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Tweestapsverificatie verplichten voor beheerders') }}
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" data-testid="sign-out-admins" @click.prevent="signOutAdmins">
+                    <template #left>
+                        <IconContainer icon="logout" aside-icon="power" class="error" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Alle beheerders afmelden') }}
+                    </h3>
+                </STListItem>
+            </STList>
+        </template>
+
+        <hr>
+        <h2>{{ $t('%NN') }}</h2>
 
         <STList class="illustration-list">
-            <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
+            <STListItem :selectable="true" class="left-center" data-testid="open-api-users" @click="openApiUsers(true)">
                 <template #left>
                     <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                 </template>
@@ -222,13 +247,14 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-
+import { useTwoFactorEnabled } from '@stamhoofd/components/hooks/useTwoFactorEnabled.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
@@ -242,6 +268,7 @@ const show = useShow();
 const present = usePresent();
 const dismiss = useDismiss();
 const requestOwner = {};
+const twoFactorEnabled = useTwoFactorEnabled();
 
 const errorBox = ref<ErrorBox | null>(null);
 const validator = new Validator();
@@ -324,6 +351,65 @@ const disableCalendar = computed({
     },
 });
 
+const requireTwoFactor = computed({
+    get: () => organization.value.privateMeta?.requireTwoFactor ?? false,
+    set: (requireTwoFactor) => {
+        organizationPatch.value = organizationPatch.value.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({ requireTwoFactor }),
+        });
+    },
+});
+
+/**
+ * Requiring two-factor authentication is only enforced when a session is created, so admins
+ * that are already signed in keep their session and are never asked to enroll. Ending those
+ * sessions forces them through the login flow, and with that through the enrollment.
+ */
+async function signOutAdmins() {
+    if (!await CenteredMessage.confirm({
+        title: $t('Alle beheerders afmelden?'),
+        confirmText: $t('Afmelden'),
+        description: hasChanges.value
+            ? $t('Ze moeten zich daarna opnieuw aanmelden. Jouw wijzigingen hierboven worden nog niet opgeslagen.')
+            : $t('Ze moeten zich daarna opnieuw aanmelden.'),
+    })) {
+        return;
+    }
+
+    await doSignOutAdmins();
+}
+
+/**
+ * Ask to sign out the other admins right after two-factor authentication became required:
+ * without it the requirement only applies to admins that sign in again on their own.
+ */
+async function askToSignOutAdmins() {
+    if (!await CenteredMessage.confirm({
+        title: $t('Alle beheerders afmelden?'),
+        confirmText: $t('Afmelden'),
+        description: $t('Beheerders moeten tweestapsverificatie pas verplicht instellen bij hun volgende aanmelding. Daarom raden we aan om alle beheerders af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.'),
+        cancelText: $t('Niet afmelden'),
+        destructive: false,
+    })) {
+        return;
+    }
+
+    await doSignOutAdmins();
+}
+
+async function doSignOutAdmins() {
+    try {
+        await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/organization/admins/sign-out',
+            owner: requestOwner,
+        });
+        new Toast($t('Alle beheerders zijn afgemeld'), 'success green').show();
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
 async function save() {
     if (saving.value) {
         return;
@@ -344,11 +430,20 @@ async function save() {
         return;
     }
 
+    // Read before saving, because saving updates the organization we compare against
+    const startedRequiringTwoFactor = !baseOrganization.value.privateMeta?.requireTwoFactor && requireTwoFactor.value;
+
     saving.value = true;
     try {
         await organizationManager.value.patch(organizationPatch.value);
         organizationPatch.value = Organization.patch({ id: baseOrganization.value.id });
         new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+
+        if (startedRequiringTwoFactor) {
+            // After the patch, so the admins that sign in again already meet the new requirement
+            await askToSignOutAdmins();
+        }
+
         await dismiss({ force: true });
     } catch (e) {
         errorBox.value = new ErrorBox(e);

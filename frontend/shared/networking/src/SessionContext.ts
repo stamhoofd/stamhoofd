@@ -66,6 +66,13 @@ export class SessionContext implements RequestMiddleware {
     isStorageDisabled = false;
 
     /**
+     * Set by checkSSO() when the identity provider signed the user in, but the login still
+     * needs a second factor (`mfaToken`) or the enrollment of one (`setupToken`). There is
+     * no session token yet. The login view reads this to continue the flow, and clears it.
+     */
+    pendingSSOTwoFactor: { mfaToken: string } | { setupToken: string; canUsePasskeys: boolean } | null = null;
+
+    /**
      * A session always needs a platform: it is required to calculate permissions. Pass the app level
      * platform (see loadPlatform), which is either read from cache or fetched over the network.
      */
@@ -328,18 +335,20 @@ export class SessionContext implements RequestMiddleware {
     async checkSSO() {
         const search = UrlHelper.initial.getSearchParams();
         const oid_rt = search.get('oid_rt');
+        const oid_mfa = search.get('oid_mfa');
+        const oid_mfa_setup = search.get('oid_mfa_setup');
+        const oid_mfa_passkeys = search.get('oid_mfa_passkeys');
         const state = search.get('s');
         const error = search.get('error');
         const msg = search.get('msg');
 
         console.log('Checking SSO', oid_rt, state, error);
 
-        if (oid_rt && state) {
-            // Delete initial url
-            search.delete('oid_rt');
-            search.delete('s');
-
-            // Check valid state
+        /**
+         * The state is a one-time value we stored before starting the flow: it proves the
+         * result in the url belongs to a login this browser started.
+         */
+        const consumeState = async (): Promise<boolean> => {
             try {
                 const savedState = await Storage.secure.getItem('oid-state');
                 if (savedState !== state) {
@@ -348,15 +357,26 @@ export class SessionContext implements RequestMiddleware {
                     if (!this.canGetCompleted()) {
                         new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
                     }
-                    return;
+                    return false;
                 }
                 Storage.secure.removeItem('oid-state').catch(console.error);
+                return true;
             } catch (e) {
                 console.error(e);
 
                 if (!this.canGetCompleted()) {
                     new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
                 }
+                return false;
+            }
+        };
+
+        if (oid_rt && state) {
+            // Delete initial url
+            search.delete('oid_rt');
+            search.delete('s');
+
+            if (!await consumeState()) {
                 return;
             }
 
@@ -372,6 +392,25 @@ export class SessionContext implements RequestMiddleware {
             } catch (e) {
                 console.error(e);
             }
+        }
+
+        // The identity provider authenticated the user, but the login is not finished: a
+        // second factor still has to be passed or set up. No session token was handed out,
+        // so we only remember what is pending; the login views pick this up and run the
+        // same 2FA flow as a password login.
+        if ((oid_mfa || oid_mfa_setup) && state) {
+            search.delete('oid_mfa');
+            search.delete('oid_mfa_setup');
+            search.delete('oid_mfa_passkeys');
+            search.delete('s');
+
+            if (!await consumeState()) {
+                return;
+            }
+
+            this.pendingSSOTwoFactor = oid_mfa
+                ? { mfaToken: oid_mfa }
+                : { setupToken: oid_mfa_setup!, canUsePasskeys: oid_mfa_passkeys === '1' };
         }
 
         if (state && error) {
@@ -429,7 +468,12 @@ export class SessionContext implements RequestMiddleware {
         }
     }
 
-    async startSSO(data: { webshopId?: string; prompt?: string; providerType: LoginProviderType }) {
+    /**
+     * `reauthenticate` confirms the identity of the user that is already signed in instead
+     * of linking the provider to their account: the current session counts as freshly
+     * authenticated again when the provider returns the same user.
+     */
+    async startSSO(data: { webshopId?: string; prompt?: string; providerType: LoginProviderType; reauthenticate?: boolean }) {
         const spaState = generateId(40);
         try {
             await Storage.secure.setItem('oid-state', spaState);
@@ -474,6 +518,10 @@ export class SessionContext implements RequestMiddleware {
                 decoder: OpenIDAuthTokenResponse as Decoder<OpenIDAuthTokenResponse>,
             });
             url.searchParams.set('authToken', respponse.data.ssoAuthToken);
+
+            if (data.reauthenticate) {
+                url.searchParams.set('reauthenticate', 'true');
+            }
         }
 
         // Redirect / open url
@@ -496,6 +544,16 @@ export class SessionContext implements RequestMiddleware {
 
     hasToken(): boolean {
         return !!this.token;
+    }
+
+    /**
+     * The access token as it is right now, without refreshing it first. Only use this to
+     * authenticate a request that must also work when the session is invalid or expired -
+     * a normal authenticated request should go through authenticatedServer, which refreshes
+     * the token when needed.
+     */
+    get currentAccessToken(): string | null {
+        return this.token?.token.accessToken ?? null;
     }
 
     canGetCompleted(): boolean {
@@ -546,7 +604,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     get identityServer() {
-        if (STAMHOOFD.userMode === 'platform') {
+        if (STAMHOOFD.userMode === 'platform' || (this.user && this.user.organizationId === null)) {
             return SessionContext.serverForOrganization(null);
         }
         return SessionContext.serverForOrganization(this.organization?.id);

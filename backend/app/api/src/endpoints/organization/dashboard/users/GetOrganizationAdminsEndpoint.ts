@@ -4,6 +4,7 @@ import { User } from '@stamhoofd/models';
 import { OrganizationAdmins } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
+import { TwoFactorHelper } from '../../../../helpers/TwoFactorHelper.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
@@ -34,10 +35,12 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
 
         // Get all admins
         const admins = await User.getAdmins(organization.id);
+        const users = admins.map(user => user.getStructure());
+        await TwoFactorHelper.fillTwoFactorStatus(users);
 
         return new Response(
             OrganizationAdmins.create({
-                users: admins.map(user => user.getStructure()),
+                users,
             }),
         );
     }

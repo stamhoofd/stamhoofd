@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, PlatformConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { PermissionLevel, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -21,6 +21,40 @@ describe('Endpoint.PatchPlatform', () => {
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
+
+    const setPlatformRequiresTwoFactor = async (requireTwoFactor: boolean) => {
+        const platform = await Platform.getForEditing();
+        platform.privateConfig.requireTwoFactor = requireTwoFactor;
+        await platform.save();
+    };
+
+    test('Should save whether two-factor authentication is required for platform admins', async () => {
+        const organization = await new OrganizationFactory({ }).create();
+
+        const admin = await new UserFactory({
+            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const token = await Token.createToken(admin);
+
+        try {
+            const response = await patchPlatform({
+                patch: PlatformStruct.patch({
+                    privateConfig: PlatformPrivateConfig.patch({
+                        requireTwoFactor: true,
+                    }),
+                }),
+                organization,
+                token,
+            });
+
+            expect(response.body.privateConfig?.requireTwoFactor).toBe(true);
+            expect((await Platform.getForEditing()).privateConfig.requireTwoFactor).toBe(true);
+        }
+        finally {
+            // The platform row is shared by every test file
+            await setPlatformRequiresTwoFactor(false);
+        }
+    });
 
     describe('userMode organization', () => {
         beforeEach(async () => {

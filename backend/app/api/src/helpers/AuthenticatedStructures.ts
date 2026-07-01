@@ -9,6 +9,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context.js';
+import { TwoFactorHelper } from './TwoFactorHelper.js';
 
 /**
  * Builds authenticated structures for the current user
@@ -425,7 +426,7 @@ export class AuthenticatedStructures {
             }
         }
 
-        return UserWithMembers.create({
+        const struct = UserWithMembers.create({
             ...user,
             hasAccount: user.hasAccount(),
             hasPassword: user.hasPasswordBasedAccount(),
@@ -433,6 +434,8 @@ export class AuthenticatedStructures {
             // Always include the current context organization - because it is possible we switch organization and we don't want to refetch every time
             members: await this.membersBlob(filtered, true, user),
         });
+        await TwoFactorHelper.fillTwoFactorStatus([struct]);
+        return struct;
     }
 
     /**
@@ -452,6 +455,8 @@ export class AuthenticatedStructures {
                 members: await this.membersBlob(filteredMembers, false),
             }));
         }
+
+        await TwoFactorHelper.fillTwoFactorStatus(structs);
 
         return structs;
     }
@@ -696,6 +701,9 @@ export class AuthenticatedStructures {
                 await Context.auth.filterMemberData(member, blob, { forAdminCartCalculation: options?.forAdminCartCalculation ?? false }),
             );
         }
+
+        // After filterMemberData, so we only query for the users we actually return.
+        await TwoFactorHelper.fillTwoFactorStatus(memberBlobs.flatMap(b => b.users));
 
         for (const blob of memberBlobs) {
             blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map((r) => {
