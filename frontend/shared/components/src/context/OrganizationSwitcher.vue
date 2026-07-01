@@ -5,7 +5,7 @@
         <ContextLogo :organization="organization" :app="app" />
         <div>
             <h1>
-                <span data-testid="app-name">{{ small && organization ? organization.name : getAppTitle(app, organization, 'bar') }}</span><span v-if="small" class="icon arrow-down-small gray" />
+                <span data-testid="app-name">{{ getAppTitle(app, organization, small ? 'small-bar' : 'bar') }}</span><span v-if="small" class="icon arrow-down-small gray" />
             </h1>
             <h2 v-if="!small && getAppDescription(app, organization, 'bar') && canSwitch">
                 <span>{{ getAppDescription(app, organization, 'bar') }}</span>
@@ -17,8 +17,8 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 
 import { useOrganization } from '#hooks/useOrganization';
 import { usePositionableSheet } from '#tables/usePositionableSheet';
@@ -26,9 +26,9 @@ import { useAppContext, useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import { useContextOptions } from './hooks/useContextOptions';
 
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import OrganizationLogo from './OrganizationLogo.vue';
 import PlatformLogo from './PlatformLogo.vue';
-import { AppManager } from '@stamhoofd/networking/AppManager';
 
 const organization = useOrganization();
 const app = useAppContext();
@@ -38,7 +38,20 @@ const { hasAdminOption, getDefaultOptions } = useContextOptions();
 
 const options = getDefaultOptions();
 const hasAdmin = hasAdminOption();
-const canSwitch = options.length > 1 || (options.length === 1 && (((options[0].organization?.id ?? null) !== (organization.value?.id ?? null)) || (options[0].app !== app && options[0].app !== 'auto' && app !== 'auto'))) || hasAdmin || (STAMHOOFD.userMode === 'organization' && AppManager.shared.isOnDashboardDomain);
+const canSwitch = options.length > 1
+    || (
+        // Can switch if only one option, and the option differs from the current app (move away from an option you normally cannot navigate to)
+        options.length === 1
+        && (
+            ((options[0].organization?.id ?? null) !== (organization.value?.id ?? null) && !STAMHOOFD.singleOrganization)
+            || (options[0].app !== app && options[0].app !== 'auto' && app !== 'auto')
+        )
+    )
+    || hasAdmin
+    || (
+        STAMHOOFD.userMode === 'organization'
+        && AppManager.shared.isOnDashboardDomain
+    );
 
 withDefaults(
     defineProps<{

@@ -66,21 +66,21 @@ export function useContextOptions() {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            opts.push(getRegistrationOption(STAMHOOFD.singleOrganization && STAMHOOFD.singleOrganization === $organization.value?.id ? $organization.value : null, user));
+            opts.push(getRegistrationOption(null, user));
         }
 
         let organizationIds = [...user?.permissions?.organizationPermissions.keys() ?? []];
         if (STAMHOOFD.singleOrganization) {
             organizationIds = [STAMHOOFD.singleOrganization];
-        }
+        } else {
+            // Always add membership organization (we'll check permissions in the loop)
+            if (platform.value.membershipOrganizationId && !organizationIds.includes(platform.value.membershipOrganizationId)) {
+                organizationIds.push(platform.value.membershipOrganizationId);
+            }
 
-        // Always add membership organization (we'll check permissions in the loop)
-        if (platform.value.membershipOrganizationId && !organizationIds.includes(platform.value.membershipOrganizationId)) {
-            organizationIds.push(platform.value.membershipOrganizationId);
-        }
-
-        if ($organization.value && !organizationIds.includes($organization.value.id)) {
-            organizationIds.push($organization.value.id);
+            if ($organization.value && !organizationIds.includes($organization.value.id)) {
+                organizationIds.push($organization.value.id);
+            }
         }
 
         for (const organizationId of organizationIds) {
@@ -115,7 +115,7 @@ export function useContextOptions() {
                     continue;
                 }
 
-                if ($organization.value?.id === organization.id) {
+                if ($organization.value?.id === organization.id || STAMHOOFD.singleOrganization) {
                     app = 'dashboard';
                 }
             }

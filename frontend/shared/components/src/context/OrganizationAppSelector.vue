@@ -105,7 +105,6 @@ onMounted(async () => {
 
 function isCurrentOption(o: Option) {
     // Current option = logged in with the same user
-
     return (!organization.value || !o.organization || (organization.value && o.organization?.id === organization.value.id)) && user.value && o.context.user?.id === user.value.id;
 }
 

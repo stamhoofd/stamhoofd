@@ -1536,14 +1536,10 @@ test.describe('Routing on page load @routing', () => {
 
     test.describe('Single Organization mode', () => {
         let organization!: Organization;
-        async function createOrganization() {
-            const organization = await new OrganizationFactory({}).create();
-            return organization;
-        }
 
         test.beforeAll(async () => {
             TestUtils.setPermanentEnvironment('userMode', 'platform');
-            organization = await createOrganization();
+            organization = membershipOrganization;
             TestUtils.setPermanentEnvironment('singleOrganization', organization.id);
         });
 
@@ -1569,8 +1565,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: null,
                     expectedLocator: '#settings-view',
                     expectedTopLeft: {
-                        // single org + all options 'current' → no "search others" (suppressed by singleOrganization)
-                        options: [adminOption, unscopedMemberPortalOption, otherOrgOptions(organization), otherOrgOptions(membershipOrganization)],
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1585,8 +1580,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                     expectedTopLeft: {
-                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging'), otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1600,8 +1595,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
                     expectedTopLeft: {
-                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging'), otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1615,8 +1610,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedTopLeft: {
-                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging'), otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1632,8 +1627,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                     expectedTopLeft: {
-                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging'), otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1647,8 +1642,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedTopLeft: {
-                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging'), otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1662,8 +1657,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                     expectedTopLeft: {
-                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging'), otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
+                        options: [adminOption, unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1692,7 +1687,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: null,
                     expectedLocator: '[data-testid="no-permissions-view"]',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, otherOrgOptions(organization)],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1707,7 +1702,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging')],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1722,7 +1717,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '#settings-view',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging')],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1737,7 +1732,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging')],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1752,7 +1747,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="events-overview"]',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging')],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1769,7 +1764,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="event-view-' + event.id + '"]',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging')],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1784,7 +1779,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedScope: organization,
                     expectedLocator: '[data-testid="dashboard-start-view"]',
                     expectedTopLeft: {
-                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Mijn vereniging')],
+                        options: [unscopedMemberPortalOption, dashboardOption(organization, 'Beheerdersportaal')],
                         includeSearchOthers: false,
                     },
                 });
@@ -1841,10 +1836,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: false,
-                    },
+                    expectedTopLeft: 'organization-logo',
                 });
             });
 
@@ -1856,10 +1848,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/activiteiten',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="events-overview"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: false,
-                    },
+                    expectedTopLeft: 'organization-logo',
                 });
             });
 
@@ -1873,10 +1862,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/activiteiten/' + event.slug,
                     expectedScope: organization,
                     expectedLocator: '[data-testid="event-view-' + event.id + '"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: false,
-                    },
+                    expectedTopLeft: 'organization-logo',
                 });
             });
 
@@ -1888,10 +1874,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden/start',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="members-start-view"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: false,
-                    },
+                    expectedTopLeft: 'organization-logo',
                 });
             });
         });
@@ -1911,7 +1894,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedLocator: '[data-testid="login-view"]',
                     expectedTopLeft: {
                         options: [unscopedMemberPortalOption],
-                        includeSearchOthers: true,
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1926,7 +1909,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedLocator: '[data-testid="login-view"]',
                     expectedTopLeft: {
                         options: [unscopedMemberPortalOption],
-                        includeSearchOthers: true,
+                        includeSearchOthers: false,
                     },
                 });
             });
@@ -1939,10 +1922,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: true,
-                    },
+                    expectedTopLeft: 'organization-logo',
+
                 });
             });
 
@@ -1954,10 +1935,8 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE/leden',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: true,
-                    },
+                    expectedTopLeft: 'organization-logo',
+
                 });
             });
 
@@ -1969,10 +1948,7 @@ test.describe('Routing on page load @routing', () => {
                     expectedUrl: domain + '/nl-BE',
                     expectedScope: organization,
                     expectedLocator: '[data-testid="login-view"]',
-                    expectedTopLeft: {
-                        options: [unscopedMemberPortalOption],
-                        includeSearchOthers: true,
-                    },
+                    expectedTopLeft: 'organization-logo',
                 });
             });
         });

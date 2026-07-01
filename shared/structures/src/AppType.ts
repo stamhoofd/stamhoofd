@@ -77,7 +77,7 @@ export function uriToApp(uri: string) {
 
 export const getAppName = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return STAMHOOFD.userMode === 'organization' ? $t('%6v') : $t('%44');
+        case 'dashboard': return STAMHOOFD.userMode === 'organization' || !!STAMHOOFD.singleOrganization ? $t('%6v') : $t('%44');
         case 'registration': return $t('%2g');
         case 'admin': return $t(`%IW`);
         case 'webshop': return $t(`%2N`);
@@ -100,22 +100,15 @@ export const getAppNameDescription = (app: AppType) => {
  * current = switching between apps in the same scope (member portal <-> admin portal of same organization)
  * other = switching between different organizations, or when searching organizations
  */
-export type AppDisplayPosition = 'bar' | 'current' | 'other';
+export type AppDisplayPosition = 'bar' | 'small-bar' | 'current' | 'other';
 
 export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
-    if (displayPosition === 'bar') {
-        if (organization) {
-            return organization.name;
-        }
-        return getAppName(app);
-    }
-
     if (displayPosition === 'current' && app !== 'auto') {
         return getAppName(app);
     }
 
     // Other
-    if (!organization) {
+    if (!organization || STAMHOOFD.singleOrganization) {
         return getAppName(app);
     }
     return organization.name;
@@ -134,8 +127,7 @@ export const getAppDescription = (app: AppType | 'auto', organization: Organizat
     }
 
     // Other
-
-    if (!organization) {
+    if (!organization || STAMHOOFD.singleOrganization) {
         return getAppNameDescription(app);
     }
     return organization.address.anonymousString();
