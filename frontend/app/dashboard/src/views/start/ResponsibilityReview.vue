@@ -8,7 +8,7 @@
                 </template>
             </IconContainer>
         </template>
-        <h3 class="style-title-list large">
+        <h3 class="style-title-list">
             {{ name }}
         </h3>
         <p v-if="placeholderString" class="style-description-small">
