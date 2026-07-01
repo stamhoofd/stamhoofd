@@ -6022,5 +6022,8 @@
   "%ZZm": "Alle hoofdbeheerders",
   "%ZZr": "Ben je zeker dat je deze categorie en groepen wilt verwijderen?",
   "%ZZs": "Beheerders volledige boekhouding",
-  "%ZZt": "Schakel de kalender functionaliteit uit in Stamhoofd."
+  "%ZZt": "Schakel de kalender functionaliteit uit in Stamhoofd.",
+  "%ZZu": "Werkjaar vergrendeld",
+  "%ZZv": "Betalende vereniging",
+  "%ZZw": "Werkjaar niet actief"
 }

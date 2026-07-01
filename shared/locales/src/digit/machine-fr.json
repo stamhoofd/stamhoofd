@@ -1467,6 +1467,10 @@
     "original": "Schakel de kalender functionaliteit uit in Ravot.",
     "translation": "Désactivez la fonctionnalité du calendrier dans Ravot."
   },
+  "%ZZv": {
+    "original": "Betalende groep",
+    "translation": "Groupe payant"
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

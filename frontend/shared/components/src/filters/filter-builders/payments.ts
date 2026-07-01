@@ -190,7 +190,7 @@ export function usePaymentsUIFilterBuilders() {
 
         // Also allow to specifically select organizations
         const organizationRelationFilter = new RelationFilterBuilder({
-            name: $t('Vereniging'),
+            name: $t('%1PI'),
             key: 'id',
             wrapper: FilterWrapperMarker,
             relationFetcher: organizationsRelationFetcher,
@@ -198,7 +198,7 @@ export function usePaymentsUIFilterBuilders() {
         payingOrganizationBuilders.splice(1, 0, organizationRelationFilter);
 
         builders.push(new GroupUIFilterBuilder({
-            name: $t('Betalende vereniging'),
+            name: $t('%ZZv'),
             builders: payingOrganizationBuilders,
             wrapper: { payingOrganization: FilterWrapperMarker } as WrapperFilter,
         }));

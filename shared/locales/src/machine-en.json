@@ -17163,6 +17163,18 @@
     "original": "Schakel de kalender functionaliteit uit in Stamhoofd.",
     "translation": "Turn off the calendar feature in Stamhoofd."
   },
+  "%ZZu": {
+    "original": "Werkjaar vergrendeld",
+    "translation": "Work year locked"
+  },
+  "%ZZv": {
+    "original": "Betalende vereniging",
+    "translation": "Paying association"
+  },
+  "%ZZw": {
+    "original": "Werkjaar niet actief",
+    "translation": "Work year not active"
+  },
   "%Za": {
     "original": "Alle emaildomeinnamen zijn toegestaan",
     "translation": "All email domain names are allowed"

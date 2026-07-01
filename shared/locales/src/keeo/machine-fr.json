@@ -1527,6 +1527,18 @@
     "original": "Schakel de kalender functionaliteit uit in Keeo.",
     "translation": "Désactivez la fonctionnalité du calendrier dans Keeo."
   },
+  "%ZZu": {
+    "original": "Scoutsjaar vergrendeld",
+    "translation": "Année scoute verrouillée"
+  },
+  "%ZZv": {
+    "original": "Betalende eenheid",
+    "translation": "Unité payante"
+  },
+  "%ZZw": {
+    "original": "Scoutsjaar niet actief",
+    "translation": "Année scoute inactive"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

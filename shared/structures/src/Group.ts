@@ -502,13 +502,13 @@ export class Group extends AutoEncoder {
                 if (this.periodId !== options.organization.period.period.id) {
                     tags.push({
                         icon: 'lock',
-                        title: $t('Werkjaar niet actief'),
+                        title: $t('%ZZw'),
                         style: 'error',
                     });
                 } else if (this.settings.period?.locked) {
                     tags.push({
                         icon: 'lock',
-                        title: $t('Werkjaar vergrendeld'),
+                        title: $t('%ZZu'),
                         style: 'error',
                     });
                 }

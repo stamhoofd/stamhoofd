@@ -1299,6 +1299,10 @@
     "original": "Schakel de kalender functionaliteit uit in Ravot.",
     "translation": "Turn off the calendar feature in Ravot."
   },
+  "%ZZv": {
+    "original": "Betalende groep",
+    "translation": "Paying group"
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators of {organization}. Go to 'My account' if you want to register as a member."

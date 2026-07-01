@@ -1519,6 +1519,18 @@
     "original": "Schakel de kalender functionaliteit uit in Jamboree.",
     "translation": "Turn off the calendar feature in Jamboree."
   },
+  "%ZZu": {
+    "original": "Scoutsjaar vergrendeld",
+    "translation": "Scout year locked"
+  },
+  "%ZZv": {
+    "original": "Betalende eenheid",
+    "translation": "Paying unit"
+  },
+  "%ZZw": {
+    "original": "Scoutsjaar niet actief",
+    "translation": "Scout year not active"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separately from Jamboree. For Microsoft you can"
