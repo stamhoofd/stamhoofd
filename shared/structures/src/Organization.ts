@@ -62,7 +62,7 @@ export class BaseOrganization extends AutoEncoder {
     /**
      * Potentially includes a path
      */
-    getRegistrationHost(i18n?: { language: Language; locale: string }): string {
+    getRegistrationHost(i18n?: { language: Language; locale: string } | null | false): string {
         return getAppHost('registration', this, false, i18n);
     }
 
@@ -82,7 +82,7 @@ export class BaseOrganization extends AutoEncoder {
     }
 
     get registerUrl() {
-        return 'https://' + this.getRegistrationHost();
+        return 'https://' + this.getRegistrationHost(false);
     }
 
     get dashboardUrl() {

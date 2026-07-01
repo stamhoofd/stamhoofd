@@ -301,7 +301,6 @@ import { Toast } from '../overlays/Toast';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
 import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 
-
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { countAll } from '#tables/classes/ObjectFetcher.ts';
 import ImageComponent from '../views/ImageComponent.vue';
@@ -440,7 +439,7 @@ const link = computed(() => {
     if (!eventOrganization.value) {
         return '';
     }
-    return `https://${eventOrganization.value.getRegistrationHost()}/activiteiten/${props.event.slug}`;
+    return `https://${eventOrganization.value.getRegistrationHost(false)}/activiteiten/${props.event.slug}`;
 });
 
 enum Routes {

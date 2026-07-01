@@ -21,7 +21,7 @@
                     <div v-copyable="organization.registerUrl" v-tooltip="$t('%R7')" class="input-with-buttons">
                         <div>
                             <form novalidate class="input-icon-container icon earth small">
-                                <input :value="organization.getRegistrationHost()" class="input" readonly="true" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+                                <input :value="organization.getRegistrationHost(false)" class="input" readonly="true" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
                             </form>
                         </div>
                         <div>
