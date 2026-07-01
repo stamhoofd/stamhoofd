@@ -43,8 +43,8 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { MemberRegistrationInvitation, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { InvitationMemberData, LimitedFilteredRequest, PermissionLevel, RegistrationInvitation } from '@stamhoofd/structures';
@@ -81,7 +81,7 @@ const visibleRegistrationsTitle = computed(() => {
 const auth = useAuth();
 const present = usePresent();
 const organization = useOrganization();
-const organizationManager = useOrganizationManager();
+const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
 const platform = usePlatform();
 const context = useContext();
 
@@ -166,9 +166,9 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
     const el = event.currentTarget! as HTMLElement;
     const bounds = el.getBoundingClientRect();
 
-    const periods = await organizationManager.value.loadPeriods(false, true, owner).catch(console.error);
-    const selectedOrganizationRegistrationPeriod = periods?.organizationPeriods.find(p => p.period.id === registration.group.periodId);
-    const actions = builder.getActions({ selectedOrganizationRegistrationPeriod });
+    const periods = await fetchOrganizationPeriods({ shouldRetry: true }).catch(console.error);
+    const selectedOrganizationRegistrationPeriod = periods ? periods.organizationPeriods.find(p => p.period.id === registration.group.periodId) : undefined;
+    const actions = await builder.getActions({ selectedOrganizationRegistrationPeriod });
 
     if (actions.filter(a => a.enabled()).length === 0) {
         Toast.warning($t(`%10J`)).show();

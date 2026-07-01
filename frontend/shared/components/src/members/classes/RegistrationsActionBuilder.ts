@@ -1,14 +1,15 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PlatformMember, Registration} from '@stamhoofd/structures';
+import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PlatformMember, Registration } from '@stamhoofd/structures';
 import { appToUri, PermissionLevel, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
-import type { PlatformFamilyManager} from '../PlatformFamilyManager';
+import type { PlatformFamilyManager } from '../PlatformFamilyManager';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 
 export function useRegistrationsActionBuilder() {
@@ -17,6 +18,7 @@ export function useRegistrationsActionBuilder() {
     const platformFamilyManager = usePlatformFamilyManager();
     const owner = useRequestOwner();
     const organization = useOrganization();
+    const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
 
     return (options: { registration: Registration; member: PlatformMember }) => {
         const org = options.member.organizations.find(o => o.id === options.registration.organizationId) ?? organization.value;
@@ -33,6 +35,7 @@ export function useRegistrationsActionBuilder() {
             registrations: [options.registration],
             platformFamilyManager,
             owner,
+            fetchOrganizationPeriods,
         });
     };
 }
@@ -48,6 +51,10 @@ export class RegistrationsActionBuilder {
     context: SessionContext;
     platformFamilyManager: PlatformFamilyManager;
     owner: any;
+    fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
+
+    /** Cache of periods, loadResolvedPeriods fills in */
+    private resolvedPeriods: OrganizationRegistrationPeriod[] | null = null;
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
@@ -57,6 +64,7 @@ export class RegistrationsActionBuilder {
         organization: Organization;
         platformFamilyManager: PlatformFamilyManager;
         owner: any;
+        fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
     }) {
         this.present = settings.present;
         this.context = settings.context;
@@ -65,6 +73,34 @@ export class RegistrationsActionBuilder {
         this.organization = settings.organization;
         this.platformFamilyManager = settings.platformFamilyManager;
         this.owner = settings.owner;
+        this.fetchOrganizationPeriods = settings.fetchOrganizationPeriods;
+    }
+
+    /** Resolve (and cache) the organization periods */
+    async loadResolvedPeriods(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): Promise<void> {
+        const fallback = [selectedOrganizationRegistrationPeriod ?? this.organization.period];
+
+        // Only the context organization's periods can be fetched, and only full-access users may switch periods.
+        if (!this.context.auth.hasFullAccess() || !this.fetchOrganizationPeriods || this.context.organization?.id !== this.organization.id) {
+            this.resolvedPeriods = fallback;
+            return;
+        }
+
+        try {
+            const list = await this.fetchOrganizationPeriods({ shouldRetry: true });
+            const periods = list.organizationPeriods.filter(p => !p.period.locked);
+            this.resolvedPeriods = periods.length > 0 ? periods : fallback;
+        } catch (e) {
+            console.error('Failed to load organization registration periods', e);
+            this.resolvedPeriods = fallback;
+        }
+    }
+
+    private getResolvedPeriods(fallbackPeriod?: OrganizationRegistrationPeriod): OrganizationRegistrationPeriod[] {
+        if (this.resolvedPeriods && this.resolvedPeriods.length > 0) {
+            return this.resolvedPeriods;
+        }
+        return [fallbackPeriod ?? this.organization.period];
     }
 
     get hasWrite() {
@@ -91,8 +127,7 @@ export class RegistrationsActionBuilder {
             }
         }
 
-        const organization = this.organization;
-        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [selectedOrganizationRegistrationPeriod ?? organization.period];
+        const periods = this.getResolvedPeriods(selectedOrganizationRegistrationPeriod);
 
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
@@ -266,7 +301,9 @@ export class RegistrationsActionBuilder {
         ];
     }
 
-    getActions(options: { selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
+    async getActions(options: { selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): Promise<TableAction<PlatformMember>[]> {
+        await this.loadResolvedPeriods(options.selectedOrganizationRegistrationPeriod);
+
         return [
             ...this.getMoveAction(options.selectedOrganizationRegistrationPeriod),
             ...this.getAdminActions(),

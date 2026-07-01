@@ -15,6 +15,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, ExcelExportType, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
@@ -44,6 +45,7 @@ export function useMemberActions() {
     const owner = useRequestOwner();
     const organization = useOrganization();
     const platform = usePlatform();
+    const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
 
     return (options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; forceWriteAccess?: boolean | null }) => {
         return new MemberActionBuilder({
@@ -56,6 +58,7 @@ export function useMemberActions() {
             platformFamilyManager,
             owner,
             forceWriteAccess: options?.forceWriteAccess,
+            fetchOrganizationPeriods,
         });
     };
 }
@@ -79,6 +82,10 @@ export class MemberActionBuilder {
     owner: any;
 
     forceWriteAccess: boolean | null = null;
+    fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
+
+    /** Cache of periods, loadResolvedPeriods fills in */
+    private resolvedPeriods: OrganizationRegistrationPeriod[] | null = null;
 
     private readonly isWaitingList: boolean;
     private eventGroupsLinkedToWaitingList: Group[] | null = null;
@@ -98,6 +105,7 @@ export class MemberActionBuilder {
         owner: any;
         categories: GroupCategoryTree[];
         forceWriteAccess?: boolean | null;
+        fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
     }) {
         this.present = settings.present;
         this.context = settings.context;
@@ -108,6 +116,7 @@ export class MemberActionBuilder {
         this.platformFamilyManager = settings.platformFamilyManager;
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
+        this.fetchOrganizationPeriods = settings.fetchOrganizationPeriods;
         this.isWaitingList = this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
     }
 
@@ -199,7 +208,7 @@ export class MemberActionBuilder {
             ];
         };
 
-        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [organization.period];
+        const periods = this.getResolvedPeriods(organization);
 
         if (periods.length > 1) {
             return periods.map((period) => {
@@ -297,7 +306,7 @@ export class MemberActionBuilder {
         suggestedGroups = suggestedGroups.filter(g => this.groups.find(gg => gg.id === g.id) === undefined); // Remove groups that are already selected
 
         const organization = this.organizations[0];
-        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [selectedOrganizationRegistrationPeriod ?? organization.period];
+        const periods = this.getResolvedPeriods(organization, selectedOrganizationRegistrationPeriod);
 
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
@@ -507,9 +516,44 @@ export class MemberActionBuilder {
         presentEditMember({ member, present: this.present, context: this.context }).catch(console.error);
     }
 
+    /** Resolve (and cache) the organization periods */
+    private async loadResolvedPeriods(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): Promise<void> {
+        if (this.organizations.length !== 1) {
+            this.resolvedPeriods = [];
+            return;
+        }
+
+        const organization = this.organizations[0];
+        const fallback = [selectedOrganizationRegistrationPeriod ?? organization.period];
+
+        // Only the context organization's periods can be fetched, and only full-access users may switch periods.
+        if (!this.context.auth.hasFullAccess() || !this.fetchOrganizationPeriods || this.context.organization?.id !== organization.id) {
+            this.resolvedPeriods = fallback;
+            return;
+        }
+
+        try {
+            const list = await this.fetchOrganizationPeriods({ shouldRetry: true });
+            const periods = list.organizationPeriods.filter(p => !p.period.locked);
+            this.resolvedPeriods = periods.length > 0 ? periods : fallback;
+        } catch (e) {
+            console.error('Failed to load organization registration periods', e);
+            this.resolvedPeriods = fallback;
+        }
+    }
+
+    private getResolvedPeriods(organization: Organization, fallbackPeriod?: OrganizationRegistrationPeriod): OrganizationRegistrationPeriod[] {
+        if (this.organizations.length === 1 && this.organizations[0].id === organization.id && this.resolvedPeriods && this.resolvedPeriods.length > 0) {
+            return this.resolvedPeriods;
+        }
+        return [fallbackPeriod ?? organization.period];
+    }
+
     async getActions(options: { includeMove?: boolean; includeEdit?: boolean;
         // true if only actions that are relevant for a waiting list should be included (to limit the amount of actions shown)
         includeOnlyIfRelevantForWaitingList?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod; } = {}): Promise<TableAction<PlatformMember>[]> {
+        await this.loadResolvedPeriods(options.selectedOrganizationRegistrationPeriod);
+
         const allActions: TableAction<PlatformMember>[] = [
             new InMemoryTableAction({
                 name: $t(`%XO`),
@@ -597,20 +641,26 @@ export class MemberActionBuilder {
             return [];
         }
 
-        let categoryTree: null | GroupCategoryTree = null;
+        // Each entry is a period (null for waiting lists) and the category tree to invite into.
+        const periodTrees: { period: OrganizationRegistrationPeriod | null; categoryTree: GroupCategoryTree }[] = [];
 
         if (this.isWaitingList) {
             await this.fetchEventGroupsLinkedToWaitingList();
-            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess() });
+            const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
+            if (tree) {
+                periodTrees.push({ period: null, categoryTree: tree });
+            }
         } else if (this.organizations.length === 1) {
-            categoryTree = this.organizations[0].period.adminCategoryTree;
+            for (const period of this.getResolvedPeriods(this.organizations[0])) {
+                periodTrees.push({ period, categoryTree: period.adminCategoryTree });
+            }
         }
 
-        if (!categoryTree) {
+        if (periodTrees.length === 0) {
             return [];
         }
 
-        const allGroups = categoryTree.getAllGroups().concat(this.eventGroupsLinkedToWaitingList ?? []);
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.eventGroupsLinkedToWaitingList ?? []);
         this._allGroupsLinkedToWaitingList = allGroups;
 
         if (allGroups.length === 0) {
@@ -658,7 +708,9 @@ export class MemberActionBuilder {
         }
 
         const getChildActions = ({ action, disableIfAll }: { action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>; disableIfAll: (item: PlatformMember, group: Group) => boolean }) => {
-            const childActions = [];
+            const buildForTree = (categoryTree: GroupCategoryTree) => getActionsForCategory<PlatformMember>(categoryTree, action, disableIfAll);
+
+            const childActions: TableAction<PlatformMember>[] = [];
 
             if (eventGroups.length > 0) {
                 childActions.push(new MenuTableAction({
@@ -679,7 +731,21 @@ export class MemberActionBuilder {
                 }));
             }
 
-            return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action, disableIfAll));
+            // Group by period when more than one period is available, otherwise show a flat list.
+            if (periodTrees.length > 1) {
+                return childActions.concat(periodTrees.map((entry) => {
+                    return new MenuTableAction({
+                        name: entry.period?.period.name ?? '',
+                        groupIndex: 1,
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        enabled,
+                        childActions: () => buildForTree(entry.categoryTree),
+                    });
+                }));
+            }
+
+            return childActions.concat(buildForTree(periodTrees[0].categoryTree));
         };
 
         const actions = [
@@ -1348,13 +1414,12 @@ export async function deleteInvitationsForMembers({ members, group, context, own
     new Toast(successMessage, 'success green').show();
 }
 
-export function getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList, organization, hasFullAccess }: { waitingList: Group; organization: Organization; hasFullAccess: boolean }): null | GroupCategoryTree {
+export function getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList, periods }: { waitingList: Group; periods: OrganizationRegistrationPeriod[] }): null | GroupCategoryTree {
     const isWaitingList = waitingList.type === GroupType.WaitingList;
     if (!isWaitingList) {
         return null;
     }
 
-    const periods = organization.periods && hasFullAccess ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [organization.period];
     const period = periods.find(p => p.period.id === waitingList.periodId);
     if (!period) {
         return null;
