@@ -1,0 +1,261 @@
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+
+import { Token } from './Token.js';
+
+/**
+ * The multi-factor authentication methods a user can use as a second factor.
+ */
+export enum MFAMethodType {
+    TOTP = 'TOTP',
+    Passkey = 'Passkey',
+    RecoveryCode = 'RecoveryCode',
+}
+
+/**
+ * Sent as the `meta` of a `require_mfa` error when a password login succeeded but a
+ * second factor is required. The client uses `token` to complete the `mfa` grant.
+ */
+export class MFAChallengeResponse extends AutoEncoder {
+    /**
+     * The short-lived, single-use MFA session token.
+     */
+    @field({ decoder: StringDecoder, ...NextVersion })
+    token = '';
+
+    /**
+     * The second factors the user has enrolled and can use to complete this login.
+     */
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(MFAMethodType)), ...NextVersion })
+    methods: MFAMethodType[] = [];
+
+    /**
+     * WebAuthn authentication options (PublicKeyCredentialRequestOptionsJSON) generated
+     * by @simplewebauthn/server on OUR server, passed through to the browser's
+     * startAuthentication(). This is trusted server output (not user input), so it is
+     * kept opaque. Only set when the user has passkeys.
+     */
+    @field({ decoder: AnyDecoder, nullable: true, ...NextVersion })
+    webauthnAuthenticationOptions: unknown = null;
+}
+
+/**
+ * Sent as the `meta` of a `require_mfa_setup` error when a user is required to have 2FA
+ * but has none enrolled yet. The client uses `setupToken` to authorize enrollment.
+ */
+export class MFASetupResponse extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    setupToken = '';
+}
+
+/**
+ * Returned by the TOTP setup endpoint. The `secret` is shown once so the user can add
+ * it to their authenticator app (also encoded in the otpauth URI + QR code).
+ */
+export class TOTPSetupResponse extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    totpId = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    secret = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    otpauthUri = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    qrCodeDataUrl = '';
+}
+
+/**
+ * Request body to confirm a TOTP authenticator (verify the first code + name it).
+ */
+export class TOTPConfirmRequest extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    code = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    name = '';
+}
+
+/**
+ * A TOTP authenticator shown in the account settings list.
+ */
+export class TOTPCredential extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    name = '';
+
+    @field({ decoder: DateDecoder, ...NextVersion })
+    createdAt = new Date();
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    lastUsedAt: Date | null = null;
+}
+
+/**
+ * A passkey shown in the account settings list.
+ */
+export class PasskeyCredential extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    name = '';
+
+    @field({ decoder: DateDecoder, ...NextVersion })
+    createdAt = new Date();
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    lastUsedAt: Date | null = null;
+}
+
+/**
+ * A freshly generated batch of recovery codes. Only ever returned once, right after
+ * generation. The server only stores hashes.
+ */
+export class RecoveryCodes extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    codes: string[] = [];
+}
+
+/**
+ * Overview of the user's enrolled factors, used to render the settings screen.
+ */
+export class MFAStatus extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(TOTPCredential), ...NextVersion })
+    totp: TOTPCredential[] = [];
+
+    @field({ decoder: new ArrayDecoder(PasskeyCredential), ...NextVersion })
+    passkeys: PasskeyCredential[] = [];
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    hasRecoveryCodes = false;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    recoveryCodesRemaining = 0;
+}
+
+/**
+ * Response of an enrollment action. `token` is only set during forced enrollment (the
+ * setup-token flow), where completing the first factor also logs the user in.
+ * `recoveryCodes` is only set when this was the user's first factor.
+ */
+export class MFAEnrollmentResult extends AutoEncoder {
+    @field({ decoder: MFAStatus, ...NextVersion })
+    status: MFAStatus = MFAStatus.create({});
+
+    @field({ decoder: Token, nullable: true, ...NextVersion })
+    token: Token | null = null;
+
+    @field({ decoder: RecoveryCodes, nullable: true, ...NextVersion })
+    recoveryCodes: RecoveryCodes | null = null;
+}
+
+/**
+ * WebAuthn registration options (PublicKeyCredentialCreationOptionsJSON) generated by
+ * @simplewebauthn/server on OUR server, passed through to the browser's
+ * startRegistration(). Trusted server output (not user input), kept opaque.
+ */
+export class WebauthnRegistrationOptions extends AutoEncoder {
+    @field({ decoder: AnyDecoder, nullable: true, ...NextVersion })
+    options: unknown = null;
+}
+
+// --- WebAuthn credential payloads (UNTRUSTED USER INPUT — fully decoded/validated) ---
+
+/**
+ * The inner `response` of a WebAuthn authentication assertion (browser output).
+ */
+export class WebauthnAssertionResponseData extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    clientDataJSON = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    authenticatorData = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    signature = '';
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    userHandle: string | null = null;
+}
+
+/**
+ * A WebAuthn authentication assertion (AuthenticationResponseJSON) submitted by the
+ * client to complete a passkey login. Decoded + validated as a structure.
+ */
+export class WebauthnAuthenticationCredential extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    id = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    rawId = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    type = 'public-key';
+
+    @field({ decoder: WebauthnAssertionResponseData, ...NextVersion })
+    response: WebauthnAssertionResponseData = WebauthnAssertionResponseData.create({});
+}
+
+/**
+ * The inner `response` of a WebAuthn attestation (registration; browser output).
+ */
+export class WebauthnAttestationResponseData extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    clientDataJSON = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    attestationObject = '';
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    authenticatorData: string | null = null;
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    transports: string[] = [];
+
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    publicKeyAlgorithm: number | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    publicKey: string | null = null;
+}
+
+/**
+ * A WebAuthn registration attestation (RegistrationResponseJSON) submitted by the client
+ * when enrolling a passkey. Decoded + validated as a structure.
+ */
+export class WebauthnRegistrationCredential extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    id = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    rawId = '';
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    type = 'public-key';
+
+    @field({ decoder: WebauthnAttestationResponseData, ...NextVersion })
+    response: WebauthnAttestationResponseData = WebauthnAttestationResponseData.create({});
+}
+
+/**
+ * The client's decoded registration credential returned by startRegistration(), plus a
+ * user-provided name for the passkey.
+ */
+export class WebauthnRegistrationRequest extends AutoEncoder {
+    @field({ decoder: WebauthnRegistrationCredential, ...NextVersion })
+    response: WebauthnRegistrationCredential = WebauthnRegistrationCredential.create({});
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    name = '';
+}
+
+/**
+ * Request body to rename an enrolled credential (TOTP authenticator or passkey).
+ */
+export class MFACredentialRenameRequest extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion })
+    name = '';
+}

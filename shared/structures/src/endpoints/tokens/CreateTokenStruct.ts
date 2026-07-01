@@ -2,6 +2,7 @@ import type { Data } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 import { ChallengeGrantStruct } from './ChallengeGrantStruct.js';
+import { MFAGrantStruct } from './MFAGrantStruct.js';
 import { PasswordGrantStruct } from './PasswordGrantStruct.js';
 import { PasswordTokenGrantStruct } from './PasswordTokenGrantStruct.js';
 import { RefreshTokenGrantStruct } from './RefreshTokenGrantStruct.js';
@@ -9,10 +10,14 @@ import { RequestChallengeGrantStruct } from './RequestChallengeGrantStruct.js';
 
 /// Only used as input
 export class CreateTokenStruct {
-    static decode(data: Data): ChallengeGrantStruct | RefreshTokenGrantStruct | RequestChallengeGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct {
+    static decode(data: Data): ChallengeGrantStruct | RefreshTokenGrantStruct | RequestChallengeGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct | MFAGrantStruct {
         const grantType = data.field('grant_type').string;
         if (grantType === 'challenge') {
             return ChallengeGrantStruct.decode(data);
+        }
+
+        if (grantType === 'mfa') {
+            return MFAGrantStruct.decode(data);
         }
 
         if (grantType === 'refresh_token') {

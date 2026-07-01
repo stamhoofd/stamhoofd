@@ -70,6 +70,20 @@
                     </h3>
                 </STListItem>
 
+                <STListItem v-if="passwordEnabled" :selectable="true" data-testid="open-mfa-settings" @click.prevent="openMFASettings">
+                    <template #left>
+                        <span class="icon shield" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ $t('Tweestapsverificatie') }}
+                    </h3>
+
+                    <template #right>
+                        <span class="icon arrow-right-small" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="!usesGoogle && googleEnabled" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/partners/icons/google.svg" width="24" height="24">
@@ -367,6 +381,10 @@ async function deleteRequest() {
 
 async function openChangePassword() {
     await present(AsyncComponent(() => import('#views/ChangePasswordView.vue'), {}).setDisplayStyle('sheet'));
+}
+
+async function openMFASettings() {
+    await present(AsyncComponent(() => import('#auth/MFASettingsView.vue'), {}).setDisplayStyle('sheet'));
 }
 
 let disconnecting = false;
