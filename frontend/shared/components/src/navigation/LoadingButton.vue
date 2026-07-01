@@ -50,6 +50,7 @@ watch(() => props.loading, (val, old) => {
 
     &.block {
         display: block;
+        max-width: none;
     }
 
     &.max {
