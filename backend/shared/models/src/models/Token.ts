@@ -25,6 +25,12 @@ export class Token extends QueryableModel {
     static table = 'tokens';
     static MAX_DEVICES = 15;
 
+    /**
+     * How long after authentication a token still counts as "fresh" for sensitive
+     * actions (e.g. managing 2FA methods).
+     */
+    static FRESH_WINDOW = 10 * 60 * 1000;
+
     @column({ type: 'string' })
     userId: string;
 
@@ -40,6 +46,14 @@ export class Token extends QueryableModel {
 
     @column({ type: 'datetime' })
     refreshTokenValidUntil: Date;
+
+    /**
+     * When set, this token was minted by a real authentication (password, mfa, passkey,
+     * password_token) at this time. Tokens created by a refresh_token rotation leave this
+     * NULL. Used by Context.authenticateFresh() to gate sensitive actions (2FA management).
+     */
+    @column({ type: 'datetime', nullable: true })
+    authenticatedAt: Date | null = null;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
@@ -67,6 +81,14 @@ export class Token extends QueryableModel {
 
     isAccessTokenExpired(): boolean {
         return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date();
+    }
+
+    /**
+     * A token is fresh if it was minted by a real authentication (not a refresh) within
+     * the FRESH_WINDOW. Sensitive endpoints require a fresh token.
+     */
+    isFresh(): boolean {
+        return this.authenticatedAt !== null && this.authenticatedAt.getTime() > Date.now() - Token.FRESH_WINDOW;
     }
 
     static async getAPIUserWithToken(user: User) {
@@ -227,8 +249,14 @@ export class Token extends QueryableModel {
         return token;
     }
 
-    static async createToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+    /**
+     * @param authenticatedAt Pass the current date when this token is minted by a real
+     * authentication (password/mfa/passkey/password_token) so it counts as "fresh".
+     * Leave null (default) for refresh_token rotations.
+     */
+    static async createToken<U extends User>(user: U, authenticatedAt: Date | null = null): Promise<(Token & { user: U })> {
         const token = await this.createUnsavedToken(user);
+        token.authenticatedAt = authenticatedAt;
         await token.save();
         return token;
     }

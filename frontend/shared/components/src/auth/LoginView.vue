@@ -72,7 +72,8 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { computed, ref } from 'vue';
@@ -132,6 +133,7 @@ defineRoutes([
 const errors = useErrors();
 const $context = useContext();
 const dismiss = useDismiss();
+const present = usePresent();
 const $navigate = useNavigate();
 const appNavigate = useAppNavigate();
 
@@ -246,6 +248,37 @@ async function submit() {
                     email: email.value,
                     organization: $context.value.organization,
                 },
+            });
+        } else if (result.mfaChallenge) {
+            // Password was correct, but a second factor is required.
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: AsyncComponent(() => import('./ChooseMFAMethodView.vue'), {
+                            mfaChallenge: result.mfaChallenge,
+                            onCompleted: async () => {
+                                // The session now has a fresh token: close the login flow.
+                                await dismiss({ force: true });
+                            },
+                        }),
+                    }),
+                ],
+                modalDisplayStyle: 'sheet',
+            });
+        } else if (result.mfaSetupToken) {
+            // Password was correct, but the user must enroll a second factor first.
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: AsyncComponent(() => import('./SetupMFAView.vue'), {
+                            setupToken: result.mfaSetupToken,
+                            onCompleted: async () => {
+                                await dismiss({ force: true });
+                            },
+                        }),
+                    }),
+                ],
+                modalDisplayStyle: 'sheet',
             });
         } else {
             await dismiss({ force: true });

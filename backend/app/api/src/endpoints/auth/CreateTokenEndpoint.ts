@@ -1,15 +1,19 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
-import type { ChallengeGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
-import { CreateTokenStruct, LoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+import { EmailVerificationCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, WebauthnCredential } from '@stamhoofd/models';
+import type { ChallengeGrantStruct, MFAGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
+import { CreateTokenStruct, LoginMethod, MFAMethodType, MFASetupResponse, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
+import { TOTPHelper } from '../../helpers/TOTPHelper.js';
+import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
+import { WebauthnHelper } from '../../helpers/WebauthnHelper.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct;
+type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct | MFAGrantStruct;
 type ResponseBody = TokenStruct;
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -140,7 +144,34 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                const token = await Token.createToken(user);
+                // Second factor: if the user has enrolled factors, require them before
+                // issuing a session token (follows the verify_email idiom).
+                if (await TwoFactorHelper.userHasFactors(user.id)) {
+                    const challenge = await TwoFactorHelper.createLoginChallenge(user);
+                    throw new SimpleError({
+                        code: 'require_mfa',
+                        message: 'Two-factor authentication required',
+                        human: $t('Tweestapsverificatie is vereist om aan te melden.'),
+                        meta: challenge.encode({ version: request.request.getVersion() }),
+                        statusCode: 403,
+                    });
+                }
+
+                // Forced enrollment: the user is required to have 2FA but has none yet.
+                if (TwoFactorHelper.isTwoFactorRequired(user, organization)) {
+                    const setup = await MFAToken.createFor(user.id, 'setup');
+                    throw new SimpleError({
+                        code: 'require_mfa_setup',
+                        message: 'Two-factor authentication setup required',
+                        human: $t('Je moet tweestapsverificatie instellen voor je verder kan.'),
+                        meta: MFASetupResponse.create({
+                            setupToken: setup.token,
+                        }).encode({ version: request.request.getVersion() }),
+                        statusCode: 403,
+                    });
+                }
+
+                const token = await Token.createToken(user, new Date());
 
                 if (!token) {
                     throw new SimpleError({
@@ -151,6 +182,87 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
+                const st = new TokenStruct(token);
+                return new Response(st);
+            }
+
+            case 'mfa': {
+                const mfaToken = await MFAToken.getValid(request.body.mfaToken, 'login');
+                if (!mfaToken) {
+                    throw new SimpleError({
+                        code: 'invalid_mfa_token',
+                        message: 'The MFA session is invalid or expired',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 400,
+                    });
+                }
+
+                const user = await User.getByID(mfaToken.userId);
+                if (!user) {
+                    await mfaToken.consume();
+                    throw new SimpleError({
+                        code: 'invalid_mfa_token',
+                        message: 'The MFA session is invalid or expired',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 400,
+                    });
+                }
+
+                // Scope check (same rules as refresh/password_token)
+                if ((organization && user.organizationId && user.organizationId !== organization.id) || (!organization && user.organizationId)) {
+                    throw new SimpleError({
+                        code: 'invalid_mfa_token',
+                        message: 'The MFA session is invalid or expired',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 400,
+                    });
+                }
+
+                let verified = false;
+                if (request.body.method === MFAMethodType.TOTP) {
+                    const code = request.body.code ?? '';
+                    for (const totp of await MFATOTP.getConfirmedForUser(user.id)) {
+                        if (TOTPHelper.verify(code, totp.secret)) {
+                            totp.lastUsedAt = new Date();
+                            await totp.save();
+                            verified = true;
+                            break;
+                        }
+                    }
+                }
+                else if (request.body.method === MFAMethodType.RecoveryCode) {
+                    verified = await RecoveryCodeHelper.consume(user.id, request.body.code ?? '');
+                }
+                else if (request.body.method === MFAMethodType.Passkey) {
+                    const assertion = request.body.assertion;
+                    const credentialId = assertion?.id;
+                    if (mfaToken.webauthnChallenge && assertion && credentialId) {
+                        const credential = await WebauthnCredential.getByCredentialId(credentialId);
+                        if (credential && credential.userId === user.id) {
+                            const newCounter = await WebauthnHelper.verifyAuthentication(assertion, mfaToken.webauthnChallenge, credential);
+                            if (newCounter !== null) {
+                                credential.counter = newCounter;
+                                credential.lastUsedAt = new Date();
+                                await credential.save();
+                                verified = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!verified) {
+                    const locked = await mfaToken.registerFailedAttempt();
+                    throw new SimpleError({
+                        code: locked ? 'too_many_attempts' : 'invalid_mfa_code',
+                        message: locked ? 'Too many attempts' : 'Invalid code',
+                        human: locked ? $t('Te veel pogingen. Meld je opnieuw aan.') : $t('De ingevoerde code is ongeldig.'),
+                        statusCode: locked ? 429 : 400,
+                    });
+                }
+
+                await mfaToken.consume();
+
+                const token = await Token.createToken(user, new Date());
                 const st = new TokenStruct(token);
                 return new Response(st);
             }
@@ -188,7 +300,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
 
                 // Important to create a new token before adjusting the old token
-                const token = await Token.createToken(passwordToken.user);
+                const token = await Token.createToken(passwordToken.user, new Date());
 
                 // TODO: make token short lived until renewal
 
