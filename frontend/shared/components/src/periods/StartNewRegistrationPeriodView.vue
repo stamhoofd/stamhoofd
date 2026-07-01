@@ -130,7 +130,7 @@
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
+import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import Dropdown from '#inputs/Dropdown.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import { Toast } from '#overlays/Toast.ts';
@@ -143,11 +143,9 @@ import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import type { Group, GroupCategoryTree, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
-import { GroupStatus } from '@stamhoofd/structures';
+import { GroupStatus, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
-import type { Ref } from 'vue';
 
 const props = defineProps<{
     period: RegistrationPeriod;
@@ -159,8 +157,13 @@ type Row
         | { type: 'group'; key: string; depth: number; old: Group; new: Group };
 
 const loading = ref(false);
-const organization = useOrganization();
-const fromPeriod = ref(organization.value?.period ?? null) as Ref<OrganizationRegistrationPeriod | null>;
+const organization = useRequiredOrganization();
+
+const fromPeriod = ref<OrganizationRegistrationPeriod | null>(organization.value.period);
+if (props.period.startDate < organization.value.period.period.startDate) {
+    fromPeriod.value = null;
+}
+
 const periods = ref<RegistrationPeriodList | null>(null);
 const fetchOrganizationRegistrationPeriods = useFetchOrganizationRegistrationPeriods();
 

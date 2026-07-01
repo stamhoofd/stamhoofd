@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import { useAppContext } from '#context/appContext.ts';
 import { useNow } from '#hooks/useNow.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import type { Group } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -19,5 +20,6 @@ const props = defineProps<{
 
 const now = useNow();
 const app = useAppContext();
-const tags = computed(() => props.group.getTags({ now: now.value, app }));
+const organization = useOrganization();
+const tags = computed(() => props.group.getTags({ now: now.value, app, organization: organization.value }));
 </script>

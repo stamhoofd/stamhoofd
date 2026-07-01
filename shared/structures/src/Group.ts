@@ -456,7 +456,7 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date }): GroupTagItem[] {
+    getTags(options: { app: AppType; now?: Date; organization: Organization | null }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPrices(this);
@@ -485,19 +485,33 @@ export class Group extends AutoEncoder {
             });
         }
 
-        if (options.app === 'dashboard' && this.closed && !this.notYetOpen) {
+        if (options.app === 'dashboard') {
             if (this.status === GroupStatus.Closed) {
                 tags.push({
                     icon: 'lock',
                     title: $t('%CZ'),
                     style: 'error',
                 });
-            } else if (this.settings.registrationEndDate) {
+            } else if (this.settings.registrationEndDate && this.closed && !this.notYetOpen) {
                 tags.push({
                     icon: 'lock',
                     title: $t('%1Ve', { date: Formatter.endDate(this.settings.registrationEndDate) }),
                     style: 'error',
                 });
+            } else if (options.organization && options.organization.id === this.organizationId) {
+                if (this.periodId !== options.organization.period.period.id) {
+                    tags.push({
+                        icon: 'lock',
+                        title: $t('Werkjaar niet actief'),
+                        style: 'error',
+                    });
+                } else if (this.settings.period?.locked) {
+                    tags.push({
+                        icon: 'lock',
+                        title: $t('Werkjaar vergrendeld'),
+                        style: 'error',
+                    });
+                }
             }
         }
 

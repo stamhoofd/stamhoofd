@@ -326,7 +326,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         // Period has ended
-        if (STAMHOOFD.environment !== 'development' && period.endDate < new Date()) {
+        if (STAMHOOFD.environment !== 'development' && period.endDate < new Date() && STAMHOOFD.userMode === 'platform') {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Period has ended',
