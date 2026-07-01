@@ -457,6 +457,7 @@ function getSortingContextMenu() {
         setSort: (column: Column<Value, any>, direction: SortItemDirection) => {
             sortBy.value = column;
             sortDirection.value = direction;
+            saveColumnConfiguration();
         },
     });
 }
