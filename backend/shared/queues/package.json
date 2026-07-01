@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/queues",
-    "version": "2.125.2",
+    "version": "2.126.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
