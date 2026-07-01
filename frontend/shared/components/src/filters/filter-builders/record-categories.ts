@@ -90,6 +90,17 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                                 },
                             },
                         },
+                        additionalUnwrappers: [
+                            { recordAnswers: {
+                                [record.id]: {
+                                    selectedChoices: {
+                                        id: {
+                                            $in: FilterWrapperMarker,
+                                        },
+                                    },
+                                },
+                            } },
+                        ],
                     }),
                 );
             }
