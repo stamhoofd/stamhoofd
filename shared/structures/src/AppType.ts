@@ -141,6 +141,13 @@ export const getAppDescription = (app: AppType | 'auto', organization: Organizat
     return organization.address.anonymousString();
 };
 
+function localeUri(i18n: { language: Language; locale: string }) {
+    if (STAMHOOFD.fixedCountry) {
+        return i18n.language.toString();
+    }
+    return i18n.locale;
+}
+
 export function getAppHost(app: AppType | null, organization: { i18n: { locale: string; language: Language }; address: Address; registerDomain?: string | null; uri: string } | null, preferDashboard = false, i18n?: { language: Language; locale: string }): string {
     if (organization && organization.registerDomain && !preferDashboard && app !== 'admin' && STAMHOOFD.userMode === 'organization') {
         let d = organization.registerDomain;
@@ -158,7 +165,7 @@ export function getAppHost(app: AppType | null, organization: { i18n: { locale: 
 
     if (!STAMHOOFD.domains.registration || preferDashboard || !organization) {
         if (!app) {
-            return STAMHOOFD.domains.dashboard + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '');
+            return STAMHOOFD.domains.dashboard + (i18n ?? organization?.i18n ? '/' + localeUri(i18n ?? organization!.i18n) : '');
         }
 
         let includeUri = true;
@@ -182,16 +189,16 @@ export function getAppHost(app: AppType | null, organization: { i18n: { locale: 
 
         if (includeUri && !organization) {
             // App requires organization scope, but we don't have one
-            return STAMHOOFD.domains.dashboard + (i18n ? '/' + (i18n.locale) : '');
+            return STAMHOOFD.domains.dashboard + (i18n ? '/' + localeUri(i18n) : '');
         }
 
-        return STAMHOOFD.domains.dashboard + (i18n ?? organization?.i18n ? '/' + (i18n ?? organization!.i18n).locale : '') + '/' + appToUri(app) + (includeUri && organization ? '/' + organization.uri : '');
+        return STAMHOOFD.domains.dashboard + (i18n ?? organization?.i18n ? '/' + localeUri(i18n ?? organization!.i18n) : '') + '/' + appToUri(app) + (includeUri && organization ? '/' + organization.uri : '');
     }
 
     let defaultDomain = STAMHOOFD.domains.registration[organization.address.country] ?? STAMHOOFD.domains.registration[''];
 
     if (i18n ?? organization.i18n) {
-        defaultDomain += '/' + ((i18n ?? organization.i18n).locale);
+        defaultDomain += '/' + localeUri(i18n ?? organization.i18n);
     }
 
     if (!app) {
