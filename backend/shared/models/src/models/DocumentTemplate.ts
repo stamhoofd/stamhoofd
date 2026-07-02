@@ -498,10 +498,6 @@ export class DocumentTemplate extends QueryableModel {
 
         if (existingDocuments.length > 0) {
             for (const document of existingDocuments) {
-                if (this.isLocked !== document.isLocked) {
-                    document.isLocked = this.isLocked;
-                }
-
                 await this.updateDocumentWithAnswers(document, fieldAnswers);
                 document.data.name = this.settings.name;
                 if (existingDocuments.length === 1) {

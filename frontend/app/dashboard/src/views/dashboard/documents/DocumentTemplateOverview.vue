@@ -506,7 +506,7 @@ const xmlExportDescription = computed(() => props.template.privateSettings.templ
 async function migrateDocumentTemplateFromV1() {
     if (!await CenteredMessage.confirm({
         title: $t('Controleer de instellingen'),
-        description: $t('Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document kan de layout van het document wijzigen.'),
+        description: $t('Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document zal de nieuwe layout van documenten gebruikt worden waardoor de documenten er anders uit zullen zien.'),
         confirmText: $t('Doorgaan'),
     })) {
         return;
@@ -537,18 +537,9 @@ async function migrateDocumentTemplateFromV1() {
         }),
     });
 
-    const editView = (await import('./EditDocumentTemplateView.vue')).default;
-
-    const patched = documentTemplate.patch(patch);
-
-    console.error('before:');
-    console.error(Array.from(Object.entries(documentTemplate.settings.linkedFields)).map(([k, v]) => [k, JSON.stringify(v)]));
-    console.error('after:');
-    console.error(Array.from(Object.entries(patched.settings.linkedFields)).map(([k, v]) => [k, JSON.stringify(v)]));
-
     await present({
         components: [
-            new ComponentWithProperties(editView, {
+            new ComponentWithProperties((await import('./EditDocumentTemplateView.vue')).default, {
                 isNew: false,
                 document: documentTemplate,
                 initialPatch: patch,
@@ -567,13 +558,10 @@ function createDocumentTemplateGroupPatches(documentTemplate: DocumentTemplatePr
         throw new Error('Category with id visible-date not found on participation document template definition.');
     }
 
-    const groupFieldAnswerPatchesMap = new Map<string, PatchMap<string, RecordAnswer>>();
-
     for (const category of documentTemplate.privateSettings.templateDefinition.groupFieldCategories) {
         for (const record of category.records) {
             const newRecord = newCategory.records.find(r => r.id === record.id);
             if (!newRecord || newRecord.type !== RecordType.Checkbox) {
-                // todo
                 continue;
             }
 
@@ -589,14 +577,6 @@ function createDocumentTemplateGroupPatches(documentTemplate: DocumentTemplatePr
                 if (typeof objectValue !== 'boolean') {
                     continue;
                 }
-
-                let groupfieldAnswersPatch = groupFieldAnswerPatchesMap.get(documentTemplateGroup.id);
-                if (!groupfieldAnswersPatch) {
-                    groupfieldAnswersPatch = new PatchMap<string, RecordAnswer>(documentTemplateGroup.fieldAnswers);
-                    groupFieldAnswerPatchesMap.set(documentTemplateGroup.id, groupfieldAnswersPatch);
-                }
-
-                groupfieldAnswersPatch.delete(record.id);
 
                 // set value to true if selected is true for some group
                 if (objectValue) {
@@ -614,15 +594,11 @@ function createDocumentTemplateGroupPatches(documentTemplate: DocumentTemplatePr
     }
 
     for (const documentTemplateGroup of documentTemplate.privateSettings.groups) {
-        const groupFieldAnswerPatches = groupFieldAnswerPatchesMap.get(documentTemplateGroup.id);
-
-        if (groupFieldAnswerPatches) {
-            // todo: does not work
-            groupsPatches.addPatch(DocumentTemplateGroup.patch({
-                id: documentTemplateGroup.id,
-                fieldAnswers: groupFieldAnswerPatches,
-            }));
-        }
+        groupsPatches.addPatch(DocumentTemplateGroup.patch({
+            id: documentTemplateGroup.id,
+            // remove all field answers
+            fieldAnswers: new Map() as PatchMap<string, RecordAnswer>,
+        }));
     }
 
     const addFieldAnswerIfHasLinkedField = ({ linkedFieldId, recordId }: { linkedFieldId: string; recordId: string }) => {
