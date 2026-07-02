@@ -76,7 +76,7 @@
             <hr><h2>{{ $t('%16X') }}</h2>
 
             <STList>
-                <STListItem v-if="isLocked && template.privateSettings.templateDefinition.type !== 'fiscal'" :selectable="true" class="left-center" @click="migrateDocumentTemplateFromV1">
+                <STListItem v-if="isLocked && template.privateSettings.templateDefinition.type === 'participation'" :selectable="true" class="left-center" @click="migrateDocumentTemplateFromV1">
                     <template #left>
                         <IconContainer class="" icon="unlock" />
                     </template>
