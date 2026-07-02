@@ -23,7 +23,7 @@ async function invoices() {
         return;
     }
 
-    if (isOutside('03:00', '10:00')) {
+    if (isOutside('03:00', '10:00') && STAMHOOFD.environment !== 'development') {
         return;
     }
 
@@ -80,8 +80,7 @@ async function createInvoicesFor(organization: Organization) {
         const blob = {
             // Grouping by payingOrganizationId avoid privacy issues and data leaks
             payingOrganizationId: payment.payingOrganizationId ?? null,
-            vatNumber: payment.customer?.company?.VATNumber,
-            companyNumber: payment.customer?.company?.companyNumber,
+            vatNumber: Formatter.slugVATNumber(payment.customer?.company?.VATNumber ?? payment.customer?.company?.companyNumber ?? ''),
             // Name and adress is ignored, because subject to changes
         };
         const id = JSON.stringify(blob);
