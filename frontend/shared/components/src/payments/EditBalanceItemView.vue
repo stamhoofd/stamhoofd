@@ -203,6 +203,30 @@
                 <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" :price="payment.payment.isFailed ? 0 : payment.price" />
             </STList>
 
+            <template v-if="invoices.length > 0">
+                <hr><h2>{{ $t('Facturen') }}</h2>
+                <p>{{ $t('Deze aanrekening werd (gedeeltelijk) gefactureerd op volgende facturen.') }}</p>
+
+                <STList>
+                    <STListItem v-for="invoice of invoices" :key="invoice.id" :selectable="true" class="right-stack" @click="openInvoice(invoice)">
+                        <h3 class="style-title-list">
+                            {{ getInvoiceTitle(invoice) }}
+                        </h3>
+                        <p v-if="invoice.invoicedAt" class="style-description-small">
+                            {{ formatDate(invoice.invoicedAt, true) }}
+                        </p>
+                        <p v-else class="style-description-small">
+                            {{ $t('Concept') }}
+                        </p>
+
+                        <template #right>
+                            <span class="style-price-base">{{ formatPrice(getInvoicedAmount(invoice)) }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
             <hr>
             <h2>{{ $t('%16X') }}</h2>
 
@@ -288,14 +312,17 @@ import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { usePop, useShow } from '@simonbackx/vue-app-navigation';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { BalanceItemRelation } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import type { BalanceItemRelation, Invoice } from '@stamhoofd/structures';
+import { AccessRight, BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, InvoiceTypeHelper, LimitedFilteredRequest, PlatformFamily, SortItemDirection, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
+import { useAuth } from '#hooks/useAuth.ts';
 import { GlobalEventBus } from '../EventBus';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
@@ -325,10 +352,15 @@ const owner = useRequestOwner();
 const loadFamilyFromId = useLoadFamilyFromId();
 const loadingPayments = ref(false);
 const now = new Date();
+const auth = useAuth();
+const show = useShow();
+const invoicesObjectFetcher = useInvoicesObjectFetcher();
+const invoices = ref([]) as Ref<Invoice[]>;
 
 // Load mmeber on load
 loadMember().catch(console.error);
 loadFamilyFromUser().catch(console.error);
+loadInvoices().catch(console.error);
 
 const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
@@ -678,6 +710,47 @@ async function loadFamilyFromUser() {
         console.error(e);
         return;
     }
+}
+
+async function loadInvoices() {
+    if (props.isNew) {
+        return;
+    }
+    if (!organization.value?.meta.invoicesEnabled) {
+        return;
+    }
+    if (!auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+        return;
+    }
+
+    const result = await invoicesObjectFetcher.fetch(new LimitedFilteredRequest({
+        filter: {
+            items: {
+                $elemMatch: {
+                    balanceItemId: props.balanceItem.id,
+                },
+            },
+        },
+        sort: [{ key: 'invoicedAt', order: SortItemDirection.DESC }],
+        limit: 100,
+    }));
+    invoices.value = result.results;
+}
+
+function getInvoiceTitle(invoice: Invoice) {
+    return Formatter.capitalizeFirstLetter(InvoiceTypeHelper.getName(invoice.type)) + (invoice.number ? ' ' + invoice.number : '');
+}
+
+function getInvoicedAmount(invoice: Invoice) {
+    return invoice.items.filter(i => i.balanceItemId === props.balanceItem.id).reduce((sum, i) => sum + i.balanceInvoicedAmount, 0);
+}
+
+async function openInvoice(invoice: Invoice) {
+    await show({
+        components: [
+            AsyncComponent(() => import('./InvoiceView.vue'), { invoice }),
+        ],
+    });
 }
 
 function canOpenRelation(type: BalanceItemRelationType) {

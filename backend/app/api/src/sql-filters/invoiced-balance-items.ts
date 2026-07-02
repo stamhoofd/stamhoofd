@@ -8,6 +8,11 @@ export const invoicedBalanceItemCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    balanceItemId: createColumnFilter({
+        expression: SQL.column('balanceItemId'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
     name: createColumnFilter({
         expression: SQL.column('name'),
         type: SQLValueType.String,
