@@ -57,7 +57,7 @@
                     {{ $t('%cK') }}
                 </p>
 
-                <STList v-if="nonPatchedGroup.settings.hasCustomDates">
+                <STList v-if="STAMHOOFD.userMode === 'organization' || hasCustomDates">
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
                             <Checkbox v-model="hasCustomDates" />
@@ -781,8 +781,8 @@ import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSe
 import ImageInput from '#inputs/ImageInput.vue';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useOrganizationRegistrationRecordSettingsRoute } from '@stamhoofd/components/records/useOrganizationRegistrationRecordSettingsRoute.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(
     defineProps<{
