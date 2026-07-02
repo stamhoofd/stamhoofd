@@ -3,7 +3,7 @@ import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encodin
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { DocumentTemplate } from '@stamhoofd/models';
+import { Document, DocumentTemplate } from '@stamhoofd/models';
 import { DocumentTemplatePrivate, PermissionLevel } from '@stamhoofd/structures';
 
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -74,6 +74,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
 
             let shouldCheckIfAlreadyHasFiscalDocument = false;
 
+            if (patch.isLocked !== undefined) {
+                template.isLocked = patch.isLocked;
+            }
+
             if (patch.privateSettings) {
                 const patchType = patch.privateSettings.templateDefinition?.type;
 
@@ -112,6 +116,13 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
             }
 
             await template.save();
+
+            if (patch.isLocked !== undefined) {
+                await Document.update()
+                    .where('templateId', template.id)
+                    .set('isLocked', template.isLocked)
+                    .update();
+            }
 
             // Update documents
             await template.buildAll();
