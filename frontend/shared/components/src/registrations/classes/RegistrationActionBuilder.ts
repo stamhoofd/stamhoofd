@@ -7,17 +7,22 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import type { PlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
-import { deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, getEventGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
+import { getActionsForCategory, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
+import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
+import { fetchAll } from '#tables/classes/ObjectFetcher.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration, RegistrationInvitationRequest } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, ExcelExportType, GroupType, LimitedFilteredRequest, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
+import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { Toast } from '../../overlays/Toast';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
@@ -1096,4 +1101,96 @@ function getUniqueMembersFromRegistrations(registrations: PlatformRegistration[]
 function getUniqueOrganizationsFromRegistrations(registrations: PlatformRegistration[]): Organization[] {
     const allOrganinizationIds = Formatter.uniqueArray(registrations.map(r => r.organizationId));
     return allOrganinizationIds.map(id => registrations.find(r => r.organizationId === id)!.member.organizations.find(o => o.id === id)!).filter(o => !!o);
+}
+
+function getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList, periods }: { waitingList: Group; periods: OrganizationRegistrationPeriod[] }): null | GroupCategoryTree {
+    const isWaitingList = waitingList.type === GroupType.WaitingList;
+    if (!isWaitingList) {
+        return null;
+    }
+
+    const period = periods.find(p => p.period.id === waitingList.periodId);
+    if (!period) {
+        return null;
+    }
+
+    return period.getCategoryTree({
+        admin: true,
+        filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id,
+    });
+}
+
+/**
+ * Returns all event groups linked to the waiting list.
+ * Does not throw if an error occurs.
+ * @param waitingListId
+ * @returns
+ */
+async function getEventGroupsLinkedToWaitingList(waitingListId: string): Promise<Group[]> {
+    const request = new LimitedFilteredRequest({
+        limit: 100,
+        filter: {
+            waitingListId,
+            // only get events
+            type: GroupType.EventRegistration,
+        },
+    });
+
+    const groupsObjectFetcher = useGroupsObjectFetcher();
+
+    let eventGroups: Group[] = [];
+    try {
+        eventGroups = await fetchAll(request, groupsObjectFetcher);
+    } catch (e) {
+        console.error(e);
+    }
+
+    return eventGroups;
+}
+
+async function deleteInvitationsForMembers({ members, group, context, owner, wereItemsFetched }: { members: PlatformMember[]; group: Group; context: SessionContext; owner: any; wereItemsFetched: boolean }) {
+    const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+
+    for (const member of members) {
+        for (const invitation of member.member.registrationInvitations.filter(i => i.group.id === group.id)) {
+            invitations.addDelete(invitation.id);
+        }
+    }
+
+    if (invitations.getDeletes().length === 0) {
+        const groupName = group.settings.name.toString();
+        Toast.warning(members.length === 1 ? $t('%1Qh', { group: groupName }) : $t('Deze leden zijn nog niet uitgenodigd voor {group}', { group: groupName })).show();
+        return;
+    }
+
+    try {
+        await context.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/registration-invitations',
+            body: invitations,
+            owner,
+        });
+
+        for (const invitationId of invitations.getDeletes()) {
+            for (const registrationInvitations of members.map(m => m.member.registrationInvitations)) {
+                const indexOfInvitation = registrationInvitations.findIndex(i => i.id === invitationId);
+                if (indexOfInvitation !== -1) {
+                    registrationInvitations.splice(indexOfInvitation, 1);
+                    break;
+                }
+            }
+        }
+
+        RegistrationInvitationEventBus.sendEvent('updated', {
+            groupIds: new Set([group.id]),
+            origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync',
+        }).catch(console.error);
+    } catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
+        return;
+    }
+
+    const successMessage = members.length === 1 ? $t('%1RC', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
+    new Toast(successMessage, 'success green').show();
 }

@@ -264,13 +264,12 @@
 </template>
 
 <script setup lang="ts">
-import { LoadComponent } from '#containers/AsyncComponent.ts';
+import { AsyncComponent, LoadComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -291,15 +290,15 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import IconContainer from '../icons/IconContainer.vue';
 import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import RegistrationCountSpan from '#members/components/RegistrationCountSpan.vue';
+import IconContainer from '../icons/IconContainer.vue';
 
+import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
-import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { countAll } from '#tables/classes/ObjectFetcher.ts';
@@ -505,13 +504,19 @@ defineRoute({
 
 defineRoute({
     url: Routes.WaitingList,
-    component: async () => (await import('#members/MembersTableView.vue')).default,
+    component: async () => (await import('#registrations/RegistrationsTableView.vue')).default,
     defaultProperties: () => {
         if (!props.event.group || !props.event.group.waitingList) {
             throw new Error('No waiting list found');
         }
+
         return {
+            organization: eventOrganization.value,
             group: props.event.group.waitingList,
+            dateRange: {
+                start: props.event.startDate,
+                end: props.event.endDate,
+            },
         };
     },
 });

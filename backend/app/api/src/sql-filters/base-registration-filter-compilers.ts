@@ -154,6 +154,11 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
                 type: SQLValueType.Number,
                 nullable: false,
             }),
+            toPay: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('memberCachedBalance', 'toPay'), 0),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
         },
     ),
     registrationCachedBalance: createJoinedRelationFilter(

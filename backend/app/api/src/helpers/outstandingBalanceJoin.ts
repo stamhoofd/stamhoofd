@@ -2,21 +2,31 @@ import { CachedBalance, Registration } from '@stamhoofd/models';
 import type { SQLNamedExpression } from '@stamhoofd/sql';
 import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
 
-export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
-    SQL.select('objectId', 'organizationId',
-        new SQLSelectAs(
-            new SQLSum(
-                SQL.column('amountOpen'),
+export function createMemberCachedBalanceJoin() {
+    return SQL.leftJoin(
+        SQL.select('objectId', 'organizationId',
+            new SQLSelectAs(
+                new SQLSum(
+                    SQL.column('amountOpen'),
+                ),
+                new SQLAlias('amountOpen'),
             ),
-            new SQLAlias('amountOpen'),
-        ),
-    )
-        .from(CachedBalance.table)
-        .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
-        .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId'))
-        .as('memberCachedBalance') as SQLNamedExpression,
-    'memberCachedBalance',
-)
+            new SQLSelectAs(
+                new SQLSum(
+                    SQL.calculation(SQL.column('amountOpen'))
+                        .add(SQL.column('amountPending')),
+                ),
+                new SQLAlias('toPay'),
+            ),
+        )
+            .from(CachedBalance.table)
+            .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
+            .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId'))
+            .as('memberCachedBalance') as SQLNamedExpression, 'memberCachedBalance',
+    );
+}
+
+export const memberCachedBalanceForOrganizationJoin = createMemberCachedBalanceJoin()
     .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
 

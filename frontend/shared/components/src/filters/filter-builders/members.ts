@@ -1,14 +1,15 @@
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, Gender, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
-import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import { useUser } from '#hooks/useUser.ts';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -19,7 +20,6 @@ import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from '.
 import { getFilterBuildersForRecordCategories } from './record-categories';
 import type { RegistrationFilterBuilderFactory } from './registrations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
-import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();
@@ -753,8 +753,9 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
         all.push(
             new NumberFilterBuilder({
-                name: $t(`%76`),
-                key: 'memberCachedBalance.amountOpen',
+                name: $t(`Rekening`),
+                key: 'memberCachedBalance.toPay',
+                description: $t('Openstaande rekening voor dit lid'),
                 type: NumberFilterFormat.Currency,
                 wrapper: {
                     registrations: {
@@ -770,8 +771,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                                 $and: [FilterWrapperMarker],
                             },
                         },
-                    }
-                ]
+                    },
+                ],
             }));
     }
 
@@ -868,13 +869,13 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     return all;
 }
 
-export function useAdvancedPlatformMembershipUIFilterBuilders(): {loading: Ref<boolean>, filterBuilders: ComputedRef<UIFilterBuilder<UIFilter<BaseUIFilterBuilder>>[]>} {
+export function useAdvancedPlatformMembershipUIFilterBuilders(): { loading: Ref<boolean>; filterBuilders: ComputedRef<UIFilterBuilder<UIFilter<BaseUIFilterBuilder>>[]> } {
     const isPlatform = STAMHOOFD.userMode === 'platform';
     if (!isPlatform) {
         return {
             loading: ref(false),
             filterBuilders: computed(() => []),
-        }
+        };
     }
 
     const $platform = usePlatform();
@@ -1115,23 +1116,23 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
     const builders: UIFilterBuilders = [
         ...getMemberBaseFilters(),
         new GroupUIFilterBuilder({
-                name: $t('%1EI'),
-                allowCreation: false,
-                builders: [
-                    new StringFilterBuilder({
-                            name: $t('%1ON'),
-                            key: 'id',
-                            allowCreation: false,
-                            wrapper: {
-                                group: FilterWrapperMarker
-                            },
-                    })
-                ],
-                wrapper: {
-                    registrations: {
-                        $elemMatch: FilterWrapperMarker
-                    }
+            name: $t('%1EI'),
+            allowCreation: false,
+            builders: [
+                new StringFilterBuilder({
+                    name: $t('%1ON'),
+                    key: 'id',
+                    allowCreation: false,
+                    wrapper: {
+                        group: FilterWrapperMarker,
+                    },
+                }),
+            ],
+            wrapper: {
+                registrations: {
+                    $elemMatch: FilterWrapperMarker,
                 },
+            },
         }),
         new MultipleChoiceFilterBuilder({
             name: $t(`%17z`),
@@ -1163,7 +1164,7 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
     return builders;
 };
 
-export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration, options: {groupNameFilters?: boolean} = {groupNameFilters: true}) {
+export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration, options: { groupNameFilters?: boolean } = { groupNameFilters: true }) {
     const all: UIFilterBuilders = [];
 
     const nameFilters: UIFilterBuilders = [
@@ -1178,13 +1179,13 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
         new StringFilterBuilder({
             name: $t('%1MU'),
             key: 'lastName',
-        })
+        }),
     ];
 
     if (options.groupNameFilters) {
         all.push(new GroupUIFilterBuilder({
             name: $t('%1Os'),
-            builders: nameFilters
+            builders: nameFilters,
         }));
     } else {
         all.push(...nameFilters);
@@ -1229,23 +1230,23 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
         const all: UIFilterBuilders = getMemberBaseFilters(recordConfiguration);
 
         all.push(new GroupUIFilterBuilder({
-                name: $t('%1EI'),
-                allowCreation: false,
-                builders: [
-                    new StringFilterBuilder({
-                            name: $t('%1ON'),
-                            key: 'id',
-                            allowCreation: false,
-                            wrapper: {
-                                group: FilterWrapperMarker
-                            },
-                    })
-                ],
-                wrapper: {
-                    registrations: {
-                        $elemMatch: FilterWrapperMarker
-                    }
+            name: $t('%1EI'),
+            allowCreation: false,
+            builders: [
+                new StringFilterBuilder({
+                    name: $t('%1ON'),
+                    key: 'id',
+                    allowCreation: false,
+                    wrapper: {
+                        group: FilterWrapperMarker,
+                    },
+                }),
+            ],
+            wrapper: {
+                registrations: {
+                    $elemMatch: FilterWrapperMarker,
                 },
+            },
         }));
 
         all.push(new MultipleChoiceFilterBuilder({

@@ -1,5 +1,5 @@
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -109,6 +109,7 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
 export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     key = '';
     name = '';
+    description = '';
     wrapFilter?: UIFilterWrapper | null;
     unwrapFilter?: UIFilterUnwrapper | null;
     wrapper?: WrapperFilter;
@@ -117,11 +118,12 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     floatingPoint = false;
     type = NumberFilterFormat.Number;
 
-    constructor(data: { key: string; name: string; type?: NumberFilterFormat; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; additionalUnwrappers?: WrapperFilter[] }) {
+    constructor(data: { key: string; name: string; description?: string; type?: NumberFilterFormat; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; additionalUnwrappers?: WrapperFilter[] }) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.name = data.name;
+        this.description = data.description ?? '';
         this.wrapper = data.wrapper;
         this.additionalUnwrappers = data.additionalUnwrappers;
         if (data.type !== undefined) {

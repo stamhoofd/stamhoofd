@@ -130,8 +130,8 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         organization !== null
             ? new SelectableColumn({
                     id: 'outstandingBalance',
-                    name: $t(`%76`),
-                    description: $t('%184'),
+                    name: $t(`Rekening`),
+                    description: $t('Openstaande rekening voor dit lid'),
                     enabled: false,
                 })
             : null,

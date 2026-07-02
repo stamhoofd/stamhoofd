@@ -6,7 +6,6 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
 import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
-import { fetchAll } from '#tables/classes/ObjectFetcher.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
@@ -18,13 +17,12 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, ExcelExportType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { GlobalEventBus } from '../../EventBus';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
-import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import type { NavigationActions } from '../../types/NavigationActions';
@@ -87,14 +85,6 @@ export class MemberActionBuilder {
     /** Cache of periods, loadResolvedPeriods fills in */
     private resolvedPeriods: OrganizationRegistrationPeriod[] | null = null;
 
-    private readonly isWaitingList: boolean;
-    private eventGroupsLinkedToWaitingList: Group[] | null = null;
-    private _allGroupsLinkedToWaitingList: Group[] | null = null;
-
-    get allGroupsLinkedToWaitingList() {
-        return this._allGroupsLinkedToWaitingList?.slice() ?? [];
-    }
-
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
         context: SessionContext;
@@ -117,7 +107,6 @@ export class MemberActionBuilder {
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
         this.fetchOrganizationPeriods = settings.fetchOrganizationPeriods;
-        this.isWaitingList = this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
     }
 
     get hasWrite() {
@@ -549,9 +538,7 @@ export class MemberActionBuilder {
         return [fallbackPeriod ?? organization.period];
     }
 
-    async getActions(options: { includeMove?: boolean; includeEdit?: boolean;
-        // true if only actions that are relevant for a waiting list should be included (to limit the amount of actions shown)
-        includeOnlyIfRelevantForWaitingList?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod; } = {}): Promise<TableAction<PlatformMember>[]> {
+    async getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): Promise<TableAction<PlatformMember>[]> {
         await this.loadResolvedPeriods(options.selectedOrganizationRegistrationPeriod);
 
         const allActions: TableAction<PlatformMember>[] = [
@@ -594,23 +581,6 @@ export class MemberActionBuilder {
             ...await this.getInviteMemberForGroupActionsWithGroups(),
         ];
 
-        const includeOnlyRelevantForWaitingList = options.includeOnlyIfRelevantForWaitingList && this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
-
-        if (!includeOnlyRelevantForWaitingList) {
-            allActions.push(new InMemoryTableAction({
-                name: $t(`%ej`),
-                icon: 'star',
-                priority: 0,
-                groupIndex: 1,
-                needsSelection: true,
-                singleSelection: true,
-                enabled: () => this.context.auth.hasFullAccess(),
-                handler: (members: PlatformMember[]) => {
-                    this.editResponsibilities(members[0]);
-                },
-            }));
-        }
-
         if (options.includeMove) {
             allActions.push(...this.getMoveAction(options.selectedOrganizationRegistrationPeriod));
         }
@@ -626,16 +596,6 @@ export class MemberActionBuilder {
         return allActions;
     }
 
-    private async fetchEventGroupsLinkedToWaitingList(): Promise<void> {
-        if (!this.isWaitingList || this.eventGroupsLinkedToWaitingList !== null) {
-            return;
-        }
-
-        const waitingListId = this.groups[0].id;
-
-        this.eventGroupsLinkedToWaitingList = await getEventGroupsLinkedToWaitingList(waitingListId);
-    }
-
     private async getInviteMemberForGroupActionsWithGroups(): Promise<TableAction<PlatformMember>[]> {
         if (this.organizations.length === 0) {
             return [];
@@ -644,13 +604,7 @@ export class MemberActionBuilder {
         // Each entry is a period (null for waiting lists) and the category tree to invite into.
         const periodTrees: { period: OrganizationRegistrationPeriod | null; categoryTree: GroupCategoryTree }[] = [];
 
-        if (this.isWaitingList) {
-            await this.fetchEventGroupsLinkedToWaitingList();
-            const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
-            if (tree) {
-                periodTrees.push({ period: null, categoryTree: tree });
-            }
-        } else if (this.organizations.length === 1) {
+        if (this.organizations.length === 1) {
             for (const period of this.getResolvedPeriods(this.organizations[0])) {
                 periodTrees.push({ period, categoryTree: period.adminCategoryTree });
             }
@@ -660,76 +614,18 @@ export class MemberActionBuilder {
             return [];
         }
 
-        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.eventGroupsLinkedToWaitingList ?? []);
-        this._allGroupsLinkedToWaitingList = allGroups;
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups());
 
         if (allGroups.length === 0) {
             return [];
         }
 
-        const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
-
         const enabled = () => this.hasWrite;
-
-        if (this.isWaitingList && allGroups.length === 1) {
-            const group = allGroups[0];
-
-            return [
-                new InMemoryTableAction({
-                    name: $t('%1Qq'),
-                    icon: 'success',
-                    priority: 15,
-                    groupIndex: 2,
-                    enabled,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    // disable if already invited
-                    disableIfAll: (member: PlatformMember) => isMemberInvited(member, group) || isMemberRegistered(member, group),
-                    handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
-                        await this.inviteForGroup(members, group, wereItemsFetched);
-                    },
-                }),
-
-                new InMemoryTableAction({
-                    name: $t('%1Rb'),
-                    icon: 'canceled',
-                    priority: 14,
-                    groupIndex: 2,
-                    enabled,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    // disable if not invited
-                    disableIfAll: (member: PlatformMember) => !isMemberInvited(member, group) && !isMemberRegistered(member, group),
-                    handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
-                        await this.deleteInvitations(members, group, wereItemsFetched);
-                    },
-                }),
-            ];
-        }
 
         const getChildActions = ({ action, disableIfAll }: { action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>; disableIfAll: (item: PlatformMember, group: Group) => boolean }) => {
             const buildForTree = (categoryTree: GroupCategoryTree) => getActionsForCategory<PlatformMember>(categoryTree, action, disableIfAll);
 
             const childActions: TableAction<PlatformMember>[] = [];
-
-            if (eventGroups.length > 0) {
-                childActions.push(new MenuTableAction({
-                    name: $t('%uB'),
-                    groupIndex: 0,
-                    enabled,
-                    childActions: () => eventGroups.map((g) => {
-                        return new InMemoryTableAction({
-                            name: g.settings.name.toString(),
-                            needsSelection: true,
-                            allowAutoSelectAll: false,
-                            disableIfAll: item => disableIfAll(item, g),
-                            handler: async (items: PlatformMember[], wereItemsFetched: boolean) => {
-                                await action(items, g, wereItemsFetched);
-                            },
-                        });
-                    }),
-                }));
-            }
 
             // Group by period when more than one period is available, otherwise show a flat list.
             if (periodTrees.length > 1) {
@@ -751,8 +647,8 @@ export class MemberActionBuilder {
         const actions = [
             new MenuTableAction({
                 name: $t(`%1QU`),
-                priority: this.isWaitingList ? 2 : 1,
-                groupIndex: this.isWaitingList ? 2 : 5,
+                priority: 1,
+                groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
@@ -763,22 +659,6 @@ export class MemberActionBuilder {
                 }),
             }),
         ];
-
-        if (this.isWaitingList) {
-            actions.push(new MenuTableAction({
-                name: $t(`%1RK`),
-                priority: 1,
-                groupIndex: 2,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled,
-                childActions: () => getChildActions({
-                    // disable if not invited
-                    disableIfAll: (member: PlatformMember, group: Group) => !isMemberInvited(member, group) && !isMemberRegistered(member, group),
-                    action: async (members, group, wereItemsFetched) => await this.deleteInvitations(members, group, wereItemsFetched),
-                }),
-            }));
-        }
 
         return actions;
     }
@@ -1122,16 +1002,6 @@ export class MemberActionBuilder {
             wereItemsFetched,
         });
     }
-
-    private async deleteInvitations(members: PlatformMember[], group: Group, wereItemsFetched: boolean) {
-        await deleteInvitationsForMembers({
-            members,
-            group,
-            context: this.context,
-            owner: this.owner,
-            wereItemsFetched,
-        });
-    }
 }
 
 export function getActionsForCategory<T extends { id: string }>(
@@ -1365,96 +1235,4 @@ export async function inviteMembersForGroup({ members, group, context, owner, we
         Toast.fromError(e).show();
         return;
     }
-}
-
-export async function deleteInvitationsForMembers({ members, group, context, owner, wereItemsFetched }: { members: PlatformMember[]; group: Group; context: SessionContext; owner: any; wereItemsFetched: boolean }) {
-    const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
-
-    for (const member of members) {
-        for (const invitation of member.member.registrationInvitations.filter(i => i.group.id === group.id)) {
-            invitations.addDelete(invitation.id);
-        }
-    }
-
-    if (invitations.getDeletes().length === 0) {
-        const groupName = group.settings.name.toString();
-        Toast.warning(members.length === 1 ? $t('%1Qh', { group: groupName }) : $t('Deze leden zijn nog niet uitgenodigd voor {group}', { group: groupName })).show();
-        return;
-    }
-
-    try {
-        await context.authenticatedServer.request({
-            method: 'PATCH',
-            path: '/registration-invitations',
-            body: invitations,
-            owner,
-        });
-
-        for (const invitationId of invitations.getDeletes()) {
-            for (const registrationInvitations of members.map(m => m.member.registrationInvitations)) {
-                const indexOfInvitation = registrationInvitations.findIndex(i => i.id === invitationId);
-                if (indexOfInvitation !== -1) {
-                    registrationInvitations.splice(indexOfInvitation, 1);
-                    break;
-                }
-            }
-        }
-
-        RegistrationInvitationEventBus.sendEvent('updated', {
-            groupIds: new Set([group.id]),
-            origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync',
-        }).catch(console.error);
-    } catch (e) {
-        console.error(e);
-        Toast.fromError(e).show();
-        return;
-    }
-
-    const successMessage = members.length === 1 ? $t('%1RC', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
-    new Toast(successMessage, 'success green').show();
-}
-
-export function getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList, periods }: { waitingList: Group; periods: OrganizationRegistrationPeriod[] }): null | GroupCategoryTree {
-    const isWaitingList = waitingList.type === GroupType.WaitingList;
-    if (!isWaitingList) {
-        return null;
-    }
-
-    const period = periods.find(p => p.period.id === waitingList.periodId);
-    if (!period) {
-        return null;
-    }
-
-    return period.getCategoryTree({
-        admin: true,
-        filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id,
-    });
-}
-
-/**
- * Returns all event groups linked to the waiting list.
- * Does not throw if an error occurs.
- * @param waitingListId
- * @returns
- */
-export async function getEventGroupsLinkedToWaitingList(waitingListId: string): Promise<Group[]> {
-    const request = new LimitedFilteredRequest({
-        limit: 100,
-        filter: {
-            waitingListId,
-            // only get events
-            type: GroupType.EventRegistration,
-        },
-    });
-
-    const groupsObjectFetcher = useGroupsObjectFetcher();
-
-    let eventGroups: Group[] = [];
-    try {
-        eventGroups = await fetchAll(request, groupsObjectFetcher);
-    } catch (e) {
-        console.error(e);
-    }
-
-    return eventGroups;
 }

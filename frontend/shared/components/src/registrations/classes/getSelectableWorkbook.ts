@@ -220,8 +220,8 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         organization !== null
             ? new SelectableColumn({
                     id: 'outstandingBalance',
-                    name: $t(`%76`),
-                    description: $t('%184'),
+                    name: $t(`Rekening`),
+                    description: $t('Openstaande rekening voor dit lid'),
                     enabled: false,
                 })
             : null,
@@ -237,7 +237,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         new SelectableColumn({
             id: 'toPay',
             name: $t(`%m0`),
-            description: $t('%183'),
+            description: $t('Nog te betalen voor deze inschrijving'),
         }),
         new SelectableColumn({
             id: 'registeredAt',

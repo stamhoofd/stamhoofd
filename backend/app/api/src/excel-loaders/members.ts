@@ -274,11 +274,11 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
         },
         {
             id: 'outstandingBalance',
-            name: $t(`%76`),
+            name: $t(`Rekening`),
             width: 30,
             getValue: (v) => {
                 return {
-                    value: v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0) / 1_0000,
+                    value: v.member.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0) / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,

@@ -1,12 +1,12 @@
 import { Column } from '#tables/classes/Column.ts';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import type { AppType, Group, GroupCategoryTree, Organization, PlatformMember } from '@stamhoofd/structures';
 import { ContinuousMembershipStatus, GroupType, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformMember;
 
-export function getMemberColumns({ organization, dateRange, group, groups, filterPeriodId, periodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
+export function getMemberColumns({ organization, dateRange, groups, filterPeriodId, periodId, auth, category, app, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; financialRead: boolean }) {
     const isPlatform = STAMHOOFD.userMode === 'platform';
 
     const allColumns: Column<ObjectType, any>[] = [
@@ -47,83 +47,85 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 50,
             recommendedWidth: 120,
         }),
-        isPlatform ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
-            id: 'membership',
-            name: $t(`%1Ny`),
-            enabled: !waitingList,
-            getValue: (member) => {
-                return {
-                    status: member.membershipStatus,
-                    hasFutureMembership: member.hasFutureMembership,
-                };
-            },
-            format: ({ status }) => {
-                switch (status) {
-                    case MembershipStatus.Trial:
-                        return $t(`%1IH`);
-                    case MembershipStatus.Active:
-                        return $t(`%1H0`);
-                    case MembershipStatus.Expiring:
-                        return $t(`%7F`);
-                    case MembershipStatus.Temporary:
-                        return $t(`%zU`);
-                    case MembershipStatus.Inactive:
-                        return $t(`%zV`);
-                }
-            },
-            getStyle: ({ status, hasFutureMembership }) => {
-                switch (status) {
-                    case MembershipStatus.Trial:
-                        return 'secundary';
-                    case MembershipStatus.Active:
-                        return 'success';
-                    case MembershipStatus.Expiring:
-                        return 'warn';
-                    case MembershipStatus.Temporary:
-                        return 'secundary';
-                    case MembershipStatus.Inactive: {
-                        if (hasFutureMembership) {
-                            return 'warn';
+        isPlatform
+            ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
+                    id: 'membership',
+                    name: $t(`%1Ny`),
+                    enabled: true,
+                    getValue: (member) => {
+                        return {
+                            status: member.membershipStatus,
+                            hasFutureMembership: member.hasFutureMembership,
+                        };
+                    },
+                    format: ({ status }) => {
+                        switch (status) {
+                            case MembershipStatus.Trial:
+                                return $t(`%1IH`);
+                            case MembershipStatus.Active:
+                                return $t(`%1H0`);
+                            case MembershipStatus.Expiring:
+                                return $t(`%7F`);
+                            case MembershipStatus.Temporary:
+                                return $t(`%zU`);
+                            case MembershipStatus.Inactive:
+                                return $t(`%zV`);
                         }
+                    },
+                    getStyle: ({ status, hasFutureMembership }) => {
+                        switch (status) {
+                            case MembershipStatus.Trial:
+                                return 'secundary';
+                            case MembershipStatus.Active:
+                                return 'success';
+                            case MembershipStatus.Expiring:
+                                return 'warn';
+                            case MembershipStatus.Temporary:
+                                return 'secundary';
+                            case MembershipStatus.Inactive: {
+                                if (hasFutureMembership) {
+                                    return 'warn';
+                                }
 
-                        return 'error';
-                    }
-                }
-            },
-            minimumWidth: 120,
-            recommendedWidth: 140,
-            allowSorting: false,
-        }) : null,
+                                return 'error';
+                            }
+                        }
+                    },
+                    minimumWidth: 120,
+                    recommendedWidth: 140,
+                    allowSorting: false,
+                })
+            : null,
         isPlatform && dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
-                id: 'continuousMembership',
-                name: 'Doorlopende aansluiting',
-                getValue: member => member.getContinuousMembershipStatus(dateRange!),
-                format: (status) => {
-                    switch (status) {
-                        case ContinuousMembershipStatus.Full:
-                            return 'Volledig';
-                        case ContinuousMembershipStatus.Partial:
-                            return 'Gedeeltelijk';
-                        case ContinuousMembershipStatus.None:
-                            return 'Geen aansluiting';
-                    }
-                },
-                getStyle: (status) => {
-                    switch (status) {
-                        case ContinuousMembershipStatus.Full:
-                            return 'success';
-                        case ContinuousMembershipStatus.Partial:
-                            return 'warn';
-                        case ContinuousMembershipStatus.None:
-                            return 'error';
-                    }
-                },
-                minimumWidth: 120,
-                recommendedWidth: 140,
-                allowSorting: false,
-                enabled: false,
-            })
+                    id: 'continuousMembership',
+                    name: 'Doorlopende aansluiting',
+                    getValue: member => member.getContinuousMembershipStatus(dateRange!),
+                    format: (status) => {
+                        switch (status) {
+                            case ContinuousMembershipStatus.Full:
+                                return 'Volledig';
+                            case ContinuousMembershipStatus.Partial:
+                                return 'Gedeeltelijk';
+                            case ContinuousMembershipStatus.None:
+                                return 'Geen aansluiting';
+                        }
+                    },
+                    getStyle: (status) => {
+                        switch (status) {
+                            case ContinuousMembershipStatus.Full:
+                                return 'success';
+                            case ContinuousMembershipStatus.Partial:
+                                return 'warn';
+                            case ContinuousMembershipStatus.None:
+                                return 'error';
+                        }
+                    },
+                    minimumWidth: 120,
+                    recommendedWidth: 140,
+                    allowSorting: false,
+                    enabled: false,
+                })
             : null,
         new Column<ObjectType, string[]>({
             name: $t(`%7D`),
@@ -156,80 +158,6 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             enabled: false,
         }),
     ].filter(column => column !== null);
-
-    if (group) {
-        if (group.settings.prices.length > 1) {
-            allColumns.push(
-                new Column<ObjectType, GroupPrice[]>({
-                    id: 'groupPrice',
-                    allowSorting: false,
-                    name: $t('%62'),
-                    getValue: member => member.filterRegistrations({ groups: [group!] }).map(r => r.groupPrice),
-                    format: prices => Formatter.joinLast(prices.map(o => o.name.toString()).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%1FW'),
-                    getStyle: prices => prices.length === 0 ? 'gray' : '',
-                    minimumWidth: 100,
-                    recommendedWidth: 300,
-                }),
-            );
-        }
-
-        for (const optionMenu of group.settings.optionMenus) {
-            allColumns.push(
-                new Column<ObjectType, RegisterItemOption[]>({
-                    id: 'optionMenu-' + optionMenu.id,
-                    allowSorting: false,
-                    name: optionMenu.name,
-                    getValue: member => member.filterRegistrations({ groups: [group!] }).flatMap((r) => {
-                        const option = r.options.find(o => o.optionMenu.id === optionMenu.id);
-                        if (!option) {
-                            return [];
-                        }
-                        return [option];
-                    }),
-                    format: (values) => {
-                        if (values.length === 0) {
-                            return $t(`%1FW`);
-                        }
-                        return values.map(v => v.option.allowAmount || v.amount > 1 ? (v.amount + 'x ' + v.option.name) : v.option.name).join(', ');
-                    },
-                    getStyle: values => values.length === 0 ? 'gray' : '',
-                    minimumWidth: 100,
-                    recommendedWidth: 200,
-                }),
-            );
-        }
-
-        for (const category of group.settings.recordCategories) {
-            for (const record of category.getAllRecords()) {
-                allColumns.push(
-                    new Column<ObjectType, RecordAnswer | null>({
-                        id: 'record-' + record.id,
-                        allowSorting: false,
-                        name: record.name.toString(),
-                        getValue: (member) => {
-                            for (const registration of member.filterRegistrations({ groups: [group!] })) {
-                                const answer = registration.recordAnswers.get(record.id);
-                                if (answer) {
-                                    return answer;
-                                }
-                            }
-                            return null;
-                        },
-                        format: (answer) => {
-                            if (answer === null) {
-                                return $t(`%zX`);
-                            }
-                            return answer.stringValue;
-                        },
-                        getStyle: answer => answer === null || answer.isEmpty ? 'gray' : '',
-                        minimumWidth: 100,
-                        recommendedWidth: 200,
-                        enabled: false,
-                    }),
-                );
-            }
-        }
-    }
 
     if (groups.length) {
         /**
@@ -271,8 +199,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
                     if (!member.patchedMember.details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
                         base.push($t(`%19Q`));
-                    }
-                    else {
+                    } else {
                         if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
                             base.push($t(`%zb`));
                         }
@@ -302,7 +229,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         );
     }
 
-    if (app === 'admin' || (group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration && auth.hasSomePlatformAccess())) {
+    if (app === 'admin') {
         allColumns.push(
             new Column<ObjectType, Organization[]>({
                 id: 'organization',
@@ -332,37 +259,13 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         );
     }
 
-    // Who has paid?
-    if (group && group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization) {
-        allColumns.push(
-            new Column<ObjectType, string | null>({
-                id: 'groupRegistration',
-                allowSorting: false,
-                name: $t('%8t'),
-                getValue: (member) => {
-                    const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
-                    if (registrations.find(r => r.payingOrganizationId)) {
-                        const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
-                        return organization ? organization.name : $t(`%Gr`);
-                    }
-                    return null;
-                },
-                format: organizations => organizations || $t(`%18s`),
-                getStyle: organizations => organizations === null ? 'gray' : '',
-                minimumWidth: 100,
-                recommendedWidth: 300,
-                enabled: false,
-            }),
-        );
-    }
-
     if (groups.find(g => g.settings.trialDays)) {
         allColumns.push(
             new Column<ObjectType, Date | null>({
                 name: $t(`%1IH`),
                 allowSorting: false,
                 getValue: (v) => {
-                    const registrations = v.filterRegistrations({ groups, periodId: periodId ?? group?.periodId ?? '' });
+                    const registrations = v.filterRegistrations({ groups, periodId: periodId ?? '' });
 
                     if (registrations.length === 0) {
                         return null;
@@ -391,94 +294,17 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`%1Of`),
-            allowSorting: false,
+            id: 'registeredAt',
+            name: $t(`%zg`),
+            allowSorting: true,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
+                const registrations = v.filterRegistrations({ });
 
                 if (registrations.length === 0) {
                     return null;
                 }
 
-                const filtered = registrations.filter(r => r.startDate).map(r => r.startDate!.getTime());
-
-                if (filtered.length === 0) {
-                    return null;
-                }
-                return new Date(Math.min(...filtered));
-            },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`),
-            getStyle: v => v === null ? 'gray' : '',
-            minimumWidth: 80,
-            recommendedWidth: 200,
-            enabled: false,
-        }),
-    );
-
-    allColumns.push(
-        new Column<ObjectType, Date | null>({
-            name: $t(`%1P8`),
-            allowSorting: false,
-            getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
-
-                if (registrations.length === 0) {
-                    return null;
-                }
-
-                const filtered = registrations.filter(r => r.endDate).map(r => r.endDate!.getTime());
-
-                if (filtered.length === 0) {
-                    return null;
-                }
-                return new Date(Math.max(...filtered));
-            },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`),
-            getStyle: v => v === null ? 'gray' : '',
-            minimumWidth: 80,
-            recommendedWidth: 200,
-            enabled: false,
-        }),
-    );
-
-    if (waitingList) {
-        allColumns.push(
-            new Column<ObjectType, string[]>({
-                name: $t('%1UD'),
-                enabled: true,
-                // todo?
-                allowSorting: false,
-                getValue: (v) => {
-                    if (organization) {
-                        return v.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.group.name.toString());
-                    }
-                    return v.member.registrationInvitations.map(i => i.group.name.toString());
-                },
-                format: (v) => {
-                    if (v.length === 0) {
-                        return $t('%1QP');
-                    }
-                    return Formatter.joinLast(v.sort(), ', ', ' ' + $t(`%M1`) + ' ');
-                },
-                getStyle: v => v.length === 0 ? 'gray' : '',
-                minimumWidth: 100,
-                recommendedWidth: 200
-            })
-        )
-    }
-
-    allColumns.push(
-        new Column<ObjectType, Date | null>({
-            name: waitingList ? $t(`%zf`) : $t(`%zg`),
-            allowSorting: false,
-            getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
-
-                if (registrations.length === 0) {
-                    return null;
-                }
-
-                const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime());
+                const filtered = registrations.filter(r => r.registeredAt !== null).map(r => r.registeredAt!.getTime());
 
                 if (filtered.length === 0) {
                     return null;
@@ -507,34 +333,14 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
     );
 
-    if (!waitingList && financialRead && groups.length > 0) {
+    if (financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({
-                name: $t(`%1IP`),
-                allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
-                format: (outstandingBalance) => {
-                    if (outstandingBalance < 0) {
-                        return Formatter.price(outstandingBalance);
-                    }
-                    if (outstandingBalance <= 0) {
-                        return $t(`%1Mn`);
-                    }
-                    return Formatter.price(outstandingBalance);
-                },
-                getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
-                minimumWidth: 70,
-                recommendedWidth: 80,
-                enabled: false,
-            }),
-        );
-
-        allColumns.push(
-            new Column<ObjectType, number>({
-                name: $t(`%m0`),
-                description: $t('%183'),
-                allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0),
+                id: 'memberCachedBalance.toPay',
+                name: $t(`Rekening`),
+                description: $t('Openstaande rekening voor dit lid'),
+                allowSorting: true,
+                getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0),
                 format: (outstandingBalance) => {
                     if (outstandingBalance < 0) {
                         return Formatter.price(outstandingBalance);
@@ -552,28 +358,12 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         );
     }
 
-    allColumns.push(
-        new Column<ObjectType, number>({
-            name: $t(`%76`),
-            description: $t('%184'),
-            allowSorting: false,
-            getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
-            format: (outstandingBalance) => {
-                return Formatter.price(outstandingBalance);
-            },
-            getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
-            minimumWidth: 70,
-            recommendedWidth: 200,
-            enabled: false,
-        }),
-    );
-
     if (category) {
         allColumns.push(
             new Column<ObjectType, Group[]>({
                 id: 'category',
                 allowSorting: false,
-                name: waitingList ? $t(`%1IQ`) : (category.settings.name || $t('%1EI')),
+                name: (category.settings.name || $t('%1EI')),
                 getValue: (member) => {
                     if (!category) {
                         return [];
@@ -595,9 +385,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 enabled: false,
             }),
         );
-    }
-
-    if (!group && !category) {
+    } else {
         allColumns.push(
             new Column<ObjectType, Group[]>({
                 id: 'category',

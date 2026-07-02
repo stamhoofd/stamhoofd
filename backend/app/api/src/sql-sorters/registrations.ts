@@ -3,10 +3,10 @@ import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
 import type { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { Context, ContextInstance } from '../helpers/Context.js';
 import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { groupJoin, memberJoin, organizationJoin } from '../sql-filters/registrations.js';
-import { Context, ContextInstance } from '../helpers/Context.js';
 
 export class RegistrationSortData {
     readonly registration: RegistrationWithMemberBlob;
@@ -115,6 +115,19 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: memberCachedBalanceForOrganizationJoin,
         select: [SQL.column('memberCachedBalance', 'amountOpen')],
+    },
+    'memberCachedBalance.toPay': {
+        getValue({ registration }) {
+            return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLIfNull(SQL.column('memberCachedBalance', 'toPay'), 0),
+                direction,
+            });
+        },
+        join: memberCachedBalanceForOrganizationJoin,
+        select: [SQL.column('memberCachedBalance', 'toPay')],
     },
     'registrationCachedBalance.toPay': {
         getValue({ registration }) {

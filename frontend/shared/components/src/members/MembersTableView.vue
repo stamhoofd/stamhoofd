@@ -41,7 +41,6 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { getMemberColumns } from '#members/helpers/getMemberColumns.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
-import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
@@ -79,8 +78,6 @@ const props = withDefaults(
         customEstimatedRows: null,
     },
 );
-
-const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
 const { filterBuilders, loading: isLoadingFilters } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
 const actions: Ref<TableAction<ObjectType>[]> = ref([]);
@@ -254,7 +251,6 @@ const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(computed(() => tableObjectFet
 
 const allColumns = getMemberColumns({
     dateRange: props.dateRange,
-    group: props.group,
     periodId: props.periodId,
     category: props.category,
     organization: organization.value,
@@ -262,7 +258,6 @@ const allColumns = getMemberColumns({
     filterPeriodId: filterPeriodId.value,
     auth,
     app,
-    waitingList: waitingList.value,
     financialRead: financialRead.value,
 });
 
@@ -310,8 +305,6 @@ if (!organization.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
 
-let groupsLinkedToWaitingList: Group[] = [];
-
 async function createActions(): Promise<void> {
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
@@ -332,7 +325,6 @@ async function createActions(): Promise<void> {
             selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
             includeMove: true,
             includeEdit: !excludeEdit,
-            includeOnlyIfRelevantForWaitingList: true,
         }),
     ];
 
@@ -340,23 +332,8 @@ async function createActions(): Promise<void> {
         results.push(actionBuilder.getChargeAction());
     }
 
-    groupsLinkedToWaitingList = actionBuilder.allGroupsLinkedToWaitingList;
-
     actions.value = results;
 }
 
 createActions().catch(console.error);
-
-if (waitingList.value) {
-    useRegistrationInvitationEventListener('updated', async (value) => {
-        // not necessary in this case because the invitations are updated directly
-        if (value.origin === 'members-table-sync') {
-            return;
-        }
-
-        if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
-            tableObjectFetcher.reset(true, true);
-        }
-    });
-}
 </script>

@@ -5,13 +5,14 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, MembersBlob, StamhoofdFilter } from '@stamhoofd/structures';
-import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
 import { memberFilterCompilers } from '../../../sql-filters/members.js';
 import { memberSorters } from '../../../sql-sorters/members.js';
 import { validateGroupFilter } from './helpers/validateGroupFilter.js';
@@ -279,28 +280,16 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
         }
 
-        let next: LimitedFilteredRequest | undefined;
+        const membersBlob = await AuthenticatedStructures.membersBlob(members);
 
-        if (members.length >= requestQuery.limit) {
-            const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
-
-            next = new LimitedFilteredRequest({
-                filter: requestQuery.filter,
-                pageFilter: nextFilter,
-                sort: requestQuery.sort,
-                limit: requestQuery.limit,
-                search: requestQuery.search,
-            });
-
-            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
-                console.error('Found infinite loading loop for', requestQuery);
-                next = undefined;
-            }
-        }
+        const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
+            request: requestQuery,
+            results: membersBlob.members,
+            sorters,
+        });
 
         return new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.membersBlob(members),
+            results: membersBlob,
             next,
         });
     }

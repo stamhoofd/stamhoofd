@@ -56,8 +56,9 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
             }));
         } else {
             all.push(new NumberFilterBuilder({
-                key: 'memberCachedBalance.amountOpen',
-                name: $t(`%76`),
+                key: 'registrationCachedBalance.toPay',
+                description: $t('Nog te betalen voor deze inschrijving'),
+                name: $t(`Te betalen`),
                 type: NumberFilterFormat.Currency,
             }));
         }
