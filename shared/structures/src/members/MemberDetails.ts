@@ -298,12 +298,14 @@ export class MemberDetails extends AutoEncoder {
         this.alternativeEmails = filterUsedAndInvalidEmails(this.alternativeEmails, false);
 
         if (this.phone) {
-            this.phone = Formatter.removeDuplicateSpaces(this.phone.trim());
+            if (this.calculatedParentsHaveAccess) {
+                this.phone = Formatter.removeDuplicateSpaces(this.phone.trim());
 
-            for (const parent of this.parents) {
-                if (parent.phone === this.phone) {
-                    this.phone = null;
-                    break;
+                for (const parent of this.parents) {
+                    if (parent.phone === this.phone) {
+                        this.phone = null;
+                        break;
+                    }
                 }
             }
         }
