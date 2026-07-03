@@ -20,6 +20,7 @@ class Options {
     details?: MemberDetails;
 
     generateData?: boolean;
+    generateSensitiveData?: boolean;
 
     /// In order to add something to the keychain, we need the private key of the user (since everything needs to be signed)
     userPrivateKey?: string;
@@ -59,7 +60,6 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
 
         if (this.options.generateData === true || (this.options.generateData === undefined && this.options.details === undefined)) {
             memberDetails.gender = Math.random() >= 0.05 ? (Math.random() >= 0.5 ? Gender.Male : Gender.Female) : Gender.Other;
-            memberDetails.nationalRegisterNumber = '12345678';
 
             if (!memberDetails.firstName) {
                 memberDetails.firstName = this.randomFirstName(memberDetails.gender);
@@ -140,6 +140,10 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
             if (Math.random() >= 0.9) {
                 memberDetails.emergencyContacts.push(await emergencyContactFactory.create());
             }
+        }
+
+        if (this.options.generateSensitiveData === true) {
+            memberDetails.nationalRegisterNumber = '12341234';
         }
 
         const member = new Member()

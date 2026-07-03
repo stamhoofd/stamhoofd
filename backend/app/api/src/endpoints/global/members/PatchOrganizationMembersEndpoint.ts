@@ -168,7 +168,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
 
-            await PatchOrganizationMembersEndpoint.checkCanAccessMember(member, securityCode, 'patch');
+            await PatchOrganizationMembersEndpoint.checkCanAccessMember(member, securityCode, 'direct');
 
             patch = await Context.auth.filterMemberPatch(member, patch);
             const originalDetails = member.details.clone();
@@ -1011,13 +1011,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         await log.save();
     }
 
-    static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
-        if ((await member.isSafeToMergeDuplicateWithoutSecurityCode(Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+    static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch' | 'direct') {
+        if ((type !== 'direct' && await member.isSafeToMergeDuplicateWithoutSecurityCode(Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         } else if (securityCode) {
             await this.checkSecurityCode(member, securityCode);
         } else {
-            if (type === 'patch') {
+            if (type === 'direct') {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
 

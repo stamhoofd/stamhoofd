@@ -47,6 +47,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName,
                 birthDay,
                 generateData: true,
+                generateSensitiveData: true,
             }).create();
 
             const token = await Token.createToken(user);
@@ -94,6 +95,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName,
                 birthDay,
                 generateData: true,
+                generateSensitiveData: true,
                 // should be member of the same organization
                 organization,
             }).create();
@@ -148,6 +150,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName,
                 birthDay,
                 generateData: true,
+                generateSensitiveData: true,
                 // should be member of the same organization
                 organization,
             }).create();
@@ -157,6 +160,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName,
                 birthDay,
                 generateData: true,
+                generateSensitiveData: true,
                 // should be member of the same organization
                 organization,
             }).create();
@@ -185,7 +189,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             request.headers.authorization = 'Bearer ' + token.accessToken;
             await expect(testServer.test(endpoint, request))
                 .rejects
-                .toThrow(STExpect.errorWithCode('not_found'));
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
         });
 
         test('Should be able to create duplicate from another organization in userMode organization', async () => {
@@ -215,6 +219,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 lastName,
                 birthDay,
                 generateData: true,
+                generateSensitiveData: true,
                 // member of other organization
                 organization: otherOrganization,
                 details: MemberDetails.create({
