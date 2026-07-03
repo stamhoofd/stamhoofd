@@ -3,7 +3,7 @@ import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import type { WebshopTimeSlot } from '@stamhoofd/structures';
+import type { TransferSettings, WebshopTimeSlot } from '@stamhoofd/structures';
 import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -926,6 +926,26 @@ export class Order extends QueryableModel {
     }
 
     /**
+     * Get the transfer settings for this order
+     * @param this
+     * @param shouldThrowIfNoIban
+     * @returns
+     */
+    getTransferSettings(this: Order & { webshop: Webshop & { organization: Organization } }, { shouldThrowIfNoIban }: { shouldThrowIfNoIban?: boolean } = {}): TransferSettings {
+        const transferSettings = this.webshop.meta.transferSettings.fillMissing(this.webshop.organization.mappedTransferSettings);
+
+        if (shouldThrowIfNoIban && !transferSettings.iban) {
+            throw new SimpleError({
+                code: 'missing_iban',
+                message: 'Missing IBAN',
+                human: $t(`%w2`),
+            });
+        }
+
+        return transferSettings;
+    }
+
+    /**
      * WARNING: this should always run inside a queue so it only runs once for the same orde
      * Include any tickets that are generated and should be included in the e-mail
      */
@@ -951,15 +971,7 @@ export class Order extends QueryableModel {
         // Now we have a number, update the payment
         if (payment && payment.method === PaymentMethod.Transfer) {
             // Only now we can update the transfer description, since we need the order number as a reference
-            payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings);
-
-            if (!payment.transferSettings.iban) {
-                throw new SimpleError({
-                    code: 'missing_iban',
-                    message: 'Missing IBAN',
-                    human: $t(`%w2`),
-                });
-            }
+            payment.transferSettings = this.getTransferSettings({ shouldThrowIfNoIban: true });
             payment.generateDescription(organization, this.number.toString(), this.getTransferReplacements());
             await payment.save();
         }

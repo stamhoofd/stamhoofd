@@ -8,10 +8,10 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
-import { AuditLogService } from '../../../../services/AuditLogService.js';
-import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
+import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -153,6 +153,13 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         const payment = new Payment();
                         payment.organizationId = organization.id;
                         payment.method = struct.data.paymentMethod;
+
+                        // quick throw to prevent payment from being saved
+                        if (payment.method === PaymentMethod.Transfer) {
+                            // will throw if iban is missing
+                            order.getTransferSettings({ shouldThrowIfNoIban: true });
+                        }
+
                         payment.status = PaymentStatus.Created;
                         payment.price = totalPrice;
                         PaymentService.roundPayment(payment);
