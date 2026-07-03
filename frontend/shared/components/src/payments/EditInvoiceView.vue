@@ -114,8 +114,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';

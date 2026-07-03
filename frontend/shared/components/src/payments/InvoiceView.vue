@@ -2,6 +2,9 @@
     <div class="st-view invoice-view">
         <STNavigationBar :title="title">
             <template #right>
+                <button v-if="invoice.xml && invoice.pdf" v-tooltip="'Download PDF in plaats van XML (niet officieel)'" type="button" class="button icon color-pdf file-pdf" @click="downloadInvoicePdf(invoice)" />
+                <button type="button" class="button icon download gray" @click="downloadInvoice(invoice)" />
+
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hA')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hB')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
@@ -152,6 +155,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';
 import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
+import { useDownloadInvoice } from './hooks/useDownloadInvoice.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -167,13 +171,6 @@ const props = withDefaults(
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('invoice', props);
 const errors = useErrors();
 const title = props.invoice.number ?? '/';
+const { downloadInvoice, downloadInvoicePdf } = useDownloadInvoice();
 
-const sortedItems = computed(() => {
-    return props.invoice.items.slice().sort((a, b) => {
-        return Sorter.stack(
-            Sorter.byNumberValue(a.totalWithoutVAT, b.totalWithoutVAT),
-            Sorter.byStringValue(a.name, b.name),
-        );
-    });
-});
 </script>

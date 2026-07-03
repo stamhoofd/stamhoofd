@@ -19,46 +19,20 @@
 <script lang="ts" setup>
 import type { Invoice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Toast } from '../overlays/Toast';
 import { computed } from 'vue';
+import { useDownloadInvoice } from './hooks/useDownloadInvoice';
 
 const props = defineProps<{
-    invoice: Invoice
+    invoice: Invoice;
 }>();
 
 const description = computed(() => {
     if (props.invoice.items.length > 2) {
-        return $t('%1Zv', {count: props.invoice.items.length})
+        return $t('%1Zv', { count: props.invoice.items.length });
     }
-    return Formatter.uniqueArray(props.invoice.items.map(i => i.name)).join('\n')
-})
+    return Formatter.uniqueArray(props.invoice.items.map(i => i.name)).join('\n');
+});
 
-async function downloadInvoice(invoice: Invoice) {
-    const url = invoice.xml ? invoice.xml?.getPublicPath() : invoice.pdf?.getPublicPath()
-
-    if (url) {
-        const a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank"
-        a.setAttribute("download", (invoice.invoicedAt ? (Formatter.dateIso(invoice.invoicedAt) + " - ") : "") + "Stamhoofd " + (invoice.number?.toString() ?? invoice.id));
-        a.click();
-    } else {
-        Toast.error($t('%1bY')).show();
-    }
-}
-
-async function downloadInvoicePdf(invoice: Invoice) {
-    const url = invoice.pdf?.getPublicPath()
-
-    if (url) {
-        const a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank"
-        a.setAttribute("download", (invoice.invoicedAt ? (Formatter.dateIso(invoice.invoicedAt) + " - ") : "") + "Stamhoofd " + (invoice.number ?? invoice.id));
-        a.click();
-    } else {
-        Toast.error($t('%1Xu')).show();
-    }
-}
+const { downloadInvoice, downloadInvoicePdf } = useDownloadInvoice();
 
 </script>
