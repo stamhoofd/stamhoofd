@@ -1,6 +1,6 @@
 import EditMemberGeneralBox from '../../components/edit/EditMemberGeneralBox.vue';
 
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
@@ -67,7 +67,7 @@ export class MemberGeneralStep implements EditMemberStep {
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
             saveText: $t(`%16p`),
-            markReviewed: ['details'],
+            markReviewed: manager.member.isNew ? [] : ['details'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },
