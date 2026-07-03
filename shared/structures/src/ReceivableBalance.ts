@@ -119,7 +119,7 @@ export class DetailedReceivableBalance extends ReceivableBalance {
     /**
      * All invoices related to this receivable balance (via the paying organization or via the invoiced balance items)
      */
-    @field({ decoder: new ArrayDecoder(Invoice), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(Invoice), version: 401 })
     invoices: Invoice[] = [];
 
     get filteredBalanceItems() {
