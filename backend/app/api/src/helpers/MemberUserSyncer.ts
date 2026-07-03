@@ -23,7 +23,7 @@ export class MemberUserSyncerStatic {
                     throw new Error('Failed to load users for member ' + member.id);
                 }
 
-                const { userEmails, parentEmails, unverifiedEmails, allEmails } = this.getMemberAccessEmails(member.details);
+                const { userEmails, parentEmails, parentAccessEmails, unverifiedEmails, allEmails } = this.getMemberAccessEmails(member.details);
 
                 // Make sure all these users have access to the member
                 for (const email of userEmails) {
@@ -34,19 +34,18 @@ export class MemberUserSyncerStatic {
                     });
                 }
 
-                if (member.details.calculatedParentsHaveAccess) {
-                    for (const parent of member.details.parents) {
-                        for (const email of parent.getEmails()) {
-                            if (userEmails.includes(email.toLocaleLowerCase())) {
-                                continue;
-                            }
-
-                            // Link parents and unverified emails
-                            await this.linkUser(email, member, true, {
-                                firstName: parent.firstName,
-                                lastName: parent.lastName,
-                            });
+                // Only parents that have access to the member (partners keep access regardless of age)
+                for (const parent of member.details.getParentsWithAccess()) {
+                    for (const email of parent.getEmails()) {
+                        if (userEmails.includes(email.toLocaleLowerCase())) {
+                            continue;
                         }
+
+                        // Link parents and unverified emails
+                        await this.linkUser(email, member, true, {
+                            firstName: parent.firstName,
+                            lastName: parent.lastName,
+                        });
                     }
                 }
 
@@ -74,7 +73,8 @@ export class MemberUserSyncerStatic {
                             // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                             await this.linkUser(user.email, member, true);
                         }
-                    } else if (!member.details.calculatedParentsHaveAccess && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
+                    } else if (parentEmails.includes(user.email.toLocaleLowerCase()) && !parentAccessEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
+                        // This email only belongs to parents that no longer have access
                         await this.unlinkUser(user, member);
                     }
                 }
@@ -93,6 +93,7 @@ export class MemberUserSyncerStatic {
     getMemberAccessEmails(details: MemberDetails) {
         const userEmails = details.getMemberEmails().map(e => e.toLocaleLowerCase());
         const parentEmails = details.getParentEmails().map(e => e.toLocaleLowerCase());
+        const parentAccessEmails = details.getParentsWithAccess().flatMap(p => p.getEmails()).map(e => e.toLocaleLowerCase());
         const unverifiedEmails = details.unverifiedEmails.map(e => e.toLocaleLowerCase());
         const allEmails = [...userEmails, ...parentEmails, ...unverifiedEmails];
 
@@ -100,6 +101,7 @@ export class MemberUserSyncerStatic {
             allEmails,
             userEmails,
             parentEmails,
+            parentAccessEmails,
             unverifiedEmails,
         };
     }

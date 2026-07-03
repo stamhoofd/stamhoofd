@@ -11,6 +11,15 @@ export class Parent extends AutoEncoder {
     id: string;
 
     @field({ decoder: new EnumDecoder(ParentType), defaultValue: () => ParentType.Mother, isDefaultValue: v => v === ParentType.Mother })
+    @field({
+        decoder: new EnumDecoder(ParentType),
+        version: 401,
+        defaultValue: () => ParentType.Mother,
+        isDefaultValue: v => v === ParentType.Mother,
+        // Partner was introduced in version 401. Older clients don't know this value and would fail
+        // to decode it, so downgrade it to Other when encoding for them.
+        downgrade: (type: ParentType) => type === ParentType.Partner ? ParentType.Other : type,
+    })
     type: ParentType;
 
     @field({ decoder: StringDecoder })

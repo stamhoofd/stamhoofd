@@ -12,6 +12,7 @@ import { EmergencyContact } from './EmergencyContact.js';
 import { Gender } from './Gender.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { Parent } from './Parent.js';
+import { ParentType } from './ParentType.js';
 import type { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordAnswerDecoder, RecordAnswerMapDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
@@ -442,6 +443,40 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
+     * Whether a specific parent has access to this member.
+     *
+     * Partners keep access regardless of the member's age (unless access was explicitly disabled),
+     * while other parents lose access by default once the member is old enough (see calculatedParentsHaveAccess).
+     */
+    parentHasAccess(parent: Parent): boolean {
+        if (this.calculatedParentsHaveAccess) {
+            return true;
+        }
+
+        if (parent.type === ParentType.Partner) {
+            // A partner keeps access unless it was explicitly disabled
+            return this.parentsHaveAccess?.value ?? true;
+        }
+
+        return false;
+    }
+
+    getParentsWithAccess(): Parent[] {
+        return this.parents.filter(p => this.parentHasAccess(p));
+    }
+
+    /**
+     * Title used for the parents section in the UI. For older members a partner is more likely
+     * than a parent, so we broaden the wording.
+     */
+    getParentsTitle(): string {
+        if (this.age !== null && this.age >= 24) {
+            return $t(`Partner of ouders`);
+        }
+        return $t(`Ouders`);
+    }
+
+    /**
      * Age, set to 99 if missing
      */
     get defaultAge() {
@@ -792,18 +827,16 @@ export class MemberDetails extends AutoEncoder {
             }
         }
 
-        if (this.calculatedParentsHaveAccess) {
-            // Only the first email address of parents
-            emails.push(
-                ...this.parents.flatMap((p) => {
-                    const q = p.getEmails();
-                    if (q.length) {
-                        return [q[0].toLocaleLowerCase()];
-                    }
-                    return [];
-                }),
-            );
-        }
+        // Only the first email address of each parent that has access
+        emails.push(
+            ...this.getParentsWithAccess().flatMap((p) => {
+                const q = p.getEmails();
+                if (q.length) {
+                    return [q[0].toLocaleLowerCase()];
+                }
+                return [];
+            }),
+        );
 
         return emails;
     }
