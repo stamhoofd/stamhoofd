@@ -253,16 +253,18 @@ export class MemberDetails extends AutoEncoder {
 
         // Remove email address on member if it was set on a parent too
         if (this.email !== null) {
-            this.email = this.email.toLowerCase().trim();
+            if (this.calculatedParentsHaveAccess) {
+                this.email = this.email.toLowerCase().trim();
 
-            for (const parent of this.parents) {
-                if (parent.hasEmail(this.email)) {
-                    this.email = null;
-                    break;
+                for (const parent of this.parents) {
+                    if (parent.hasEmail(this.email)) {
+                        this.email = null;
+                        break;
+                    }
                 }
-            }
-            if (!this.email || !DataValidator.isEmailValid(this.email)) {
-                this.email = null;
+                if (!this.email || !DataValidator.isEmailValid(this.email)) {
+                    this.email = null;
+                }
             }
         }
 
