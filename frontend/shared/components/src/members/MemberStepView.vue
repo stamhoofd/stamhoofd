@@ -203,6 +203,9 @@ const smsTryCount = ref(0);
  * When phone is null the backend cycles through the known numbers based on tryCount.
  */
 async function requestSecurityCode(method: SecurityCodeSendMethod, phone: string | null) {
+    if (!isDuplicate.value) {
+        return;
+    }
     const response = await context.value.authenticatedServer.request({
         method: 'POST',
         path: '/members/security-code',
