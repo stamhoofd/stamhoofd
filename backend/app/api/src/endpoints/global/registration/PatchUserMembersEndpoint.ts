@@ -107,12 +107,25 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     });
                 }
 
-                // give the parents access to the member they are patching if they would loose access by setting the email of the member (if the member is an adult without email)
+                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
+
+                const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
+
+                const originalReviewTimes = member.details.reviewTimes;
+
+                member.details.patchOrPut(struct.details);
+
+                if (struct.details.uitpasNumberDetails || didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)) {
+                    await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
+                }
+
+                member.details.cleanData();
+                this.throwIfInvalidDetails(member.details);
+
+                // give the parents access to the member they are patching if they would loose access
                 if (
-                    // an email is being set
-                    struct.details.email
-                    // and the member has no email yet but is an adult
-                    && member.details.email === null && member.details.defaultAge >= 18
+                    // if the parents have no access after the patch
+                    !member.details.calculatedParentsHaveAccess
                     // and the parent access is not yet configured
                     && member.details.parentsHaveAccess === null
                     // and the user is one of the parents
@@ -122,20 +135,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                         value: true,
                     });
                 }
-
-                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
-
-                const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
-
-                const originalReviewTimes = member.details.reviewTimes;
-                member.details.patchOrPut(struct.details);
-
-                if (struct.details.uitpasNumberDetails || didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)) {
-                    await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
-                }
-
-                member.details.cleanData();
-                this.throwIfInvalidDetails(member.details);
             }
 
             if (!member.details) {
