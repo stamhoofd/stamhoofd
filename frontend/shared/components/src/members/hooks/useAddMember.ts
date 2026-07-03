@@ -8,6 +8,7 @@ import { useAppContext } from '#context/appContext.ts';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { getMarkReviewedForGeneralStep } from '#members/classes/steps/MemberGeneralStep.ts';
 
 export function useAddMember() {
     const navigate = useNavigationActions();
@@ -35,6 +36,7 @@ export function useAddMember() {
                 saveText: $t('%16p'),
                 member,
                 component: markRaw(EditMemberGeneralBox),
+                getMarkReviewed: (member: PlatformMember) => getMarkReviewedForGeneralStep(member),
                 saveHandler: async (navigate: NavigationActions) => {
                     // Copy the changes to the original family
                     family.copyFromClone(clonedFamily);

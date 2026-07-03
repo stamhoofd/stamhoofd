@@ -152,11 +152,13 @@ const props = withDefaults(
         // do not change this
         member: PlatformMember;
         markReviewed?: ReviewTimeType[];
+        getMarkReviewed?: ((member: PlatformMember) => ReviewTimeType[]) | null;
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         saveText: () => $t(`%1Op`),
         saveHandler: null,
         markReviewed: () => [],
+        getMarkReviewed: null,
     },
 );
 
@@ -262,10 +264,12 @@ async function startSecurityCodeViaSMS() {
 }
 
 function patchMemberWithReviewed(member: PlatformMember) {
-    if (props.markReviewed.length && willMarkReviewed) {
+    const extra = props.getMarkReviewed ? props.getMarkReviewed(member) : [];
+    const markReviewed = Formatter.uniqueArray([...props.markReviewed, ...extra]);
+    if (markReviewed.length && willMarkReviewed) {
         const times = member.patchedMember.details.reviewTimes.clone();
 
-        for (const r of props.markReviewed) {
+        for (const r of markReviewed) {
             times.markReviewed(r, new Date());
         }
 

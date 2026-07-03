@@ -2,11 +2,44 @@ import EditMemberGeneralBox from '../../components/edit/EditMemberGeneralBox.vue
 
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';
 import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
 import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
+
+export function getMarkReviewedForGeneralStep(member: PlatformMember) {
+    const details = member.patchedMember.details;
+
+    // Check missing information
+    if (!details.phone && member.isPropertyEnabled('phone')) {
+        // Don't mark reviewed if data is missing
+        return [];
+    }
+
+    if (!details.email && member.isPropertyEnabled('emailAddress')) {
+        // Don't mark reviewed if data is missing
+        return [];
+    }
+
+    if (!details.address && member.isPropertyEnabled('address')) {
+        // Don't mark reviewed if data is missing
+        return [];
+    }
+
+    if (!details.birthDay && member.isPropertyEnabled('birthDay')) {
+        // Don't mark reviewed if data is missing
+        return [];
+    }
+
+    if (!details.nationalRegisterNumber && member.isPropertyEnabled('nationalRegisterNumber')) {
+        // Don't mark reviewed if data is missing
+        return [];
+    }
+
+    return ['details'];
+}
 
 export class MemberGeneralStep implements EditMemberStep {
     options: MemberSharedStepOptions;
@@ -67,7 +100,7 @@ export class MemberGeneralStep implements EditMemberStep {
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
             saveText: $t(`%16p`),
-            markReviewed: manager.member.isNew ? [] : ['details'],
+            getMarkReviewed: (member: PlatformMember) => getMarkReviewedForGeneralStep(member),
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },
