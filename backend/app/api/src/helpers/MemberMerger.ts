@@ -4,6 +4,7 @@ import {
     Member,
     MemberPlatformMembership,
     MemberResponsibilityRecord,
+    MemberUser,
     MergedMember,
     Registration,
     User,
@@ -70,6 +71,7 @@ export async function mergeTwoMembers(base: Member, other: Member, options?: { u
     if (other.existsInDatabase) {
         await mergeRegistrations(base, other);
         await mergeUsers(base, other);
+        // await mergeUserMembers(base, other);
         await mergeResponsibilities(base, other);
         await mergeBalanceItems(base, other);
         await mergeDocuments(base, other);
@@ -112,6 +114,20 @@ async function mergeRegistrations(base: Member, other: Member) {
 
 async function mergeUsers(base: Member, other: Member) {
     await mergeModels(base, other, User);
+}
+
+async function mergeUserMembers(base: Member, other: Member) {
+    const baseId = base.id;
+    const otherModels = await MemberUser.select().where('membersId', other.id).fetch();
+
+    for (const otherModel of otherModels) {
+        otherModel.membersId = baseId;
+
+        await otherModel.save({
+            skipMarkSaved: true,
+            skipSendEvents: true,
+        });
+    }
 }
 
 async function mergeResponsibilities(base: Member, other: Member) {

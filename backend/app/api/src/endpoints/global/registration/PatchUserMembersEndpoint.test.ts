@@ -9,6 +9,7 @@ import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint.js';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -101,6 +102,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             expect(member.details.birthDay).toEqual(newBirthDay);
             expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
             expect(member.details.alternativeEmails).toHaveLength(0);
+
+            // Check access
+            expect(member.users.filter(u => u.id === user.id)).toHaveLength(1);
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {
@@ -171,6 +175,99 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             // Check parent is still there
             expect(member.details.parents.length).toBe(1);
             expect(member.details.parents[0]).toEqual(existingMember.details.parents[0]);
+
+            // Check access
+            expect(member.users.filter(u => u.id === user.id)).toHaveLength(1);
+        });
+
+        test('Putting a new member without email address gives you access and links your user', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({ organization }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Invented ' + Math.floor(Math.random() * 100000),
+                    lastName: 'Last ' + Math.floor(Math.random() * 100000),
+                    birthDay: new Date(),
+                    // Security code is not required: you have access
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            // Check id of the returned memebr matches the existing member
+            expect(response.body.members.length).toBe(1);
+
+            // Check data matches the original data + changes from the put
+            const member = response.body.members[0];
+
+            // Check access
+            expect(member.users.map(u => u.id)).toEqual([user.id]);
+        });
+
+        test('[Regression] Putting a new member with same name of existing member you have access to does not create a duplicate link', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({ organization }).create();
+            const details = MemberDetails.create({
+                firstName,
+                lastName,
+                securityCode: 'ABC-123',
+                parents: [
+                    Parent.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                    }),
+                ],
+            });
+
+            const existingMember = await new MemberFactory({
+                birthDay,
+                details,
+            }).create();
+
+            await MemberUserSyncer.linkUser(user.email, existingMember, true);
+
+            // Check access
+            expect(existingMember.users).toHaveLength(1);
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1000);
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    birthDay: newBirthDay,
+                    // Security code is not required: you have access
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            // Check id of the returned memebr matches the existing member
+            expect(response.body.members.length).toBe(1);
+            expect(response.body.members[0].id).toBe(existingMember.id);
+
+            // Check data matches the original data + changes from the put
+            const member = response.body.members[0];
+            expect(member.details.firstName).toBe(firstName);
+            expect(member.details.lastName).toBe(lastName);
+            expect(member.details.birthDay).toEqual(newBirthDay);
+
+            // Check access
+            expect(member.users.map(u => u.id)).toEqual([user.id]);
         });
     });
 

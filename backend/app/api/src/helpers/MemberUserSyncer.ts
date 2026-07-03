@@ -1,13 +1,55 @@
 import type { MemberWithUsers } from '@stamhoofd/models';
-import { CachedBalance, Member, MemberResponsibilityRecord, Organization, Platform, User } from '@stamhoofd/models';
+import { CachedBalance, Member, MemberResponsibilityRecord, MemberUser, Organization, Platform, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCount, SQLSelectAs } from '@stamhoofd/sql';
 import type { MemberDetails, PermissionRole } from '@stamhoofd/structures';
 import { AuditLogSource, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService.js';
 
 export class MemberUserSyncerStatic {
+    /**
+     * Delete duplicate member <-> user links (the same user linked to the same member more than once),
+     * keeping the row with the lowest id for each (membersId, usersId) pair.
+     *
+     * Runs as a single atomic statement, either scoped to one member or across all members (memberId = null).
+     */
+    async removeDuplicates(memberId: string | null) {
+        // Find only the (membersId, usersId) pairs that actually have duplicates, together with the
+        // lowest id we want to keep. HAVING COUNT(*) > 1 keeps this derived table tiny (duplicates are
+        // rare), so we only materialize + join the handful of affected groups instead of the whole table.
+        // It has to be a derived table so MySQL materializes it up front: a plain self-join against the
+        // delete target does not reliably delete rows (and is forbidden as a subquery on the same table).
+        const duplicateGroups = SQL.select(
+            SQL.column('membersId'),
+            SQL.column('usersId'),
+            new SQLSelectAs(SQL.min(SQL.column('id')), new SQLAlias('keepId')),
+        )
+            .from(SQL.table(MemberUser.table))
+            .groupBy(SQL.column('membersId'), SQL.column('usersId'))
+            .having(SQL.where(new SQLCount(), '>', 1));
+
+        if (memberId !== null) {
+            duplicateGroups.where(SQL.column('membersId'), memberId);
+        }
+
+        // Delete the duplicate rows: every row in an affected group whose id is higher than the one we keep.
+        const query = SQL.delete()
+            .from(SQL.table(MemberUser.table, 'duplicate'))
+            .join(
+                SQL.join(duplicateGroups.as('duplicate_group'))
+                    .where(SQL.column('duplicate_group', 'membersId'), SQL.column('duplicate', 'membersId'))
+                    .where(SQL.column('duplicate_group', 'usersId'), SQL.column('duplicate', 'usersId'))
+                    .where(SQL.column('duplicate', 'id'), '>', SQL.column('duplicate_group', 'keepId')),
+            );
+
+        if (memberId !== null) {
+            query.where(SQL.column('duplicate', 'membersId'), memberId);
+        }
+
+        await query.delete();
+    }
+
     /**
      * Call when:
      * - responsibilities have changed
@@ -21,6 +63,22 @@ export class MemberUserSyncerStatic {
                 await Member.users.load(member);
                 if (!Member.users.isLoaded(member)) {
                     throw new Error('Failed to load users for member ' + member.id);
+                }
+
+                // Check duplicate users
+                // Cleanup legacy bugs, but also cleans up merges
+                let removeDuplicates = false;
+                for (const user of member.users) {
+                    const o = member.users.filter(u => u.id === user.id);
+                    if (o.length > 1) {
+                        removeDuplicates = true;
+                        break;
+                    }
+                }
+
+                if (removeDuplicates) {
+                    await this.removeDuplicates(member.id);
+                    await Member.users.load(member);
                 }
 
                 const { userEmails, parentEmails, unverifiedEmails, allEmails } = this.getMemberAccessEmails(member.details);

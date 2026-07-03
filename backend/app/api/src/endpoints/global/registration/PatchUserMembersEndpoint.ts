@@ -171,30 +171,25 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             await Document.updateForMember(member);
         }
 
-        // Modify members
-        if (addedMembers.length > 0) {
-            // Give access to created members
-            await Member.users.reverse('members').link(user, addedMembers);
-        }
-
         await PatchOrganizationMembersEndpoint.deleteMembers(request.body.getDeletes());
 
-        members = await Member.getMembersWithRegistrationForUser(user);
-
-        for (const member of addedMembers) {
-            const updatedMember = members.find(m => m.id === member.id);
-            if (updatedMember) {
-                // Make sure we also give access to other parents
-                await MemberUserSyncer.onChangeMember(updatedMember);
-
-                if (!updatedMember.users.find(u => u.id === user.id)) {
-                    // Also link the user to the member if the email address is missing in the details
-                    await MemberUserSyncer.linkUser(user.email, updatedMember, true);
-                }
-
-                await Document.updateForMember(updatedMember);
+        for (const updatedMember of addedMembers) {
+            await Member.users.load(updatedMember);
+            if (!Member.users.isLoaded(updatedMember)) {
+                throw new Error('Failed to load users for member ' + updatedMember.id);
             }
+
+            // Make sure we also give access to other parents
+            await MemberUserSyncer.onChangeMember(updatedMember);
+
+            if (!updatedMember.users.find(u => u.id === user.id)) {
+                // Also link the user to the member if the email address is missing in the details
+                await MemberUserSyncer.linkUser(user.email, updatedMember, true);
+            }
+
+            await Document.updateForMember(updatedMember);
         }
+        members = await Member.getMembersWithRegistrationForUser(user);
 
         return new Response(
             await AuthenticatedStructures.membersBlob(members),

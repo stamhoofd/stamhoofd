@@ -1,5 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
-import { Member, MemberFactory, MemberResponsibilityRecordFactory, User, UserFactory } from '@stamhoofd/models';
+import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, User, UserFactory } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MemberUserSyncer } from './MemberUserSyncer.js';
@@ -1024,6 +1025,68 @@ describe('Helpers.MemberUserSyncer', () => {
                     permissions: null,
                 }),
             ]);
+        });
+    });
+
+    describe('removeDuplicates', () => {
+        const link = async (memberId: string, userId: string) => {
+            await SQL.insert(MemberUser.table)
+                .columns('membersId', 'usersId')
+                .values([memberId, userId])
+                .insert();
+        };
+
+        const countLinks = async (memberId: string, userId: string) => {
+            const rows = await SQL.select()
+                .from(SQL.table(MemberUser.table))
+                .where(SQL.column('membersId'), memberId)
+                .where(SQL.column('usersId'), userId)
+                .fetch();
+            return rows.length;
+        };
+
+        test('Duplicate links for a single member are collapsed to one', async () => {
+            const member = await new MemberFactory({}).create();
+            const otherMember = await new MemberFactory({}).create();
+            const userA = await new UserFactory({ email: 'a@example.com' }).create();
+            const userB = await new UserFactory({ email: 'b@example.com' }).create();
+
+            // 3 duplicate links for (member, userA)
+            await link(member.id, userA.id);
+            await link(member.id, userA.id);
+            await link(member.id, userA.id);
+
+            // A single link for (member, userB) should be kept untouched
+            await link(member.id, userB.id);
+
+            // Duplicates for another member should not be affected when scoping to member
+            await link(otherMember.id, userA.id);
+            await link(otherMember.id, userA.id);
+
+            await MemberUserSyncer.removeDuplicates(member.id);
+
+            expect(await countLinks(member.id, userA.id)).toBe(1);
+            expect(await countLinks(member.id, userB.id)).toBe(1);
+
+            // Untouched: scoped to member only
+            expect(await countLinks(otherMember.id, userA.id)).toBe(2);
+        });
+
+        test('Duplicate links across all members are collapsed when memberId is null', async () => {
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const userA = await new UserFactory({ email: 'a@example.com' }).create();
+
+            await link(member1.id, userA.id);
+            await link(member1.id, userA.id);
+            await link(member2.id, userA.id);
+            await link(member2.id, userA.id);
+            await link(member2.id, userA.id);
+
+            await MemberUserSyncer.removeDuplicates(null);
+
+            expect(await countLinks(member1.id, userA.id)).toBe(1);
+            expect(await countLinks(member2.id, userA.id)).toBe(1);
         });
     });
 
