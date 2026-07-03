@@ -155,12 +155,9 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         payment.method = struct.data.paymentMethod;
 
                         // quick throw to prevent payment from being saved
-                        if (payment.method === PaymentMethod.Transfer && !webshop.meta.paymentConfiguration.transferSettings.iban) {
-                            throw new SimpleError({
-                                code: 'missing_iban',
-                                message: 'Missing IBAN',
-                                human: $t(`%w2`),
-                            });
+                        if (payment.method === PaymentMethod.Transfer) {
+                            // will throw if iban is missing
+                            order.getTransferSettings({ shouldThrowIfNoIban: true });
                         }
 
                         payment.status = PaymentStatus.Created;
