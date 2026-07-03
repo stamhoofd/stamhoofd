@@ -347,7 +347,7 @@ export class StripeInvoicer {
                 break;
             }
             const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-            const { end: endNext } = StripeInvoicer.getMonthUnixStartEnd(currentMonth);
+            const { end: endNext } = StripeInvoicer.getMonthUnixStartEnd(nextMonth);
             const isLastMonth = endNext >= stopAt.getTime() / 1000;
             await this.generateInvoices(sellingOrganization, currentMonth, { ...options, force: (isLastMonth && !!options?.forceLast) || !!options?.force });
             currentMonth = nextMonth;
