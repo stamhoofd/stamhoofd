@@ -569,12 +569,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 export function useAuditLogUIFilterBuilders() {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
-    let options: MultipleChoiceUIFilterOption[] = Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type));
-
-    if (STAMHOOFD.userMode === 'organization') {
-        // remove option for member security code (not available in organization mode)
-        options = options.filter(option => option.value !== AuditLogType.MemberSecurityCodeUsed);
-    }
+    const options: MultipleChoiceUIFilterOption[] = Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type));
 
     const typeFilter = new MultipleChoiceFilterBuilder({
         name: $t(`%1B`),
