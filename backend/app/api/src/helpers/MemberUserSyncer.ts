@@ -5,24 +5,7 @@ import { SQL } from '@stamhoofd/sql';
 import type { MemberDetails, PermissionRole } from '@stamhoofd/structures';
 import { AuditLogSource, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import basex from 'base-x';
-import crypto from 'crypto';
 import { AuditLogService } from '../services/AuditLogService.js';
-
-const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // Note: we removed 0, O, I and l to make it easier for humans
-const customBase = basex(ALPHABET);
-
-async function randomBytes(size: number): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        crypto.randomBytes(size, (err: Error | null, buf: Buffer) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(buf);
-        });
-    });
-}
 
 export class MemberUserSyncerStatic {
     /**
@@ -97,12 +80,10 @@ export class MemberUserSyncerStatic {
                 }
 
                 // Generate security code (only for userMode platform)
-                if (STAMHOOFD.userMode !== 'organization' && member.details.securityCode === null) {
+                if (member.details.securityCode === null) {
                     console.log('Generating security code for member ' + member.id);
 
-                    const length = 16;
-                    const code = customBase.encode(await randomBytes(100)).toUpperCase().substring(0, length);
-                    member.details.securityCode = code;
+                    member.details.securityCode = await Member.generateSecurityCode();
                     await member.save();
                 }
             });

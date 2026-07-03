@@ -6,20 +6,15 @@ import { MemberUserSyncer } from '../helpers/MemberUserSyncer.js';
 import { allSettledButThrowFirst, SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
-    if (STAMHOOFD.environment == 'test') {
+    if (STAMHOOFD.environment === 'test') {
         console.log('skipped in tests');
-        return;
-    }
-
-    if (STAMHOOFD.platformName.toLowerCase() !== 'stamhoofd') {
-        console.log('skipped for platform (only runs for Stamhoofd): ' + STAMHOOFD.platformName);
         return;
     }
 
     const result = await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
         return await SeedTools.loopBatched({
             query: Member.select('id'),
-            batchSize: 500,
+            batchSize: 50,
             batchAction: async (rawMembers) => {
                 const membersWithRegistrations = await Member.getBlobByIds(...rawMembers.map(m => m.id));
 

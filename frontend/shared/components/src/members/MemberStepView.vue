@@ -17,18 +17,6 @@
                 <STList class="illustration-list">
                     <STListItem class="left-center">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/communication.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%e0') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%7h') }}
-                        </p>
-                    </STListItem>
-
-                    <STListItem class="left-center">
-                        <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
@@ -38,6 +26,87 @@
                             {{ $t('%e2') }}
                         </p>
                     </STListItem>
+
+                    <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
+                        <template #left>
+                            <IconContainer icon="email" aside-icon="send send" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Stuur me de code via e-mail') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Stuur een nieuwe e-mail met de code naar alle e-mailadressen die we kennen van dit lid') }}
+                        </p>
+
+                        <template #right>
+                            <Spinner v-if="sendingCode === SecurityCodeSendMethod.Email" />
+                            <span v-else class="icon arrow-right-small" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem class="left-center">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/communication.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%e0') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%7h') }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <template v-else>
+                <hr>
+                <h2>{{ $t('%dz') }}</h2>
+
+                <STList class="illustration-list">
+                    <STListItem class="left-center">
+                        <template #left>
+                            <IconContainer icon="email" aside-icon="search stroke" class="gray" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%e1') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%e2') }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
+                        <template #left>
+                            <IconContainer icon="email" aside-icon="send send" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Stuur me de code via e-mail') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Stuur een nieuwe e-mail met de code naar alle e-mailadressen die we kennen van dit lid') }}
+                        </p>
+
+                        <template #right>
+                            <Spinner v-if="sendingCode === SecurityCodeSendMethod.Email" />
+                            <span v-else class="icon arrow-right-small" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem class="left-center" :selectable="true" @click="startSecurityCodeViaSMS">
+                        <template #left>
+                            <IconContainer icon="smartphone" aside-icon="send stroke" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Stuur me de code via SMS') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('We sturen een SMS naar een GSM-nummer dat je ingeeft, als we het kennen van {member}', {member: cloned.patchedMember.details.firstName}) }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
         </template>
@@ -46,16 +115,20 @@
 </template>
 
 <script setup lang="ts">
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
-import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Address, PlatformMember, ReviewTimeType } from '@stamhoofd/structures';
-import { Version } from '@stamhoofd/structures';
+import { SecurityCodeSendMethod, SendMemberSecurityCodeRequest, SendMemberSecurityCodeResponse, Version } from '@stamhoofd/structures';
 import type { ComponentOptions, Ref } from 'vue';
 import { computed, onActivated, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { useAppContext } from '#context/appContext.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import CodeInput from '../inputs/CodeInput.vue';
@@ -63,6 +136,9 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import type { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
+
+import IconContainer from '#icons/IconContainer.vue';
+import Spinner from '#Spinner.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -109,6 +185,81 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const willMarkReviewed = !isAdmin;
 const isDuplicate = ref(false);
 const code = ref('');
+const context = useContext();
+const owner = useRequestOwner();
+
+// The method that is currently being sent (used to show a spinner), null when idle
+const sendingCode = ref<SecurityCodeSendMethod | null>(null);
+
+// The number of times an SMS was already sent without a specific phone number. Used by the backend to
+// cycle through the known phone numbers when the user chooses to send to any known number.
+const smsTryCount = ref(0);
+
+/**
+ * Perform the request. Throws on failure and shows a success toast on success.
+ * For SMS, phone is the number the user filled in (the backend only sends if it matches a known number).
+ * When phone is null the backend cycles through the known numbers based on tryCount.
+ */
+async function requestSecurityCode(method: SecurityCodeSendMethod, phone: string | null) {
+    const details = cloned.value.patchedMember.details;
+    const response = await context.value.authenticatedServer.request({
+        method: 'POST',
+        path: '/members/security-code',
+        body: SendMemberSecurityCodeRequest.create({
+            firstName: details.firstName,
+            lastName: details.lastName,
+            birthDay: details.birthDay,
+            method,
+            phone,
+            tryCount: smsTryCount.value,
+        }),
+        decoder: SendMemberSecurityCodeResponse as Decoder<SendMemberSecurityCodeResponse>,
+        owner,
+    });
+
+    if (method === SecurityCodeSendMethod.SMS) {
+        if (phone === null) {
+            // Cycle to the next known number the next time we send to any number
+            smsTryCount.value += 1;
+        }
+        Toast.success($t('We stuurden een SMS met de code naar {recipient}. Het kan enkele minuten duren voor je de SMS ontvangt. Even geduld.', { recipient: response.data.maskedRecipient })).setHide(30_000).show();
+    } else {
+        Toast.success($t('We stuurden de code via e-mail naar alle e-mailadressen die we kennen van dit lid. Kijk rond in de e-mailinbox van jou en je gezinsleden, controleer ook zeker je spam.')).setHide(30_000).show();
+    }
+}
+
+async function sendSecurityCodeViaEmail() {
+    if (sendingCode.value) {
+        return;
+    }
+    sendingCode.value = SecurityCodeSendMethod.Email;
+    try {
+        await requestSecurityCode(SecurityCodeSendMethod.Email, null);
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+    sendingCode.value = null;
+}
+
+// Ask for the phone number in an extra step, then send the SMS to it (if we know it for this member).
+async function startSecurityCodeViaSMS() {
+    if (sendingCode.value) {
+        return;
+    }
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./SendMemberSecurityCodeSMSView.vue'), {
+                    memberName: cloned.value.patchedMember.details.firstName,
+                    sendHandler: async (phone: string) => {
+                        await requestSecurityCode(SecurityCodeSendMethod.SMS, phone);
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
 
 function patchMemberWithReviewed(member: PlatformMember) {
     if (props.markReviewed.length && willMarkReviewed) {
@@ -184,7 +335,7 @@ async function save() {
     } catch (e) {
         if (isSimpleError(e) || isSimpleErrors(e)) {
             // security codes are not available for userMode organization
-            if (STAMHOOFD.userMode !== 'organization' && e.hasCode('known_member_missing_rights')) {
+            if (e.hasCode('known_member_missing_rights')) {
                 isDuplicate.value = true;
                 loading.value = false;
                 return;

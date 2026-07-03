@@ -1012,27 +1012,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
-        // do not check security code for user mode organization (throw error if not allowed)
-        if (STAMHOOFD.userMode === 'organization') {
-            if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
-                console.log('checkSecurityCode: allowed for ' + member.id);
-                return;
-            }
-
-            if (type === 'patch') {
-                throw Context.auth.memberNotFoundOrNoAccess();
-            }
-
-            throw new SimpleError({
-                code: 'known_member_missing_rights',
-                message: 'Creating known member without sufficient access rights',
-                // different message for userMode organization because security codes are not available in that mode
-                human: $t(`%1Oz`, { member: member.details.firstName }),
-                statusCode: 400,
-            });
-        }
-
-        if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+        if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode(Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         } else if (securityCode) {
             await this.checkSecurityCode(member, securityCode);
@@ -1044,7 +1024,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
-                human: $t(`%1BA`, { member: member.details.firstName }),
+                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de vereniging om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.`, {
+                    member: member.details.firstName,
+                    email: Context.auth.user.email,
+                }),
                 statusCode: 400,
             });
         }

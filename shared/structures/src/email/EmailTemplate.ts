@@ -99,6 +99,11 @@ export enum EmailTemplateType {
     AdminInvitation = 'AdminInvitation',
     AdminInvitationNewUser = 'AdminInvitationNewUser',
 
+    /**
+     * E-mail sent to a member (and its parents) containing the security code, so they can gain access to the member.
+     */
+    MemberSecurityCode = 'MemberSecurityCode',
+
     DeleteAccountConfirmation = 'DeleteAccountConfirmation',
 
     /**
@@ -299,6 +304,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.VerifyEmailWithoutCode: return $t(`%po`);
             case EmailTemplateType.AdminInvitation: return $t(`%pp`);
             case EmailTemplateType.AdminInvitationNewUser: return $t(`%pq`);
+            case EmailTemplateType.MemberSecurityCode: return $t(`Beveiligingscode van een lid`);
 
             case EmailTemplateType.UserBalanceIncreaseNotification: return $t(`%pr`);
             case EmailTemplateType.UserBalanceReminder: return $t(`%ps`);
@@ -391,6 +397,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DeleteAccountConfirmation:
             case EmailTemplateType.VerifyEmail:
             case EmailTemplateType.VerifyEmailWithoutCode:
+            case EmailTemplateType.MemberSecurityCode:
                 return $t(`%pw`);
 
             case EmailTemplateType.AdminInvitation:
@@ -515,6 +522,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.VerifyEmailWithoutCode: return $t(`%qC`);
             case EmailTemplateType.AdminInvitation: return $t(`%qD`);
             case EmailTemplateType.AdminInvitationNewUser: return $t(`%qE`);
+            case EmailTemplateType.MemberSecurityCode: return $t(`Deze e-mail wordt verstuurd wanneer iemand de beveiligingscode van een lid opvraagt om er toegang toe te krijgen.`);
 
             case EmailTemplateType.SignupAlreadyHasAccount: return $t(`%qF`);
 
@@ -699,6 +707,16 @@ export class EmailTemplate extends AutoEncoder {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.confirmEmailUrl,
+            ];
+        }
+
+        if (type === EmailTemplateType.MemberSecurityCode) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.requesterEmail,
+                ExampleReplacements.all.firstNameMember,
+                ExampleReplacements.all.lastNameMember,
+                ExampleReplacements.all.securityCode,
             ];
         }
 

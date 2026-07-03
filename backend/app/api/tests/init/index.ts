@@ -5,3 +5,4 @@ export * from './initBundleDiscount.js';
 export * from './initStripe.js';
 export * from './initPermissionRole.js';
 export * from './initUitpasApi.js';
+export * from './initSMSApi.js';

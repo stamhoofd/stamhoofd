@@ -806,9 +806,27 @@ export class MemberDetails extends AutoEncoder {
         return emails;
     }
 
+    getPhoneNumbersForVerification() {
+        const phones: string[] = [];
+        if (this.phone) {
+            phones.push(this.phone);
+        }
+        for (const parent of this.parents) {
+            if (parent.phone) {
+                phones.push(parent.phone);
+            }
+        }
+        return Formatter.uniqueArray(phones);
+    }
+
     hasEmail(email: string) {
         const cleanedEmail = email.toLowerCase().trim();
         return this.getMemberEmails().includes(cleanedEmail) || this.getParentEmails().includes(cleanedEmail);
+    }
+
+    hasUnverifiedEmail(email: string) {
+        const cleanedEmail = email.toLowerCase().trim();
+        return this.unverifiedEmails.includes(cleanedEmail);
     }
 
     getAllAddresses() {

@@ -46,6 +46,7 @@ export async function applyInternalSecrets(context: CliContext, service: AppServ
         UITPAS_API_CLIENT_ID: await read('op://Localhost/UiTPAS/client_id'),
         UITPAS_API_CLIENT_SECRET: await read('op://Localhost/UiTPAS/client_secret'),
         UITPAS_API_URL: await read('op://Localhost/UiTPAS/api_url'),
+        GATEWAYAPI_TOKEN: await read('op://DevOps Development/GatewayAPI/token'),
     });
 }
 

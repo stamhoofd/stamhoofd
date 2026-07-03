@@ -59,6 +59,8 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
 
         if (this.options.generateData === true || (this.options.generateData === undefined && this.options.details === undefined)) {
             memberDetails.gender = Math.random() >= 0.05 ? (Math.random() >= 0.5 ? Gender.Male : Gender.Female) : Gender.Other;
+            memberDetails.nationalRegisterNumber = '12345678';
+
             if (!memberDetails.firstName) {
                 memberDetails.firstName = this.randomFirstName(memberDetails.gender);
             }
@@ -118,15 +120,12 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
             if (!memberDetails.lastName) {
                 if (memberDetails.parents.length == 2 && Math.random() >= 0.9) {
                     memberDetails.lastName = memberDetails.parents[0].lastName + '-' + memberDetails.parents[1].lastName;
-                }
-                else {
+                } else {
                     if (memberDetails.parents[0].type == ParentType.Father) {
                         memberDetails.lastName = memberDetails.parents[0].lastName;
-                    }
-                    else if (memberDetails.parents[1] && memberDetails.parents[1].type == ParentType.Father) {
+                    } else if (memberDetails.parents[1] && memberDetails.parents[1].type == ParentType.Father) {
                         memberDetails.lastName = memberDetails.parents[1].lastName;
-                    }
-                    else {
+                    } else {
                         memberDetails.lastName = memberDetails.parents[0].lastName;
                     }
                 }

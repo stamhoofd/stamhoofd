@@ -39,6 +39,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 birthDay,
                 generateData: true,
             }).create();
+            existingMember.details.nationalRegisterNumber = '123454123';
+            await existingMember.save();
 
             const token = await Token.createToken(user);
 

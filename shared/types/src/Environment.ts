@@ -138,6 +138,9 @@ export type BackendSpecificEnvironment = {
     readonly UITPAS_API_CLIENT_ID?: string;
     readonly UITPAS_API_CLIENT_SECRET?: string;
 
+    // SMS via gatewayapi.com
+    readonly GATEWAYAPI_TOKEN?: string;
+
     readonly HEALTH_ACCESS_KEY?: string; // Expose a health endpoint
 };
 

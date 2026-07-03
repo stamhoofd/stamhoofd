@@ -126,6 +126,15 @@ export class EditorSmartVariable extends AutoEncoder {
                 deleteMessage: $t(`%oi`),
             }),
             EditorSmartVariable.create({
+                id: 'requesterEmail',
+                name: $t(`E-mailadres aanvrager`),
+            }),
+            EditorSmartVariable.create({
+                id: 'securityCode',
+                name: $t(`Beveiligingscode`),
+                deleteMessage: $t(`De beveiligingscode van het lid werd verwijderd uit de tekst.`),
+            }),
+            EditorSmartVariable.create({
                 id: 'inviterName',
                 name: $t(`%oj`),
             }),

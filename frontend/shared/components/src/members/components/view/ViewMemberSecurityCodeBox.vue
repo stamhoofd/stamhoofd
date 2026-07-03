@@ -6,7 +6,19 @@
                 <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
             </div>
         </h2>
-        <p>{{ $t('%g3') }}</p>
+
+        <p v-if="!$isPlatform">
+            <I18nComponent :t="$t('Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders. <button>Meer info</button>')">
+                <template #button="{content}">
+                    <a class="inline-link" :href="LocalizedDomains.getDocs('beveiligingscodes')" target="_blank">
+                        {{ content }}
+                    </a>
+                </template>
+            </I18nComponent>
+        </p>
+        <p v-else>
+            {{ $t('%g3') }}
+        </p>
 
         <p class="style-description">
             <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(securityCode, 4, '\u2011') }}</code>
@@ -15,13 +27,15 @@
 </template>
 
 <script setup lang="ts">
+import { useAuth } from '#hooks/useAuth.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
+import type I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { MemberDetails, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { useAuth } from '#hooks/useAuth.ts';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
@@ -69,8 +83,7 @@ async function renewSecurityCode() {
         arr.addPatch(patch);
         await platformFamilyManager.isolatedPatch([props.member], arr);
         Toast.success($t('%6T')).show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 

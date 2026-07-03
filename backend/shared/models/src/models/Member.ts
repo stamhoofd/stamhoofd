@@ -2,6 +2,8 @@ import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import basex from 'base-x';
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
@@ -27,6 +29,10 @@ export type MemberWithUsersRegistrationsAndGroups = MemberWithUsers & MemberWith
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member };
+
+// Note: we removed 0, O, I and l to make it easier for humans
+const SECURITY_CODE_ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ';
+const securityCodeBase = basex(SECURITY_CODE_ALPHABET);
 
 export class Member extends QueryableModel {
     static table = 'members';
@@ -114,6 +120,23 @@ export class Member extends QueryableModel {
     static users = new ManyToManyRelation(Member, User, 'users');
 
     /**
+     * Generate a random security code that a member can use to gain access to their data.
+     * The alphabet excludes ambiguous characters (0, O, I, l) to make it easier for humans.
+     */
+    static async generateSecurityCode(length = 16): Promise<string> {
+        const buffer = await new Promise<Buffer>((resolve, reject) => {
+            crypto.randomBytes(100, (err: Error | null, buf: Buffer) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(buf);
+            });
+        });
+        return securityCodeBase.encode(buffer).toUpperCase().substring(0, length);
+    }
+
+    /**
      * Fetch all members with their corresponding (valid) registration
      */
     static async getWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups | null> {
@@ -193,8 +216,7 @@ export class Member extends QueryableModel {
                 const member = members.find(m => m.id === registration.memberId);
                 if (member) {
                     registration.setRelation(registrationMemberRelation, member);
-                }
-                else {
+                } else {
                     throw new Error('Unexpected missing member for registration ' + registration.id);
                 }
             }
@@ -250,8 +272,7 @@ export class Member extends QueryableModel {
                 )
                 .fetch() as (Registration | undefined)[];
             alreadyLoadedRegistrations.push(...registrations);
-        }
-        else {
+        } else {
             if (!withGroups) {
                 return members as MemberWithRegistrations[];
             }
@@ -269,14 +290,12 @@ export class Member extends QueryableModel {
                     const group = groups.find(g => g.id === registration!.groupId);
                     if (group && !group.deletedAt) {
                         registration!.setRelation(Registration.group, group);
-                    }
-                    else {
+                    } else {
                         // Remove registration from list
                         alreadyLoadedRegistrations[index] = undefined;
                     }
                 }
-            }
-            else {
+            } else {
                 if (ids.length === 0) {
                     // Nothing loaded
                     return members as MemberWithRegistrations[];
@@ -464,33 +483,31 @@ export class Member extends QueryableModel {
         });
     }
 
-    async isSafeToMergeDuplicateWithoutSecurityCode() {
-        if (this.details.recordAnswers.size > 0) {
-            return false;
+    async isSafeToMergeDuplicateWithoutSecurityCode(email?: string) {
+        let quickPass = false;
+        if (email) {
+            if (this.details.hasEmail(email) || this.details.hasUnverifiedEmail(email)) {
+                // Give access
+                quickPass = true;
+            }
         }
 
-        if (this.details.parents.length > 0) {
-            return false;
+        if (this.details.getNotificationEmails().length === 0 && this.details.getPhoneNumbersForVerification().length === 0) {
+            quickPass = true;
         }
 
-        if (this.details.emergencyContacts.length > 0) {
-            return false;
-        }
+        if (!quickPass) {
+            if ([...this.details.recordAnswers.values()].find(a => a.settings.sensitive)) {
+                return false;
+            }
 
-        if (this.details.uitpasNumberDetails) {
-            return false;
-        }
+            if (this.details.parents.find(p => p.nationalRegisterNumber !== null && p.nationalRegisterNumber !== NationalRegisterNumberOptOut)) {
+                return false;
+            }
 
-        if (this.details.nationalRegisterNumber !== null && this.details.nationalRegisterNumber !== NationalRegisterNumberOptOut) {
-            return false;
-        }
-
-        if (this.details.requiresFinancialSupport !== null) {
-            return false;
-        }
-
-        if (this.details.address || this.details.phone || this.details.email || this.details.alternativeEmails.length > 0 || this.details.unverifiedAddresses.length > 0 || this.details.unverifiedPhones.length > 0 || this.details.unverifiedEmails.length > 0) {
-            return false;
+            if (this.details.nationalRegisterNumber !== null && this.details.nationalRegisterNumber !== NationalRegisterNumberOptOut) {
+                return false;
+            }
         }
 
         // If responsibilities: not safe

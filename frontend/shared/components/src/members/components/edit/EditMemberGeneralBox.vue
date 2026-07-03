@@ -49,7 +49,7 @@
                 </STInputBox>
 
                 <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
-                <EmailInput v-if="!(member.isNew && isAdmin) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
+                <EmailInput v-if="!(member.isNew) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
                     <template #right>
                         <button :v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
@@ -147,7 +147,7 @@ const props = withDefaults(defineProps<{
     willMarkReviewed?: boolean;
 }>(), {
     willMarkReviewed: false,
-    parentErrorBox: null
+    parentErrorBox: null,
 });
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
