@@ -1,13 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, Invoice, Organization, Payment, StripeAccount, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, InvoiceStruct, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
-import { InvoiceService } from '../services/InvoiceService.js';
 import { PaymentService } from '../services/PaymentService.js';
-import { AuthenticatedStructures } from './AuthenticatedStructures.js';
 import { VATService } from '../services/VATService.js';
 
 export class ApplicationFeeDetails {
@@ -120,12 +118,12 @@ export class StripeReportInvoicer {
     }
 
     async generateInvoices(sellingOrganization: Organization, reference: string) {
-        const invoices: Invoice[] = [];
+        const payments: Payment[] = [];
         for (const [account, details] of this.report.applicationFeesPerAccount) {
             try {
-                const invoice = await this.generateInvoice(sellingOrganization, reference, account, details);
-                if (invoice) {
-                    invoices.push(invoice);
+                const payment = await this.generateInvoice(sellingOrganization, reference, account, details);
+                if (payment) {
+                    payments.push(payment);
                 }
             } catch (e) {
                 console.error(e);
@@ -136,11 +134,11 @@ export class StripeReportInvoicer {
                 });
             }
         }
-        return invoices;
+        return payments;
     }
 
-    static async hasInvoice(sellingOrganization: Organization, reference: string) {
-        return !!await Invoice.select().where('organizationId', sellingOrganization.id).where('reference', reference).where('number', '!=', null).first(false);
+    static async hasPayment(sellingOrganization: Organization, reference: string) {
+        return !!await Payment.select().where('organizationId', sellingOrganization.id).where('reference', reference).where('status', PaymentStatus.Succeeded).first(false);
     }
 
     async generateInvoice(sellingOrganization: Organization, reference: string, accountId: string, applicationFee: ApplicationFeeDetails) {
@@ -174,45 +172,37 @@ export class StripeReportInvoicer {
             });
         }
 
-        const existingInvoices = await Invoice.select()
+        const existingPayments = await Payment.select()
             .where('organizationId', sellingOrganization.id)
             .where('payingOrganizationId', organization.id)
             .where('reference', reference)
-            .where('number', '!=', null)
+            .where('status', PaymentStatus.Succeeded)
             .fetch();
 
-        for (const i of existingInvoices) {
-            if (!i.stripeAccountId && i.totalWithVAT === applicationFee.amount) {
-                i.stripeAccountId = accountId;
-
-                console.log('Set stripe account id for invoice ' + i.number + ' to ' + accountId);
-                await i.save();
-            }
-
-            if (!i.stripeAccountId) {
+        for (const i of existingPayments) {
+            if (i.price !== applicationFee.amount) {
                 throw new SimpleError({
-                    code: 'invoice_already_exists_with_different_amount',
-                    message: 'Invoice without account id already exists with different amount ' + organization.id + ' expected ' + applicationFee.amount + ' got ' + i.totalWithVAT + ' in invoice ' + i.number,
+                    code: 'payment_already_exists_with_different_amount',
+                    message: 'Payment already exists with different amount ' + organization.id + ' expected ' + applicationFee.amount + ' got ' + i.price + ' in payment ' + i.id,
                 });
             }
+        }
 
-            if (i.stripeAccountId === accountId) {
-                if (i.totalWithVAT !== applicationFee.amount) {
-                    throw new SimpleError({
-                        code: 'invoice_already_exists_with_different_amount',
-                        message: 'Invoice already exists with different amount ' + organization.id + ' expected ' + applicationFee.amount + ' got ' + i.totalWithVAT + ' in invoice ' + i.number,
-                    });
-                }
-
-                // Already invoiced
-                console.warn('Tried to invoice an already invoiced.');
-                return;
-            }
+        if (existingPayments.length) {
+            console.warn('Tried to create an already created stripe invoice payment ' + existingPayments.map(p => p.id).join(', '));
+            return;
         }
 
         const customer = PaymentCustomer.create({
             company: organization.defaultCompanies[0],
         });
+
+        if (customer.company!.isSameEntity(seller)) {
+            throw new SimpleError({
+                code: 'same_customer',
+                message: 'Cannot invoice self',
+            });
+        }
 
         const balanceItems: BalanceItem[] = [];
 
@@ -292,9 +282,10 @@ export class StripeReportInvoicer {
         payment.status = PaymentStatus.Pending;
         payment.price = applicationFee.amount;
         payment.roundingAmount = 0;
-        payment.method = PaymentMethod.Unknown;
+        payment.method = PaymentMethod.AccountDeductions;
         payment.type = PaymentType.Payment;
         payment.createMandate = null;
+        payment.reference = reference;
 
         payment.provider = PaymentProvider.Stripe;
         payment.stripeAccountId = stripeAccount.id;
@@ -310,23 +301,8 @@ export class StripeReportInvoicer {
             await balanceItemPayment.save();
         }
 
-        // Create invoice (before payment, to prevent auto-invoicing)
-        const generalStructs = await AuthenticatedStructures.paymentsGeneral([payment], false);
-
-        const invoiceStruct = InvoiceStruct.create({
-            seller,
-            customer: payment.customer,
-            payments: generalStructs,
-        });
-        invoiceStruct.buildFromPayments();
-
-        invoiceStruct.reference = reference;
-        invoiceStruct.stripeAccountId = accountId;
-
-        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, this.end);
-        const invoice = await InvoiceService.createFrom(sellingOrganization, invoiceStruct);
-
-        return invoice;
+        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, this.start);
+        return payment;
     }
 }
 
@@ -367,7 +343,7 @@ export class StripeInvoicer {
 
         try {
             await QueueHandler.schedule(reference, async () => {
-                if (!options?.force && await StripeReportInvoicer.hasInvoice(sellingOrganization, reference)) {
+                if (!options?.force && await StripeReportInvoicer.hasPayment(sellingOrganization, reference)) {
                     console.log('Already invoiced month', reference);
                     return;
                 }

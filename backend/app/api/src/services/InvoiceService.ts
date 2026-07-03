@@ -61,6 +61,15 @@ export class InvoiceService {
             });
         }
 
+        if (struct.customer.company && struct.customer.company.isSameEntity(struct.seller)) {
+            throw new SimpleError({
+                code: 'invalid_customer',
+                message: 'Cannot self invoice',
+                human: $t('Kan geen facturen aan zichzelf opmaken'),
+                statusCode: 400,
+            });
+        }
+
         model.seller = struct.seller;
         model.organizationId = organization.id;
         model.payingOrganizationId = struct.payingOrganizationId;

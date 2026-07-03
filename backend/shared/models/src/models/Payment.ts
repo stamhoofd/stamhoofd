@@ -88,6 +88,12 @@ export class Payment extends QueryableModel {
     @column({ type: 'string', nullable: true })
     stripeAccountId: string | null = null;
 
+    /**
+     * For automatic payment creation, reference is used to determine if it already is created or not.
+     */
+    @column({ type: 'string', nullable: true })
+    reference: string | null = null;
+
     @column({ type: 'json', decoder: CreateMandateSettings, nullable: true })
     createMandate: CreateMandateSettings | null = null;
 

@@ -93,4 +93,37 @@ export class Company extends AutoEncoder {
         }
         return true;
     }
+
+    isSameEntity(other: Company) {
+        if (this.VATNumber && other.VATNumber) {
+            if (Formatter.slugVATNumber(this.VATNumber) === Formatter.slugVATNumber(other.VATNumber)) {
+                return true;
+            }
+            return false;
+        }
+
+        if (this.companyNumber && other.companyNumber) {
+            if (Formatter.slugVATNumber(this.companyNumber) === Formatter.slugVATNumber(other.companyNumber)) {
+                if (this.address && other.address) {
+                    // Ignore if different country (only for company numbers)
+                    return this.address.country === other.address.country;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        if (this.address && other.address) {
+            if (Formatter.slug(this.name) === Formatter.slug(other.name)) {
+                if (this.address.equals(other.address)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (!!this.address === !!other.address) {
+            return Formatter.slug(this.name) === Formatter.slug(other.name);
+        }
+
+        return false;
+    }
 }

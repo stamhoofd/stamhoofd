@@ -8,8 +8,8 @@ registerCron('stripe-invoices', createStripeInvoices);
 let lastStripeInvoice: Date | null = null;
 
 async function createStripeInvoices() {
-    if (STAMHOOFD.environment !== 'production') {
-        // return;
+    if (STAMHOOFD.environment !== 'production' && STAMHOOFD.environment !== 'development') {
+        return;
     }
 
     if (STAMHOOFD.userMode === 'platform') {
@@ -26,6 +26,7 @@ async function createStripeInvoices() {
         console.log('Stripe check done for this day');
         return;
     }
+
     console.log('Creating Stripe Invoices...');
 
     if (!STAMHOOFD.STRIPE_SECRET_KEY) {
