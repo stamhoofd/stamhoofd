@@ -211,7 +211,7 @@ export class StripeReportInvoicer {
         }
 
         const customer = PaymentCustomer.create({
-            company: sellingOrganization.defaultCompanies[0],
+            company: organization.defaultCompanies[0],
         });
 
         const balanceItems: BalanceItem[] = [];
