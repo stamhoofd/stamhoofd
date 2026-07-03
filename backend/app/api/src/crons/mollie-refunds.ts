@@ -16,7 +16,7 @@ export const MOLLIE_REFUNDS_MINIMUM_DATE = new Date('2026-06-22T00:00:00.000Z');
 let lastRun: Date | null = null;
 export async function checkMollieRefunds() {
     if (STAMHOOFD.environment !== 'development') {
-        if (lastRun && new Date().getTime() - lastRun.getTime() < 1000 * 60 * 60 * 24) {
+        if (lastRun && new Date().getTime() - lastRun.getTime() < 1000 * 60 * 60 * 12) {
             return;
         }
         lastRun = new Date();
