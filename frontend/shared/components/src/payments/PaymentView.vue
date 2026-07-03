@@ -598,7 +598,7 @@ async function createInvoice() {
 
     try {
         const invoice = Invoice.create({
-            seller: organization.value?.meta.companies[0] ?? Company.create({}),
+            seller: organization.value?.defaultCompanies[0] ?? Company.create({}),
             customer: props.payment.customer ?? PaymentCustomer.create({}),
             payments: [props.payment],
         });

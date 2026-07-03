@@ -90,6 +90,11 @@ export class DatabaseHelper {
         await Database.delete('DELETE FROM `webshops`');
         await this.clearGroups();
         await Database.delete('DELETE FROM `email_addresses`');
+
+        // invoiced_balance_items restricts deletion of balance_items, which blocks the organizations delete cascade
+        await Database.delete('DELETE FROM `invoiced_balance_items`');
+        await Database.delete('DELETE FROM `invoices`');
+
         await Database.update(
             'UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null',
             ['delete'],
@@ -117,6 +122,11 @@ export class DatabaseHelper {
         const Database = await this.getDatabase();
         await Database.delete('DELETE FROM `stamhoofd_packages`');
         await Database.delete('DELETE FROM `balance_item_payments`');
+
+        // invoiced_balance_items restricts deletion of balance_items, so delete invoices first
+        await Database.delete('DELETE FROM `invoiced_balance_items`');
+        await Database.delete('DELETE FROM `invoices`');
+
         await Database.delete('DELETE FROM `balance_items`');
         await Database.delete('DELETE FROM `mollie_payments`');
         await Database.delete('DELETE FROM `payments`');

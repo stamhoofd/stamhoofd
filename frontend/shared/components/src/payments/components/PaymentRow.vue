@@ -31,6 +31,12 @@
         <p v-if="payment.price && price !== null && price !== payment.price" class="style-description-small">
             {{ $t('%hs', {price: formatPrice(payment.price)}) }}
         </p>
+        <p v-if="showInvoiceStatus && payment.invoiceId" class="style-description-small">
+            {{ $t('Gefactureerd') }}
+        </p>
+        <p v-else-if="showInvoiceStatus" class="style-description-small">
+            {{ $t('Nog niet gefactureerd') }}
+        </p>
 
         <template #right>
             <span class="style-price-base" :class="{negative: (price ?? payment.price) < 0}">{{ formatPrice(price ?? payment.price) }}</span>
@@ -51,9 +57,11 @@ const props = withDefaults(
         payment: PaymentGeneral | Payment;
         price?: number | null;
         payments?: (PaymentGeneral | Payment)[];
+        showInvoiceStatus?: boolean;
     }>(), {
         payments: () => [],
         price: null,
+        showInvoiceStatus: false,
     },
 );
 

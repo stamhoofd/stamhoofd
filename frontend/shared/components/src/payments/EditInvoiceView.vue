@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -165,7 +165,7 @@ const companies = computed(() => organization.value.meta.companies);
 const present = usePresent();
 const context = useContext();
 const owner = useRequestOwner();
-const pop = usePop();
+const dismiss = useDismiss();
 
 const seller = computed({
     get: () => patched.value.seller,
@@ -201,8 +201,7 @@ async function save() {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<Invoice>;
         if (props.isNew) {
             arr.addPut(patched.value);
-        }
-        else {
+        } else {
             arr.addPatch(patch.value);
         }
 
@@ -224,18 +223,15 @@ async function save() {
 
         if (props.isNew) {
             Toast.success($t('%1Ll')).show();
-        }
-        else {
+        } else {
             Toast.success($t('%1Lm')).show();
         }
 
         props.saveHandler?.(props.invoice);
-        await pop({ force: true });
-    }
-    catch (e) {
+        await dismiss({ force: true });
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }

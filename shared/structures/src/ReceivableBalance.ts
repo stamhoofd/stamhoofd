@@ -1,6 +1,7 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
+import { Invoice } from './billing/Invoice.js';
 import { TranslateMethod } from './I18nInterface.js';
 import { PaymentGeneral } from './members/PaymentGeneral.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
@@ -114,6 +115,12 @@ export class DetailedReceivableBalance extends ReceivableBalance {
 
     @field({ decoder: new ArrayDecoder(PaymentGeneral) })
     payments: PaymentGeneral[] = [];
+
+    /**
+     * All invoices related to this receivable balance (via the paying organization or via the invoiced balance items)
+     */
+    @field({ decoder: new ArrayDecoder(Invoice), ...NextVersion })
+    invoices: Invoice[] = [];
 
     get filteredBalanceItems() {
         return BalanceItem.filterBalanceItems(this.balanceItems);

@@ -3,12 +3,13 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { DetailedReceivableBalance, PaymentStatus, PermissionLevel, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import type { MemberWithUsersAndRegistrations } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, CachedBalance, Member, MemberUser, Payment, Registration } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Member, MemberUser, Payment, Registration } from '@stamhoofd/models';
 import { Context } from '../../../../helpers/Context.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import type { SQLWhere } from '@stamhoofd/sql';
 import { SQL } from '@stamhoofd/sql';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type Params = { id: string; type: ReceivableBalanceType };
 type Query = undefined;
@@ -53,146 +54,36 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             }
         }
 
-        let paymentModels: Payment[] = [];
+        // Note: the cache updates are disabled because they caused performance issues
+        // BalanceItemService.scheduleOrganizationUpdate / scheduleMemberUpdate / scheduleUserUpdate
 
-        switch (request.params.type) {
-            case ReceivableBalanceType.organization: {
-                // Force cache updates, because sometimes the cache could be out of date
-                // BalanceItemService.scheduleOrganizationUpdate(organization.id, request.params.id);
+        const balanceItemWhere = await GetReceivableBalanceEndpoint.getBalanceItemWhere(request.params.type, request.params.id);
 
-                paymentModels = await Payment.select()
-                    .where('organizationId', organization.id)
-                    .andWhere(
-                        SQL.whereNot('status', PaymentStatus.Failed),
-                    )
-                    .join(
-                        SQL.join(BalanceItemPayment.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
-                    )
-                    .join(
-                        SQL.join(BalanceItem.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
-                    )
-                    .where(SQL.column(BalanceItem.table, 'payingOrganizationId'), request.params.id)
-                    .groupBy(SQL.column(Payment.table, 'id'))
-                    .fetch();
-                break;
-            }
+        const paymentModels = await Payment.select()
+            .where('organizationId', organization.id)
+            .andWhere(
+                SQL.whereNot('status', PaymentStatus.Failed),
+            )
+            .join(
+                SQL.join(BalanceItemPayment.table)
+                    .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
+            )
+            .join(
+                SQL.join(BalanceItem.table)
+                    .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+            )
+            .andWhere(balanceItemWhere)
+            .groupBy(SQL.column(Payment.table, 'id'))
+            .fetch();
 
-            case ReceivableBalanceType.member: {
-                // Force cache updates, because sometimes the cache could be out of date
-                // BalanceItemService.scheduleMemberUpdate(organization.id, request.params.id);
-
-                paymentModels = await Payment.select()
-                    .where('organizationId', organization.id)
-                    .join(
-                        SQL.join(BalanceItemPayment.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
-                    )
-                    .join(
-                        SQL.join(BalanceItem.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
-                    )
-                    .where(SQL.column(BalanceItem.table, 'memberId'), request.params.id)
-                    .andWhere(
-                        SQL.whereNot('status', PaymentStatus.Failed),
-                    )
-                    .groupBy(SQL.column(Payment.table, 'id'))
-                    .fetch();
-                break;
-            }
-
-            case ReceivableBalanceType.user: {
-                const memberUsers = await MemberUser.select().where('usersId', request.params.id).fetch();
-                const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
-
-                // Force cache updates, because sometimes the cache could be out of date
-                // BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
-                //
-                // for (const memberId of memberIds) {
-                //    BalanceItemService.scheduleMemberUpdate(organization.id, memberId);
-                // }
-
-                const q = Payment.select()
-                    .where('organizationId', organization.id)
-                    .join(
-                        SQL.join(BalanceItemPayment.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
-                    )
-                    .join(
-                        SQL.join(BalanceItem.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
-                    );
-
-                if (memberIds.length === 0) {
-                    q.where(SQL.column(BalanceItem.table, 'userId'), request.params.id);
-                } else {
-                    q.where(
-                        SQL.where(SQL.column(BalanceItem.table, 'userId'), request.params.id)
-                            .or(SQL.column(BalanceItem.table, 'memberId'), memberIds),
-                    );
-                }
-
-                paymentModels = await q
-                    .andWhere(
-                        SQL.whereNot('status', PaymentStatus.Failed),
-                    )
-                    .groupBy(SQL.column(Payment.table, 'id'))
-                    .fetch();
-                break;
-            }
-
-            case ReceivableBalanceType.userWithoutMembers: {
-                // Force cache updates, because sometimes the cache could be out of date
-                // BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
-
-                const q = Payment.select()
-                    .where('organizationId', organization.id)
-                    .join(
-                        SQL.join(BalanceItemPayment.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
-                    )
-                    .join(
-                        SQL.join(BalanceItem.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
-                    )
-                    .where(SQL.column(BalanceItem.table, 'userId'), request.params.id);
-
-                paymentModels = await q
-                    .andWhere(
-                        SQL.whereNot('status', PaymentStatus.Failed),
-                    )
-                    .groupBy(SQL.column(Payment.table, 'id'))
-                    .fetch();
-                break;
-            }
-
-            case ReceivableBalanceType.registration: {
-                paymentModels = await Payment.select()
-                    .where('organizationId', organization.id)
-                    .join(
-                        SQL.join(BalanceItemPayment.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
-                    )
-                    .join(
-                        SQL.join(BalanceItem.table)
-                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
-                    )
-                    .where(SQL.column(BalanceItem.table, 'registrationId'), request.params.id)
-                    .andWhere(
-                        SQL.whereNot('status', PaymentStatus.Failed),
-                    )
-                    .groupBy(SQL.column(Payment.table, 'id'))
-                    .fetch();
-                break;
-            }
-        }
+        const invoiceModels = await GetReceivableBalanceEndpoint.getInvoices(organization.id, request.params.type, request.params.id, balanceItemWhere);
 
         // Flush caches (this makes sure that we do a reload in the frontend after a registration or change, we get the newest balances)
         // await BalanceItemService.flushCaches(organization.id);
         const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
         const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
+        const invoices = await AuthenticatedStructures.invoices(invoiceModels);
 
         const balances = await CachedBalance.getForObjects([request.params.id], organization.id, request.params.type);
 
@@ -211,7 +102,77 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
                 ...base,
                 balanceItems,
                 payments,
+                invoices,
             }),
         );
+    }
+
+    /**
+     * Builds the condition that matches all balance items that belong to this receivable balance.
+     * Requires the balance_items table to be joined in the query.
+     */
+    private static async getBalanceItemWhere(type: ReceivableBalanceType, id: string): Promise<SQLWhere> {
+        switch (type) {
+            case ReceivableBalanceType.organization:
+                return SQL.where(SQL.column(BalanceItem.table, 'payingOrganizationId'), id);
+
+            case ReceivableBalanceType.member:
+                return SQL.where(SQL.column(BalanceItem.table, 'memberId'), id);
+
+            case ReceivableBalanceType.user: {
+                const memberUsers = await MemberUser.select().where('usersId', id).fetch();
+                const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
+
+                if (memberIds.length === 0) {
+                    return SQL.where(SQL.column(BalanceItem.table, 'userId'), id);
+                }
+                return SQL.where(SQL.column(BalanceItem.table, 'userId'), id)
+                    .or(SQL.column(BalanceItem.table, 'memberId'), memberIds);
+            }
+
+            case ReceivableBalanceType.userWithoutMembers:
+                return SQL.where(SQL.column(BalanceItem.table, 'userId'), id);
+
+            case ReceivableBalanceType.registration:
+                return SQL.where(SQL.column(BalanceItem.table, 'registrationId'), id);
+        }
+    }
+
+    /**
+     * All invoices that are related to this receivable balance: invoices that invoiced one of the
+     * balance items of this receivable balance, and for organizations also invoices that are
+     * directly addressed to the paying organization.
+     */
+    private static async getInvoices(organizationId: string, type: ReceivableBalanceType, id: string, balanceItemWhere: SQLWhere): Promise<Invoice[]> {
+        const invoiceModels = await Invoice.select()
+            .where('organizationId', organizationId)
+            .join(
+                SQL.join(InvoicedBalanceItem.table)
+                    .where(SQL.column(InvoicedBalanceItem.table, 'invoiceId'), SQL.column(Invoice.table, 'id')),
+            )
+            .join(
+                SQL.join(BalanceItem.table)
+                    .where(SQL.column(InvoicedBalanceItem.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+            )
+            .andWhere(balanceItemWhere)
+            .groupBy(SQL.column(Invoice.table, 'id'))
+            .fetch();
+
+        if (type === ReceivableBalanceType.organization) {
+            const directInvoices = await Invoice.select()
+                .where('organizationId', organizationId)
+                .where('payingOrganizationId', id)
+                .fetch();
+
+            for (const invoice of directInvoices) {
+                if (!invoiceModels.some(i => i.id === invoice.id)) {
+                    invoiceModels.push(invoice);
+                }
+            }
+        }
+
+        // Oldest first
+        invoiceModels.sort((a, b) => Sorter.byDateValue(b.invoicedAt ?? b.createdAt, a.invoicedAt ?? a.createdAt));
+        return invoiceModels;
     }
 }

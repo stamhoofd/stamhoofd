@@ -74,6 +74,27 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="invoicesEnabled && invoiceablePayments.length" :selectable="true" element-name="button" @click="createInvoice">
+                    <template #left>
+                        <IconContainer icon="receipt">
+                            <template #aside>
+                                <span class="icon add small primary" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ $t('Factuur opmaken') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Maak een factuur aan voor één of meerdere betalingen die nog niet werden gefactureerd.') }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="detailedItem.amountOpen === 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" class="theme-secundary" @click="createPayment(PaymentType.Reallocation)">
                     <template #left>
                         <IconContainer icon="wand">
@@ -100,7 +121,7 @@
                 <p>{{ $t('%ha') }}</p>
 
                 <STList>
-                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
+                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" :show-invoice-status="invoicesEnabled" />
                 </STList>
             </template>
 
@@ -111,8 +132,16 @@
             </p>
 
             <STList v-else>
-                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
+                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" :show-invoice-status="invoicesEnabled" />
             </STList>
+
+            <template v-if="detailedItem.invoices.length">
+                <hr><h2>{{ $t('%1JA') }}</h2>
+
+                <STList>
+                    <InvoiceRow v-for="invoice of detailedItem.invoices" :key="invoice.id" :invoice="invoice" :invoices="detailedItem.invoices" />
+                </STList>
+            </template>
 
             <hr><h2>{{ $t('%hc') }}</h2>
 
@@ -140,15 +169,18 @@
 
 <script lang="ts" setup>
 import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import { useAppContext } from '#context/appContext.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { GlobalEventBus } from '#EventBus.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import IconContainer from '#icons/IconContainer.vue';
 import SegmentedControl from '#inputs/SegmentedControl.vue';
 import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
 import { Toast } from '#overlays/Toast.ts';
 import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
+import InvoiceRow from '#payments/components/InvoiceRow.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 
 import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
@@ -188,6 +220,8 @@ const auth = useAuth();
 const hasWrite = auth.hasAccessRight(AccessRight.MemberWriteFinancialData);
 const present = usePresent();
 const loadFamily = useLoadFamily();
+const organization = useOrganization();
+const app = useAppContext();
 
 const pendingPayments = computed(() => {
     return detailedItem.value?.payments.filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
@@ -195,6 +229,12 @@ const pendingPayments = computed(() => {
 
 const succeededPayments = computed(() => {
     return detailedItem.value?.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt)) ?? [];
+});
+
+const invoicesEnabled = computed(() => app === 'dashboard' && (organization.value?.meta.invoicesEnabled ?? false));
+
+const invoiceablePayments = computed(() => {
+    return detailedItem.value?.payments.filter(p => !p.invoiceId && !p.isFailed && p.price !== 0) ?? [];
 });
 
 // Load detailed item
@@ -302,6 +342,23 @@ async function createPayment(type: PaymentType) {
     });
     await present({
         components: [component],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function createInvoice() {
+    const component = AsyncComponent(() => import('#payments/SelectPaymentsToInvoiceView.vue'), {
+        payments: invoiceablePayments.value,
+        saveHandler: async () => {
+            await reload();
+        },
+    });
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: component,
+            }),
+        ],
         modalDisplayStyle: 'popup',
     });
 }
