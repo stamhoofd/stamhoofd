@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="$t(`%XH`)" />
+        <Title v-bind="$attrs" :title="member.patchedMember.details.getParentsTitle()" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />

@@ -124,12 +124,11 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 // give the parents access to the member they are patching if they would loose access
                 if (
-                    // if the parents have no access after the patch
-                    !member.details.calculatedParentsHaveAccess
                     // and the parent access is not yet configured
-                    && member.details.parentsHaveAccess === null
-                    // and the user is one of the parents
-                    && member.details.parents.find(p => p.email === user.email)) {
+                    member.details.parentsHaveAccess === null
+                    // and the user is one of the parents that would not have access after the patch
+                    // (a partner already keeps access, so this won't wrongly grant access to all parents)
+                    && member.details.parents.some(p => p.email === user.email && !member.details.parentHasAccess(p))) {
                     // grant parents access
                     member.details.parentsHaveAccess = BooleanStatus.create({
                         value: true,

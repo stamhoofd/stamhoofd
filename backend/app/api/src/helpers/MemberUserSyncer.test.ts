@@ -1,6 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
 import { Member, MemberFactory, MemberResponsibilityRecordFactory, User, UserFactory } from '@stamhoofd/models';
-import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, Parent, ParentType, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MemberUserSyncer } from './MemberUserSyncer.js';
 
@@ -145,6 +145,93 @@ describe('Helpers.MemberUserSyncer', () => {
                 email: 'untitled@example.com',
                 memberId: null,
                 permissions: null,
+            }),
+        ]);
+    });
+
+    test('Partner parents get access for adult members by default, other parents do not', async () => {
+        const member = await new MemberFactory({
+            details: MemberDetails.create({
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 366 * 30), // 30 years old
+                parents: [
+                    Parent.create({
+                        firstName: 'Linda',
+                        lastName: 'Potter',
+                        email: 'linda@example.com',
+                        type: ParentType.Partner,
+                    }),
+                    Parent.create({
+                        firstName: 'Peter',
+                        lastName: 'Doe',
+                        email: 'peter@example.com',
+                        type: ParentType.Father,
+                    }),
+                ],
+                email: 'john@example.com',
+                alternativeEmails: ['john@work.com'],
+            }),
+        }).create();
+
+        await MemberUserSyncer.onChangeMember(member);
+
+        const users = await Member.users.load(member);
+        expect(users).toIncludeSameMembers([
+            // Member
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@example.com',
+                memberId: member.id,
+            }),
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@work.com',
+                memberId: member.id,
+            }),
+
+            // Only the partner parent gets access, not the father
+            expect.objectContaining({
+                firstName: 'Linda',
+                lastName: 'Potter',
+                email: 'linda@example.com',
+                memberId: null,
+                permissions: null,
+            }),
+        ]);
+    });
+
+    test('Partner access is revoked when parent access is explicitly disabled', async () => {
+        const member = await new MemberFactory({
+            details: MemberDetails.create({
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 366 * 30), // 30 years old
+                parentsHaveAccess: BooleanStatus.create({ value: false }),
+                parents: [
+                    Parent.create({
+                        firstName: 'Linda',
+                        lastName: 'Potter',
+                        email: 'linda@example.com',
+                        type: ParentType.Partner,
+                    }),
+                ],
+                email: 'john@example.com',
+            }),
+        }).create();
+
+        await MemberUserSyncer.onChangeMember(member);
+
+        const users = await Member.users.load(member);
+        expect(users).toIncludeSameMembers([
+            // Only the member, the partner has no access
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@example.com',
+                memberId: member.id,
             }),
         ]);
     });

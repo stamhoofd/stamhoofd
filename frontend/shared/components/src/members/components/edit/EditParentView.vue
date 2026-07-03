@@ -97,8 +97,8 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
-import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
+import type { Address, Parent, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { NationalRegisterNumberOptOut, ParentType, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -135,7 +135,10 @@ const pop = usePop();
 const loading = ref(false);
 const saveText = ref($t(`%1Op`));
 const app = useAppContext();
-const parentTypes = ParentTypeHelper.getPublicTypes();
+const parentTypes = computed(() => ParentTypeHelper.getPublicTypes({
+    // Partner is only relevant for adult members, but keep it available when already selected
+    includePartner: patched.value.type === ParentType.Partner || relatedMembers.value.some(m => m.patchedMember.details.defaultAge >= 18),
+}));
 const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`%14u`)} bewerken` : $t(`%fV`));
 const navigate = useNavigationActions();
 

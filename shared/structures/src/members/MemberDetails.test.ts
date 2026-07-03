@@ -1,7 +1,16 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
-import { MemberDetails } from './MemberDetails.js';
+import { BooleanStatus, MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';
+import { ParentType } from './ParentType.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
+
+/**
+ * Returns a birthDay for a member of the given age (in years), based on today.
+ */
+function birthDayForAge(age: number): Date {
+    const now = new Date();
+    return new Date(now.getFullYear() - age, now.getMonth(), now.getDate());
+}
 
 describe('Correctly merge multiple details together', () => {
     test('Merge', () => {
@@ -461,6 +470,106 @@ describe('Correctly merge multiple details together', () => {
             expect(encoded).toMatchObject({
                 uitpasNumber: null,
             });
+        });
+    });
+
+    describe('Parent access (partner)', () => {
+        function createDetails(age: number, parents: Parent[], parentsHaveAccess: BooleanStatus | null = null) {
+            return MemberDetails.create({
+                firstName: 'Test',
+                lastName: 'Member',
+                email: 'member@example.com',
+                birthDay: birthDayForAge(age),
+                parents,
+                parentsHaveAccess,
+            });
+        }
+
+        test('An adult member only grants access to partners by default, not to other parents', () => {
+            const partner = Parent.create({ firstName: 'Partner', lastName: 'X', type: ParentType.Partner, email: 'partner@example.com' });
+            const parent = Parent.create({ firstName: 'Parent', lastName: 'Y', type: ParentType.Mother, email: 'parent@example.com' });
+
+            const details = createDetails(30, [partner, parent]);
+
+            expect(details.calculatedParentsHaveAccess).toBe(false);
+            expect(details.parentHasAccess(partner)).toBe(true);
+            expect(details.parentHasAccess(parent)).toBe(false);
+            expect(details.getParentsWithAccess()).toEqual([partner]);
+        });
+
+        test('A minor member grants access to all parents including partners', () => {
+            const partner = Parent.create({ firstName: 'Partner', lastName: 'X', type: ParentType.Partner, email: 'partner@example.com' });
+            const parent = Parent.create({ firstName: 'Parent', lastName: 'Y', type: ParentType.Mother, email: 'parent@example.com' });
+
+            const details = createDetails(10, [partner, parent]);
+
+            expect(details.calculatedParentsHaveAccess).toBe(true);
+            expect(details.parentHasAccess(partner)).toBe(true);
+            expect(details.parentHasAccess(parent)).toBe(true);
+            expect(details.getParentsWithAccess()).toEqual([partner, parent]);
+        });
+
+        test('Explicitly disabling parent access also removes partner access', () => {
+            const partner = Parent.create({ firstName: 'Partner', lastName: 'X', type: ParentType.Partner, email: 'partner@example.com' });
+            const parent = Parent.create({ firstName: 'Parent', lastName: 'Y', type: ParentType.Mother, email: 'parent@example.com' });
+
+            const details = createDetails(30, [partner, parent], BooleanStatus.create({ value: false }));
+
+            expect(details.parentHasAccess(partner)).toBe(false);
+            expect(details.parentHasAccess(parent)).toBe(false);
+            expect(details.getParentsWithAccess()).toEqual([]);
+        });
+
+        test('Explicitly enabling parent access grants access to all parents', () => {
+            const partner = Parent.create({ firstName: 'Partner', lastName: 'X', type: ParentType.Partner, email: 'partner@example.com' });
+            const parent = Parent.create({ firstName: 'Parent', lastName: 'Y', type: ParentType.Mother, email: 'parent@example.com' });
+
+            const details = createDetails(30, [partner, parent], BooleanStatus.create({ value: true }));
+
+            expect(details.parentHasAccess(partner)).toBe(true);
+            expect(details.parentHasAccess(parent)).toBe(true);
+        });
+
+        test('Partners receive notification emails for adult members', () => {
+            const partner = Parent.create({ firstName: 'Partner', lastName: 'X', type: ParentType.Partner, email: 'partner@example.com' });
+            const parent = Parent.create({ firstName: 'Parent', lastName: 'Y', type: ParentType.Mother, email: 'parent@example.com' });
+
+            const details = createDetails(30, [partner, parent]);
+
+            const emails = details.getNotificationEmails();
+            expect(emails).toContain('partner@example.com');
+            expect(emails).not.toContain('parent@example.com');
+        });
+    });
+
+    describe('getParentsTitle', () => {
+        test('Uses "Partner of ouders" for members aged 24 or older', () => {
+            const details = MemberDetails.create({ firstName: 'Test', birthDay: birthDayForAge(24) });
+            expect(details.getParentsTitle()).toBe('Partner of ouders');
+        });
+
+        test('Uses "Ouders" for younger members', () => {
+            const details = MemberDetails.create({ firstName: 'Test', birthDay: birthDayForAge(23) });
+            expect(details.getParentsTitle()).toBe('Ouders');
+        });
+
+        test('Uses "Ouders" when the birthday is unknown', () => {
+            const details = MemberDetails.create({ firstName: 'Test', birthDay: null });
+            expect(details.getParentsTitle()).toBe('Ouders');
+        });
+    });
+
+    describe('ParentType.Partner encoding', () => {
+        test('Downgrades Partner to Other for clients before version 401', () => {
+            const parent = Parent.create({ firstName: 'Partner', lastName: 'X', type: ParentType.Partner });
+
+            expect(parent.encode({ version: 400 })).toMatchObject({ type: ParentType.Other });
+            expect(parent.encode({ version: 401 })).toMatchObject({ type: ParentType.Partner });
+        });
+
+        test('Keeps other parent types unchanged when downgrading', () => {
+            const parent = Parent.create({ firstName: 'Parent', lastName: 'Y', type: ParentType.Mother });
+            expect(parent.encode({ version: 400 })).toMatchObject({ type: ParentType.Mother });
         });
     });
 });
