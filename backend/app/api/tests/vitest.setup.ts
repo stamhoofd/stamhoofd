@@ -55,6 +55,11 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `webshops`');
     await Database.delete('DELETE FROM `groups`');
     await Database.delete('DELETE FROM `email_addresses`');
+
+    // invoiced_balance_items restricts deleting balance items, which blocks the organizations
+    // cascade below, so it has to be cleared first
+    await Database.delete('DELETE FROM `invoiced_balance_items`');
+    await Database.delete('DELETE FROM `invoices`');
     await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
     await Database.delete('DELETE FROM `organizations`');
     await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
