@@ -3,8 +3,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Organization } from '@stamhoofd/models';
-import { Member, Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
-import { EmailTemplateType, Recipient, Replacement, SecurityCodeSendMethod, SendMemberSecurityCodeRequest, SendMemberSecurityCodeResponse } from '@stamhoofd/structures';
+import { AuditLog, Member, Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmailTemplateType, Recipient, Replacement, SecurityCodeSendMethod, SendMemberSecurityCodeRequest, SendMemberSecurityCodeResponse } from '@stamhoofd/structures';
 import type { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -292,6 +292,8 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             type: 'transactional',
         });
 
+        await this.logSecurityCodeRequested(member, SecurityCodeSendMethod.Email, emails.join(', '));
+
         return SendMemberSecurityCodeResponse.create({
             method: SecurityCodeSendMethod.Email,
             maskedRecipient: '',
@@ -417,10 +419,41 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             defaultCountry: member.details.address?.country ?? organization?.address?.country,
         });
 
+        const maskedRecipient = this.maskPhone(phone);
+        await this.logSecurityCodeRequested(member, SecurityCodeSendMethod.SMS, maskedRecipient);
+
         return SendMemberSecurityCodeResponse.create({
             method: SecurityCodeSendMethod.SMS,
-            maskedRecipient: this.maskPhone(phone),
+            maskedRecipient,
         });
+    }
+
+    /**
+     * Record an audit log entry so it is traceable who requested a member's security code, how and to where.
+     */
+    private async logSecurityCodeRequested(member: Member, method: SecurityCodeSendMethod, maskedRecipient: string) {
+        const log = new AuditLog();
+
+        // A member can belong to multiple organizations, so this is best-effort (mainly visible in the admin panel).
+        log.organizationId = member.organizationId;
+        log.type = AuditLogType.MemberSecurityCodeRequested;
+        log.source = AuditLogSource.User;
+        log.userId = Context.user?.id ?? null;
+        log.objectId = member.id;
+        log.replacements = new Map([
+            ['m', AuditLogReplacement.create({
+                value: member.details.name,
+                type: AuditLogReplacementType.Member,
+                id: member.id,
+            })],
+            ['method', AuditLogReplacement.create({
+                value: method === SecurityCodeSendMethod.SMS ? 'SMS' : 'e-mail',
+            })],
+            ['recipient', AuditLogReplacement.create({
+                value: maskedRecipient,
+            })],
+        ]);
+        await log.save();
     }
 
     private trackMemberLimit(member: Member, method: SecurityCodeSendMethod) {

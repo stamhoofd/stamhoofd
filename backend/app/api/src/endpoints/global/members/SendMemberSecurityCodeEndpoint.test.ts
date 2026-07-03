@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { RateLimiter } from '@stamhoofd/models';
-import { EmailTemplateFactory, Member, MemberFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { EmailTemplateType, MemberDetails, Parent, ParentType, SecurityCodeSendMethod, SendMemberSecurityCodeRequest } from '@stamhoofd/structures';
+import { AuditLog, EmailTemplateFactory, Member, MemberFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MemberDetails, Parent, ParentType, SecurityCodeSendMethod, SendMemberSecurityCodeRequest } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import type { SMSMocker } from '../../../../tests/helpers/SMSMocker.js';
@@ -111,7 +111,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const response = await testServer.test(endpoint, request);
 
         expect(response.body.method).toBe(SecurityCodeSendMethod.SMS);
-        expect(response.body.maskedRecipient).toBe('•••• 56');
+        expect(response.body.maskedRecipient).toBe('•• •• 56');
 
         expect(mocker.sentMessages.length).toBe(1);
         expect(mocker.lastMessage!.recipient).toEqual(32470123456);
@@ -150,7 +150,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
         expect(mocker.sentMessages.length).toBe(2);
         expect(mocker.lastMessage!.recipient).toEqual(32471987654);
-        expect(response.body.maskedRecipient).toBe('•••• 54');
+        expect(response.body.maskedRecipient).toBe('•• •• 54');
     });
 
     test('only sends to the provided phone number when it matches a known number', async () => {
@@ -172,7 +172,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
         expect(mocker.sentMessages.length).toBe(1);
         expect(mocker.lastMessage!.recipient).toEqual(32471987654);
-        expect(response.body.maskedRecipient).toBe('•••• 54');
+        expect(response.body.maskedRecipient).toBe('•• •• 54');
     });
 
     test('throws when the provided phone number is not known for the member', async () => {
@@ -216,6 +216,54 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             .rejects
             .toThrow(STExpect.errorWithCode('too_many_requests'));
         expect(mocker.sentMessages.length).toBe(0);
+    });
+
+    test('creates an audit log when a security code is requested via email', async () => {
+        const { organization, user, token, member } = await setup();
+
+        await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+            firstName: 'Jef',
+            lastName: 'Testman',
+            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            method: SecurityCodeSendMethod.Email,
+        })));
+
+        const log = await AuditLog.select()
+            .where('type', AuditLogType.MemberSecurityCodeRequested)
+            .where('objectId', member.id)
+            .first(true);
+
+        expect(log.userId).toBe(user.id);
+        expect(log.organizationId).toBe(member.organizationId);
+        expect(log.replacements.get('m')).toMatchObject({
+            id: member.id,
+            value: member.details.name,
+            type: AuditLogReplacementType.Member,
+        });
+        expect(log.replacements.get('method')?.value).toBe('e-mail');
+        expect(log.replacements.get('recipient')?.value).toContain('kid@example.com');
+        expect(log.replacements.get('recipient')?.value).toContain('parent@example.com');
+    });
+
+    test('creates an audit log with the masked recipient when a security code is requested via SMS', async () => {
+        initSMSApi();
+        const { user, organization, token, member } = await setup();
+
+        await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
+            firstName: 'Jef',
+            lastName: 'Testman',
+            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            method: SecurityCodeSendMethod.SMS,
+        })));
+
+        const log = await AuditLog.select()
+            .where('type', AuditLogType.MemberSecurityCodeRequested)
+            .where('objectId', member.id)
+            .first(true);
+
+        expect(log.userId).toBe(user.id);
+        expect(log.replacements.get('method')?.value).toBe('SMS');
+        expect(log.replacements.get('recipient')?.value).toBe('•• •• 56');
     });
 
     test('can look up the member by id', async () => {

@@ -1012,7 +1012,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
-        if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode(Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+        if ((await member.isSafeToMergeDuplicateWithoutSecurityCode(Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         } else if (securityCode) {
             await this.checkSecurityCode(member, securityCode);

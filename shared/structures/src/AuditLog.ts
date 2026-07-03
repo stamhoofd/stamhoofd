@@ -100,6 +100,7 @@ export enum AuditLogType {
 
     // Security code
     MemberSecurityCodeUsed = 'MemberSecurityCodeUsed',
+    MemberSecurityCodeRequested = 'MemberSecurityCodeRequested',
 
     // Email
     EmailSent = 'EmailSent',
@@ -258,6 +259,9 @@ export function getAuditLogTypeName(type: AuditLogType): string {
         case AuditLogType.MemberSecurityCodeUsed:
             return `Gebruik van beveiligingscodes`;
 
+        case AuditLogType.MemberSecurityCodeRequested:
+            return `Aangevraagde beveiligingscodes`;
+
         case AuditLogType.RegistrationInvitationAdded:
             return `Nieuwe uitnodigingen`;
         case AuditLogType.RegistrationInvitationDeleted:
@@ -410,6 +414,9 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
 
         case AuditLogType.MemberSecurityCodeUsed:
             return [`key`, `success primary stroke`];
+
+        case AuditLogType.MemberSecurityCodeRequested:
+            return [`key`, `send stroke`];
 
         case AuditLogType.RegistrationInvitationAdded:
             return [`email`, `add green`];
@@ -584,6 +591,9 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.MemberSecurityCodeUsed:
             return `De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}`;
 
+        case AuditLogType.MemberSecurityCodeRequested:
+            return `De beveiligingscode van {{m}} werd opgevraagd{{if method ' via ' method}}{{if recipient ' naar ' recipient}}`;
+
         case AuditLogType.RegistrationInvitationAdded:
             return `{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}`;
         case AuditLogType.RegistrationInvitationDeleted:
@@ -622,6 +632,7 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.MemberEdited:
         case AuditLogType.MemberDeleted:
         case AuditLogType.MemberSecurityCodeUsed:
+        case AuditLogType.MemberSecurityCodeRequested:
             return ['m'];
         case AuditLogType.MemberRegistered:
         case AuditLogType.MemberUnregistered:
