@@ -3,7 +3,7 @@
         <template #left>
             <IconContainer :icon="log.icon" :class="log.subIcon && log.subIcon.includes('primary') ? 'primary' : (log.subIcon && log.subIcon.includes('green') ? 'theme-success' : (log.subIcon && log.subIcon.includes('red') ? 'theme-error' : 'gray'))">
                 <template v-if="log.subIcon" #aside>
-                    <ProgressIcon :icon="log.subIcon" />
+                    <ProgressIcon :icon="log.subIcon + ' tiny'" />
                 </template>
             </IconContainer>
         </template>
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { AuditLog} from '@stamhoofd/structures';
+import type { AuditLog } from '@stamhoofd/structures';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -61,11 +61,9 @@ const showDescriptionInTitle = computed(() => props.log.type === AuditLogType.Un
 if (props.log.user) {
     if (props.log.source === AuditLogSource.User) {
         userDescription.push($t(`%uX`) + ' ');
-    }
-    else if (props.log.source === AuditLogSource.Payment) {
+    } else if (props.log.source === AuditLogSource.Payment) {
         userDescription.push($t(`%uY`) + ' ');
-    }
-    else {
+    } else {
         userDescription.push($t(`%uZ`) + ' ');
     }
 
@@ -74,17 +72,13 @@ if (props.log.user) {
         value: props.log.user.name,
         type: AuditLogReplacementType.User,
     }));
-}
-else if (props.log.source === AuditLogSource.User) {
+} else if (props.log.source === AuditLogSource.User) {
     userDescription.push($t(`%ua`));
-}
-else if (props.log.source === AuditLogSource.Anonymous) {
+} else if (props.log.source === AuditLogSource.Anonymous) {
     userDescription.push($t(`%ub`));
-}
-else if (props.log.source === AuditLogSource.System) {
+} else if (props.log.source === AuditLogSource.System) {
     userDescription.push($t(`%uc`));
-}
-else if (props.log.source === AuditLogSource.Payment) {
+} else if (props.log.source === AuditLogSource.Payment) {
     userDescription.push($t(`%ud`));
 }
 
