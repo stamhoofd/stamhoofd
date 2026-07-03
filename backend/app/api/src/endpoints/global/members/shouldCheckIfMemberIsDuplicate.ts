@@ -1,6 +1,5 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import type { MemberDetails } from '@stamhoofd/structures';
-import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 /**
  * Returns true when either the firstname, lastname or birthday has changed

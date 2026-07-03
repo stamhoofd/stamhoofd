@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { SecurityCodeSendMethod } from '../members/SecurityCodeSendMethod.js';
 
@@ -11,17 +11,8 @@ export class SendMemberSecurityCodeRequest extends AutoEncoder {
     /**
      * Look up the member by id. When set, the name/birthDay fields are ignored.
      */
-    @field({ decoder: StringDecoder, nullable: true })
-    memberId: string | null = null;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    firstName: string | null = null;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    lastName: string | null = null;
-
-    @field({ decoder: DateDecoder, nullable: true })
-    birthDay: Date | null = null;
+    @field({ decoder: StringDecoder })
+    memberId: string;
 
     @field({ decoder: new EnumDecoder(SecurityCodeSendMethod) })
     method: SecurityCodeSendMethod;

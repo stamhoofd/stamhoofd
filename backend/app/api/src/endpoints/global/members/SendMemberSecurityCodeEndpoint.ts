@@ -57,25 +57,6 @@ export const memberEmailSecurityCodeSendLimiter = new RateLimiter({
 });
 
 /**
- * Limit per member name + organization, so a birth day cannot be guessed or detected by
- * trying different birth days for a known member name.
- */
-export const nameSecurityCodeSendLimiter = new RateLimiter({
-    limits: [
-        {
-            // Max 10 requests per hour
-            limit: 10,
-            duration: 60 * 60 * 1000,
-        },
-        {
-            // Max 20 requests per day
-            limit: 20,
-            duration: 24 * 60 * 60 * 1000,
-        },
-    ],
-});
-
-/**
  * Limit per user to avoid member enumeration attacks.
  */
 export const userSecurityCodeSendLimiter = new RateLimiter({
@@ -190,51 +171,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
      * String matching relies on the case- and accent-insensitive collation of the database.
      */
     private async findMember(body: SendMemberSecurityCodeRequest, organization: Organization | null): Promise<Member | undefined> {
-        if (body.memberId) {
-            return (await Member.getByID(body.memberId)) ?? undefined;
-        }
-
-        if (!body.firstName || !body.lastName || !body.birthDay) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Either memberId or firstName, lastName and birthDay are required',
-                human: $t(`%Zb9`),
-                statusCode: 400,
-            });
-        }
-
-        // Rate limit by member name + organization (checked before the lookup, so a birth day cannot be
-        // guessed or detected by trying different birth days for a known member name).
-        const nameKey = (organization?.id ?? 'platform') + ':' + body.firstName.toLowerCase().trim() + ' ' + body.lastName.toLowerCase().trim();
-        try {
-            nameSecurityCodeSendLimiter.track(nameKey, 1);
-        } catch (e) {
-            throw new SimpleError({
-                code: 'too_many_requests',
-                message: 'Too many security code requests for this member name',
-                human: $t(`%ZbM`),
-                statusCode: 429,
-            });
-        }
-
-        const query: { firstName: string; lastName: string; birthDay: string; organizationId?: string } = {
-            firstName: body.firstName,
-            lastName: body.lastName,
-            birthDay: Formatter.dateIso(body.birthDay),
-        };
-
-        // In organization mode members are scoped to a single organization
-        if (organization && STAMHOOFD.userMode !== 'platform') {
-            query.organizationId = organization.id;
-        }
-
-        const members = await Member.where(query);
-        if (members.length === 0) {
-            return undefined;
-        }
-
-        // Prefer a member that already has a security code set
-        return members.find(m => m.details.securityCode) ?? members[0];
+        return (await Member.getByID(body.memberId)) ?? undefined;
     }
 
     /**

@@ -33,9 +33,34 @@ type ResponseBody = MembersBlob;
 export const securityCodeLimiter = new RateLimiter({
     limits: [
         {
-            // Max 10 a day
-            limit: 10,
+            // Max 5 per 15 minutes (this makes sure accidental enters block maximum 15 minutes and not the whole day)
+            limit: 5,
+            duration: 15 * 60 * 1000 * 60,
+        },
+        {
+            // Max 12 a day
+            limit: 12,
             duration: 24 * 60 * 1000 * 60,
+        },
+    ],
+});
+
+export const duplicateCheckLimiter = new RateLimiter({
+    limits: [
+        {
+            // Max 5 requests per 5 minutes
+            limit: 5,
+            duration: 15 * 60 * 1000,
+        },
+        {
+            // Max 6 requests per 10 minutes
+            limit: 6,
+            duration: 15 * 60 * 1000,
+        },
+        {
+            // Max 7 requests per day
+            limit: 7,
+            duration: 24 * 60 * 60 * 1000,
         },
     ],
 });
@@ -1029,6 +1054,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     email: Context.auth.user.email,
                 }),
                 statusCode: 400,
+                meta: {
+                    id: member.id,
+                },
             });
         }
     }
@@ -1050,6 +1078,24 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     static async checkDuplicate(member: Member, securityCode: string | null | undefined, type: 'put' | 'patch') {
         if (!this.shouldCheckIfMemberIsDuplicate(member)) {
             return;
+        }
+
+        if ((!member.organizationId && !Context.auth.hasSomePlatformAccess()) || (member.organizationId && !await Context.auth.hasSomeAccess(member.organizationId))) {
+            try {
+                duplicateCheckLimiter.track(member.organizationId + '-' + Formatter.slug(member.details.name), 1);
+            } catch (e) {
+                Email.sendWebmaster({
+                    subject: '[Limiet] Limiet bereikt voor aantal duplicate checks per member name',
+                    text: $t(`%EA`) + ' ' + member.details.name + ' ' + '(Org: ' + ' ' + member.organizationId + ')' + ' by ' + Context.user?.id + '\n\n' + e.message + '\n\nStamhoofd',
+                });
+
+                throw new SimpleError({
+                    code: 'too_many_tries',
+                    message: 'Too many names',
+                    human: $t(`Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw.`),
+                    field: 'details.name',
+                });
+            }
         }
 
         // Check for duplicates and prevent creating a duplicate member by a user

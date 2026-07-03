@@ -77,7 +77,7 @@
 
                     <STListItem class="left-center" :selectable="true" @click="sendSecurityCodeViaEmail">
                         <template #left>
-                            <IconContainer icon="email" aside-icon="send send" />
+                            <IconContainer icon="email" aside-icon="send stroke" />
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('%Zb3') }}
@@ -185,7 +185,7 @@ const manager = usePlatformFamilyManager();
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 const willMarkReviewed = !isAdmin;
-const isDuplicate = ref(false);
+const isDuplicate = ref<string | null>(null);
 const code = ref('');
 const context = useContext();
 const owner = useRequestOwner();
@@ -203,14 +203,11 @@ const smsTryCount = ref(0);
  * When phone is null the backend cycles through the known numbers based on tryCount.
  */
 async function requestSecurityCode(method: SecurityCodeSendMethod, phone: string | null) {
-    const details = cloned.value.patchedMember.details;
     const response = await context.value.authenticatedServer.request({
         method: 'POST',
         path: '/members/security-code',
         body: SendMemberSecurityCodeRequest.create({
-            firstName: details.firstName,
-            lastName: details.lastName,
-            birthDay: details.birthDay,
+            memberId: isDuplicate.value,
             method,
             phone,
             tryCount: smsTryCount.value,
@@ -326,7 +323,7 @@ async function save() {
 
         if (isDuplicate.value) {
             Toast.success($t('%Bl', { name: cloned.value.patchedMember.details.firstName })).show();
-            isDuplicate.value = false;
+            isDuplicate.value = null;
         }
 
         if (props.saveHandler) {
@@ -340,9 +337,12 @@ async function save() {
         if (isSimpleError(e) || isSimpleErrors(e)) {
             // security codes are not available for userMode organization
             if (e.hasCode('known_member_missing_rights')) {
-                isDuplicate.value = true;
-                loading.value = false;
-                return;
+                const meta = isSimpleErrors(e) ? e.errors.find(er => er.hasCode('known_member_missing_rights'))?.meta : e.meta;
+                if (typeof meta === 'object' && meta !== null && 'id' in meta && typeof meta.id === 'string') {
+                    isDuplicate.value = meta.id;
+                    loading.value = false;
+                    return;
+                }
             }
         }
         errors.errorBox = new ErrorBox(e);

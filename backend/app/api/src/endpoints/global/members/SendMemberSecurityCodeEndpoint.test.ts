@@ -8,7 +8,7 @@ import { Formatter } from '@stamhoofd/utility';
 import type { SMSMocker } from '../../../../tests/helpers/SMSMocker.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initSMSApi } from '../../../../tests/init/index.js';
-import { memberPhoneLookupLimiter, memberSecurityCodeSendLimiter, nameSecurityCodeSendLimiter, SendMemberSecurityCodeEndpoint, smsOrganizationLimiter, userSecurityCodeSendLimiter } from './SendMemberSecurityCodeEndpoint.js';
+import { memberPhoneLookupLimiter, memberSecurityCodeSendLimiter, SendMemberSecurityCodeEndpoint, smsOrganizationLimiter, userSecurityCodeSendLimiter } from './SendMemberSecurityCodeEndpoint.js';
 
 const baseUrl = `/members/security-code`;
 const endpoint = new SendMemberSecurityCodeEndpoint();
@@ -31,7 +31,6 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
         // Rate limiters are in-memory singletons, reset them between tests
         resetLimiter(memberSecurityCodeSendLimiter);
-        resetLimiter(nameSecurityCodeSendLimiter);
         resetLimiter(userSecurityCodeSendLimiter);
         resetLimiter(smsOrganizationLimiter);
         resetLimiter(memberPhoneLookupLimiter);
@@ -75,12 +74,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     }
 
     test('sends the code via email to all known email addresses', async () => {
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -99,12 +96,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
     test('sends the code via SMS to the member phone number', async () => {
         const mocker: SMSMocker = initSMSApi();
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -123,12 +118,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
     test('cycles to the next phone number on retries', async () => {
         const mocker: SMSMocker = initSMSApi();
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const body = SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
             tryCount: 0,
         });
@@ -140,9 +133,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         resetLimiter(memberSecurityCodeSendLimiter);
 
         const retry = SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
             tryCount: 1,
         });
@@ -155,14 +146,12 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
     test('only sends to the provided phone number when it matches a known number', async () => {
         const mocker: SMSMocker = initSMSApi();
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         // Provide the parent number in national format. Even though tryCount 0 would normally select the
         // member number, an exact (normalized) match must win.
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
             tryCount: 0,
             phone: '0471 98 76 54',
@@ -177,12 +166,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
     test('throws when the provided phone number is not known for the member', async () => {
         const mocker: SMSMocker = initSMSApi();
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
             phone: '+32 490 00 00 00',
         }));
@@ -205,9 +192,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         }
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
             phone: '+32 490 00 00 00',
         }));
@@ -222,9 +207,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, user, token, member } = await setup();
 
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.Email,
         })));
 
@@ -250,9 +233,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { user, organization, token, member } = await setup();
 
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
         })));
 
@@ -266,19 +247,6 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         expect(log.replacements.get('recipient')?.value).toBe('•• •• 56');
     });
 
-    test('can look up the member by id', async () => {
-        const { organization, token, member } = await setup();
-
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
-            method: SecurityCodeSendMethod.Email,
-        }));
-
-        const response = await testServer.test(endpoint, request);
-        expect(response.body.method).toBe(SecurityCodeSendMethod.Email);
-        expect(await EmailMocker.transactional.getSucceededCount()).toBe(2);
-    });
-
     test('generates a security code if the member has none', async () => {
         const { organization, token, member } = await setup();
 
@@ -287,9 +255,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         await member.save();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -309,9 +275,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const { organization, token } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Unknown',
-            lastName: 'Person',
-            birthDay: new Date(Date.UTC(2000, 0, 1)),
+            memberId: 'not-found',
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -322,12 +286,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
     test('throws when the member has no phone number for SMS', async () => {
         initSMSApi();
-        const { organization, token } = await setup({ phone: null, parents: [] });
+        const { organization, token, member } = await setup({ phone: null, parents: [] });
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -336,13 +298,11 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             .toThrow(STExpect.errorWithCode('no_phone'));
     });
 
-    test('rate limits sending per member', async () => {
-        const { organization, token } = await setup();
+    test('rate limits sending email per member', async () => {
+        const { organization, token, member } = await setup();
 
         const body = () => SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.Email,
         });
 
@@ -356,12 +316,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     test('rate limits sending SMS per member', async () => {
         const mocker: SMSMocker = initSMSApi();
 
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const body = () => SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
         });
 
@@ -375,28 +333,6 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         expect(mocker.sentMessages.length).toBe(3);
     });
 
-    test('rate limits by member name and organization to prevent birthday guessing', async () => {
-        const { organization, token } = await setup();
-
-        // Simulate that the hourly limit for this member name in this organization is already reached
-        const nameKey = organization.id + ':jef testman';
-        for (let i = 0; i < 10; i++) {
-            nameSecurityCodeSendLimiter.track(nameKey, 1);
-        }
-
-        // Even with a wrong birth day, the request is blocked before the member lookup happens
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(1990, 0, 1)),
-            method: SecurityCodeSendMethod.Email,
-        }));
-
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_requests'));
-    });
-
     test('rate limits SMS per organization to 25 per day', async () => {
         const mocker: SMSMocker = initSMSApi();
         const { organization, token, member } = await setup();
@@ -407,9 +343,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         }
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
         }));
 
@@ -420,7 +354,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     });
 
     test('rate limits per user to prevent enumeration', async () => {
-        const { organization, user, token } = await setup();
+        const { organization, user, token, member } = await setup();
 
         // Simulate that the user already reached the hourly limit
         for (let i = 0; i < 20; i++) {
@@ -428,9 +362,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         }
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.Email,
         }));
 
@@ -442,12 +374,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     test('reports an error when the SMS gateway fails', async () => {
         const mocker: SMSMocker = initSMSApi();
         mocker.forceFailure();
-        const { organization, token } = await setup();
+        const { organization, token, member } = await setup();
 
         const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            firstName: 'Jef',
-            lastName: 'Testman',
-            birthDay: new Date(Date.UTC(2010, 4, 5)),
+            memberId: member.id,
             method: SecurityCodeSendMethod.SMS,
         }));
 
