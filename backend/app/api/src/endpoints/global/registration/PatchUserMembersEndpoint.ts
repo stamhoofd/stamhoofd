@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
 import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
-import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import type { OneToManyRelation } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -112,6 +112,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
 
                 const originalReviewTimes = member.details.reviewTimes;
+
                 member.details.patchOrPut(struct.details);
 
                 if (struct.details.uitpasNumberDetails || didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)) {
@@ -120,6 +121,20 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 member.details.cleanData();
                 this.throwIfInvalidDetails(member.details);
+
+                // give the parents access to the member they are patching if they would loose access
+                if (
+                    // if the parents have no access after the patch
+                    !member.details.calculatedParentsHaveAccess
+                    // and the parent access is not yet configured
+                    && member.details.parentsHaveAccess === null
+                    // and the user is one of the parents
+                    && member.details.parents.find(p => p.email === user.email)) {
+                    // grant parents access
+                    member.details.parentsHaveAccess = BooleanStatus.create({
+                        value: true,
+                    });
+                }
             }
 
             if (!member.details) {
