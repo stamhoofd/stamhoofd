@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
 import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
-import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import type { OneToManyRelation } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -104,6 +104,22 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                         message: 'Cannot override details',
                         human: $t(`%Dj`),
                         field: 'details',
+                    });
+                }
+
+                // give the parents access to the member they are patching if they would loose access by setting the email of the member (if the member is an adult without email)
+                if (
+                    // an email is being set
+                    struct.details.email
+                    // and the member has no email yet but is an adult
+                    && member.details.email === null && member.details.defaultAge >= 18
+                    // and the parent access is not yet configured
+                    && member.details.parentsHaveAccess === null
+                    // and the user is one of the parents
+                    && member.details.parents.find(p => p.email === user.email)) {
+                    // grant parents access
+                    member.details.parentsHaveAccess = BooleanStatus.create({
+                        value: true,
                     });
                 }
 
