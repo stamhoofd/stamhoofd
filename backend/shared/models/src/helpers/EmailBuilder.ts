@@ -621,22 +621,20 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
         if (recipientUser) {
             const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
             const suffixes: string[] = [];
-            if (STAMHOOFD.userMode === 'platform') {
-                const { Member } = await import('../models/Member.js');
-                const memberIds = await Member.getMemberIdsForUser(recipientUser);
-                const members = await Member.getByIDs(...memberIds);
-                if (members.length > 0) {
-                    for (const member of members) {
-                        suffixes.push(
-                            $t('%1EC', {
-                                firstName: Formatter.escapeHtml(member.firstName),
-                                securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
-                            }),
-                        );
-                    }
-                } else {
-                    console.log('No member found for user', recipientUser.id);
+            const { Member } = await import('../models/Member.js');
+            const memberIds = await Member.getMemberIdsForUser(recipientUser);
+            const members = await Member.getByIDs(...memberIds);
+            if (members.length > 0) {
+                for (const member of members) {
+                    suffixes.push(
+                        $t('%1EC', {
+                            firstName: Formatter.escapeHtml(member.firstName),
+                            securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+                        }),
+                    );
                 }
+            } else {
+                console.log('No member found for user', recipientUser.id);
             }
             const suffix = suffixes.length > 0 ? (' ' + suffixes.join(' ')) : '';
             recipient.replacements.push(
