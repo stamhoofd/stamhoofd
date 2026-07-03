@@ -112,6 +112,12 @@ export class Member extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    /**
+     * The last time the member was registered.
+     */
+    @column({ type: 'datetime', nullable: true })
+    lastRegisteredAt: Date | null = null;
     // #endregion
 
     static registrations = new OneToManyRelation(Member, Registration, 'registrations', 'memberId');
@@ -517,5 +523,18 @@ export class Member extends QueryableModel {
         }
 
         return true;
+    }
+
+    async tryUpdateLastRegisteredAt(registration: Registration) {
+        if (registration.registeredAt === null) {
+            return;
+        }
+
+        if (this.lastRegisteredAt === null || this.lastRegisteredAt < registration.registeredAt) {
+            this.lastRegisteredAt = new Date(registration.registeredAt.getTime());
+
+            // only update lastRegisteredAt -> prevent side effects
+            await Member.update().set('lastRegisteredAt', this.lastRegisteredAt).where('id', this.id).update();
+        }
     }
 }

@@ -78,4 +78,15 @@ export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGr
             });
         },
     },
+    lastRegisteredAt: {
+        getValue(a) {
+            return a.lastRegisteredAt;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('lastRegisteredAt'),
+                direction,
+            });
+        },
+    },
 };

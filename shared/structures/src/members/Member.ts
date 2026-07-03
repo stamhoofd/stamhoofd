@@ -47,6 +47,12 @@ export class Member extends AutoEncoder {
     @field({ decoder: DateDecoder, version: 31 })
     updatedAt: Date = new Date();
 
+    /**
+     * The last time the member was registered.
+     */
+    @field({ decoder: DateDecoder, ...NextVersion, nullable: true })
+    lastRegisteredAt: Date | null = null;
+
     get tiny() {
         return TinyMember.create({
             id: this.id,
