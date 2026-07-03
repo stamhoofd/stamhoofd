@@ -1092,7 +1092,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw new SimpleError({
                     code: 'too_many_tries',
                     message: 'Too many names',
-                    human: $t(`Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw.`),
+                    human: $t(`%ZbQ`),
                     field: 'details.name',
                 });
             }

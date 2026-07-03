@@ -17435,10 +17435,6 @@
     "original": "We konden je SMS niet versturen. Probeer het later opnieuw.",
     "translation": "We couldn't send your SMS. Please try again later."
   },
-  "%Zb9": {
-    "original": "Geef een lid op.",
-    "translation": "Specify a member."
-  },
   "%ZbA": {
     "original": "Stuur naar gelijk welk GSM-nummer we kennen van {member}",
     "translation": "Send to any mobile number we have for {member}."
@@ -17498,6 +17494,10 @@
   "%ZbP": {
     "original": "Stuur de code via SMS",
     "translation": "Send the code via SMS."
+  },
+  "%ZbQ": {
+    "original": "Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw.",
+    "translation": "Oops! For security reasons, we've temporarily limited how many names and birth dates you can enter into the system. Please try again in 15 minutes."
   },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",

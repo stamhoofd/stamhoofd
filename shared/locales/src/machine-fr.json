@@ -17623,10 +17623,6 @@
     "original": "We konden je SMS niet versturen. Probeer het later opnieuw.",
     "translation": "Nous n'avons pas pu envoyer votre SMS. Veuillez réessayer plus tard."
   },
-  "%Zb9": {
-    "original": "Geef een lid op.",
-    "translation": "Indiquez un membre."
-  },
   "%ZbA": {
     "original": "Stuur naar gelijk welk GSM-nummer we kennen van {member}",
     "translation": "Envoyer à n'importe quel numéro de GSM que nous connaissons pour {member}"
@@ -17686,6 +17682,10 @@
   "%ZbP": {
     "original": "Stuur de code via SMS",
     "translation": "Envoyer le code par SMS"
+  },
+  "%ZbQ": {
+    "original": "Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw.",
+    "translation": "Oups ! Pour des raisons de sécurité, nous limitons le nombre de noms et de dates de naissance que vous pouvez saisir dans le système. Veuillez réessayer dans 15 minutes."
   },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
