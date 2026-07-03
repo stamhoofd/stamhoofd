@@ -43,6 +43,16 @@ export type MollieMockChargeback = {
     createdAt: string;
 };
 
+export type MollieMockRefund = {
+    id: string;
+    paymentId: string;
+    amount: { currency: string; value: string };
+    status: 'queued' | 'pending' | 'canceled' | 'processing' | 'failed' | 'refunded';
+    description: string;
+    createdAt: string;
+    metadata: Record<string, unknown> | null;
+};
+
 const MOLLIE_CHECKOUT_URL = 'https://molliecheckout/';
 
 /**
@@ -65,6 +75,7 @@ export class MollieMocker {
     customers: { id: string }[] = [];
     mandates: MollieMockMandate[] = [];
     chargebacks: MollieMockChargeback[] = [];
+    refunds: MollieMockRefund[] = [];
 
     #forceFailure = false;
 
@@ -73,6 +84,7 @@ export class MollieMocker {
         this.customers = [];
         this.mandates = [];
         this.chargebacks = [];
+        this.refunds = [];
         this.#forceFailure = false;
     }
 
@@ -150,6 +162,18 @@ export class MollieMocker {
             if (method === 'DELETE' && parts.length === 2) {
                 return this.#cancelPayment(parts[1]);
             }
+            if (method === 'POST' && parts.length === 3 && parts[2] === 'refunds') {
+                return this.#createRefund(parts[1], decoded);
+            }
+            if (method === 'GET' && parts.length === 4 && parts[2] === 'refunds') {
+                return this.#getRefund(parts[1], parts[3]);
+            }
+        }
+
+        if (parts[0] === 'refunds' && method === 'GET') {
+            // The cron iterates newest first (sort desc)
+            const sorted = this.refunds.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return this.#listResource('refunds', sorted.map(r => this.#refundResource(r)));
         }
 
         // customers + nested mandates
@@ -194,7 +218,9 @@ export class MollieMocker {
             id,
             status: 'open',
             amount: body.amount ?? { currency: 'EUR', value: '0.00' },
-            internalPaymentId: body.metadata?.paymentId ?? null,
+            // The webshop checkout (PlaceOrderEndpoint) uses the 'payment' metadata key,
+            // other flows (MollieService.createPayment) use 'paymentId'
+            internalPaymentId: body.metadata?.paymentId ?? body.metadata?.payment ?? null,
             redirectUrl: body.redirectUrl ?? null,
             sequenceType: body.sequenceType ?? 'oneoff',
             customerId: body.customerId ?? null,
@@ -369,6 +395,120 @@ export class MollieMocker {
             paymentId: chargeback.paymentId,
             createdAt: chargeback.createdAt,
             _links: { self: { href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId + '/chargebacks/' + chargeback.id, type: 'application/hal+json' } },
+        };
+    }
+
+    // ---- Refunds ----------------------------------------------------------
+
+    /**
+     * The remaining refundable amount for a payment (in euro), like Mollie's amountRemaining.
+     */
+    getRemainingAmount(payment: MollieMockPayment): number {
+        const refunded = this.refunds
+            .filter(r => r.paymentId === payment.id && r.status !== 'canceled' && r.status !== 'failed')
+            .reduce((total, r) => total + parseFloat(r.amount.value), 0);
+        return parseFloat(payment.amount.value) - refunded;
+    }
+
+    /**
+     * Handle POST /payments/:id/refunds like Mollie: refuse refunds on unpaid payments and
+     * refunds that are higher than the remaining refundable amount.
+     */
+    #createRefund(paymentId: string, body: Record<string, any>): [number, unknown] {
+        const payment = this.payments.find(p => p.id === paymentId);
+        if (!payment) {
+            return [404, { status: 404, title: 'Not Found', detail: 'No payment exists with token ' + paymentId }];
+        }
+
+        if (payment.status !== 'paid') {
+            return [422, { status: 422, title: 'Unprocessable Entity', detail: 'The payment is not paid; you can only refund paid payments' }];
+        }
+
+        const value = parseFloat(String(body.amount?.value ?? '0'));
+        if (!(value > 0)) {
+            return [422, { status: 422, title: 'Unprocessable Entity', detail: 'The amount is invalid', field: 'amount' }];
+        }
+
+        if (value > this.getRemainingAmount(payment) + 0.000001) {
+            return [422, { status: 422, title: 'Unprocessable Entity', detail: 'The amount is higher than the remaining payment amount', field: 'amount' }];
+        }
+
+        const refund: MollieMockRefund = {
+            id: this.createId('re'),
+            paymentId: payment.id,
+            amount: body.amount,
+            status: 'pending',
+            description: body.description ?? '',
+            createdAt: new Date().toISOString(),
+            metadata: body.metadata ?? null,
+        };
+        this.refunds.push(refund);
+        return [201, this.#refundResource(refund)];
+    }
+
+    #getRefund(paymentId: string, refundId: string): [number, unknown] {
+        const refund = this.refunds.find(r => r.id === refundId && r.paymentId === paymentId);
+        if (!refund) {
+            return [404, { status: 404, title: 'Not Found', detail: 'No refund exists with token ' + refundId }];
+        }
+        return [200, this.#refundResource(refund)];
+    }
+
+    /**
+     * Register a refund directly (simulating a refund created in the Mollie dashboard).
+     * Used to drive the mollie-refunds cron.
+     */
+    createRefund(payment: MollieMockPayment, options: { value?: string; status?: MollieMockRefund['status']; createdAt?: Date; metadata?: Record<string, unknown> } = {}): MollieMockRefund {
+        const refund: MollieMockRefund = {
+            id: this.createId('re'),
+            paymentId: payment.id,
+            amount: { currency: payment.amount.currency, value: options.value ?? payment.amount.value },
+            status: options.status ?? 'pending',
+            description: '',
+            createdAt: (options.createdAt ?? new Date()).toISOString(),
+            metadata: options.metadata ?? null,
+        };
+        this.refunds.push(refund);
+        return refund;
+    }
+
+    /**
+     * Mark a refund as executed by Mollie and trigger the webhook of the original payment
+     * (like Mollie does when the status of a refund changes).
+     */
+    async settleRefund(refund: MollieMockRefund = this.refunds[this.refunds.length - 1]) {
+        refund.status = 'refunded';
+        await this.#exchangeRefund(refund);
+    }
+
+    /**
+     * Mark a refund as failed at Mollie (e.g. the bank refused the transfer) and trigger the
+     * webhook of the original payment.
+     */
+    async failRefund(refund: MollieMockRefund = this.refunds[this.refunds.length - 1]) {
+        refund.status = 'failed';
+        await this.#exchangeRefund(refund);
+    }
+
+    async #exchangeRefund(refund: MollieMockRefund) {
+        const payment = this.payments.find(p => p.id === refund.paymentId);
+        if (payment) {
+            await this.#exchange(payment);
+        }
+    }
+
+    #refundResource(refund: MollieMockRefund) {
+        return {
+            resource: 'refund',
+            id: refund.id,
+            mode: 'test',
+            amount: refund.amount,
+            status: refund.status,
+            description: refund.description,
+            paymentId: refund.paymentId,
+            createdAt: refund.createdAt,
+            metadata: refund.metadata ?? undefined,
+            _links: { self: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId + '/refunds/' + refund.id, type: 'application/hal+json' } },
         };
     }
 

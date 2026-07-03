@@ -9,17 +9,17 @@
 
             <div v-if="isItemSelected(item) && isCustomizeItemValue(item)" class="split-inputs option" @click.stop>
                 <div>
-                    <STInputBox :title="item.priceOpen >= 0 ? $t('%16x') : $t('%16y')">
-                        <PriceInput :currency="getItemPrice(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(Math.abs(item.priceOpen) / 100_00) + ' euro')" :model-value="Math.abs(getItemPrice(item))" :min="0" :max="Math.abs(item.priceOpen)" :placeholder="$t(`%2X`)" @update:model-value="setItemPrice(item, Math.abs($event) * Math.sign(item.priceOpen))" />
+                    <STInputBox :title="fullPrice(item) >= 0 ? $t('%16x') : $t('%16y')">
+                        <PriceInput :currency="getItemPrice(item) === fullPrice(item) ? 'euro' : ('/ ' + formatFloat(Math.abs(fullPrice(item)) / 100_00) + ' euro')" :model-value="Math.abs(getItemPrice(item))" :min="0" :max="Math.abs(fullPrice(item))" :placeholder="$t(`%2X`)" @update:model-value="setItemPrice(item, Math.abs($event) * Math.sign(fullPrice(item)))" />
                     </STInputBox>
                 </div>
             </div>
             <p v-else class="style-description">
                 <span v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
-                    ({{ formatPrice(item.priceOpen) }})
+                    ({{ formatPrice(getDisplayPrice(item)) }})
                 </span>
-                <span v-else class="style-price-base" :class="{negative: item.priceOpen < 0}">
-                    {{ formatPrice(item.priceOpen) }}
+                <span v-else class="style-price-base" :class="{negative: getDisplayPrice(item) < 0}">
+                    {{ formatPrice(getDisplayPrice(item)) }}
                 </span>
             </p>
 
@@ -47,9 +47,31 @@ const props = withDefaults(defineProps<{
     list: BalanceItemPaymentDetailed[];
     isPayable: boolean;
     canCustomizeItemValue?: (item: BalanceItem) => boolean;
+
+    /**
+     * The (maximum) price that gets selected for an item. Defaults to the open amount of the item.
+     * Used when refunding a specific payment: then the price paid via that payment is used instead.
+     */
+    getFullPrice?: ((item: BalanceItem) => number) | null;
 }>(), {
     canCustomizeItemValue: () => true,
+    getFullPrice: null,
 });
+
+function fullPrice(item: BalanceItem) {
+    return props.getFullPrice ? props.getFullPrice(item) : item.priceOpen;
+}
+
+/**
+ * The price shown for an item when the price input is not visible:
+ * the selected price, or the price that would get selected.
+ */
+function getDisplayPrice(item: BalanceItem) {
+    if (isItemSelected(item)) {
+        return getItemPrice(item);
+    }
+    return fullPrice(item);
+}
 
 const customizeItemValues = ref(new Set<string>());
 
@@ -83,7 +105,7 @@ onMounted(async () => {
 const emit = defineEmits<{ (e: 'patch', patch: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed>): void }>();
 
 const filteredBalanceItems = computed(() => {
-    return BalanceItem.filterBalanceItems(props.items);
+    return props.getFullPrice ? props.items : BalanceItem.filterBalanceItems(props.items);
 });
 
 const total = computed(() => {
@@ -102,9 +124,8 @@ const priceBreakdown = computed(() => {
 function toggleCustomizeItemValue(item: BalanceItem) {
     if (customizeItemValues.value.has(item.id)) {
         customizeItemValues.value.delete(item.id);
-        setItemPrice(item, item.priceOpen);
-    }
-    else {
+        setItemPrice(item, fullPrice(item));
+    } else {
         customizeItemValues.value.add(item.id);
     }
 }
@@ -129,13 +150,12 @@ function setItemSelected(item: BalanceItem, selected: boolean) {
     if (selected) {
         const add = BalanceItemPaymentDetailed.create({
             balanceItem: item,
-            price: item.priceOpen,
+            price: fullPrice(item),
         });
         const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
         arr.addPut(add);
         addPatch(arr);
-    }
-    else {
+    } else {
         const q = props.list.find(p => p.balanceItem.id === item.id);
         const id = q?.id;
 
@@ -143,8 +163,7 @@ function setItemSelected(item: BalanceItem, selected: boolean) {
             const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
             arr.addDelete(id);
             addPatch(arr);
-        }
-        else {
+        } else {
             console.error('Could not find item to remove', item, q);
         }
     }

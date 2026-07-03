@@ -1,47 +1,15 @@
-import { ArrayDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Sorter } from '@stamhoofd/utility';
 import { BalanceItemRelationType } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { BaseOrganization } from '../Organization.js';
-import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
-import { Payment, Settlement } from './Payment.js';
+import { PrivatePayment } from './Payment.js';
 
-export class PaymentGeneral extends Payment {
+export class PaymentGeneral extends PrivatePayment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
     balanceItemPayments: BalanceItemPaymentDetailed[] = [];
-
-    @field({ decoder: StringDecoder, nullable: true })
-    iban: string | null = null;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    ibanName: string | null = null;
-
-    /**
-     * Only set for administrators with the correct permissions
-     */
-    @field({ decoder: Settlement, nullable: true })
-    settlement: Settlement | null = null;
-
-    /**
-     * Only set for administrators with the correct permissions
-     */
-    @field({ decoder: IntegerDecoder, version: 196 })
-    @field({ ...upgradePriceFrom2To4DecimalPlaces })
-    transferFee = 0;
-
-    @field({ decoder: IntegerDecoder, optional: true })
-    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
-    serviceFeePayout = 0;
-
-    @field({ decoder: IntegerDecoder, optional: true })
-    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
-    serviceFeeManual = 0;
-
-    @field({ decoder: IntegerDecoder, optional: true })
-    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
-    serviceFeeManualCharged = 0;
 
     /**
      * Only set for administrators with the correct permissions

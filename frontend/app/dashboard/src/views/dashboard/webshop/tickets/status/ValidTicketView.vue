@@ -367,8 +367,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -384,7 +382,7 @@ import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/componen
 
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import type { Payment, PrivateOrder, ProductDateRange, TicketPublicPrivate } from '@stamhoofd/structures';
-import { AccessRight, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
+import { AccessRight, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -563,9 +561,10 @@ function openOrder() {
 const owner = {};
 
 function created() {
-    // Listen for patches in payments
+    // Listen for patches in payments (a new refund is not in order.payments yet, but its
+    // reversingPaymentId references the payment of the order that is being refunded)
     GlobalEventBus.addListener(owner, 'paymentPatch', async (payment) => {
-        if (payment && payment.id && props.order.payments.find(p => p.id === payment.id as string)) {
+        if (payment && payment.id && props.order.payments.find(p => p.id === payment.id as string || p.id === payment.reversingPaymentId as string)) {
             await props.webshopManager.orders.fetchAllUpdated();
         }
         return Promise.resolve();
@@ -594,6 +593,9 @@ function createPayment() {
         paidAt: new Date(),
     });
 
+    // Online payments of this order that can still be (partially) refunded via the payment provider
+    const refundablePayments = props.order.payments.filter(p => p.provider === PaymentProvider.Mollie && p.type === PaymentType.Payment && p.isSucceeded && p.price + p.refundedAmount + p.pendingRefundAmount > 0);
+
     const component = AsyncComponent(() => import('@stamhoofd/components/payments/EditPaymentView.vue'), {
         payment,
         balanceItems: props.order.balanceItems,
@@ -601,17 +603,8 @@ function createPayment() {
         customers: [
             props.order.data.customer.toPaymentCustomer(),
         ],
-        saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
-            const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-            arr.addPut(payment.patch(patch));
-            await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/organization/payments',
-                body: arr,
-                decoder: new ArrayDecoder(PaymentGeneral),
-                shouldRetry: false,
-            });
-
+        refundablePayments,
+        saveHandler: async () => {
             // Update order
             await props.webshopManager.orders.fetchAllUpdated();
         },

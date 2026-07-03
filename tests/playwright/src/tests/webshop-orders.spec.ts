@@ -3,15 +3,18 @@ import { setup, test } from '../test-fixtures/base.js';
 setup();
 
 // other imports
-import type { Page } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 import { devices, expect } from '@playwright/test';
 import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
-import { Organization, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { Organization, OrganizationFactory, Payment, Token, UserFactory } from '@stamhoofd/models';
 import {
     MollieOnboarding,
     MollieStatus,
     PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    PaymentType,
     PermissionLevel,
     Permissions,
     STPackageBundle,
@@ -21,7 +24,7 @@ import {
 } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
-import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
+import { DashboardPage, DashboardTab, TableHelper, WorkerData } from '../helpers/index.js';
 import { WebshopOrdersView } from '../helpers/page/webshop/WebshopOrdersView.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
 
@@ -97,6 +100,22 @@ async function mockHostedPaymentPage(page: Page, url: string) {
         contentType: 'text/html',
         body: '<html><body data-testid="provider-mock-page">Mock payment page</body></html>',
     }));
+}
+
+/**
+ * Navigate the admin dashboard to the orders table of a webshop and wait for the first row.
+ * Reusable to (re)open the table, e.g. after a page reload where the deep order URL isn't restored.
+ */
+async function openWebshopOrders(adminPage: Page, organization: Organization, webshopName: string): Promise<TableHelper> {
+    const dashboard = new DashboardPage(adminPage);
+    await dashboard.openOrganizationDashboard({ organizationUri: organization.uri });
+    await dashboard.openTab(DashboardTab.Webshops);
+    await adminPage.getByTestId('webshop-menu-item').filter({ hasText: webshopName }).click();
+    await adminPage.getByTestId('open-orders-button').click();
+
+    const table = new TableHelper(adminPage);
+    await table.waitForFirstRow();
+    return table;
 }
 
 /**
@@ -262,6 +281,236 @@ function registerWebshopOrderTests() {
         await page.goto(mollieMocker.getLastPayment().redirectUrl!);
         await flow.expectTicketsDownloadable();
         await flow.expectTicketCount(3);
+    });
+
+    /**
+     * Create a Mollie-paid order of 2 x Product 1, then (as admin) lower the cart to 1 product
+     * and create an online refund for the difference via the order view. Returns the admin page
+     * with the order view still open.
+     */
+    async function createOrderAndRefundDifference(page: Page, browser: Browser, prefix: string) {
+        const organization = await createWebshopOrganization(prefix);
+        organization.privateMeta.mollieOnboarding = MollieOnboarding.create({
+            canReceivePayments: true,
+            canReceiveSettlements: true,
+            status: MollieStatus.Completed,
+        });
+        await organization.save();
+
+        mollieMocker = new MollieMocker();
+        mollieMocker.start();
+        await mollieMocker.setupToken(organization);
+
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `${prefix} shop ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.Bancontact],
+        });
+
+        await mockHostedPaymentPage(page, MOLLIE_CHECKOUT_URL);
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1', { count: 2 });
+        await flow.goToCheckout();
+        await flow.fillCustomer();
+        await flow.selectPaymentMethod(PaymentLabel.Bancontact);
+        await flow.confirmPayment();
+
+        await page.waitForURL(MOLLIE_CHECKOUT_URL);
+        await mollieMocker.succeedPayment();
+        await page.goto(mollieMocker.getLastPayment().redirectUrl!);
+        await flow.expectOrderConfirmed();
+
+        // The admin lowers the order to 1 product
+        const admin = await createAdmin(organization);
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await table.getRow('John').click();
+
+        const orderView = adminPage.getByTestId('order-view');
+        await orderView.locator('button.icon.more').first().click();
+        await adminPage.getByRole('button', { name: 'Wijzig...' }).click();
+
+        const editOrderView = adminPage.getByTestId('edit-order-view');
+        await editOrderView.locator('.cart-item-row button.icon.min').click();
+        await editOrderView.getByTestId('save-button').click();
+        await editOrderView.waitFor({ state: 'detached' });
+
+        // The order is now paid too much: register the refund via the order
+        await adminPage.getByRole('button', { name: 'Betaling / terugbetaling registreren' }).click();
+
+        const refundView = adminPage.getByTestId('edit-payment-view');
+
+        // The view preselects the open (negative) balance, switches the type to a refund
+        // and selects the online refund via the Mollie payment of the order
+        await expect(refundView.getByText('Online terugbetaling (automatisch)').first()).toBeVisible();
+
+        await refundView.getByTestId('save-button').click();
+        await adminPage.getByRole('button', { name: 'Ja, terugbetalen' }).click();
+        await refundView.waitFor({ state: 'detached' });
+
+        return { organization, webshop, adminContext, adminPage, table };
+    }
+
+    test('Bancontact via Mollie: a refund for an edited order shows up in the order immediately', async ({ page, browser }) => {
+        const { adminContext, adminPage } = await createOrderAndRefundDifference(page, browser, 'MolliePendRef');
+
+        // Without reloading, the order lists the pending refund: the backend bumped the
+        // updatedAt of the order, so the local order database of the client refetched it
+        const refundRow = adminPage.getByTestId('order-payment-row').filter({ hasText: 'Terugbetaling' });
+        await expect(refundRow).toBeVisible();
+        await expect(refundRow.locator('.icon.clock')).toBeVisible();
+
+        // The open balance is settled by the pending refund
+        await expect(adminPage.getByRole('button', { name: 'Betaling / terugbetaling registreren' })).toHaveCount(0);
+
+        // The refund payment is registered in the backend, pending until Mollie executes it
+        const sourcePaymentId = mollieMocker!.getLastPayment().internalPaymentId!;
+        const sourcePayment = (await Payment.getByID(sourcePaymentId))!;
+        const refunds = await Payment.select().where('reversingPaymentId', sourcePaymentId).fetch();
+        expect(refunds).toHaveLength(1);
+        expect(refunds[0]).toMatchObject({
+            type: PaymentType.Refund,
+            status: PaymentStatus.Pending,
+            method: PaymentMethod.Bancontact,
+            provider: PaymentProvider.Mollie,
+            price: -(sourcePayment.price / 2),
+        });
+
+        await adminContext.close();
+    });
+
+    test('Bancontact via Mollie: a refund executed by Mollie is visible after reloading the orders', async ({ page, browser }) => {
+        const { organization, webshop, adminContext, adminPage } = await createOrderAndRefundDifference(page, browser, 'MollieSetRef');
+
+        const sourcePaymentId = mollieMocker!.getLastPayment().internalPaymentId!;
+        const refunds = await Payment.select().where('reversingPaymentId', sourcePaymentId).fetch();
+        expect(refunds).toHaveLength(1);
+        expect(refunds[0].status).toBe(PaymentStatus.Pending);
+
+        // Mollie executes the refund and calls the webhook
+        await mollieMocker!.settleRefund();
+
+        const settledRefund = await Payment.getByID(refunds[0].id);
+        expect(settledRefund!.status).toBe(PaymentStatus.Succeeded);
+
+        // Reopen the orders table: the client refetches the (updatedAt-bumped) order from its local
+        // database, so the refund is now shown as succeeded in the order
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await table.getRow('John').click();
+
+        const refundRow = adminPage.getByTestId('order-payment-row').filter({ hasText: 'Terugbetaling' });
+        await expect(refundRow).toBeVisible();
+        await expect(refundRow.locator('.icon.success')).toBeVisible();
+        await expect(refundRow.locator('.icon.clock')).toHaveCount(0);
+
+        await adminContext.close();
+    });
+
+    test('Bancontact via Mollie: admin can refund the payment online', async ({ page, browser }) => {
+        const organization = await createWebshopOrganization('MollieRefund');
+        organization.privateMeta.mollieOnboarding = MollieOnboarding.create({
+            canReceivePayments: true,
+            canReceiveSettlements: true,
+            status: MollieStatus.Completed,
+        });
+        await organization.save();
+
+        mollieMocker = new MollieMocker();
+        mollieMocker.start();
+        await mollieMocker.setupToken(organization);
+
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Mollie refund ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.Bancontact],
+        });
+
+        await mockHostedPaymentPage(page, MOLLIE_CHECKOUT_URL);
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1');
+        await flow.goToCheckout();
+        await flow.fillCustomer();
+        await flow.selectPaymentMethod(PaymentLabel.Bancontact);
+        await flow.confirmPayment();
+
+        await page.waitForURL(MOLLIE_CHECKOUT_URL);
+        await mollieMocker.succeedPayment();
+
+        await page.goto(mollieMocker.getLastPayment().redirectUrl!);
+        await flow.expectOrderConfirmed();
+
+        // The admin refunds the payment online from the order in the dashboard
+        const admin = await createAdmin(organization);
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await table.getRow('John').click();
+
+        // Open the payment of the order and start a refund
+        await adminPage.getByTestId('order-payment-row').click();
+        await adminPage.getByTestId('refund-online-button').click();
+
+        // The edit payment view preselects all items of the payment for a full
+        // refund and defaults to an online refund via the payment provider
+        const refundView = adminPage.getByTestId('edit-payment-view');
+        await refundView.getByTestId('save-button').click();
+        await adminPage.getByRole('button', { name: 'Ja, terugbetalen' }).click();
+        await refundView.waitFor({ state: 'detached' });
+
+        // The refund was created at Mollie for the full payment amount
+        await expect.poll(() => mollieMocker?.refunds.length).toBe(1);
+        expect(mollieMocker!.refunds[0].amount.value).toBe(mollieMocker!.getLastPayment().amount.value);
+
+        // The refund payment was created in the backend, pending until Mollie executes it
+        const sourcePaymentId = mollieMocker.getLastPayment().internalPaymentId!;
+        const sourcePayment = (await Payment.getByID(sourcePaymentId))!;
+        const refunds = await Payment.select().where('reversingPaymentId', sourcePaymentId).fetch();
+        expect(refunds).toHaveLength(1);
+        expect(refunds[0]).toMatchObject({
+            type: PaymentType.Refund,
+            status: PaymentStatus.Pending,
+            method: PaymentMethod.Bancontact,
+            provider: PaymentProvider.Mollie,
+            price: -sourcePayment.price,
+        });
+
+        // The payment view shows the pending refund
+        await expect(adminPage.getByText(/Er is een terugbetaling van/)).toBeVisible();
+
+        // Mollie executes the refund and calls the webhook
+        await mollieMocker.settleRefund();
+
+        const settledRefund = await Payment.getByID(refunds[0].id);
+        expect(settledRefund!.status).toBe(PaymentStatus.Succeeded);
+
+        const updatedSource = await Payment.getByID(sourcePaymentId);
+        expect(updatedSource!.refundedAmount).toBe(-sourcePayment.price);
+        expect(updatedSource!.pendingRefundAmount).toBe(0);
+
+        // After reopening the orders table, the order lists the succeeded refund
+        const reloadedTable = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await reloadedTable.getRow('John').click();
+
+        const refundRow = adminPage.getByTestId('order-payment-row').filter({ hasText: 'Terugbetaling' });
+        await expect(refundRow).toBeVisible();
+        await expect(refundRow.locator('.icon.success')).toBeVisible();
+
+        await adminContext.close();
     });
 
     test('Bancontact via Stripe on a normal shop: paid confirmation, no tickets', async ({ page }) => {

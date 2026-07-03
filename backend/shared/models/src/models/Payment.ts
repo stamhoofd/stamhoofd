@@ -3,7 +3,7 @@ import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, Paym
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { BalanceItem } from './BalanceItem.js';
 import type { BalanceItemPayment } from './BalanceItemPayment.js';
@@ -108,6 +108,13 @@ export class Payment extends QueryableModel {
      */
     @column({ type: 'integer' })
     refundedAmount = 0;
+
+    /**
+     * Total price (negative, like refundedAmount) of refunds that are still pending at the
+     * payment provider. Moves to refundedAmount once the provider confirms the refund.
+     */
+    @column({ type: 'integer' })
+    pendingRefundAmount = 0;
 
     /**
      * The difference between the sum of the balance item payments price and the price of the payment, caused by rounding to 1 cent.
@@ -237,11 +244,19 @@ export class Payment extends QueryableModel {
     }
 
     async updateRefundedAmount() {
-        this.refundedAmount = await Payment.select()
+        const reversals = await Payment.select()
             .where('organizationId', this.organizationId)
             .where('reversingPaymentId', this.id)
-            .where('status', PaymentStatus.Succeeded)
-            .sum(SQL.column('price'));
+            .fetch();
+
+        this.refundedAmount = reversals
+            .filter(p => p.status === PaymentStatus.Succeeded)
+            .reduce((total, p) => total + p.price, 0);
+
+        this.pendingRefundAmount = reversals
+            .filter(p => p.status !== PaymentStatus.Succeeded && p.status !== PaymentStatus.Failed)
+            .reduce((total, p) => total + p.price, 0);
+
         await this.save();
     }
 

@@ -299,6 +299,23 @@ export class BalanceItemService {
         }
     }
 
+    /**
+     * Bump the updatedAt of the orders these balance items belong to. Clients keep a local copy
+     * of all orders (for offline support) and only pull in orders with a newer updatedAt, so this
+     * makes sure changes to the balance items of an order (or their payments) reach the clients.
+     */
+    static async markOrdersUpdated(items: BalanceItem[]) {
+        const orderIds = Formatter.uniqueArray(items.flatMap(item => item.orderId ? [item.orderId] : []));
+
+        for (const orderId of orderIds) {
+            const order = await Order.getByID(orderId);
+            if (order) {
+                order.markUpdated();
+                await order.save();
+            }
+        }
+    }
+
     static async undoPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
         // If order
         if (balanceItem.orderId) {
@@ -327,7 +344,7 @@ export class BalanceItemService {
 
     static async markFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
         // If order
-        if (balanceItem.orderId) {
+        if (balanceItem.orderId && payment.type === PaymentType.Payment) {
             const order = await Order.getByID(balanceItem.orderId);
             if (order) {
                 await order.onPaymentFailed(payment, organization);
@@ -343,7 +360,7 @@ export class BalanceItemService {
 
     static async undoFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
         // If order
-        if (balanceItem.orderId) {
+        if (balanceItem.orderId && payment.type === PaymentType.Payment) {
             const order = await Order.getByID(balanceItem.orderId);
             if (order) {
                 await order.undoPaymentFailed(payment, organization);

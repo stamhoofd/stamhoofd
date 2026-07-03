@@ -1,6 +1,6 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Member, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Group, Organization, PayconiqPayment, Payment, Platform, sendEmailTemplate, UsedRegisterCode } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Group, MolliePayment, Organization, PayconiqPayment, Payment, Platform, sendEmailTemplate, UsedRegisterCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Replacement, VATExcemptReason, Version } from '@stamhoofd/structures';
@@ -71,6 +71,9 @@ export class PaymentService {
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
 
+                    // Make sure clients refetch the orders these balance items belong to
+                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
 
@@ -122,6 +125,9 @@ export class PaymentService {
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
 
+                    // Make sure clients refetch the orders these balance items belong to
+                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
 
@@ -143,8 +149,13 @@ export class PaymentService {
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
 
+                    // Make sure clients refetch the orders these balance items belong to
+                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
+
+                    await this.updateReversedPaymentsFor(payment);
                 });
 
                 if (payment.type === PaymentType.Payment) {
@@ -165,10 +176,55 @@ export class PaymentService {
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
 
+                    // Make sure clients refetch the orders these balance items belong to
+                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
+
+                    await this.updateReversedPaymentsFor(payment);
                 });
             }
+        });
+    }
+
+    /**
+     * Mainly makes sure a change in a payment is reloaded in the webshop orders client cache
+     */
+    static async handlePaymentCreated(payment: Payment, organization: Organization) {
+        await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
+            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
+                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                    unloaded,
+                );
+                await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
+
+                // Make sure clients refetch the orders these balance items belong to
+                await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+
+                // Flush caches so data is up to date in response
+                await BalanceItemService.flushCaches(organization.id);
+
+                await this.updateReversedPaymentsFor(payment);
+            });
+        });
+    }
+
+    /**
+     * Mainly makes sure a change in a payment is reloaded in the webshop orders client cache
+     */
+    static async handlePaymentUpdated(payment: Payment, organization: Organization) {
+        await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
+            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
+                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                    unloaded,
+                );
+
+                // Make sure clients refetch the orders these balance items belong to
+                await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+            });
         });
     }
 
@@ -304,7 +360,25 @@ export class PaymentService {
 
                 const testMode = organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production';
 
-                if (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status === PaymentStatus.Failed)) {
+                if (payment.type === PaymentType.Refund) {
+                    // Refunds have their own status flow at the provider: they are never
+                    // cancelable and can stay pending for days (e.g. bank refunds), so they are
+                    // never manually expired either (that would allow refunding twice).
+                    if ((payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) && payment.provider === PaymentProvider.Mollie) {
+                        try {
+                            const mollieService = await MollieService.create({ sellingOrganization: organization });
+                            if (mollieService) {
+                                const { status } = await mollieService.getRefundStatus(payment);
+                                console.log('Mollie setting refund status to', status);
+                                await this.handlePaymentStatusUpdate(payment, organization, status);
+                            } else {
+                                console.error('Missing Mollie credentials for refund payment', payment.id);
+                            }
+                        } catch (e) {
+                            console.error('Refund check failed Mollie', payment.id, e);
+                        }
+                    }
+                } else if (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status === PaymentStatus.Failed)) {
                     if (payment.provider === PaymentProvider.Stripe) {
                         try {
                             let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment), testMode);
@@ -422,6 +496,10 @@ export class PaymentService {
                             // Update the status
                             await StripeHelper.getStatus(payment, false, testMode);
                         }
+
+                        // Mollie calls the webhook of the original payment when the status of one
+                        // of its refunds changes: update refunds that are still pending locally
+                        await this.checkPendingRefunds(payment, organization);
                     }
                 }
                 return payment;
@@ -735,56 +813,385 @@ export class PaymentService {
             // Creates issues to know what balance item was paid and what was not.
             throw new Error('Cannot register chargeback with different amount than the payment for payment ' + payment.id);
         }
-        const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
-        const items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)));
+
+        const chargeback = await this.createReversalPayment({ payment, type: PaymentType.Chargeback });
+        const organization = await Organization.getByID(chargeback.organizationId!, true);
+
+        try {
+            await this.handlePaymentStatusUpdate(chargeback, organization, PaymentStatus.Succeeded, date);
+        } catch (e) {
+            console.error('Failed to mark chargeback as succeeded', e);
+            await this.deleteReversalPayment(chargeback);
+            throw e;
+        }
+        return chargeback;
+    }
+
+    /**
+     * Register a refund that already exists at the payment provider (e.g. detected via the
+     * mollie-refunds cron because it was created in the provider's own dashboard). The (positive)
+     * amount is allocated automatically across the balance items of the original payment.
+     *
+     * Pass the current status of the refund at the provider: refunds that are still being
+     * processed stay pending locally until the provider reports them as executed.
+     */
+    static async registerRefund(payment: Payment, amount: number, date: Date, status: PaymentStatus.Pending | PaymentStatus.Succeeded = PaymentStatus.Succeeded) {
+        const refund = await this.createReversalPayment({ payment, type: PaymentType.Refund, amount });
+        const organization = await Organization.getByID(refund.organizationId!, true);
+
+        try {
+            await this.handlePaymentStatusUpdate(refund, organization, status, date);
+        } catch (e) {
+            console.error('Failed to register refund', e);
+            // Nothing is linked to the provider yet: safe to delete, the cron will retry later
+            await this.deleteReversalPayment(refund);
+            throw e;
+        }
+        return refund;
+    }
+
+    /**
+     * Check the provider status of refunds of a source payment that are still pending locally,
+     * and update them when the provider reports a final state (refunded or failed). Called when
+     * the source payment is polled (e.g. because the provider called our webhook after a refund
+     * status change) and via the mollie-refunds cron.
+     */
+    static async checkPendingRefunds(payment: Payment, organization: Organization) {
+        if (payment.provider !== PaymentProvider.Mollie) {
+            return;
+        }
+
+        const pendingRefunds = (await Payment.select()
+            .where('reversingPaymentId', payment.id)
+            .fetch())
+            .filter(p => p.type === PaymentType.Refund && (p.status === PaymentStatus.Pending || p.status === PaymentStatus.Created));
+
+        if (pendingRefunds.length === 0) {
+            return;
+        }
+
+        const mollieService = await MollieService.create({ sellingOrganization: organization });
+        if (!mollieService) {
+            console.error('Missing Mollie credentials while checking pending refunds of payment', payment.id);
+            return;
+        }
+
+        for (const refund of pendingRefunds) {
+            try {
+                const { status } = await mollieService.getRefundStatus(refund);
+                await this.handlePaymentStatusUpdate(refund, organization, status);
+            } catch (e) {
+                console.error('Failed to check pending refund', refund.id, e);
+            }
+        }
+    }
+
+    /**
+     * Create a refund via the API of the payment provider of the source payment.
+     * The refunded balance items can differ from the balance items of the source payment.
+     *
+     * Currently only Mollie is supported. Payconiq and Stripe will follow later.
+     */
+    static async createRefund({ organization, sourcePayment, balanceItems, adminUserId, customer }: {
+        organization: Organization;
+        sourcePayment: Payment;
+        /**
+         * The (negative) prices per balance item that will be refunded
+         */
+        balanceItems: Map<BalanceItem, number>;
+        adminUserId?: string | null;
+        customer?: PaymentCustomer | null;
+    }): Promise<Payment> {
+        if (organization.id !== sourcePayment.organizationId) {
+            throw new Error('Unexpected organization for source payment, expected ' + sourcePayment.organizationId + ', received ' + organization.id);
+        }
+
+        if (sourcePayment.provider !== PaymentProvider.Mollie) {
+            throw new SimpleError({
+                code: 'refund_not_supported',
+                message: 'Refunds are only supported for payments via Mollie for now',
+                human: $t('Automatisch terugbetalen is momenteel enkel mogelijk voor online betalingen via Mollie.'),
+            });
+        }
+
+        const refund = await this.createReversalPayment({
+            payment: sourcePayment,
+            type: PaymentType.Refund,
+            balanceItems,
+            adminUserId,
+            customer,
+        });
+
+        let mollieRefund: { mollieRefundId: string; createdAt: Date; status: PaymentStatus };
+
+        try {
+            const mollieService = await MollieService.create({ sellingOrganization: organization });
+            if (!mollieService) {
+                throw new SimpleError({
+                    code: 'refund_not_supported',
+                    message: 'Missing Mollie credentials for organization ' + organization.id,
+                    human: $t('De terugbetaling kan niet aangemaakt worden omdat de koppeling met Mollie ontbreekt.'),
+                });
+            }
+
+            mollieRefund = await mollieService.createRefund({
+                payment: sourcePayment,
+                amount: -refund.price,
+                description: organization.name + ' ' + refund.id,
+                metadata: {
+                    refundPaymentId: refund.id,
+                },
+            });
+        } catch (e) {
+            // Mollie refused or never received the refund: it is safe to remove the local payment
+            await this.deleteReversalPayment(refund);
+            throw e;
+        }
+
+        // The refund now exists at Mollie and cannot be undone: never delete the local payment
+        // from this point on. If one of the steps below fails, the refund stays pending locally
+        // and the mollie-refunds cron will reconcile it later (via the link or via the
+        // refundPaymentId metadata on the Mollie refund).
+        const molliePayment = new MolliePayment();
+        molliePayment.paymentId = refund.id;
+        molliePayment.mollieId = mollieRefund.mollieRefundId;
+        await molliePayment.save();
+
+        // Most refunds are not executed immediately by Mollie (queued/pending/processing): only
+        // mark the refund as succeeded once Mollie reports it as refunded. Status changes are
+        // picked up via the payment webhook (pollStatus) and the mollie-refunds cron.
+        await this.handlePaymentStatusUpdate(refund, organization, mollieRefund.status, mollieRefund.createdAt);
+
+        return refund;
+    }
+
+    /**
+     * Create a (not yet succeeded) reversal payment (refund or chargeback) for an existing payment.
+     * When no explicit balance items are provided, the amount is allocated across the balance items
+     * of the original payment (taking into account earlier reversals of that payment).
+     */
+    static async createReversalPayment({ payment, type, amount, balanceItems, adminUserId, customer }: {
+        payment: Payment;
+        type: PaymentType.Refund | PaymentType.Chargeback;
+
+        /**
+         * Positive amount to reverse. Required when no explicit balance items are provided.
+         * Ignored when balanceItems is set (the amount is calculated from the items).
+         */
+        amount?: number;
+
+        /**
+         * Optional explicit (negative) prices per balance item
+         */
+        balanceItems?: Map<BalanceItem, number>;
+        adminUserId?: string | null;
+        customer?: PaymentCustomer | null;
+    }): Promise<Payment> {
+        if (payment.status !== PaymentStatus.Succeeded) {
+            throw new SimpleError({
+                code: 'invalid_payment',
+                message: 'Cannot reverse a payment that did not succeed',
+                human: $t('Je kan enkel een betaling terugbetalen die geslaagd is.'),
+            });
+        }
+
+        if (payment.price <= 0) {
+            throw new SimpleError({
+                code: 'invalid_payment',
+                message: 'Cannot reverse a payment without a positive amount',
+                human: $t('Je kan enkel een betaling met een positief bedrag terugbetalen.'),
+            });
+        }
+
+        // Earlier reversals of this payment (refunds and chargebacks) reduce the remaining
+        // refundable amount. Pending reversals are included to prevent refunding twice.
+        const previousReversals = (await Payment.select()
+            .where('reversingPaymentId', payment.id)
+            .fetch())
+            .filter(p => p.status !== PaymentStatus.Failed);
+
+        // Note: prices of reversals are negative
+        const reversedAmount = previousReversals.reduce((total, p) => total + p.price, 0);
+        const remaining = payment.price + reversedAmount;
+
+        // The (negative) price per balance item id of the reversal we'll create
+        const reversalPrices = new Map<string, number>();
+        let price: number;
+        let roundingAmount: number;
+        let items: BalanceItem[];
+
+        if (balanceItems) {
+            // Note: individual items can have a positive price (e.g. reversing a discount),
+            // only the total of the refund has to be negative
+            let total = 0;
+            for (const [balanceItem, itemPrice] of balanceItems) {
+                if (payment.organizationId !== balanceItem.organizationId) {
+                    throw new Error('Unexpected balance item from other organization');
+                }
+
+                if (itemPrice !== 0) {
+                    reversalPrices.set(balanceItem.id, (reversalPrices.get(balanceItem.id) ?? 0) + itemPrice);
+                }
+                total += itemPrice;
+            }
+
+            if (total >= 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'The total price should be smaller than zero',
+                    human: $t('Het totale bedrag van een terugbetaling moet kleiner zijn dan nul.'),
+                    field: 'price',
+                });
+            }
+
+            ({ price, roundingAmount } = this.round(total));
+            items = [...balanceItems.keys()];
+        } else if (type === PaymentType.Chargeback || (amount === payment.price && previousReversals.length === 0)) {
+            // Reverse the original payment exactly: negate all balance item payments
+            // (chargebacks always reverse the full amount, validated in registerChargeback)
+            const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
+
+            for (const original of balanceItemPayments) {
+                if (original.price !== 0) {
+                    reversalPrices.set(original.balanceItemId, (reversalPrices.get(original.balanceItemId) ?? 0) - original.price);
+                }
+            }
+
+            price = -payment.price;
+            roundingAmount = -payment.roundingAmount;
+            items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)));
+        } else {
+            if (amount === undefined || amount <= 0) {
+                throw new Error('Amount is required to create a reversal payment without explicit balance items');
+            }
+
+            // Partial refund: allocate the amount across the balance items of the original payment,
+            // reduced by what was already reversed on those items
+            const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
+            const previousItems = previousReversals.length > 0
+                ? await BalanceItemPayment.select().where('paymentId', previousReversals.map(p => p.id)).fetch()
+                : [];
+
+            const available = new Map<string, number>();
+            for (const original of balanceItemPayments) {
+                available.set(original.balanceItemId, (available.get(original.balanceItemId) ?? 0) + original.price);
+            }
+            for (const reversed of previousItems) {
+                if (available.has(reversed.balanceItemId)) {
+                    // Prices of reversals are negative
+                    available.set(reversed.balanceItemId, available.get(reversed.balanceItemId)! + reversed.price);
+                }
+            }
+
+            let remainingToAllocate = amount;
+            for (const [balanceItemId, availableAmount] of available) {
+                if (remainingToAllocate <= 0) {
+                    break;
+                }
+                if (availableAmount <= 0) {
+                    continue;
+                }
+                const allocated = Math.min(availableAmount, remainingToAllocate);
+                reversalPrices.set(balanceItemId, -allocated);
+                remainingToAllocate -= allocated;
+            }
+
+            // A small remainder can occur because the original payment was rounded to 1 cent
+            if (remainingToAllocate >= 100 || remainingToAllocate <= -100) {
+                throw new SimpleError({
+                    code: 'refund_allocation_failed',
+                    message: 'Could not allocate the refund amount across the balance items of payment ' + payment.id,
+                    human: $t('Het terug te betalen bedrag kon niet verdeeld worden over de items van de originele betaling.'),
+                });
+            }
+
+            price = -amount;
+            roundingAmount = -remainingToAllocate;
+            items = await BalanceItem.getByIDs(...Formatter.uniqueArray([...reversalPrices.keys()]));
+        }
+
+        if (type === PaymentType.Refund && -price > remaining) {
+            throw new SimpleError({
+                code: 'refund_amount_too_high',
+                message: 'The refund amount is higher than the remaining refundable amount of the payment',
+                human: $t('Het terug te betalen bedrag ({amount}) is hoger dan wat er nog terugbetaald kan worden van deze betaling ({remaining}).', {
+                    amount: Formatter.price(-price),
+                    remaining: Formatter.price(remaining),
+                }),
+            });
+        }
 
         // Done validation
-        const chargeback = new Payment();
+        const reversal = new Payment();
 
         // Who will receive this money?
-        chargeback.organizationId = payment.organizationId!;
+        reversal.organizationId = payment.organizationId!;
 
         // Who paid
-        chargeback.payingUserId = payment.payingUserId;
-        chargeback.payingOrganizationId = payment.payingOrganizationId;
-        chargeback.customer = payment.customer;
+        reversal.payingUserId = payment.payingUserId;
+        reversal.payingOrganizationId = payment.payingOrganizationId;
+        // Prefer the customer (company/VAT details) of the payment that is being reversed, so the
+        // VAT number cannot change between the payment and the refund. Only when the original
+        // payment has no customer, the provided customer is used.
+        reversal.customer = payment.customer ?? customer ?? null;
 
-        chargeback.status = PaymentStatus.Created;
-        chargeback.price = -payment.price;
-        chargeback.roundingAmount = -payment.roundingAmount;
-        chargeback.method = payment.method;
-        chargeback.type = PaymentType.Chargeback;
-        chargeback.mandateId = payment.mandateId; ;
-        chargeback.adminUserId = payment.adminUserId;
+        reversal.status = PaymentStatus.Created;
+        reversal.price = price;
+        reversal.roundingAmount = roundingAmount;
+        reversal.method = payment.method;
+        reversal.type = type;
+        reversal.mandateId = payment.mandateId;
+        reversal.adminUserId = adminUserId !== undefined ? adminUserId : payment.adminUserId;
 
-        chargeback.provider = payment.provider;
-        chargeback.stripeAccountId = payment.stripeAccountId;
-        chargeback.reversingPaymentId = payment.id;
-        await chargeback.save();
+        reversal.provider = payment.provider;
+        reversal.stripeAccountId = payment.stripeAccountId;
+        reversal.reversingPaymentId = payment.id;
+        await reversal.save();
 
-        for (const original of balanceItemPayments) {
+        for (const [balanceItemId, itemPrice] of reversalPrices) {
             // Create one balance item payment to pay it in one payment
             const balanceItemPayment = new BalanceItemPayment();
-            balanceItemPayment.balanceItemId = original.balanceItemId;
-            balanceItemPayment.paymentId = chargeback.id;
-            balanceItemPayment.organizationId = chargeback.organizationId;
-            balanceItemPayment.price = -original.price;
+            balanceItemPayment.balanceItemId = balanceItemId;
+            balanceItemPayment.paymentId = reversal.id;
+            balanceItemPayment.organizationId = reversal.organizationId;
+            balanceItemPayment.price = itemPrice;
             await balanceItemPayment.save();
         }
 
         // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
         await BalanceItemService.updatePaidAndPending(items);
 
-        const organization = await Organization.getByID(chargeback.organizationId, true);
+        // Make sure clients refetch the orders these balance items belong to
+        await BalanceItemService.markOrdersUpdated(items);
 
+        // The reversal is pending: update the pending refund amount of the reversed payment
+        await this.updateReversedPaymentsFor(reversal);
+
+        return reversal;
+    }
+
+    /**
+     * Delete a reversal payment that could not be completed (e.g. the payment provider refused the refund)
+     */
+    static async deleteReversalPayment(reversal: Payment) {
         try {
-            await this.handlePaymentStatusUpdate(chargeback, organization, PaymentStatus.Succeeded, date);
+            const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', reversal.id).fetch();
+            for (const balanceItemPayment of balanceItemPayments) {
+                await balanceItemPayment.delete();
+            }
+            await reversal.delete();
+
+            const items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)));
+            await BalanceItemService.updatePaidAndPending(items);
+
+            // Make sure clients refetch the orders these balance items belong to
+            await BalanceItemService.markOrdersUpdated(items);
+
+            // Update the (pending) refund amount of the reversed payment
+            await this.updateReversedPaymentsFor(reversal);
         } catch (e) {
-            console.error('Failed to mark chargeback as succeeded', e);
-            await chargeback.delete();
-            throw e;
+            console.error('Failed to clean up reversal payment ' + reversal.id, e);
         }
-        return chargeback;
     }
 
     static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration, adminUserId }: {

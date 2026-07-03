@@ -3,6 +3,7 @@ import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/s
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
@@ -58,6 +59,13 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     human: $t(`%Em`),
                     field: 'balanceItemPayments',
                 });
+            }
+
+            // A put with a reversingPaymentId creates a refund via the API of the payment
+            // provider of that payment (instead of registering a manual payment)
+            if (put.reversingPaymentId !== null) {
+                changedPayments.push(await this.createOnlineRefund(organization, user, put));
+                continue;
             }
 
             if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(put.method)) {
@@ -227,16 +235,9 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Mark paid or failed
             if (put.status !== PaymentStatus.Created && put.status !== PaymentStatus.Pending) {
-                await PaymentService.handlePaymentStatusUpdate(payment, organization, put.status);
-
-                if (put.status === PaymentStatus.Succeeded) {
-                    payment.paidAt = put.paidAt;
-                    await payment.save();
-                }
+                await PaymentService.handlePaymentStatusUpdate(payment, organization, put.status, put.status === PaymentStatus.Succeeded ? (put.paidAt ?? undefined) : undefined);
             } else {
-                for (const balanceItem of balanceItems) {
-                    await BalanceItemService.markUpdated(balanceItem, payment, organization);
-                }
+                await PaymentService.handlePaymentCreated(payment, organization);
             }
 
             changedPayments.push(payment);
@@ -344,6 +345,8 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 if (patch.status && patch.status !== payment.status) {
                     await PaymentService.handlePaymentStatusUpdate(payment, organization, patch.status);
+                } else {
+                    await PaymentService.handlePaymentUpdated(payment, organization);
                 }
 
                 changedPayments.push(
@@ -358,5 +361,65 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         return new Response(
             await AuthenticatedStructures.paymentsGeneral(changedPayments, true),
         );
+    }
+
+    /**
+     * Create a refund via the API of the payment provider (currently only Mollie).
+     *
+     * The put contains the new (negative) payment to create, with `reversingPaymentId` set to the
+     * existing online payment that will be (partially) refunded via the payment provider. The
+     * balance items of the new payment can differ from the balance items of the source payment.
+     */
+    private async createOnlineRefund(organization: Organization, user: User, put: PaymentGeneral): Promise<Payment> {
+        if (put.type !== PaymentType.Refund) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Only payments of type Refund can reverse another payment',
+                human: $t('Enkel terugbetalingen kunnen gekoppeld worden aan een bestaande betaling.'),
+                field: 'type',
+            });
+        }
+
+        const sourcePayment = await Payment.getByID(put.reversingPaymentId!);
+        if (!sourcePayment || sourcePayment.organizationId !== organization.id || !(await Context.auth.canAccessPayment(sourcePayment, PermissionLevel.Write))) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Payment not found',
+                human: $t('De terug te betalen betaling werd niet gevonden.'),
+                field: 'reversingPaymentId',
+            });
+        }
+
+        if (sourcePayment.type !== PaymentType.Payment) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Can only refund payments of type Payment',
+                human: $t('Je kan enkel een gewone betaling terugbetalen.'),
+                field: 'reversingPaymentId',
+            });
+        }
+
+        const balanceItems = new Map<BalanceItem, number>();
+
+        for (const item of put.balanceItemPayments) {
+            const balanceItem = await BalanceItem.getByID(item.balanceItem.id);
+            if (!balanceItem || balanceItem.organizationId !== organization.id) {
+                throw Context.auth.notFoundOrNoAccess($t('Eén van de items werd niet gevonden.'));
+            }
+            balanceItems.set(balanceItem, (balanceItems.get(balanceItem) ?? 0) + item.price);
+        }
+
+        // Check permissions
+        if (!(await Context.auth.canAccessBalanceItems([...balanceItems.keys()], PermissionLevel.Write))) {
+            throw Context.auth.error($t('Je hebt geen toegang om deze items terug te betalen.'));
+        }
+
+        return await PaymentService.createRefund({
+            organization,
+            sourcePayment,
+            balanceItems,
+            adminUserId: user.id,
+            customer: put.customer,
+        });
     }
 }

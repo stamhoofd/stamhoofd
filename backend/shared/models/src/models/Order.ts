@@ -206,7 +206,7 @@ export class Order extends QueryableModel {
     }
 
     async undoPaymentFailed(this: Order, _payment: Payment | null, _organization: Organization) {
-        if (this.status !== OrderStatus.Deleted && this.status !== OrderStatus.Canceled) {
+        if (this.status !== OrderStatus.Deleted) {
             this.markUpdated();
             await this.save();
 

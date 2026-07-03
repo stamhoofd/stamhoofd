@@ -37,8 +37,16 @@
             </p>
         </template>
 
-        <p v-if="item instanceof BalanceItem" class="style-description-small">
+        <p v-if="item instanceof BalanceItem && !item.startDate" class="style-description-small">
             {{ formatDate(item.createdAt) }}
+        </p>
+
+        <p v-else-if="item instanceof BalanceItem && item.startDate && item.endDate" class="style-description-small">
+            {{ formatDateRange(item.startDate, item.endDate) }}
+        </p>
+
+        <p v-else-if="item instanceof BalanceItem && item.startDate" class="style-description-small">
+            {{ formatStartDate(item.startDate) }}
         </p>
     </template>
 </template>

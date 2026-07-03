@@ -77,6 +77,21 @@ export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 393 })
     payingUserId: string | null = null;
 
+    /**
+     * Link to the payment that is being reversed by this payment.
+     * Used for refunds and chargebacks. When creating a refund, this references
+     * the online payment that will be (partially) refunded via the payment provider.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    reversingPaymentId: string | null = null;
+
+    /**
+     * Total price (negative, like refundedAmount) of refunds that are still pending at the
+     * payment provider. Moves to refundedAmount once the provider confirms the refund.
+     */
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    pendingRefundAmount = 0;
+
     get isPending() {
         return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed;
     }

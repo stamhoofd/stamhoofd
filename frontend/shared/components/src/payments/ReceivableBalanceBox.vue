@@ -184,13 +184,12 @@ import InvoiceRow from '#payments/components/InvoiceRow.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 
 import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { BaseOrganization, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
-import { AccessRight, BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
@@ -235,6 +234,14 @@ const invoicesEnabled = computed(() => app === 'dashboard' && (organization.valu
 
 const invoiceablePayments = computed(() => {
     return detailedItem.value?.payments.filter(p => !p.invoiceId && !p.isFailed && p.price !== 0) ?? [];
+});
+
+// Online payments that can still be (partially) refunded via the payment provider (only Mollie for now),
+// most recent first (note: refundedAmount and pendingRefundAmount are negative)
+const refundableOnlinePayments = computed(() => {
+    return detailedItem.value?.payments
+        .filter(p => p.provider === PaymentProvider.Mollie && p.type === PaymentType.Payment && p.isSucceeded && p.price + p.refundedAmount + p.pendingRefundAmount > 0)
+        .sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt)) ?? [];
 });
 
 // Load detailed item
@@ -325,16 +332,8 @@ async function createPayment(type: PaymentType) {
         balanceItems: computed(() => detailedItem.value?.filteredBalanceItems ?? []),
         family: props.member?.family ?? null,
         isNew: true,
-        saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
-            const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-            arr.addPut(payment.patch(patch));
-            await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/organization/payments',
-                body: arr,
-                decoder: new ArrayDecoder(PaymentGeneral),
-                shouldRetry: false,
-            });
+        refundablePayments: refundableOnlinePayments.value,
+        saveHandler: async () => {
             await reload();
             // Also reload member outstanding amount of the whole family
             await reloadFamily();

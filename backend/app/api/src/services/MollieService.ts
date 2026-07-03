@@ -1,5 +1,5 @@
 import type { Mandate, Payment as MolliePaymentType } from '@mollie/api-client';
-import { ApiMode, createMollieClient, MandateMethod, MandateStatus, PaymentMethod as molliePaymentMethod, PaymentStatus as molliePaymentStatus, OnboardingStatus, ProfileStatus, SequenceType } from '@mollie/api-client';
+import { ApiMode, createMollieClient, MandateMethod, MandateStatus, MollieApiError, PaymentMethod as molliePaymentMethod, PaymentStatus as molliePaymentStatus, OnboardingStatus, ProfileStatus, RefundStatus, SequenceType } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Payment, User } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
@@ -513,6 +513,83 @@ export class MollieService {
         };
     }
 
+    /**
+     * Create a refund at Mollie for a payment that was paid via Mollie.
+     * The amount is a (positive) price in the internal format (per ten thousand).
+     * Provider errors (e.g. amount higher than the refundable remainder, insufficient balance)
+     * are converted to SimpleErrors that can be shown to the user.
+     */
+    /**
+     * Map a Mollie refund status to a payment status. A refund only succeeds once Mollie
+     * reports it as refunded: before that it can still fail or be canceled.
+     */
+    static refundStatusToPaymentStatus(status: RefundStatus): PaymentStatus {
+        switch (status) {
+            case RefundStatus.refunded:
+                return PaymentStatus.Succeeded;
+            case RefundStatus.failed:
+            case RefundStatus.canceled:
+                return PaymentStatus.Failed;
+            default:
+                // queued, pending, processing
+                return PaymentStatus.Pending;
+        }
+    }
+
+    async createRefund({ payment, amount, description, metadata }: {
+        payment: Payment;
+        amount: number;
+        description: string;
+        metadata?: { [key: string]: string | undefined };
+    }): Promise<{ mollieRefundId: string; createdAt: Date; status: PaymentStatus }> {
+        const molliePayment = await MolliePayment.select().where('paymentId', payment.id).first(false);
+        if (!molliePayment) {
+            throw new SimpleError({
+                code: 'refund_not_supported',
+                message: 'Mollie payment not found for payment ' + payment.id,
+                human: $t('Deze betaling kan niet terugbetaald worden omdat de bijhorende Mollie-betaling niet gevonden werd.'),
+            });
+        }
+
+        const data: Parameters<typeof this.client.paymentRefunds.create>[0] = {
+            paymentId: molliePayment.mollieId,
+            amount: {
+                currency: 'EUR',
+                value: (Math.round(amount / 100) / 100).toFixed(2),
+            },
+            description,
+            metadata,
+            testmode: this.testMode,
+        };
+
+        console.log('Creating Mollie refund', data);
+
+        try {
+            const refund = await this.client.paymentRefunds.create(data);
+            console.log('Mollie refund response', refund);
+
+            return {
+                mollieRefundId: refund.id,
+                createdAt: new Date(refund.createdAt),
+                status: MollieService.refundStatusToPaymentStatus(refund.status),
+            };
+        } catch (e) {
+            console.error('Failed to create Mollie refund for payment ' + payment.id, e);
+
+            if (e instanceof MollieApiError) {
+                // E.g. the amount is higher than the remaining refundable amount, the payment
+                // was already (fully) refunded, or there is not enough balance available
+                throw new SimpleError({
+                    code: 'refund_failed',
+                    message: 'Mollie refused to create the refund: ' + e.message,
+                    human: $t('De terugbetaling werd geweigerd door Mollie: {message}', { message: e.message }),
+                    statusCode: 400,
+                });
+            }
+            throw e;
+        }
+    }
+
     async getStatus(payment: Payment, cancel = false) {
         const molliePayment = await MolliePayment.select().where('paymentId', payment.id).first(false);
         if (!molliePayment) {
@@ -526,5 +603,35 @@ export class MollieService {
         console.log(mollieData);
 
         return this.getStatusFor(mollieData, payment, cancel);
+    }
+
+    /**
+     * Get the status of a refund payment (type Refund). The linked MolliePayment row contains the
+     * Mollie refund id (re_...), while the source payment's row contains the Mollie payment id
+     * (tr_...) that is needed to address the refund in the Mollie API.
+     */
+    async getRefundStatus(refundPayment: Payment): Promise<{ status: PaymentStatus }> {
+        const mollieRefund = await MolliePayment.select().where('paymentId', refundPayment.id).first(false);
+        if (!mollieRefund) {
+            throw new Error('Mollie refund not found for payment ' + refundPayment.id);
+        }
+
+        if (!refundPayment.reversingPaymentId) {
+            throw new Error('Refund payment ' + refundPayment.id + ' is missing a reversing payment id');
+        }
+
+        const sourceMolliePayment = await MolliePayment.select().where('paymentId', refundPayment.reversingPaymentId).first(false);
+        if (!sourceMolliePayment) {
+            throw new Error('Mollie payment not found for source payment ' + refundPayment.reversingPaymentId);
+        }
+
+        const refund = await this.client.paymentRefunds.get(mollieRefund.mollieId, {
+            paymentId: sourceMolliePayment.mollieId,
+            testmode: this.testMode,
+        });
+
+        return {
+            status: MollieService.refundStatusToPaymentStatus(refund.status),
+        };
     }
 }

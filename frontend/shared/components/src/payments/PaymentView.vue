@@ -34,13 +34,21 @@
                     {{ $t('%hE') }}
                 </p>
 
-                <p v-if="payment.isPending && payment.type == PaymentType.Refund" class="warning-box">
+                <p v-if="payment.isPending && payment.type == PaymentType.Refund && !payment.provider" class="warning-box">
                     {{ $t("%hV") }}
+                </p>
+
+                <p v-if="payment.isPending && payment.type == PaymentType.Refund && payment.provider" class="info-box">
+                    {{ $t('De terugbetaling is in verwerking bij de betaalprovider. Het kan tot enkele werkdagen duren voor de terugbetaling wordt uitgevoerd.') }}
                 </p>
             </template>
 
             <p v-if="payment.refundedAmount" class="warning-box">
                 {{ $t('%1Ug', {price: formatPrice(payment.refundedAmount)}) }}
+            </p>
+
+            <p v-if="payment.pendingRefundAmount" class="warning-box">
+                {{ $t('Er is een terugbetaling van {price} voor deze betaling in verwerking bij de betaalprovider.', {price: formatPrice(-payment.pendingRefundAmount)}) }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -288,10 +296,30 @@
                 </STListItem>
             </STList>
 
-            <template v-if="(isManualMethod || organization?.meta.invoicesEnabled) && canWrite">
+            <template v-if="(isManualMethod || organization?.meta.invoicesEnabled || canRefundOnline) && canWrite">
                 <hr><h2>{{ $t('%16X') }}</h2>
 
                 <STList>
+                    <STListItem v-if="canRefundOnline" :selectable="true" class="theme-error" data-testid="refund-online-button" @click="refundOnline">
+                        <template #left>
+                            <IconContainer icon="card" class="error">
+                                <template #aside>
+                                    <span class="icon undo small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
+                        <h2 class="style-title-list">
+                            {{ $t('Terugbetalen') }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ $t('Betaal deze betaling volledig of gedeeltelijk terug via de betaalprovider.') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
                         <template #left>
                             <IconContainer icon="bank" class="primary">
@@ -433,9 +461,10 @@ import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { Company, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
+import type { BalanceItem } from '@stamhoofd/structures';
+import { BalanceItemPaymentDetailed, Company, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -466,6 +495,16 @@ const isManualMethod = computed(() => props.payment.method === PaymentMethod.Tra
 const auth = useAuth();
 const app = useAppContext();
 const canWrite = computed(() => app === 'dashboard' && auth.canAccessPayment(props.payment, PermissionLevel.Write));
+
+// Refunding via the payment provider is only possible for Mollie payments (for now)
+// (note: refundedAmount and pendingRefundAmount are negative)
+const canRefundOnline = computed(() => {
+    return props.payment.provider === PaymentProvider.Mollie
+        && props.payment.isSucceeded
+        && props.payment.type === PaymentType.Payment
+        && props.payment.price + props.payment.refundedAmount + props.payment.pendingRefundAmount > 0
+        && props.payment.organizationId === organization.value?.id;
+});
 const VATPercentage = 21; // todo
 const context = useContext();
 const owner = useRequestOwner();
@@ -498,24 +537,6 @@ async function editPayment() {
                 payment: props.payment,
                 isNew: false,
                 balanceItems: [],
-                saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
-                    const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-                    arr.addPatch(patch);
-                    const response = await context.value.authenticatedServer.request({
-                        method: 'PATCH',
-                        path: '/organization/payments',
-                        body: arr,
-                        decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
-                        shouldRetry: false,
-                    });
-
-                    const updatedPayment = response.data.find(p => p.id === props.payment.id);
-                    if (updatedPayment) {
-                        props.payment.deepSet(updatedPayment);
-                    } else {
-                        await reload();
-                    }
-                },
             }),
         ],
         modalDisplayStyle: 'popup',
@@ -578,6 +599,52 @@ async function mark(status: PaymentStatus) {
         Toast.fromError(e).show();
     }
     markingPaid.value = false;
+}
+
+async function refundOnline() {
+    await reload();
+
+    // Default: fully reverse the items of this payment (the user can deselect or lower amounts)
+    const fullPrices = new Map<string, number>();
+    for (const item of props.payment.balanceItemPayments) {
+        fullPrices.set(item.balanceItem.id, (fullPrices.get(item.balanceItem.id) ?? 0) - item.price);
+    }
+    const balanceItems = [...new Map(props.payment.balanceItemPayments.map(p => [p.balanceItem.id, p.balanceItem])).values()];
+
+    const refund = PaymentGeneral.create({
+        type: PaymentType.Refund,
+        // Refund online via this payment by default (the user can still switch to
+        // e.g. a manual transfer in the view)
+        reversingPaymentId: props.payment.id,
+        method: props.payment.method,
+        status: PaymentStatus.Succeeded,
+        paidAt: new Date(),
+        customer: props.payment.customer,
+        payingOrganization: props.payment.payingOrganization,
+        payingOrganizationId: props.payment.payingOrganizationId,
+        payingUserId: props.payment.payingUserId,
+        balanceItemPayments: balanceItems.map(balanceItem => BalanceItemPaymentDetailed.create({
+            balanceItem,
+            price: fullPrices.get(balanceItem.id) ?? 0,
+        })),
+    });
+
+    await present({
+        components: [
+            AsyncComponent(() => import('./EditPaymentView.vue'), {
+                payment: refund,
+                isNew: true,
+                balanceItems,
+                getFullPrice: (item: BalanceItem) => fullPrices.get(item.id) ?? 0,
+                refundablePayments: [props.payment],
+                saveHandler: async () => {
+                    // Reload the refunded payment (refundedAmount changed)
+                    await reload();
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function viewAudit() {

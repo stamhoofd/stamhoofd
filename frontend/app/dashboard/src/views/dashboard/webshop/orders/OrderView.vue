@@ -63,7 +63,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-for="(payment, index) in order.payments" :key="payment.id" v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" class="right-description" @click="openPayment(payment)" @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null">
+                <STListItem v-for="(payment, index) in order.payments" :key="payment.id" v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" data-testid="order-payment-row" :selectable="hasPaymentsWrite" class="right-description" @click="openPayment(payment)" @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null">
                     <h3 class="style-definition-label">
                         {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
@@ -292,21 +292,18 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useArrowUpDown } from '@stamhoofd/components/hooks/useArrowUpDown.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-
 
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -314,16 +311,14 @@ import type { TableActionSelection } from '@stamhoofd/components/tables/classes/
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { AccessRight, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { ComputedRef } from 'vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
-
 
 const props = withDefaults(defineProps<{
     initialOrder: PrivateOrderWithTickets;
@@ -337,7 +332,6 @@ const props = withDefaults(defineProps<{
 
 const present = usePresent();
 const pop = usePop();
-const context = useContext();
 const organizationManager = useOrganizationManager();
 const show = useShow();
 
@@ -573,9 +567,10 @@ function created() {
         recheckTickets();
     }
 
-    // Listen for patches in payments
+    // Listen for patches in payments (a new refund is not in order.payments yet, but its
+    // reversingPaymentId references the payment of the order that is being refunded)
     GlobalEventBus.addListener(owner, 'paymentPatch', async (payment) => {
-        if (payment && payment.id && order.value.payments.find(p => p.id === payment.id as string)) {
+        if (payment && payment.id && order.value.payments.find(p => p.id === payment.id as string || p.id === payment.reversingPaymentId as string)) {
             // Reload tickets and order
             await downloadNewOrders();
             downloadNewTickets();
@@ -671,8 +666,7 @@ function downloadNewTickets() {
         if (tickets.value.length === 0) {
             if (Request.isNetworkError(e)) {
                 new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.', 'error red').show();
-            }
-            else {
+            } else {
                 Toast.fromError(e).show();
                 new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt', 'error red').show();
             }
@@ -695,10 +689,13 @@ const recordAnswers = computed(() => order.value.data.recordAnswers);
 
 function createPayment() {
     const payment = PaymentGeneral.create({
-        method: PaymentMethod.PointOfSale,
+        method: PaymentMethod.Unknown,
         status: PaymentStatus.Succeeded,
         paidAt: new Date(),
     });
+
+    // Online payments of this order that can still be (partially) refunded via the payment provider
+    const refundablePayments = order.value.payments.filter(p => p.provider === PaymentProvider.Mollie && p.type === PaymentType.Payment && p.isSucceeded && p.price + p.refundedAmount + p.pendingRefundAmount > 0);
 
     const component = AsyncComponent(() => import('@stamhoofd/components/payments/EditPaymentView.vue'), {
         payment,
@@ -707,17 +704,8 @@ function createPayment() {
             order.value.data.customer.toPaymentCustomer(),
         ],
         isNew: true,
-        saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
-            const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-            arr.addPut(payment.patch(patch));
-            await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/organization/payments',
-                body: arr,
-                decoder: new ArrayDecoder(PaymentGeneral),
-                shouldRetry: false,
-            });
-
+        refundablePayments,
+        saveHandler: async () => {
             // Update order
             await downloadNewOrders();
         },

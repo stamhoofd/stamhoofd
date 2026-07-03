@@ -69,7 +69,7 @@ export async function migrate(context: CliContext): Promise<void> {
 export async function testUnit(context: CliContext, ci: boolean): Promise<void> {
     const dbPort = await startTestMysql(context);
     try {
-        await run('yarn', ['-s', 'lerna', 'run', 'test', '--ignore', '@stamhoofd/playwright', '--ignore', '@stamhoofd/dashboard'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+        await run('yarn', ['-s', 'lerna', 'run', 'test', '--ignore', '@stamhoofd/playwright', '--ignore', '@stamhoofd/dashboard', '--ignore', '@stamhoofd/cli'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
     }
     finally {
         await docker.removeContainer(testMysqlContainer, context.verbose);
