@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import type { SQLExpression, SQLExpressionOptions, SQLQuery} from './SQLExpression.js';
+import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import type { SQLJoin } from './SQLJoin.js';
 import { SQLLogger } from './SQLLogger.js';
@@ -7,7 +7,7 @@ import { Whereable } from './SQLWhere.js';
 
 class EmptyClass {}
 export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
-    _from: SQLExpression;
+    _from: SQLNamedExpression;
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
 
     clone(): this {
@@ -16,7 +16,7 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
         return c as any;
     }
 
-    from(table: SQLExpression): this {
+    from(table: SQLNamedExpression): this {
         this._from = table;
         return this;
     }
@@ -32,7 +32,13 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
         ];
 
         options = options ?? {};
-        options.defaultNamespace = (this._from as any).namespace ?? (this._from as any).table ?? undefined;
+        options.defaultNamespace = this._from.getName();
+
+        if (this._joins.length > 0) {
+            // Multi-table delete (DELETE <target> FROM <table> JOIN ...): MySQL requires us to
+            // name the table we delete rows from. We only delete from the main FROM table.
+            query.push(Database.escapeId(this._from.getName()));
+        }
 
         query.push(
             'FROM',
