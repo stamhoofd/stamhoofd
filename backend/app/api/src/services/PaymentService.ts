@@ -910,7 +910,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'refund_not_supported',
                 message: 'Refunds are only supported for payments via Mollie for now',
-                human: $t('Automatisch terugbetalen is momenteel enkel mogelijk voor online betalingen via Mollie.'),
+                human: $t('%ZaK'),
             });
         }
 
@@ -930,7 +930,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'refund_not_supported',
                     message: 'Missing Mollie credentials for organization ' + organization.id,
-                    human: $t('De terugbetaling kan niet aangemaakt worden omdat de koppeling met Mollie ontbreekt.'),
+                    human: $t('%Zag'),
                 });
             }
 
@@ -991,7 +991,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'invalid_payment',
                 message: 'Cannot reverse a payment that did not succeed',
-                human: $t('Je kan enkel een betaling terugbetalen die geslaagd is.'),
+                human: $t('%ZZz'),
             });
         }
 
@@ -999,7 +999,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'invalid_payment',
                 message: 'Cannot reverse a payment without a positive amount',
-                human: $t('Je kan enkel een betaling met een positief bedrag terugbetalen.'),
+                human: $t('%ZaU'),
             });
         }
 
@@ -1039,7 +1039,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'The total price should be smaller than zero',
-                    human: $t('Het totale bedrag van een terugbetaling moet kleiner zijn dan nul.'),
+                    human: $t('%Zae'),
                     field: 'price',
                 });
             }
@@ -1101,7 +1101,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'refund_allocation_failed',
                     message: 'Could not allocate the refund amount across the balance items of payment ' + payment.id,
-                    human: $t('Het terug te betalen bedrag kon niet verdeeld worden over de items van de originele betaling.'),
+                    human: $t('%Za5'),
                 });
             }
 
@@ -1114,7 +1114,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'refund_amount_too_high',
                 message: 'The refund amount is higher than the remaining refundable amount of the payment',
-                human: $t('Het terug te betalen bedrag ({amount}) is hoger dan wat er nog terugbetaald kan worden van deze betaling ({remaining}).', {
+                human: $t('%ZaP', {
                     amount: Formatter.price(-price),
                     remaining: Formatter.price(remaining),
                 }),

@@ -547,7 +547,7 @@ export class MollieService {
             throw new SimpleError({
                 code: 'refund_not_supported',
                 message: 'Mollie payment not found for payment ' + payment.id,
-                human: $t('Deze betaling kan niet terugbetaald worden omdat de bijhorende Mollie-betaling niet gevonden werd.'),
+                human: $t('%Za1'),
             });
         }
 
@@ -582,7 +582,7 @@ export class MollieService {
                 throw new SimpleError({
                     code: 'refund_failed',
                     message: 'Mollie refused to create the refund: ' + e.message,
-                    human: $t('De terugbetaling werd geweigerd door Mollie: {message}', { message: e.message }),
+                    human: $t('%ZZx', { message: e.message }),
                     statusCode: 400,
                 });
             }

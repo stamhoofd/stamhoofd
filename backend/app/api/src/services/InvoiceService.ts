@@ -65,7 +65,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'invalid_customer',
                 message: 'Cannot self invoice',
-                human: $t('Kan geen facturen aan zichzelf opmaken'),
+                human: $t('%ZaI'),
                 statusCode: 400,
             });
         }

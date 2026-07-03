@@ -1,12 +1,12 @@
 <template>
-    <SaveView :title="title" :disabled="selectedPayments.length === 0" :save-text="$t('Doorgaan')" save-icon-right="arrow-right" @save="goNext">
+    <SaveView :title="title" :disabled="selectedPayments.length === 0" :save-text="$t('%16p')" save-icon-right="arrow-right" @save="goNext">
         <h1>{{ title }}</h1>
-        <p>{{ $t('Selecteer de betalingen die je wil factureren. Er wordt één factuur aangemaakt voor alle geselecteerde betalingen samen.') }}</p>
+        <p>{{ $t('%ZaT') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="hasDifferentCustomers" class="warning-box">
-            {{ $t('De geselecteerde betalingen hebben verschillende facturatiegegevens. Kijk de gegevens in de volgende stap goed na: standaard worden de facturatiegegevens van de meest recente betaling gebruikt.') }}
+            {{ $t('%ZaZ') }}
         </p>
 
         <STList>
@@ -75,7 +75,7 @@ const props = withDefaults(
     },
 );
 
-const title = $t('Factuur opmaken');
+const title = $t('%1K2');
 const errors = useErrors();
 const organization = useRequiredOrganization();
 const show = useShow();
@@ -121,7 +121,7 @@ const hasDifferentCustomers = computed(() => {
 const priceBreakdown = computed(() => {
     return [
         {
-            name: $t('Totaal te factureren'),
+            name: $t('%ZaS'),
             price: selectedPayments.value.reduce((sum, p) => sum + p.price, 0),
         },
     ];

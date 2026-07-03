@@ -82,10 +82,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Ontgrendelen') }}
+                        {{ $t('%Zak') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t("Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd.") }}
+                        {{ $t("%Zaf") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -505,9 +505,9 @@ const xmlExportDescription = computed(() => props.template.privateSettings.templ
 
 async function migrateDocumentTemplateFromV1() {
     if (!await CenteredMessage.confirm({
-        title: $t('Controleer de instellingen'),
-        description: $t('Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document zal de nieuwe layout van documenten gebruikt worden waardoor de documenten er anders uit zullen zien.'),
-        confirmText: $t('Doorgaan'),
+        title: $t('%1Bz'),
+        description: $t('%ZaG'),
+        confirmText: $t('%16p'),
     })) {
         return;
     }

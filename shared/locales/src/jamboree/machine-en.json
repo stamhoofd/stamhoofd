@@ -1531,6 +1531,18 @@
     "original": "Scoutsjaar niet actief",
     "translation": "Scout year not active"
   },
+  "%ZaD": {
+    "original": "Voor deze terugbetaalmethode moet je zelf de terugbetaling uitvoeren naast de registratie in Jamboree.",
+    "translation": "For this refund method, you need to process the refund yourself, aside from the registration in Jamboree."
+  },
+  "%ZaG": {
+    "original": "Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Jamboree. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document zal de nieuwe layout van documenten gebruikt worden waardoor de documenten er anders uit zullen zien.",
+    "translation": "This document was locked because it was created in the old version of Jamboree. In the next step, check the settings for this document and click save. This will unlock the document. After unlocking, the new document layout will be used, which may look different."
+  },
+  "%Zaf": {
+    "original": "Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Jamboree.",
+    "translation": "This document is locked because it was created in the old version of Jamboree."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separately from Jamboree. For Microsoft you can"

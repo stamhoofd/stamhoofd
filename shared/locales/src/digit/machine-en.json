@@ -1303,6 +1303,18 @@
     "original": "Betalende groep",
     "translation": "Paying group"
   },
+  "%ZaD": {
+    "original": "Voor deze terugbetaalmethode moet je zelf de terugbetaling uitvoeren naast de registratie in Ravot.",
+    "translation": "For this refund method, you need to process the refund yourself, aside from the registration in Ravot."
+  },
+  "%ZaG": {
+    "original": "Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Ravot. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document zal de nieuwe layout van documenten gebruikt worden waardoor de documenten er anders uit zullen zien.",
+    "translation": "This document was locked because it was created in the old version of Ravot. In the next step, check the settings for this document and click save. This will unlock the document. After unlocking, the new document layout will be used, which may look different."
+  },
+  "%Zaf": {
+    "original": "Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Ravot.",
+    "translation": "This document is locked because it was created in the old version of Ravot."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators of {organization}. Go to 'My account' if you want to register as a member."

@@ -204,8 +204,8 @@
             </STList>
 
             <template v-if="invoices.length > 0">
-                <hr><h2>{{ $t('Facturen') }}</h2>
-                <p>{{ $t('Deze aanrekening werd (gedeeltelijk) gefactureerd op volgende facturen.') }}</p>
+                <hr><h2>{{ $t('%1JA') }}</h2>
+                <p>{{ $t('%Za7') }}</p>
 
                 <STList>
                     <STListItem v-for="invoice of invoices" :key="invoice.id" :selectable="true" class="right-stack" @click="openInvoice(invoice)">
@@ -216,7 +216,7 @@
                             {{ formatDate(invoice.invoicedAt, true) }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('Concept') }}
+                            {{ $t('%1D2') }}
                         </p>
 
                         <template #right>

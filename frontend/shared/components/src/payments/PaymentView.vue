@@ -39,7 +39,7 @@
                 </p>
 
                 <p v-if="payment.isPending && payment.type == PaymentType.Refund && payment.provider" class="info-box">
-                    {{ $t('De terugbetaling is in verwerking bij de betaalprovider. Het kan tot enkele werkdagen duren voor de terugbetaling wordt uitgevoerd.') }}
+                    {{ $t('%Zaa') }}
                 </p>
             </template>
 
@@ -48,7 +48,7 @@
             </p>
 
             <p v-if="payment.pendingRefundAmount" class="warning-box">
-                {{ $t('Er is een terugbetaling van {price} voor deze betaling in verwerking bij de betaalprovider.', {price: formatPrice(-payment.pendingRefundAmount)}) }}
+                {{ $t('%Zai', {price: formatPrice(-payment.pendingRefundAmount)}) }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -310,10 +310,10 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('Terugbetalen') }}
+                            {{ $t('%ZaM') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Betaal deze betaling volledig of gedeeltelijk terug via de betaalprovider.') }}
+                            {{ $t('%Zaj') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

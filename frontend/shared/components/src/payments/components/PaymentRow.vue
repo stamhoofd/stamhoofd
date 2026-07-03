@@ -32,10 +32,10 @@
             {{ $t('%hs', {price: formatPrice(payment.price)}) }}
         </p>
         <p v-if="showInvoiceStatus && payment.invoiceId" class="style-description-small">
-            {{ $t('Gefactureerd') }}
+            {{ $t('%1JO') }}
         </p>
         <p v-else-if="showInvoiceStatus" class="style-description-small">
-            {{ $t('Nog niet gefactureerd') }}
+            {{ $t('%1JB') }}
         </p>
 
         <template #right>

@@ -1,5 +1,5 @@
 <template>
-    <CategorizedView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" data-testid="edit-payment-view" :loading="saving" :save-text="isOnlineRefund ? $t('Terugbetalen') : undefined" @save="save">
+    <CategorizedView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" data-testid="edit-payment-view" :loading="saving" :save-text="isOnlineRefund ? $t('%ZaM') : undefined" @save="save">
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <CategorizedBox v-if="isNew" icon="box" :title=" $t('%gu')">
@@ -20,7 +20,7 @@
                 {{ $t('%gw') }}
             </p>
             <p v-else-if="onlineRefundAvailable">
-                {{ $t('Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd.') }}
+                {{ $t('%ZaW') }}
             </p>
             <p v-else>
                 {{ $t('%5J') }}
@@ -59,7 +59,7 @@
         <CategorizedBox v-if="isOnlineRefund || availableMethods.includes(method)" :icon="status === 'Succeeded' ? 'success' : 'clock'" :title="$t('%1Ml')">
             <template #summary>
                 <p v-if="isOnlineRefund" class="style-description-small">
-                    {{ $t('Online terugbetaling (automatisch)') }}
+                    {{ $t('%Za4') }}
                 </p>
                 <template v-else>
                     <p class="style-description-small">
@@ -94,7 +94,7 @@
                 <STInputBox v-if="type !== PaymentType.Reallocation" :title="type === PaymentType.Payment ? $t(`%M7`) : $t(`%gz`)" error-fields="method" :error-box="errors.errorBox">
                     <Dropdown v-model="methodOption">
                         <option v-if="onlineRefundAvailable" value="online">
-                            {{ $t('Online terugbetaling (automatisch)') }}
+                            {{ $t('%Za4') }}
                         </option>
                         <option v-for="m in availableMethods" :key="m" :value="m">
                             {{ PaymentMethodHelper.getNameCapitalized(m) }}
@@ -111,21 +111,21 @@
                 </STInputBox>
             </div>
             <p v-if="isOnlineRefund" class="style-description-small">
-                {{ $t('De terugbetaling wordt automatisch uitgevoerd door de betaalprovider. Het bedrag wordt teruggestort naar de rekening of kaart waarmee de oorspronkelijke betaling werd gedaan.') }}
+                {{ $t('%Za3') }}
             </p>
             <p v-if="!isOnlineRefund && type === PaymentType.Refund" class="style-description-small">
-                {{ $t('Voor deze terugbetaalmethode moet je zelf de terugbetaling uitvoeren naast de registratie in Stamhoofd.') }}
+                {{ $t('%ZaD') }}
             </p>
         </CategorizedBox>
 
-        <CategorizedBox v-if="isOnlineRefund" icon="card" :title="$t('Terugbetalen via')">
+        <CategorizedBox v-if="isOnlineRefund" icon="card" :title="$t('%ZaO')">
             <template #summary>
                 <p v-if="selectedSourcePayment" class="style-description-small">
                     {{ selectedSourcePayment.title }}
                 </p>
             </template>
 
-            <p>{{ $t('Kies de online betaling die (gedeeltelijk) wordt terugbetaald.') }}</p>
+            <p>{{ $t('%Za8') }}</p>
 
             <STList>
                 <STListItem v-for="candidate of refundablePayments" :key="candidate.id" element-name="label" :selectable="true">
@@ -137,7 +137,7 @@
                         {{ candidate.title }}
                     </h3>
                     <p v-if="candidate.paidAt" class="style-description-small">
-                        {{ $t('Betaald op {date}', {date: formatDate(candidate.paidAt)}) }}
+                        {{ $t('%hr', {date: formatDate(candidate.paidAt)}) }}
                     </p>
                     <p v-if="candidate.iban" class="style-description-small">
                         {{ Formatter.iban(candidate.iban) }}
@@ -147,11 +147,11 @@
                     </p>
 
                     <p v-if="candidate.settlement" class="style-definition-text">
-                        {{ $t('Uitbetaald op {date}', {name: formatDate(candidate.settlement.settledAt)}) }}
+                        {{ $t('%ZaX', {name: formatDate(candidate.settlement.settledAt)}) }}
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('Nog maximaal {price} terug te betalen', {price: formatPrice(getRemainingAmount(candidate))}) }}
+                        {{ $t('%ZaY', {price: formatPrice(getRemainingAmount(candidate))}) }}
                     </p>
 
                     <template #right>
@@ -196,7 +196,7 @@
 
             <template v-if="isOnlineRefund && selectedSourcePayment?.customer">
                 <p class="info-box">
-                    {{ $t('De facturatiegegevens van de originele betaling worden overgenomen op de terugbetaling. Zo blijft onder andere het BTW-nummer hetzelfde als op de betaling die wordt terugbetaald.') }}
+                    {{ $t('%ZaA') }}
                 </p>
 
                 <STList class="info">
@@ -581,14 +581,14 @@ async function validateOnlineRefund(): Promise<boolean> {
     if (!sourcePayment) {
         throw new SimpleError({
             code: 'missing_field',
-            message: $t('Kies de betaling die je wilt terugbetalen.'),
+            message: $t('%ZaQ'),
         });
     }
 
     if (-total.value > getRemainingAmount(sourcePayment)) {
         throw new SimpleError({
             code: 'refund_amount_too_high',
-            message: $t('Het terug te betalen bedrag ({amount}) is hoger dan wat er nog terugbetaald kan worden via de gekozen betaling ({remaining}). Kies een andere betaling of registreer een manuele terugbetaling.', {
+            message: $t('%ZaH', {
                 amount: Formatter.price(-total.value),
                 remaining: Formatter.price(getRemainingAmount(sourcePayment)),
             }),
@@ -596,12 +596,12 @@ async function validateOnlineRefund(): Promise<boolean> {
     }
 
     return await CenteredMessage.confirm(
-        $t('Ben je zeker dat je {price} wilt terugbetalen via {method}?', {
+        $t('%Zad', {
             price: Formatter.price(-total.value),
             method: PaymentMethodHelper.getName(sourcePayment.method),
         }),
-        $t('Ja, terugbetalen'),
-        $t('Dit kan niet ongedaan gemaakt worden.'),
+        $t('%ZaB'),
+        $t('%Zac'),
     );
 }
 
@@ -688,9 +688,9 @@ async function save() {
 
         if (isOnlineRefund.value) {
             if (props.payment.isPending) {
-                Toast.success($t('De terugbetaling werd aangemaakt en is in verwerking bij de betaalprovider. Het kan tot enkele werkdagen duren voor de terugbetaling wordt uitgevoerd.')).show();
+                Toast.success($t('%ZaC')).show();
             } else {
-                Toast.success($t('De terugbetaling werd aangemaakt.')).show();
+                Toast.success($t('%Za0')).show();
             }
         }
 

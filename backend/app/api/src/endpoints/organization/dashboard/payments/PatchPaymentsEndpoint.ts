@@ -375,7 +375,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Only payments of type Refund can reverse another payment',
-                human: $t('Enkel terugbetalingen kunnen gekoppeld worden aan een bestaande betaling.'),
+                human: $t('%Zab'),
                 field: 'type',
             });
         }
@@ -385,7 +385,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Payment not found',
-                human: $t('De terug te betalen betaling werd niet gevonden.'),
+                human: $t('%ZZy'),
                 field: 'reversingPaymentId',
             });
         }
@@ -394,7 +394,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Can only refund payments of type Payment',
-                human: $t('Je kan enkel een gewone betaling terugbetalen.'),
+                human: $t('%ZaJ'),
                 field: 'reversingPaymentId',
             });
         }
@@ -404,14 +404,14 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const item of put.balanceItemPayments) {
             const balanceItem = await BalanceItem.getByID(item.balanceItem.id);
             if (!balanceItem || balanceItem.organizationId !== organization.id) {
-                throw Context.auth.notFoundOrNoAccess($t('Eén van de items werd niet gevonden.'));
+                throw Context.auth.notFoundOrNoAccess($t('%Za2'));
             }
             balanceItems.set(balanceItem, (balanceItems.get(balanceItem) ?? 0) + item.price);
         }
 
         // Check permissions
         if (!(await Context.auth.canAccessBalanceItems([...balanceItems.keys()], PermissionLevel.Write))) {
-            throw Context.auth.error($t('Je hebt geen toegang om deze items terug te betalen.'));
+            throw Context.auth.error($t('%Za9'));
         }
 
         return await PaymentService.createRefund({

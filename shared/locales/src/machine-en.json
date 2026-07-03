@@ -17175,9 +17175,181 @@
     "original": "Werkjaar niet actief",
     "translation": "Work year not active"
   },
+  "%ZZx": {
+    "original": "De terugbetaling werd geweigerd door Mollie: {message}",
+    "translation": "The refund was declined by Mollie: {message}"
+  },
+  "%ZZy": {
+    "original": "De terug te betalen betaling werd niet gevonden.",
+    "translation": "The payment to be refunded was not found."
+  },
+  "%ZZz": {
+    "original": "Je kan enkel een betaling terugbetalen die geslaagd is.",
+    "translation": "You can only refund a payment that has been completed successfully."
+  },
   "%Za": {
     "original": "Alle emaildomeinnamen zijn toegestaan",
     "translation": "All email domain names are allowed"
+  },
+  "%Za0": {
+    "original": "De terugbetaling werd aangemaakt.",
+    "translation": "The refund has been created."
+  },
+  "%Za1": {
+    "original": "Deze betaling kan niet terugbetaald worden omdat de bijhorende Mollie-betaling niet gevonden werd.",
+    "translation": "This payment cannot be refunded because the related Mollie payment could not be found."
+  },
+  "%Za2": {
+    "original": "Eén van de items werd niet gevonden.",
+    "translation": "One of the items was not found."
+  },
+  "%Za3": {
+    "original": "De terugbetaling wordt automatisch uitgevoerd door de betaalprovider. Het bedrag wordt teruggestort naar de rekening of kaart waarmee de oorspronkelijke betaling werd gedaan.",
+    "translation": "The refund will be processed automatically by the payment provider. The amount will be returned to the account or card used for the original payment."
+  },
+  "%Za4": {
+    "original": "Online terugbetaling (automatisch)",
+    "translation": "Online refund (automatic)"
+  },
+  "%Za5": {
+    "original": "Het terug te betalen bedrag kon niet verdeeld worden over de items van de originele betaling.",
+    "translation": "The refund amount could not be allocated across the items in the original payment."
+  },
+  "%Za6": {
+    "original": "Maak een factuur aan voor één of meerdere betalingen die nog niet werden gefactureerd.",
+    "translation": "Create an invoice for one or more payments that have not yet been invoiced."
+  },
+  "%Za7": {
+    "original": "Deze aanrekening werd (gedeeltelijk) gefactureerd op volgende facturen.",
+    "translation": "This charge was (partially) invoiced on the following invoices."
+  },
+  "%Za8": {
+    "original": "Kies de online betaling die (gedeeltelijk) wordt terugbetaald.",
+    "translation": "Select the online payment to (partially) refund."
+  },
+  "%Za9": {
+    "original": "Je hebt geen toegang om deze items terug te betalen.",
+    "translation": "You do not have access to refund these items."
+  },
+  "%ZaA": {
+    "original": "De facturatiegegevens van de originele betaling worden overgenomen op de terugbetaling. Zo blijft onder andere het BTW-nummer hetzelfde als op de betaling die wordt terugbetaald.",
+    "translation": "The billing data from the original payment will be copied to the refund, so the VAT number and other details will remain the same as on the original payment."
+  },
+  "%ZaB": {
+    "original": "Ja, terugbetalen",
+    "translation": "Yes, refund"
+  },
+  "%ZaC": {
+    "original": "De terugbetaling werd aangemaakt en is in verwerking bij de betaalprovider. Het kan tot enkele werkdagen duren voor de terugbetaling wordt uitgevoerd.",
+    "translation": "The refund has been created and is being processed by the payment provider. It may take a few business days for the refund to be completed."
+  },
+  "%ZaD": {
+    "original": "Voor deze terugbetaalmethode moet je zelf de terugbetaling uitvoeren naast de registratie in Stamhoofd.",
+    "translation": "For this refund method, you need to process the refund yourself, aside from the registration in Stamhoofd."
+  },
+  "%ZaG": {
+    "original": "Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document zal de nieuwe layout van documenten gebruikt worden waardoor de documenten er anders uit zullen zien.",
+    "translation": "This document was locked because it was created in the old version of Stamhoofd. In the next step, check the settings for this document and click save. This will unlock the document. After unlocking, the new document layout will be used, which may look different."
+  },
+  "%ZaH": {
+    "original": "Het terug te betalen bedrag ({amount}) is hoger dan wat er nog terugbetaald kan worden via de gekozen betaling ({remaining}). Kies een andere betaling of registreer een manuele terugbetaling.",
+    "translation": "The refund amount ({amount}) is higher than what can still be refunded via the selected payment ({remaining}). Choose a different payment or register a manual refund."
+  },
+  "%ZaI": {
+    "original": "Kan geen facturen aan zichzelf opmaken",
+    "translation": "Cannot create invoices to oneself"
+  },
+  "%ZaJ": {
+    "original": "Je kan enkel een gewone betaling terugbetalen.",
+    "translation": "You can only refund a standard payment."
+  },
+  "%ZaK": {
+    "original": "Automatisch terugbetalen is momenteel enkel mogelijk voor online betalingen via Mollie.",
+    "translation": "Automatic refunds are currently only possible for online payments via Mollie."
+  },
+  "%ZaM": {
+    "original": "Terugbetalen",
+    "translation": "Refund"
+  },
+  "%ZaO": {
+    "original": "Terugbetalen via",
+    "translation": "Refund via"
+  },
+  "%ZaP": {
+    "original": "Het terug te betalen bedrag ({amount}) is hoger dan wat er nog terugbetaald kan worden van deze betaling ({remaining}).",
+    "translation": "The refund amount ({amount}) is higher than what can still be refunded from this payment ({remaining})."
+  },
+  "%ZaQ": {
+    "original": "Kies de betaling die je wilt terugbetalen.",
+    "translation": "Select the payment you wish to refund."
+  },
+  "%ZaS": {
+    "original": "Totaal te factureren",
+    "translation": "Total to be invoiced"
+  },
+  "%ZaT": {
+    "original": "Selecteer de betalingen die je wil factureren. Er wordt één factuur aangemaakt voor alle geselecteerde betalingen samen.",
+    "translation": "Select the payments you want to invoice. One invoice will be created for all selected payments together."
+  },
+  "%ZaU": {
+    "original": "Je kan enkel een betaling met een positief bedrag terugbetalen.",
+    "translation": "You can only refund a payment with a positive amount."
+  },
+  "%ZaW": {
+    "original": "Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd.",
+    "translation": "Specify below exactly what was refunded (enter a negative amount)."
+  },
+  "%ZaX": {
+    "original": "Uitbetaald op {date}",
+    "translation": "Paid out on {date}"
+  },
+  "%ZaY": {
+    "original": "Nog maximaal {price} terug te betalen",
+    "translation": "A maximum of {price} can still be refunded"
+  },
+  "%ZaZ": {
+    "original": "De geselecteerde betalingen hebben verschillende facturatiegegevens. Kijk de gegevens in de volgende stap goed na: standaard worden de facturatiegegevens van de meest recente betaling gebruikt.",
+    "translation": "The selected payments have different billing data. Please double-check the data in the next step: by default, the billing data from the most recent payment will be used."
+  },
+  "%Zaa": {
+    "original": "De terugbetaling is in verwerking bij de betaalprovider. Het kan tot enkele werkdagen duren voor de terugbetaling wordt uitgevoerd.",
+    "translation": "The refund is being processed by the payment provider. It may take a few business days for the refund to be completed."
+  },
+  "%Zab": {
+    "original": "Enkel terugbetalingen kunnen gekoppeld worden aan een bestaande betaling.",
+    "translation": "Only refunds can be linked to an existing payment."
+  },
+  "%Zac": {
+    "original": "Dit kan niet ongedaan gemaakt worden.",
+    "translation": "This action cannot be undone."
+  },
+  "%Zad": {
+    "original": "Ben je zeker dat je {price} wilt terugbetalen via {method}?",
+    "translation": "Are you sure you want to refund {price} via {method}?"
+  },
+  "%Zae": {
+    "original": "Het totale bedrag van een terugbetaling moet kleiner zijn dan nul.",
+    "translation": "The total amount for a refund must be less than zero."
+  },
+  "%Zaf": {
+    "original": "Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Stamhoofd.",
+    "translation": "This document is locked because it was created in the old version of Stamhoofd."
+  },
+  "%Zag": {
+    "original": "De terugbetaling kan niet aangemaakt worden omdat de koppeling met Mollie ontbreekt.",
+    "translation": "The refund cannot be created because the connection with Mollie is missing."
+  },
+  "%Zai": {
+    "original": "Er is een terugbetaling van {price} voor deze betaling in verwerking bij de betaalprovider.",
+    "translation": "A refund of {price} for this payment is currently being processed by the payment provider."
+  },
+  "%Zaj": {
+    "original": "Betaal deze betaling volledig of gedeeltelijk terug via de betaalprovider.",
+    "translation": "Refund this payment, fully or partially, via the payment provider."
+  },
+  "%Zak": {
+    "original": "Ontgrendelen",
+    "translation": "Unlock"
   },
   "%Zb": {
     "original": "Enkel e-mailadressen met deze domeinnamen kunnen deze login methode gebruiken.",

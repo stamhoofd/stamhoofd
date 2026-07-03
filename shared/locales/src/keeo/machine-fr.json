@@ -1539,6 +1539,18 @@
     "original": "Scoutsjaar niet actief",
     "translation": "Année scoute inactive"
   },
+  "%ZaD": {
+    "original": "Voor deze terugbetaalmethode moet je zelf de terugbetaling uitvoeren naast de registratie in Keeo.",
+    "translation": "Pour cette méthode, vous devez effectuer vous-même le remboursement en plus de l'enregistrement dans Keeo."
+  },
+  "%ZaG": {
+    "original": "Dit document werd vergrendeld omdat het werd aangemaakt in de oude versie van Keeo. Controleer in de volgend stap de instellingen van het document en klik op opslaan. Dan zal het document ontgrendeld worden. Door het ontgrendelen van het document zal de nieuwe layout van documenten gebruikt worden waardoor de documenten er anders uit zullen zien.",
+    "translation": "Ce document est verrouillé car il a été créé dans l'ancienne version de Keeo. Vérifiez les paramètres du document à l'étape suivante et cliquez sur enregistrer. Le document sera alors déverrouillé. Après le déverrouillage, la nouvelle mise en page des documents sera utilisée, ce qui les rendra différents."
+  },
+  "%Zaf": {
+    "original": "Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Keeo.",
+    "translation": "Ce document est verrouillé car il a été créé dans l'ancienne version de Keeo."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

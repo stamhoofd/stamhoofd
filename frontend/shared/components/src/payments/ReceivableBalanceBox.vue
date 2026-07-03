@@ -84,10 +84,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Factuur opmaken') }}
+                        {{ $t('%1K2') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Maak een factuur aan voor één of meerdere betalingen die nog niet werden gefactureerd.') }}
+                        {{ $t('%Za6') }}
                     </p>
 
                     <template #right>
