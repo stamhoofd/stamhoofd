@@ -39,7 +39,7 @@ export class SMSService {
         throw new SimpleError({
             code: 'invalid_phone',
             message: 'Invalid phone number for SMS: ' + phone,
-            human: $t(`Dit telefoonnummer is ongeldig, we konden geen SMS versturen.`),
+            human: $t(`%ZbO`),
         });
     }
 
@@ -57,7 +57,7 @@ export class SMSService {
             throw new SimpleError({
                 code: 'sms_not_configured',
                 message: 'SMS gateway is not configured',
-                human: $t(`Versturen via SMS is momenteel niet beschikbaar. Probeer het via e-mail.`),
+                human: $t(`%ZbC`),
             });
         }
 
@@ -84,7 +84,7 @@ export class SMSService {
             throw new SimpleError({
                 code: 'sms_unreachable',
                 message: 'Network issue when sending SMS: ' + (error instanceof Error ? error.message : String(error)),
-                human: $t(`We konden je SMS niet versturen. Probeer het later opnieuw.`),
+                human: $t(`%Zb8`),
             });
         }
 
@@ -94,7 +94,7 @@ export class SMSService {
             throw new SimpleError({
                 code: 'sms_failed',
                 message: 'Failed to send SMS via GatewayAPI: ' + response.status + ' ' + body,
-                human: $t(`We konden je SMS niet versturen. Probeer het later opnieuw.`),
+                human: $t(`%Zb8`),
             });
         }
     }

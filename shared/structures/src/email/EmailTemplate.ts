@@ -304,7 +304,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.VerifyEmailWithoutCode: return $t(`%po`);
             case EmailTemplateType.AdminInvitation: return $t(`%pp`);
             case EmailTemplateType.AdminInvitationNewUser: return $t(`%pq`);
-            case EmailTemplateType.MemberSecurityCode: return $t(`Beveiligingscode van een lid`);
+            case EmailTemplateType.MemberSecurityCode: return $t(`%ZbB`);
 
             case EmailTemplateType.UserBalanceIncreaseNotification: return $t(`%pr`);
             case EmailTemplateType.UserBalanceReminder: return $t(`%ps`);
@@ -522,7 +522,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.VerifyEmailWithoutCode: return $t(`%qC`);
             case EmailTemplateType.AdminInvitation: return $t(`%qD`);
             case EmailTemplateType.AdminInvitationNewUser: return $t(`%qE`);
-            case EmailTemplateType.MemberSecurityCode: return $t(`Deze e-mail wordt verstuurd wanneer iemand de beveiligingscode van een lid opvraagt om er toegang toe te krijgen.`);
+            case EmailTemplateType.MemberSecurityCode: return $t(`%Zb5`);
 
             case EmailTemplateType.SignupAlreadyHasAccount: return $t(`%qF`);
 

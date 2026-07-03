@@ -32,10 +32,10 @@
                             <IconContainer icon="email" aside-icon="send send" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Stuur me de code via e-mail') }}
+                            {{ $t('%Zb3') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Stuur een nieuwe e-mail met de code naar alle e-mailadressen die we kennen van dit lid') }}
+                            {{ $t('%Zau') }}
                         </p>
 
                         <template #right>
@@ -80,10 +80,10 @@
                             <IconContainer icon="email" aside-icon="send send" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Stuur me de code via e-mail') }}
+                            {{ $t('%Zb3') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Stuur een nieuwe e-mail met de code naar alle e-mailadressen die we kennen van dit lid') }}
+                            {{ $t('%Zau') }}
                         </p>
 
                         <template #right>
@@ -97,10 +97,10 @@
                             <IconContainer icon="smartphone" aside-icon="send stroke" />
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Stuur me de code via SMS') }}
+                            {{ $t('%ZbE') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('We sturen een SMS naar een GSM-nummer dat je ingeeft, als we het kennen van {member}', {member: cloned.patchedMember.details.firstName}) }}
+                            {{ $t('%Zan', {member: cloned.patchedMember.details.firstName}) }}
                         </p>
 
                         <template #right>
@@ -222,9 +222,9 @@ async function requestSecurityCode(method: SecurityCodeSendMethod, phone: string
             // Cycle to the next known number the next time we send to any number
             smsTryCount.value += 1;
         }
-        Toast.success($t('We stuurden een SMS met de code naar {recipient}. Het kan enkele minuten duren voor je de SMS ontvangt. Even geduld.', { recipient: response.data.maskedRecipient })).setHide(30_000).show();
+        Toast.success($t('%ZbG', { recipient: response.data.maskedRecipient })).setHide(30_000).show();
     } else {
-        Toast.success($t('We stuurden de code via e-mail naar alle e-mailadressen die we kennen van dit lid. Kijk rond in de e-mailinbox van jou en je gezinsleden, controleer ook zeker je spam.')).setHide(30_000).show();
+        Toast.success($t('%Zb6')).setHide(30_000).show();
     }
 }
 

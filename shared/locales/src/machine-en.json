@@ -2739,10 +2739,6 @@
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar voor een standaard leeftijdsgroep",
     "translation": "You can only assign a role to members who are registered in the current work year for a default age group."
   },
-  "%1BA": {
-    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.",
-    "translation": "{member} is already known in our system, but your email address is not. To get access, you need the security code."
-  },
   "%1BB": {
     "original": "Je kan de status van de UiTPAS-credentials niet handmatig instellen",
     "translation": "You can't set the status of the UiTPAS credentials manually."
@@ -4322,10 +4318,6 @@
   "%1Hc": {
     "original": "Geef ouders toegang en stuur hen automatische e-mails",
     "translation": "Give parents access and send them automatic emails"
-  },
-  "%1Hd": {
-    "original": "Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt.",
-    "translation": "Parents currently have access until {firstName} turns 18."
   },
   "%1He": {
     "original": "De ouders hebben toegang tot de gegevens van {firstName} en ontvangen automatische e-mails.",
@@ -6050,10 +6042,6 @@
   "%1Oy": {
     "original": "Het maximum is {max}",
     "translation": "The maximum is {max}"
-  },
-  "%1Oz": {
-    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de vereniging.",
-    "translation": "{member} is already known in our system, but your email address is not. Please contact the association."
   },
   "%1P0": {
     "original": "Scan en betaal met Bancontact Pay",
@@ -17351,9 +17339,165 @@
     "original": "Ontgrendelen",
     "translation": "Unlock"
   },
+  "%Zal": {
+    "original": "We kennen geen telefoonnummer van dit lid. Probeer het via e-mail.",
+    "translation": "We don't have a phone number for this member. Try contacting them via email."
+  },
+  "%Zam": {
+    "original": "Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt en een eigen e-mailadres heeft.",
+    "translation": "Currently, parents have access until {firstName} turns 18 and has their own email address."
+  },
+  "%Zan": {
+    "original": "We sturen een SMS naar een GSM-nummer dat je ingeeft, als we het kennen van {member}",
+    "translation": "We will send an SMS to a mobile number you provide, if we have it for {member}."
+  },
+  "%Zao": {
+    "original": "{securityCode} is je beveiligingscode voor {firstName} van {organization}",
+    "translation": "{securityCode} is your security code for {firstName} from {organization}."
+  },
+  "%Zap": {
+    "original": "Vul jouw GSM-nummer hier in",
+    "translation": "Enter your mobile number here."
+  },
+  "%Zaq": {
+    "original": "{securityCode} is je beveiligingscode voor {firstName}",
+    "translation": "{securityCode} is your security code for {firstName}."
+  },
+  "%Zar": {
+    "original": "Dit telefoonnummer kennen we niet van dit lid. Controleer het nummer of probeer het via e-mail.",
+    "translation": "We don't have this phone number on record for this member. Check the number or try via email."
+  },
+  "%Zas": {
+    "original": "{securityCode} is je code voor {firstName}",
+    "translation": "{securityCode} is your code for {firstName}."
+  },
+  "%Zat": {
+    "original": "Het maximum aantal SMS-berichten voor vandaag is bereikt. Probeer het via e-mail.",
+    "translation": "The maximum number of SMS messages for today has been reached. Please try via email."
+  },
+  "%Zau": {
+    "original": "Stuur een nieuwe e-mail met de code naar alle e-mailadressen die we kennen van dit lid",
+    "translation": "Send a new email with the code to all email addresses we have for this member."
+  },
+  "%Zav": {
+    "original": "{securityCode} is je beveiligingscode voor {firstName} van {organization} (aangevraagd door {user})",
+    "translation": "{securityCode} is your security code for {firstName} from {organization} (requested by {user})."
+  },
+  "%Zaw": {
+    "original": "Er werd recent al een code verstuurd voor dit lid. Wacht enkele minuten en probeer het opnieuw.",
+    "translation": "A code was recently sent for this member. Please wait a few minutes and try again."
+  },
+  "%Zax": {
+    "original": "Verstuur",
+    "translation": "Send"
+  },
+  "%Zay": {
+    "original": "Vul het gsm-nummer in waarop je de code van {member} wil ontvangen. We sturen de code enkel als we dit nummer kennen van dit lid.",
+    "translation": "Enter the mobile number where you want to receive the code for {member}. We will only send the code if we have this number for the member."
+  },
+  "%Zaz": {
+    "original": "{securityCode} is je beveiligingscode voor {firstName} (aangevraagd door {user})",
+    "translation": "{securityCode} is your security code for {firstName} (requested by {user})."
+  },
   "%Zb": {
     "original": "Enkel e-mailadressen met deze domeinnamen kunnen deze login methode gebruiken.",
     "translation": "Only email addresses with these domain names can use this login method."
+  },
+  "%Zb1": {
+    "original": "We kennen geen e-mailadres van dit lid. Probeer het via SMS.",
+    "translation": "We don't have an email address for this member. Try via SMS."
+  },
+  "%Zb2": {
+    "original": "{securityCode} is je code voor {firstName} (aangevraagd door {user})",
+    "translation": "{securityCode} is your code for {firstName} (requested by {user})."
+  },
+  "%Zb3": {
+    "original": "Stuur me de code via e-mail",
+    "translation": "Send me the code via email."
+  },
+  "%Zb4": {
+    "original": "Ben je zeker dat je wilt sluiten zonder een SMS te sturen?",
+    "translation": "Are you sure you want to close without sending an SMS?"
+  },
+  "%Zb5": {
+    "original": "Deze e-mail wordt verstuurd wanneer iemand de beveiligingscode van een lid opvraagt om er toegang toe te krijgen.",
+    "translation": "This email is sent when someone requests a member's security code to gain access."
+  },
+  "%Zb6": {
+    "original": "We stuurden de code via e-mail naar alle e-mailadressen die we kennen van dit lid. Kijk rond in de e-mailinbox van jou en je gezinsleden, controleer ook zeker je spam.",
+    "translation": "We sent the code via email to all email addresses we have for this member. Be sure to check your inbox and your family's inboxes, and don't forget to check your spam folder."
+  },
+  "%Zb7": {
+    "original": "De beveiligingscode van het lid werd verwijderd uit de tekst.",
+    "translation": "The member's security code has been removed from the text."
+  },
+  "%Zb8": {
+    "original": "We konden je SMS niet versturen. Probeer het later opnieuw.",
+    "translation": "We couldn't send your SMS. Please try again later."
+  },
+  "%Zb9": {
+    "original": "Geef een lid op.",
+    "translation": "Specify a member."
+  },
+  "%ZbA": {
+    "original": "Stuur naar gelijk welk GSM-nummer we kennen van {member}",
+    "translation": "Send to any mobile number we have for {member}."
+  },
+  "%ZbB": {
+    "original": "Beveiligingscode van een lid",
+    "translation": "Member security code"
+  },
+  "%ZbC": {
+    "original": "Versturen via SMS is momenteel niet beschikbaar. Probeer het via e-mail.",
+    "translation": "Sending via SMS is currently unavailable. Please try via email."
+  },
+  "%ZbD": {
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de vereniging om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.",
+    "translation": "{member} is already known in our system, but your email address ({email}) is not linked. Therefore, we can't verify if you ({email}) should have access to {member}: your access is blocked for security reasons. To gain access, you'll need the security code. Alternatively, log out and log back in with an email address already known to the system. Contact the association to find out which email address that is, or to have a different email address assigned to {member}."
+  },
+  "%ZbE": {
+    "original": "Stuur me de code via SMS",
+    "translation": "Send me the code via SMS."
+  },
+  "%ZbF": {
+    "original": "We konden geen lid vinden met deze gegevens.",
+    "translation": "We could not find a member with these data."
+  },
+  "%ZbG": {
+    "original": "We stuurden een SMS met de code naar {recipient}. Het kan enkele minuten duren voor je de SMS ontvangt. Even geduld.",
+    "translation": "We sent the code by SMS to {recipient}. It may take a few minutes to receive the SMS. Please be patient."
+  },
+  "%ZbI": {
+    "original": "Niet versturen",
+    "translation": "Don't send"
+  },
+  "%ZbJ": {
+    "original": "E-mailadres aanvrager",
+    "translation": "Applicant's email address"
+  },
+  "%ZbK": {
+    "original": "klaas.klaassen@voorbeeld.com",
+    "translation": "john.johnson@example.com"
+  },
+  "%ZbL": {
+    "original": "Je probeerde te vaak een telefoonnummer. Wacht even of probeer het opnieuw zonder voorkeurstelefoonnummer.",
+    "translation": "You tried too many phone numbers. Please wait a moment or try again without a preferred phone number."
+  },
+  "%ZbM": {
+    "original": "Je hebt te veel beveiligingscodes opgevraagd. Probeer het later opnieuw.",
+    "translation": "You've requested too many security codes. Please try again later."
+  },
+  "%ZbN": {
+    "original": "Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders. <button>Meer info</button>",
+    "translation": "Use this code to give an account access to this member if their email address is not yet registered in the system. This code is also always included at the bottom of all emails sent to members/parents. <button>More info</button>"
+  },
+  "%ZbO": {
+    "original": "Dit telefoonnummer is ongeldig, we konden geen SMS versturen.",
+    "translation": "This phone number is invalid, we couldn't send an SMS."
+  },
+  "%ZbP": {
+    "original": "Stuur de code via SMS",
+    "translation": "Send the code via SMS."
   },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",

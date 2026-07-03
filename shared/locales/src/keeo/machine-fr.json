@@ -299,10 +299,6 @@
     "original": "Aangerekende eenheid",
     "translation": "Unité facturée"
   },
-  "%1Oz": {
-    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de eenheid.",
-    "translation": "{member} est déjà connu dans notre système, mais pas ton adresse e-mail. Contacte l’unité."
-  },
   "%1P9": {
     "original": "Wat voor eenheid?",
     "translation": "Quel type d’unité ?"
@@ -1550,6 +1546,10 @@
   "%Zaf": {
     "original": "Dit document is vergrendeld omdat het werd aangemaakt in de oude versie van Keeo.",
     "translation": "Ce document est verrouillé car il a été créé dans l'ancienne version de Keeo."
+  },
+  "%ZbD": {
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de eenheid om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.",
+    "translation": "{member} est déjà connu dans notre système, mais votre adresse e-mail ({email}) n’y est pas associée. Nous ne pouvons donc pas vérifier si vous ({email}) pouvez accéder à {member} : votre accès est bloqué pour des raisons de sécurité. Pour accéder, vous avez besoin du code de sécurité. Vous pouvez aussi vous déconnecter puis vous reconnecter avec une adresse e-mail déjà connue dans le système. Contactez l’unité pour savoir quelle adresse e-mail est utilisée, ou pour en associer une nouvelle à {member}."
   },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",

@@ -1024,7 +1024,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
-                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de vereniging om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.`, {
+                human: $t(`%ZbD`, {
                     member: member.details.firstName,
                     email: Context.auth.user.email,
                 }),

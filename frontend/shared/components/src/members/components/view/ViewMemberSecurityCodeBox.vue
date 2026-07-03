@@ -8,7 +8,7 @@
         </h2>
 
         <p v-if="!$isPlatform">
-            <I18nComponent :t="$t('Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders. <button>Meer info</button>')">
+            <I18nComponent :t="$t('%ZbN')">
                 <template #button="{content}">
                     <a class="inline-link" :href="LocalizedDomains.getDocs('beveiligingscodes')" target="_blank">
                         {{ content }}

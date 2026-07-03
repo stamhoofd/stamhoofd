@@ -18,7 +18,7 @@
                     {{ $t('%1Hc') }}
                 </h3>
                 <p v-if="!parentsHaveAccessChangeDate && parentsHaveAccess" class="style-description-small">
-                    {{ $t('Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt en een eigen e-mailadres heeft.', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('%Zam', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
                 <p v-else-if="parentsHaveAccess" class="style-description-small">
                     {{ $t('%1He', {firstName: member.patchedMember.details.firstName}) }}

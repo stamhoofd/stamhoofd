@@ -182,7 +182,7 @@ function getReplacements() {
         }),
         requesterEmail: Replacement.create({
             token: 'requesterEmail',
-            value: $t(`klaas.klaassen@voorbeeld.com`),
+            value: $t(`%ZbK`),
         }),
         securityCode: Replacement.create({
             token: 'securityCode',

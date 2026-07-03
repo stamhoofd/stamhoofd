@@ -163,7 +163,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_requests',
                 message: 'Too many security code requests for this user',
-                human: $t(`Je hebt te veel beveiligingscodes opgevraagd. Probeer het later opnieuw.`),
+                human: $t(`%ZbM`),
                 statusCode: 429,
             });
         }
@@ -173,7 +173,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'member_not_found',
                 message: 'No member found for the given details',
-                human: $t(`We konden geen lid vinden met deze gegevens.`),
+                human: $t(`%ZbF`),
                 statusCode: 404,
             });
         }
@@ -198,7 +198,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Either memberId or firstName, lastName and birthDay are required',
-                human: $t(`Geef een lid op.`),
+                human: $t(`%Zb9`),
                 statusCode: 400,
             });
         }
@@ -212,7 +212,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_requests',
                 message: 'Too many security code requests for this member name',
-                human: $t(`Je hebt te veel beveiligingscodes opgevraagd. Probeer het later opnieuw.`),
+                human: $t(`%ZbM`),
                 statusCode: 429,
             });
         }
@@ -259,7 +259,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'no_email',
                 message: 'No email address is known for this member',
-                human: $t(`We kennen geen e-mailadres van dit lid. Probeer het via SMS.`),
+                human: $t(`%Zb1`),
                 statusCode: 400,
             });
         }
@@ -306,7 +306,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'no_phone',
                 message: 'No phone number is known for this member',
-                human: $t(`We kennen geen telefoonnummer van dit lid. Probeer het via e-mail.`),
+                human: $t(`%Zal`),
                 statusCode: 400,
             });
         }
@@ -324,7 +324,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'too_many_requests',
                     message: 'Too many phone number lookups for this member',
-                    human: $t(`Je probeerde te vaak een telefoonnummer. Wacht even of probeer het opnieuw zonder voorkeurstelefoonnummer.`),
+                    human: $t(`%ZbL`),
                     statusCode: 429,
                 });
             }
@@ -338,7 +338,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'phone_not_found',
                     message: 'The provided phone number is not linked to this member',
-                    human: $t(`Dit telefoonnummer kennen we niet van dit lid. Controleer het nummer of probeer het via e-mail.`),
+                    human: $t(`%Zar`),
                     statusCode: 404,
                 });
             }
@@ -360,7 +360,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_sms',
                 message: 'The daily SMS limit for this organization has been reached',
-                human: $t(`Het maximum aantal SMS-berichten voor vandaag is bereikt. Probeer het via e-mail.`),
+                human: $t(`%Zat`),
                 statusCode: 429,
             });
         }
@@ -369,13 +369,13 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         const formattedCode = Formatter.spaceString(code, 4, '-');
 
         let message = Context.user?.name && !Context.auth.hasSomePlatformAccess()
-            ? $t(`{securityCode} is je beveiligingscode voor {firstName} van {organization} (aangevraagd door {user})`, {
+            ? $t(`%Zav`, {
                     organization: organization?.name ?? (await Platform.getShared()).config.name,
                     firstName: member.details.firstName,
                     securityCode: formattedCode,
                     user: Context.user.name,
                 })
-            : $t(`{securityCode} is je beveiligingscode voor {firstName} van {organization}`, {
+            : $t(`%Zao`, {
                     organization: organization?.name ?? (await Platform.getShared()).config.name,
                     firstName: member.details.firstName,
                     securityCode: formattedCode,
@@ -383,13 +383,13 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
 
         if (message.length > 160) {
             message = Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
-                ? $t(`{securityCode} is je beveiligingscode voor {firstName} (aangevraagd door {user})`, {
+                ? $t(`%Zaz`, {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
                         user: Context.user.firstName,
                     })
-                : $t(`{securityCode} is je beveiligingscode voor {firstName}`, {
+                : $t(`%Zaq`, {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
@@ -398,13 +398,13 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
 
         if (message.length > 160) {
             message = Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
-                ? $t(`{securityCode} is je code voor {firstName} (aangevraagd door {user})`, {
+                ? $t(`%Zb2`, {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
                         user: Context.user.firstName,
                     })
-                : $t(`{securityCode} is je code voor {firstName}`, {
+                : $t(`%Zas`, {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
@@ -434,7 +434,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_requests',
                 message: 'A security code was already sent for this member recently',
-                human: $t(`Er werd recent al een code verstuurd voor dit lid. Wacht enkele minuten en probeer het opnieuw.`),
+                human: $t(`%Zaw`),
                 statusCode: 429,
             });
         }

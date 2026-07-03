@@ -1,14 +1,14 @@
 <template>
-    <SaveView :title="$t('Stuur de code via SMS')" :loading="loading" :save-text="$t('Verstuur')" @save="submit">
-        <h1>{{ $t('Stuur de code via SMS') }}</h1>
-        <p>{{ $t('Vul het gsm-nummer in waarop je de code van {member} wil ontvangen. We sturen de code enkel als we dit nummer kennen van dit lid.', { member: memberName }) }}</p>
+    <SaveView :title="$t('%ZbP')" :loading="loading" :save-text="$t('%Zax')" @save="submit">
+        <h1>{{ $t('%ZbP') }}</h1>
+        <p>{{ $t('%Zay', { member: memberName }) }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <PhoneInput v-if="!sendToAny" v-model="phone" :title="$t('Telefoonnummer')" :placeholder="$t('Vul jouw GSM-nummer hier in')" :validator="errors.validator" :required="true" :nullable="false" />
+        <PhoneInput v-if="!sendToAny" v-model="phone" :title="$t('%wD')" :placeholder="$t('%Zap')" :validator="errors.validator" :required="true" :nullable="false" />
 
         <STList>
-            <CheckboxListItem v-model="sendToAny" :label="$t('Stuur naar gelijk welk GSM-nummer we kennen van {member}', { member: memberName })" />
+            <CheckboxListItem v-model="sendToAny" :label="$t('%ZbA', { member: memberName })" />
         </STList>
     </SaveView>
 </template>
@@ -59,7 +59,7 @@ async function submit() {
 }
 
 const shouldNavigateAway = async () => {
-    return await CenteredMessage.confirm($t(`Ben je zeker dat je wilt sluiten zonder een SMS te sturen?`), $t(`Niet versturen`));
+    return await CenteredMessage.confirm($t(`%Zb4`), $t(`%ZbI`));
 };
 
 defineExpose({
