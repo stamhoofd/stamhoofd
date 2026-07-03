@@ -18,7 +18,7 @@
                     {{ $t('%1Hc') }}
                 </h3>
                 <p v-if="!parentsHaveAccessChangeDate && parentsHaveAccess" class="style-description-small">
-                    {{ $t('%1Hd', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt en een eigen e-mailadres heeft.', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
                 <p v-else-if="parentsHaveAccess" class="style-description-small">
                     {{ $t('%1He', {firstName: member.patchedMember.details.firstName}) }}
@@ -89,14 +89,14 @@
 import type { PlatformMember } from '@stamhoofd/structures';
 import { BooleanStatus, Parent, PermissionLevel } from '@stamhoofd/structures';
 
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useAppContext } from '#context/appContext.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { usePresent } from '@simonbackx/vue-app-navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';
-import { useAppContext } from '#context/appContext.ts';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
@@ -104,9 +104,9 @@ import { useValidation } from '../../../errors/useValidation';
 import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 
-import Title from './Title.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import Title from './Title.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -131,8 +131,7 @@ useValidation(errors.validator, () => {
             message: $t(`%107`),
             field: 'parents',
         }));
-    }
-    else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
+    } else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
             message: $t(`%108`),
@@ -147,9 +146,9 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('%1NR', { 
+                message: $t('%1NR', {
                     parentName: props.member.patchedMember.details.parents.find(p => p.phone === props.member.patchedMember.details.phone)?.firstName ?? $t('%1NQ'),
-                    firstName: props.member.patchedMember.details.firstName
+                    firstName: props.member.patchedMember.details.firstName,
                 }),
                 field: 'phone',
             }));
@@ -163,9 +162,9 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('%1NS', { 
+                message: $t('%1NS', {
                     parentName: props.member.patchedMember.details.parents.find(p => p.email === props.member.patchedMember.details.email)?.firstName ?? $t('%1NQ'),
-                    firstName: props.member.patchedMember.details.firstName 
+                    firstName: props.member.patchedMember.details.firstName,
                 }),
                 field: 'email',
             }));
@@ -226,8 +225,7 @@ function setParentSelected(parent: Parent, selected: boolean) {
         patch.addDelete(parent.id); // avoids creating duplicates
         patch.addPut(parent);
         props.member.addDetailsPatch({ parents: patch });
-    }
-    else {
+    } else {
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
         patch.addDelete(parent.id);
         props.member.addDetailsPatch({ parents: patch });

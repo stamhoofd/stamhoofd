@@ -428,7 +428,13 @@ export class MemberDetails extends AutoEncoder {
         if (this.parentsHaveAccess) {
             return this.parentsHaveAccess.value;
         }
-        return this.defaultAge < 18;
+
+        if (this.defaultAge < 18) {
+            return true;
+        }
+
+        // also give access if member has no email
+        return this.email === null;
     }
 
     /**
