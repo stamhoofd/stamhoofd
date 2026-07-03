@@ -457,6 +457,6 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
     private maskPhone(phone: string): string {
         const digits = phone.replace(/\D/g, '');
         const last = digits.substring(Math.max(0, digits.length - 2));
-        return '•••• ' + last;
+        return '•• •• ' + last;
     }
 }
