@@ -7,6 +7,7 @@ import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 import { PaymentService } from '../services/PaymentService.js';
 import { VATService } from '../services/VATService.js';
+import { SQL } from '@stamhoofd/sql';
 
 export class ApplicationFeeDetails {
     transferFee = 0;
@@ -138,7 +139,13 @@ export class StripeReportInvoicer {
     }
 
     static async hasPayment(sellingOrganization: Organization, reference: string) {
-        return !!await Payment.select().where('organizationId', sellingOrganization.id).where('reference', reference).where('status', PaymentStatus.Succeeded).first(false);
+        return !!await Payment.select()
+            .where('organizationId', sellingOrganization.id)
+            .where('reference', reference)
+            .where('status', PaymentStatus.Succeeded)
+            .where('method', PaymentMethod.AccountDeductions)
+            .where('provider', PaymentProvider.Stripe)
+            .first(false);
     }
 
     async generateInvoice(sellingOrganization: Organization, reference: string, accountId: string, applicationFee: ApplicationFeeDetails) {
@@ -175,7 +182,14 @@ export class StripeReportInvoicer {
         const existingPayments = await Payment.select()
             .where('organizationId', sellingOrganization.id)
             .where('payingOrganizationId', organization.id)
+            .where(
+                // required because the same organization can have multiple stripe accounts. Null = legacy
+                SQL.where('stripeAccountId', stripeAccount.id)
+                    .or('stripeAccountId', null),
+            )
             .where('reference', reference)
+            .where('method', PaymentMethod.AccountDeductions)
+            .where('provider', PaymentProvider.Stripe)
             .where('status', PaymentStatus.Succeeded)
             .fetch();
 
@@ -320,7 +334,7 @@ export class StripeInvoicer {
     }
 
     // Loops all months until all invoices are generated
-    async generateAllInvoices(sellingOrganization: Organization, options?: { force?: boolean; start?: Date }) {
+    async generateAllInvoices(sellingOrganization: Organization, options?: { force?: boolean; start?: Date; forceLast?: boolean }) {
         const startMonth = options?.start ?? new Date(2026, 0, 1);
         const stopAt = new Date(Date.now() + (STAMHOOFD.environment === 'production' ? (-60 * 60 * 24 * 1000) : (60 * 60 * 24 * 1000 * 31))); // One day margin before creating invoices
         let currentMonth = new Date(startMonth);
@@ -332,8 +346,11 @@ export class StripeInvoicer {
                 // Stop
                 break;
             }
-            await this.generateInvoices(sellingOrganization, currentMonth, options);
-            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+            const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+            const { end: endNext } = StripeInvoicer.getMonthUnixStartEnd(currentMonth);
+            const isLastMonth = endNext >= stopAt.getTime() / 1000;
+            await this.generateInvoices(sellingOrganization, currentMonth, { ...options, force: (isLastMonth && !!options?.forceLast) || !!options?.force });
+            currentMonth = nextMonth;
         }
     }
 
