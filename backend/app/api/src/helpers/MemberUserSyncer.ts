@@ -133,7 +133,7 @@ export class MemberUserSyncerStatic {
                             await this.linkUser(user.email, member, true);
                         }
                     } else if (!member.details.calculatedParentsHaveAccess && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
-                        await this.unlinkUser(user, member);
+                        // await this.unlinkUser(user, member);
                     }
                 }
 
