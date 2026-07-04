@@ -1,8 +1,12 @@
 <template>
     <div ref="el" class="infinite-object-fetcher-end">
-        <p v-if="!fetcher.hasMoreObjects && fetcher.objects.length === 0" class="info-box">
-            {{ emptyMessage }}
-        </p>
+        <template v-if="!fetcher.hasMoreObjects && fetcher.objects.length === 0">
+            <slot name="empty">
+                <p class="info-box">
+                    {{ emptyMessage }}
+                </p>
+            </slot>
+        </template>
 
         <div v-if="fetcher.hasMoreObjects" class="spinner-container center">
             <Spinner />
@@ -47,11 +51,6 @@ onUnmounted(() => {
 .infinite-object-fetcher-end {
     // Reduced animation glitches
     min-height: 60px;
-    padding-top: 1px; // Disable margin collapsing
-
-    > .info-box {
-        margin-top: 0;
-    }
 
     &:empty {
         min-height: 0;
@@ -59,7 +58,7 @@ onUnmounted(() => {
 }
 
 .infinite-object-fetcher-end > .spinner-container {
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 </style>

@@ -34,7 +34,20 @@
             <STList v-if="fetcher.objects.length">
                 <RegisterItemCheckboxRow v-for="member in fetcher.objects" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" />
             </STList>
-            <InfiniteObjectFetcherEnd :empty-message="$t('%eI')" :fetcher="fetcher" />
+            <InfiniteObjectFetcherEnd :empty-message="$t('%eI')" :fetcher="fetcher">
+                <template #empty>
+                    <p v-if="isEmptyFilter(fetcher.baseFilter)" class="info-box">
+                        {{ $t('%eI') }}
+                    </p>
+                    <p v-else class="info-box with-button">
+                        {{ $t('Geen resultaten gevonden voor deze filter') }}
+
+                        <button class="button text" type="button" @click="resetFilter">
+                            {{ $t('Toon alle leden') }}
+                        </button>
+                    </p>
+                </template>
+            </InfiniteObjectFetcherEnd>
         </SaveView>
     </ExternalOrganizationContainer>
 </template>
@@ -110,6 +123,10 @@ async function editFilter(event: MouseEvent) {
             }),
         ],
     });
+}
+
+function resetFilter() {
+    selectedUIFilter.value = null;
 }
 
 function extendSort(list: SortList): SortList {

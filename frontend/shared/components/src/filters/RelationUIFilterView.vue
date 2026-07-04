@@ -30,7 +30,7 @@
                 </STListItem>
             </STList>
             <template v-if="infiniteObjectFetcher.errorState === null">
-                <STList>
+                <STList v-if="lastOptions.length">
                     <STListItem v-for="option of lastOptions" :key="option.value" :selectable="true" element-name="label">
                         <template #left>
                             <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
@@ -220,7 +220,22 @@ function setOptionSelected(option: RelationFilterOption<T>, selected: boolean) {
 
 <style lang="scss" scoped>
 
-.input-with-buttons {
-    margin-bottom: 15px;
+.results .st-list {
+    margin-top: 15px;
+
+    & + .st-list {
+        margin-top: 0;
+    }
 }
+
+.infinite-object-fetcher-end {
+    // Reduced animation glitches
+    min-height: 60px;
+    padding-top: 1px;
+
+    &:empty {
+        min-height: 0;
+    }
+}
+
 </style>

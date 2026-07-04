@@ -124,7 +124,7 @@
                 <slot name="empty" />
             </p>
             <p v-else-if="totalFilteredCount === 0" class="info-box with-button">
-                {{ $t('%jd') }}
+                {{ $t('Geen resultaten gevonden voor deze filter') }}
 
                 <button class="button text" type="button" @click="resetFilter">
                     {{ $t('%x') }}
