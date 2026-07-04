@@ -306,6 +306,12 @@ export function mergeMemberDetails(base: Member, other: Member): void {
         'dataPermissions',
     );
 
+    mergeBooleanStatusIfBaseNotSet(
+        baseDetails,
+        otherDetails,
+        'parentsHaveAccess',
+    );
+
     // address
     mergeAddress(baseDetails, otherDetails, baseDetails);
 
