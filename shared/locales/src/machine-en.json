@@ -17499,6 +17499,14 @@
     "original": "Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw.",
     "translation": "Oops! For security reasons, we've temporarily limited how many names and birth dates you can enter into the system. Please try again in 15 minutes."
   },
+  "%ZbR": {
+    "original": "Geen resultaten gevonden voor deze filter",
+    "translation": "No results found for this filter"
+  },
+  "%ZbS": {
+    "original": "Toon alle leden",
+    "translation": "Show all members"
+  },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
     "translation": "No excluded domain names"
@@ -19910,10 +19918,6 @@
   "%jc": {
     "original": "Selecteer",
     "translation": "Select"
-  },
-  "%jd": {
-    "original": "Geen resultaten gevonden",
-    "translation": "No results found"
   },
   "%je": {
     "original": "'Pas kolommen op het scherm'",

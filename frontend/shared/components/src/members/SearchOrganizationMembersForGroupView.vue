@@ -40,10 +40,10 @@
                         {{ $t('%eI') }}
                     </p>
                     <p v-else class="info-box with-button">
-                        {{ $t('Geen resultaten gevonden voor deze filter') }}
+                        {{ $t('%ZbR') }}
 
                         <button class="button text" type="button" @click="resetFilter">
-                            {{ $t('Toon alle leden') }}
+                            {{ $t('%ZbS') }}
                         </button>
                     </p>
                 </template>

@@ -44,6 +44,6 @@ async function createStripeInvoices() {
     const invoicer = new StripeInvoicer({
         secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
     });
-    await invoicer.generateAllInvoices(membershipOrganization, { forceLast: Formatter.dateIso(today) === '2026-07-03' });
+    await invoicer.generateAllInvoices(membershipOrganization, { forceLast: Formatter.dateIso(today) === '2026-07-04' });
     lastStripeInvoice = new Date();
 }

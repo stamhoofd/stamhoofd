@@ -2728,7 +2728,6 @@
   "%ja": "Minimum {min} vereist",
   "%jb": "Gereed",
   "%jc": "Selecteer",
-  "%jd": "Geen resultaten gevonden",
   "%je": "'Pas kolommen op het scherm'",
   "%jf": "Ophalen...",
   "%jg": "Actie uitvoeren...",
@@ -6104,5 +6103,7 @@
   "%ZbN": "Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders. <button>Meer info</button>",
   "%ZbO": "Dit telefoonnummer is ongeldig, we konden geen SMS versturen.",
   "%ZbP": "Stuur de code via SMS",
-  "%ZbQ": "Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw."
+  "%ZbQ": "Oeps! Om veiligheidsredenen blokkeren we het aantal namen en geboortedata die je kan ingeven in het systeem. Probeer binnen 15 minuten opnieuw.",
+  "%ZbR": "Geen resultaten gevonden voor deze filter",
+  "%ZbS": "Toon alle leden"
 }
