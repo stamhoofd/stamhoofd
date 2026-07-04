@@ -693,7 +693,7 @@ describe('Helpers.MemberUserSyncer', () => {
             ]);
         });
 
-        test('Parents are removed if member turns 18', async () => {
+        test.skip('Parents are removed if member turns 18', async () => {
             const member = await new MemberFactory({
                 details: MemberDetails.create({
                     firstName: 'John',

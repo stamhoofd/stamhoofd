@@ -132,8 +132,9 @@ export class MemberUserSyncerStatic {
                             // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                             await this.linkUser(user.email, member, true);
                         }
-                    } else if (!member.details.calculatedParentsHaveAccess && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
-                        // await this.unlinkUser(user, member);
+                    } else if (member.details.parentsHaveAccess?.value === false && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
+                        // Only remove if manually set to false for now
+                        await this.unlinkUser(user, member);
                     }
                 }
 
