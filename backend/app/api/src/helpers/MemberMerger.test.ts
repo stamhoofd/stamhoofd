@@ -778,5 +778,139 @@ describe('member merge', () => {
             expect(m1.details.email).toBe('example@example.com');
             expect(m1.details.alternativeEmails).toEqual([]);
         });
+
+        describe('Parents have access get merged', () => {
+            test('False other', () => {
+                const m1 = new Member();
+                const m2 = new Member();
+
+                const base = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                });
+
+                const other = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: false }),
+                });
+
+                m1.details = base.clone();
+                m2.details = other.clone();
+
+                mergeMemberDetails(m1, m2);
+
+                expect(m1.details.email).toBe('example@example.com');
+                expect(m1.details.parentsHaveAccess?.value).toEqual(false);
+            });
+            test('True other', () => {
+                const m1 = new Member();
+                const m2 = new Member();
+
+                const base = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                });
+
+                const other = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: true }),
+                });
+
+                m1.details = base.clone();
+                m2.details = other.clone();
+
+                mergeMemberDetails(m1, m2);
+
+                expect(m1.details.email).toBe('example@example.com');
+                expect(m1.details.parentsHaveAccess?.value).toEqual(true);
+            });
+
+            test('Both different other prefer newest other', () => {
+                const m1 = new Member();
+                const m2 = new Member();
+
+                const base = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: true, date: new Date(0) }),
+                });
+
+                const other = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: false, date: new Date(1) }),
+                });
+
+                m1.details = base.clone();
+                m2.details = other.clone();
+
+                mergeMemberDetails(m1, m2);
+
+                expect(m1.details.email).toBe('example@example.com');
+                expect(m1.details.parentsHaveAccess?.value).toEqual(false);
+            });
+
+            test('Both different other prefer newest base', () => {
+                const m1 = new Member();
+                const m2 = new Member();
+
+                const base = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: true, date: new Date(1) }),
+                });
+
+                const other = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: false, date: new Date(0) }),
+                });
+
+                m1.details = base.clone();
+                m2.details = other.clone();
+
+                mergeMemberDetails(m1, m2);
+
+                expect(m1.details.email).toBe('example@example.com');
+                expect(m1.details.parentsHaveAccess?.value).toEqual(true);
+            });
+
+            test('Both different other prefer newest base 2', () => {
+                const m1 = new Member();
+                const m2 = new Member();
+
+                const base = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: false, date: new Date(1) }),
+                });
+
+                const other = MemberDetails.create({
+                    email: 'example@example.com',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    parentsHaveAccess: BooleanStatus.create({ value: true, date: new Date(0) }),
+                });
+
+                m1.details = base.clone();
+                m2.details = other.clone();
+
+                mergeMemberDetails(m1, m2);
+
+                expect(m1.details.email).toBe('example@example.com');
+                expect(m1.details.parentsHaveAccess?.value).toEqual(false);
+            });
+        });
     });
 });
