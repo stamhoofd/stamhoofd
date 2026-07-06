@@ -6,9 +6,9 @@
 
         <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`%1IP`)">
             <LoadingInputBox :loading="uitpasSocialTariffLoading">
-                <PriceInput v-model="price" :min="null" :placeholder="$t(`%1Mn`)" :disabled="!!product.uitpasEvent && enableUitpasSocialTariff" />
+                <PriceInput v-model="price" :min="null" :placeholder="$t(`%1Mn`)" :disabled="uitpasFeature && !!product.uitpasEvent && enableUitpasSocialTariff" />
             </LoadingInputBox>
-            <p v-if="!!product.uitpasEvent" class="style-description-small">
+            <p v-if="uitpasFeature && !!product.uitpasEvent" class="style-description-small">
                 {{ $t('%1AL') }}
             </p>
         </STInputBox>
@@ -102,7 +102,7 @@ import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/si
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import type { Validator } from '@stamhoofd/components/errors/Validator';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
@@ -130,7 +130,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void }>();
-const uitpasFeature = useFeatureFlag()('uitpas');
+const uitpasFeature = useFeatureFlagComputed('uitpas');
 
 const errors = useErrors({ validator: props.validator });
 

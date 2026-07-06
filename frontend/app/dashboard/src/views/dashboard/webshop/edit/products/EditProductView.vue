@@ -70,7 +70,7 @@
             <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
         </template>
 
-        <template v-if="patchedProduct.uitpasEvent">
+        <template v-if="uitpasFeature && patchedProduct.uitpasEvent">
             <hr><h2 class="style-with-button">
                 <div>{{ $t('%1Bp') }}</div>
                 `<button class="button text only-icon-smartphone" type="button" @click="clearUitpasEvent">
@@ -425,7 +425,7 @@ import { ComponentWithProperties, NavigationController, usePop, usePresent } fro
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
@@ -468,7 +468,7 @@ const props = defineProps<{
 const errors = useErrors();
 const present = usePresent();
 const pop = usePop();
-const uitpasFeature = useFeatureFlag()('uitpas');
+const uitpasFeature = useFeatureFlagComputed('uitpas');
 
 /// For now only used to update locations and times of other products that are shared
 const { patch: patchWebshop, patched: patchedWebshop, addPatch: addWebshopPatch, hasChanges: hasWebshopChanges } = usePatch(props.webshop);

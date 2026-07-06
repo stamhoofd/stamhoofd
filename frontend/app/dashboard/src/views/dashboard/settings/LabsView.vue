@@ -74,6 +74,15 @@
                 </h3>
             </STListItem>
 
+            <STListItem v-if="!!STAMHOOFD.domains.webshop" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('UiTPAS-kansentarief op webshops') }}
+                </h3>
+            </STListItem>
+
             <STListItem v-if="!$isPlatform" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="disableCalendar" />
