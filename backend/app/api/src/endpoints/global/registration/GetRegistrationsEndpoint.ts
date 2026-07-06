@@ -159,6 +159,10 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             .setMaxExecutionTime(15 * 1000)
             .where('registeredAt', '!=', null);
 
+        if (organization && STAMHOOFD.userMode === 'organization') {
+            query.where('organizationId', organization.id);
+        }
+
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }

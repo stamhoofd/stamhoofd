@@ -486,19 +486,6 @@ export class AdminPermissionChecker {
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
     async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithUsersRegistrationsAndGroups = true) {
-        if (registration.deactivatedAt || !registration.registeredAt) {
-            if (!checkMember) {
-                // We can't grant access to a member because of a deactivated registration
-                return false;
-            }
-
-            // No full access: cannot access deactivated registrations
-            if (permissionLevel !== PermissionLevel.Read) {
-                // Not allowed to edit registrations that are deleted
-                return false;
-            }
-        }
-
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
@@ -509,6 +496,21 @@ export class AdminPermissionChecker {
             // Only full permissions; because non-full doesn't have access to other periods
             return true;
         }
+
+        // Non full admin logic
+        if (registration.deactivatedAt || !registration.registeredAt) {
+            if (!checkMember) {
+                // We can't grant access to a member because of a deactivated registration - unless full permission
+                return false;
+            }
+
+            // No full access: cannot access deactivated registrations
+            if (permissionLevel !== PermissionLevel.Read) {
+                // Not allowed to edit registrations that are deleted
+                return false;
+            }
+        }
+
         const organization = await this.getOrganization(registration.organizationId);
 
         if (registration.periodId !== organization.periodId) {

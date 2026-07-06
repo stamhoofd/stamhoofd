@@ -228,6 +228,22 @@ export class ContextPermissions {
     }
 
     canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        const organizationPermissions = this.getPermissionsForOrganization(organization);
+
+        if (!organizationPermissions) {
+            return false;
+        }
+
+        if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
+            // Only full permissions; because non-full doesn't have access to other periods
+            return true;
+        }
+
+        if (registration.deactivatedAt || !registration.registeredAt) {
+            // We can't grant access to a member because of a deactivated registration - unless full permission
+            return false;
+        }
+
         if (this.canAccessGroup(registration.group, permissionLevel, organization)) {
             return true;
         }
@@ -268,7 +284,11 @@ export class ContextPermissions {
             return true;
         }
 
-        for (const registration of member.filterRegistrations({ currentPeriod: true })) {
+        if (member.patchedMember.organizationId && member.patchedMember.organizationId === this.organization?.id && this.hasFullAccess()) {
+            return true;
+        }
+
+        for (const registration of member.filterRegistrations({})) {
             const organization = member.family.getOrganization(registration.organizationId);
             if (organization) {
                 if (this.canAccessRegistration(registration, organization, permissionLevel)) {

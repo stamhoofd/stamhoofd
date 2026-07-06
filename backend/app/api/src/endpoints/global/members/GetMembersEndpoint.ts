@@ -44,8 +44,11 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
-        // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
-        if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: 'registrations' })) {
+        if (organization && STAMHOOFD.userMode === 'organization' && await Context.auth.hasFullAccess(organization.id)) {
+            // Don't add any scoping. Organization id filter is added automatically.
+        } else if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: 'registrations' })) {
+            // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
+
             if (!organization) {
                 const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
                 if (tags !== 'all' && tags.length === 0) {
@@ -69,9 +72,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         },
                     };
                 }
-            }
-
-            if (organization) {
+            } else {
                 // Add organization scope filter
                 if (await Context.auth.canAccessAllMembers(organization.id, permissionLevel)) {
                     if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
