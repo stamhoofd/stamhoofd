@@ -1,16 +1,27 @@
 import { UitpasEventResponse, UitpasEventsResponse } from '@stamhoofd/structures';
 import { SimpleError } from '@simonbackx/simple-errors';
 
+/* Pick a translated string, prefer 'nl' */
+function pickTranslation(value: unknown): string {
+    if (typeof value !== 'object' || value === null) {
+        return '';
+    }
+    const entries = Object.entries(value as Record<string, unknown>).filter((e): e is [string, string] => typeof e[1] === 'string');
+    if (entries.length === 0) {
+        return '';
+    }
+    const nl = entries.find(([key]) => key === 'nl');
+    return nl ? nl[1] : entries[0][1];
+}
+
 type EventsResponse = {
     totalItems: number;
     itemsPerPage: number;
     member: Array<{
         '@id': string;
-        'name': {
-            nl: string;
-        };
+        'name': Record<string, string>;
         'location': {
-            name: object;
+            name: Record<string, string>;
         };
         'startDate'?: string;
         'endDate'?: string;
@@ -33,10 +44,7 @@ function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
             || !('@id' in member)
             || typeof member['@id'] !== 'string'
             || !('name' in member)
-            || typeof member.name !== 'object'
-            || member.name === null
-            || !('nl' in member.name)
-            || typeof member.name.nl !== 'string'
+            || pickTranslation(member.name) === ''
             || !('location' in member)
             || typeof member.location !== 'object'
             || member.location === null
@@ -111,6 +119,10 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         });
     });
 
+    return parseUitpasEventsResponse(json);
+}
+
+export function parseUitpasEventsResponse(json: unknown): UitpasEventsResponse {
     assertIsEventsResponse(json);
     const eventsResponse = new UitpasEventsResponse();
     eventsResponse.totalItems = json.totalItems;
@@ -118,16 +130,8 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
     eventsResponse.member = json.member.map((member) => {
         const event = new UitpasEventResponse();
         event.url = member['@id'];
-        event.name = member.name.nl;
-        const locationName = member.location.name as Record<string, string>;
-        const entrs = Object.entries(locationName);
-        const hasNl = entrs.find(([key]) => key === 'nl');
-        if (hasNl) {
-            event.location = locationName.nl;
-        } else {
-            const lang = entrs[0];
-            event.location = lang ? lang[1] : '';
-        }
+        event.name = pickTranslation(member.name);
+        event.location = pickTranslation(member.location.name);
         if (member.startDate) {
             event.startDate = new Date(member.startDate);
         }
