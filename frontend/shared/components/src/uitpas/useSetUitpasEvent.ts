@@ -5,6 +5,7 @@ import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/si
 import type { Ref } from 'vue';
 import { nextTick } from 'vue';
 import { useGetOfficialUitpasSocialTariff } from './useGetOfficialUitpasSocialTariff';
+import { Toast } from '#overlays/Toast.ts';
 
 type EventResponse = {
     '@id': string;
@@ -116,6 +117,9 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
                 }
                 const basePrice = basePrices[0].price;
                 const newReducedPrice = await getOfficialUitpasSocialTariff(uitpasEvent.url, basePrice);
+                if (p.price !== newReducedPrice) {
+                    Toast.warning($t('Het tarief {tariffName} werd aangepast, op basis van de richtlijnen van jouw UiTPAS-regio.', { tariffName: p.name })).setHide(null).show();
+                }
                 const patch = ProductPrice.patch({ id: p.id, price: newReducedPrice });
                 const produchtPatch = Product.patch({ id: patchedProduct.value.id });
                 produchtPatch.prices.addPatch(patch);
