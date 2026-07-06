@@ -61,6 +61,10 @@ export class SSOService {
         this.provider = data.provider;
         this.platform = data.platform;
         this.organization = data.organization ?? null;
+
+        if (STAMHOOFD.userMode === 'platform' && this.organization) {
+            throw new Error('SSO provided by organization disabled in platform mode');
+        }
     }
 
     static async clearExpiredTokensOrFromUser(userId: string | null = null) {
@@ -371,7 +375,7 @@ export class SSOService {
             if (token) {
                 user = await User.getByID(token.userId);
 
-                if (!user) {
+                if (!user || user.organizationId !== (this.organization?.id ?? null)) {
                     throw new SimpleError({
                         code: 'invalid_user',
                         message: 'User not found',
