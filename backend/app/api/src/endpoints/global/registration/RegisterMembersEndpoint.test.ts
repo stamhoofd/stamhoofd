@@ -3266,7 +3266,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // #region act and assert
             await post(body1, organization, token);
-            await expect(post(body2, organization, token)).rejects.toThrow(/No permission to delete this registration/);
+            await expect(post(body2, organization, token)).rejects.toThrow(/Cannot delete inactive registration/);
             // #endregion
         });
     });
