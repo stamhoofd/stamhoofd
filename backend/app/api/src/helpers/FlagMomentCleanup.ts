@@ -1,137 +1,84 @@
-import { Group, Member, MemberResponsibilityRecord, Organization, Platform, Registration } from '@stamhoofd/models';
-import { SQL, SQLWhereExists } from '@stamhoofd/sql';
-import { GroupType } from '@stamhoofd/structures';
+import { Member, MemberResponsibilityRecord, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { MemberUserSyncer } from './MemberUserSyncer.js';
 
 export class FlagMomentCleanup {
     /**
-     * End functions of old members who have no active registration for the current period.
+     * End organization-scoped responsibilities of members that are no longer registered, based on
+     * MemberResponsibilityRecord.getAutoRemoveDate.
      */
-    static async endFunctionsOfUsersWithoutRegistration() {
-        console.log('Start cleanup functions');
-        const responsibilitiesToEnd = await this.getActiveMemberResponsibilityRecordsForOrganizationWithoutRegistrationInCurrentPeriod();
-
+    static async endResponsibilitiesOfUnregisteredMembers() {
         const now = new Date();
 
-        await Promise.all(responsibilitiesToEnd.map(async (responsibility) => {
-            responsibility.endDate = now;
-            await responsibility.save();
-            console.log(`Ended responsibility with id ${responsibility.id}`);
+        // NOTE: query should always be in accordance with getAutoRemoveDate!
 
-            const member = await Member.getByID(responsibility.memberId);
-            if (member) {
+        // Platform-wide (default) responsibilities are only kept alive by registrations in groups linked to a
+        // default age group. In organization mode this list is empty and that nuance does not apply.
+        const platformResponsibilityIds = STAMHOOFD.userMode === 'platform'
+            ? (await Platform.getShared()).config.responsibilities.map(r => r.id)
+            : [];
+
+        // All active, organization-scoped responsibility records
+        const records = await MemberResponsibilityRecord.select()
+            .where(MemberResponsibilityRecord.whereActive) // rule A
+            .whereNot('organizationId', null) // rule B
+            .fetch();
+
+        if (records.length === 0) {
+            return;
+        }
+
+        // Group records per member, so we load each member's registrations only once
+        const recordsPerMember = new Map<string, MemberResponsibilityRecord[]>();
+        for (const record of records) {
+            const list = recordsPerMember.get(record.memberId);
+            if (list) {
+                list.push(record);
+            } else {
+                recordsPerMember.set(record.memberId, [record]);
+            }
+        }
+
+        // Resolve the current period per organization (each organization can be in its own period)
+        const periodPerOrganization = new Map<string, RegistrationPeriod | null>();
+        const getCurrentPeriod = async (organizationId: string): Promise<RegistrationPeriod | null> => {
+            const cached = periodPerOrganization.get(organizationId);
+            if (cached !== undefined) {
+                return cached;
+            }
+            const organization = await Organization.getByID(organizationId);
+            const period = organization?.periodId ? (await RegistrationPeriod.getByID(organization.periodId)) ?? null : null;
+            periodPerOrganization.set(organizationId, period);
+            return period;
+        };
+
+        for (const [memberId, memberRecords] of recordsPerMember) {
+            const member = await Member.getByIdWithRegistrationsAndGroups(memberId);
+            if (!member) {
+                continue;
+            }
+
+            let changed = false;
+            for (const record of memberRecords) {
+                // record.organizationId is guaranteed to be set (whereNot organizationId null)
+                const currentPeriod = await getCurrentPeriod(record.organizationId!);
+                if (!currentPeriod) {
+                    continue; // organization has no current period -> skip
+                }
+
+                const autoRemoveDate = record.getBaseStructure().getAutoRemoveDate(member.registrations.map(r => r.getStructure()), currentPeriod, platformResponsibilityIds);
+                if (autoRemoveDate === null || autoRemoveDate > now) {
+                    continue;
+                }
+
+                record.endDate = now;
+                await record.save();
+                changed = true;
+                console.log(`Ended responsibility ${record.id} of member ${memberId} in organization ${record.organizationId} (auto-remove date was ${autoRemoveDate.toISOString()})`);
+            }
+
+            if (changed) {
                 await MemberUserSyncer.onChangeMember(member);
             }
-        }));
-    }
-
-    static async getActiveMemberResponsibilityRecordsForOrganizationWithoutRegistrationInCurrentPeriod() {
-        if (STAMHOOFD.userMode === 'platform') {
-            const platform = await Platform.getShared();
-            const currentPeriodId = platform.periodId;
-            const platformResponsibilityIds = platform.config.responsibilities.map(r => r.id);
-
-            return await MemberResponsibilityRecord.select()
-                .whereNot('organizationId', null)
-                .where(
-                    MemberResponsibilityRecord.whereActive,
-                )
-                .whereNot(
-                    new SQLWhereExists(
-                        SQL.select()
-                            .from(Registration.table)
-                            .join(
-                                SQL.innerJoin(SQL.table(Group.table))
-                                    .where(
-                                        SQL.column(Group.table, 'id'),
-                                        SQL.column(Registration.table, 'groupId'),
-                                    ),
-                            )
-                            .where(
-                                SQL.column(Registration.table, 'memberId'),
-                                SQL.column(MemberResponsibilityRecord.table, 'memberId'),
-                            ).where(
-                                SQL.column(Registration.table, 'organizationId'),
-                                SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
-                            ).where(
-                                SQL.column(Registration.table, 'periodId'),
-                                currentPeriodId,
-                            ).where(
-                                SQL.column(Registration.table, 'deactivatedAt'),
-                                null,
-                            ).whereNot(
-                                SQL.column(Registration.table, 'registeredAt'),
-                                null,
-                            ).where(
-                                SQL.column(Group.table, 'type'),
-                                GroupType.Membership,
-                            ).where(
-                                SQL.where(
-                                    SQL.column(Group.table, 'defaultAgeGroupId'),
-                                    '!=',
-                                    null,
-                                ).or(
-                                    SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'),
-                                    '!=',
-                                    platformResponsibilityIds,
-                                ),
-                            ).where(
-                                SQL.column(Group.table, 'deletedAt'),
-                                null,
-                            ),
-                    ),
-                )
-                .fetch();
-        } else {
-            return await MemberResponsibilityRecord.select()
-                .join(SQL.innerJoin(
-                    SQL.table(Organization.table))
-                    .where(
-                        SQL.column(Organization.table, 'id'),
-                        SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
-                    ),
-                )
-                .whereNot('organizationId', null)
-                .whereNot(SQL.column(Organization.table, 'periodId'), null)
-                .where(
-                    MemberResponsibilityRecord.whereActive,
-                )
-                .whereNot(
-                    new SQLWhereExists(
-                        SQL.select()
-                            .from(Registration.table)
-                            .join(
-                                SQL.innerJoin(SQL.table(Group.table))
-                                    .where(
-                                        SQL.column(Group.table, 'id'),
-                                        SQL.column(Registration.table, 'groupId'),
-                                    ),
-                            )
-                            .where(
-                                SQL.column(Registration.table, 'memberId'),
-                                SQL.column(MemberResponsibilityRecord.table, 'memberId'),
-                            ).where(
-                                SQL.column(Registration.table, 'organizationId'),
-                                SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
-                            ).where(
-                                SQL.column(Registration.table, 'periodId'),
-                                SQL.column(Organization.table, 'periodId'),
-                            ).where(
-                                SQL.column(Registration.table, 'deactivatedAt'),
-                                null,
-                            ).whereNot(
-                                SQL.column(Registration.table, 'registeredAt'),
-                                null,
-                            ).where(
-                                SQL.column(Group.table, 'type'),
-                                GroupType.Membership,
-                            ).where(
-                                SQL.column(Group.table, 'deletedAt'),
-                                null,
-                            ),
-                    ),
-                )
-                .fetch();
         }
     }
 }
