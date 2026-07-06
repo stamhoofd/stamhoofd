@@ -177,11 +177,10 @@ import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
 import { useShallowMap } from './hooks/useShallowMap';
 import TableActionsContextMenu from './TableActionsContextMenu.vue';
 
-const MAX_SCROLLABLE_PX = 10_000_000; // safer for Firefox
-
 export interface TableListable {
     id: string;
 }
+const MAX_SCROLLABLE_PX = 10_000_000; // safer for Firefox
 
 class VisibleRow<T> {
     id = uuidv4();
