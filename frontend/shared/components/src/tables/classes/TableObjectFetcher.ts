@@ -132,11 +132,6 @@ export class TableObjectFetcher<O extends { id: string }> {
         }
 
         this.objects = [];
-        // The visible range belongs to the previous object list. After clearing the
-        // list, the table can report the same range again; resetting this state
-        // makes that next visibility update trigger a fresh fetch.
-        this.currentStartIndex = 0;
-        this.currentEndIndex = 0;
 
         if (total) {
             this.totalCount = null;

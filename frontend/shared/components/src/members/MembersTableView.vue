@@ -39,9 +39,7 @@ import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
-import { getMemberColumns } from '#members/helpers/getMemberColumns.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
-import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
@@ -51,10 +49,13 @@ import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, GroupType, SGVSyncStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
+import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
+import { getMemberColumns } from '#members/helpers/getMemberColumns.ts';
+import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;
 
@@ -115,7 +116,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform();
-const filterPeriodId = computed(() => props.periodId ?? props.group?.periodId ?? organization?.value?.period?.period?.id ?? platform.value.period.id);
+const filterPeriodId = props.periodId ?? props.group?.periodId ?? organization?.value?.period?.period?.id ?? platform.value.period.id;
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const defaultFilter = isPlatform && app === 'admin' && !props.group && !props.customFilter
     ? {
@@ -130,7 +131,7 @@ const defaultFilter = isPlatform && app === 'admin' && !props.group && !props.cu
     : null;
 
 const organizationRegistrationPeriod = computed(() => {
-    const periodId = filterPeriodId.value;
+    const periodId = filterPeriodId;
 
     return organization.value?.periods?.organizationPeriods?.find(p => p.period.id === periodId);
 });
@@ -186,16 +187,14 @@ function getRequiredFilter(): StamhoofdFilter | null {
     }
 
     if (!props.group && !props.category) {
-        const periodId = filterPeriodId.value;
-
-        if (organization.value && periodId) {
+        if (organization.value && props.periodId) {
             // Only show members that are registered in the current period AND in this group
             // (avoid showing old members that moved to other groups)
             return {
                 registrations: {
                     $elemMatch: {
                         organizationId: organization.value.id,
-                        periodId,
+                        periodId: props.periodId,
                         group: {
                             // Do not show members that are only registered for a waiting list or event
                             type: GroupType.Membership,
@@ -205,11 +204,11 @@ function getRequiredFilter(): StamhoofdFilter | null {
             };
         }
 
-        if (periodId) {
+        if (props.periodId) {
             return {
                 registrations: {
                     $elemMatch: {
-                        periodId,
+                        periodId: props.periodId,
                     },
                 },
             };
@@ -219,7 +218,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
 
     const extra: StamhoofdFilter[] = getRequiredRegistrationsFilter({
         group: props.group ?? undefined,
-        periodId: filterPeriodId.value,
+        periodId: props.periodId ?? undefined,
     });
 
     return [
@@ -241,15 +240,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
 }
 
 const objectFetcher = useMembersObjectFetcher({
-    get requiredFilter() {
-        return getRequiredFilter();
-    },
+    requiredFilter: getRequiredFilter(),
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
-watch(filterPeriodId, () => {
-    tableObjectFetcher.reset(true, true);
-});
 const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(computed(() => tableObjectFetcher.objects.map(member => member.member)));
 
 const allColumns = getMemberColumns({
@@ -259,7 +253,7 @@ const allColumns = getMemberColumns({
     category: props.category,
     organization: organization.value,
     groups,
-    filterPeriodId: filterPeriodId.value,
+    filterPeriodId,
     auth,
     app,
     waitingList: waitingList.value,

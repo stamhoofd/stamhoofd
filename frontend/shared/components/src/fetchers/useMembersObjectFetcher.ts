@@ -1,9 +1,9 @@
-import { useContext } from '#hooks/useContext.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
-import type { Decoder } from '@simonbackx/simple-encoding';
 import type { CountFilteredRequest, PlatformMember, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SortItemDirection } from '@stamhoofd/structures';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { useContext } from '#hooks/useContext.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 
 type ObjectType = PlatformMember;
 
@@ -78,9 +78,5 @@ export function useMembersObjectFetcher(overrides?: Partial<ObjectFetcher<Object
         },
 
         ...overrides,
-
-        get requiredFilter() {
-            return overrides?.requiredFilter ?? null;
-        },
     };
 }
