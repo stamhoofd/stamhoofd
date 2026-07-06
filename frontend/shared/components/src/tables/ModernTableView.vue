@@ -177,6 +177,8 @@ import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
 import { useShallowMap } from './hooks/useShallowMap';
 import TableActionsContextMenu from './TableActionsContextMenu.vue';
 
+const MAX_SCROLLABLE_PX = 10_000_000; // safer for Firefox
+
 export interface TableListable {
     id: string;
 }
@@ -1929,7 +1931,7 @@ watchEffect(() => {
 });
 
 const totalHeight = computed(() => {
-    return rowHeight.value * totalFilteredCount.value;
+    return Math.min(MAX_SCROLLABLE_PX, rowHeight.value * totalFilteredCount.value);
 });
 
 function getPrevious(value: Value): Value | null {
