@@ -190,10 +190,19 @@ export class PlatformFamily {
             const family = new PlatformFamily(context);
             family._isSingle = true;
 
-            for (const organization of blob.organizations) {
-                // Check if this organization is relevant to this member
-                if (member.registrations.find(r => r.organizationId === organization.id) || member.platformMemberships.find(m => m.organizationId === organization.id) || member.responsibilities.find(r => r.organizationId === organization.id)) {
+            if (member.organizationId) {
+                const organization = blob.organizations.find(o => o.id === member.organizationId);
+                if (organization) {
                     family.insertOrganization(organization);
+                } else {
+                    console.warn('Missing organization in response', member.organizationId);
+                }
+            } else {
+                for (const organization of blob.organizations) {
+                // Check if this organization is relevant to this member
+                    if (member.registrations.find(r => r.organizationId === organization.id) || member.platformMemberships.find(m => m.organizationId === organization.id) || member.responsibilities.find(r => r.organizationId === organization.id)) {
+                        family.insertOrganization(organization);
+                    }
                 }
             }
 
@@ -1214,6 +1223,14 @@ export class PlatformMember implements ObjectWithRecords {
         currentPeriod?: boolean;
         types?: GroupType[];
     }) {
+        if (this.patchedMember.organizationId) {
+            const org = this.family.getOrganization(this.patchedMember.organizationId);
+            if (org) {
+                return [org];
+            }
+            return [];
+        }
+
         const registrations = this.filterRegistrations(filters);
         const base: Organization[] = [];
 
