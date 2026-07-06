@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/cli",
-    "version": "2.129.2",
+    "version": "2.129.3",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -32,7 +32,7 @@
         "@aws-sdk/client-s3": "3.1068.0",
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.11.4",
-        "@stamhoofd/types": "2.129.2",
+        "@stamhoofd/types": "2.129.3",
         "chalk": "5.6.2",
         "log-update": "8.0.0",
         "openai": "4.104.0",

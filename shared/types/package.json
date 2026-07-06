@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/types",
-    "version": "2.129.2",
+    "version": "2.129.3",
     "type": "module",
     "exports": {
         "./*": {
@@ -21,7 +21,7 @@
         "jose": "5.10.0"
     },
     "devDependencies": {
-        "eslint-plugin-stamhoofd": "2.129.2"
+        "eslint-plugin-stamhoofd": "2.129.3"
     },
     "license": "UNLICENCED",
     "publishConfig": {
