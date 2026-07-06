@@ -27,10 +27,10 @@ export class Formatter {
 
     static iban(ibanRaw: string) {
         try {
-            return friendlyFormatIBAN(ibanRaw) ?? ibanRaw; // 'NL91ABNA0517164300'
+            return (friendlyFormatIBAN(ibanRaw) ?? ibanRaw).trim().replaceAll('*', '•').replace(/(?:••••\s)+/, '•••• ');
         } catch (e) {
             console.error('Invalid IBAN', ibanRaw, e);
-            return ibanRaw; // Return the raw IBAN if it cannot be formatted
+            return ibanRaw.trim().replaceAll('*', '•').replace(/(?:••••\s)+/, '•••• ');
         }
     }
 

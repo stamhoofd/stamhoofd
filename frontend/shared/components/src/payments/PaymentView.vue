@@ -127,6 +127,16 @@
                     </p>
                 </STListItem>
 
+                <STListItem v-else-if="payment.ibanName">
+                    <h3 class="style-definition-label">
+                        {{ $t('Bankkaart op naam van') }}
+                    </h3>
+
+                    <p class="style-definition-text">
+                        {{ payment.ibanName }}
+                    </p>
+                </STListItem>
+
                 <STListItem v-if="payment.settlement" class="right-description right-stack">
                     <h3 class="style-definition-label">
                         {{ $t('%hL') }}

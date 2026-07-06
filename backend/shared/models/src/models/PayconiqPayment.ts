@@ -1,16 +1,16 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import type { PayconiqAccount} from '@stamhoofd/structures';
+import type { PayconiqAccount } from '@stamhoofd/structures';
 import { PaymentStatus, Version } from '@stamhoofd/structures';
 import type { IncomingMessage } from 'http';
 import https from 'https';
 import { v4 as uuidv4 } from 'uuid';
 
-import type {Organization} from './Organization.js';
-import type {Payment} from './Payment.js';
+import type { Organization } from './Organization.js';
+import type { Payment } from './Payment.js';
 
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 export class PayconiqPayment extends QueryableModel {
     static table = 'payconiq_payments';
@@ -84,10 +84,13 @@ export class PayconiqPayment extends QueryableModel {
 
                 if (typeof name === 'string') {
                     payment.ibanName = name.substring(0, 128);
+
+                    if (StringCompare.isFullCaps(payment.ibanName)) {
+                        payment.ibanName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(payment.ibanName.toLowerCase())).substring(0, 128);
+                    }
                 }
                 await payment.save();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to save iban in Payconiq payment');
                 console.error(e);
             }
@@ -120,8 +123,7 @@ export class PayconiqPayment extends QueryableModel {
         try {
             await PayconiqPayment.request('DELETE', '/v3/payments/' + this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
             return true;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to cancel Payconiq payment', this.id, this.payconiqId, this.payconiqId, e);
             return false;
         }
@@ -143,8 +145,7 @@ export class PayconiqPayment extends QueryableModel {
 
             }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
             return response;
-        }
-        catch (e) {
+        } catch (e) {
             return;
         }
     }
@@ -188,8 +189,7 @@ export class PayconiqPayment extends QueryableModel {
             const u = new URL(paymentQRCode);
             u.searchParams.set('s', 'L');
             paymentQRCode = u.toString();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Found unreadable payment QR Code');
             console.error(e);
         }
@@ -265,8 +265,7 @@ export class PayconiqPayment extends QueryableModel {
                             let json: any;
                             try {
                                 json = JSON.parse(body);
-                            }
-                            catch (error) {
+                            } catch (error) {
                                 console.error(error);
 
                                 // invalid json
@@ -279,8 +278,7 @@ export class PayconiqPayment extends QueryableModel {
                                     console.error(response.statusCode + ' ' + body);
                                     reject(new Error(body));
                                     return;
-                                }
-                                else {
+                                } else {
                                     // something wrong: throw parse error
                                     reject(error);
                                     return;
@@ -294,8 +292,7 @@ export class PayconiqPayment extends QueryableModel {
                             }
 
                             resolve(json);
-                        }
-                        catch (error) {
+                        } catch (error) {
                             console.error(error);
                             reject(error);
                         }
