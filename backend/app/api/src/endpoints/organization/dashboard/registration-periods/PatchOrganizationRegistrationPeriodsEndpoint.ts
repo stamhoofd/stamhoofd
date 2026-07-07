@@ -342,7 +342,20 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         organizationPeriod.settings = struct.settings;
         await organizationPeriod.save();
 
-        for (const s of struct.groups) {
+        // Create waiting list groups first: a regular group referencing a waiting list requires
+        // that waiting list group to already exist in the same period (see createGroup), otherwise
+        // it fails with 'Waiting list not found' and gets silently skipped below.
+        const sortedGroups = [...struct.groups].sort((a, b) => {
+            if (a.type === GroupType.WaitingList && b.type !== GroupType.WaitingList) {
+                return -1;
+            }
+            if (b.type === GroupType.WaitingList && a.type !== GroupType.WaitingList) {
+                return 1;
+            }
+            return 0;
+        });
+
+        for (const s of sortedGroups) {
             s.settings.registeredMembers = 0;
             s.settings.reservedMembers = 0;
             try {
