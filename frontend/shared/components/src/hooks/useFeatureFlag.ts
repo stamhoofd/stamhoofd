@@ -1,5 +1,7 @@
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Organization, OrganizationPrivateMetaData, Platform } from '@stamhoofd/structures';
+import type { ComputedRef } from 'vue';
+import { computed } from 'vue';
 import { usePatchOrganization } from '../organizations/usePatchOrganization';
 import { useContext } from './useContext';
 import { useOrganization } from './useOrganization';
@@ -20,6 +22,11 @@ export function useFeatureFlag(): (flag: string) => boolean {
     return (flag: string) => {
         return checkFeatureFlag(flag, context.value, platform.value, organization.value);
     };
+}
+
+export function useFeatureFlagComputed(flag: string): ComputedRef<boolean> {
+    const getFeatureFlag = useFeatureFlag();
+    return computed(() => getFeatureFlag(flag));
 }
 
 export function manualFeatureFlag(flag: string, context: SessionContext, organization?: Organization | null): boolean {

@@ -35,15 +35,6 @@
             {{ $t('%15o') }}
         </Checkbox>
 
-        <template v-if="isRootAdmin">
-            <hr>
-            <h2>Stamhoofd flags</h2>
-
-            <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
-                UiTPAS-kansentarief op webshops (onvolledig)
-            </Checkbox>
-        </template>
-
         <hr><h2>{{ $t('%HJ') }}</h2>
 
         <STList>
@@ -73,7 +64,6 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
@@ -87,7 +77,6 @@ const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
-const isRootAdmin = useIsRootAdmin();
 
 const present = usePresent();
 

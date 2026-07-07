@@ -294,7 +294,7 @@
 <script lang="ts" setup>
 
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -346,7 +346,7 @@ const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const organization = useRequiredOrganization();
 const patchOrganization = usePatchOrganization();
-const uitpasFeature = useFeatureFlag()('uitpas');
+const uitpasFeature = useFeatureFlagComputed('uitpas');
 
 defineRoutes([
     {
