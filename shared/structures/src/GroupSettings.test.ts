@@ -233,6 +233,41 @@ describe('GroupSettings stock', () => {
             });
             expect(group.settings.getTotalRemainingMenuOptionsStock(group)[0]).toBe(5);
         });
+
+        it('ignores multiple choice menus', () => {
+            const group = buildGroup({
+                prices: [
+                ],
+                optionMenus: [
+                    GroupOptionMenu.create({
+                        multipleChoice: true,
+                        options: [
+                            GroupOption.create({ stock: 100 }),
+                            GroupOption.create({ stock: 5 }),
+                        ],
+                    }),
+                    GroupOptionMenu.create({
+                        multipleChoice: true,
+                        options: [
+                            GroupOption.create({ stock: 100 }),
+                            GroupOption.create({ stock: 5 }),
+                        ],
+                    }),
+                    GroupOptionMenu.create({
+                        // only this menu should be used
+                        multipleChoice: false,
+                        options: [
+                            GroupOption.create({ stock: 100 }),
+                            GroupOption.create({ stock: 5 }),
+                        ],
+                    }),
+                ],
+            });
+
+            const result = group.settings.getTotalRemainingMenuOptionsStock(group);
+            expect(result).toHaveLength(1);
+            expect(result[0]).toBe(105);
+        });
     });
 
     describe('getRemainingStockIncludingPricesAndOptions', () => {
