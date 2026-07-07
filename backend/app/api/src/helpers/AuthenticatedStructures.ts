@@ -514,6 +514,9 @@ export class AuthenticatedStructures {
         }
 
         for (const member of members) {
+            if (member.organizationId) {
+                organizationIds.push(member.organizationId);
+            }
             for (const registration of member.registrations) {
                 organizationIds.push(registration.organizationId);
             }
@@ -620,14 +623,8 @@ export class AuthenticatedStructures {
                 group: Group;
             })[] = [];
             const userManager = Context.auth.isUserManager(member);
+
             for (const registration of member.registrations) {
-                if (includeContextOrganization || registration.organizationId !== Context.auth.organization?.id) {
-                    const found = organizations.get(registration.id);
-                    if (!found) {
-                        const organization = await Context.auth.getOrganization(registration.organizationId);
-                        organizations.set(organization.id, organization);
-                    }
-                }
                 if (organizations.get(registration.organizationId)?.active || (Context.auth.organization && Context.auth.organization.active && registration.organizationId === Context.auth.organization.id) || await Context.auth.hasFullAccess(registration.organizationId)) {
                     if (
                         !!options?.forAdminCartCalculation
@@ -639,6 +636,7 @@ export class AuthenticatedStructures {
                     }
                 }
             }
+
             member.registrations = filtered;
             const balancesPermission = (!!options?.forAdminCartCalculation) || await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id);
 

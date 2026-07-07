@@ -1,8 +1,9 @@
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
+import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
+import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { ref } from 'vue';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -10,38 +11,29 @@ import { NumberFilterBuilder } from '../NumberUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getMemberBaseFilters } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
-import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 
 export function useGetPlatformMembershipsUIFilterBuilders() {
     const platform = usePlatform();
-    const manager = usePlatformManager();
-    const owner = useRequestOwner();
     const loading = ref(true);
-    const organizationFilterBuilders = useGetOrganizationUIFilterBuilders({onlyBaseFilters: true});
-
-    manager.value.loadPeriods(false, true, owner).then(() => {
-        loading.value = false;
-    }).catch((e) => {
-        console.error('Failed to load periods in useAdvancedPlatformMembershipUIFilterBuilders', e);
-    });
+    const organizationFilterBuilders = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
+    const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
 
     const getWebshopUIFilterBuilders = (): UIFilterBuilders => {
         const builders: UIFilterBuilders = [
-            new MultipleChoiceFilterBuilder({
-                name: $t('%7Z'),
-                options: (platform.value.periods ?? []).map((period) => {
-                    return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
-                }),
-                wrapper: {
-                    periodId: { $in: FilterWrapperMarker },
-                },
-                additionalUnwrappers: [
-                    {
-                        periodId: FilterWrapperMarker,
-                    },
-                ],
-            })
         ];
+
+        if (STAMHOOFD.userMode === 'platform') {
+            builders.push(
+                new RelationFilterBuilder({
+                    name: $t('%7Z'),
+                    key: 'periodId',
+                    relationFetcher: registrationPeriodsRelationFetcher,
+                    viewProperties: {
+                        searchEnabled: false,
+                    },
+                }),
+            );
+        }
 
         if (platform.value.config.membershipTypes.length > 1) {
             builders.push(new MultipleChoiceFilterBuilder({
@@ -58,7 +50,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
         }
 
         builders.push(...[
-             new DateFilterBuilder({
+            new DateFilterBuilder({
                 name: $t('%1Of'),
                 key: 'startDate',
             }),
@@ -81,7 +73,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
             new NumberFilterBuilder({
                 key: 'price',
                 name: $t('%1IP'),
-                type: NumberFilterFormat.Currency
+                type: NumberFilterFormat.Currency,
             }),
 
             new NumberFilterBuilder({
@@ -99,7 +91,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                 },
             }),
             // group
-             new GroupUIFilterBuilder({
+            new GroupUIFilterBuilder({
                 name: $t('%1Ok'),
                 description: $t('%1PD'),
                 builders: organizationFilterBuilders.getOrganizationUIFilterBuilders(),
@@ -109,7 +101,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                     },
                 },
             }),
-        ])
+        ]);
 
         // Put a GroupUIFilterBuilder first so it can parse any filter structure,
         // including the defaultFilter which uses $or for the status.

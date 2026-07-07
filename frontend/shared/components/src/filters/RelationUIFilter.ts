@@ -202,21 +202,37 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
             return null;
         }
 
-        for (const subKey of ['$in', '$or']) {
-            const filter = unwrapFilterByPath(unwrapped, [this.key, subKey]);
-            if (filter === undefined) {
-                continue;
+        {
+            const filter = unwrapFilterByPath(unwrapped, [this.key, '$in']);
+            if (filter) {
+                const options = this.getOptionsFromFilter(filter);
+                if (options) {
+                    return new RelationUIFilter({
+                        builder: this,
+                        relationFetcher: this.relationFetcher,
+                        values: options,
+                        type: this.type,
+                        defaultOptions: this.defaultOptions,
+                        viewProperties: this.viewProperties,
+                    }, { isInverted });
+                }
             }
-            const options = this.getOptionsFromFilter(filter);
-            if (options) {
-                return new RelationUIFilter({
-                    builder: this,
-                    relationFetcher: this.relationFetcher,
-                    values: options,
-                    type: this.type,
-                    defaultOptions: this.defaultOptions,
-                    viewProperties: this.viewProperties,
-                }, { isInverted });
+        }
+
+        {
+            const filter = unwrapFilterByPath(unwrapped, [this.key]);
+            if (filter) {
+                const options = this.getOptionsFromFilter(filter);
+                if (options) {
+                    return new RelationUIFilter({
+                        builder: this,
+                        relationFetcher: this.relationFetcher,
+                        values: options,
+                        type: this.type,
+                        defaultOptions: this.defaultOptions,
+                        viewProperties: this.viewProperties,
+                    }, { isInverted });
+                }
             }
         }
 

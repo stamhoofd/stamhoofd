@@ -41,8 +41,12 @@
 </template>
 
 <script lang="ts" setup>
+import { useAuth } from '#hooks/useAuth.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import type { TableActionSelection } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
@@ -55,20 +59,16 @@ import { useAppContext } from '../../../context/appContext';
 import { GlobalEventBus } from '../../../EventBus';
 import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
 import { useRegistrationInvitationsObjectFetcher } from '../../../fetchers/useRegistrationInvitationsObjectFetcher';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useContext } from '#hooks/useContext.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { Toast } from '../../../overlays/Toast';
 import { getDeleteInvitationAction } from '../../../registrations/classes/RegistrationInvitationActionBuilder';
-import type { TableActionSelection } from '#tables/classes/TableAction.ts';
 
 import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 import { useRegistrationsActionBuilder } from '../../classes/RegistrationsActionBuilder';
 import ViewMemberInvitationRow from './ViewMemberInvitationRow.vue';
 import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
-import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -81,7 +81,13 @@ const visibleRegistrationsTitle = computed(() => {
 const auth = useAuth();
 const present = usePresent();
 const organization = useOrganization();
-const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods();
+const memberOrganization = computed(() => {
+    if (props.member.patchedMember.organizationId) {
+        return organization.value ?? props.member.family.getOrganization(props.member.patchedMember.organizationId) ?? props.member.filterOrganizations({})[0] ?? null;
+    }
+    return organization.value ?? props.member.filterOrganizations({})[0] ?? null;
+});
+const fetchOrganizationPeriods = useFetchOrganizationRegistrationPeriods({ organization: memberOrganization });
 const platform = usePlatform();
 const context = useContext();
 
@@ -255,21 +261,29 @@ async function editInvitation(memberRegistrationInvitation: MemberRegistrationIn
     });
     await present(displayedComponent.setDisplayStyle('overlay'));
 }
+const fetchPeriods = useFetchRegistrationPeriods({ organization: memberOrganization });
 
-function switchCycle(event: MouseEvent) {
-    const menu = new ContextMenu([
-        (platform.value.periods ?? []).slice(0, 5).map((p) => {
-            return new ContextMenuItem({
-                name: p.name,
-                selected: p.id === period.value.id,
-                action: () => {
-                    period.value = p;
-                    return true;
-                },
-            });
-        }),
-    ]);
-    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error);
+async function switchCycle(event: MouseEvent) {
+    // Capture button before doing async work
+    const button = event.currentTarget as HTMLElement;
+    try {
+        const periods = await fetchPeriods({ shouldRetry: false });
+        const menu = new ContextMenu([
+            (periods ?? []).slice(0, 5).map((p) => {
+                return new ContextMenuItem({
+                    name: p.name,
+                    selected: p.id === period.value.id,
+                    action: () => {
+                        period.value = p;
+                        return true;
+                    },
+                });
+            }),
+        ]);
+        await menu.show({ button, yOffset: -10 });
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
 }
 
 </script>

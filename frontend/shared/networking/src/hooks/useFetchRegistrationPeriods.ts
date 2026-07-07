@@ -3,13 +3,15 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import type { Organization } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationPeriod, SortItemDirection } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { useRequestOwner } from './useRequestOwner';
 
-export function useFetchRegistrationPeriods() {
+export function useFetchRegistrationPeriods({ organization }: { organization?: Ref<Organization | null> | undefined } = {}) {
     const context = useContext();
     const owner = useRequestOwner();
-    const organization = useOrganization();
+    organization = organization ?? useOrganization();
     const platform = usePlatform();
 
     return async function ({ shouldRetry }: { shouldRetry?: boolean }) {
@@ -23,7 +25,7 @@ export function useFetchRegistrationPeriods() {
         startDate.setHours(0, 0, 0, 0);
 
         // Request data
-        const periodsResponse = await context.value.authenticatedServer.request({
+        const periodsResponse = await (organization.value ? context.value.getAuthenticatedServerForOrganization(organization.value.id) : context.value.authenticatedServer).request({
             method: 'GET',
             path: '/registration-periods',
             query: new LimitedFilteredRequest({

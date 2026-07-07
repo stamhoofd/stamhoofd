@@ -16,8 +16,8 @@
     <LoadingBoxTransition>
         <div v-if="infiniteObjectFetcher" class="results">
             <STErrorsDefault :error-box="errorBox" />
-            <STList v-if="firstOptions.length">
-                <STListItem v-for="option of firstOptions" :key="option.value" :selectable="true" element-name="label">
+            <STList v-if="firstOptions.length || lastOptions.length">
+                <STListItem v-for="option of [...firstOptions, ...lastOptions]" :key="option.value" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
                     </template>
@@ -29,22 +29,7 @@
                     </p>
                 </STListItem>
             </STList>
-            <template v-if="infiniteObjectFetcher.errorState === null">
-                <STList v-if="lastOptions.length">
-                    <STListItem v-for="option of lastOptions" :key="option.value" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ option.name }}
-                        </h3>
-                        <p v-if="option.description" class="style-description-small">
-                            {{ option.description }}
-                        </p>
-                    </STListItem>
-                </STList>
-                <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`%1XB`)" />
-            </template>
+            <InfiniteObjectFetcherEnd v-if="infiniteObjectFetcher.errorState === null" :fetcher="infiniteObjectFetcher" :empty-message="$t(`%1XB`)" />
         </div>
     </LoadingBoxTransition>
 </template>

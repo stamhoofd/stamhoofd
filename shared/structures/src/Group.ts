@@ -5,7 +5,7 @@ import { Formatter } from '@stamhoofd/utility';
 import type { AppType } from './AppType.js';
 import type { Event } from './Event.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
-import { getActivePeriodIds } from './getActivePeriods.js';
+import { getActivePeriodIds, getActivePeriods } from './getActivePeriods.js';
 import type { GroupCategory } from './GroupCategory.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { GroupPrivateSettings } from './GroupPrivateSettings.js';
@@ -271,11 +271,25 @@ export class Group extends AutoEncoder {
         return getActivePeriodIds(this.periodId, organization);
     }
 
+    /**
+     * Return the period ids that we consider as active for a given
+     * group and organization combination.
+     */
+    getActivePeriods(organization: Organization | null) {
+        return getActivePeriods(this.settings.period ?? { id: this.periodId, name: $t('Onbekend werkjaar') }, organization);
+    }
+
     getRecommendedFilter(organization?: Organization | null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
-        const periodIds = [...this.getActivePeriodIds(organization ?? null)];
-        const periodIdFilter = periodIds.length === 1 ? { periodId: periodIds[0] } : { periodId: { $in: periodIds } };
+        const periods = this.getActivePeriods(organization ?? null).map((p) => {
+            return {
+                $: '$rel',
+                value: p.id,
+                name: p.name,
+            };
+        });
+        const periodIdFilter = periods.length === 1 ? { periodId: periods[0] } : { periodId: { $in: periods } };
 
         if (this.settings.minAge !== null) {
             filter.push({

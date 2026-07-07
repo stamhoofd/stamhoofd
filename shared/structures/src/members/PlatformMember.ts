@@ -416,7 +416,7 @@ export class PlatformFamily {
         const organizationIds = new Set<string>();
         const organizationTags = new Set<string>();
         const ages = new Set<number>();
-        const periodIds = getActivePeriodIds(null, null, this.platform);
+        const periodIds = new Set(getActivePeriodIds(null, null, this.platform));
         for (const org of this.organizations) {
             const ids = getActivePeriodIds(null, org);
             for (const id of ids) {

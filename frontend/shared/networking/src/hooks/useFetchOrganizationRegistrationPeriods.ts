@@ -2,11 +2,13 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import type { Organization } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { useFetchRegistrationPeriods } from './useFetchRegistrationPeriods';
 import { useRequestOwner } from './useRequestOwner';
 import { reactive } from 'vue';
+import type { Ref } from 'vue';
 
 const periodsCache = new Map<string, RegistrationPeriodList>();
 
@@ -14,11 +16,11 @@ export function clearOrganizationPeriodsCache() {
     periodsCache.clear();
 }
 
-export function useFetchOrganizationRegistrationPeriods() {
+export function useFetchOrganizationRegistrationPeriods({ organization }: { organization?: Ref<Organization> } = {}) {
     const context = useContext();
     const owner = useRequestOwner();
-    const fetchPeriods = useFetchRegistrationPeriods();
-    const organization = useRequiredOrganization();
+    const fetchPeriods = useFetchRegistrationPeriods({ organization });
+    organization = organization ?? useRequiredOrganization();
 
     return async function ({ shouldRetry, force }: { shouldRetry?: boolean; force?: boolean }) {
         const cache = periodsCache.get(organization.value.id);
@@ -32,7 +34,7 @@ export function useFetchOrganizationRegistrationPeriods() {
         let organizationPeriods: OrganizationRegistrationPeriod[] = [];
 
         if (periods.length !== 0) {
-            const response = await context.value.authenticatedServer.request({
+            const response = await context.value.getAuthenticatedServerForOrganization(organization.value.id).request({
                 method: 'GET',
                 path: '/organization/registration-periods',
                 query: new LimitedFilteredRequest({

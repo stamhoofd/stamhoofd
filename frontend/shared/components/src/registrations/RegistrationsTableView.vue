@@ -120,6 +120,7 @@ const auth = useAuth();
 const platform = usePlatform();
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
+const filterPeriodName = (filterPeriodId === props.organization?.period.period.id ? props.organization.period.period.name : null) ?? (filterPeriodId === platform.value?.period.id ? platform.value.period.name : null) ?? (filterPeriodId === props.group?.settings.period?.id ? props.group.settings.period?.name : null);
 
 const defaultFilter: StamhoofdFilter = getDefaultFilter();
 
@@ -147,7 +148,13 @@ function getDefaultFilter(): StamhoofdFilter {
                 if (isPlatform) {
                     filter = mergeFilters([
                         filter,
-                        { periodId: filterPeriodId },
+                        {
+                            periodId: {
+                                $: '$rel',
+                                value: filterPeriodId,
+                                name: filterPeriodName ?? $t('Onbekend werkjaar'),
+                            },
+                        },
                     ]);
                 }
             } else if (isPlatform) {

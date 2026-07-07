@@ -1,7 +1,7 @@
 import type { RelationFilterOption } from './RelationUIFilter';
 
 function hasOption<T extends string | number | Date | null | boolean>(options: RelationFilterOption<T>[], option: RelationFilterOption<T>) {
-    return options.some(o => o.value === option.value && o.name === option.name);
+    return options.some(o => o.value === option.value);
 }
 
 function filterDistinctOptions<T extends string | number | Date | null | boolean>(sourceOptions: RelationFilterOption<T>[], optionsToFilter: RelationFilterOption<T>[]) {

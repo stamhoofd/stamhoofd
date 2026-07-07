@@ -1,29 +1,26 @@
-import { Column } from '#tables/classes/Column.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { PlatformMembership } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { ref } from 'vue';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { Column } from '#tables/classes/Column.ts';
+import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import type { PlatformMembership, RegistrationPeriod } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { onMounted, shallowRef } from 'vue';
 
 type ObjectType = PlatformMembership;
 
 export function useGetPlatformMembershipColumns() {
     const platform = usePlatform();
-
-    const manager = usePlatformManager();
-    const owner = useRequestOwner();
-    const loading = ref(true);
-
-    manager.value.loadPeriods(false, true, owner).then(() => {
-        loading.value = false;
-    }).catch((e) => {
-        console.error('Failed to load periods in useAdvancedPlatformMembershipUIFilterBuilders', e);
-    });
+    const fetchRegistrationPeriods = useFetchRegistrationPeriods();
+    const periods = shallowRef<RegistrationPeriod[]>([]);
 
     function getMembershipType(id: string) {
         return platform.value.config.membershipTypes.find(mt => mt.id === id);
     }
+
+    onMounted(async () => {
+        if (STAMHOOFD.userMode === 'platform') {
+            periods.value = await fetchRegistrationPeriods({ shouldRetry: true });
+        }
+    });
 
     const now = new Date();
     const formatDate = (placeholder = $t(`%Gr`)) => (v: Date | null, width: number) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : placeholder;
@@ -39,7 +36,7 @@ export function useGetPlatformMembershipColumns() {
             recommendedWidth: 100,
             getStyle: () => 'code',
             index: 0,
-            enabled: false
+            enabled: false,
         }),
         new Column<ObjectType, string>({
             id: 'member.name',
@@ -48,7 +45,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: true,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, string>({
             id: 'member.name',
@@ -59,7 +56,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: false,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, string>({
             id: 'organization.name',
@@ -67,12 +64,12 @@ export function useGetPlatformMembershipColumns() {
             getValue: m => m.organization.name,
             getStyleForObject: (m) => {
                 // Gray if not yet charged
-                return m.balanceItemId ? '' : 'gray'
+                return m.balanceItemId ? '' : 'gray';
             },
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: true,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, string>({
             id: 'organization.uri',
@@ -81,7 +78,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 60,
             recommendedWidth: 100,
             enabled: false,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, string>({
             id: 'membershipTypeId',
@@ -97,7 +94,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 60,
             recommendedWidth: 100,
             enabled: true,
-            allowSorting: true
+            allowSorting: true,
         }),
         new Column<ObjectType, Date>({
             id: 'startDate',
@@ -108,7 +105,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 80,
             recommendedWidth: 200,
             enabled: true,
-            allowSorting: true
+            allowSorting: true,
         }),
         new Column<ObjectType, Date>({
             id: 'endDate',
@@ -119,7 +116,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 80,
             recommendedWidth: 200,
             enabled: true,
-            allowSorting: true
+            allowSorting: true,
         }),
         new Column<ObjectType, Date | null>({
             id: 'expiredDate',
@@ -131,7 +128,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 80,
             recommendedWidth: 200,
             enabled: false,
-            allowSorting: true
+            allowSorting: true,
         }),
         new Column<ObjectType, Date | null>({
             id: 'balanceItem.createdAt',
@@ -142,7 +139,7 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: true,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, number>({
             id: 'price',
@@ -164,45 +161,45 @@ export function useGetPlatformMembershipColumns() {
             id: 'balanceItem.priceOpen',
             name: $t('%1Ni'),
             getValue: m => m.balanceItem?.priceOpen ?? null,
-            format: (p) => p === null ? $t('%1OJ') : Formatter.price(p),
-            getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+            format: p => p === null ? $t('%1OJ') : Formatter.price(p),
+            getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
             minimumWidth: 100,
             recommendedWidth: 100,
             enabled: false,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, number | null>({
             id: 'balanceItem.pricePaid',
             name: $t('%1OD'),
             getValue: m => m.balanceItem?.pricePaid ?? null,
-            format: (p) => Formatter.price(p ?? 0),
-            getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+            format: p => Formatter.price(p ?? 0),
+            getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
             minimumWidth: 100,
             recommendedWidth: 100,
             enabled: false,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, number | null>({
             id: 'balanceItem.pricePending',
             name: $t('%1OL'),
             getValue: m => m.balanceItem?.pricePending ?? null,
-            format: (p) => Formatter.price(p ?? 0),
-            getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+            format: p => Formatter.price(p ?? 0),
+            getStyle: p => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
             minimumWidth: 100,
             recommendedWidth: 120,
             enabled: false,
-            allowSorting: false
+            allowSorting: false,
         }),
         new Column<ObjectType, Date>({
             id: 'createdAt',
             name: $t('%1Jc'),
             allowSorting: true,
-            getValue: (v) => v.createdAt,
+            getValue: v => v.createdAt,
             format: formatDate(),
             getStyle: styleDate,
             minimumWidth: 80,
             recommendedWidth: 220,
-            enabled: true
+            enabled: true,
         }),
         new Column<ObjectType, Date | null>({
             id: 'trialUntil',
@@ -216,9 +213,9 @@ export function useGetPlatformMembershipColumns() {
                 const date = formatDate()(value, width);
 
                 if (value > now) {
-                    return $t('%g8', {date})
+                    return $t('%g8', { date });
                 }
-                return $t('%16u', {date})
+                return $t('%16u', { date });
             },
             getStyle: v => v === null ? 'gray' : (v < now ? 'negative' : ''),
             minimumWidth: 70,
@@ -229,32 +226,38 @@ export function useGetPlatformMembershipColumns() {
             id: 'freeAmount',
             name: $t('%1Oo'),
             allowSorting: true,
-            getValue: (v) => v.freeAmount,
+            getValue: v => v.freeAmount,
             format: v => v ? v.toString() : $t('%1FW'),
-            getStyle: v => v ?  '' : 'gray',
+            getStyle: v => v ? '' : 'gray',
             minimumWidth: 80,
             recommendedWidth: 220,
-            enabled: false
+            enabled: false,
         }),
-        new Column<ObjectType, string>({
-            id: 'periodId',
-            name: $t('%7Z'),
-            allowSorting: false,
-            getValue: (v) => {
-                const periodId = v.periodId;
-                const period = platform.value.periods?.find(p => p.id === periodId);
-                if (period) {
-                    return period.name;
-                }
-                return '';
-            },
-            format: v => v ? v.toString() : $t('%1No'),
-            getStyle: v => v ?  '' : 'gray',
-            minimumWidth: 80,
-            recommendedWidth: 220,
-            enabled: false
-        }),
+
     ];
+
+    if (STAMHOOFD.userMode === 'platform') {
+        columns.push(
+            new Column<ObjectType, string>({
+                id: 'periodId',
+                name: $t('%7Z'),
+                allowSorting: false,
+                getValue: (v) => {
+                    const periodId = v.periodId;
+                    const period = periods.value.find(p => p.id === periodId);
+                    if (period) {
+                        return period.name;
+                    }
+                    return '';
+                },
+                format: v => v ? v.toString() : $t('%1No'),
+                getStyle: v => v ? '' : 'gray',
+                minimumWidth: 80,
+                recommendedWidth: 220,
+                enabled: false,
+            }),
+        );
+    }
 
     return columns;
 }

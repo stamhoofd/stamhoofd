@@ -69,13 +69,13 @@ describe('getRelationFilterDisplayOptions', () => {
         expect(getVisibleNames(result)).toEqual(['No group', 'Group D', 'Group A']);
     });
 
-    test('uses both value and name when checking for duplicate options', () => {
+    test('uses only value when checking for duplicate options', () => {
         const result = getRelationFilterDisplayOptions({
             defaultOptions: [],
             selectedOptions: [option('Old name', '1')],
             asyncOptions: [option('New name', '1')],
         });
 
-        expect(getVisibleNames(result)).toEqual(['Old name', 'New name']);
+        expect(getVisibleNames(result)).toEqual(['New name']);
     });
 });

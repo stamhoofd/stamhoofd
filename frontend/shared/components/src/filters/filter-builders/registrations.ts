@@ -1,11 +1,11 @@
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useAppContext } from '#context/appContext.ts';
+import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { FilterWrapperMarker, GroupType } from '@stamhoofd/structures';
 import type { ComputedRef } from 'vue';
 import { computed, ref } from 'vue';
-import { useAppContext } from '#context/appContext.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import { useUser } from '#hooks/useUser.ts';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { RelationFilterBuilder } from '../RelationUIFilter';
@@ -23,21 +23,14 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
     const $user = useUser();
     const isPlatform = STAMHOOFD.userMode === 'platform';
     const app = useAppContext();
-
-    const manager = usePlatformManager();
-    const owner = useRequestOwner();
     const loading = ref(true);
 
     const organizationRelationsFetcher = useOrganizationsRelationFetcher();
 
     const groupsRelationFetcher = useGroupsRelationFetcher();
     const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
-
-    manager.value.loadPeriods(false, true, owner).then(() => {
-        loading.value = false;
-    }).catch((e) => {
-        console.error('Failed to load periods in useAdvancedRegistrationsUIFilterBuilders', e);
-    });
+    const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
+    const organization = useOrganization();
 
     const getRegistrationFilters: RegistrationFilterBuilderFactory = ({ periodId }: RegistrationFilterBuilderFactoryOptions = {}) => computed(() => {
         const platform = $platform.value;
@@ -54,22 +47,15 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             relationFetcher: organizationRelationsFetcher,
         }));
 
-        if (!periodId) {
+        if (!periodId && (organization.value || STAMHOOFD.userMode === 'platform')) {
             all.push(
-                new MultipleChoiceFilterBuilder({
+                new RelationFilterBuilder({
                     name: $t('%7Z'),
-                    options: (platform.periods ?? []).map((period) => {
-                        return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
-                    }),
-                    allowCreation: hasPlatformPermissions,
-                    wrapper: {
-                        periodId: { $in: FilterWrapperMarker },
+                    key: 'periodId',
+                    relationFetcher: registrationPeriodsRelationFetcher,
+                    viewProperties: {
+                        searchEnabled: false,
                     },
-                    additionalUnwrappers: [
-                        {
-                            periodId: FilterWrapperMarker,
-                        },
-                    ],
                 }),
             );
         }

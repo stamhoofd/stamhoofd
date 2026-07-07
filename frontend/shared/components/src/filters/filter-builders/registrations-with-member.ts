@@ -1,5 +1,7 @@
 import { useAppContext } from '#context/appContext.ts';
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
+import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
+import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -30,6 +32,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
     const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const organization = useOrganization();
+    const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
 
     const filterBuilders = computed(() => {
         const all: UIFilterBuilder<UIFilter>[] = [];
@@ -39,20 +42,14 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
             key: 'registeredAt',
         }));
 
-        if (app === 'admin') {
-            all.push(new MultipleChoiceFilterBuilder({
+        if (app === 'admin' && STAMHOOFD.userMode === 'platform') {
+            all.push(new RelationFilterBuilder({
                 name: $t('%7Z'),
-                options: ($platform.value.periods ?? []).map((period) => {
-                    return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
-                }),
-                wrapper: {
-                    periodId: { $in: FilterWrapperMarker },
+                key: 'periodId',
+                relationFetcher: registrationPeriodsRelationFetcher,
+                viewProperties: {
+                    searchEnabled: false,
                 },
-                additionalUnwrappers: [
-                    {
-                        periodId: FilterWrapperMarker,
-                    },
-                ],
             }));
         } else {
             all.push(new NumberFilterBuilder({

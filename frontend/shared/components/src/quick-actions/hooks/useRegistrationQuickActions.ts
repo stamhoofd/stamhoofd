@@ -386,7 +386,7 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
         const ages = new Set<number>();
         // filter on the group that is linked to this event
         const eventGroupIds = new Set<string>();
-        const periodIds = getActivePeriodIds(null, null, family.platform);
+        const periodIds = new Set(getActivePeriodIds(null, null, family.platform));
         for (const org of family.organizations) {
             const ids = getActivePeriodIds(null, org);
             for (const id of ids) {
