@@ -574,6 +574,11 @@ export class GroupSettings extends AutoEncoder {
         const results: (number)[] = [];
 
         for (const menu of this.optionMenus) {
+            // no selection is required if multiple choice is true
+            if (menu.multipleChoice) {
+                continue;
+            }
+
             let total: number = 0;
             let skip = false;
 
