@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
-import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import { getInvoicesUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/invoices.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
@@ -53,7 +53,7 @@ const configurationId = computed(() => {
 
 const organization = useOrganization();
 const platform = usePlatform();
-const filterBuilders = usePaymentsUIFilterBuilders();
+const filterBuilders = getInvoicesUIFilterBuilders();
 const title = computed(() => {
     return $t('%1JA');
 });
