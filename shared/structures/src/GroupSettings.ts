@@ -9,7 +9,7 @@ import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
-import type { OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from './RegistrationPeriod.js';
+import type { OrganizationRegistrationPeriodSettings } from './RegistrationPeriod.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
@@ -546,12 +546,12 @@ export class GroupSettings extends AutoEncoder {
     }
 
     /**
-     * Maximum amount that can still be registered taking the stock of the individual prices into
+     * Total amount that can still be registered taking the stock of the individual prices into
      * account. Returns null if no price imposes a limit (at least one selectable price has unlimited
      * stock). Hidden prices are ignored since they cannot be selected for new registrations.
      */
-    getRemainingPricesStock(item: RegisterItem | Group): number | null {
-        let max: number | null = null;
+    getTotalRemainingPricesStock(item: RegisterItem | Group): number | null {
+        let total: number | null = null;
         for (const price of this.prices) {
             if (price.hidden) {
                 continue;
@@ -561,26 +561,67 @@ export class GroupSettings extends AutoEncoder {
                 // This price has unlimited stock, so prices don't impose a limit
                 return null;
             }
-            max = max === null ? remaining : Math.max(max, remaining);
+            total = total === null ? remaining : total + remaining;
         }
-        return max;
+        return total;
     }
 
     /**
-     * Remaining stock taking both the group its own stock (maxMembers) and the stock of the
-     * individual prices into account. Returns the minimum of both, or null if neither imposes a limit.
+     * Total amount per menu that can still be registered taking the stock of the individual options into
+     * account. Only includes menu if it imposes a limit. Hidden options are ignored since they cannot be selected for new registrations.
      */
-    getRemainingStockIncludingPrices(item: RegisterItem | Group): number | null {
-        const groupStock = this.getRemainingStock(item);
-        const pricesStock = this.getRemainingPricesStock(item);
+    getTotalRemainingMenuOptionsStock(item: RegisterItem | Group): (number)[] {
+        const results: (number)[] = [];
 
-        if (groupStock === null) {
-            return pricesStock;
+        for (const menu of this.optionMenus) {
+            // no selection is required if multiple choice is true
+            if (menu.multipleChoice) {
+                continue;
+            }
+
+            let total: number = 0;
+            let skip = false;
+
+            for (const option of menu.options) {
+                if (option.hidden) {
+                    continue;
+                }
+
+                const remaining = option.getRemainingStock(item);
+                if (remaining === null) {
+                    skip = true;
+                    // This option has unlimited stock, so menu does not impose a limit
+                    break;
+                }
+
+                total = total + remaining;
+            }
+
+            if (!skip) {
+                results.push(total);
+            }
         }
-        if (pricesStock === null) {
-            return groupStock;
+
+        return results;
+    }
+
+    /**
+     * Remaining stock taking both the group its own stock (maxMembers), the stock of the
+     * individual prices and the stock of the options into account. Returns the minimum of both, or null if neither imposes a limit.
+     */
+    getRemainingStockIncludingPricesAndOptions(item: RegisterItem | Group): number | null {
+        const groupStock = this.getRemainingStock(item);
+        const pricesStock = this.getTotalRemainingPricesStock(item);
+        const optionsStock = this.getTotalRemainingMenuOptionsStock(item);
+
+        const limits = [groupStock, pricesStock, ...optionsStock].filter(limit => limit !== null);
+        if (limits.length === 0) {
+            // if no limits
+            return null;
         }
-        return Math.min(groupStock, pricesStock);
+
+        // return lowest limit
+        return Math.min(...limits);
     }
 
     get isFull() {
