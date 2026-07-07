@@ -1013,7 +1013,7 @@ export class RegisterItem implements ObjectWithRecords {
      * This allows organizations to switch to a new period earlier and disable allowing registrations of the previous organization as being valid.
      */
     isActivePeriodId(periodId: string) {
-        const activePeriodIds = this.group.getActivePeriodIds(this.organization);
+        const activePeriodIds = new Set(this.group.getActivePeriodIds(this.organization));
         return activePeriodIds.has(periodId);
     }
 
