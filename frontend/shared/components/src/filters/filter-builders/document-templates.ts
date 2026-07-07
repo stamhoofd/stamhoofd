@@ -1,5 +1,6 @@
 import { DocumentStatus, DocumentStatusHelper, FilterWrapperMarker } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { useAppContext } from '#context/appContext.ts';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -7,7 +8,9 @@ import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 
-export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>[] {
+export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>[] {
+    const app = useAppContext();
+
     const all: UIFilterBuilder<UIFilter>[] = [
         new StringFilterBuilder({
             name: $t(`%1Os`),
@@ -55,7 +58,36 @@ export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
                 },
             },
         }),
+        new MultipleChoiceFilterBuilder({
+            name: $t(`Automatisch bijwerken`),
+            options: [
+                new MultipleChoiceUIFilterOption($t(`Ja`), 1),
+                new MultipleChoiceUIFilterOption($t(`Nee`), 0),
+            ],
+            wrapper: {
+                updatesEnabled: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }),
     ];
+
+    if (app === 'admin') {
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t(`Vergrendeld`),
+                options: [
+                    new MultipleChoiceUIFilterOption($t(`Ja`), 1),
+                    new MultipleChoiceUIFilterOption($t(`Nee`), 0),
+                ],
+                wrapper: {
+                    isLocked: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+        );
+    }
 
     all.unshift(
         new GroupUIFilterBuilder({

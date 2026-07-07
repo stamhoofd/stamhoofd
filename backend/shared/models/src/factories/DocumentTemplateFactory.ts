@@ -9,6 +9,7 @@ class Options {
     groups: Group[];
     status?: DocumentStatus;
     updatesEnabled?: boolean;
+    isLocked?: boolean;
     minPricePaid?: number | null;
     maxAge?: number | null;
     year?: number | null;
@@ -156,6 +157,11 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
     async create(): Promise<DocumentTemplate> {
         const documentTemplate = await this.createWithoutSave();
         await documentTemplate.save();
+        if (this.options.isLocked) {
+            // A locked template can no longer be saved normally, so lock it after the initial save.
+            documentTemplate.isLocked = true;
+            await documentTemplate.save({ forceSave: true });
+        }
         return documentTemplate;
     }
 }
