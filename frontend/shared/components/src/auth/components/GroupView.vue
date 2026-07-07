@@ -72,7 +72,7 @@
                                     <span class="icon label small" />
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('%1Vy') }}
+                                    {{ financialSupportSettings.priceName }}
                                 </h2>
 
                                 <p class="style-description-small">
