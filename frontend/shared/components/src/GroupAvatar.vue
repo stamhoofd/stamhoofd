@@ -18,12 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupType } from '@stamhoofd/structures';
 import type { Group } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import IconContainer from './icons/IconContainer.vue';
 import { useOrganization } from './hooks/useOrganization.ts';
+import IconContainer from './icons/IconContainer.vue';
 
 const props = withDefaults(defineProps<{
     group: Group;
@@ -55,7 +55,7 @@ const asideIcon = computed(() => {
         return 'dot yellow stroke';
     }
 
-    if (props.group.closed || ((!props.group.waitingList || props.group.waitingList.closed) && props.group.settings.getRemainingStockIncludingPrices(props.group) === 0)) {
+    if (props.group.closed || ((!props.group.waitingList || props.group.waitingList.closed) && props.group.settings.getRemainingStockIncludingPricesAndOptions(props.group) === 0)) {
         return 'dot red stroke';
     }
 
