@@ -78,7 +78,7 @@ import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 
-import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/document-templates.ts';
+import { useDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/document-templates.ts';
 import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 
@@ -188,7 +188,7 @@ const yearLabels = tabItems.map((y) => {
 },
 );
 
-const filterBuilders = getDocumentTemplateUIFilterBuilders();
+const filterBuilders = useDocumentTemplateUIFilterBuilders();
 const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
 
 watchEffect(() => {

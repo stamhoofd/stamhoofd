@@ -4,6 +4,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
+import { useDocumentTemplateUIFilterBuilders } from './document-templates';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -59,6 +60,7 @@ const getOrganizationAdminUIFilterBuilders: () => UIFilterBuilders = () => {
 export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: boolean } = { onlyBaseFilters: false }) {
     const platform = usePlatform();
     const _user = useUser();
+    const documentTemplateFilterBuilders = useDocumentTemplateUIFilterBuilders();
 
     const setupStepFilterNameMap: Record<SetupStepType, string> = {
         [SetupStepType.Responsibilities]: $t('%7D'),
@@ -310,6 +312,32 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 builders: getOrganizationCompanyFilterBuilders(),
                 wrapper: {
                     companies: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            })),
+
+            ifNotBase(new StringFilterBuilder({
+                name: $t('Naam van een vragenlijst'),
+                key: 'recordCategoryName',
+            })),
+
+            ifNotBase(new StringFilterBuilder({
+                name: $t('Naam van een subcategorie'),
+                key: 'recordChildCategoryName',
+            })),
+
+            ifNotBase(new StringFilterBuilder({
+                name: $t('Naam van een vraag'),
+                key: 'recordName',
+            })),
+
+            ifNotBase(new GroupUIFilterBuilder({
+                name: $t('Documenten'),
+                description: $t('Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.'),
+                builders: documentTemplateFilterBuilders,
+                wrapper: {
+                    documentTemplates: {
                         $elemMatch: FilterWrapperMarker,
                     },
                 },
