@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { GroupSettings, Group as GroupStruct, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
+import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
@@ -151,6 +151,65 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             // patch organization registration period should not fail
             const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
             expect(response.body).toBeDefined();
+        });
+
+        test('should copy groups that reference a waiting list', async () => {
+            const organization = await new OrganizationFactory({ }).create();
+
+            // create period
+            const startDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+            const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+            const newPeriod = await new RegistrationPeriodFactory({
+                organization,
+                startDate,
+                endDate,
+            }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            // A waiting list group and a regular group that references it. The regular group is
+            // listed BEFORE the waiting list, reproducing the ordering produced by Group.defaultSort
+            // when duplicating a period (groups with a maxAge sort before waiting lists).
+            const waitingListGroup = GroupStruct.create({
+                type: GroupType.WaitingList,
+                settings: GroupSettings.create({ name: TranslatedString.create('Wachtlijst') }),
+            });
+
+            const regularGroup = GroupStruct.create({
+                type: GroupType.Membership,
+                settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen'), maxAge: 8 }),
+                waitingList: waitingListGroup,
+            });
+
+            const newOrganizationPeriod = OrganizationRegistrationPeriodStruct.create({
+                period: newPeriod.getStructure(),
+            });
+            newOrganizationPeriod.groups.push(regularGroup, waitingListGroup);
+            newOrganizationPeriod.settings.categories = [
+                GroupCategory.create({ id: 'root', groupIds: [regularGroup.id] }),
+            ];
+            newOrganizationPeriod.settings.rootCategoryId = 'root';
+
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            patch.addPut(newOrganizationPeriod);
+
+            const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
+            expect(response.body).toBeDefined();
+
+            // Both the regular group and its waiting list should have been created
+            const createdGroups = await Group.getAll(organization.id, newPeriod.id, true, [GroupType.Membership, GroupType.WaitingList]);
+            const regular = createdGroups.find(g => g.id === regularGroup.id);
+            const waitingList = createdGroups.find(g => g.id === waitingListGroup.id);
+
+            expect(waitingList).toBeDefined();
+            expect(regular).toBeDefined();
+            expect(regular!.waitingListId).toBe(waitingListGroup.id);
         });
 
         test('should not be able to patch groups of other organization', async () => {
