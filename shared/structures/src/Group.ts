@@ -276,7 +276,7 @@ export class Group extends AutoEncoder {
      * group and organization combination.
      */
     getActivePeriods(organization: Organization | null) {
-        return getActivePeriods(this.settings.period ?? { id: this.periodId, name: $t('Onbekend werkjaar') }, organization);
+        return getActivePeriods(this.settings.period ?? { id: this.periodId, name: $t('%8X') }, organization);
     }
 
     getRecommendedFilter(organization?: Organization | null): StamhoofdFilter {

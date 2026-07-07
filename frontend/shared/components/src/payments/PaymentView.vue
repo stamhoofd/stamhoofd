@@ -129,7 +129,7 @@
 
                 <STListItem v-else-if="payment.ibanName">
                     <h3 class="style-definition-label">
-                        {{ $t('Bankkaart op naam van') }}
+                        {{ $t('%Zba') }}
                     </h3>
 
                     <p class="style-definition-text">

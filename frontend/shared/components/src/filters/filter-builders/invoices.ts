@@ -9,26 +9,26 @@ import type { UIFilterBuilders } from '../UIFilter';
 export function getInvoicesUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`Factuurnummer`),
+            name: $t(`%1YZ`),
             key: 'number',
         }),
         new DateFilterBuilder({
-            name: $t(`Factuurdatum`),
+            name: $t(`%1J6`),
             key: 'invoicedAt',
             nullable: true,
         }),
         new NumberFilterBuilder({
-            name: $t(`Bedrag incl. BTW`),
+            name: $t(`%1JC`),
             type: NumberFilterFormat.Currency,
             key: 'totalWithVAT',
         }),
         new NumberFilterBuilder({
-            name: $t(`Bedrag excl. BTW`),
+            name: $t(`%1JD`),
             type: NumberFilterFormat.Currency,
             key: 'totalWithoutVAT',
         }),
         new DateFilterBuilder({
-            name: $t(`Aanmaakdatum`),
+            name: $t(`%1Jc`),
             key: 'createdAt',
         }),
         getCustomerUIFilterBuilders()[0],

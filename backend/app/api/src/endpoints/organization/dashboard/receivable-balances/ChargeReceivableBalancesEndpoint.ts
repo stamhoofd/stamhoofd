@@ -48,7 +48,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Already pending charge',
-                human: $t('Er is al een aanrekening bezig, even geduld voor je een tweede aanrekening aanrekend.'),
+                human: $t('%Zbh'),
             });
         }
 

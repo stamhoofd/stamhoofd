@@ -318,23 +318,23 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             })),
 
             ifNotBase(new StringFilterBuilder({
-                name: $t('Naam van een vragenlijst'),
+                name: $t('%ZbU'),
                 key: 'recordCategoryName',
             })),
 
             ifNotBase(new StringFilterBuilder({
-                name: $t('Naam van een subcategorie'),
+                name: $t('%Zbf'),
                 key: 'recordChildCategoryName',
             })),
 
             ifNotBase(new StringFilterBuilder({
-                name: $t('Naam van een vraag'),
+                name: $t('%Zbc'),
                 key: 'recordName',
             })),
 
             ifNotBase(new GroupUIFilterBuilder({
-                name: $t('Documenten'),
-                description: $t('Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.'),
+                name: $t('%tw'),
+                description: $t('%Zbm'),
                 builders: documentTemplateFilterBuilders,
                 wrapper: {
                     documentTemplates: {

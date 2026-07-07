@@ -1483,6 +1483,10 @@
     "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de groep om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.",
     "translation": "{member} est déjà enregistré dans notre système, mais ton adresse e-mail ({email}) n'y est pas liée. Nous ne pouvons donc pas vérifier si tu ({email}) as bien le droit d'accéder à {member} : ton accès a été bloqué par mesure de sécurité. Pour accéder, tu as besoin du code de sécurité. Tu peux aussi te déconnecter puis te reconnecter avec une adresse e-mail déjà connue dans le système. Contacte le groupe pour savoir quelle adresse e-mail est utilisée, ou pour attribuer une autre adresse e-mail à {member}."
   },
+  "%Zbm": {
+    "original": "Filter op groepen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
+    "translation": "Filtrez sur les groupes qui utilisent un modèle de document répondant à certains critères."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

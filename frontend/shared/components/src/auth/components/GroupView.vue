@@ -90,7 +90,7 @@
             <div v-if="priceList.length > 1" class="container">
                 <hr>
                 <h2>
-                    {{ $t('Tarieven') }}
+                    {{ $t('%61') }}
                 </h2>
                 <STList>
                     <template v-for="(price, index) of priceList" :key="index">

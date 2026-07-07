@@ -59,10 +59,10 @@ export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
             },
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`Automatisch bijwerken`),
+            name: $t(`%ZbW`),
             options: [
-                new MultipleChoiceUIFilterOption($t(`Ja`), 1),
-                new MultipleChoiceUIFilterOption($t(`Nee`), 0),
+                new MultipleChoiceUIFilterOption($t(`%wo`), 1),
+                new MultipleChoiceUIFilterOption($t(`%18s`), 0),
             ],
             wrapper: {
                 updatesEnabled: {
@@ -75,10 +75,10 @@ export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
     if (app === 'admin') {
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t(`Vergrendeld`),
+                name: $t(`%Bb`),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`Ja`), 1),
-                    new MultipleChoiceUIFilterOption($t(`Nee`), 0),
+                    new MultipleChoiceUIFilterOption($t(`%wo`), 1),
+                    new MultipleChoiceUIFilterOption($t(`%18s`), 0),
                 ],
                 wrapper: {
                     isLocked: {

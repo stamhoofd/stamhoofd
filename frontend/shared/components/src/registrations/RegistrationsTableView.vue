@@ -152,7 +152,7 @@ function getDefaultFilter(): StamhoofdFilter {
                             periodId: {
                                 $: '$rel',
                                 value: filterPeriodId,
-                                name: filterPeriodName ?? $t('Onbekend werkjaar'),
+                                name: filterPeriodName ?? $t('%8X'),
                             },
                         },
                     ]);

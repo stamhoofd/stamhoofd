@@ -22,7 +22,7 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
         if (organization.period.period.endDate <= twoMonthsFromNow && organization.period.period.nextPeriodId) {
             periods.set(organization.period.period.nextPeriodId, {
                 id: organization.period.period.nextPeriodId,
-                name: $t('Volgend werkjaar'),
+                name: $t('%ZbX'),
             });
         }
         // If the organization period has only been active for less than 2 months, also check the previous period id
@@ -30,7 +30,7 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
         if (organization.period.period.startDate >= twoMonthsAgo && organization.period.period.previousPeriodId) {
             periods.set(organization.period.period.previousPeriodId, {
                 id: organization.period.period.previousPeriodId,
-                name: $t('Vorig werkjaar'),
+                name: $t('%Zbb'),
             });
         }
     } else if (STAMHOOFD.userMode === 'platform') {
@@ -42,14 +42,14 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
             if (platform.period.endDate <= twoMonthsFromNow && platform.period.nextPeriodId) {
                 periods.set(platform.period.nextPeriodId, {
                     id: platform.period.nextPeriodId,
-                    name: $t('Volgend werkjaar'),
+                    name: $t('%ZbX'),
                 });
             }
             const twoMonthsAgo = Formatter.luxon().minus({ months: 2 }).toJSDate();
             if (platform.period.startDate >= twoMonthsAgo && platform.period.previousPeriodId) {
                 periods.set(platform.period.previousPeriodId, {
                     id: platform.period.previousPeriodId,
-                    name: $t('Vorig werkjaar'),
+                    name: $t('%Zbb'),
                 });
             }
         }

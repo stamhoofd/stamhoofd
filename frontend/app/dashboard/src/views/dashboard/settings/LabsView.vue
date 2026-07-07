@@ -79,7 +79,7 @@
                     <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('UiTPAS-kansentarief op webshops') }}
+                    {{ $t('%Zbg') }}
                 </h3>
             </STListItem>
 

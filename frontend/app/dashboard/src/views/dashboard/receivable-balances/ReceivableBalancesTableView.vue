@@ -168,7 +168,7 @@ const charge = useChargeReceivableBalances();
 
 const actions: TableAction<ObjectType>[] = [
     new AsyncTableAction({
-        name: $t('Exporteer naar Excel'),
+        name: $t('%V8'),
         icon: 'download',
         priority: 11,
         groupIndex: 3,

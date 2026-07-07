@@ -1551,6 +1551,18 @@
     "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de eenheid om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.",
     "translation": "{member} est déjà connu dans notre système, mais votre adresse e-mail ({email}) n’y est pas associée. Nous ne pouvons donc pas vérifier si vous ({email}) pouvez accéder à {member} : votre accès est bloqué pour des raisons de sécurité. Pour accéder, vous avez besoin du code de sécurité. Vous pouvez aussi vous déconnecter puis vous reconnecter avec une adresse e-mail déjà connue dans le système. Contactez l’unité pour savoir quelle adresse e-mail est utilisée, ou pour en associer une nouvelle à {member}."
   },
+  "%ZbX": {
+    "original": "Volgend scoutsjaar",
+    "translation": "Prochaine année scoute"
+  },
+  "%Zbb": {
+    "original": "Vorig scoutsjaar",
+    "translation": "Année scoute précédente"
+  },
+  "%Zbm": {
+    "original": "Filter op eenheden met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
+    "translation": "Filtrer les unités ayant un modèle de document qui remplit certaines conditions."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

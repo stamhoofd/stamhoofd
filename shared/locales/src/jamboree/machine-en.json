@@ -1543,6 +1543,18 @@
     "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres ({email}) is er niet aan gekoppeld. We kunnen dus niet verifiëren of jij ({email}) wel toegang mag hebben tot {member}: jouw toegang is om veiligheidsredenen geblokkeerd. Om toegang te krijgen heb je de beveiligingscode nodig. Ofwel log je uit en log je daarna opnieuw in met een e-mailadres dat wél al gekend is in het systeem. Neem contact op met de eenheid om te achterhalen welk e-mailadres dat is, of om een ander e-mailadres toe te kennen aan {member}.",
     "translation": "{member} is already known in our system, but your email address ({email}) is not linked to it. As a result, we can't verify if you ({email}) should have access to {member}: your access has been blocked for security reasons. To gain access, you'll need the security code. Alternatively, you can log out and then log back in with an email address that is already recognized by the system. Contact the unit to find out which email address that is, or to have a different email address assigned to {member}."
   },
+  "%ZbX": {
+    "original": "Volgend scoutsjaar",
+    "translation": "Next scouts year"
+  },
+  "%Zbb": {
+    "original": "Vorig scoutsjaar",
+    "translation": "Previous scouts year"
+  },
+  "%Zbm": {
+    "original": "Filter op eenheden met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
+    "translation": "Filter units with a document template that meets certain conditions."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separately from Jamboree. For Microsoft you can"

@@ -7495,10 +7495,6 @@
     "original": "Je kan toegang geven aan beheerders via beheerdersrollen.",
     "translation": "Vous pouvez donner des accès aux gestionnaires via les rôles de gestionnaire."
   },
-  "%1Vy": {
-    "original": "Verlaagd tarief",
-    "translation": "Tarif réduit"
-  },
   "%1W0": {
     "original": "Inschrijven bij {organization}",
     "translation": "S'inscrire chez {organization}"
@@ -7654,10 +7650,6 @@
   "%1Wl": {
     "original": "{x} jaar",
     "translation": "{x} ans"
-  },
-  "%1Wm": {
-    "original": "Wie?",
-    "translation": "Qui ?"
   },
   "%1Wn": {
     "original": "platform",
@@ -8030,10 +8022,6 @@
   "%1Yd": {
     "original": "Je test momenteel de ledenadministratie functie. Je ledenportaal staat nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.",
     "translation": "Tu testes actuellement la fonction d'administration des membres. Ton portail des membres est encore en mode démo. Active la fonction pour l'utiliser réellement."
-  },
-  "%1Ye": {
-    "original": "Waar?",
-    "translation": "Où ?"
   },
   "%1Yg": {
     "original": "Vul hieronder jouw API-key in om betalingen rechtstreeks via Bancontact Pay | Wero te verwerken. ",
@@ -17694,6 +17682,50 @@
   "%ZbS": {
     "original": "Toon alle leden",
     "translation": "Afficher tous les membres"
+  },
+  "%ZbU": {
+    "original": "Naam van een vragenlijst",
+    "translation": "Nom d'un formulaire personnalisé"
+  },
+  "%ZbW": {
+    "original": "Automatisch bijwerken",
+    "translation": "Mise à jour automatique"
+  },
+  "%ZbX": {
+    "original": "Volgend werkjaar",
+    "translation": "Prochaine année associative"
+  },
+  "%Zba": {
+    "original": "Bankkaart op naam van",
+    "translation": "Carte bancaire au nom de"
+  },
+  "%Zbb": {
+    "original": "Vorig werkjaar",
+    "translation": "Année associative précédente"
+  },
+  "%Zbc": {
+    "original": "Naam van een vraag",
+    "translation": "Nom d'une question"
+  },
+  "%Zbf": {
+    "original": "Naam van een subcategorie",
+    "translation": "Nom d'une sous-catégorie"
+  },
+  "%Zbg": {
+    "original": "UiTPAS-kansentarief op webshops",
+    "translation": "Tarif à chance UiTPAS sur les boutiques en ligne"
+  },
+  "%Zbh": {
+    "original": "Er is al een aanrekening bezig, even geduld voor je een tweede aanrekening aanrekend.",
+    "translation": "Une facturation est déjà en cours, veuillez patienter avant d'en lancer une nouvelle."
+  },
+  "%Zbk": {
+    "original": "Het tarief {tariffName} werd aangepast, op basis van de richtlijnen van jouw UiTPAS-regio.",
+    "translation": "Le tarif {tariffName} a été adapté selon les directives de votre région UiTPAS."
+  },
+  "%Zbm": {
+    "original": "Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
+    "translation": "Filtrer les associations ayant un modèle de document qui remplit certaines conditions."
   },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
