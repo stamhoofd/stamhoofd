@@ -1,12 +1,11 @@
 import { ArrayDecoder, AutoEncoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
+import { BundleDiscount } from './BundleDiscount.js';
 import { Group, GroupStatus } from './Group.js';
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from './GroupCategory.js';
 import { GroupType } from './GroupType.js';
-import type { Organization } from './Organization.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { SetupSteps } from './SetupSteps.js';
-import { BundleDiscount } from './BundleDiscount.js';
 
 export class RegistrationPeriodSettings extends AutoEncoder {
     // todo
@@ -77,7 +76,12 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     }
 
     get publicCategoryTree(): GroupCategoryTree {
-        return this.getCategoryTree({ smartCombine: true, maxDepth: 2 });
+        return this.getCategoryTree({
+            smartCombine: true,
+            maxDepth: 2,
+            // every group should have at least 1 visible price
+            filterGroups: g => g.settings.prices.some(p => !p.hidden),
+        });
     }
 
     get adminCategoryTree(): GroupCategoryTree {

@@ -156,13 +156,6 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     /**
      * @deprecated
      */
-    get publicCategoryTree(): GroupCategoryTree {
-        return this.period.publicCategoryTree;
-    }
-
-    /**
-     * @deprecated
-     */
     get adminCategoryTree(): GroupCategoryTree {
         return this.getCategoryTree({ admin: true });
     }
