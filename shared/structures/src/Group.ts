@@ -459,7 +459,7 @@ export class Group extends AutoEncoder {
     getTags(options: { app: AppType; now?: Date; organization: Organization | null }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
-        const remainingStock = this.settings.getRemainingStockIncludingPrices(this);
+        const remainingStock = this.settings.getRemainingStockIncludingPricesAndOptions(this);
         const activePreRegistrationDate = this.activePreRegistrationDate;
         const preRegistrations = activePreRegistrationDate !== null;
         const allWaitingList = this.settings.waitingListType === WaitingListType.All;
