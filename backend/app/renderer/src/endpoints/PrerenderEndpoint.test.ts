@@ -5,12 +5,12 @@ import { STExpect } from '@stamhoofd/test-utils';
 import fs from 'fs/promises';
 
 async function fileExists(path: string): Promise<boolean> {
-  try {
-    await fs.access(path, fs.constants.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
+    try {
+        await fs.access(path, fs.constants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 describe('Endpoint.Prerender', () => {
@@ -18,19 +18,19 @@ describe('Endpoint.Prerender', () => {
     const testServer = new TestServer();
 
     beforeAll(async () => {
-        await PrerenderEndpoint.fileCache.clear()
-    })
+        await PrerenderEndpoint.fileCache.clear();
+    });
 
     beforeEach(() => {
         nock.enableNetConnect();
-    })
+    });
 
     test('Returns 200 when healthy', async () => {
         const request = Request.post({
             path: '/prerender',
-            query: { 
-                url: 'https://shop.stamhoofd.be/test/'
-             },
+            query: {
+                url: 'https://shop.stamhoofd.be/test/',
+            },
         });
 
         const response = await testServer.test(endpoint, request);
@@ -44,9 +44,9 @@ describe('Endpoint.Prerender', () => {
 
         const request = Request.post({
             path: '/prerender',
-            query: { 
-                url: 'https://shop.stamhoofd.be/test/'
-             },
+            query: {
+                url: 'https://shop.stamhoofd.be/test/',
+            },
         });
 
         const response = await testServer.test(endpoint, request);
@@ -64,12 +64,12 @@ describe('Endpoint.Prerender', () => {
 
         const request = Request.post({
             path: '/prerender',
-            query: { 
-                url: 'https://shop.stamhoofd.be/test/'
-             },
+            query: {
+                url: 'https://shop.stamhoofd.be/test/',
+            },
         });
 
-        await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.simpleError({code: 'unavailable', statusCode: 503}))
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.simpleError({ code: 'unavailable', statusCode: 503 }));
     });
 
     test('Purges stale cache', async () => {
@@ -88,15 +88,15 @@ describe('Endpoint.Prerender', () => {
     test('Returns 301 when redirecting to different domain locale', async () => {
         const request = Request.post({
             path: '/prerender',
-            query: { 
-                url: 'https://shop.stamhoofd.nl/test/'
-             },
+            query: {
+                url: 'https://shop.stamhoofd.nl/test/',
+            },
         });
 
         const response = await testServer.test(endpoint, request);
         expect(response.status).toBe(301);
         expect(response.headers).toEqual(expect.objectContaining({
-            location: 'https://shop.stamhoofd.be/test/'
-        }))
+            location: 'https://shop.stamhoofd.be/test',
+        }));
     });
 });
