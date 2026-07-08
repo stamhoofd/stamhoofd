@@ -6,7 +6,7 @@ import { CountFilteredRequest, CountResponse, PaymentCustomer, PaymentMethod, Pe
 import { Context } from '../../../../helpers/Context.js';
 import { GetReceivableBalancesEndpoint } from './GetReceivableBalancesEndpoint.js';
 import type { BalanceItem } from '@stamhoofd/models';
-import { Organization, User } from '@stamhoofd/models';
+import { Organization, Platform, User } from '@stamhoofd/models';
 import { CachedBalance } from '@stamhoofd/models';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -38,6 +38,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const sellingOrganization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
+        const platform = await Platform.getShared();
 
         if (!await Context.auth.canManageFinances(sellingOrganization.id)) {
             throw Context.auth.error();
@@ -77,6 +78,12 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     total += i.priceOpen;
                 }
                 if (total <= 0) {
+                    continue;
+                }
+
+                if (total <= 4_00_00 && sellingOrganization.id === platform.membershipOrganizationId && STAMHOOFD.userMode === 'organization') {
+                    // Skip too small payments for Stamhoofd
+                    console.error('Skipped charging too small payment for', cachedBalance.objectId, cachedBalance.objectType);
                     continue;
                 }
 
