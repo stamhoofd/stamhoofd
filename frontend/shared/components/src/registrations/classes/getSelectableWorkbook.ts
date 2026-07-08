@@ -262,7 +262,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         // id of registration
         new SelectableColumn({
             id: 'id',
-            name: $t(`%1P`),
+            name: $t(`Inschrijvings-ID`),
             description: $t('%174'),
             enabled: false,
         }),
