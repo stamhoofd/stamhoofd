@@ -16,5 +16,15 @@ export default defineConfig({
             exclude: ['src/migrations/**'],
             reporter: ['text', 'html', 'lcov'],
         },
+        server: {
+            deps: {
+                inline: [
+                    // @simonbackx/simple-endpoints and @simonbackx/simple-database do async imports inside the package
+                    // we need to make sure Vitest also adds .ts support there
+                    '@simonbackx/simple-endpoints',
+                    '@simonbackx/simple-database',
+                ],
+            },
+        },
     },
 });
