@@ -1,9 +1,13 @@
-import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
+import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { Platform } from '../Platform.js';
 import { Organization } from '../Organization.js';
+import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { MemberDetails } from './MemberDetails.js';
 import { ContinuousMembershipStatus } from './MembershipStatus.js';
+import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
+import { RecordCategory } from './records/RecordCategory.js';
+import { TranslatedString } from '../TranslatedString.js';
 import {
     PlatformFamily,
     PlatformMember,
@@ -249,6 +253,38 @@ describe('PlatformMember', () => {
                 // assert
                 expect(status).toBe(ContinuousMembershipStatus.Full);
             }
+        });
+    });
+
+    describe('getAllRecordCategories', () => {
+        test('does not return the same record category twice when the member belongs to the scoped organization', () => {
+            const categoryA = RecordCategory.create({ name: new TranslatedString('Category A') });
+            const categoryB = RecordCategory.create({ name: new TranslatedString('Category B') });
+
+            const organization = Organization.create({
+                meta: OrganizationMetaData.create({
+                    recordsConfiguration: OrganizationRecordsConfiguration.create({
+                        recordCategories: [categoryA, categoryB],
+                    }),
+                }),
+            });
+
+            const blob = MembersBlob.create({
+                organizations: [organization],
+                members: [
+                    MemberWithRegistrationsBlob.create({
+                        organizationId: organization.id,
+                        details: MemberDetails.create({}),
+                    }),
+                ],
+            });
+
+            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const member = family.members[0];
+
+            const categories = member.getAllRecordCategories({ scopeOrganization: organization });
+
+            expect(categories.map(c => c.id)).toEqual([categoryA.id, categoryB.id]);
         });
     });
 });
