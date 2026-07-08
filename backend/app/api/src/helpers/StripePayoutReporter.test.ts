@@ -60,18 +60,18 @@ describe('StripePayoutReporter', () => {
      * fully transferred to the connected account. The payout pays out the application fee
      * minus the Stripe processing fee to the platform.
      */
-    const mockStripeData = (accountId: string, { feeCents = 250, chargeCents = 10000, stripeFeeCents = 25 } = {}) => {
+    const mockStripeData = (accountId: string, { feeCents = 250, chargeCents = 10000, stripeFeeCents = 25, feeRefundCents = 0 } = {}) => {
         const createdUnix = monthStartUnix + 14 * 24 * 3600;
         const payout = {
             id: stripeMocker.createId('po'),
             object: 'payout',
             status: 'paid',
-            amount: feeCents - stripeFeeCents,
+            amount: feeCents - feeRefundCents - stripeFeeCents,
             arrival_date: createdUnix + 5 * 24 * 3600,
             statement_descriptor: 'STAMHOOFD',
         };
 
-        const transactions = [
+        const transactions: unknown[] = [
             {
                 id: stripeMocker.createId('txn'),
                 type: 'charge',
@@ -99,12 +99,28 @@ describe('StripePayoutReporter', () => {
             {
                 id: stripeMocker.createId('txn'),
                 type: 'payout',
-                amount: -(feeCents - stripeFeeCents),
+                amount: -(feeCents - feeRefundCents - stripeFeeCents),
                 fee: 0,
                 created: createdUnix + 5 * 24 * 3600,
                 source: null,
             },
         ];
+
+        if (feeRefundCents > 0) {
+            transactions.push({
+                id: stripeMocker.createId('txn'),
+                type: 'application_fee_refund',
+                amount: -feeRefundCents,
+                fee: 0,
+                created: createdUnix,
+                source: {
+                    object: 'fee_refund',
+                    id: stripeMocker.createId('fr'),
+                    amount: feeRefundCents,
+                    fee: { object: 'application_fee', id: stripeMocker.createId('fee'), amount: feeCents, account: accountId },
+                },
+            });
+        }
 
         nock('https://api.stripe.com')
             .get('/v1/payouts')
@@ -269,6 +285,28 @@ describe('StripePayoutReporter', () => {
 
         expect(payoutExport.completePayouts.length).toBe(0);
         expect(payoutExport.isValid).toBe(false);
+    });
+
+    test('Refunded application fees reduce the amount that should be invoiced', async () => {
+        const { organization, stripeAccount } = await init();
+        mockStripeData(stripeAccount.accountId, { feeCents: 250, feeRefundCents: 50, stripeFeeCents: 25 });
+
+        // 2 euro invoiced: 2.50 euro of fees minus 0.50 euro refunded
+        const payment = await createPayment(organization, stripeAccount, 200_00);
+        await createInvoice(organization, payment, { number: '2026-103', totalWithVAT: 200_00, VATTotalAmount: 3471 });
+
+        const reporter = await buildReport();
+        const payoutExport = reporter.toStructure();
+
+        const breakdown = payoutExport.payouts[0];
+        expect(breakdown.payout.amount).toBe(175_00);
+        expect(breakdown.isValid).toBe(true);
+
+        const invoiceItem = breakdown.items.find(i => i.type === StripePayoutItemType.Invoice)!;
+        expect(invoiceItem.amount).toBe(200_00);
+
+        expect(payoutExport.completePayouts.length).toBe(1);
+        expect(payoutExport.isValid).toBe(true);
     });
 
     test('An invoiced payment with a different amount than the application fees marks the report as incomplete', async () => {

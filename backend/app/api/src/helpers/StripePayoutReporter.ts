@@ -201,8 +201,15 @@ export class StripeReport {
         }
 
         if (balanceTransaction.type === 'application_fee_refund') {
-            const source = balanceTransaction.source as Stripe.ApplicationFee;
-            const account = typeof source.account === 'string' ? source.account : source.account.id;
+            // The source is a fee refund: the connected account is stored on the refunded application fee itself
+            const source = balanceTransaction.source as Stripe.FeeRefund;
+            const fee = typeof source.fee === 'string' || !source.fee ? null : source.fee;
+
+            if (!fee) {
+                throw new Error('Received unexpanded fee for refunded application fee ' + balanceTransaction.id);
+            }
+
+            const account = typeof fee.account === 'string' ? fee.account : fee.account.id;
 
             if (account) {
                 const currentAmount = await this.getAccountReport(balanceTransaction, account);
@@ -370,7 +377,8 @@ export class StripePayoutReport {
 
         for await (const balanceItem of stripe.balanceTransactions.list({
             payout: this.payout.id,
-            expand: ['data.source.charge'],
+            // charge = for refunds, fee = for application fee refunds
+            expand: ['data.source.charge', 'data.source.fee'],
             limit: 100,
         })) {
             await report.add(balanceItem);
