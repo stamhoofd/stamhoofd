@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-middleware",
-    "version": "2.130.0",
+    "version": "2.131.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
