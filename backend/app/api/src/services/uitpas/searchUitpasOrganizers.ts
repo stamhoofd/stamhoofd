@@ -40,7 +40,7 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
             human: $t(`%1Bb`),
         });
     }
-    const baseUrl = 'https://api-test.uitpas.be/organizers';
+    const baseUrl = `${STAMHOOFD.UITPAS_API_URL}/organizers`;
     const params = new URLSearchParams();
     params.append('name', name);
     params.append('limit', '200');
@@ -63,6 +63,7 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         });
     });
     if (!response.ok) {
+        console.log(response.status, response.statusText, await response.text());
         throw new SimpleError({
             code: 'unsuccessful_response_searching_uitpas_organizers',
             message: `Unsuccessful response when searching for UiTPAS organizers`,

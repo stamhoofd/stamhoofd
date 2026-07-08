@@ -52,7 +52,7 @@ function isSocialTariffErrorResponse(
 }
 
 async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber: string, basePrice: number, uitpasEventUrl: string) {
-    const baseUrl = 'https://api-test.uitpas.be/tariffs';
+    const baseUrl = `${STAMHOOFD.UITPAS_API_URL}/tariffs`;
     const params = new URLSearchParams();
     params.append('regularPrice', (basePrice / 1_0000).toFixed(2));
     const eventId = uitpasEventUrl.split('/').pop();

@@ -27,7 +27,7 @@ function assertsIsStaticSocialTariffResponse(json: unknown): asserts json is Sta
 }
 
 export async function getSocialTariffForEvent(access_token: string, basePrice: number, uitpasEventUrl: string) {
-    const baseUrl = 'https://api-test.uitpas.be/tariffs/static';
+    const baseUrl = `${STAMHOOFD.UITPAS_API_URL}/tariffs/static`;
     const params = new URLSearchParams();
     params.append('regularPrice', (basePrice / 10_000).toFixed(2));
     const eventId = uitpasEventUrl.split('/').pop(); // Extract the event ID from the URL

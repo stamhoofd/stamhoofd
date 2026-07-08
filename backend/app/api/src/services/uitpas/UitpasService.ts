@@ -297,7 +297,7 @@ export class UitpasService {
     }
 
     static async registerAttendance() {
-        // https://api-test.uitpas.be/checkins
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/create-a-checkin
     }
 
     static async searchUitpasEvents(organizationId: string, uitpasOrganizerId: string, textQuery?: string) {
