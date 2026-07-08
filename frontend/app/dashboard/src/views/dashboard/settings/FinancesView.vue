@@ -79,10 +79,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Stripe uitbetalingen exporteren') }}
+                            {{ $t('%Zby') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Ontvang een rapport via e-mail om te controleren of alle aangerekende Stripe kosten correct werden gefactureerd.') }}
+                            {{ $t('%Zc0') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

@@ -17555,9 +17555,53 @@
     "original": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
     "translation": "You can only make limited corrections to a member's date of birth; you can't change the day, month, and year all at once. Please contact a main administrator if this is required."
   },
+  "%Zbs": {
+    "original": "Al {count} transacties verwerkt",
+    "translation": "Already processed {count} transactions"
+  },
+  "%Zbt": {
+    "original": "Uitbetalingen exporteren",
+    "translation": "Export payouts"
+  },
+  "%Zbu": {
+    "original": "Je ontvangt het rapport via e-mail zodra het klaar is. Zo kunnen we controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
+    "translation": "You'll receive the report by email once it's ready. This way we can double-check whether all charged Stripe fees were invoiced correctly."
+  },
+  "%Zbv": {
+    "original": "Er bestaat geen lid met het ID \"{id}\". Kijk na of het ID juist is: een rij met een ID kan nooit een nieuw lid aanmaken.",
+    "translation": "There is no member with ID \"{id}\". Please check if the ID is correct: a row with an ID can never create a new member."
+  },
+  "%Zby": {
+    "original": "Stripe uitbetalingen exporteren",
+    "translation": "Export Stripe payouts"
+  },
+  "%Zbz": {
+    "original": "Van {start} tot {end}",
+    "translation": "From {start} to {end}"
+  },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
     "translation": "No excluded domain names"
+  },
+  "%Zc0": {
+    "original": "Ontvang een rapport via e-mail om te controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
+    "translation": "Receive a report by email to check whether all charged Stripe fees were invoiced correctly."
+  },
+  "%Zc1": {
+    "original": "N.v.t.",
+    "translation": "N/A"
+  },
+  "%Zc2": {
+    "original": "Lopende rapporten",
+    "translation": "Ongoing reports"
+  },
+  "%Zc3": {
+    "original": "Niet uitbetaald",
+    "translation": "Not paid out"
+  },
+  "%Zc5": {
+    "original": "Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is",
+    "translation": "You will receive an email with the payouts as soon as the report is ready"
   },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",

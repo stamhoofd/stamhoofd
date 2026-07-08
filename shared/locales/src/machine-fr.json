@@ -17743,9 +17743,53 @@
     "original": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
     "translation": "Vous ne pouvez corriger la date de naissance d’un membre existant que de façon limitée, il n’est pas possible de modifier le jour, le mois et l’année en même temps. Si besoin, contactez un administrateur principal."
   },
+  "%Zbs": {
+    "original": "Al {count} transacties verwerkt",
+    "translation": "Déjà {count} transactions traitées"
+  },
+  "%Zbt": {
+    "original": "Uitbetalingen exporteren",
+    "translation": "Exporter les paiements"
+  },
+  "%Zbu": {
+    "original": "Je ontvangt het rapport via e-mail zodra het klaar is. Zo kunnen we controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
+    "translation": "Vous recevrez le rapport par e-mail dès qu'il sera prêt. Cela nous permet de vérifier si tous les frais Stripe facturés ont bien été appliqués."
+  },
+  "%Zbv": {
+    "original": "Er bestaat geen lid met het ID \"{id}\". Kijk na of het ID juist is: een rij met een ID kan nooit een nieuw lid aanmaken.",
+    "translation": "Aucun membre n'existe avec l'ID « {id} ». Vérifiez si l'ID est correct : une ligne avec un ID ne peut jamais créer un nouveau membre."
+  },
+  "%Zby": {
+    "original": "Stripe uitbetalingen exporteren",
+    "translation": "Exporter les paiements Stripe"
+  },
+  "%Zbz": {
+    "original": "Van {start} tot {end}",
+    "translation": "Du {start} au {end}"
+  },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
     "translation": "Aucun nom de domaine exclu"
+  },
+  "%Zc0": {
+    "original": "Ontvang een rapport via e-mail om te controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
+    "translation": "Recevez un rapport par e-mail pour vérifier que tous les frais Stripe facturés ont bien été appliqués."
+  },
+  "%Zc1": {
+    "original": "N.v.t.",
+    "translation": "N/A"
+  },
+  "%Zc2": {
+    "original": "Lopende rapporten",
+    "translation": "Rapports en cours"
+  },
+  "%Zc3": {
+    "original": "Niet uitbetaald",
+    "translation": "Non payé"
+  },
+  "%Zc5": {
+    "original": "Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is",
+    "translation": "Vous recevrez un e-mail avec les paiements dès que le rapport sera prêt"
   },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",

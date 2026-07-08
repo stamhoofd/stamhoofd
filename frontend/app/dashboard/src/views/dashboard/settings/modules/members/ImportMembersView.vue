@@ -622,7 +622,7 @@ async function goNext() {
             if (notFoundResults.length) {
                 const idColumnIndex = columns.value.find(c => c.matcher instanceof MemberIdColumnMatcher)?.index ?? 0;
                 show(AsyncComponent(() => import('./ImportMembersErrorsView.vue'), {
-                    importErrors: notFoundResults.map(r => new ImportError(r.baseMemerData.row, idColumnIndex, $t('Er bestaat geen lid met het ID "{id}". Kijk na of het ID juist is: een rij met een ID kan nooit een nieuw lid aanmaken.', { id: r.baseMemerData.id ?? '' }))),
+                    importErrors: notFoundResults.map(r => new ImportError(r.baseMemerData.row, idColumnIndex, $t('%Zbv', { id: r.baseMemerData.id ?? '' }))),
                 })).catch(console.error);
                 saving.value = false;
                 return;

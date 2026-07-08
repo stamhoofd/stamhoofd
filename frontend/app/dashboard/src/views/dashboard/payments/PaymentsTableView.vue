@@ -204,15 +204,15 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, ObjectType>({
         id: 'settlement.settledAt',
-        name: $t('Uitbetalingsdatum'),
+        name: $t('%MB'),
         getValue: object => object,
         format: (object, width) => {
             const value = object.settlement?.settledAt ?? null;
             if (!value && !object.provider) {
-                return $t('N.v.t.');
+                return $t('%Zc1');
             }
             if (!value) {
-                return $t('Niet uitbetaald');
+                return $t('%Zc3');
             }
 
             return (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true));
@@ -242,12 +242,12 @@ const allColumns: Column<ObjectType, any>[] = [
             const value = object.settlement?.reference ?? null;
             if (!value && !object.provider) {
                 if (object.method === PaymentMethod.Transfer) {
-                    return object.transferDescription ?? $t('Onbekend');
+                    return object.transferDescription ?? $t('%Gr');
                 }
-                return $t('N.v.t.');
+                return $t('%Zc1');
             }
             if (!value) {
-                return $t('Niet uitbetaald');
+                return $t('%Zc3');
             }
 
             return value;

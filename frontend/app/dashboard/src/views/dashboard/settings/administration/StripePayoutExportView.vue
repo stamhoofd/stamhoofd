@@ -1,9 +1,9 @@
 <template>
-    <SaveView :loading="saving" :title="$t('Uitbetalingen exporteren')" :save-text="$t('Exporteren')" @save="save">
+    <SaveView :loading="saving" :title="$t('%Zbt')" :save-text="$t('%Oy')" @save="save">
         <h1>
-            {{ $t('Stripe uitbetalingen exporteren') }}
+            {{ $t('%Zby') }}
         </h1>
-        <p>{{ $t('Je ontvangt het rapport via e-mail zodra het klaar is. Zo kunnen we controleren of alle aangerekende Stripe kosten correct werden gefactureerd.') }}</p>
+        <p>{{ $t('%Zbu') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -41,14 +41,14 @@
         </STList>
 
         <div v-if="runningJobs.length" class="container">
-            <hr><h2>{{ $t('Lopende rapporten') }}</h2>
+            <hr><h2>{{ $t('%Zc2') }}</h2>
             <STList>
                 <STListItem v-for="(runningJob, index) in runningJobs" :key="index">
                     <h3 class="style-title-list">
-                        {{ $t('Van {start} tot {end}', {start: formatDateTime(runningJob.start), end: formatDateTime(runningJob.end)}) }}
+                        {{ $t('%Zbz', {start: formatDateTime(runningJob.start), end: formatDateTime(runningJob.end)}) }}
                     </h3>
                     <p v-if="runningJob.count" class="style-description-small">
-                        {{ $t('Al {count} transacties verwerkt', {count: runningJob.count.toString()}) }}
+                        {{ $t('%Zbs', {count: runningJob.count.toString()}) }}
                     </p>
                 </STListItem>
             </STList>
@@ -249,7 +249,7 @@ async function save() {
             },
             owner: requestOwner,
         });
-        new Toast($t('Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is'), 'success').show();
+        new Toast($t('%Zc5'), 'success').show();
         await pop({ force: true });
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);

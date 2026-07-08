@@ -6116,5 +6116,16 @@
   "%Zbn": "Inschrijvings-ID",
   "%Zbp": "Naam van het werkjaar geassocieerd aan dit item",
   "%Zbq": "Je kan de voornaam van een bestaand lid niet volledig wijzigen, enkel een typfout verbeteren. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
-  "%Zbr": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is."
+  "%Zbr": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
+  "%Zbs": "Al {count} transacties verwerkt",
+  "%Zbt": "Uitbetalingen exporteren",
+  "%Zbu": "Je ontvangt het rapport via e-mail zodra het klaar is. Zo kunnen we controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
+  "%Zbv": "Er bestaat geen lid met het ID \"{id}\". Kijk na of het ID juist is: een rij met een ID kan nooit een nieuw lid aanmaken.",
+  "%Zby": "Stripe uitbetalingen exporteren",
+  "%Zbz": "Van {start} tot {end}",
+  "%Zc0": "Ontvang een rapport via e-mail om te controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
+  "%Zc1": "N.v.t.",
+  "%Zc2": "Lopende rapporten",
+  "%Zc3": "Niet uitbetaald",
+  "%Zc5": "Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is"
 }
