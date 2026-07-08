@@ -30,6 +30,7 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 - **Never change files unrelated to your current task.**
 - Write tests for all backend endpoint changes (unit + integration), and Playwright tests for new UI views (most important happy path). Cover many situations with few tests, without gigantic single tests. Use `TestUtils.setEnvironment(...)` to simulate environments.
 - For bugfixes: write a test that reproduces the bug, verify it fails before the fix and passes after.
+- Always run all linting, typechecking and tests before considering your work done.
 
 ## Build ordering (the #1 source of confusing errors)
 
