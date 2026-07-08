@@ -217,7 +217,17 @@ const allColumns: Column<ObjectType, any>[] = [
 
             return (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true));
         },
-        getStyle: value => !value ? 'gray' : '',
+        getStyle: (object, width) => {
+            const value = object.settlement?.settledAt ?? null;
+            if (!value && !object.provider) {
+                return 'gray';
+            }
+            if (!value) {
+                return 'gray';
+            }
+
+            return '';
+        },
         minimumWidth: 120,
         recommendedWidth: 120,
         allowSorting: false,
@@ -242,7 +252,20 @@ const allColumns: Column<ObjectType, any>[] = [
 
             return value;
         },
-        getStyle: value => !value ? 'gray' : '',
+        getStyle: (object, width) => {
+            const value = object.settlement?.reference ?? null;
+            if (!value && !object.provider) {
+                if (object.method === PaymentMethod.Transfer) {
+                    return '';
+                }
+                return 'gray';
+            }
+            if (!value) {
+                return 'gray';
+            }
+
+            return '';
+        },
         minimumWidth: 120,
         recommendedWidth: 250,
         allowSorting: false,
