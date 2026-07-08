@@ -726,8 +726,9 @@ jobs:
           IS_DRAFT=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json isDraft --jq '.isDraft')
           HAS_LABEL=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name] | contains(["ready if CI succeeds"])')
           if [ "$IS_DRAFT" = "true" ] && [ "$HAS_LABEL" = "true" ]; then
-            gh pr ready "$PR_NUMBER" --repo "$REPO"
-            echo "Marked PR #$PR_NUMBER as ready for review"
+            gh pr ready "$PR_NUMBER" --repo "$REPO" || true
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "ready if CI succeeds" || true
+            echo "Marked PR #$PR_NUMBER as ready for review and removed the label"
           else
             echo "No action (isDraft=$IS_DRAFT, hasLabel=$HAS_LABEL)"
           fi
