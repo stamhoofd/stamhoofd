@@ -13,6 +13,7 @@ import { FullNameColumnMatcher } from './default-matchers/FullNameColumnMatcher'
 import { GenderColumnMatcher } from './default-matchers/GenderColumnMatcher';
 import { GroupColumnMatcher } from './default-matchers/GroupColumnMatcher';
 import { LastNameColumnMatcher } from './default-matchers/LastNameColumnMatcher';
+import { MemberIdColumnMatcher } from './default-matchers/MemberIdColumnMatcher';
 import { MemberNumberColumnMatcher } from './default-matchers/MemberNumberColumnMatcher';
 import { NationalRegisterNumberColumnMatcher } from './default-matchers/NationalRegisterNumberMatcher';
 import { PaidColumnMatcher } from './default-matchers/PaidColumnMatcher';
@@ -31,6 +32,7 @@ import { TextColumnMatcher } from './TextColumnMatcher';
 
 // Always make sure fullname is before lastname!
 export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => OrganizationRegistrationPeriod) => [
+    new MemberIdColumnMatcher(),
     new MemberNumberColumnMatcher(),
     new FullNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new FirstNameColumnMatcher(MemberDetailsMatcherCategory.Member),
