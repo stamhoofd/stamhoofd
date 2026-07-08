@@ -16,7 +16,11 @@ type MollieSettlement = {
     };
 };
 
-type MolliePaymentJSON = {
+/**
+ * Both payments (tr_...) and refunds (re_...) settled in a settlement are matched to a local
+ * payment through the mollieId of their MolliePayment link, so we only need their id here.
+ */
+type MollieSettlementEntryJSON = {
     id: string;
 };
 
@@ -146,64 +150,88 @@ export async function checkMollieSettlementsFor(token: string, checkAll = false)
     }
 }
 
-async function updateSettlement(token: string, settlement: MollieSettlement, fromPaymentId?: string) {
+async function updateSettlement(token: string, settlement: MollieSettlement) {
+    // Regular payments settled in this settlement
+    await updateSettlementResource(token, settlement, 'payments');
+
+    // Refunds settled in this settlement. These are negative entries linked to a refund payment
+    // (created by the mollie-refunds cron), so we can set their settlement metadata too.
+    await updateSettlementResource(token, settlement, 'refunds');
+
+    // Chargebacks settled in this settlement. Like refunds, these are negative entries linked to a
+    // chargeback payment (created by the mollie-chargebacks cron).
+    await updateSettlementResource(token, settlement, 'chargebacks');
+}
+
+/**
+ * Loop over all entries (payments, refunds or chargebacks) that are part of a settlement and set the
+ * settlement metadata on the matching local payment. Every resource exposes its entries under
+ * `_embedded[resource]` and uses the same pagination, so they share this logic.
+ */
+async function updateSettlementResource(token: string, settlement: MollieSettlement, resource: 'payments' | 'refunds' | 'chargebacks', fromId?: string) {
     const limit = 250;
 
-    // Loop all payments of this settlement
-    const request = await axios.get('https://api.mollie.com/v2/settlements/' + settlement.id + '/payments?limit=' + limit + (fromPaymentId ? ('&from=' + encodeURIComponent(fromPaymentId)) : ''), {
+    const request = await axios.get('https://api.mollie.com/v2/settlements/' + settlement.id + '/' + resource + '?limit=' + limit + (fromId ? ('&from=' + encodeURIComponent(fromId)) : ''), {
         headers: {
             Authorization: 'Bearer ' + token,
         },
     });
 
     if (request.status === 200) {
-        const molliePayments = request.data._embedded.payments as MolliePaymentJSON[];
+        const entries = request.data._embedded[resource] as MollieSettlementEntryJSON[];
 
-        for (const mollie of molliePayments) {
-            // Search payment
-            const mps = await MolliePayment.where({ mollieId: mollie.id });
-            if (mps.length == 1) {
-                const mp = mps[0];
-                const payment = await Payment.getByID(mp.paymentId);
-                if (payment) {
-                    payment.settlement = Settlement.create({
-                        id: settlement.id,
-                        reference: settlement.reference,
-                        settledAt: new Date(settlement.settledAt),
-                        amount: Math.round(parseFloat(settlement.amount.value) * 100) * 100,
-                    });
-                    const saved = await payment.save();
-
-                    if (saved) {
-                        // Mark order as 'updated', or the frontend won't pull in the updates
-                        const order = await Order.getForPayment(null, payment.id);
-                        if (order) {
-                            order.updatedAt = new Date();
-                            order.forceSaveProperty('updatedAt');
-                            await order.save();
-                        }
-
-                        // TODO: Mark registrations as 'saved'
-                    }
-
-                    if (STAMHOOFD.environment === 'development') {
-                        console.log('Updated settlement of payment ' + payment.id);
-                        console.log(payment.settlement);
-                    }
-                } else {
-                    console.log('Missing payment ' + mp.paymentId);
-                }
-            } else {
-                // Probably a payment in a different system/platform
-                // console.log("No mollie payment found for id "+mollie.id)
-            }
+        for (const entry of entries) {
+            await applySettlementToPayment(settlement, entry.id);
         }
 
         // Check next page
-        if (request.data._links.next) {
-            await updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id);
+        if (request.data._links.next && entries.length > 0) {
+            await updateSettlementResource(token, settlement, resource, entries[entries.length - 1].id);
         }
     } else {
         console.error(request.data);
+    }
+}
+
+/**
+ * Find the local payment linked to a Mollie payment or refund id and store the settlement metadata.
+ */
+async function applySettlementToPayment(settlement: MollieSettlement, mollieId: string) {
+    // Search payment
+    const mps = await MolliePayment.where({ mollieId });
+    if (mps.length === 1) {
+        const mp = mps[0];
+        const payment = await Payment.getByID(mp.paymentId);
+        if (payment) {
+            payment.settlement = Settlement.create({
+                id: settlement.id,
+                reference: settlement.reference,
+                settledAt: new Date(settlement.settledAt),
+                amount: Math.round(parseFloat(settlement.amount.value) * 100) * 100,
+            });
+            const saved = await payment.save();
+
+            if (saved) {
+                // Mark order as 'updated', or the frontend won't pull in the updates
+                const order = await Order.getForPayment(null, payment.id);
+                if (order) {
+                    order.updatedAt = new Date();
+                    order.forceSaveProperty('updatedAt');
+                    await order.save();
+                }
+
+                // TODO: Mark registrations as 'saved'
+            }
+
+            if (STAMHOOFD.environment === 'development') {
+                console.log('Updated settlement of payment ' + payment.id);
+                console.log(payment.settlement);
+            }
+        } else {
+            console.log('Missing payment ' + mp.paymentId);
+        }
+    } else {
+        // Probably a payment in a different system/platform
+        // console.log("No mollie payment found for id "+mollieId)
     }
 }
