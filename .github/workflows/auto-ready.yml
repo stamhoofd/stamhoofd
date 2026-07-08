@@ -26,8 +26,9 @@ jobs:
             --jq '.workflow_runs[0].conclusion // empty')
 
           if [ "$STATUS" = "success" ]; then
-            gh pr ready "$PR_NUMBER"
-            echo "CI already passed — marked PR #$PR_NUMBER as ready for review"
+            gh pr ready "$PR_NUMBER" || true
+            gh pr edit "$PR_NUMBER" --remove-label "ready if CI succeeds" || true
+            echo "CI already passed — marked PR #$PR_NUMBER as ready for review and removed the label"
           else
             echo "CI has not passed yet for $SHA (conclusion: ${STATUS:-none}). Will convert when CI completes."
           fi
