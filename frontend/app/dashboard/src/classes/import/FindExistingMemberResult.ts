@@ -7,6 +7,12 @@ export class FindExistingMemberResult {
     readonly existingMember: PlatformMember | null = null;
     private _isEqual: boolean = false;
 
+    /**
+     * The row had an id, but no member with that id was found in the system.
+     * This is a hard error: a row with an id can never create a new member.
+     */
+    readonly isMemberWithIdNotFound: boolean = false;
+
     get name() {
         return this.baseMemerData.firstName + ' ' + this.baseMemerData.lastName;
     }
@@ -30,7 +36,19 @@ export class FindExistingMemberResult {
     }
 
     constructor(readonly baseMemerData: ImportMemberBaseResult, allMembers: PlatformMember[], readonly organization: Organization) {
-        const { birthDay, firstName, lastName, nationalRegisterNumber, memberNumber } = this.baseMemerData;
+        const { id, birthDay, firstName, lastName, nationalRegisterNumber, memberNumber } = this.baseMemerData;
+
+        if (id) {
+            // Only match on the id, never on other properties
+            const memberWithId = allMembers.find(m => m.id === id);
+            if (memberWithId) {
+                this.existingMember = memberWithId;
+                this._isEqual = true;
+            } else {
+                this.isMemberWithIdNotFound = true;
+            }
+            return;
+        }
 
         if (firstName === null || lastName === null) {
             return;

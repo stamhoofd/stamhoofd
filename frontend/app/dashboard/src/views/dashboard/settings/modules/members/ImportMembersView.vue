@@ -115,7 +115,7 @@ import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembe
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import type { Address, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import type { Address, OrganizationRegistrationPeriod, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
@@ -123,6 +123,7 @@ import XLSX from 'xlsx';
 import { AddressColumnMatcher } from '../../../../../classes/import/AddressColumnMatcher';
 import type { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { DateColumnMatcher } from '../../../../../classes/import/DateColumnMatcher';
+import { MemberIdColumnMatcher } from '../../../../../classes/import/default-matchers/MemberIdColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
 import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
 import { ImportError } from '../../../../../classes/import/ImportError';
@@ -538,22 +539,36 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
 
 const memberFetcher = useMembersObjectFetcher();
 
-async function fetchAllMembers() {
+async function fetchAllMembers(memberIds: string[]) {
     const selectedPeriod = period.value.period;
     // only get members for selected period + previous period
     const periodIds = [selectedPeriod.id, selectedPeriod.previousPeriodId, selectedPeriod.nextPeriodId].filter((id): id is string => !!id);
 
-    const initialRequest: LimitedFilteredRequest = new LimitedFilteredRequest({
-        filter: {
-            registrations: {
-                $elemMatch: {
-                    organizationId: organization.value.id,
-                    periodId: {
-                        $in: periodIds,
-                    },
+    const registrationsFilter: StamhoofdFilter = {
+        registrations: {
+            $elemMatch: {
+                organizationId: organization.value.id,
+                periodId: {
+                    $in: periodIds,
                 },
             },
         },
+    };
+
+    const initialRequest: LimitedFilteredRequest = new LimitedFilteredRequest({
+        filter: memberIds.length
+            ? {
+                    // Also fetch members by id, so members without registrations can be matched too
+                    $or: [
+                        registrationsFilter,
+                        {
+                            id: {
+                                $in: memberIds,
+                            },
+                        },
+                    ],
+                }
+            : registrationsFilter,
         // todo: change limit?
         limit: 100,
     });
@@ -562,7 +577,8 @@ async function fetchAllMembers() {
 }
 
 async function findExistingMembers(data: ImportMemberBaseResult[]) {
-    const allMembers = await fetchAllMembers();
+    const memberIds = data.map(item => item.id).filter((id): id is string => !!id);
+    const allMembers = await fetchAllMembers(memberIds);
     return data.map(item => new FindExistingMemberResult(item, allMembers, organization.value));
 }
 
@@ -599,6 +615,18 @@ async function goNext() {
         } else {
             // find equal members and possible equal members
             const results = await findExistingMembers(result.data);
+
+            // Rows with an id that doesn't exist in the system are a hard error:
+            // a row with an id can never create a new member
+            const notFoundResults = results.filter(r => r.isMemberWithIdNotFound);
+            if (notFoundResults.length) {
+                const idColumnIndex = columns.value.find(c => c.matcher instanceof MemberIdColumnMatcher)?.index ?? 0;
+                show(AsyncComponent(() => import('./ImportMembersErrorsView.vue'), {
+                    importErrors: notFoundResults.map(r => new ImportError(r.baseMemerData.row, idColumnIndex, $t('Er bestaat geen lid met het ID "{id}". Kijk na of het ID juist is: een rij met een ID kan nooit een nieuw lid aanmaken.', { id: r.baseMemerData.id ?? '' }))),
+                })).catch(console.error);
+                saving.value = false;
+                return;
+            }
 
             const probablyEqualResults = results.filter(r => r.isProbablyEqual);
             if (probablyEqualResults.length) {

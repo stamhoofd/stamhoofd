@@ -3,6 +3,7 @@
  * This data is used for checking if the member already exists.
  */
 export class ImportMemberBaseResult {
+    private _id: string | null = null;
     private _firstName: string | null = null;
     private _lastName: string | null = null;
     private _birthDay: Date | null = null;
@@ -11,6 +12,10 @@ export class ImportMemberBaseResult {
 
     constructor(readonly row: number) {
 
+    }
+
+    get id() {
+        return this._id;
     }
 
     get firstName() {
@@ -31,6 +36,10 @@ export class ImportMemberBaseResult {
 
     get nationalRegisterNumber() {
         return this._nationalRegisterNumber;
+    }
+
+    setId(id: string) {
+        this._id = id;
     }
 
     setFirstName(firstName: string) {
