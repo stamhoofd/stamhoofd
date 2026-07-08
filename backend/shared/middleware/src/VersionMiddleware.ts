@@ -24,8 +24,7 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
 
         try {
             version = request.getVersion();
-        }
-        catch (e) {
+        } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('missing_version')) {
                 // Allow missing version on /openid/ path
                 if (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test' || request.url.startsWith('/openid/')) {
@@ -46,6 +45,10 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         } */
 
         if (version < this.minimumVersion) {
+            if (request.url.startsWith('/payments/') && request.method === 'POST' && platform === undefined) {
+                // Allow for exchange notifications
+                return;
+            }
             // WARNING: update caddy config for on demand certificates, because we don't want to throw errors over there!
             if (platform === 'web' || platform === undefined) {
                 throw new SimpleError({
@@ -54,8 +57,7 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
                     message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
                     human: $t(`%G8`),
                 });
-            }
-            else {
+            } else {
                 throw new SimpleError({
                     code: 'client_update_required',
                     statusCode: 400,
@@ -81,8 +83,7 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
 
         try {
             response.headers['X-Version'] = Math.min(Version, request.getVersion());
-        }
-        catch (e) {
+        } catch (e) {
             // No version provided or invalid version
         }
 
