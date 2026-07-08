@@ -74,6 +74,21 @@
                         </template>
                     </STListItem>
 
+                    <STListItem v-if="canExportStripePayouts" :selectable="true" class="left-center" @click="$navigate(Routes.StripePayouts)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/bank.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Stripe uitbetalingen exporteren') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Ontvang een rapport via e-mail om te controleren of alle aangerekende Stripe kosten correct werden gefactureerd.') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem v-if="STAMHOOFD.environment === 'development' && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/box.svg">
@@ -189,11 +204,12 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, BalanceItem, DetailedPayableBalance, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
@@ -207,6 +223,7 @@ enum Routes {
     PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
     Packages = 'pakketten',
+    StripePayouts = 'StripePayouts',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -355,6 +372,13 @@ if (!isPlatform) {
         present: 'popup' as const,
         component: async () => (await import('./packages/PackageSettingsView.vue')).default,
     });
+
+    defineRoute({
+        name: Routes.StripePayouts,
+        url: 'stripe-uitbetalingen',
+        present: 'popup',
+        component: async () => (await import('./administration/StripePayoutExportView.vue')).default,
+    });
 }
 
 const auth = useAuth();
@@ -363,7 +387,16 @@ const owner = useRequestOwner();
 const context = useContext();
 const errors = useErrors();
 const organization = useOrganization();
+const platform = usePlatform();
 const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
+
+// Manual Stripe payout reports: only for the platform membership organization itself
+const canExportStripePayouts = computed(() => {
+    return !isPlatform
+        && !!platform.value.membershipOrganizationId
+        && organization.value?.id === platform.value.membershipOrganizationId
+        && auth.hasPlatformFullAccess();
+});
 
 const balancePromise = updateBalance().catch(console.error);
 

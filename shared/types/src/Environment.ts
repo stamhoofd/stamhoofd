@@ -105,6 +105,9 @@ export type BackendSpecificEnvironment = {
     readonly STRIPE_ENDPOINT_SECRET?: string;
     readonly STRIPE_CONNECT_METHOD?: 'express' | 'standard';
 
+    // Extra recipients of the automatic monthly Stripe payout report (only added when the report is valid)
+    readonly STRIPE_PAYOUT_REPORT_EMAILS?: string[];
+
     // Communication with other internal services
     readonly INTERNAL_SECRET_KEY: string;
 

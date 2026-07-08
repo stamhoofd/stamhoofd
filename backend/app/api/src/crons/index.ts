@@ -11,6 +11,7 @@ import './invoices.js';
 import './service-fees.js';
 import './members-fees.js';
 import './stripe-invoices.js';
+import './stripe-payout-reports.js';
 import './transfer-fees.js';
 import './drip-emails.js';
 import './update-organization-future-events.js';
