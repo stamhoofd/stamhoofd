@@ -152,18 +152,6 @@ const allColumns: Column<ObjectType, any>[] = [
         enabled: false,
     }),
 
-    new Column<ObjectType, string | null>({
-        id: 'transferDescription',
-        name: $t('%J8'),
-        getValue: object => object.transferDescription,
-        format: value => value || 'Geen',
-        getStyle: value => !value ? 'gray' : '',
-        minimumWidth: 120,
-        recommendedWidth: 250,
-        allowSorting: false,
-        enabled: props.methods?.includes(PaymentMethod.Transfer) ?? false,
-    }),
-
     new Column<ObjectType, Date>({
         id: 'createdAt',
         name: $t('%1JJ'),
@@ -212,6 +200,53 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 50,
         recommendedWidth: 100,
+    }),
+
+    new Column<ObjectType, ObjectType>({
+        id: 'settlement.settledAt',
+        name: $t('Uitbetalingsdatum'),
+        getValue: object => object,
+        format: (object, width) => {
+            const value = object.settlement?.settledAt ?? null;
+            if (!value && !object.provider) {
+                return $t('N.v.t.');
+            }
+            if (!value) {
+                return $t('Niet uitbetaald');
+            }
+
+            return (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true));
+        },
+        getStyle: value => !value ? 'gray' : '',
+        minimumWidth: 120,
+        recommendedWidth: 120,
+        allowSorting: false,
+        enabled: false,
+    }),
+
+    new Column<ObjectType, ObjectType>({
+        id: 'transferDescription',
+        name: $t('%J8'),
+        getValue: object => object,
+        format: (object) => {
+            const value = object.settlement?.reference ?? null;
+            if (!value && !object.provider) {
+                if (object.method === PaymentMethod.Transfer) {
+                    return object.transferDescription ?? $t('Onbekend');
+                }
+                return $t('N.v.t.');
+            }
+            if (!value) {
+                return $t('Niet uitbetaald');
+            }
+
+            return value;
+        },
+        getStyle: value => !value ? 'gray' : '',
+        minimumWidth: 120,
+        recommendedWidth: 250,
+        allowSorting: false,
+        enabled: props.methods?.includes(PaymentMethod.Transfer) ?? false,
     }),
 
     new Column<ObjectType, PaymentStatus>({
