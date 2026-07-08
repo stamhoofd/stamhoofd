@@ -187,6 +187,9 @@ export class StripePayoutExportData {
     }
 
     get isValid() {
-        return this.totalPaidOut === this.totalInvoices - this.totalStripeFees - this.totalStripeReserved && this.completePayouts.length === this.includedPayouts.length;
+        return this.totalPaidOut === this.totalInvoices - this.totalStripeFees - this.totalStripeReserved
+            // Aggregate totals can mask payout-level mismatches that cancel each other out
+            && this.includedPayouts.every(p => p.isValid)
+            && this.completePayouts.length === this.includedPayouts.length;
     }
 }

@@ -10,7 +10,7 @@ import { resetNock } from '../../tests/helpers/resetNock.js';
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import { initMembershipOrganization } from '../../tests/init/initMembershipOrganization.js';
 import { StripeInvoicer } from './StripeInvoicer.js';
-import { StripePayoutItemType } from './StripePayoutExportData.js';
+import { StripePayoutBreakdownData, StripePayoutData, StripePayoutExportData, StripePayoutItemData, StripePayoutItemType } from './StripePayoutExportData.js';
 import { StripePayoutReporter } from './StripePayoutReporter.js';
 
 describe('StripePayoutReporter', () => {
@@ -350,6 +350,35 @@ describe('StripePayoutReporter', () => {
 
         expect(payoutExport.completePayouts.length).toBe(1);
         expect(payoutExport.isValid).toBe(true);
+    });
+
+    test('Payout-level mismatches that cancel each other out still make the report invalid', () => {
+        const payoutExport = new StripePayoutExportData({ start: reportStart, end: reportEnd });
+
+        const buildBreakdown = (payoutAmount: number, itemAmount: number) => new StripePayoutBreakdownData({
+            payout: new StripePayoutData({
+                id: stripeMocker.createId('po'),
+                amount: payoutAmount,
+                arrivalDate: new Date(2026, 2, 15),
+                statementDescriptor: 'STAMHOOFD',
+            }),
+            items: [
+                new StripePayoutItemData({
+                    name: 'Stripe Factuur',
+                    type: StripePayoutItemType.StripeFees,
+                    amount: itemAmount,
+                }),
+            ],
+        });
+
+        // One payout paid out 1 euro too much and the other 1 euro too little: the aggregate
+        // totals still match, but the report should not be considered valid
+        payoutExport.payouts.push(buildBreakdown(100_00, 200_00), buildBreakdown(300_00, 200_00));
+
+        expect(payoutExport.totalPaidOut).toBe(400_00);
+        expect(payoutExport.completePayouts.length).toBe(2);
+        expect(payoutExport.payouts[0].isValid).toBe(false);
+        expect(payoutExport.isValid).toBe(false);
     });
 
     test('An invoiced payment with a different amount than the application fees marks the report as incomplete', async () => {
