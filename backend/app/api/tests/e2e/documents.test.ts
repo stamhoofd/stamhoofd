@@ -301,13 +301,15 @@ describe('E2E.Documents', () => {
         await assertNoDocument(registration);
 
         // Change age as user (different endpoint, but should also have the same side effect)
+        // A user may only make a small birth date correction, so we only change the year (the
+        // member was born on 2000-01-01 above) to make them young again.
         await patchUserMember({
             organization,
             user,
             patch: MemberWithRegistrationsBlob.patch({
                 id: member.id,
                 details: MemberDetails.patch({
-                    birthDay: new Date(),
+                    birthDay: new Date(new Date().getFullYear(), 0, 1),
                 }),
             }),
         });

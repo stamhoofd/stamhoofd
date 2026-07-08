@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
@@ -1196,6 +1197,73 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 expect(result.body.members.length).toBe(1);
                 expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
             });
+        });
+    });
+
+    describe('Name and birth date changes', () => {
+        async function createOwnedMember() {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({}).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+            const token = await Token.createToken(user);
+            return { organization, user, member, token };
+        }
+
+        async function patchMember(organization: Awaited<ReturnType<typeof createOwnedMember>>['organization'], token: Awaited<ReturnType<typeof createOwnedMember>>['token'], memberId: string, details: AutoEncoderPatchType<MemberDetails>) {
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: memberId,
+                details,
+            }));
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            return await testServer.test(endpoint, request);
+        }
+
+        test('A user cannot drastically change the first name of their member', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            await expect(patchMember(organization, token, member.id, MemberDetails.patch({ firstName: 'Michael' })))
+                .rejects
+                .toThrow(STExpect.errorWithCode('not_allowed'));
+        });
+
+        test('A user can fix a typo in the first name', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ firstName: 'Jon' }));
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.firstName).toBe('Jon');
+        });
+
+        test('A user can change the last name', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ lastName: 'Smith' }));
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.lastName).toBe('Smith');
+        });
+
+        test('A user cannot change the day, month and year of the birth date all at once', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            const base = member.details.birthDay!;
+            const newBirthDay = new Date(base.getFullYear() + 2, base.getMonth() + 3, base.getDate() + 5);
+            await expect(patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay })))
+                .rejects
+                .toThrow(STExpect.errorWithCode('not_allowed'));
+        });
+
+        test('A user can correct a single part of the birth date', async () => {
+            const { organization, member, token } = await createOwnedMember();
+            const base = member.details.birthDay!;
+            const newBirthDay = new Date(base.getFullYear() + 1, base.getMonth(), base.getDate());
+            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay }));
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 1);
         });
     });
 });

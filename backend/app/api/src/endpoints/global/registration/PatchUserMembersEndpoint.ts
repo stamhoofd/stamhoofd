@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
 import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
-import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { BooleanStatus, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 
 import type { OneToManyRelation } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -15,6 +15,7 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate.js';
+import { throwIfDrasticMemberDetailsChange } from '../members/throwIfDrasticMemberDetailsChange.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -108,6 +109,11 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 }
 
                 shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
+
+                // Only full-permission admins may drastically change the name or birth date of an existing member
+                if (!await Context.auth.canAccessMember(member, PermissionLevel.Full)) {
+                    throwIfDrasticMemberDetailsChange(struct.details, member.details);
+                }
 
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
 

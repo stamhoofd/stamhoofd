@@ -156,7 +156,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             const memberToPatch = await new MemberFactory({
-                firstName: 'otherName',
+                // A typo of the existing member's first name, so correcting it (below) is allowed
+                // and still triggers the duplicate detection
+                firstName: firstName + 'n',
                 lastName,
                 birthDay,
                 generateData: true,
@@ -618,7 +620,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const patch = MemberWithRegistrationsBlob.patch({
                 id: member.id,
                 details: MemberDetails.patch({
-                    firstName: 'Changed',
+                    // Changing the last name is always allowed; it proves the registration grants write access
+                    lastName: 'Changed',
                 }),
             });
             arr.addPatch(patch);
@@ -639,7 +642,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(response.body.members.length).toBe(1);
             const memberStruct = response.body.members[0];
             expect(memberStruct.details).toMatchObject({
-                firstName: 'Changed',
+                lastName: 'Changed',
             });
         });
 
@@ -798,6 +801,74 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(memberStruct.details).toMatchObject({
                 firstName: 'Changed',
             });
+        });
+    });
+
+    describe('Name and birth date changes', () => {
+        test('A non-full admin cannot drastically change the first name of a member', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const group = await new GroupFactory({ organization }).create();
+            const resources = new Map();
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ firstName: 'Michael' }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('not_allowed'));
+        });
+
+        test('A full admin can drastically change the name and birth date of a member', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const token = await Token.createToken(user);
+
+            const base = member.details.birthDay!;
+            const newBirthDay = new Date(base.getFullYear() + 5, base.getMonth() + 4, base.getDate() + 6);
+
+            const arr: Body = new PatchableArray();
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({ firstName: 'Michael', birthDay: newBirthDay }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].details.firstName).toBe('Michael');
+            expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 5);
         });
     });
 

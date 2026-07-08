@@ -23,6 +23,7 @@ import { MemberNumberService } from '../../../services/MemberNumberService.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate.js';
+import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetailsChange.js';
 import { mergeTwoMembers } from '../../../helpers/MemberMerger.js';
 
 type Params = Record<string, never>;
@@ -211,6 +212,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(patch, originalDetails);
+
+                // Only full-permission admins may drastically change the name or birth date of an existing member
+                if (!await Context.auth.canAccessMember(member, PermissionLevel.Full)) {
+                    throwIfDrasticMemberDetailsChange(patch.details, originalDetails);
+                }
 
                 const wasReduced = member.details.shouldApplyReducedPrice;
 
