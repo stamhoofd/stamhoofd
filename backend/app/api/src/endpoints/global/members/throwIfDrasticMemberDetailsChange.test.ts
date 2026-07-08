@@ -1,3 +1,4 @@
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError } from '@simonbackx/simple-errors';
 import { MemberDetails } from '@stamhoofd/structures';
 import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetailsChange.js';
@@ -5,7 +6,7 @@ import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetails
 /**
  * Runs the check and returns the thrown SimpleError (as { code, field }), or null when nothing was thrown.
  */
-function runCheck(patch: ReturnType<typeof MemberDetails.patch>, original: MemberDetails): { code: string; field?: string } | null {
+function runCheck(patch: AutoEncoderPatchType<MemberDetails>, original: MemberDetails): { code: string; field?: string } | null {
     try {
         throwIfDrasticMemberDetailsChange(patch, original);
         return null;

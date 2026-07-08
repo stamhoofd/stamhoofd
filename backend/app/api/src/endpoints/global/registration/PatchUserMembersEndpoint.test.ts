@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
@@ -1215,7 +1216,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             return { organization, user, member, token };
         }
 
-        async function patchMember(organization: Awaited<ReturnType<typeof createOwnedMember>>['organization'], token: Awaited<ReturnType<typeof createOwnedMember>>['token'], memberId: string, details: ReturnType<typeof MemberDetails.patch>) {
+        async function patchMember(organization: Awaited<ReturnType<typeof createOwnedMember>>['organization'], token: Awaited<ReturnType<typeof createOwnedMember>>['token'], memberId: string, details: AutoEncoderPatchType<MemberDetails>) {
             const arr: Body = new PatchableArray();
             arr.addPatch(MemberWithRegistrationsBlob.patch({
                 id: memberId,
