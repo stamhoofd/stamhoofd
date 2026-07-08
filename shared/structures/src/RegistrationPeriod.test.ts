@@ -74,8 +74,10 @@ describe('OrganizationRegistrationPeriod.duplicate', () => {
 
         expect(duplicate.settings.bundleDiscounts).toHaveLength(1);
         expect(duplicatedBundleDiscount).not.toBe(bundleDiscount);
-        expect(duplicatedBundleDiscount.id).toBe(bundleDiscount.id);
+        expect(duplicatedBundleDiscount.id).not.toBe(bundleDiscount.id);
         expect(duplicatedBundleDiscount.name.toString()).toBe(bundleDiscount.name.toString());
-        expect(duplicatedGroup.settings.prices[0].bundleDiscounts.has(bundleDiscount.id)).toBe(true);
+        // The group price link must be remapped to the new discount id
+        expect(duplicatedGroup.settings.prices[0].bundleDiscounts.has(bundleDiscount.id)).toBe(false);
+        expect(duplicatedGroup.settings.prices[0].bundleDiscounts.has(duplicatedBundleDiscount.id)).toBe(true);
     });
 });
