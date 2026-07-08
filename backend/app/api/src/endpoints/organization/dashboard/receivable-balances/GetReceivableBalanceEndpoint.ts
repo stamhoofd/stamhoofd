@@ -83,7 +83,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
         const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
-        const invoices = await AuthenticatedStructures.invoices(invoiceModels);
+        const invoices = await AuthenticatedStructures.invoices(invoiceModels, true);
 
         const balances = await CachedBalance.getForObjects([request.params.id], organization.id, request.params.type);
 

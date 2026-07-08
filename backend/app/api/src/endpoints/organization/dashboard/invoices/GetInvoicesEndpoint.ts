@@ -198,7 +198,7 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         return new PaginatedResponse<InvoiceStruct[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.invoices(invoices),
+            results: await AuthenticatedStructures.invoices(invoices, true),
             next,
         });
     }

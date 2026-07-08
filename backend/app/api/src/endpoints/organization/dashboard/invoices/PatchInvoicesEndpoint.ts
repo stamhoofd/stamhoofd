@@ -58,7 +58,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         return new Response(
-            await AuthenticatedStructures.invoices(invoices),
+            await AuthenticatedStructures.invoices(invoices, true),
         );
     }
 }
