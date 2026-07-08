@@ -7,8 +7,8 @@ android {
         applicationId "com.stamhoofd.stamhoofd"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 413
-        versionName "2.131.0"
+        versionCode 414
+        versionName "2.132.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
