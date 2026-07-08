@@ -60,11 +60,13 @@ beforeAll(async () => {
     // cascade below, so it has to be cleared first
     await Database.delete('DELETE FROM `invoiced_balance_items`');
     await Database.delete('DELETE FROM `invoices`');
+
+    // payments restrict deleting stripe accounts (which cascade from organizations), and a payment
+    // can reference a stripe account of a different organization, so payments have to be cleared first
+    await Database.delete('DELETE FROM `payments`');
     await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
     await Database.delete('DELETE FROM `organizations`');
     await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
-
-    await Database.delete('DELETE FROM `payments`');
     await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
 
     // Use random file keys in tests
