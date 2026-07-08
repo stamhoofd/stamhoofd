@@ -7,7 +7,7 @@ import type { Browser, Page } from '@playwright/test';
 import { devices, expect } from '@playwright/test';
 import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
-import { Organization, OrganizationFactory, Payment, Token, UserFactory } from '@stamhoofd/models';
+import { OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory } from '@stamhoofd/models';
 import {
     MollieOnboarding,
     MollieStatus,
@@ -410,6 +410,240 @@ function registerWebshopOrderTests() {
         await expect(refundRow).toBeVisible();
         await expect(refundRow.locator('.icon.success')).toBeVisible();
         await expect(refundRow.locator('.icon.clock')).toHaveCount(0);
+
+        await adminContext.close();
+    });
+
+    test('Order sync does not skip an order added in the second it last synced', async ({ browser }) => {
+        // Regression test for the incremental order sync watermark. The client stores a watermark
+        // (updatedAt of the last fetched order) and later fetches orders with updatedAt > watermark.
+        // updatedAt has a one-second resolution, so an order created in the same second as the
+        // watermark — but after the client already synced — would be skipped forever by a strict
+        // cursor. The client guards against this by capping the stored watermark to (now - 30s), so
+        // recent seconds keep being re-fetched until they are safely in the past.
+        const organization = await createWebshopOrganization('SameSecondSync');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Same second sync ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        // updatedAt is server-stamped. X is "now" (to the second). We mock the dashboard's browser
+        // clock so we can fast-forward past the 30s safety margin without waiting in real time.
+        const X = new Date();
+        X.setMilliseconds(0);
+
+        // The first order already exists when the admin opens the table.
+        await new OrderFactory({ webshop, firstName: 'Alice', lastName: 'First', updatedAt: X }).create();
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        // Start the mocked clock at X and let time keep flowing (resume) so the dashboard boots and
+        // loads normally; only the base time is under our control.
+        await adminPage.clock.install({ time: X });
+        await adminPage.clock.resume();
+        await loginAs({ page: adminPage, user: admin });
+
+        // First load: the client fetches Alice and stores its watermark, capped to (now - 30s),
+        // i.e. below X (the sync happens far less than 30s after X).
+        let table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getRow('Alice')).toBeVisible();
+
+        // A second order gets the SAME updatedAt as the watermark's source, created after the client
+        // already synced. A strict `updatedAt > X` cursor would never fetch it.
+        await new OrderFactory({ webshop, firstName: 'Bob', lastName: 'Second', updatedAt: X }).create();
+
+        // Fast-forward past the 30s safety margin, then let time keep flowing again.
+        await adminPage.clock.fastForward(24 * 60 * 60 * 1_000 + 1_000);
+        await adminPage.clock.resume();
+
+        // Reload the table: the capped watermark (X - 30s) still re-fetches the same-second order.
+        table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getRow('Bob')).toBeVisible();
+        await expect(table.getRow('Alice')).toBeVisible();
+
+        await new OrderFactory({ webshop, firstName: 'Tim', lastName: 'Third', updatedAt: X }).create();
+
+        // Reload again: the watermark has now advanced to X (both orders are safely in the past), so
+        // the sync requests orders with updatedAt > X and the backend returns nothing — the known
+        // orders are not re-fetched.
+        const ordersResponsePromise = adminPage.waitForResponse(r =>
+            r.request().method() === 'GET'
+            && /\/webshop\/orders(?:\?|$)/.test(r.url())
+            && !r.url().includes('/count'),
+        );
+        table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+
+        const ordersResponse = await ordersResponsePromise;
+        const body = await ordersResponse.json();
+        expect(body.results).toHaveLength(0);
+
+        // Bob is still shown from the local (IndexedDB) cache even though the sync returned nothing.
+        await expect(table.getRow('Alice')).toBeVisible();
+        await expect(table.getRow('Bob')).toBeVisible();
+        await expect(table.getRow('Tim')).not.toBeVisible();
+
+        await new OrderFactory({ webshop, firstName: 'Linda', lastName: 'Fourth' }).create();
+        await new OrderFactory({ webshop, firstName: 'Quickly after', lastName: 'Fourth', updatedAt: new Date(X.getTime() + 1_000) }).create();
+
+        table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(table.getRow('Alice')).toBeVisible();
+        await expect(table.getRow('Bob')).toBeVisible();
+        await expect(table.getRow('Linda')).toBeVisible();
+        await expect(table.getRow('Quickly after')).toBeVisible();
+        await expect(table.getRow('Tim')).not.toBeVisible();
+
+        await adminContext.close();
+    });
+
+    test('Order sync fetches all orders when 100+ share one updatedAt', async ({ browser }) => {
+        // The sync fetches orders in pages of 100 and continues with a keyset cursor on
+        // (updatedAt, number). With 101 orders sharing the exact same updatedAt, the cursor must
+        // rely on the number tiebreaker to reach the second page; a broken cursor would stop after
+        // the first 100 (or loop). All 101 must end up in the local database on the first load.
+        const organization = await createWebshopOrganization('PaginatedSync');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Paginated sync ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        // 101 orders (> the 100-per-page API limit), all with the same updatedAt. The one with the
+        // highest number is created last, so it lands on the second page of the sync.
+        const sharedUpdatedAt = new Date();
+        sharedUpdatedAt.setMilliseconds(0);
+        for (let number = 1; number <= 101; number++) {
+            const isSecondPageMarker = number === 101;
+            await new OrderFactory({
+                webshop,
+                firstName: isSecondPageMarker ? 'PageTwoMarker' : 'Filler',
+                lastName: `Order ${number}`,
+                number,
+                updatedAt: sharedUpdatedAt,
+            }).create();
+        }
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        // Opening the table triggers the initial sync, which pages all orders into the local db
+        // before rendering. The header shows the number of locally-stored orders: all 101.
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(adminPage.getByTestId('table').locator('.title-suffix')).toHaveText('101');
+
+        // The second-page order is retrievable too (searching streams from the local db).
+        await adminPage.getByTestId('table').locator('input[name="search"]').fill('PageTwoMarker');
+        await expect(table.getRow('PageTwoMarker')).toBeVisible();
+
+        await adminContext.close();
+    });
+
+    test('Ticket sync fetches all tickets when 100+ share one updatedAt', async ({ browser }) => {
+        // Same as the order pagination test, but for the ticket sync (WebshopTicketsRepo). Tickets
+        // are paged in 100s with a keyset cursor on (updatedAt, id); 101 tickets sharing one
+        // updatedAt force the id tiebreaker to reach the second page. A single-ticket webshop shows
+        // an order's tickets, so the order view surfaces how many tickets ended up in the local db.
+        const organization = await createWebshopOrganization('TicketPagination');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Ticket pagination ${WorkerData.id}`,
+            ticketType: WebshopTicketType.SingleTicket,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        // One order with 101 tickets, all sharing the exact same updatedAt.
+        const order = await new OrderFactory({ webshop, firstName: 'Ticketholder', lastName: 'Order' }).create();
+        const sharedUpdatedAt = new Date();
+        sharedUpdatedAt.setMilliseconds(0);
+        for (let index = 1; index <= 101; index++) {
+            await new TicketFactory({ order, index, total: 101, updatedAt: sharedUpdatedAt }).create();
+        }
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        // Opening the order triggers the ticket sync, which pages all tickets into the local db.
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await table.getRow('Ticketholder').click();
+
+        // The order view shows the number of tickets it found locally: all 101 were fetched.
+        await expect(adminPage.getByTestId('tickets-button')).toContainText('0 / 101');
+
+        await adminContext.close();
+    });
+
+    test('Order sync does not skip orders when a page fails mid-sync', async ({ browser }) => {
+        // The sync stores orders per page. If the first page is stored but a later page fails, the
+        // watermark must NOT have advanced past the orders we never fetched. All orders share one
+        // updatedAt that is older than the watermark margin, so the watermark equals that exact
+        // updatedAt: advancing it after only the first page would skip the second-page order forever
+        // (the next sync filters updatedAt > watermark, which excludes an order at that same second).
+        const organization = await createWebshopOrganization('InterruptedSync');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Interrupted sync ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+        });
+        const admin = await createAdmin(organization);
+
+        // 101 orders, all with the same updatedAt well before the 24h watermark margin. The
+        // highest-numbered order (created last) lands on the sync's second page.
+        const oldUpdatedAt = new Date(Date.now() - 25 * 60 * 60 * 1000);
+        oldUpdatedAt.setMilliseconds(0);
+        for (let number = 1; number <= 101; number++) {
+            await new OrderFactory({
+                webshop,
+                firstName: number === 101 ? 'PageTwoMarker' : 'Filler',
+                lastName: `Order ${number}`,
+                number,
+                updatedAt: oldUpdatedAt,
+            }).create();
+        }
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        // Let the first order-list page through, then drop the connection for the rest (the count
+        // endpoint keeps working, so only the paginated list is interrupted).
+        let interruptSync = true;
+        let listRequests = 0;
+        await adminPage.route(
+            url => url.pathname.endsWith('/webshop/orders'),
+            async (route) => {
+                listRequests++;
+                if (interruptSync && listRequests >= 2) {
+                    await route.abort('internetdisconnected');
+                } else {
+                    await route.continue();
+                }
+            },
+        );
+
+        // First load: only the first page (100 orders) makes it into the local database.
+        await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(adminPage.getByTestId('table').locator('.title-suffix')).toHaveText('100');
+
+        // Restore the connection.
+        interruptSync = false;
+
+        // Reopen the table: the frontend must re-fetch the order it missed, so all 101 are present.
+        const reloadedTable = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(adminPage.getByTestId('table').locator('.title-suffix')).toHaveText('101');
+        await adminPage.getByTestId('table').locator('input[name="search"]').fill('PageTwoMarker');
+        await expect(reloadedTable.getRow('PageTwoMarker')).toBeVisible();
 
         await adminContext.close();
     });

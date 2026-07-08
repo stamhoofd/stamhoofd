@@ -157,6 +157,7 @@ export enum BalanceItemRelationType {
     GroupOption = 'GroupOption', // Contains the option that was chosen for the group
     Member = 'Member', // Contains the name of the member you registered
     MembershipType = 'MembershipType',
+    RegistrationPeriod = 'RegistrationPeriod', // Contains the name of the registration period (working year) associated with the registration, discount or membership
     Discount = 'Discount', // Name and id of the related discount
 
     STPackage = 'STPackage', // Purchase - Stamhoofd specific
@@ -173,6 +174,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOption: return $t(`%TE`);
         case BalanceItemRelationType.Member: return $t(`%1PM`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
+        case BalanceItemRelationType.RegistrationPeriod: return $t('Werkjaar');
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
         case BalanceItemRelationType.STPricingType: return $t(`%1YH`);
@@ -189,6 +191,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.GroupOption: return $t(`%li`);
         case BalanceItemRelationType.Member: return $t(`%lj`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
+        case BalanceItemRelationType.RegistrationPeriod: return $t('Naam van het werkjaar geassocieerd aan dit item');
         case BalanceItemRelationType.Discount: return $t(`%177`);
         case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
         case BalanceItemRelationType.STPricingType: return $t(`%1Xo`);
@@ -800,16 +803,20 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                let prefix = '';
+                const descriptions: string[] = [];
                 if (option) {
                     const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`%lk`);
-                    prefix = $t(`%lx`) + ' ' + group;
+                    descriptions.push($t(`%lx`) + ' ' + group);
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    return (prefix ? (prefix + '\n') : '') + member.name;
+                    descriptions.push(member.name.toString());
                 }
-                return prefix;
+                const period = this.relations.get(BalanceItemRelationType.RegistrationPeriod);
+                if (period) {
+                    descriptions.push(period.name.toString());
+                }
+                return descriptions.join('\n');
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const descriptions: string[] = [];
@@ -821,14 +828,26 @@ export class BalanceItem extends AutoEncoder {
                 if (group) {
                     descriptions.push($t(`%m1`) + ' ' + group.name);
                 }
+                const period = this.relations.get(BalanceItemRelationType.RegistrationPeriod);
+                if (period) {
+                    descriptions.push(period.name.toString());
+                }
                 return descriptions.join('\n');
             }
             case BalanceItemType.PlatformMembership: {
+                const descriptions: string[] = [];
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    return member.name.toString();
+                    descriptions.push(member.name.toString());
                 }
-                break;
+                const period = this.relations.get(BalanceItemRelationType.RegistrationPeriod);
+                if (period) {
+                    descriptions.push(period.name.toString());
+                }
+                if (descriptions.length === 0) {
+                    break;
+                }
+                return descriptions.join('\n');
             }
             case BalanceItemType.CancellationFee: {
                 const list: string[] = [];

@@ -5,7 +5,7 @@ import { EventBus } from '@stamhoofd/components/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
 import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
@@ -13,6 +13,22 @@ import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
 import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
+
+/**
+ * Safety margin subtracted from the current time when advancing the order sync watermark.
+ *
+ * updatedAt is stamped with new Date() at save time and stored with a one-second resolution, so a
+ * write only ever gets timestamp S during wall-clock second S. Right after a fetch that read up to
+ * second S, another order can still be saved with that same timestamp S (before second S ends, or
+ * before our query happened to see it). Advancing the watermark all the way to S would skip such an
+ * order forever, because the next sync uses updatedAt > watermark.
+ *
+ * By capping the stored watermark to (now - this margin) we keep re-fetching the most recent seconds
+ * until they are safely in the past, without ever re-fetching older, sealed seconds. The margin must
+ * exceed the one-second resolution plus any client/server clock skew and write-visibility lag; it
+ * also bounds how many recent seconds get re-fetched on each sync.
+ */
+const WATERMARK_SAFETY_MARGIN_MS = 60 * 60 * 1000;
 
 class CompilerFilterError extends Error {}
 class CallbackError extends Error {}
@@ -64,12 +80,6 @@ export class WebshopOrdersRepo {
 
         const promises: Promise<void>[] = [];
 
-        const putAndSetLastFetched = async (orders: PrivateOrder[]) => {
-            await this.store.putAll(orders);
-            // first await put all orders to prevent setting the last fetched order if the putAll fails
-            await this.apiClient.setlastFetchedOrder(orders[orders.length - 1]);
-        };
-
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
                 hadSuccessfulFetch = true;
@@ -79,7 +89,8 @@ export class WebshopOrdersRepo {
 
             if (orders.length) {
                 totalOrders.push(...orders);
-                promises.push(putAndSetLastFetched(orders));
+                // Store each page as it arrives, but do not advance the watermark yet (see below).
+                promises.push(this.store.putAll(orders));
             }
         };
 
@@ -99,6 +110,15 @@ export class WebshopOrdersRepo {
 
         // wait until all orders have been stored
         await Promise.all(promises);
+
+        // Only advance the watermark once every page has been fetched (getAllUpdated resolved) and
+        // stored. Advancing it per page would skip orders on a page that failed to load: the next
+        // sync filters updatedAt > watermark, so an order sharing the last stored order's (sealed)
+        // second would never be re-fetched. If a page fails, getAllUpdated throws before this line,
+        // so the watermark stays put and the next sync re-fetches from where it left off.
+        if (totalOrders.length > 0) {
+            await this.apiClient.setlastFetchedOrder(totalOrders[totalOrders.length - 1]);
+        }
 
         if (fetchedOrders.length > 0) {
             await this.eventBus.sendEvent('fetched', fetchedOrders);
@@ -129,8 +149,7 @@ export class WebshopOrdersRepo {
         // Move all data to original order
         try {
             await this.store.putAll(patched);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             // No db support or other error. Should ignore
         }
@@ -138,8 +157,7 @@ export class WebshopOrdersRepo {
         // Patching orders can result in changed tickets. We'll need to pull those in.
         try {
             this.tickets.fetchAllUpdated().catch(console.error);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
 
@@ -162,8 +180,7 @@ export class WebshopOrdersRepo {
                 let order: PrivateOrder;
                 try {
                     order = decoder.decode(new ObjectData(rawOrder, { version: Version, medium: EncodeMedium.Database }));
-                }
-                catch (e) {
+                } catch (e) {
                     // force fetch all again
                     this.apiClient.clearLastFetchedOrder().catch(console.error);
                     throw e;
@@ -186,8 +203,7 @@ export class WebshopOrdersRepo {
     ): Promise<number> {
         try {
             return await this.store.streamRaw<T>(options);
-        }
-        catch (e) {
+        } catch (e) {
             if (e instanceof CallbackError || e instanceof CompilerFilterError) {
                 throw e;
             }
@@ -202,8 +218,7 @@ export class WebshopOrdersRepo {
     async getAllRaw(): Promise<any []> {
         try {
             return await this.store.getAllRaw();
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             throw new SimpleError({
                 code: 'loading_failed',
@@ -299,8 +314,7 @@ export class OrdersStore {
             for (const order of orders) {
                 if (order.status === OrderStatus.Deleted) {
                     objectStore.delete(order.id);
-                }
-                else {
+                } else {
                     const indexBox = createPrivateOrderIndexBox(order);
                     objectStore.put(indexBox.encode({ version: Version, medium: EncodeMedium.Database }));
                 }
@@ -357,16 +371,13 @@ export class OrdersStore {
 
                     if (sortItem.key === 'id') {
                         request = objectStore.openCursor(null, direction);
-                    }
-                    else {
+                    } else {
                         request = objectStore.index(sortItem.key).openCursor(null, direction);
                     }
-                }
-                else {
+                } else {
                     request = objectStore.openCursor();
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 reject(e);
                 return;
             }
@@ -379,8 +390,7 @@ export class OrdersStore {
             if (filter) {
                 try {
                     compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
-                }
-                catch (e: any) {
+                } catch (e: any) {
                     console.error('Compile filter failed', e);
                     reject(new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed'));
                     return;
@@ -410,8 +420,7 @@ export class OrdersStore {
 
                     try {
                         callback(decodedResult);
-                    }
-                    catch (e: any) {
+                    } catch (e: any) {
                         console.error('callback failed', e);
                         // Propagate error
                         reject(new CallbackError((e.message as string | undefined) ?? 'Callback failed'));
@@ -542,8 +551,7 @@ class WebshopOrdersApiClient {
 
         if (isFetchAll) {
             this.lastFetchedOrder = null;
-        }
-        else {
+        } else {
             await this.initLastFetchedOrder();
         }
 
@@ -553,17 +561,11 @@ class WebshopOrdersApiClient {
         };
 
         if (this.lastFetchedOrder) {
-            filter['$or'] = [
-                {
-                    updatedAt: { $gt: this.lastFetchedOrder.updatedAt },
-                },
-                {
-                    $and: [
-                        { updatedAt: { $eq: this.lastFetchedOrder.updatedAt } },
-                        { number: { $gt: this.lastFetchedOrder.number } },
-                    ],
-                },
-            ];
+            // The watermark is capped when it is stored (see setlastFetchedOrder) so it never points
+            // into a second that might still receive order updates we haven't fetched. A strict > is
+            // therefore safe and complete: every order in and after an as-yet-unsealed second keeps
+            // being re-fetched until that second is safely in the past.
+            filter['updatedAt'] = { $gt: this.lastFetchedOrder.updatedAt };
         }
 
         const request = new LimitedFilteredRequest({
@@ -608,8 +610,7 @@ class WebshopOrdersApiClient {
 
         try {
             await fetchAll(request, fetcher, { onResultsReceived });
-        }
-        finally {
+        } finally {
             this._isFetching = false;
         }
     }
@@ -638,16 +639,22 @@ class WebshopOrdersApiClient {
             return;
         }
 
+        let timestamp = new Date(order.updatedAt);
+        if (timestamp.getTime() > Date.now() - WATERMARK_SAFETY_MARGIN_MS) {
+            // There is a chance multiple orders will be updated at the same time
+            timestamp = new Date(timestamp.getTime() - 1_000);
+        }
+
         // important: this only works if the orders are sorted by updatedAt asc and then by number asc
         if (this.lastFetchedOrder
-            && (this.lastFetchedOrder.updatedAt > order.updatedAt
-                || (this.lastFetchedOrder.updatedAt === order.updatedAt && this.lastFetchedOrder.number > order.number)
+            && (this.lastFetchedOrder.updatedAt > timestamp
+                || (this.lastFetchedOrder.updatedAt === timestamp && this.lastFetchedOrder.number > order.number)
             )) {
             return;
         }
 
         this.lastFetchedOrder = {
-            updatedAt: order.updatedAt,
+            updatedAt: timestamp,
             number: order.number!,
         };
         await this.settingsStore.set('lastFetchedOrder', this.lastFetchedOrder);
@@ -661,8 +668,7 @@ class WebshopOrdersApiClient {
 
         try {
             this.lastFetchedOrder = await this.settingsStore.get('lastFetchedOrder') ?? null;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             // Probably no database support. Ignore it and load everything.
             this.lastFetchedOrder = null;

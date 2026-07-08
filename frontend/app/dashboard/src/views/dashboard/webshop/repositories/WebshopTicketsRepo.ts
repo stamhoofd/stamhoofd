@@ -51,23 +51,25 @@ export class WebshopTicketsRepo {
 
         const promises: Promise<void>[] = [];
 
-        const putAndSetLastFetched = async (tickets: TicketPrivate[]) => {
-            await this.storeAll(tickets);
-            // first await store all tickets to prevent setting the last fetched order if the putAll fails
-            await this.apiClient.setLastFetchedTicket(tickets[tickets.length - 1]);
-        };
-
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 totalTickets.push(...tickets);
-                promises.push(putAndSetLastFetched(tickets));
+                // Store each page as it arrives, but do not advance the watermark yet (see below).
+                promises.push(this.storeAll(tickets));
             }
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived });
         await Promise.all(promises);
 
+        // Only advance the watermark once every page has been fetched (getAllUpdated resolved) and
+        // stored. Advancing it per page would skip tickets on a page that failed to load: the next
+        // sync filters updatedAt > watermark, so a ticket sharing the last stored ticket's (sealed)
+        // second would never be re-fetched. If a page fails, getAllUpdated throws before this line,
+        // so the watermark stays put and the next sync re-fetches from where it left off.
         if (totalTickets.length > 0) {
+            await this.apiClient.setLastFetchedTicket(totalTickets[totalTickets.length - 1]);
+
             // deleted tickets get handled in listener
             await this.eventBus.sendEvent('fetched', totalTickets);
         }
@@ -532,6 +534,18 @@ export class WebshopTicketPatchesStore {
 }
 
 /**
+ * How recent an updatedAt must be for the sync watermark to treat its second as still open.
+ *
+ * updatedAt is stored with a one-second resolution, so multiple tickets can share the exact same
+ * second. When the last fetched ticket was updated within this margin of now, the watermark is
+ * stored one second before its updatedAt, so a sibling ticket saved in that same second — which our
+ * query might not have seen yet — is still re-fetched on the next sync. Once a ticket is older than
+ * this margin its second can no longer receive writes, so the exact updatedAt is stored and it is no
+ * longer re-fetched. The margin must exceed any client/server clock skew and write-visibility lag.
+ */
+const WATERMARK_SAFETY_MARGIN_MS = 60 * 60 * 1000;
+
+/**
  * Responsible webshop tickets network operations.
  */
 class WebshopTicketsApiClient {
@@ -581,17 +595,11 @@ class WebshopTicketsApiClient {
         };
 
         if (this.lastFetchedTicket) {
-            filter['$or'] = [
-                {
-                    updatedAt: { $gt: this.lastFetchedTicket.updatedAt },
-                },
-                {
-                    $and: [
-                        { updatedAt: { $eq: this.lastFetchedTicket.updatedAt } },
-                        { id: { $gt: this.lastFetchedTicket.id } },
-                    ],
-                },
-            ];
+            // The watermark is capped when it is stored (see setLastFetchedTicket) so it never points
+            // into a second that might still receive ticket updates we haven't fetched. A strict > is
+            // therefore safe and complete: every ticket in and after an as-yet-unsealed second keeps
+            // being re-fetched until that second is safely in the past.
+            filter['updatedAt'] = { $gt: this.lastFetchedTicket.updatedAt };
         }
 
         const filteredRequest = new LimitedFilteredRequest({
@@ -655,8 +663,22 @@ class WebshopTicketsApiClient {
     }
 
     async setLastFetchedTicket(ticket: TicketPrivate) {
+        let timestamp = new Date(ticket.updatedAt);
+        if (timestamp.getTime() > Date.now() - WATERMARK_SAFETY_MARGIN_MS) {
+            // There is a chance multiple tickets will be updated at the same time
+            timestamp = new Date(timestamp.getTime() - 1_000);
+        }
+
+        // important: this only works if the tickets are sorted by updatedAt asc and then by id asc
+        if (this.lastFetchedTicket
+            && (this.lastFetchedTicket.updatedAt > timestamp
+                || (this.lastFetchedTicket.updatedAt === timestamp && this.lastFetchedTicket.id > ticket.id)
+            )) {
+            return;
+        }
+
         this.lastFetchedTicket = {
-            updatedAt: ticket.updatedAt,
+            updatedAt: timestamp,
             id: ticket.id!,
         };
         await this.settingsStore.set('lastFetchedTicket', this.lastFetchedTicket);

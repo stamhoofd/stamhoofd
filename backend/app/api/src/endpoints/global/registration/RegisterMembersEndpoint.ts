@@ -5,7 +5,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -516,12 +516,37 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
         }
 
-        async function createBalanceItem({ registration, skipZero, amount, unitPrice, description, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
+        // Cache the registration period relation per periodId, so we only load each period once.
+        const periodRelationCache = new Map<string, BalanceItemRelation | null>();
+        async function getPeriodRelation(periodId: string): Promise<BalanceItemRelation | null> {
+            if (periodRelationCache.has(periodId)) {
+                return periodRelationCache.get(periodId)!;
+            }
+
+            const period = await RegistrationPeriod.getByID(periodId);
+            const relation = period
+                ? BalanceItemRelation.create({
+                        id: period.id,
+                        name: new TranslatedString(period.getBaseStructure().name),
+                    })
+                : null;
+
+            periodRelationCache.set(periodId, relation);
+            return relation;
+        }
+
+        async function createBalanceItem({ registration, periodId, skipZero, amount, unitPrice, description, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; periodId: string; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
             // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
             if (skipZero === true) {
                 if (unitPrice === 0 || amount === 0) {
                     return;
                 }
+            }
+
+            // Add the registration period (working year) relation so it is visible in the item description.
+            const periodRelation = await getPeriodRelation(periodId);
+            if (periodRelation) {
+                relations.set(BalanceItemRelationType.RegistrationPeriod, periodRelation);
             }
 
             // Create balance item
@@ -608,6 +633,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // Base price
             await createBalanceItem({
                 registration,
+                periodId: item.group.periodId,
                 unitPrice: item.groupPrice.price.forMember(item.member),
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
@@ -621,6 +647,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             for (const option of item.options) {
                 await createBalanceItem({
                     registration,
+                    periodId: item.group.periodId,
                     amount: option.amount,
                     unitPrice: option.option.price.forMember(item.member),
                     skipZero: true, // Do not create for zero option prices
@@ -654,6 +681,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     // Base price
                     await createBalanceItem({
                         registration,
+                        periodId: item.group.periodId,
                         unitPrice: -discountValue,
                         type: BalanceItemType.RegistrationBundleDiscount,
                         description: discount.name,
@@ -722,6 +750,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 await createBalanceItem({
                     registration: registration.registration,
+                    periodId: registration.group.periodId,
                     unitPrice: -difference,
                     type: BalanceItemType.RegistrationBundleDiscount,
                     description: discount.name,

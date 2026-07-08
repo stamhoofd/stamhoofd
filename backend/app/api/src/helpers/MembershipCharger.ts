@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Member, MemberPlatformMembership, Platform } from '@stamhoofd/models';
+import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -23,6 +23,25 @@ export const MembershipCharger = {
 
         function getType(id: string) {
             return platform.config.membershipTypes.find(t => t.id === id);
+        }
+
+        // Cache the registration period relation per periodId, so we only load each period once.
+        const periodRelationCache = new Map<string, BalanceItemRelation | null>();
+        async function getPeriodRelation(periodId: string): Promise<BalanceItemRelation | null> {
+            if (periodRelationCache.has(periodId)) {
+                return periodRelationCache.get(periodId)!;
+            }
+
+            const period = await RegistrationPeriod.getByID(periodId);
+            const relation = period
+                ? BalanceItemRelation.create({
+                        id: period.id,
+                        name: new TranslatedString(period.getBaseStructure().name),
+                    })
+                : null;
+
+            periodRelationCache.set(periodId, relation);
+            return relation;
         }
 
         let createdCount = 0;
@@ -113,6 +132,12 @@ export const MembershipCharger = {
                         }),
                     ],
                 ]);
+
+                // Add the registration period (working year) relation so it is visible in the item description.
+                const periodRelation = await getPeriodRelation(membership.periodId);
+                if (periodRelation) {
+                    balanceItem.relations.set(BalanceItemRelationType.RegistrationPeriod, periodRelation);
+                }
 
                 balanceItem.type = BalanceItemType.PlatformMembership;
                 balanceItem.organizationId = chargeVia;

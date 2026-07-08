@@ -2,8 +2,8 @@ import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AccessRight, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { assertBalances } from '../../../../tests/assertions/assertBalances.js';
@@ -458,6 +458,47 @@ describe('Endpoint.RegisterMembers', () => {
             await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleError({ code: 'already_registered' }));
+        });
+
+        test('Sets the registration period relation on created balance items', async () => {
+            const { organization, group, groupPrice, token, member } = await initData();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_0000,
+                customer: null,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+
+            const registrationId = response.body.registrations[0].id;
+            const balanceItems = await BalanceItem.where({ registrationId });
+            expect(balanceItems.length).toBeGreaterThan(0);
+
+            for (const balanceItem of balanceItems) {
+                const relation = balanceItem.relations.get(BalanceItemRelationType.RegistrationPeriod);
+                expect(relation).toBeDefined();
+                expect(relation?.id).toBe(period.id);
+                expect(relation?.name.toString()).toBe(period.getBaseStructure().name);
+            }
         });
 
         test('Should fail if duplicate registration in cart', async () => {
