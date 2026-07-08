@@ -33,7 +33,7 @@
                                 <li v-if="hasOnlinePaymentMethod && hasTransfer">
                                     {{ $t('%1Z3') }}
                                 </li>
-                                <li v-if="hasOnlinePaymentMethod">
+                                <li v-else-if="hasOnlinePaymentMethod">
                                     {{ $t('%1VN') }}
                                 </li>
                                 <li v-else-if="hasTransfer">
