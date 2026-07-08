@@ -8,6 +8,8 @@ export default class TestE2e extends BaseCommand {
     static description = 'Use this when you changed user-facing flows and want to validate the app in a real browser environment.';
     static examples = [
         'stam test e2e',
+        'stam test e2e --grep @billing',
+        'stam test e2e --grep @billing --skip-build',
         'stam test e2e --clear',
         'stam test e2e --ci',
         'stam test e2e --extra',
@@ -17,11 +19,13 @@ export default class TestE2e extends BaseCommand {
 
     static flags = {
         ...BaseCommand.verboseFlags,
-        ci: ciFlag,
-        clear: Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
-        extra: Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
-        ui: Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
-        workers: Flags.integer({ description: 'Number of Playwright workers' }),
+        'ci': ciFlag,
+        'clear': Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
+        'extra': Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
+        'grep': Flags.string({ char: 'g', description: 'Only run tests matching this pattern/tag (passed to playwright --grep)' }),
+        'skip-build': Flags.boolean({ default: false, description: 'Skip build:shared, the API test pre-build, and the frontend build (only test files changed)' }),
+        'ui': Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
+        'workers': Flags.integer({ description: 'Number of Playwright workers' }),
     };
 
     async run(): Promise<void> {
@@ -29,6 +33,6 @@ export default class TestE2e extends BaseCommand {
         if (flags.workers !== undefined && flags.workers < 1) {
             throw new Error('--workers must be at least 1');
         }
-        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, extra: flags.extra, ui: flags.ui, workers: flags.workers });
+        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers });
     }
 }

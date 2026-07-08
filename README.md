@@ -116,6 +116,21 @@ In Firefox, go to Settings > Privacy and security. Scroll down to certificates. 
 
 Stamhoofd uses MailDev to test emails in development. It is started by `yarn stam dev all` and `yarn stam services up`. Run `yarn stam status` to see the MailDev URL and credentials.
 
+### Testing (unit tests)
+
+`yarn stam test` is the go-to way to run the Vitest unit suites. It runs `build:shared` first and only starts an isolated MySQL when a selected package needs one — you never have to provision databases yourself.
+
+```bash
+yarn stam test unit                 # every unit package (excludes Playwright)
+yarn stam test api                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint)
+yarn stam test unit SomeFile        # filter by filename across all packages
+yarn stam test structures bundle-discounts        # package + filename filter
+yarn stam test structures -t 'partial test name'  # package + test-name filter (passed to vitest -t)
+yarn stam test api --skip-build     # skip the automatic build:shared step
+```
+
+For browser tests, use `yarn stam test e2e` (Playwright) or `yarn stam test all` for both.
+
 ### Backend
 
 Use these commands in `/backend`

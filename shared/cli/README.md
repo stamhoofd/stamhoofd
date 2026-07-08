@@ -152,19 +152,27 @@ The command imports a local realm with the printed client and test user.
 
 ### Tests
 
-Unit tests start an isolated MySQL container, create `stamhoofd-tests`, run tests with the mapped `DB_PORT`, and remove the container afterward:
+`yarn stam test` runs `build:shared` first and only starts a MySQL container when a selected package needs one. That container runs off a data volume that persists between runs (so the data dir + migrations are reused, mapped `DB_PORT`), and it is shut down after the run. Both the container and volume are namespaced per worktree so runs don't collide:
 
 ```bash
-yarn stam test unit
+yarn stam test unit                                 # every unit package (excludes Playwright)
+yarn stam test api                                  # one package (api, models, sql, structures, renderer, redirecter, queues, utility, sgv, object-differ, eslint)
+yarn stam test unit SomeFile                         # filter by filename across all packages
+yarn stam test structures bundle-discounts           # package + filename filter
+yarn stam test structures -t 'partial test name'     # package + test-name filter (passed to vitest -t)
+yarn stam test api --skip-build                      # skip the automatic build:shared step
+yarn stam test api --clear                           # reset the test database (drop its volume) before running
 ```
 
 Run Playwright tests with:
 
 ```bash
-yarn stam test e2e
+yarn stam test e2e                                   # full build + suite
+yarn stam test e2e --grep @tag                       # only tests matching a name/tag (playwright --grep)
+yarn stam test e2e --grep @tag --skip-build          # skip build:shared + API/frontend rebuild (only test files changed)
 ```
 
-The e2e command keeps its MySQL container and data volume between runs so migrated worker databases can be reused. Reset that persistent e2e database with:
+Like the unit runs, the e2e command keeps its data volume between runs (so migrated worker databases are reused) and shuts the container down afterward. Reset that persistent e2e database with:
 
 ```bash
 yarn stam test e2e --clear

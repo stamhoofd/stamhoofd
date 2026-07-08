@@ -41,20 +41,31 @@ yarn clear && yarn clear-vite-cache && yarn && yarn build:shared
 
 ## Commands
 
-From repo root: `yarn lint` · `yarn typecheck` · `yarn test` (all unit tests, excludes Playwright; `yarn stam test unit` provisions an isolated MySQL). Prefer these scripts over your own commands — they do required setup and teardown.
+From repo root: `yarn lint` · `yarn typecheck`. **`yarn stam test` is the one go-to way to run unit tests** — it runs `build:shared` first and only starts an isolated MySQL when a selected package needs one. Prefer it over your own commands; it does all required setup and teardown.
 
-**Never hand-roll test infrastructure.** The isolated MySQL, migrations, and env are already provisioned by `yarn stam test unit` (and per-package `yarn test`) — don't spin up Docker, create databases, or set `DB_PORT`/env vars yourself. Run a single file via the existing scripts (`yarn stam test unit path/to/Foo.test.ts`). If they don't work, STOP and ask the user.
+```bash
+yarn stam test unit                 # every unit package (excludes Playwright)
+yarn stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint
+yarn stam test unit SomeFile        # filename filter across all packages
+yarn stam test structures bundle-discounts          # package + filename filter
+yarn stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)
+yarn stam test api --skip-build     # skip the automatic build:shared
+yarn stam test api --clear          # reset the test database (drop its volume) before running
+```
 
-Tests use **Vitest**, run scoped per package: `cd backend/app/api && yarn test`, or `yarn vitest run path/to/Foo.test.ts` / `yarn vitest run -t 'partial name'`. Backend tests run against a real MySQL test database. The frontend dashboard "test" is a `vue-tsc` typecheck only; UI behavior is covered by Playwright.
+The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
+
+**Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `yarn stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `yarn typecheck`); UI behavior is covered by Playwright.
 
 ### Playwright
 
-Run ONLY via these scripts, never invoke or build Playwright manually:
+Run ONLY via `yarn stam test e2e`, never invoke or build Playwright manually:
 
-- `yarn test:playwright` — full build + suite (optionally `--grep @tag`)
-- `yarn test:playwright:skip-build --grep @tag` — when only test files changed since the last run
+- `yarn stam test e2e` — full build + suite
+- `yarn stam test e2e --grep @tag` — only tests matching a name/tag (playwright `--grep`)
+- `yarn stam test e2e --grep @tag --skip-build` — same, but skip `build:shared` + the API/frontend rebuild when only test files changed since the last run
 
-On environment issues (domains don't resolve, SSL errors, blank pages): STOP and ask the user to fix it.
+Never use different commands to run tests. On environment issues (domains don't resolve, SSL errors, blank pages): STOP and ask the user to fix it.
 
 ### Imports
 

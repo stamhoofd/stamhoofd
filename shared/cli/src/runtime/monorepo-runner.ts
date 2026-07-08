@@ -31,9 +31,50 @@ const backendSharedPackages = [
     'backend/shared/middleware',
 ];
 
-const testMysqlContainer = 'stamhoofd-test-mysql';
-const e2eMysqlContainer = 'stamhoofd-e2e-mysql';
-const e2eMysqlDataVolume = 'stamhoofd-e2e-mysql-data';
+// Namespace the test MySQL containers + data volumes by instance so each git worktree gets its own
+// and tests can run in parallel across worktrees. The primary worktree keeps the historical
+// `stamhoofd-*` names (its instance name is `stamhoofd`). The data volume persists between runs (so
+// initialized data + applied migrations are reused); the container itself is shut down after the run
+// and `--clear` wipes the volume for a fresh start.
+function testMysqlNames(context: CliContext): { container: string; volume: string } {
+    return {
+        container: `${context.instance.name}-test-mysql`,
+        volume: `${context.instance.name}-test-mysql-data`,
+    };
+}
+
+function e2eMysqlNames(context: CliContext): { container: string; volume: string } {
+    return {
+        container: `${context.instance.name}-e2e-mysql`,
+        volume: `${context.instance.name}-e2e-mysql-data`,
+    };
+}
+
+export type UnitTestPackage = {
+    /** Short name used on the command line, e.g. `stam test api`. Matches the package folder name. */
+    name: string;
+    /** Path to the package relative to the repo root. */
+    path: string;
+    /** Whether the package's tests connect to MySQL (checked via its vitest setup files). */
+    needsDatabase: boolean;
+};
+
+// The unit-test packages that `stam test unit` runs. To add a package: give it a `test` script that
+// runs vitest, then add it here with the correct `needsDatabase` (true if its vitest setup/tests
+// query `Database` from @simonbackx/simple-database).
+export const unitTestPackages: UnitTestPackage[] = [
+    { name: 'structures', path: 'shared/structures', needsDatabase: false },
+    { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
+    { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
+    { name: 'eslint', path: 'shared/eslint', needsDatabase: false },
+    { name: 'utility', path: 'shared/utility', needsDatabase: false },
+    { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
+    { name: 'models', path: 'backend/shared/models', needsDatabase: true },
+    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
+    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
+    { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
+    { name: 'api', path: 'backend/app/api', needsDatabase: true },
+];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
 export async function buildShared(context: CliContext): Promise<void> {
@@ -66,27 +107,80 @@ export async function migrate(context: CliContext): Promise<void> {
     await run('yarn', ['-s', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
 }
 
-export async function testUnit(context: CliContext, ci: boolean): Promise<void> {
-    const dbPort = await startTestMysql(context);
+export type UnitTestOptions = {
+    /** Packages to run. Defaults to every unit-test package. */
+    packages?: UnitTestPackage[];
+    /** Vitest filename filters (substring match on the test file path). */
+    fileFilters?: string[];
+    /** Vitest `-t` test-name pattern. */
+    testNamePattern?: string;
+    ci?: boolean;
+    /** Skip the automatic `build:shared` step. */
+    skipBuild?: boolean;
+    /** Drop the persistent test database volume before running (fresh start). */
+    clear?: boolean;
+};
+
+export async function runUnitTests(context: CliContext, options: UnitTestOptions = {}): Promise<void> {
+    const packages = options.packages ?? unitTestPackages;
+    if (packages.length === 0) {
+        throw new Error('No test packages selected.');
+    }
+
+    if (!options.skipBuild) {
+        await buildShared(context);
+    }
+
+    const needsDatabase = packages.some(pkg => pkg.needsDatabase);
+    const dbPort = needsDatabase ? await startTestMysql(context, options.clear ?? false) : undefined;
+
+    // With multiple packages a filename/test-name filter will legitimately match nothing in some of
+    // them, so don't let an empty package fail the whole run.
+    const passWithNoTests = packages.length > 1;
+
     try {
-        await run('yarn', ['-s', 'lerna', 'run', 'test', '--ignore', '@stamhoofd/playwright', '--ignore', '@stamhoofd/dashboard', '--ignore', '@stamhoofd/cli'], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+        for (const pkg of packages) {
+            const args = ['vitest', 'run'];
+            if (passWithNoTests) {
+                args.push('--passWithNoTests');
+            }
+            if (options.testNamePattern) {
+                args.push('-t', options.testNamePattern);
+            }
+            args.push(...(options.fileFilters ?? []));
+            await run('yarn', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+        }
     }
     finally {
-        await docker.removeContainer(testMysqlContainer, context.verbose);
+        // Shut down the container after the run; the data volume is kept for the next run.
+        if (needsDatabase) {
+            await docker.removeContainer(testMysqlNames(context).container, context.verbose);
+        }
     }
 }
 
-export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number }): Promise<void> {
+export async function testUnit(context: CliContext, ci: boolean): Promise<void> {
+    await runUnitTests(context, { ci });
+}
+
+export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; grep?: string; skipBuild?: boolean }): Promise<void> {
     const dbPort = await startE2eMysql(context, options.clear);
+    const { container: e2eContainer } = e2eMysqlNames(context);
     let shouldRestoreCaddy = false;
-    await buildShared(context);
+    if (!options.skipBuild) {
+        await buildShared(context);
+    }
     try {
         await startSharedServices(context);
         shouldRestoreCaddy = true;
-        await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
-        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers) }, verbose: context.verbose });
+        if (!options.skipBuild) {
+            await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
+        }
+        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
     }
     finally {
+        // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
+        await docker.removeContainer(e2eContainer, context.verbose);
         if (shouldRestoreCaddy) {
             try {
                 await CaddyService.reload(context);
@@ -157,43 +251,45 @@ async function removeTsBuildInfo(packagePath: string): Promise<void> {
         .map(entry => fs.rm(path.join(packagePath, entry), { force: true })));
 }
 
-async function startTestMysql(context: CliContext): Promise<string> {
-    console.log('Starting isolated test MySQL...');
-    await docker.removeContainer(testMysqlContainer, context.verbose);
-    await docker.run(['run', '-d', '--name', testMysqlContainer, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), mysqlImage, ...mysqlServerArgs()], { quiet: true, verbose: context.verbose });
-    await docker.waitForMysql(testMysqlContainer);
-    await docker.run(['exec', testMysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { quiet: true, verbose: context.verbose });
+// Ensure a MySQL container is running off a persistent named volume (reused across runs so the data
+// dir + migrations don't have to be reinitialized), create the `stamhoofd-tests` database, and
+// return the mapped host port. `clear` first drops the container + volume for a fresh start.
+async function ensureTestMysql(context: CliContext, names: { container: string; volume: string }, clear: boolean): Promise<string> {
+    const { container, volume } = names;
+    if (clear) {
+        await docker.removeContainer(container, context.verbose);
+        await docker.removeVolume(volume, context.verbose);
+    }
 
-    const port = await docker.run(['port', testMysqlContainer, '3306/tcp'], { capture: true, verbose: context.verbose });
+    if (!await docker.containerIsRunning(container)) {
+        await docker.removeContainer(container, context.verbose);
+        await docker.createVolume(volume, context.verbose);
+        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { quiet: true, verbose: context.verbose });
+    }
+
+    await docker.waitForMysql(container);
+    await docker.run(['exec', container, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { quiet: true, verbose: context.verbose });
+
+    const port = await docker.run(['port', container, '3306/tcp'], { capture: true, verbose: context.verbose });
     const dbPort = port.stdout.trim().split(':').at(-1);
     if (!dbPort) {
-        throw new Error('Could not determine isolated test MySQL port.');
+        throw new Error(`Could not determine test MySQL port for ${container}.`);
     }
+    return dbPort;
+}
+
+async function startTestMysql(context: CliContext, clear: boolean): Promise<string> {
+    const names = testMysqlNames(context);
+    console.log(clear ? `Starting fresh test MySQL (${names.container})...` : `Starting test MySQL (${names.container})...`);
+    const dbPort = await ensureTestMysql(context, names, clear);
     console.log(`Test MySQL is mapped to ${localIpv4Host}:${dbPort}.`);
     return dbPort;
 }
 
 async function startE2eMysql(context: CliContext, clear: boolean): Promise<string> {
-    console.log(clear ? 'Starting fresh persistent e2e MySQL...' : 'Starting persistent e2e MySQL...');
-    if (clear) {
-        await docker.removeContainer(e2eMysqlContainer, context.verbose);
-        await docker.removeVolume(e2eMysqlDataVolume, context.verbose);
-    }
-
-    if (!await docker.containerIsRunning(e2eMysqlContainer)) {
-        await docker.removeContainer(e2eMysqlContainer, context.verbose);
-        await docker.createVolume(e2eMysqlDataVolume, context.verbose);
-        await docker.run(['run', '-d', '--name', e2eMysqlContainer, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${e2eMysqlDataVolume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { quiet: true, verbose: context.verbose });
-    }
-
-    await docker.waitForMysql(e2eMysqlContainer);
-    await docker.run(['exec', e2eMysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { quiet: true, verbose: context.verbose });
-
-    const port = await docker.run(['port', e2eMysqlContainer, '3306/tcp'], { capture: true, verbose: context.verbose });
-    const dbPort = port.stdout.trim().split(':').at(-1);
-    if (!dbPort) {
-        throw new Error('Could not determine persistent e2e MySQL port.');
-    }
+    const names = e2eMysqlNames(context);
+    console.log(clear ? `Starting fresh e2e MySQL (${names.container})...` : `Starting e2e MySQL (${names.container})...`);
+    const dbPort = await ensureTestMysql(context, names, clear);
     console.log(`E2E MySQL is mapped to ${localIpv4Host}:${dbPort}.`);
     return dbPort;
 }
