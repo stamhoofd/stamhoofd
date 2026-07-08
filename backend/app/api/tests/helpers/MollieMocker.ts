@@ -53,6 +53,22 @@ export type MollieMockRefund = {
     metadata: Record<string, unknown> | null;
 };
 
+export type MollieMockSettlement = {
+    id: string;
+    reference: string;
+    status: 'open' | 'pending' | 'paidout' | 'failed';
+    amount: { currency: string; value: string };
+    createdAt: string;
+    /** null for the still-open settlement, a date once it has been paid out */
+    settledAt: string | null;
+    /** Mollie payment ids (tr_...) settled in this settlement */
+    paymentIds: string[];
+    /** Mollie refund ids (re_...) settled in this settlement */
+    refundIds: string[];
+    /** Mollie chargeback ids (chb_...) settled in this settlement */
+    chargebackIds: string[];
+};
+
 const MOLLIE_CHECKOUT_URL = 'https://molliecheckout/';
 
 /**
@@ -76,6 +92,7 @@ export class MollieMocker {
     mandates: MollieMockMandate[] = [];
     chargebacks: MollieMockChargeback[] = [];
     refunds: MollieMockRefund[] = [];
+    settlements: MollieMockSettlement[] = [];
 
     #forceFailure = false;
 
@@ -85,6 +102,7 @@ export class MollieMocker {
         this.mandates = [];
         this.chargebacks = [];
         this.refunds = [];
+        this.settlements = [];
         this.#forceFailure = false;
     }
 
@@ -204,6 +222,26 @@ export class MollieMocker {
 
         if (parts[0] === 'chargebacks' && method === 'GET') {
             return this.#listResource('chargebacks', this.chargebacks.map(c => this.#chargebackResource(c)));
+        }
+
+        // settlements + nested payments/refunds (drives the settlements cron)
+        if (parts[0] === 'settlements' && method === 'GET') {
+            if (parts.length === 1) {
+                return this.#listResource('settlements', this.settlements.map(s => this.#settlementResource(s)));
+            }
+            const settlement = this.settlements.find(s => s.id === parts[1]);
+            if (settlement && parts.length === 3 && parts[2] === 'payments') {
+                const items = this.payments.filter(p => settlement.paymentIds.includes(p.id));
+                return this.#listResource('payments', items.map(p => this.#paymentResource(p)));
+            }
+            if (settlement && parts.length === 3 && parts[2] === 'refunds') {
+                const items = this.refunds.filter(r => settlement.refundIds.includes(r.id));
+                return this.#listResource('refunds', items.map(r => this.#refundResource(r)));
+            }
+            if (settlement && parts.length === 3 && parts[2] === 'chargebacks') {
+                const items = this.chargebacks.filter(c => settlement.chargebackIds.includes(c.id));
+                return this.#listResource('chargebacks', items.map(c => this.#chargebackResource(c)));
+            }
         }
 
         console.error('MollieMocker: unhandled request', method, uri);
@@ -509,6 +547,41 @@ export class MollieMocker {
             createdAt: refund.createdAt,
             metadata: refund.metadata ?? undefined,
             _links: { self: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId + '/refunds/' + refund.id, type: 'application/hal+json' } },
+        };
+    }
+
+    // ---- Settlements ------------------------------------------------------
+
+    /**
+     * Register a settled (paid out) settlement that groups the given payments and refunds.
+     * Used to drive the settlements cron (CheckSettlements).
+     */
+    createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date } = {}): MollieMockSettlement {
+        const settlement: MollieMockSettlement = {
+            id: this.createId('stl'),
+            reference: '1234567.' + (this.settlements.length + 1).toString().padStart(4, '0') + '.01',
+            status: 'paidout',
+            amount: { currency: 'EUR', value: options.value ?? '0.00' },
+            createdAt: new Date().toISOString(),
+            settledAt: (options.settledAt ?? new Date()).toISOString(),
+            paymentIds: (options.payments ?? []).map(p => p.id),
+            refundIds: (options.refunds ?? []).map(r => r.id),
+            chargebackIds: (options.chargebacks ?? []).map(c => c.id),
+        };
+        this.settlements.push(settlement);
+        return settlement;
+    }
+
+    #settlementResource(settlement: MollieMockSettlement) {
+        return {
+            resource: 'settlement',
+            id: settlement.id,
+            reference: settlement.reference,
+            status: settlement.status,
+            amount: settlement.amount,
+            createdAt: settlement.createdAt,
+            settledAt: settlement.settledAt ?? null,
+            _links: { self: { href: 'https://api.mollie.com/v2/settlements/' + settlement.id, type: 'application/hal+json' } },
         };
     }
 
