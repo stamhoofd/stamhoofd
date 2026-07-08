@@ -299,7 +299,6 @@ export class RelationFetcherSubFilter {
         };
     }
 }
-
 export class RelationFetcher<OBJECT extends { id: string }, T extends string | number | Date | null | boolean> {
     readonly fetcher: ObjectFetcher<OBJECT>;
 
@@ -362,5 +361,26 @@ export class RelationFetcher<OBJECT extends { id: string }, T extends string | n
             name: this.getName(object),
             value: this.getValue(object),
         }));
+    }
+}
+
+export class EmptyRelationFetcher<OBJECT extends { id: string }, T extends string | number | Date | null | boolean> extends RelationFetcher<OBJECT, T> {
+    constructor() {
+        super({
+            fetcher: {
+                fetch: async () => {
+                    throw new Error('Empty relation fetcher method fetch should never get called.');
+                },
+                fetchCount: async () => {
+                    throw new Error('Empty relation fetcher method fetchCount should never get called.');
+                },
+            },
+            getName: () => {
+                throw new Error('Empty relation fetcher method getName should never get called.');
+            },
+            getValue: () => {
+                throw new Error('Empty relation fetcher method getValue should never get called.');
+            },
+        });
     }
 }

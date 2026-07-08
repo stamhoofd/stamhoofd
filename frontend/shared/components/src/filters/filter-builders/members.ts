@@ -1,12 +1,13 @@
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
+import { EmptyRelationFetcher, RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, Gender, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, Gender, GroupType, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -19,7 +20,6 @@ import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from '.
 import { getFilterBuildersForRecordCategories } from './record-categories';
 import type { RegistrationFilterBuilderFactory } from './registrations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
-import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();
@@ -1222,13 +1222,13 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
             name: $t('%1EI'),
             allowCreation: false,
             builders: [
-                new StringFilterBuilder({
-                    name: $t('%1ON'),
-                    key: 'id',
+                new RelationFilterBuilder({
+                    name: $t('%14Z'),
+                    type: GroupType.Membership,
+                    key: 'groupId',
                     allowCreation: false,
-                    wrapper: {
-                        group: FilterWrapperMarker,
-                    },
+                    wrapper: FilterWrapperMarker,
+                    relationFetcher: new EmptyRelationFetcher(),
                 }),
             ],
             wrapper: {
