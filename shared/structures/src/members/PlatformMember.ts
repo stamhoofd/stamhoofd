@@ -1363,7 +1363,8 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
-        return categories;
+        // Deduplicate by id
+        return [...new Map(categories.map(c => [c.id, c])).values()];
     }
 
     getEnabledRecordCategories(options: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } | null;
