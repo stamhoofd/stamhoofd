@@ -80,8 +80,8 @@ export class InvoicesExcelExport {
                         format: '€0.00',
                     },
                     PaymentMethodHelper.getNameCapitalized(payment.method),
-                    payment.method === PaymentMethod.Transfer ? 'Overschrijving' : (payment.settlement?.settledAt ? Formatter.dateIso(payment.settlement.settledAt) : '/'),
-                    payment.method === PaymentMethod.Transfer ? (payment.transferDescription ?? '/') : (payment.settlement?.reference ?? '/'),
+                    payment.method === PaymentMethod.Transfer && !payment.provider ? 'Overschrijving' : (payment.settlement?.settledAt ? Formatter.dateIso(payment.settlement.settledAt) : '/'),
+                    payment.method === PaymentMethod.Transfer && !payment.provider ? (payment.transferDescription ?? '/') : (payment.settlement?.reference ?? '/'),
                     {
                         value: payment.settlement?.amount ? payment.settlement.amount / 100_00 : 0,
                         format: '€0.00',
