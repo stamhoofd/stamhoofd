@@ -62,7 +62,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
     if (registerTicketSaleRequests.length === 0) {
         return new Map();
     };
-    const url = 'https://api-test.uitpas.be/ticket-sales';
+    const url = `${STAMHOOFD.UITPAS_API_URL}/ticket-sales`;
     const body = registerTicketSaleRequests.map((ticketSale) => {
         const eventId = ticketSale.uitpasEventUrl.split('/').pop();
         if (!eventId) {

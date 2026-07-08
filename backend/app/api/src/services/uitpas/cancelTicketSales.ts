@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 
 async function cancelTicketSale(access_token: string, ticketSaleId: string) {
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
-    const url = 'https://api-test.uitpas.be/ticket-sales/' + ticketSaleId;
+    const url = `${STAMHOOFD.UITPAS_API_URL}/ticket-sales/${ticketSaleId}`;
     const myHeaders = new Headers();
     myHeaders.append('Authorization', 'Bearer ' + access_token);
     myHeaders.append('Accept', 'application/json');
