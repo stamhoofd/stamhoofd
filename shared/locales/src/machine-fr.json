@@ -17727,6 +17727,22 @@
     "original": "Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
     "translation": "Filtrer les associations ayant un modèle de document qui remplit certaines conditions."
   },
+  "%Zbn": {
+    "original": "Inschrijvings-ID",
+    "translation": "ID d'inscription"
+  },
+  "%Zbp": {
+    "original": "Naam van het werkjaar geassocieerd aan dit item",
+    "translation": "Nom de l'année associative liée à cet élément"
+  },
+  "%Zbq": {
+    "original": "Je kan de voornaam van een bestaand lid niet volledig wijzigen, enkel een typfout verbeteren. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
+    "translation": "Vous ne pouvez pas modifier complètement le prénom d’un membre existant, seulement corriger une faute de frappe. Contactez un administrateur principal si c’est nécessaire."
+  },
+  "%Zbr": {
+    "original": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
+    "translation": "Vous ne pouvez corriger la date de naissance d’un membre existant que de façon limitée, il n’est pas possible de modifier le jour, le mois et l’année en même temps. Si besoin, contactez un administrateur principal."
+  },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
     "translation": "Aucun nom de domaine exclu"

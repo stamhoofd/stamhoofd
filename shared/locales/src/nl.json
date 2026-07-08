@@ -85,7 +85,6 @@
   "%1M": "Stripe Dashboard",
   "%1N": "Production",
   "%1O": "Single-Sign-On",
-  "%1P": "ID",
   "%1R": "FOS Open Scouting",
   "%1S": "Bancontact",
   "%1T": "Developers",
@@ -6113,5 +6112,9 @@
   "%Zbg": "UiTPAS-kansentarief op webshops",
   "%Zbh": "Er is al een aanrekening bezig, even geduld voor je een tweede aanrekening aanrekend.",
   "%Zbk": "Het tarief {tariffName} werd aangepast, op basis van de richtlijnen van jouw UiTPAS-regio.",
-  "%Zbm": "Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet."
+  "%Zbm": "Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
+  "%Zbn": "Inschrijvings-ID",
+  "%Zbp": "Naam van het werkjaar geassocieerd aan dit item",
+  "%Zbq": "Je kan de voornaam van een bestaand lid niet volledig wijzigen, enkel een typfout verbeteren. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
+  "%Zbr": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is."
 }

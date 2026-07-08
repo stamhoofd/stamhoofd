@@ -44,7 +44,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%1P`),
+                        name: $t(`%d`),
                         description: $t(`%Mi`),
                     }),
 

@@ -31,7 +31,7 @@ export function throwIfDrasticMemberDetailsChange(patch: MemberDetails | AutoEnc
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Drastic first name change is not allowed',
-                human: $t(`Je kan de voornaam van een bestaand lid niet volledig wijzigen, enkel een typfout verbeteren. Neem contact op met een hoofdbeheerder als dit toch nodig is.`),
+                human: $t(`%Zbq`),
                 field: 'firstName',
             });
         }
@@ -50,7 +50,7 @@ export function throwIfDrasticMemberDetailsChange(patch: MemberDetails | AutoEnc
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Drastic birth date change is not allowed',
-                human: $t(`Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.`),
+                human: $t(`%Zbr`),
                 field: 'birthDay',
             });
         }

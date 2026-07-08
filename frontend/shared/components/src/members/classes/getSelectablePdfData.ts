@@ -31,7 +31,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
     const columns: SelectablePdfData<PlatformMember>[] = [
         new SelectablePdfData<PlatformMember>({
             id: 'id',
-            name: $t(`%1P`),
+            name: $t(`%d`),
             description: $t(`%ev`),
             enabled: false,
             getValue: member => member.id,

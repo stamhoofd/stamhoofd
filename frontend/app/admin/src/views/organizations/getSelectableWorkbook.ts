@@ -16,7 +16,7 @@ export function getSelectableWorkbook(_platform: Platform) {
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%1P`),
+                        name: $t(`%d`),
                         description: $t(`%H0`),
                         enabled: false,
                     }),
@@ -61,7 +61,7 @@ export function getSelectableWorkbook(_platform: Platform) {
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: $t(`%1P`),
+                        name: $t(`%d`),
                         description: $t(`%H0`),
                         enabled: false,
                     }),
@@ -109,7 +109,7 @@ export function getSelectableWorkbook(_platform: Platform) {
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: $t(`%1P`),
+                        name: $t(`%d`),
                         description: $t(`%H0`),
                         enabled: false,
                     }),

@@ -17539,6 +17539,22 @@
     "original": "Filter op verenigingen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
     "translation": "Filter associations with a document template that meets certain conditions."
   },
+  "%Zbn": {
+    "original": "Inschrijvings-ID",
+    "translation": "Registration ID"
+  },
+  "%Zbp": {
+    "original": "Naam van het werkjaar geassocieerd aan dit item",
+    "translation": "Name of the work year linked to this item"
+  },
+  "%Zbq": {
+    "original": "Je kan de voornaam van een bestaand lid niet volledig wijzigen, enkel een typfout verbeteren. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
+    "translation": "You can only make minor corrections to a member's first name, such as fixing a typo. Please contact a main administrator if a bigger change is needed."
+  },
+  "%Zbr": {
+    "original": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
+    "translation": "You can only make limited corrections to a member's date of birth; you can't change the day, month, and year all at once. Please contact a main administrator if this is required."
+  },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
     "translation": "No excluded domain names"

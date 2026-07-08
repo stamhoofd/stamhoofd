@@ -174,7 +174,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOption: return $t(`%TE`);
         case BalanceItemRelationType.Member: return $t(`%1PM`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
-        case BalanceItemRelationType.RegistrationPeriod: return $t('Werkjaar');
+        case BalanceItemRelationType.RegistrationPeriod: return $t('%7Z');
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
         case BalanceItemRelationType.STPricingType: return $t(`%1YH`);
@@ -191,7 +191,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.GroupOption: return $t(`%li`);
         case BalanceItemRelationType.Member: return $t(`%lj`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
-        case BalanceItemRelationType.RegistrationPeriod: return $t('Naam van het werkjaar geassocieerd aan dit item');
+        case BalanceItemRelationType.RegistrationPeriod: return $t('%Zbp');
         case BalanceItemRelationType.Discount: return $t(`%177`);
         case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
         case BalanceItemRelationType.STPricingType: return $t(`%1Xo`);

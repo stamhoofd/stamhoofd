@@ -28,7 +28,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // member
         new SelectableColumn({
             id: 'id',
-            name: $t(`%1P`),
+            name: $t(`%d`),
             description: $t(`%ev`),
             enabled: false,
         }),

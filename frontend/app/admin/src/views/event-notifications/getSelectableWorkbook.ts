@@ -17,7 +17,7 @@ export function getSelectableWorkbook(platform: Platform) {
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%1P`),
+                        name: $t(`%d`),
                         description: $t('%CW'),
                     }),
 

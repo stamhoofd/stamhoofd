@@ -1571,6 +1571,10 @@
     "original": "Filter op eenheden met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
     "translation": "Filtrer les unités ayant un modèle de document qui remplit certaines conditions."
   },
+  "%Zbp": {
+    "original": "Naam van het scoutsjaar geassocieerd aan dit item",
+    "translation": "Nom de l'année scoute liée à cet élément"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"
