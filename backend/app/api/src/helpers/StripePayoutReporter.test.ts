@@ -60,7 +60,7 @@ describe('StripePayoutReporter', () => {
      * fully transferred to the connected account. The payout pays out the application fee
      * minus the Stripe processing fee to the platform.
      */
-    const mockStripeData = (accountId: string, { feeCents = 250, chargeCents = 10000, stripeFeeCents = 25, feeRefundCents = 0 } = {}) => {
+    const mockStripeData = (accountId: string, { feeCents = 250, chargeCents = 10000, stripeFeeCents = 25, feeRefundCents = 0, refundCents = 0 } = {}) => {
         const createdUnix = monthStartUnix + 14 * 24 * 3600;
         const payout = {
             id: stripeMocker.createId('po'),
@@ -105,6 +105,30 @@ describe('StripePayoutReporter', () => {
                 source: null,
             },
         ];
+
+        if (refundCents > 0) {
+            // A customer refund: paid back from the connected account balance via a transfer refund
+            transactions.push({
+                id: stripeMocker.createId('txn'),
+                type: 'refund',
+                amount: -refundCents,
+                fee: 0,
+                created: createdUnix,
+                source: {
+                    object: 'refund',
+                    id: stripeMocker.createId('re'),
+                    amount: refundCents,
+                    charge: { object: 'charge', id: stripeMocker.createId('ch'), amount: chargeCents, on_behalf_of: accountId },
+                },
+            }, {
+                id: stripeMocker.createId('txn'),
+                type: 'transfer_refund',
+                amount: refundCents,
+                fee: 0,
+                created: createdUnix,
+                source: { object: 'transfer', id: stripeMocker.createId('tr'), destination: accountId },
+            });
+        }
 
         if (feeRefundCents > 0) {
             transactions.push({
@@ -304,6 +328,25 @@ describe('StripePayoutReporter', () => {
 
         const invoiceItem = breakdown.items.find(i => i.type === StripePayoutItemType.Invoice)!;
         expect(invoiceItem.amount).toBe(200_00);
+
+        expect(payoutExport.completePayouts.length).toBe(1);
+        expect(payoutExport.isValid).toBe(true);
+    });
+
+    test('A payout containing a customer refund can be reported', async () => {
+        const { organization, stripeAccount } = await init();
+        mockStripeData(stripeAccount.accountId, { feeCents: 250, stripeFeeCents: 25, refundCents: 1000 });
+
+        const payment = await createPayment(organization, stripeAccount, 250_00);
+        await createInvoice(organization, payment, { number: '2026-104', totalWithVAT: 250_00, VATTotalAmount: 4339 });
+
+        const reporter = await buildReport();
+        const payoutExport = reporter.toStructure();
+
+        // The refund and its transfer refund cancel each other out on the payout
+        const breakdown = payoutExport.payouts[0];
+        expect(breakdown.payout.amount).toBe(225_00);
+        expect(breakdown.isValid).toBe(true);
 
         expect(payoutExport.completePayouts.length).toBe(1);
         expect(payoutExport.isValid).toBe(true);

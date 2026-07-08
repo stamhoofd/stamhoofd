@@ -255,12 +255,21 @@ export class StripeReport {
                 console.error('Unexpected refund', balanceTransaction);
                 throw new Error('Received unexpanded source for refund ' + balanceTransaction.id);
             }
-            const charge = source as Stripe.Charge;
+
+            // The source is a refund: the connected account is stored on the refunded charge
+            const refund = source as Stripe.Refund;
+            const charge = typeof refund.charge === 'string' || !refund.charge ? null : refund.charge;
+
+            if (!charge) {
+                console.error('Unexpected refund', balanceTransaction);
+                throw new Error('Received unexpanded charge for refund ' + balanceTransaction.id);
+            }
+
             const account = charge.on_behalf_of ? (typeof charge.on_behalf_of === 'string' ? charge.on_behalf_of : charge.on_behalf_of.id) : null;
 
             if (account) {
                 const currentAmount = await this.getAccountReport(balanceTransaction, account);
-                currentAmount.charges += fromStripeAmount(charge.amount);
+                currentAmount.refunds += fromStripeAmount(refund.amount);
                 currentAmount.addDate(new Date(balanceTransaction.created * 1000));
                 // Costs on main account
                 this.getMainAccountReport(balanceTransaction).fees += fromStripeAmount(balanceTransaction.fee);
