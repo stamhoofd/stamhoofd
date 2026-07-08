@@ -60,8 +60,8 @@ describe('StripePayoutReporter', () => {
      * fully transferred to the connected account. The payout pays out the application fee
      * minus the Stripe processing fee to the platform.
      */
-    const mockStripeData = (accountId: string, { feeCents = 250, chargeCents = 10000, stripeFeeCents = 25, feeRefundCents = 0, refundCents = 0 } = {}) => {
-        const createdUnix = monthStartUnix + 14 * 24 * 3600;
+    const mockStripeData = (accountId: string, { feeCents = 250, chargeCents = 10000, stripeFeeCents = 25, feeRefundCents = 0, refundCents = 0, createdOffsetDays = 0 } = {}) => {
+        const createdUnix = monthStartUnix + (14 + createdOffsetDays) * 24 * 3600;
         const payout = {
             id: stripeMocker.createId('po'),
             object: 'payout',
@@ -350,6 +350,23 @@ describe('StripePayoutReporter', () => {
 
         expect(payoutExport.completePayouts.length).toBe(1);
         expect(payoutExport.isValid).toBe(true);
+    });
+
+    test('Payouts outside the requested period are not counted as skipped', async () => {
+        const { stripeAccount } = await init();
+        // The payout is fetched (within the extra month margin), but arrives after the requested period
+        mockStripeData(stripeAccount.accountId, { createdOffsetDays: 20 });
+
+        const reporter = await buildReport();
+        const payoutExport = reporter.toStructure();
+
+        expect(payoutExport.payouts.length).toBe(1);
+        expect(payoutExport.includedPayouts.length).toBe(0);
+        expect(payoutExport.isValid).toBe(true);
+
+        await reporter.sendEmail({ to: [{ email: 'requester@example.com' }] });
+        const email = (await EmailMocker.transactional.getSucceededEmails()).find(e => e.subject.startsWith('Stripe Uitbetalingen'));
+        expect(email!.text).toContain('Overgeslagen uitbetalingen (onvolledig): 0');
     });
 
     test('Payout-level mismatches that cancel each other out still make the report invalid', () => {

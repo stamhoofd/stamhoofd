@@ -570,7 +570,8 @@ export class StripePayoutReporter {
                 + '\nTotaal doorgefactureerd aan klanten: ' + Formatter.price(payoutExport.totalInvoices) + ' (incl. BTW)'
                 + '\nGeschatte BTW terug te betalen: ' + Formatter.price(payoutExport.totalVAT)
                 + '\nGeschatte winst: ' + Formatter.price(payoutExport.net)
-                + '\n\nOvergeslagen uitbetalingen (onvolledig): ' + (payoutExport.payouts.length - completePayouts.length) + '\n',
+                // Only count the payouts in the requested period: extra payouts are fetched around it to complete the data
+                + '\n\nOvergeslagen uitbetalingen (onvolledig): ' + (payoutExport.includedPayouts.length - completePayouts.length) + '\n',
             type: 'transactional',
             attachments: [
                 {
