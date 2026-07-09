@@ -60,7 +60,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const id of request.body.getDeletes()) {
             const model = await Invoice.getByID(id);
             if (!model || model.organizationId !== organization.id) {
-                throw Context.auth.notFoundOrNoAccess($t('Deze factuur werd niet gevonden'));
+                throw Context.auth.notFoundOrNoAccess($t('%ZcE'));
             }
 
             await InvoiceService.delete(model);

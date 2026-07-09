@@ -17791,6 +17791,34 @@
     "original": "Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is",
     "translation": "Vous recevrez un e-mail avec les paiements dès que le rapport sera prêt"
   },
+  "%Zc6": {
+    "original": "Ben je zeker dat je factuur {number} wil verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer la facture {number} ?"
+  },
+  "%ZcA": {
+    "original": "Weet je het echt zeker?",
+    "translation": "En êtes-vous vraiment certain ?"
+  },
+  "%ZcE": {
+    "original": "Deze factuur werd niet gevonden",
+    "translation": "Cette facture n’a pas été trouvée"
+  },
+  "%ZcG": {
+    "original": "Er ontstaat een gat in de factuurnummering. Vink het vakje aan om te bevestigen dat je deze factuur definitief wil verwijderen.",
+    "translation": "Cela va créer une interruption dans la numérotation des factures. Cochez la case pour confirmer la suppression définitive de cette facture."
+  },
+  "%ZcH": {
+    "original": "De factuur wordt definitief verwijderd. De gekoppelde betalingen blijven behouden en kunnen opnieuw gefactureerd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "translation": "La facture sera supprimée de manière définitive. Les paiements associés seront conservés et pourront être refacturés. Cette action est irréversible."
+  },
+  "%ZcK": {
+    "original": "Ik begrijp dat deze factuur definitief verwijderd wordt",
+    "translation": "Je comprends que cette facture sera définitivement supprimée"
+  },
+  "%ZcL": {
+    "original": "De factuur werd verwijderd",
+    "translation": "La facture a été supprimée"
+  },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",
     "translation": "Les adresses e-mail avec ces noms de domaine ne peuvent pas utiliser cette méthode de connexion."

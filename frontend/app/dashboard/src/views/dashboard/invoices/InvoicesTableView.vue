@@ -244,7 +244,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 
     new InMemoryTableAction({
-        name: $t(`Verwijderen`),
+        name: $t(`%CJ`),
         icon: 'trash',
         priority: 0,
         groupIndex: 3,
@@ -288,9 +288,9 @@ async function deleteInvoice(invoice: Invoice) {
 
     // Double verification: two separate confirmations before we permanently delete the invoice.
     if (!await CenteredMessage.confirm(
-        $t('Ben je zeker dat je factuur {number} wil verwijderen?', { number: invoiceName }),
-        $t('Verwijderen'),
-        $t('De factuur wordt definitief verwijderd. De gekoppelde betalingen blijven behouden en kunnen opnieuw gefactureerd worden. Deze actie kan niet ongedaan gemaakt worden.'),
+        $t('%Zc6', { number: invoiceName }),
+        $t('%CJ'),
+        $t('%ZcH'),
         undefined,
         true,
     )) {
@@ -298,12 +298,12 @@ async function deleteInvoice(invoice: Invoice) {
     }
 
     if (!await CenteredMessage.confirm(
-        $t('Weet je het echt zeker?'),
-        $t('Definitief verwijderen'),
-        $t('Er ontstaat een gat in de factuurnummering. Vink het vakje aan om te bevestigen dat je deze factuur definitief wil verwijderen.'),
+        $t('%ZcA'),
+        $t('%ek'),
+        $t('%ZcG'),
         undefined,
         true,
-        $t('Ik begrijp dat deze factuur definitief verwijderd wordt'),
+        $t('%ZcK'),
     )) {
         return;
     }
@@ -320,7 +320,7 @@ async function deleteInvoice(invoice: Invoice) {
             shouldRetry: false,
         });
 
-        Toast.success($t('De factuur werd verwijderd')).show();
+        Toast.success($t('%ZcL')).show();
         tableObjectFetcher.reset(true, true);
     } catch (e) {
         Toast.fromError(e).show();

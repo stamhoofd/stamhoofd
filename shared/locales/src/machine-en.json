@@ -17603,6 +17603,34 @@
     "original": "Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is",
     "translation": "You will receive an email with the payouts as soon as the report is ready"
   },
+  "%Zc6": {
+    "original": "Ben je zeker dat je factuur {number} wil verwijderen?",
+    "translation": "Are you sure you want to delete invoice {number}?"
+  },
+  "%ZcA": {
+    "original": "Weet je het echt zeker?",
+    "translation": "Are you absolutely sure?"
+  },
+  "%ZcE": {
+    "original": "Deze factuur werd niet gevonden",
+    "translation": "This invoice could not be found"
+  },
+  "%ZcG": {
+    "original": "Er ontstaat een gat in de factuurnummering. Vink het vakje aan om te bevestigen dat je deze factuur definitief wil verwijderen.",
+    "translation": "Deleting this invoice will create a gap in the invoice numbering. Check the box to confirm you want to permanently delete this invoice."
+  },
+  "%ZcH": {
+    "original": "De factuur wordt definitief verwijderd. De gekoppelde betalingen blijven behouden en kunnen opnieuw gefactureerd worden. Deze actie kan niet ongedaan gemaakt worden.",
+    "translation": "The invoice will be permanently deleted. Linked payments will remain and can be invoiced again. This action cannot be undone."
+  },
+  "%ZcK": {
+    "original": "Ik begrijp dat deze factuur definitief verwijderd wordt",
+    "translation": "I understand that this invoice will be permanently deleted"
+  },
+  "%ZcL": {
+    "original": "De factuur werd verwijderd",
+    "translation": "The invoice has been deleted"
+  },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",
     "translation": "Email addresses with these domain names cannot use this login method."

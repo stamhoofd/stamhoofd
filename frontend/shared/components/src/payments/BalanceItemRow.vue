@@ -107,7 +107,7 @@ function showContextMenu(event: MouseEvent) {
     const destructiveItems: ContextMenuItem[] = [];
     if (item.pricePaid === 0 && item.pricePending === 0) {
         destructiveItems.push(new ContextMenuItem({
-            name: $t('Verwijderen'),
+            name: $t('%CJ'),
             icon: 'trash',
             destructive: true,
             action: () => {
@@ -117,7 +117,7 @@ function showContextMenu(event: MouseEvent) {
         }));
     } else if (item.status !== BalanceItemStatus.Canceled) {
         destructiveItems.push(new ContextMenuItem({
-            name: $t('Annuleren'),
+            name: $t('%1Lh'),
             icon: 'canceled',
             destructive: true,
             action: () => {
@@ -130,7 +130,7 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Bewerken'),
+                name: $t('%f9'),
                 icon: 'edit',
                 action: () => {
                     editBalanceItem(item).catch(console.error);
@@ -138,7 +138,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t('Dupliceren'),
+                name: $t('%KK'),
                 icon: 'copy',
                 action: () => {
                     duplicateBalanceItem(item).catch(console.error);
@@ -201,9 +201,9 @@ async function duplicateBalanceItem(balanceItem: BalanceItem) {
 
 async function cancelBalanceItem(balanceItem: BalanceItem) {
     if (!(await CenteredMessage.confirm({
-        title: $t('Deze aanrekening annuleren?'),
-        confirmText: $t('Ja, annuleren'),
-        description: $t('Je kan dit ongedaan maken door de aanrekening later terug te markeren als te betalen.'),
+        title: $t('%1Jx'),
+        confirmText: $t('%1Jy'),
+        description: $t('%1Jz'),
     }))) {
         return;
     }
@@ -212,7 +212,7 @@ async function cancelBalanceItem(balanceItem: BalanceItem) {
         await doStatusPatch(BalanceItem.patch({
             status: BalanceItemStatus.Canceled,
         }), balanceItem);
-        Toast.success($t('De aanrekening werd geannuleerd')).show();
+        Toast.success($t('%1Js')).show();
     } catch (e) {
         Toast.fromError(e).show();
     }
@@ -220,9 +220,9 @@ async function cancelBalanceItem(balanceItem: BalanceItem) {
 
 async function deleteBalanceItem(balanceItem: BalanceItem) {
     if (!(await CenteredMessage.confirm({
-        title: $t('Deze aanrekening verwijderen?'),
-        confirmText: $t('Verwijderen'),
-        description: $t('Je kan dit niet ongedaan maken.'),
+        title: $t('%10f'),
+        confirmText: $t('%CJ'),
+        description: $t('%1Fc'),
     }))) {
         return;
     }
@@ -232,7 +232,7 @@ async function deleteBalanceItem(balanceItem: BalanceItem) {
             status: BalanceItemStatus.Hidden,
             price: 0,
         }), balanceItem);
-        Toast.success($t('De aanrekening werd verwijderd')).show();
+        Toast.success($t('%1Jt')).show();
     } catch (e) {
         Toast.fromError(e).show();
     }
