@@ -353,10 +353,6 @@ async function makeGroupFiltersReadable(filter: StamhoofdFilter, groupMap: Map<s
                         throw new Error('Not expected parentFilter to be null: ' + JSON.stringify(registrationFilter));
                     }
                     orParentFilter = parentFilter;
-                    // delete parentFilter[currentKey];
-                    // parentFilter['group'] = {
-                    //     $in: relationFilterArray,
-                    // };
                     break;
                 }
                 default: throw new Error(`Invalid registration filter (currentKey: ${currentKey}): ` + JSON.stringify(registrationFilter));
