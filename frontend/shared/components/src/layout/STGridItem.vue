@@ -251,7 +251,7 @@ button.st-grid-item {
         }
     }
 
-    &.selectable:not(.is-dragging):active, &.hoverable:active, &.rightClickable.right-click {
+    &.selectable:not(.is-dragging):active, &.hoverable:active, &.rightClickable.right-click, &.rightClickable.focused {
         &:before {
             opacity: 1;
             transition: none;
