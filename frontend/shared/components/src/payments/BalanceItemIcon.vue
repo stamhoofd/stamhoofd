@@ -1,7 +1,7 @@
 <template>
     <figure class="style-image-with-icon gray">
         <figure>
-            <span class="icon" :class="getBalanceItemTypeIcon(item.type)" />
+            <span class="small icon" :class="getBalanceItemTypeIcon(item.type)" />
         </figure>
         <aside>
             <span v-if="item.amount > 1" class="style-bubble primary">
