@@ -43,7 +43,7 @@ export class PeppolEndointId extends AutoEncoder {
      * The registered entity name as returned by the PEPPOL directory when the id was validated.
      * Readonly: this is set by the server during validation and cannot be set through UI patches.
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 402 })
     entityName: string | null = null;
 
     get fullId(): string {
