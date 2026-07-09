@@ -69,13 +69,9 @@ export class StripePayoutChecker {
             payout: payout.id,
             // Via the Application Fee object, we can get the original payment metadata
             expand: ['data.source', 'data.source.application_fee', 'data.source.application_fee.originating_transaction'],
-            // TODO: ALSO DO CARDS! (type: 'charge')
-            // type: 'payment'
         };
 
         for await (const balanceItem of this.stripe.balanceTransactions.list(params)) {
-            // TODO
-
             if (balanceItem.type === 'charge' || balanceItem.type === 'payment') {
                 await this.handleBalanceItem(payout, balanceItem);
             }

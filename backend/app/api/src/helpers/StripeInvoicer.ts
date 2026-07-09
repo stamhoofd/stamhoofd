@@ -57,10 +57,6 @@ export class ApplicationFeeDetails {
         this.combine(ApplicationFeeDetails.fromStripe(fee));
     }
 
-    remove(fee: Stripe.BalanceTransaction) {
-        this.combine(ApplicationFeeDetails.fromStripe(fee));
-    }
-
     combine(other: ApplicationFeeDetails) {
         this.serviceFee += other.serviceFee;
         this.transferFee += other.transferFee;
