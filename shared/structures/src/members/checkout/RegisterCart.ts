@@ -90,7 +90,7 @@ export class RegisterCart {
         this.bundleDiscounts = [];
         if (this.singleOrganization) {
             for (const bundleDiscount of this.singleOrganization.period.settings.bundleDiscounts) {
-                const grouped = bundleDiscount.calculate(this);
+                const grouped = bundleDiscount.calculate(this, this.singleOrganization.period.period.id);
                 for (const [_, calculation] of grouped.calculations) {
                     if (calculation.netTotal !== 0) {
                         this.bundleDiscounts.push(calculation);
