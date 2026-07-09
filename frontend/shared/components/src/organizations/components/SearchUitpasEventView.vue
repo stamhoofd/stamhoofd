@@ -56,12 +56,12 @@ import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import DateBox from '#icons/DateBox.vue';
-import type { UitpasEventResponse} from '@stamhoofd/structures';
+import type { UitpasEventResponse } from '@stamhoofd/structures';
 import { UitpasEventsResponse } from '@stamhoofd/structures';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { throttle } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
-import { ref, watch } from 'vue';
+import type { Ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(
@@ -84,7 +84,7 @@ const owner = useRequestOwner();
 const errors = useErrors();
 const t = props.title;
 
-let lastText = '';
+let lastText: string;
 let counter = 0;
 
 const loadingAfterEventSelect = ref(false);
@@ -94,11 +94,6 @@ const updateResults = async () => {
     const t = text.value;
     const cachedCount = counter;
 
-    if (t.length === 0) {
-        results.value = [];
-        loadingResults.value = false;
-        return;
-    }
     loadingResults.value = true;
 
     try {
@@ -115,8 +110,7 @@ const updateResults = async () => {
             return;
         }
         results.value = response.data.member;
-    }
-    catch (e) {
+    } catch (e) {
         if (cachedCount !== counter) {
             // A new request have started already
             return;
@@ -148,11 +142,6 @@ const startUpdateResults = async () => {
 
     Request.cancelAll(owner);
 
-    if (value.length === 0) {
-        results.value = [];
-        loadingResults.value = false;
-        return;
-    }
     throttleUpdateResults();
 };
 
@@ -164,14 +153,17 @@ async function doSelectEvent(event: UitpasEventResponse | null) {
     loadingAfterEventSelect.value = true;
     try {
         await props.selectEvent(event, navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loadingAfterEventSelect.value = false;
     }
 }
+
+// initial load
+onMounted(async () => {
+    await startUpdateResults();
+});
 
 </script>
 
