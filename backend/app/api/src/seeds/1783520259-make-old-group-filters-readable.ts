@@ -295,6 +295,19 @@ function getGroupIdsFromFilter(filter: StamhoofdFilter): string[] {
 }
 
 async function makeGroupFiltersReadable(filter: StamhoofdFilter, groupMap: Map<string, Group>): Promise<void> {
+    function getRelationName(group: Group | null | undefined) {
+        if (!group) {
+            return 'Verwijderde groep';
+        }
+
+        const groupName = group.settings.name.toString();
+        const periodName = group.settings.period?.nameShort;
+        if (periodName) {
+            return `${groupName} (${periodName})`;
+        }
+        return groupName;
+    }
+
     async function getRelationFilter(filter: StamhoofdFilter, groupMap: Map<string, Group>): Promise<StamhoofdMagicRelationFilter> {
         const groupId = (filter as { group?: { id?: { $eq?: string } } })?.group?.id?.$eq;
         if (typeof groupId !== 'string') {
@@ -315,7 +328,7 @@ async function makeGroupFiltersReadable(filter: StamhoofdFilter, groupMap: Map<s
             $: '$rel',
             value: groupId,
             type: GroupType.Membership,
-            name: group ? group.settings.name.toString() : 'Verwijderde groep',
+            name: getRelationName(group),
         };
 
         return relationFilter;
