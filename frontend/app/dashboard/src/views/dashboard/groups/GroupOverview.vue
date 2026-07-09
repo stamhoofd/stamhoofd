@@ -178,60 +178,7 @@
                         </STListItem>
                     </STList>
 
-                    <hr>
-                    <h2>{{ $t('%16X') }}</h2>
-
-                    <STList>
-                        <template v-if="!isDifferentPeriod">
-                            <STListItem v-if="!isArchive && !isOpen" :selectable="true" class="left-center" @click="openGroup()">
-                                <template #left>
-                                    <IconContainer icon="unlock" class="success" />
-                                </template>
-                                <h2 class="style-title-list">
-                                    {{ $t('%Lh') }}
-                                </h2>
-                                <p class="style-description-small">
-                                    {{ $t('%Li') }}
-                                </p>
-
-                                <template #right>
-                                    <span class="icon arrow-right-small gray" />
-                                </template>
-                            </STListItem>
-
-                            <STListItem v-if="!isArchive && isOpen" class="left-center" :selectable="true" @click="closeGroup()">
-                                <template #left>
-                                    <IconContainer icon="lock" class="error" />
-                                </template>
-
-                                <h2 class="style-title-list">
-                                    {{ $t('%Lj') }}
-                                </h2>
-                                <p class="style-description-small">
-                                    {{ $t('%1QD') }}
-                                </p>
-                                <template #right>
-                                    <span class="icon arrow-right-small gray" />
-                                </template>
-                            </STListItem>
-                        </template>
-
-                        <STListItem :selectable="true" class="left-center" @click="deleteGroup()">
-                            <template #left>
-                                <IconContainer icon="trash" class="error" />
-                            </template>
-
-                            <h2 class="style-title-list">
-                                {{ $t('%Ll') }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t('%Lm') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-                    </STList>
+                    <ActionButtonsBox :title="$t('%16X')" :actions="groupManageActions" />
                 </template>
             </main>
         </div>
@@ -274,7 +221,8 @@ import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import ActionButtonsBox from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
+import type { ActionButton } from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
 import { useRegistrationInvitationEventListener } from '@stamhoofd/components/registrations/classes/useRegistrationInvitationEventListener';
 import { countAll } from '@stamhoofd/components/tables/classes/ObjectFetcher';
 import { Formatter } from '@stamhoofd/utility';
@@ -306,6 +254,36 @@ const getPeriods = useGetPeriods();
 
 const featureFlag = useFeatureFlag();
 const isDifferentPeriod = computed(() => organization.value && organization.value.period.period.id !== props.group.periodId);
+
+const groupManageActions = computed<ActionButton[]>(() => [
+    {
+        name: $t('%Lh'),
+        description: $t('%Li'),
+        icon: 'unlock',
+        iconClass: 'success',
+        listItemClass: 'left-center',
+        enabled: hasFullPermissions.value && !isDifferentPeriod.value && !isArchive.value && !isOpen.value,
+        action: openGroup,
+    },
+    {
+        name: $t('%Lj'),
+        description: $t('%1QD'),
+        icon: 'lock',
+        iconClass: 'error',
+        listItemClass: 'left-center',
+        enabled: hasFullPermissions.value && !isDifferentPeriod.value && !isArchive.value && isOpen.value,
+        action: closeGroup,
+    },
+    {
+        name: $t('%Ll'),
+        description: $t('%Lm'),
+        icon: 'trash',
+        iconClass: 'error',
+        listItemClass: 'left-center',
+        enabled: hasFullPermissions.value,
+        action: deleteGroup,
+    },
+]);
 
 const invitationsCount = ref<number | null>(null);
 

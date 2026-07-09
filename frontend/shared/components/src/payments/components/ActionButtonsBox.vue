@@ -5,7 +5,7 @@
         </template>
 
         <STList>
-            <STListItem v-for="(action, index) in enabledActions" :key="index" :selectable="true" :class="action.theme" :data-testid="action.testId" @click="action.action">
+            <STListItem v-for="(action, index) in enabledActions" :key="index" :selectable="true" :class="action.listItemClass" :data-testid="action.testId" @click="action.action">
                 <template #left>
                     <IconContainer :icon="action.icon" :class="action.iconClass">
                         <template v-if="action.asideIcon" #aside>
@@ -14,9 +14,9 @@
                     </IconContainer>
                 </template>
 
-                <h2 class="style-title-list">
+                <h3 class="style-title-list">
                     {{ action.name }}
-                </h2>
+                </h3>
                 <p v-if="action.description" class="style-description-small">
                     {{ action.description }}
                 </p>
@@ -41,8 +41,8 @@ export interface ActionButton {
     iconClass?: string;
     /** Small icon shown in the corner of the IconContainer (e.g. 'undo small') */
     asideIcon?: string;
-    /** Optional extra class applied to the list item (e.g. 'theme-error') */
-    theme?: string;
+    /** Optional extra class(es) applied to the list item (e.g. 'theme-error', 'left-center') */
+    listItemClass?: string;
     /** Optional data-testid for the list item */
     testId?: string;
     /** Whether the action should be shown. Disabled actions are not rendered. */

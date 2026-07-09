@@ -73,105 +73,7 @@
                 </Checkbox>
             </template>
 
-            <hr><h2>{{ $t('%16X') }}</h2>
-
-            <STList>
-                <STListItem v-if="isLocked && template.privateSettings.templateDefinition.type === 'participation'" :selectable="true" class="left-center" @click="migrateDocumentTemplateFromV1">
-                    <template #left>
-                        <IconContainer class="" icon="unlock" />
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%Zak') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t("%Zaf") }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!isDraft && !isLocked && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
-                    <template #left>
-                        <IconContainer class="" icon="government">
-                            <template #aside>
-                                <span class="icon download stroke small" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%1Kq') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ xmlExportDescription }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="isDraft && !isLocked" :selectable="true" @click="publishTemplate()">
-                    <template #left>
-                        <IconContainer icon="file-pdf" class="success">
-                            <template #aside>
-                                <span class="icon success small" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%Ke') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%Kf') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!isDraft && !isLocked" :selectable="true" @click="draftTemplate()">
-                    <template #left>
-                        <IconContainer icon="file-pdf" class="">
-                            <template #aside>
-                                <span class="icon undo stroke small" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%Kg') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%Kh') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="isDraft || isLocked" :selectable="true" @click="deleteTemplate()">
-                    <template #left>
-                        <IconContainer icon="file-pdf" class="error">
-                            <template #aside>
-                                <span class="icon trash stroke small" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%Ki') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%Kj') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+            <ActionButtonsBox :title="$t('%16X')" :actions="documentTemplateActions" />
         </main>
     </div>
 </template>
@@ -184,8 +86,9 @@ import { ComponentWithProperties, defineRoutes, NavigationController, useNavigat
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import ActionButtonsBox from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
+import type { ActionButton } from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
@@ -502,6 +405,52 @@ function gotoRecordCategory(index: number) {
 }
 
 const xmlExportDescription = computed(() => props.template.privateSettings.templateDefinition.xmlExportDescription);
+
+const documentTemplateActions = computed<ActionButton[]>(() => [
+    {
+        name: $t('%Zak'),
+        description: $t('%Zaf'),
+        icon: 'unlock',
+        listItemClass: 'left-center',
+        enabled: isLocked.value && props.template.privateSettings.templateDefinition.type === 'participation',
+        action: migrateDocumentTemplateFromV1,
+    },
+    {
+        name: $t('%1Kq'),
+        description: xmlExportDescription.value ?? undefined,
+        icon: 'government',
+        asideIcon: 'download stroke small',
+        listItemClass: 'left-center',
+        enabled: !isDraft.value && !isLocked.value && !!xmlExportDescription.value,
+        action: exportXml,
+    },
+    {
+        name: $t('%Ke'),
+        description: $t('%Kf'),
+        icon: 'file-pdf',
+        iconClass: 'success',
+        asideIcon: 'success small',
+        enabled: isDraft.value && !isLocked.value,
+        action: publishTemplate,
+    },
+    {
+        name: $t('%Kg'),
+        description: $t('%Kh'),
+        icon: 'file-pdf',
+        asideIcon: 'undo stroke small',
+        enabled: !isDraft.value && !isLocked.value,
+        action: draftTemplate,
+    },
+    {
+        name: $t('%Ki'),
+        description: $t('%Kj'),
+        icon: 'file-pdf',
+        iconClass: 'error',
+        asideIcon: 'trash stroke small',
+        enabled: isDraft.value || isLocked.value,
+        action: deleteTemplate,
+    },
+]);
 
 async function migrateDocumentTemplateFromV1() {
     if (!await CenteredMessage.confirm({

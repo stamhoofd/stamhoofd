@@ -398,7 +398,7 @@ const paymentActions = computed<ActionButton[]>(() => {
             icon: 'card',
             iconClass: 'error',
             asideIcon: 'undo small',
-            theme: 'theme-error',
+            listItemClass: 'theme-error',
             testId: 'refund-online-button',
             enabled: canShow && canRefundOnline.value,
             action: refundOnline,
