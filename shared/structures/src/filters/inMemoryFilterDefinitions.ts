@@ -23,6 +23,7 @@ export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
+    groupId: createInMemoryFilterCompiler('groupId'),
     group: createInMemoryFilterCompiler('group', {
         ...baseInMemoryFilterCompilers,
         id: createInMemoryFilterCompiler('id'),

@@ -299,7 +299,6 @@ export class RelationFetcherSubFilter {
         };
     }
 }
-
 export class RelationFetcher<OBJECT extends { id: string }, T extends string | number | Date | null | boolean> {
     readonly fetcher: ObjectFetcher<OBJECT>;
 
