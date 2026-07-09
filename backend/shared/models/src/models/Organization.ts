@@ -6,8 +6,8 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereExists } from '@stamhoofd/sql';
-import type { AppType, OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { AccessRight, Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, getAppHost, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
+import { AccessRight, Address, Company, DNSRecordStatus, EmailTemplateType, getAppHost, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -15,13 +15,13 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData.js';
+import { Event } from './Event.js';
 import { Group } from './Group.js';
 import { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
 import { Registration } from './Registration.js';
 import { StripeAccount } from './StripeAccount.js';
 import { Token } from './Token.js';
 import type { User } from './User.js';
-import { Event } from './Event.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -111,7 +111,7 @@ export class Organization extends QueryableModel {
     active = true;
 
     /**
-     * Return default locale confiruation
+     * Return default locale configuration
      */
     get i18n() {
         return new I18n(Language.Dutch, this.address.country);

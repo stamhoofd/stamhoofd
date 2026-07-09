@@ -288,7 +288,7 @@ export class STPackage extends QueryableModel {
                     }),
                     Replacement.create({
                         token: 'renewUrl',
-                        value: 'https://' + (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') + '/' + organization.i18n.locale + '/settings/packages',
+                        value: `https://${(STAMHOOFD.domains.dashboard ?? 'stamhoofd.app')}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`,
                     }),
                 ],
             }),
