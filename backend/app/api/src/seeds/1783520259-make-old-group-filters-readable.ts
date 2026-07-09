@@ -73,8 +73,6 @@ async function fixUnreadableGroupFilters(organization: Organization, dryRun: boo
         const groups = await Group.getByIDs(...new Set(groupIds));
         const groupMap = new Map(groups.map(g => [g.id, g]));
 
-        console.log('groupIds:', groupIds);
-
         console.error('filter before: ', JSON.stringify(filter));
 
         await makeGroupFiltersReadable(filter, groupMap);
