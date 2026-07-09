@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization } from '@stamhoofd/models';
+import { Group, Organization, RegistrationPeriod } from '@stamhoofd/models';
 import type { RecordCategory, StamhoofdCompareValue, StamhoofdFilter, StamhoofdMagicRelationFilter } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
@@ -295,16 +295,25 @@ function getGroupIdsFromFilter(filter: StamhoofdFilter): string[] {
 }
 
 async function makeGroupFiltersReadable(filter: StamhoofdFilter, groupMap: Map<string, Group>): Promise<void> {
-    function getRelationName(group: Group | null | undefined) {
+    async function getRelationName(group: Group | null | undefined) {
         if (!group) {
             return 'Verwijderde groep';
         }
 
         const groupName = group.settings.name.toString();
-        const periodName = group.settings.period?.nameShort;
-        if (periodName) {
-            return `${groupName} (${periodName})`;
+        let period = group.settings.period;
+        if (!period) {
+            // fetch model if no cached period
+            const periodModel = (await RegistrationPeriod.getByID(group.periodId));
+            if (periodModel) {
+                period = periodModel.getBaseStructure();
+            }
         }
+
+        if (period) {
+            return `${groupName} (${period.nameShort})`;
+        }
+
         return groupName;
     }
 
@@ -328,7 +337,7 @@ async function makeGroupFiltersReadable(filter: StamhoofdFilter, groupMap: Map<s
             $: '$rel',
             value: groupId,
             type: GroupType.Membership,
-            name: getRelationName(group),
+            name: await getRelationName(group),
         };
 
         return relationFilter;
