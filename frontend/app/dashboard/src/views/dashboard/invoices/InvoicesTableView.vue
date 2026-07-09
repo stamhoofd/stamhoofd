@@ -19,8 +19,11 @@
 </template>
 
 <script lang="ts" setup>
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
 import { getInvoicesUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/invoices.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
@@ -31,7 +34,8 @@ import type { TableAction } from '@stamhoofd/components/tables/classes/TableActi
 import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import type { Invoice, InvoiceStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
+import { InvoiceStruct } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { InvoicesExcelExport } from './InvoicesExcelExport';
@@ -53,6 +57,7 @@ const configurationId = computed(() => {
 
 const organization = useOrganization();
 const platform = usePlatform();
+const context = useContext();
 const filterBuilders = getInvoicesUIFilterBuilders();
 const title = computed(() => {
     return $t('%1JA');
@@ -238,6 +243,20 @@ const actions: TableAction<ObjectType>[] = [
         },
     }),
 
+    new InMemoryTableAction({
+        name: $t(`Verwijderen`),
+        icon: 'trash',
+        priority: 0,
+        groupIndex: 3,
+        destructive: true,
+        needsSelection: true,
+        singleSelection: true,
+        allowAutoSelectAll: false,
+        handler: async (invoices: ObjectType[]) => {
+            await deleteInvoice(invoices[0]);
+        },
+    }),
+
     /* new AsyncTableAction({
         name: $t('%V8'),
         icon: 'download',
@@ -263,6 +282,50 @@ const actions: TableAction<ObjectType>[] = [
         },
     }), */
 ];
+
+async function deleteInvoice(invoice: Invoice) {
+    const invoiceName = invoice.number ? '#' + invoice.number : invoice.id;
+
+    // Double verification: two separate confirmations before we permanently delete the invoice.
+    if (!await CenteredMessage.confirm(
+        $t('Ben je zeker dat je factuur {number} wil verwijderen?', { number: invoiceName }),
+        $t('Verwijderen'),
+        $t('De factuur wordt definitief verwijderd. De gekoppelde betalingen blijven behouden en kunnen opnieuw gefactureerd worden. Deze actie kan niet ongedaan gemaakt worden.'),
+        undefined,
+        true,
+    )) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm(
+        $t('Weet je het echt zeker?'),
+        $t('Definitief verwijderen'),
+        $t('Er ontstaat een gat in de factuurnummering. Vink het vakje aan om te bevestigen dat je deze factuur definitief wil verwijderen.'),
+        undefined,
+        true,
+        $t('Ik begrijp dat deze factuur definitief verwijderd wordt'),
+    )) {
+        return;
+    }
+
+    try {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+        arr.addDelete(invoice.id);
+
+        await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/invoices',
+            body: arr,
+            decoder: new ArrayDecoder(InvoiceStruct as Decoder<InvoiceStruct>),
+            shouldRetry: false,
+        });
+
+        Toast.success($t('De factuur werd verwijderd')).show();
+        tableObjectFetcher.reset(true, true);
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+}
 
 function showInvoice(invoice: Invoice) {
     if (invoice.pdf === null) {

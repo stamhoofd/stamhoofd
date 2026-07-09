@@ -302,6 +302,27 @@ export class InvoiceService {
         return model;
     }
 
+    /**
+     * Permanently delete an invoice.
+     *
+     * Deleting the invoice cascades on the database level:
+     * - the linked InvoicedBalanceItems are deleted (ON DELETE CASCADE)
+     * - payments linked to this invoice have their invoiceId reset (ON DELETE SET NULL), so they can be invoiced again
+     * - other invoices referencing this one via negativeInvoiceId have it reset (ON DELETE SET NULL)
+     *
+     * After deletion the invoiced cache of the affected balance items is recalculated.
+     */
+    static async delete(invoice: Invoice) {
+        // Collect the affected balance items before deleting, because the invoiced balance items are cascade deleted.
+        const { invoicedBalanceItems } = await Invoice.loadBalanceItems([invoice]);
+        const balanceItemIds = Formatter.uniqueArray(invoicedBalanceItems.map(i => i.balanceItemId));
+
+        await invoice.delete();
+
+        // Recalculate the invoiced amount cache of the balance items that were invoiced by this invoice.
+        await BalanceItemService.updateInvoiced(balanceItemIds);
+    }
+
     private static shouldForwardInvoice(invoice: Invoice, organization: Organization) {
         if (invoice.didSendPeppol) {
             return {

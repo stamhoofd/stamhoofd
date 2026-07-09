@@ -6,7 +6,7 @@ import { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import type { Invoice } from '@stamhoofd/models';
+import { Invoice } from '@stamhoofd/models';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ViesHelper } from '../../../../helpers/ViesHelper.js';
 import { InvoiceService } from '../../../../services/InvoiceService.js';
@@ -55,6 +55,15 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
 
             const model = await InvoiceService.createFrom(organization, put);
             invoices.push(model);
+        }
+
+        for (const id of request.body.getDeletes()) {
+            const model = await Invoice.getByID(id);
+            if (!model || model.organizationId !== organization.id) {
+                throw Context.auth.notFoundOrNoAccess($t('Deze factuur werd niet gevonden'));
+            }
+
+            await InvoiceService.delete(model);
         }
 
         return new Response(
