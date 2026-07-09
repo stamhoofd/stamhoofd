@@ -72,7 +72,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
             human: $t(`%1BZ`),
         });
     }
-    const baseUrl = 'https://search-test.uitdatabank.be/events';
+    const baseUrl = STAMHOOFD.UITPAS_API_URL?.includes('test') ? 'https://search-test.uitdatabank.be/events' : 'https://search.uitdatabank.be/events';
     const params = new URLSearchParams();
     params.append('clientId', clientId);
     params.append('organizerId', uitpasOrganizerId);
