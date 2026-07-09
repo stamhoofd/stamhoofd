@@ -58,7 +58,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
                 filter: body.filter,
                 limit: 100,
             }), {
-                fetch: GetOrganizationsEndpoint.buildData,
+                fetch: request => GetOrganizationsEndpoint.buildData(request),
             });
 
             for await (const data of dataGenerator) {
