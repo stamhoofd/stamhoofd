@@ -8,6 +8,11 @@
             </span>
         </h1>
         <p>{{ $t('%15w') }}</p>
+
+        <p v-if="!isCurrentPeriod" class="warning-box">
+            {{ $t('Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar.', { period: props.period.period.name }) }}
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-model="draggableBundles" :draggable="true">
@@ -44,13 +49,14 @@
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -63,6 +69,9 @@ const props = withDefaults(
 
 const title = $t('%15q');
 const pop = usePop();
+const organization = useOrganization();
+
+const isCurrentPeriod = computed(() => organization.value?.period.id === props.period.id);
 
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
 
