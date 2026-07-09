@@ -43,14 +43,19 @@
                             {{ group.settings.location }}
                         </h2>
                     </STListItem>
-                    <STListItem v-if="who">
-                        <template #left>
-                            <span class="icon filter" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ who }}
-                        </h2>
-                    </STListItem>
+                    <template v-if="whoList.length === 1">
+                        <STListItem v-for="who of whoList" :key="who.title" :selectable="who.isSelectable" @click="openWhoDetails(who)">
+                            <template #left>
+                                <span class="icon filter" />
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ who.textIfSingleItem ?? who.title }}
+                            </h2>
+                            <template v-if="who.isSelectable" #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </template>
                     <template v-if="priceList.length === 1">
                         <template v-for="(price, index) of priceList" :key="index">
                             <STListItem class="right-stack">
@@ -84,6 +89,29 @@
                             </STListItem>
                         </template>
                     </template>
+                </STList>
+            </div>
+
+            <div v-if="whoList.length > 1" class="container">
+                <hr>
+                <h2>
+                    {{ $t('Wie?') }}
+                </h2>
+                <STList>
+                    <STListItem v-for="(who, index) of whoList" :key="who.title" :selectable="who.isSelectable" @click="openWhoDetails(who)">
+                        <h2 v-if="index" class="style-title-list">
+                            {{ $t('En') }} {{ who.title }}
+                        </h2>
+                        <h2 v-else class="style-title-list">
+                            {{ Formatter.capitalizeFirstLetter(who.title) }}
+                        </h2>
+                        <p v-if="who.shortDescription" class="style-description-small">
+                            {{ Formatter.capitalizeFirstLetter(who.shortDescription) }}
+                        </p>
+                        <template v-if="who.isSelectable" #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </div>
 
@@ -160,16 +188,21 @@
 </template>
 
 <script setup lang="ts">
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
 import ImageComponent from '#views/ImageComponent.vue';
+import { Request } from '@simonbackx/simple-networking';
+import { useShow } from '@simonbackx/vue-app-navigation';
 import type { Group } from '@stamhoofd/structures';
-import { WaitingListType } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import GroupTag from './GroupTag.vue';
 
 const props = defineProps<{
@@ -177,6 +210,7 @@ const props = defineProps<{
 }>();
 
 const organization = useOrganization();
+const show = useShow();
 
 const { enabled: isFinancialSupportEnabled, financialSupportSettings } = useFinancialSupportSettings({
     group: computed(() => props.group),
@@ -189,10 +223,6 @@ function formatDateTime(date: Date) {
 
 function formatDate(date: Date) {
     return Formatter.date(date);
-}
-
-function groupName(id: string): string {
-    return organization.value?.period.groups.find(g => g.id === id)?.settings.name.toString() ?? $t('%Gr');
 }
 
 function getStockText<T extends { getRemainingStock: (group: Group) => number | null }>(item: T): string {
@@ -329,28 +359,236 @@ const errorBox = computed(() => {
     return null;
 });
 
-const who = computed(() => {
+const groupMap = ref(new Map<string, Group>());
+
+function getTextIfGroupsOverflow(count: number) {
+    if (count === 1) {
+        return $t('1 andere inschrijvingsgroep');
+    }
+    return $t('{count} andere inschrijvingsgroepen', { count });
+}
+
+function getGroupsDescription({ groupIds, maxLength }: { groupIds: string[]; maxLength?: number }): { description: string; didOverflow: boolean } {
+    if (groupIds.length < 3) {
+        // always show all groups if there are less than 3
+        maxLength = undefined;
+    }
+
+    let didOverflow = false;
+    const description = Formatter.joinLastLimited(groupIds.map(groupName), {
+        separator: ', ',
+        lastSeparator: ` ${$t('%GT')} `,
+        maxLength,
+        textIfOverflow: (count) => {
+            didOverflow = true;
+            return getTextIfGroupsOverflow(count);
+        },
+    });
+
+    return { description, didOverflow };
+}
+
+enum WhoType {
+    AgeGender,
+    RequiredGroups,
+    PreventGroups,
+}
+
+type WhoItem = { title: string; shortDescription?: string; textIfSingleItem?: string; isSelectable?: boolean; type: WhoType };
+
+const whoList = computed(() => {
+    const items: WhoItem[] = [];
     const settings = props.group.settings;
-    let who = settings.getAgeGenderDescription({ includeAge: true, includeGender: true }) ?? '';
+
+    const ageGenderDescription = settings.getAgeGenderDescription({ includeAge: true, includeGender: true });
+    if (ageGenderDescription) {
+        items.push({
+            type: WhoType.AgeGender,
+            title: ageGenderDescription,
+        });
+    }
 
     if (settings.requireGroupIds.length > 0) {
-        const prefix = Formatter.joinLast(settings.requireGroupIds.map(groupName), ', ', ' of ');
-        who = who ? prefix + '\n' + who : prefix;
+        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.requireGroupIds, maxLength: 100 });
+
+        const textIfSingleItem = $t('Iedereen die ingeschreven is bij {groups}', {
+            groups: description,
+        });
+
+        items.push({
+            type: WhoType.RequiredGroups,
+            title: $t('ingeschreven bij'),
+            textIfSingleItem,
+            shortDescription: description,
+            isSelectable: didOverflow,
+        });
     }
 
     if (settings.preventGroupIds.length > 0) {
-        const prefix = $t('%1VC', {
-            groups: Formatter.joinLast(settings.preventGroupIds.map(groupName), ', ', ' of '),
+        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.preventGroupIds, maxLength: 100 });
+
+        const textIfSingleItem = $t('Iedereen die niet ingeschreven is bij {groups}', {
+            groups: description,
         });
-        who = who ? prefix + '\n' + who : prefix;
+
+        items.push({
+            type: WhoType.PreventGroups,
+            title: $t('niet ingeschreven bij'),
+            textIfSingleItem,
+            shortDescription: description,
+            isSelectable: didOverflow,
+        });
     }
 
-    if (!who) {
-        return null;
-    }
-
-    return who;
+    return items;
 });
+
+async function openWhoDetails(item: WhoItem) {
+    if (!item.isSelectable) {
+        return;
+    }
+    switch (item.type) {
+        case WhoType.AgeGender: {
+            break;
+        }
+        case WhoType.RequiredGroups: {
+            await show({
+                components: [
+                    AsyncComponent(() => import('./GroupListView.vue'), {
+                        title: $t('Ingeschreven bij'),
+                        description: $t('Je kan enkel inschrijven voor deze inschrijvingsgroep als je ook ingeschreven bent voor één van de volgende inschrijvingsgroepen.'),
+                        groups: props.group.settings.requireGroupIds.flatMap((id) => {
+                            const group = groupMap.value.get(id);
+                            if (group) {
+                                return [group];
+                            }
+                            return [];
+                        }),
+                    }),
+                ],
+            });
+            break;
+        }
+        case WhoType.PreventGroups: {
+            await show({
+                components: [
+                    AsyncComponent(() => import('./GroupListView.vue'), {
+                        title: $t('Niet ingeschreven bij'),
+                        description: $t('Je kan niet inschrijven voor deze inschrijvingsgroep als je ingeschreven bent voor één van de volgende inschrijvingsgroepen.'),
+                        groups: props.group.settings.preventGroupIds.flatMap((id) => {
+                            const group = groupMap.value.get(id);
+                            if (group) {
+                                return [group];
+                            }
+                            return [];
+                        }),
+                    }),
+                ],
+            });
+            break;
+        }
+    }
+}
+
+function getGroupInfo(id: string): { name: string; periodName?: string } {
+    const group = groupMap.value.get(id);
+
+    if (group) {
+        const period = organization.value?.period;
+        const groupName = group.settings.name.toString();
+        if (group.periodId !== period?.id && group.settings.period) {
+            return {
+                name: groupName,
+                periodName: group.settings.period.name,
+            };
+        }
+    }
+
+    return { name: $t('%Gr') };
+}
+
+function groupName(id: string): string {
+    const { name, periodName } = getGroupInfo(id);
+
+    if (periodName) {
+        return $t(`“{group}” in {period}`, {
+            group: name,
+            period: periodName,
+        });
+    }
+
+    return name;
+}
+
+const fetcher = useGroupsObjectFetcher(undefined, {
+    shouldNotUseAuthenticatedServer: true,
+});
+
+onMounted(() => {
+    loadGroups().catch(console.error);
+});
+
+async function loadGroups() {
+    const settings = props.group.settings;
+    const groupIds = [...new Set([...settings.requireGroupIds, ...settings.preventGroupIds])];
+    const groups = await fetchGroups(groupIds);
+    groupMap.value = new Map<string, Group>(groups.map(g => [g.id, g]));
+}
+
+async function fetchGroups(groupIds: string[]) {
+    if (groupIds.length === 0) {
+        return [];
+    }
+
+    let fetchedGroups: Group[] = [];
+
+    const foundGroups: Group[] = [];
+    const groupIdsToFetch: string[] = [];
+
+    const period = organization.value?.period;
+
+    if (period) {
+        // prevent fetching groups that are already in the period
+        for (const groupId of groupIds) {
+            const foundGroup = period.groups.find(g => g.id === groupId);
+            if (foundGroup) {
+                foundGroups.push(foundGroup);
+            } else {
+                groupIdsToFetch.push(groupId);
+            }
+        }
+    } else {
+        groupIdsToFetch.push(...groupIds);
+    }
+
+    if (groupIdsToFetch.length === 0) {
+        return foundGroups;
+    }
+
+    const getAllGroups = () => {
+        return [...foundGroups, ...fetchedGroups];
+    };
+
+    try {
+        const result = await fetcher.fetch(new LimitedFilteredRequest({
+            filter: {
+                id: {
+                    $in: groupIdsToFetch,
+                },
+            },
+            limit: groupIdsToFetch.length,
+        }));
+
+        fetchedGroups = result.results;
+    } catch (e) {
+        if (Request.isAbortError(e)) {
+            return getAllGroups();
+        }
+        Toast.fromError(e).show();
+    }
+
+    return getAllGroups();
+}
 </script>
 
 <style lang="scss">

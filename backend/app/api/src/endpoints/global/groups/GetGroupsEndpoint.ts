@@ -133,7 +133,7 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
+        const maxLimit = Context.optionalAuth?.hasSomePlatformAccess() ? 1000 : 100;
 
         if (request.query.limit > maxLimit) {
             throw new SimpleError({
