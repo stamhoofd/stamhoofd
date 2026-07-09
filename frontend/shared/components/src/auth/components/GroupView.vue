@@ -442,7 +442,6 @@ const whoList = computed(() => {
  *
  * todo:
  * - always show each group name if only 2
- * - use custom period name
  */
 
 async function openWhoDetails(item: WhoItem) {
@@ -501,7 +500,7 @@ function getGroupInfo(id: string): { name: string; periodName?: string } {
         if (group.periodId !== period?.id && group.settings.period) {
             return {
                 name: groupName,
-                periodName: group.settings.period.nameShort,
+                periodName: group.settings.period.name,
             };
         }
     }
@@ -513,7 +512,7 @@ function groupName(id: string): string {
     const { name, periodName } = getGroupInfo(id);
 
     if (periodName) {
-        return $t(`“{group}” in werkjaar {period}`, {
+        return $t(`“{group}” in {period}`, {
             group: name,
             period: periodName,
         });
