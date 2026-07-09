@@ -1,7 +1,8 @@
 <template>
     <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editPrice()" @contextmenu.prevent="showContextMenu">
-        <h3 class="style-title-list">
-            {{ productPrice.name || 'Naamloos' }}
+        <h3 class="style-title-list product-price-title">
+            <span>{{ productPrice.name || 'Naamloos' }}</span>
+            <img v-if="productPrice.uitpasBaseProductPriceId !== null" src="@stamhoofd/assets/images/illustrations/uitpas.svg" class="uitpas-logo">
         </h3>
         <p v-if="productPrice.hidden" class="style-description-small">
             {{ $t('%UC') }}
@@ -101,3 +102,17 @@ function showContextMenu(event: MouseEvent) {
     menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>
+
+<style lang="scss" scoped>
+.product-price-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .uitpas-logo {
+        height: 20px;
+        width: auto;
+        flex-shrink: 0;
+    }
+}
+</style>
