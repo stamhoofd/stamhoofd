@@ -1559,6 +1559,10 @@
     "original": "Naam van het scoutsjaar geassocieerd aan dit item",
     "translation": "Name of the scout year linked to this item"
   },
+  "%ZcM": {
+    "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige scoutsjaar.",
+    "translation": "Note: bundle discounts are only applied once you have set {period} as the current scouts year."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Keeo. For Microsoft you can"

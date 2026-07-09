@@ -17819,6 +17819,10 @@
     "original": "De factuur werd verwijderd",
     "translation": "La facture a été supprimée"
   },
+  "%ZcM": {
+    "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar.",
+    "translation": "Attention\u0000a0: les r\u0000e9ductions pour plusieurs inscriptions ne s'appliquent que si vous avez d\u0000e9fini {period} comme ann\u0000e9e associative en cours."
+  },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",
     "translation": "Les adresses e-mail avec ces noms de domaine ne peuvent pas utiliser cette méthode de connexion."

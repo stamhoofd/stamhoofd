@@ -1567,6 +1567,10 @@
     "original": "Naam van het scoutsjaar geassocieerd aan dit item",
     "translation": "Nom de l'année scoute liée à cet élément"
   },
+  "%ZcM": {
+    "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige scoutsjaar.",
+    "translation": "Attention\u0000a0: les r\u0000e9ductions pour plusieurs inscriptions ne s'appliquent que si vous avez d\u0000e9fini {period} comme ann\u0000e9e scoute en cours."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

@@ -6134,5 +6134,6 @@
   "%ZcG": "Er ontstaat een gat in de factuurnummering. Vink het vakje aan om te bevestigen dat je deze factuur definitief wil verwijderen.",
   "%ZcH": "De factuur wordt definitief verwijderd. De gekoppelde betalingen blijven behouden en kunnen opnieuw gefactureerd worden. Deze actie kan niet ongedaan gemaakt worden.",
   "%ZcK": "Ik begrijp dat deze factuur definitief verwijderd wordt",
-  "%ZcL": "De factuur werd verwijderd"
+  "%ZcL": "De factuur werd verwijderd",
+  "%ZcM": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar."
 }

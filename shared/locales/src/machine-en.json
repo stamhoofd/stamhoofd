@@ -17631,6 +17631,10 @@
     "original": "De factuur werd verwijderd",
     "translation": "The invoice has been deleted"
   },
+  "%ZcM": {
+    "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar.",
+    "translation": "Note: bundle discounts are only applied once you have set {period} as the current work year."
+  },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",
     "translation": "Email addresses with these domain names cannot use this login method."

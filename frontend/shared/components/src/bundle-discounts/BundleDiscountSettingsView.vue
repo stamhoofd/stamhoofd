@@ -10,7 +10,7 @@
         <p>{{ $t('%15w') }}</p>
 
         <p v-if="!isCurrentPeriod" class="warning-box">
-            {{ $t('Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar.', { period: props.period.period.name }) }}
+            {{ $t('%ZcM', { period: props.period.period.name }) }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />

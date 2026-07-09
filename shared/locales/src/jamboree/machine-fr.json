@@ -1575,6 +1575,10 @@
     "original": "Naam van het scoutsjaar geassocieerd aan dit item",
     "translation": "Nom de l'année scoute liée à cet élément"
   },
+  "%ZcM": {
+    "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige scoutsjaar.",
+    "translation": "Attention : les réductions pour plusieurs inscriptions ne s'appliquent que si vous avez défini {period} comme année scoute en cours."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"
