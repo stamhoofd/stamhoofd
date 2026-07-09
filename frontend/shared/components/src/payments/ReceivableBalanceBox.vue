@@ -116,6 +116,14 @@
                 </STListItem>
             </STList>
 
+            <div v-if="hasWrite && detailedItem.objectType === ReceivableBalanceType.organization && detailedItem.organizationId === organization?.id && organization?.meta.registrationPaymentConfiguration.enableMandates" class="container">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>{{ $t('%1UB') }}</div>
+                </h2>
+                <PaymentMandatesBox :paying-organization-id="detailedItem.object.id" :selling-organization-id="detailedItem.organizationId" />
+            </div>
+
             <template v-if="pendingPayments.length > 0">
                 <hr><h2>{{ $t('%1OL') }}</h2>
                 <p>{{ $t('%ha') }}</p>
@@ -196,6 +204,7 @@ import { computed, onMounted, ref } from 'vue';
 import EmailAddress from '../email/EmailAddress.vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
 import { useAuth } from '#hooks/useAuth.ts';
+import PaymentMandatesBox from '#mandates/PaymentMandatesBox.vue';
 
 const props = withDefaults(
     defineProps<{
