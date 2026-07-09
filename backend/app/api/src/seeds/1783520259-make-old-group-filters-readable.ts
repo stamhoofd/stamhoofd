@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import type { RecordCategory, StamhoofdCompareValue, StamhoofdFilter, StamhoofdMagicRelationFilter } from '@stamhoofd/structures';
+import type { RecordCategory, RegistrationPeriodBase, StamhoofdCompareValue, StamhoofdFilter, StamhoofdMagicRelationFilter } from '@stamhoofd/structures';
 import { GroupType } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';
 
@@ -301,13 +301,13 @@ async function makeGroupFiltersReadable(filter: StamhoofdFilter, groupMap: Map<s
         }
 
         const groupName = group.settings.name.toString();
-        let period = group.settings.period;
-        if (!period) {
-            // fetch model if no cached period
-            const periodModel = (await RegistrationPeriod.getByID(group.periodId));
-            if (periodModel) {
-                period = periodModel.getBaseStructure();
-            }
+
+        let period: RegistrationPeriodBase | undefined = undefined;
+
+        // fetch model if no cached period
+        const periodModel = (await RegistrationPeriod.getByID(group.periodId));
+        if (periodModel) {
+            period = periodModel.getBaseStructure();
         }
 
         if (period) {
