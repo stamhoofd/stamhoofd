@@ -368,11 +368,16 @@ function getTextIfGroupsOverflow(count: number) {
     return $t('{count} andere inschrijvingsgroepen', { count });
 }
 
-function getGroupsDescription({ groupIds, lastSeparator, maxLength }: { groupIds: string[]; maxLength?: number; lastSeparator: string }): { description: string; didOverflow: boolean } {
+function getGroupsDescription({ groupIds, maxLength }: { groupIds: string[]; maxLength?: number }): { description: string; didOverflow: boolean } {
+    if (groupIds.length < 3) {
+        // always show all groups if there are less than 3
+        maxLength = undefined;
+    }
+
     let didOverflow = false;
     const description = Formatter.joinLastLimited(groupIds.map(groupName), {
         separator: ', ',
-        lastSeparator,
+        lastSeparator: ` ${$t('%GT')} `,
         maxLength,
         textIfOverflow: (count) => {
             didOverflow = true;
@@ -404,7 +409,7 @@ const whoList = computed(() => {
     }
 
     if (settings.requireGroupIds.length > 0) {
-        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.requireGroupIds, maxLength: 100, lastSeparator: ` ${$t('%GT')} ` });
+        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.requireGroupIds, maxLength: 100 });
 
         const textIfSingleItem = $t('Iedereen die ingeschreven is bij {groups}', {
             groups: description,
@@ -420,7 +425,7 @@ const whoList = computed(() => {
     }
 
     if (settings.preventGroupIds.length > 0) {
-        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.preventGroupIds, maxLength: 100, lastSeparator: ` ${$t('en')} ` });
+        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.preventGroupIds, maxLength: 100 });
 
         const textIfSingleItem = $t('Iedereen die niet ingeschreven is bij {groups}', {
             groups: description,
@@ -437,12 +442,6 @@ const whoList = computed(() => {
 
     return items;
 });
-
-/**
- *
- * todo:
- * - always show each group name if only 2
- */
 
 async function openWhoDetails(item: WhoItem) {
     if (!item.isSelectable) {
