@@ -116,7 +116,8 @@
                     </STListItem>
                 </STList>
 
-                <hr><ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="item.objectType !== ReceivableBalanceType.organization" :paying-organization="payingOrganization" />
+                <hr>
+                <ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="item.objectType !== ReceivableBalanceType.organization" :paying-organization="payingOrganization" />
             </main>
         </div>
     </LoadingViewTransition>
@@ -134,7 +135,7 @@ import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import OrganizationLogo from '#context/OrganizationLogo.vue';
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
-import type { PlatformMember, ReceivableBalance} from '@stamhoofd/structures';
+import type { PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
 import { getReceivableBalanceTypeName, LimitedFilteredRequest, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ReceivableBalanceBox from './ReceivableBalanceBox.vue';
