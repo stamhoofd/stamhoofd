@@ -1,6 +1,7 @@
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
+import { useGroupsRelationFetcher } from '#filters/relation-fetchers/groups.ts';
 import { useRegistrationPeriodsRelationFetcher } from '#filters/relation-fetchers/useRegistrationPeriodsRelationFetcher.ts';
-import { EmptyRelationFetcher, RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
+import { RelationFilterBuilder } from '#filters/RelationUIFilter.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -1215,6 +1216,8 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
  * Should match memberWithRegistrationsBlobInMemoryFilterCompilers
  */
 export function useMemberWithRegistrationsBlobFilterBuilders() {
+    const groupsRelationFetcher = useGroupsRelationFetcher();
+
     return (recordConfiguration: OrganizationRecordsConfiguration) => {
         const all: UIFilterBuilders = getMemberBaseFilters(recordConfiguration);
 
@@ -1228,7 +1231,7 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
                     key: 'groupId',
                     allowCreation: false,
                     wrapper: FilterWrapperMarker,
-                    relationFetcher: new EmptyRelationFetcher(),
+                    relationFetcher: groupsRelationFetcher({ type: GroupType.Membership }),
                 }),
             ],
             wrapper: {
