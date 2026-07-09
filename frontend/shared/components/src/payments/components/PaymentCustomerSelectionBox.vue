@@ -19,6 +19,10 @@
                 <p v-if="customer.company.administrationEmail" class="style-description-small">
                     {{ customer.company.administrationEmail }}
                 </p>
+
+                <p v-if="customer.company.customPeppolEndpointId" class="style-description-small">
+                    {{ customer.company.customPeppolEndpointId.getShortLabel() }}
+                </p>
             </template>
             <template v-else>
                 <p v-if="customer.phone" class="style-description-small">

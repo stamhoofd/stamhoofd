@@ -1,11 +1,13 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { AccessRight, Address, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { Country } from '@stamhoofd/types/Country';
+import nock from 'nock';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint.js';
 
@@ -1279,6 +1281,192 @@ describe('Endpoint.PatchOrganization', () => {
                     token,
                 })).rejects.toThrow('You do not have permissions to edit inherited responsibility roles');
             });
+        });
+    });
+
+    describe('custom PEPPOL endpoint id on companies', () => {
+        const belgianAddress = () => Address.create({
+            street: 'Demostraat',
+            number: '12',
+            city: 'Gent',
+            postalCode: '9000',
+            country: Country.Belgium,
+        });
+
+        function mockDirectoryFound(schemeID: string, id: string, entityName = 'Directory Name') {
+            return nock('https://directory.peppol.eu')
+                .get('/search/1.0/json')
+                .query({ participant: `iso6523-actorid-upis::${schemeID}:${id}` })
+                .reply(200, {
+                    'total-result-count': 1,
+                    matches: [{
+                        participantID: { scheme: 'iso6523-actorid-upis', value: `${schemeID}:${id}` },
+                        entities: [{ name: [{ name: entityName }] }],
+                    }],
+                } as nock.Body);
+        }
+
+        afterEach(() => {
+            nock.cleanAll();
+        });
+
+        const companiesPut = (company: Company): PatchableArrayAutoEncoder<Company> => {
+            const arr: PatchableArrayAutoEncoder<Company> = new PatchableArray();
+            arr.addPut(company);
+            return arr;
+        };
+
+        const companiesPatch = (patch: AutoEncoderPatchType<Company>): PatchableArrayAutoEncoder<Company> => {
+            const arr: PatchableArrayAutoEncoder<Company> = new PatchableArray();
+            arr.addPatch(patch);
+            return arr;
+        };
+
+        test('a normal organization admin cannot add a company with a custom PEPPOL endpoint id', async () => {
+            const scope = mockDirectoryFound('0208', '0123456789');
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                meta: OrganizationMetaData.patch({
+                    companies: companiesPut(Company.create({
+                        name: 'Demo Company',
+                        address: belgianAddress(),
+                        customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0123456789' }),
+                    })),
+                }),
+            });
+
+            await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'permission_denied', field: 'customPeppolEndpointId' }),
+            );
+
+            // The directory must not have been contacted: the permission check happens first.
+            expect(scope.isDone()).toBe(false);
+        });
+
+        test('a normal organization admin cannot patch a custom PEPPOL endpoint id onto an existing company', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const company = Company.create({ name: 'Demo Company', address: belgianAddress() });
+            organization.meta.companies = [company];
+            await organization.save();
+
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                meta: OrganizationMetaData.patch({
+                    companies: companiesPatch(Company.patch({
+                        id: company.id,
+                        customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0123456789' }),
+                    })),
+                }),
+            });
+
+            await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'permission_denied', field: 'customPeppolEndpointId' }),
+            );
+        });
+
+        test('a platform admin can set a custom PEPPOL endpoint id that is validated against the directory', async () => {
+            const scope = mockDirectoryFound('0088', '5412345000013');
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                meta: OrganizationMetaData.patch({
+                    companies: companiesPut(Company.create({
+                        name: 'Demo Company',
+                        address: belgianAddress(),
+                        customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }),
+                    })),
+                }),
+            });
+
+            const response = await patchOrganization({ patch, organization, token });
+
+            expect(scope.isDone()).toBe(true);
+            expect(response.body.meta.companies).toHaveLength(1);
+            expect(response.body.meta.companies[0].customPeppolEndpointId).toMatchObject({
+                schemeID: '0088',
+                id: '5412345000013',
+                // The registered entity name from the directory is stored.
+                entityName: 'Directory Name',
+            });
+        });
+
+        test('a client-supplied entityName is ignored and overwritten by the directory value', async () => {
+            mockDirectoryFound('0088', '5412345000013', 'Directory Name');
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                meta: OrganizationMetaData.patch({
+                    companies: companiesPut(Company.create({
+                        name: 'Demo Company',
+                        address: belgianAddress(),
+                        customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013', entityName: 'Spoofed name' }),
+                    })),
+                }),
+            });
+
+            const response = await patchOrganization({ patch, organization, token });
+
+            expect(response.body.meta.companies[0].customPeppolEndpointId?.entityName).toBe('Directory Name');
+        });
+
+        test('a KBO custom PEPPOL endpoint id that does not match the company number is rejected', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                meta: OrganizationMetaData.patch({
+                    companies: companiesPut(Company.create({
+                        name: 'Demo Company',
+                        address: belgianAddress(),
+                        customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '9999999999' }),
+                    })),
+                }),
+            });
+
+            await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+            );
+        });
+
+        test('a platform admin gets an error when the custom PEPPOL endpoint id is unknown to the directory', async () => {
+            nock('https://directory.peppol.eu')
+                .get('/search/1.0/json')
+                .query({ participant: 'iso6523-actorid-upis::0088:5412345000013' })
+                .reply(200, { 'total-result-count': 0, matches: [] } as nock.Body);
+
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                meta: OrganizationMetaData.patch({
+                    companies: companiesPut(Company.create({
+                        name: 'Demo Company',
+                        address: belgianAddress(),
+                        customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }),
+                    })),
+                }),
+            });
+
+            await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+            );
         });
     });
 

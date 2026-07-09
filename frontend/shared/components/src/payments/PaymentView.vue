@@ -288,6 +288,15 @@
                             <EmailAddress :email="payment.customer.company.administrationEmail" />
                         </p>
                     </STListItem>
+
+                    <STListItem v-if="payment.customer.company.customPeppolEndpointId">
+                        <h3 class="style-definition-label">
+                            {{ $t('PEPPOL') }}
+                        </h3>
+                        <p class="style-definition-text">
+                            {{ payment.customer.company.customPeppolEndpointId.getShortLabel() }}
+                        </p>
+                    </STListItem>
                 </template>
 
                 <STListItem v-if="!payment.customer.company || payment.customer.name">

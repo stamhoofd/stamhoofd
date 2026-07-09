@@ -660,6 +660,20 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         return new Response(struct);
     }
 
+    /**
+     * A custom PEPPOL endpoint id may only be set by full platform admins for now.
+     */
+    private requirePeppolPermission() {
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Only platform admins can set a custom PEPPOL endpoint id',
+                human: $t('Enkel platformbeheerders kunnen een aangepast Peppol-ID instellen.'),
+                field: 'customPeppolEndpointId',
+            });
+        }
+    }
+
     async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company> | Company[]) {
         if (isPatchableArray(companies)) {
             for (const patch of companies.getPatches()) {
@@ -672,6 +686,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         message: 'Company not found',
                         human: $t('%1cw'),
                     });
+                }
+
+                if (patch.customPeppolEndpointId !== undefined) {
+                    this.requirePeppolPermission();
                 }
 
                 // Changed VAT number
@@ -692,6 +710,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     });
                 }
 
+                if (put.customPeppolEndpointId) {
+                    this.requirePeppolPermission();
+                }
+
                 await ViesHelper.checkCompany(put, put);
             }
         } else {
@@ -705,6 +727,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             for (const company of companies) {
+                if (company.customPeppolEndpointId) {
+                    this.requirePeppolPermission();
+                }
+
                 await ViesHelper.checkCompany(company, company);
             }
         }

@@ -202,7 +202,7 @@ export class InvoiceXMlService {
                     }
                     <cac:PartyLegalEntity>
                         <cbc:RegistrationName>${esc(company.name)}</cbc:RegistrationName>
-                        <cbc:CompanyID schemeID="0208">${esc(companyNumber)}</cbc:CompanyID>
+                        <cbc:CompanyID schemeID="${esc(customerPeppolCompanyId.schemeID)}">${esc(customerPeppolCompanyId.id)}</cbc:CompanyID>
                     </cac:PartyLegalEntity>
                     ${
                         customerEmail
@@ -398,15 +398,17 @@ export class InvoiceXMlService {
             return;
         }
 
-        if (invoice.customer.company?.VATNumber === null) {
-            console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient not subject to VAT');
-            return;
-        }
+        if (!invoice.customer.company?.customPeppolEndpointId) {
+            if (invoice.customer.company?.VATNumber === null) {
+                console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient not subject to VAT');
+                return;
+            }
 
-        // Check VAT number is belgian
-        if (!invoice.customer.company?.VATNumber.startsWith('BE')) {
-            console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient outside Belgium');
-            return;
+            // Check VAT number is belgian
+            if (!invoice.customer.company?.VATNumber.startsWith('BE')) {
+                console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient outside Belgium');
+                return;
+            }
         }
 
         try {

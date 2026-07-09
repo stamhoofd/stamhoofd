@@ -33,6 +33,10 @@
             {{ company.administrationEmail }}
         </p>
 
+        <p v-if="company.customPeppolEndpointId" class="style-description-small">
+            {{ company.customPeppolEndpointId.getShortLabel() }}
+        </p>
+
         <template #right>
             <slot name="right">
                 <CompanyIcon v-if="$slots.left" :company="company" :is-default="isDefault" />
@@ -40,7 +44,6 @@
         </template>
     </STListItem>
 </template>
-
 
 <script lang="ts" setup>
 import type { Company } from '@stamhoofd/structures/Company.js';
@@ -50,11 +53,11 @@ import CompanyIcon from './CompanyIcon.vue';
 withDefaults(
     defineProps<{
         company: Company;
-        isDefault?: boolean
+        isDefault?: boolean;
     }>(),
     {
-        isDefault: false
-    }
+        isDefault: false,
+    },
 );
 
 </script>

@@ -50,6 +50,10 @@
                     <p v-if="company.address" v-copyable class="style-description-small style-copyable">
                         {{ company.address }}
                     </p>
+
+                    <p v-if="company.customPeppolEndpointId" v-copyable class="style-description-small style-copyable">
+                        {{ company.customPeppolEndpointId.getShortLabel() }}
+                    </p>
                 </STListItem>
 
                 <STListItem v-if="organization.website" element-name="a" :href="organization.website" :selectable="true" target="_blank">

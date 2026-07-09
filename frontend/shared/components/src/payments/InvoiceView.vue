@@ -95,6 +95,15 @@
                     </p>
                 </STListItem>
 
+                <STListItem v-if="invoice.customer.company.customPeppolEndpointId">
+                    <h3 class="style-definition-label">
+                        {{ $t('PEPPOL') }}
+                    </h3>
+                    <p v-copyable class="style-definition-text style-copyable">
+                        {{ invoice.customer.company.customPeppolEndpointId.getShortLabel() }}
+                    </p>
+                </STListItem>
+
                 <STListItem v-if="invoice.customer.name">
                     <h3 class="style-definition-label">
                         {{ $t('%1Kl') }}

@@ -1,9 +1,11 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Company } from '@stamhoofd/structures';
+import { PeppolScheme } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import axios from 'axios';
 import jsvat from 'jsvat-next';
+import { PeppolDirectoryService } from '../services/PeppolDirectoryService.js';
 
 export class ViesHelperStatic {
     testMode = false;
@@ -27,6 +29,43 @@ export class ViesHelperStatic {
     }
 
     async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | Company) {
+        // Validate the custom PEPPOL endpoint id, but only when it actually changed.
+        // In a patch, `customPeppolEndpointId` is undefined unless the client changed it;
+        // for a full company it is always set (null or a value), so we validate a set value.
+        if (patch.customPeppolEndpointId !== undefined && company.customPeppolEndpointId) {
+            const endpointId = company.customPeppolEndpointId;
+
+            // A KBO (0208) endpoint id is the Belgian enterprise number, so it must belong to a
+            // Belgian company and be identical to this company's own company number.
+            if (endpointId.schemeID === (PeppolScheme.KBO as string)) {
+                if (company.address?.country !== Country.Belgium) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'A KBO PEPPOL id can only be used for a Belgian company',
+                        human: $t('Een KBO-nummer kan enkel als Peppol-ID gebruikt worden voor een Belgische onderneming.'),
+                        field: 'customPeppolEndpointId',
+                    });
+                }
+
+                const companyPeppolId = company.peppolCompanyId;
+                if (!companyPeppolId || endpointId.id.replace(/\D+/g, '') !== companyPeppolId.id.replace(/\D+/g, '')) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'A KBO PEPPOL id must match the company number',
+                        human: $t('Een KBO-nummer als Peppol-ID moet gelijk zijn aan het ondernemingsnummer van deze onderneming.'),
+                        field: 'customPeppolEndpointId',
+                    });
+                }
+            }
+
+            // validate() fills in the server-controlled entityName from the PEPPOL directory.
+            await PeppolDirectoryService.validate(endpointId);
+
+            // Write the validated endpoint id back as a full replacement so any client-supplied
+            // entityName is discarded: entityName can only ever be set by the server.
+            patch.customPeppolEndpointId = endpointId;
+        }
+
         if (!company.address) {
             // Not allowed to set
             patch.companyNumber = null;

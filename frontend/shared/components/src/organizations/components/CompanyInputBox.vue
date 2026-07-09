@@ -27,6 +27,33 @@
         </div>
         <EmailInput v-model="administrationEmail" :validator="validator" :required="false" :title="$t(`%gS`)" :placeholder="$t(`%14p`)" />
     </div>
+
+    <template v-if="canEditPeppol">
+        <STInputBox class="max">
+            <STList>
+                <CheckboxListItem v-model="hasCustomPeppolEndpointId" :label="$t('Ander Peppol-ID instellen')" :description="!hasCustomPeppolEndpointId && hasVATNumber && company.peppolEndpointId ? $t('Peppol facturen worden momenteel verzonden naar {peppolId}', {peppolId: company.peppolEndpointId.fullId }) : (hasVATNumber ? $t('Hiermee bevestig je zelf een geldig Peppol-ID te hebben ingevuld en ga je akkoord dat we Peppol facturen niet langer via het ondernemingsnummer versturen.') : '')">
+                    <div class="option">
+                        <div v-if="hasCustomPeppolEndpointId" class="split-inputs">
+                            <STInputBox :title="$t('Type')">
+                                <Dropdown v-model="peppolScheme">
+                                    <option v-for="scheme in peppolSchemes" :key="scheme" :value="scheme">
+                                        {{ PeppolSchemeHelper.getLongName(scheme) }} ({{ scheme }})
+                                    </option>
+                                </Dropdown>
+                            </STInputBox>
+                            <STInputBox :title="$t('Nummer')" error-fields="customPeppolEndpointId" :error-box="errors.errorBox">
+                                <input v-model="peppolId" class="input" type="text" :placeholder="$t('Peppol-ID')">
+                            </STInputBox>
+                        </div>
+
+                        <p v-if="hasCustomPeppolEndpointId && props.company.customPeppolEndpointId?.entityName" class="style-description-small">
+                            {{ $t('Op naam van: {entityName}', {entityName: props.company.customPeppolEndpointId.entityName}) }}
+                        </p>
+                    </div>
+                </CheckboxListItem>
+            </STList>
+        </STInputBox>
+    </template>
 </template>
 
 <script setup lang="ts">
@@ -36,15 +63,21 @@ import type { Validator } from '#errors/Validator.ts';
 import AddressInput from '#inputs/AddressInput.vue';
 import CheckboxListItem from '#inputs/CheckboxListItem.vue';
 import CompanyNumberInput from '#inputs/CompanyNumberInput.vue';
+import Dropdown from '#inputs/Dropdown.vue';
 import EmailInput from '#inputs/EmailInput.vue';
 import VATNumberInput from '#inputs/VATNumberInput.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Company } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { PeppolEndointId, PeppolScheme, PeppolSchemeHelper } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { computed } from 'vue';
 import { useErrors } from '../../errors/useErrors';
+import { useContext } from '#hooks/useContext.ts';
 import { useCountry } from '#hooks/useCountry.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
+
+// PEPPOL schemes (ISO 6523 ICD codes) we currently support for a custom endpoint id.
+const peppolSchemes = Object.values(PeppolScheme);
 
 const props = defineProps<{
     company: Company;
@@ -88,8 +121,7 @@ const hasCompanyNumber = computed({
                 companyNumber: null,
                 VATNumber: null,
             });
-        }
-        else {
+        } else {
             addPatch({
                 companyNumber: '',
             });
@@ -112,8 +144,7 @@ const hasVATNumber = computed({
             addPatch({
                 VATNumber: null,
             });
-        }
-        else {
+        } else {
             addPatch({
                 VATNumber: '',
             });
@@ -163,6 +194,49 @@ const VATNumber = computed({
         addPatch({
             VATNumber: value,
             companyNumber: country.value === Country.Belgium ? value : undefined,
+        });
+    },
+});
+
+const context = useContext();
+// A custom PEPPOL endpoint id may only be set by full platform admins for now.
+const canEditPeppol = computed(() => hasCustomPeppolEndpointId.value || (STAMHOOFD.userMode === 'organization' && (!!props.company.companyNumber || !!context.value?.auth?.hasPlatformFullAccess())));
+
+const hasCustomPeppolEndpointId = computed({
+    get: () => props.company.customPeppolEndpointId !== null,
+    set: (value: boolean) => {
+        if (value === (props.company.customPeppolEndpointId !== null)) {
+            return;
+        }
+
+        addPatch({
+            customPeppolEndpointId: value
+                ? (props.company.peppolEndpointId ?? PeppolEndointId.create({ schemeID: PeppolScheme.KBO, id: '' }))
+                : null,
+        });
+    },
+});
+
+const peppolScheme = computed({
+    get: () => props.company.customPeppolEndpointId?.schemeID ?? PeppolScheme.KBO,
+    set: (schemeID: string) => {
+        addPatch({
+            customPeppolEndpointId: PeppolEndointId.create({
+                schemeID,
+                id: props.company.customPeppolEndpointId?.id ?? '',
+            }),
+        });
+    },
+});
+
+const peppolId = computed({
+    get: () => props.company.customPeppolEndpointId?.id ?? '',
+    set: (id: string) => {
+        addPatch({
+            customPeppolEndpointId: PeppolEndointId.create({
+                schemeID: props.company.customPeppolEndpointId?.schemeID ?? PeppolScheme.KBO,
+                id,
+            }),
         });
     },
 });

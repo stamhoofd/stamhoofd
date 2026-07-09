@@ -4,12 +4,64 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from './addresses/Address.js';
 
+/**
+ * The PEPPOL schemes (ISO 6523 ICD codes) we currently support for a custom endpoint id.
+ * The enum values are the actual scheme identifiers used in a PEPPOL participant id.
+ */
+export enum PeppolScheme {
+    KBO = '0208',
+    GLN = '0088',
+    DUNS = '0060',
+}
+
+export class PeppolSchemeHelper {
+    static getLongName(scheme: PeppolScheme): string {
+        switch (scheme) {
+            case PeppolScheme.KBO: return $t('KBO-nummer (België)');
+            case PeppolScheme.GLN: return $t('GLN-nummer');
+            case PeppolScheme.DUNS: return $t('DUNS-nummer');
+        }
+    }
+
+    static getShortName(scheme: PeppolScheme): string {
+        switch (scheme) {
+            case PeppolScheme.KBO: return $t('KBO');
+            case PeppolScheme.GLN: return $t('GLN');
+            case PeppolScheme.DUNS: return $t('DUNS');
+        }
+    }
+}
+
 export class PeppolEndointId extends AutoEncoder {
     @field({ decoder: StringDecoder })
     schemeID: string;
 
     @field({ decoder: StringDecoder })
     id: string;
+
+    /**
+     * The registered entity name as returned by the PEPPOL directory when the id was validated.
+     * Readonly: this is set by the server during validation and cannot be set through UI patches.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    entityName: string | null = null;
+
+    get fullId(): string {
+        return `${this.schemeID}:${this.id}`;
+    }
+
+    /**
+     * A short human label for a custom endpoint id, e.g. "GLN: 5412345000013" for a known
+     * scheme, or "PEPPOL ID: 0192:991825827" for any other scheme.
+     */
+    getShortLabel(): string {
+        const suffix = this.entityName ? ' (' + this.entityName + ')' : '';
+        const scheme = Object.values(PeppolScheme).find(s => (s as string) === this.schemeID);
+        if (scheme) {
+            return `${PeppolSchemeHelper.getShortName(scheme)}: ${this.id}` + suffix;
+        }
+        return $t('PEPPOL-ID: {id}', { id: `${this.schemeID}:${this.id}` }) + suffix;
+    }
 }
 
 export class Company extends AutoEncoder {

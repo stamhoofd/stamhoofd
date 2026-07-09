@@ -1,4 +1,4 @@
-import { Address, Company } from '@stamhoofd/structures';
+import { Address, Company, PeppolEndointId } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import nock from 'nock';
@@ -6,6 +6,9 @@ import { ViesHelper } from './ViesHelper.js';
 
 const VIES_HOST = 'https://ec.europa.eu';
 const VIES_PATH = '/taxation_customs/vies/rest-api/check-vat-number';
+
+const DIRECTORY_HOST = 'https://directory.peppol.eu';
+const DIRECTORY_PATH = '/search/1.0/json';
 
 describe('ViesHelper', () => {
     /**
@@ -252,6 +255,147 @@ describe('ViesHelper', () => {
 
             expect(patch.VATNumber).toBe('BE0411905847');
             expect(patch.companyNumber).toBe('0411905847');
+        });
+
+        describe('custom PEPPOL endpoint id', () => {
+            function mockDirectoryFound(participant: string, entityName = 'Directory Name') {
+                return nock(DIRECTORY_HOST)
+                    .get(DIRECTORY_PATH)
+                    .query({ participant })
+                    .reply(200, {
+                        'total-result-count': 1,
+                        matches: [{
+                            participantID: { scheme: 'iso6523-actorid-upis', value: participant.split('::')[1] },
+                            entities: [{ name: [{ name: entityName }] }],
+                        }],
+                    } as nock.Body);
+            }
+
+            function mockDirectoryNotFound(participant: string) {
+                return nock(DIRECTORY_HOST)
+                    .get(DIRECTORY_PATH)
+                    .query({ participant })
+                    .reply(200, { 'total-result-count': 0, matches: [] } as nock.Body);
+            }
+
+            // Use a GLN endpoint id for the generic directory/entityName tests: it has no
+            // extra constraints, unlike a KBO (0208) id which must match the company number.
+            const companyWithPeppol = () => Company.create({
+                name: 'Demo Company',
+                address: belgianAddress(),
+                customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }),
+            });
+
+            test('validates the id against the directory when it was changed', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = companyWithPeppol();
+                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }) });
+
+                await expect(ViesHelper.checkCompany(company, patch)).resolves.toBeUndefined();
+                expect(scope.isDone()).toBe(true);
+                // The registered entity name is stored from the directory.
+                expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
+            });
+
+            test('overwrites a client-supplied entityName with the value from the directory', async () => {
+                mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = Company.create({
+                    name: 'Demo Company',
+                    address: belgianAddress(),
+                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013', entityName: 'Client supplied name' }),
+                });
+                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013', entityName: 'Client supplied name' }) });
+
+                await ViesHelper.checkCompany(company, patch);
+
+                // entityName is server-controlled: the client value is discarded.
+                expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
+                expect(patch.customPeppolEndpointId).not.toBeNull();
+                expect((patch.customPeppolEndpointId as PeppolEndointId | undefined)?.entityName).toBe('Directory Name');
+            });
+
+            test('does not contact the directory when the id did not change', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = companyWithPeppol();
+                const patch = Company.patch({ name: 'Renamed Company' });
+
+                await ViesHelper.checkCompany(company, patch);
+                expect(scope.isDone()).toBe(false);
+            });
+
+            test('rejects an id that is unknown to the directory', async () => {
+                mockDirectoryNotFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = companyWithPeppol();
+                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }) });
+
+                await expect(ViesHelper.checkCompany(company, patch)).rejects.toThrow(
+                    STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+                );
+            });
+
+            test('does not contact the directory when the id is cleared', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = Company.create({ name: 'Demo Company', address: belgianAddress() });
+                const patch = Company.patch({ customPeppolEndpointId: null });
+
+                await ViesHelper.checkCompany(company, patch);
+                expect(scope.isDone()).toBe(false);
+            });
+
+            test('rejects a KBO endpoint id for a non-Belgian company before contacting the directory', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0208:0411905847');
+
+                const company = Company.create({
+                    name: 'Demo Company',
+                    address: Address.create({ street: 'Damstraat', number: '1', city: 'Amsterdam', postalCode: '1012', country: Country.Netherlands }),
+                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }),
+                });
+                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }) });
+
+                await expect(ViesHelper.checkCompany(company, patch)).rejects.toThrow(
+                    STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+                );
+                expect(scope.isDone()).toBe(false);
+            });
+
+            test('rejects a KBO endpoint id that does not match the company number before contacting the directory', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0208:9999999999');
+
+                const company = Company.create({
+                    name: 'Demo Company',
+                    address: belgianAddress(),
+                    companyNumber: '0411905847',
+                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '9999999999' }),
+                });
+                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '9999999999' }) });
+
+                await expect(ViesHelper.checkCompany(company, patch)).rejects.toThrow(
+                    STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+                );
+                expect(scope.isDone()).toBe(false);
+            });
+
+            test('accepts a KBO endpoint id that matches the company number', async () => {
+                mockVies({ valid: true });
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0208:0411905847');
+
+                const company = Company.create({
+                    name: 'Demo Company',
+                    address: belgianAddress(),
+                    companyNumber: '0411905847',
+                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }),
+                });
+                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }) });
+
+                await expect(ViesHelper.checkCompany(company, patch)).resolves.toBeUndefined();
+                expect(scope.isDone()).toBe(true);
+                expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
+            });
         });
     });
 });
