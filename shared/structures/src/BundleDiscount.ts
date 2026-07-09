@@ -66,9 +66,10 @@ export class BundleDiscount extends AutoEncoder {
         return BundleDiscount.discountsToText(this.discounts);
     }
 
-    calculate(cart: RegisterCart): BundleDiscountCalculationGroup {
+    calculate(cart: RegisterCart, periodId: string): BundleDiscountCalculationGroup {
         const group = new BundleDiscountCalculationGroup({
             bundle: this,
+            periodId,
         });
 
         for (const item of cart.items) {
@@ -105,7 +106,7 @@ export class BundleDiscount extends AutoEncoder {
                 }
                 loopedMembers.add(member.id);
 
-                for (const registration of member.filterRegistrations({})) {
+                for (const registration of member.filterRegistrations({ periodId: periodId })) {
                     const registrationWithPlatformMember = new RegistrationWithPlatformMember({
                         registration,
                         member,
@@ -123,7 +124,14 @@ export class BundleDiscount extends AutoEncoder {
         return group;
     }
 
-    applyableTo(item: RegisterItem | RegistrationWithPlatformMember) {
+    applyableTo(item: RegisterItem | RegistrationWithPlatformMember, periodId: string) {
+        // A bundle discount only applies to registrations of the period it belongs to.
+        // Historically, duplicating a period re-used the same discount id across periods,
+        // so we have to filter on the period to avoid mixing registrations from other periods.
+        if (item.group.periodId !== periodId) {
+            return false;
+        }
+
         const groupPrice = item instanceof RegistrationWithPlatformMember ? item.registration.updatedGroupPrice : item.groupPrice;
         if (groupPrice.bundleDiscounts.has(this.id)) {
             return true;
@@ -140,13 +148,16 @@ export class BundleDiscount extends AutoEncoder {
 
 class BundleDiscountCalculationGroup {
     bundle: BundleDiscount;
+    periodId: string;
 
     calculations: Map<string, BundleDiscountCalculation> = new Map();
 
     constructor(options: {
         bundle: BundleDiscount;
+        periodId: string;
     }) {
         this.bundle = options.bundle;
+        this.periodId = options.periodId;
     }
 
     calculate() {
@@ -156,7 +167,7 @@ class BundleDiscountCalculationGroup {
     }
 
     getCalculationFor(item: RegisterItem | RegistrationWithPlatformMember, options?: { onlyExisting?: boolean }) {
-        if (!this.bundle.applyableTo(item)) {
+        if (!this.bundle.applyableTo(item, this.periodId)) {
             return null;
         }
         let groupingCode = 'family-' + item.member.family.uuid + '-';

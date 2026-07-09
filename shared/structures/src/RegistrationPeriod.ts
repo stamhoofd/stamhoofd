@@ -155,7 +155,15 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         const newOrganizationPeriod = OrganizationRegistrationPeriod.create({
             period: newPeriod,
         });
-        newOrganizationPeriod.settings.bundleDiscounts = this.settings.bundleDiscounts.map(discount => discount.clone());
+
+        // Give each duplicated bundle discount a new id and remap the references on group prices
+        const discountMap = new Map<string, string>();
+        newOrganizationPeriod.settings.bundleDiscounts = this.settings.bundleDiscounts.map((discount) => {
+            const newDiscount = discount.clone();
+            newDiscount.id = uuidv4();
+            discountMap.set(discount.id, newDiscount.id);
+            return newDiscount;
+        });
 
         const yearDifference = newPeriod.startDate.getFullYear() - this.period.startDate.getFullYear();
 
@@ -185,6 +193,11 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
                 if (price.endDate) {
                     price.endDate.setFullYear(price.endDate.getFullYear() + yearDifference);
                 }
+
+                // Remap the bundle discount references to the newly generated discount ids
+                price.bundleDiscounts = new Map(
+                    [...price.bundleDiscounts].map(([discountId, settings]) => [discountMap.get(discountId) ?? discountId, settings]),
+                );
             }
 
             // Force close

@@ -384,6 +384,60 @@ describe('Unit.RegisterCart', () => {
             ]);
         });
 
+        test('Registrations from other periods are excluded from the calculation', () => {
+            // Historically, duplicating a registration period re-used the same bundle discount id
+            // across periods. Nevertheless a bundle discount is ALWAYS scoped to a period,
+            // thus registrations from other periods shouldn't be taken into account.
+            const { organization, groups, family, discount } = setupDiscountTest({
+                bundleDiscount: createBundleDiscount({
+                    name: 'Bundle discount',
+                    discounts: [
+                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
+                        { value: 15_00, type: GroupPriceDiscountType.Percentage },
+                    ],
+                }),
+            });
+            const [, groupB] = groups;
+            const [memberA, memberB, memberC] = family.members;
+
+            // A group in a different period, whose price still references the same discount id.
+            const otherPeriod = RegistrationPeriod.create({});
+            const otherPeriodGroup = Group.create({
+                organizationId: organization.id,
+                periodId: otherPeriod.id,
+                settings: GroupSettings.create({
+                    name: new TranslatedString('Old group'),
+                    prices: [
+                        GroupPrice.create({
+                            price: ReduceablePrice.create({ price: 50_0000 }),
+                        }),
+                    ],
+                }),
+            });
+            otherPeriodGroup.settings.prices[0].bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
+                name: discount.name,
+            }));
+
+            // Member A is registered for that other period.
+            addHistoricRegistration(memberA, otherPeriodGroup, organization);
+
+            const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
+            const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
+
+            const checkout = family.checkout;
+            const cart = checkout.cart;
+            cart.add(itemB);
+            cart.add(itemC);
+
+            cart.calculatePrices();
+
+            // Only the two current-period items count: the first is free, the second gets 10%.
+            // 40_0000 * 0.10 = 4_0000. The other-period registration must be ignored.
+            expect(cart.bundleDiscounts).toHaveLength(1);
+            expect(cart.bundleDiscounts[0].total).toEqual(4_0000);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(4_0000);
+        });
+
         test('Deleting a registration also removes the attached discount', () => {
             // We have two family members with existing registrations.
             // One of those registrations received a discount earlier.
@@ -623,7 +677,7 @@ describe('Unit.RegisterCart', () => {
             });
             const groupC = Group.create({
                 organizationId: organization.id,
-                periodId: organization.period.id,
+                periodId: organization.period.period.id,
                 settings: GroupSettings.create({
                     name: new TranslatedString('Group C'),
                     prices: [
@@ -752,7 +806,7 @@ describe('Unit.RegisterCart', () => {
             });
             const groupC = Group.create({
                 organizationId: organization.id,
-                periodId: organization.period.id,
+                periodId: organization.period.period.id,
                 settings: GroupSettings.create({
                     name: new TranslatedString('Group C'),
                     prices: [
