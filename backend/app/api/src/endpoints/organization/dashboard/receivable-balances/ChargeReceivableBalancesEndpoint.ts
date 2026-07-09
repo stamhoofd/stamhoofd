@@ -15,12 +15,12 @@ import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { QueueHandler } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;
-type Query = CountFilteredRequest;
-type Body = undefined;
+type Query = undefined;
+type Body = CountFilteredRequest;
 type ResponseBody = undefined;
 
 export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
+    bodyDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
@@ -54,7 +54,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
         }
 
         await QueueHandler.schedule(queueId, async () => {
-            const query = await GetReceivableBalancesEndpoint.buildQuery(request.query);
+            const query = await GetReceivableBalancesEndpoint.buildQuery(request.body);
 
             for await (const cachedBalance of query.all()) {
                 if (cachedBalance.organizationId !== sellingOrganization.id) {
