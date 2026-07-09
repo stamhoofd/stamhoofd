@@ -84,6 +84,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
     if (textQuery) {
         params.append('text', textQuery);
     }
+    params.append('sort[availableTo]', 'desc'); // last available first
     const url = `${baseUrl}?${params.toString()}`;
     const myHeaders = new Headers();
     myHeaders.append('Accept', 'application/json');
