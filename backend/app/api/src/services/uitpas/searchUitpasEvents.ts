@@ -78,11 +78,13 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
     params.append('organizerId', uitpasOrganizerId);
     params.append('embed', 'true');
     params.append('uitpas', 'true');
+    params.append('disableDefaultFilters', 'true');
     params.append('start', '0');
     params.append('limit', '200');
     if (textQuery) {
         params.append('text', textQuery);
     }
+    params.append('sort[availableTo]', 'desc'); // last available first
     const url = `${baseUrl}?${params.toString()}`;
     const myHeaders = new Headers();
     myHeaders.append('Accept', 'application/json');
