@@ -24,7 +24,7 @@ export class PeppolDirectoryServiceStatic {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Unsupported PEPPOL scheme ' + schemeID,
-                human: $t('Dit type Peppol-ID wordt niet ondersteund'),
+                human: $t('%ZcX'),
                 field: 'customPeppolEndpointId',
             });
         }
@@ -33,7 +33,7 @@ export class PeppolDirectoryServiceStatic {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing PEPPOL endpoint id',
-                human: $t('Vul een geldig Peppol-ID in'),
+                human: $t('%ZcY'),
                 field: 'customPeppolEndpointId',
             });
         }
@@ -54,7 +54,7 @@ export class PeppolDirectoryServiceStatic {
             throw new SimpleError({
                 code: 'service_unavailable',
                 message: 'PEPPOL directory unavailable',
-                human: $t('De Peppol Directory is momenteel niet beschikbaar. Probeer het later opnieuw.'),
+                human: $t('%Zcf'),
                 field: 'customPeppolEndpointId',
             });
         }
@@ -63,7 +63,7 @@ export class PeppolDirectoryServiceStatic {
             throw new SimpleError({
                 code: 'service_unavailable',
                 message: 'Invalid response from PEPPOL directory',
-                human: $t('De Peppol Directory is momenteel niet beschikbaar. Probeer het later opnieuw.'),
+                human: $t('%Zcf'),
                 field: 'customPeppolEndpointId',
             });
         }
@@ -80,7 +80,7 @@ export class PeppolDirectoryServiceStatic {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'PEPPOL participant not found in directory: ' + participant,
-                human: $t('Dit Peppol-ID ({id}) werd niet teruggevonden in de Peppol Directory. Controleer het type en het nummer.', { id: `${schemeID}:${id}` }),
+                human: $t('%Zcr', { id: `${schemeID}:${id}` }),
                 field: 'customPeppolEndpointId',
             });
         }

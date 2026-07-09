@@ -95,12 +95,12 @@
             <div v-if="whoList.length > 1" class="container">
                 <hr>
                 <h2>
-                    {{ $t('Wie?') }}
+                    {{ $t('%Zcv') }}
                 </h2>
                 <STList>
                     <STListItem v-for="(who, index) of whoList" :key="who.title" :selectable="who.isSelectable" @click="openWhoDetails(who)">
                         <h2 v-if="index" class="style-title-list">
-                            {{ $t('En') }} {{ who.title }}
+                            {{ $t('%bv') }} {{ who.title }}
                         </h2>
                         <h2 v-else class="style-title-list">
                             {{ Formatter.capitalizeFirstLetter(who.title) }}
@@ -363,9 +363,9 @@ const groupMap = ref(new Map<string, Group>());
 
 function getTextIfGroupsOverflow(count: number) {
     if (count === 1) {
-        return $t('1 andere inschrijvingsgroep');
+        return $t('%ZcT');
     }
-    return $t('{count} andere inschrijvingsgroepen', { count });
+    return $t('%Zca', { count });
 }
 
 function getGroupsDescription({ groupIds, maxLength }: { groupIds: string[]; maxLength?: number }): { description: string; didOverflow: boolean } {
@@ -411,13 +411,13 @@ const whoList = computed(() => {
     if (settings.requireGroupIds.length > 0) {
         const { description, didOverflow } = getGroupsDescription({ groupIds: settings.requireGroupIds, maxLength: 100 });
 
-        const textIfSingleItem = $t('Iedereen die ingeschreven is bij {groups}', {
+        const textIfSingleItem = $t('%Zcj', {
             groups: description,
         });
 
         items.push({
             type: WhoType.RequiredGroups,
-            title: $t('ingeschreven bij'),
+            title: $t('%Zcn'),
             textIfSingleItem,
             shortDescription: description,
             isSelectable: didOverflow,
@@ -427,13 +427,13 @@ const whoList = computed(() => {
     if (settings.preventGroupIds.length > 0) {
         const { description, didOverflow } = getGroupsDescription({ groupIds: settings.preventGroupIds, maxLength: 100 });
 
-        const textIfSingleItem = $t('Iedereen die niet ingeschreven is bij {groups}', {
+        const textIfSingleItem = $t('%ZcW', {
             groups: description,
         });
 
         items.push({
             type: WhoType.PreventGroups,
-            title: $t('niet ingeschreven bij'),
+            title: $t('%ZcP'),
             textIfSingleItem,
             shortDescription: description,
             isSelectable: didOverflow,
@@ -455,8 +455,8 @@ async function openWhoDetails(item: WhoItem) {
             await show({
                 components: [
                     AsyncComponent(() => import('./GroupListView.vue'), {
-                        title: $t('Ingeschreven bij'),
-                        description: $t('Je kan enkel inschrijven voor deze inschrijvingsgroep als je ook ingeschreven bent voor één van de volgende inschrijvingsgroepen.'),
+                        title: $t('%Zcq'),
+                        description: $t('%Zcu'),
                         groups: props.group.settings.requireGroupIds.flatMap((id) => {
                             const group = groupMap.value.get(id);
                             if (group) {
@@ -473,8 +473,8 @@ async function openWhoDetails(item: WhoItem) {
             await show({
                 components: [
                     AsyncComponent(() => import('./GroupListView.vue'), {
-                        title: $t('Niet ingeschreven bij'),
-                        description: $t('Je kan niet inschrijven voor deze inschrijvingsgroep als je ingeschreven bent voor één van de volgende inschrijvingsgroepen.'),
+                        title: $t('%Zcd'),
+                        description: $t('%ZcU'),
                         groups: props.group.settings.preventGroupIds.flatMap((id) => {
                             const group = groupMap.value.get(id);
                             if (group) {
@@ -511,7 +511,7 @@ function groupName(id: string): string {
     const { name, periodName } = getGroupInfo(id);
 
     if (periodName) {
-        return $t(`“{group}” in {period}`, {
+        return $t(`%Zct`, {
             group: name,
             period: periodName,
         });

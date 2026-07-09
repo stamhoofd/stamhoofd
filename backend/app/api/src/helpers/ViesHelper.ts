@@ -42,7 +42,7 @@ export class ViesHelperStatic {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'A KBO PEPPOL id can only be used for a Belgian company',
-                        human: $t('Een KBO-nummer kan enkel als Peppol-ID gebruikt worden voor een Belgische onderneming.'),
+                        human: $t('%Zck'),
                         field: 'customPeppolEndpointId',
                     });
                 }
@@ -52,7 +52,7 @@ export class ViesHelperStatic {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'A KBO PEPPOL id must match the company number',
-                        human: $t('Een KBO-nummer als Peppol-ID moet gelijk zijn aan het ondernemingsnummer van deze onderneming.'),
+                        human: $t('%ZcZ'),
                         field: 'customPeppolEndpointId',
                     });
                 }

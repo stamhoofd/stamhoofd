@@ -668,7 +668,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'Only platform admins can set a custom PEPPOL endpoint id',
-                human: $t('Enkel platformbeheerders kunnen een aangepast Peppol-ID instellen.'),
+                human: $t('%Zcg'),
                 field: 'customPeppolEndpointId',
             });
         }

@@ -31,23 +31,23 @@
     <template v-if="canEditPeppol">
         <STInputBox class="max">
             <STList>
-                <CheckboxListItem v-model="hasCustomPeppolEndpointId" :label="$t('Ander Peppol-ID instellen')" :description="!hasCustomPeppolEndpointId && hasVATNumber && company.peppolEndpointId ? $t('Peppol facturen worden momenteel verzonden naar {peppolId}', {peppolId: company.peppolEndpointId.fullId }) : (hasVATNumber ? $t('Hiermee bevestig je zelf een geldig Peppol-ID te hebben ingevuld en ga je akkoord dat we Peppol facturen niet langer via het ondernemingsnummer versturen.') : '')">
+                <CheckboxListItem v-model="hasCustomPeppolEndpointId" :label="$t('%ZcR')" :description="!hasCustomPeppolEndpointId && hasVATNumber && company.peppolEndpointId ? $t('%Zch', {peppolId: company.peppolEndpointId.fullId }) : (hasVATNumber ? $t('Hiermee bevestig je zelf een geldig Peppol-ID te hebben ingevuld en ga je akkoord dat we Peppol facturen niet langer via het ondernemingsnummer versturen.') : '')">
                     <div class="option">
                         <div v-if="hasCustomPeppolEndpointId" class="split-inputs">
-                            <STInputBox :title="$t('Type')">
+                            <STInputBox :title="$t('%1LP')">
                                 <Dropdown v-model="peppolScheme">
                                     <option v-for="scheme in peppolSchemes" :key="scheme" :value="scheme">
                                         {{ PeppolSchemeHelper.getLongName(scheme) }} ({{ scheme }})
                                     </option>
                                 </Dropdown>
                             </STInputBox>
-                            <STInputBox :title="$t('Nummer')" error-fields="customPeppolEndpointId" :error-box="errors.errorBox">
-                                <input v-model="peppolId" class="input" type="text" :placeholder="$t('Peppol-ID')">
+                            <STInputBox :title="$t('%cH')" error-fields="customPeppolEndpointId" :error-box="errors.errorBox">
+                                <input v-model="peppolId" class="input" type="text" :placeholder="$t('%ZcV')">
                             </STInputBox>
                         </div>
 
                         <p v-if="hasCustomPeppolEndpointId && props.company.customPeppolEndpointId?.entityName" class="style-description-small">
-                            {{ $t('Op naam van: {entityName}', {entityName: props.company.customPeppolEndpointId.entityName}) }}
+                            {{ $t('%Zco', {entityName: props.company.customPeppolEndpointId.entityName}) }}
                         </p>
                     </div>
                 </CheckboxListItem>

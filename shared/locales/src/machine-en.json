@@ -7299,10 +7299,6 @@
     "original": "We konden deze pagina niet laden. Controleer je internetverbinding en probeer het opnieuw.",
     "translation": "We couldn't load this page. Check your internet connection and try again."
   },
-  "%1VC": {
-    "original": "Iedereen die niet ingeschreven was bij {groups}",
-    "translation": "Everyone who was not registered with {groups}"
-  },
   "%1VD": {
     "original": "Servicekosten ingehouden van uitbetaling (Stripe, incl. BTW)",
     "translation": "Service charges withheld from payout (Stripe, incl. VAT)"
@@ -17634,6 +17630,134 @@
   "%ZcM": {
     "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar.",
     "translation": "Note: bundle discounts are only applied once you have set {period} as the current work year."
+  },
+  "%ZcN": {
+    "original": "KBO",
+    "translation": "KBO"
+  },
+  "%ZcO": {
+    "original": "KBO-nummer (België)",
+    "translation": "KBO number (Belgium)"
+  },
+  "%ZcP": {
+    "original": "niet ingeschreven bij",
+    "translation": "not registered with"
+  },
+  "%ZcQ": {
+    "original": "DUNS",
+    "translation": "DUNS"
+  },
+  "%ZcR": {
+    "original": "Ander Peppol-ID instellen",
+    "translation": "Set another Peppol ID"
+  },
+  "%ZcS": {
+    "original": "GLN",
+    "translation": "GLN"
+  },
+  "%ZcT": {
+    "original": "één andere inschrijvingsgroep",
+    "translation": "one other registration group"
+  },
+  "%ZcU": {
+    "original": "Je kan niet inschrijven voor deze inschrijvingsgroep als je ingeschreven bent voor één van de volgende inschrijvingsgroepen.",
+    "translation": "You cannot register for this registration group if you are already registered for one of the following registration groups."
+  },
+  "%ZcV": {
+    "original": "Peppol-ID",
+    "translation": "Peppol ID"
+  },
+  "%ZcW": {
+    "original": "Iedereen die niet ingeschreven is bij {groups}",
+    "translation": "Anyone who is not registered with {groups}"
+  },
+  "%ZcX": {
+    "original": "Dit type Peppol-ID wordt niet ondersteund",
+    "translation": "This type of Peppol ID is not supported"
+  },
+  "%ZcY": {
+    "original": "Vul een geldig Peppol-ID in",
+    "translation": "Enter a valid Peppol ID"
+  },
+  "%ZcZ": {
+    "original": "Een KBO-nummer als Peppol-ID moet gelijk zijn aan het ondernemingsnummer van deze onderneming.",
+    "translation": "A KBO number as a Peppol ID must match the company number of this business."
+  },
+  "%Zca": {
+    "original": "{count} andere inschrijvingsgroepen",
+    "translation": "{count} other registration groups"
+  },
+  "%Zcc": {
+    "original": "In {period}",
+    "translation": "In {period}"
+  },
+  "%Zcd": {
+    "original": "Niet ingeschreven bij",
+    "translation": "Not registered with"
+  },
+  "%Zce": {
+    "original": "PEPPOL",
+    "translation": "PEPPOL"
+  },
+  "%Zcf": {
+    "original": "De Peppol Directory is momenteel niet beschikbaar. Probeer het later opnieuw.",
+    "translation": "The Peppol Directory is currently unavailable. Please try again later."
+  },
+  "%Zcg": {
+    "original": "Enkel platformbeheerders kunnen een aangepast Peppol-ID instellen.",
+    "translation": "Only platform administrators can set a custom Peppol ID."
+  },
+  "%Zch": {
+    "original": "Peppol facturen worden momenteel verzonden naar {peppolId}",
+    "translation": "Peppol invoices are currently sent to {peppolId}"
+  },
+  "%Zci": {
+    "original": "PEPPOL-ID: {id}",
+    "translation": "PEPPOL ID: {id}"
+  },
+  "%Zcj": {
+    "original": "Iedereen die ingeschreven is bij {groups}",
+    "translation": "Anyone who is registered with {groups}"
+  },
+  "%Zck": {
+    "original": "Een KBO-nummer kan enkel als Peppol-ID gebruikt worden voor een Belgische onderneming.",
+    "translation": "A KBO number can only be used as a Peppol ID for a Belgian company."
+  },
+  "%Zcl": {
+    "original": "DUNS-nummer",
+    "translation": "DUNS number"
+  },
+  "%Zcm": {
+    "original": "GLN-nummer",
+    "translation": "GLN number"
+  },
+  "%Zcn": {
+    "original": "ingeschreven bij",
+    "translation": "registered with"
+  },
+  "%Zco": {
+    "original": "Op naam van: {entityName}",
+    "translation": "In the name of: {entityName}"
+  },
+  "%Zcq": {
+    "original": "Ingeschreven bij",
+    "translation": "Registered with"
+  },
+  "%Zcr": {
+    "original": "Dit Peppol-ID ({id}) werd niet teruggevonden in de Peppol Directory. Controleer het type en het nummer.",
+    "translation": "This Peppol ID ({id}) was not found in the Peppol Directory. Please check the type and number."
+  },
+  "%Zct": {
+    "original": "“{group}” in {period}",
+    "translation": "“{group}” in {period}"
+  },
+  "%Zcu": {
+    "original": "Je kan enkel inschrijven voor deze inschrijvingsgroep als je ook ingeschreven bent voor één van de volgende inschrijvingsgroepen.",
+    "translation": "You can only register for this registration group if you are also registered with one of the following registration groups."
+  },
+  "%Zcv": {
+    "original": "Wie?",
+    "translation": "Who?"
   },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",

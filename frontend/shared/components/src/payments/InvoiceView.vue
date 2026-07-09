@@ -97,7 +97,7 @@
 
                 <STListItem v-if="invoice.customer.company.customPeppolEndpointId">
                     <h3 class="style-definition-label">
-                        {{ $t('PEPPOL') }}
+                        {{ $t('%Zce') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.company.customPeppolEndpointId.getShortLabel() }}

@@ -291,7 +291,7 @@
 
                     <STListItem v-if="payment.customer.company.customPeppolEndpointId">
                         <h3 class="style-definition-label">
-                            {{ $t('PEPPOL') }}
+                            {{ $t('%Zce') }}
                         </h3>
                         <p class="style-definition-text">
                             {{ payment.customer.company.customPeppolEndpointId.getShortLabel() }}

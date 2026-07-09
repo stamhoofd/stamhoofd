@@ -17,17 +17,17 @@ export enum PeppolScheme {
 export class PeppolSchemeHelper {
     static getLongName(scheme: PeppolScheme): string {
         switch (scheme) {
-            case PeppolScheme.KBO: return $t('KBO-nummer (België)');
-            case PeppolScheme.GLN: return $t('GLN-nummer');
-            case PeppolScheme.DUNS: return $t('DUNS-nummer');
+            case PeppolScheme.KBO: return $t('%ZcO');
+            case PeppolScheme.GLN: return $t('%Zcm');
+            case PeppolScheme.DUNS: return $t('%Zcl');
         }
     }
 
     static getShortName(scheme: PeppolScheme): string {
         switch (scheme) {
-            case PeppolScheme.KBO: return $t('KBO');
-            case PeppolScheme.GLN: return $t('GLN');
-            case PeppolScheme.DUNS: return $t('DUNS');
+            case PeppolScheme.KBO: return $t('%ZcN');
+            case PeppolScheme.GLN: return $t('%ZcS');
+            case PeppolScheme.DUNS: return $t('%ZcQ');
         }
     }
 }
@@ -60,7 +60,7 @@ export class PeppolEndointId extends AutoEncoder {
         if (scheme) {
             return `${PeppolSchemeHelper.getShortName(scheme)}: ${this.id}` + suffix;
         }
-        return $t('PEPPOL-ID: {id}', { id: `${this.schemeID}:${this.id}` }) + suffix;
+        return $t('%Zci', { id: `${this.schemeID}:${this.id}` }) + suffix;
     }
 }
 
