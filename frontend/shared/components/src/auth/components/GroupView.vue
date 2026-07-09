@@ -160,16 +160,19 @@
 </template>
 
 <script setup lang="ts">
+import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
 import ImageComponent from '#views/ImageComponent.vue';
+import { Request } from '@simonbackx/simple-networking';
 import type { Group } from '@stamhoofd/structures';
-import { WaitingListType } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import GroupTag from './GroupTag.vue';
 
 const props = defineProps<{
@@ -189,10 +192,6 @@ function formatDateTime(date: Date) {
 
 function formatDate(date: Date) {
     return Formatter.date(date);
-}
-
-function groupName(id: string): string {
-    return organization.value?.period.groups.find(g => g.id === id)?.settings.name.toString() ?? $t('%Gr');
 }
 
 function getStockText<T extends { getRemainingStock: (group: Group) => number | null }>(item: T): string {
@@ -329,12 +328,16 @@ const errorBox = computed(() => {
     return null;
 });
 
+const groupMap = ref(new Map<string, Group>());
+
 const who = computed(() => {
     const settings = props.group.settings;
     let who = settings.getAgeGenderDescription({ includeAge: true, includeGender: true }) ?? '';
 
     if (settings.requireGroupIds.length > 0) {
-        const prefix = Formatter.joinLast(settings.requireGroupIds.map(groupName), ', ', ' of ');
+        const prefix = $t('Iedereen die ingeschreven is bij {groups}', {
+            groups: Formatter.joinLast(settings.requireGroupIds.map(groupName), ', ', ' of '),
+        });
         who = who ? prefix + '\n' + who : prefix;
     }
 
@@ -351,6 +354,94 @@ const who = computed(() => {
 
     return who;
 });
+
+function groupName(id: string): string {
+    const group = groupMap.value.get(id);
+
+    if (group) {
+        const period = organization.value?.period;
+        const groupName = group.settings.name.toString();
+        if (group.periodId !== period?.id && group.settings.period) {
+            return $t('"{group}"" in werkjaar {period}', {
+                group: groupName,
+                period: group.settings.period.nameShort,
+            });
+        }
+        return groupName;
+    }
+
+    return $t('%Gr');
+}
+
+const fetcher = useGroupsObjectFetcher(undefined, {
+    shouldNotUseAuthenticatedServer: true,
+});
+
+onMounted(() => {
+    loadGroups().catch(console.error);
+});
+
+async function loadGroups() {
+    const settings = props.group.settings;
+    const groupIds = [...new Set([...settings.requireGroupIds, ...settings.preventGroupIds])];
+    const groups = await fetchGroups(groupIds);
+    groupMap.value = new Map<string, Group>(groups.map(g => [g.id, g]));
+}
+
+async function fetchGroups(groupIds: string[]) {
+    if (groupIds.length === 0) {
+        return [];
+    }
+
+    let fetchedGroups: Group[] = [];
+
+    const foundGroups: Group[] = [];
+    const groupIdsToFetch: string[] = [];
+
+    const period = organization.value?.period;
+
+    if (period) {
+        // prevent fetching groups that are already in the period
+        for (const groupId of groupIds) {
+            const foundGroup = period.groups.find(g => g.id === groupId);
+            if (foundGroup) {
+                foundGroups.push(foundGroup);
+            } else {
+                groupIdsToFetch.push(groupId);
+            }
+        }
+    } else {
+        groupIdsToFetch.push(...groupIds);
+    }
+
+    if (groupIdsToFetch.length === 0) {
+        return foundGroups;
+    }
+
+    const getAllGroups = () => {
+        return [...foundGroups, ...fetchedGroups];
+    };
+
+    try {
+        const result = await fetcher.fetch(new LimitedFilteredRequest({
+            filter: {
+                id: {
+                    $in: groupIdsToFetch,
+                },
+            },
+            limit: groupIdsToFetch.length,
+        }));
+
+        fetchedGroups = result.results;
+    } catch (e) {
+        if (Request.isAbortError(e)) {
+            return getAllGroups();
+        }
+        Toast.fromError(e).show();
+    }
+
+    return getAllGroups();
+}
 </script>
 
 <style lang="scss">

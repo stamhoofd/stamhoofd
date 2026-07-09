@@ -1,9 +1,9 @@
+import { useContext } from '#hooks/useContext.ts';
+import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
-import { useContext } from '#hooks/useContext.ts';
-import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
 
 type ObjectType = Group;
 
@@ -11,15 +11,22 @@ function extendSort(list: SortList): SortList {
     return assertSort(list, [{ key: 'id' }]);
 }
 
-export function useGroupsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
+export function useGroupsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectType>>, options?: { shouldNotUseAuthenticatedServer?: boolean }): ObjectFetcher<ObjectType> {
     const context = useContext();
+
+    const getServer = () => {
+        if (options?.shouldNotUseAuthenticatedServer) {
+            return context.value.server;
+        }
+        return context.value.authenticatedServer;
+    };
 
     return {
         extendSort,
         async fetch(data: LimitedFilteredRequest) {
             console.log('Groups.fetch', data);
 
-            const response = await context.value.authenticatedServer.request({
+            const response = await getServer().request({
                 method: 'GET',
                 path: '/groups',
                 decoder: new PaginatedResponseDecoder(new ArrayDecoder(Group as Decoder<Group>), LimitedFilteredRequest),
@@ -37,7 +44,7 @@ export function useGroupsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectT
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             console.log('Groups.fetchCount', data);
 
-            const response = await context.value.authenticatedServer.request({
+            const response = await getServer().request({
                 method: 'GET',
                 path: '/groups/count',
                 decoder: CountResponse as Decoder<CountResponse>,
