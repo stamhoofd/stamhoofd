@@ -78,6 +78,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
     params.append('organizerId', uitpasOrganizerId);
     params.append('embed', 'true');
     params.append('uitpas', 'true');
+    params.append('disableDefaultFilters', 'true');
     params.append('start', '0');
     params.append('limit', '200');
     if (textQuery) {
