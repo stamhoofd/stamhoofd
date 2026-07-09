@@ -270,3 +270,149 @@ test.describe('Receivable balances (organization mode) @receivable-balances', ()
         await expect(page.getByText('Terugbetaling registreren')).toHaveCount(0);
     });
 });
+
+test.describe('Balance items (organization mode) @balance-items', () => {
+    test.beforeAll(() => {
+        TestUtils.setPermanentEnvironment('userMode', 'organization');
+    });
+
+    test('an individual balance item can be duplicated via the right-click menu', async ({ page }) => {
+        const organization = await new OrganizationFactory({
+            name: `DuplicateBalance${WorkerData.id}`,
+            packages: [STPackageBundle.Members],
+        }).create();
+        await STPackageService.updateOrganizationPackages(organization.id);
+
+        const member = await new MemberFactory({ organization, firstName: 'Dupli', lastName: 'Cate' }).create();
+
+        const description = `Duplicate Test Item ${WorkerData.id}`;
+
+        // A single manual (Other) balance item of 25 euro that is due
+        await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            type: BalanceItemType.Other,
+            status: BalanceItemStatus.Due,
+            amount: 1,
+            unitPrice: 25_0000,
+            description,
+        }).create();
+
+        // Make sure the member shows up in the receivable balances table
+        await CachedBalance.updateForObjects(organization.id, [member.id], ReceivableBalanceType.member);
+
+        // Log in as an admin and open the member's balance
+        const admin = await new UserFactory({
+            email: `admin-duplicate-${WorkerData.id}-${Date.now()}@test.be`,
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        await loginAs({ page, user: admin });
+
+        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/openstaande-bedragen`);
+
+        const table = new TableHelper(page);
+        await table.waitForFirstRow();
+        await table.getRow('Dupli Cate').click();
+
+        // The manual balance item is shown in the individual list
+        const itemRow = page.getByText(description).first();
+        await expect(itemRow).toBeVisible();
+
+        // Right-clicking an individual item shows a context menu with Edit + Duplicate
+        await itemRow.click({ button: 'right' });
+        await expect(page.getByRole('button', { name: 'Bewerken' })).toBeVisible();
+        const duplicateItem = page.getByRole('button', { name: 'Dupliceren' });
+        await expect(duplicateItem).toBeVisible();
+
+        // Duplicating opens the edit view for a brand new item; saving creates the copy
+        await duplicateItem.click();
+
+        const editView = page.locator('.edit-balance-item-view');
+        await expect(editView).toBeVisible();
+        await editView.getByTestId('save-button').click();
+        await editView.waitFor({ state: 'detached' });
+
+        // The organization now has two identical balance items (original + duplicate)
+        await expect.poll(async () => {
+            const items = await BalanceItem.select().where('organizationId', organization.id).fetch();
+            return items.filter(i => i.description === description).length;
+        }).toBe(2);
+
+        const items = await BalanceItem.select().where('organizationId', organization.id).fetch();
+        const duplicates = items.filter(i => i.description === description);
+        expect(duplicates).toHaveLength(2);
+
+        // Both are fresh, fully payable items with the same price and no paid amount
+        for (const item of duplicates) {
+            expect(item.status).toBe(BalanceItemStatus.Due);
+            expect(item.unitPrice).toBe(25_0000);
+            expect(item.pricePaid).toBe(0);
+        }
+
+        // The two items are distinct records
+        expect(new Set(duplicates.map(i => i.id)).size).toBe(2);
+    });
+
+    test('an individual balance item without payments can be deleted via the right-click menu', async ({ page }) => {
+        const organization = await new OrganizationFactory({
+            name: `DeleteBalance${WorkerData.id}`,
+            packages: [STPackageBundle.Members],
+        }).create();
+        await STPackageService.updateOrganizationPackages(organization.id);
+
+        const member = await new MemberFactory({ organization, firstName: 'Dele', lastName: 'Table' }).create();
+
+        const description = `Delete Test Item ${WorkerData.id}`;
+
+        // A single manual (Other) balance item of 40 euro that is due and unpaid
+        const item = await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            type: BalanceItemType.Other,
+            status: BalanceItemStatus.Due,
+            amount: 1,
+            unitPrice: 40_0000,
+            description,
+        }).create();
+
+        // Make sure the member shows up in the receivable balances table
+        await CachedBalance.updateForObjects(organization.id, [member.id], ReceivableBalanceType.member);
+
+        // Log in as an admin and open the member's balance
+        const admin = await new UserFactory({
+            email: `admin-delete-${WorkerData.id}-${Date.now()}@test.be`,
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        await loginAs({ page, user: admin });
+
+        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/openstaande-bedragen`);
+
+        const table = new TableHelper(page);
+        await table.waitForFirstRow();
+        await table.getRow('Dele Table').click();
+
+        const itemRow = page.getByText(description).first();
+        await expect(itemRow).toBeVisible();
+
+        // An unpaid item offers Delete (and not Cancel, which is reserved for (partially) paid items)
+        await itemRow.click({ button: 'right' });
+        const menuItems = page.getByTestId('context-menu-item');
+        await expect(menuItems.filter({ hasText: 'Verwijderen' })).toBeVisible();
+        await expect(menuItems.filter({ hasText: 'Annuleren' })).toHaveCount(0);
+
+        // Delete it and confirm the destructive action
+        await menuItems.filter({ hasText: 'Verwijderen' }).click();
+        await page.getByTestId('centered-message').getByRole('button', { name: 'Verwijderen' }).click();
+
+        // The item is hidden (soft-deleted) with a zeroed price and disappears from the list
+        await expect.poll(async () => {
+            const updated = await BalanceItem.getByID(item.id);
+            return updated?.status ?? null;
+        }).toBe(BalanceItemStatus.Hidden);
+
+        await expect(page.getByText(description)).toHaveCount(0);
+        await expect(page.getByText('Geen openstaand bedrag')).toBeVisible();
+    });
+});
