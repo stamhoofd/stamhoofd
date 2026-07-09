@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/object-differ",
-    "version": "2.132.0",
+    "version": "2.132.1",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -27,7 +27,7 @@
         "@simonbackx/simple-encoding": "2.26.10"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.132.0",
+        "@stamhoofd/test-utils": "2.132.1",
         "@types/uuid": "8.3.4",
         "uuid": "14.0.0",
         "vitest": "4.1.8"
