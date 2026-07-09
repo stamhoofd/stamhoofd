@@ -43,14 +43,19 @@
                             {{ group.settings.location }}
                         </h2>
                     </STListItem>
-                    <STListItem v-if="who">
-                        <template #left>
-                            <span class="icon filter" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ who }}
-                        </h2>
-                    </STListItem>
+                    <template v-if="whoList.length === 1">
+                        <STListItem v-for="who of whoList" :key="who.title" :selectable="who.isSelectable" @click="openWhoDetails(who)">
+                            <template #left>
+                                <span class="icon filter" />
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ who.textIfSingleItem ?? who.title }}
+                            </h2>
+                            <template v-if="who.isSelectable" #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </template>
                     <template v-if="priceList.length === 1">
                         <template v-for="(price, index) of priceList" :key="index">
                             <STListItem class="right-stack">
@@ -84,6 +89,29 @@
                             </STListItem>
                         </template>
                     </template>
+                </STList>
+            </div>
+
+            <div v-if="whoList.length > 1" class="container">
+                <hr>
+                <h2>
+                    {{ $t('Wie?') }}
+                </h2>
+                <STList>
+                    <STListItem v-for="(who, index) of whoList" :key="who.title" :selectable="who.isSelectable" @click="openWhoDetails(who)">
+                        <h2 v-if="index" class="style-title-list">
+                            {{ $t('En') }} {{ who.title }}
+                        </h2>
+                        <h2 v-else class="style-title-list">
+                            {{ Formatter.capitalizeFirstLetter(who.title) }}
+                        </h2>
+                        <p v-if="who.shortDescription" class="style-description-small">
+                            {{ Formatter.capitalizeFirstLetter(who.shortDescription) }}
+                        </p>
+                        <template v-if="who.isSelectable" #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </div>
 
@@ -160,6 +188,7 @@
 </template>
 
 <script setup lang="ts">
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -169,6 +198,7 @@ import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import ImageComponent from '#views/ImageComponent.vue';
 import { Request } from '@simonbackx/simple-networking';
+import { useShow } from '@simonbackx/vue-app-navigation';
 import type { Group } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -180,6 +210,7 @@ const props = defineProps<{
 }>();
 
 const organization = useOrganization();
+const show = useShow();
 
 const { enabled: isFinancialSupportEnabled, financialSupportSettings } = useFinancialSupportSettings({
     group: computed(() => props.group),
@@ -330,47 +361,165 @@ const errorBox = computed(() => {
 
 const groupMap = ref(new Map<string, Group>());
 
-const who = computed(() => {
+function getTextIfGroupsOverflow(count: number) {
+    if (count === 1) {
+        return $t('1 andere inschrijvingsgroep');
+    }
+    return $t('{count} andere inschrijvingsgroepen', { count });
+}
+
+function getGroupsDescription({ groupIds, lastSeparator, maxLength }: { groupIds: string[]; maxLength?: number; lastSeparator: string }): { description: string; didOverflow: boolean } {
+    let didOverflow = false;
+    const description = Formatter.joinLastLimited(groupIds.map(groupName), {
+        separator: ', ',
+        lastSeparator,
+        maxLength,
+        textIfOverflow: (count) => {
+            didOverflow = true;
+            return getTextIfGroupsOverflow(count);
+        },
+    });
+
+    return { description, didOverflow };
+}
+
+enum WhoType {
+    AgeGender,
+    RequiredGroups,
+    PreventGroups,
+}
+
+type WhoItem = { title: string; shortDescription?: string; textIfSingleItem?: string; isSelectable?: boolean; type: WhoType };
+
+const whoList = computed(() => {
+    const items: WhoItem[] = [];
     const settings = props.group.settings;
-    let who = settings.getAgeGenderDescription({ includeAge: true, includeGender: true }) ?? '';
+
+    const ageGenderDescription = settings.getAgeGenderDescription({ includeAge: true, includeGender: true });
+    if (ageGenderDescription) {
+        items.push({
+            type: WhoType.AgeGender,
+            title: ageGenderDescription,
+        });
+    }
 
     if (settings.requireGroupIds.length > 0) {
-        const prefix = $t('Iedereen die ingeschreven is bij {groups}', {
-            groups: Formatter.joinLast(settings.requireGroupIds.map(groupName), ', ', ' of '),
+        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.requireGroupIds, maxLength: 100, lastSeparator: ` ${$t('%GT')} ` });
+
+        const textIfSingleItem = $t('Iedereen die ingeschreven is bij {groups}', {
+            groups: description,
         });
-        who = who ? prefix + '\n' + who : prefix;
+
+        items.push({
+            type: WhoType.RequiredGroups,
+            title: $t('ingeschreven bij'),
+            textIfSingleItem,
+            shortDescription: description,
+            isSelectable: didOverflow,
+        });
     }
 
     if (settings.preventGroupIds.length > 0) {
-        const prefix = $t('%1VC', {
-            groups: Formatter.joinLast(settings.preventGroupIds.map(groupName), ', ', ' of '),
+        const { description, didOverflow } = getGroupsDescription({ groupIds: settings.preventGroupIds, maxLength: 100, lastSeparator: ` ${$t('en')} ` });
+
+        const textIfSingleItem = $t('Iedereen die niet ingeschreven is bij {groups}', {
+            groups: description,
         });
-        who = who ? prefix + '\n' + who : prefix;
+
+        items.push({
+            type: WhoType.PreventGroups,
+            title: $t('niet ingeschreven bij'),
+            textIfSingleItem,
+            shortDescription: description,
+            isSelectable: didOverflow,
+        });
     }
 
-    if (!who) {
-        return null;
-    }
-
-    return who;
+    return items;
 });
 
-function groupName(id: string): string {
+/**
+ *
+ * todo:
+ * - always show each group name if only 2
+ * - use custom period name
+ */
+
+async function openWhoDetails(item: WhoItem) {
+    if (!item.isSelectable) {
+        return;
+    }
+    switch (item.type) {
+        case WhoType.AgeGender: {
+            break;
+        }
+        case WhoType.RequiredGroups: {
+            await show({
+                components: [
+                    AsyncComponent(() => import('./GroupListView.vue'), {
+                        title: $t('Ingeschreven bij'),
+                        description: $t('Je kan enkel inschrijven voor deze inschrijvingsgroep als je ook ingeschreven bent voor één van de volgende inschrijvingsgroepen.'),
+                        groups: props.group.settings.requireGroupIds.flatMap((id) => {
+                            const group = groupMap.value.get(id);
+                            if (group) {
+                                return [group];
+                            }
+                            return [];
+                        }),
+                    }),
+                ],
+            });
+            break;
+        }
+        case WhoType.PreventGroups: {
+            await show({
+                components: [
+                    AsyncComponent(() => import('./GroupListView.vue'), {
+                        title: $t('Niet ingeschreven bij'),
+                        description: $t('Je kan niet inschrijven voor deze inschrijvingsgroep als je ingeschreven bent voor één van de volgende inschrijvingsgroepen.'),
+                        groups: props.group.settings.preventGroupIds.flatMap((id) => {
+                            const group = groupMap.value.get(id);
+                            if (group) {
+                                return [group];
+                            }
+                            return [];
+                        }),
+                    }),
+                ],
+            });
+            break;
+        }
+    }
+}
+
+function getGroupInfo(id: string): { name: string; periodName?: string } {
     const group = groupMap.value.get(id);
 
     if (group) {
         const period = organization.value?.period;
         const groupName = group.settings.name.toString();
         if (group.periodId !== period?.id && group.settings.period) {
-            return $t('"{group}"" in werkjaar {period}', {
-                group: groupName,
-                period: group.settings.period.nameShort,
-            });
+            return {
+                name: groupName,
+                periodName: group.settings.period.nameShort,
+            };
         }
-        return groupName;
     }
 
-    return $t('%Gr');
+    return { name: $t('%Gr') };
+}
+
+function groupName(id: string): string {
+    const { name, periodName } = getGroupInfo(id);
+
+    if (periodName) {
+        return $t(`“{group}” in werkjaar {period}`, {
+            group: name,
+            period: periodName,
+        });
+    }
+
+    return name;
 }
 
 const fetcher = useGroupsObjectFetcher(undefined, {
