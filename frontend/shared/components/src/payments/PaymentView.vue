@@ -306,140 +306,7 @@
                 </STListItem>
             </STList>
 
-            <template v-if="(isManualMethod || organization?.meta.invoicesEnabled || canRefundOnline) && canWrite">
-                <hr><h2>{{ $t('%16X') }}</h2>
-
-                <STList>
-                    <STListItem v-if="canRefundOnline" :selectable="true" class="theme-error" data-testid="refund-online-button" @click="refundOnline">
-                        <template #left>
-                            <IconContainer icon="card" class="error">
-                                <template #aside>
-                                    <span class="icon undo small" />
-                                </template>
-                            </IconContainer>
-                        </template>
-
-                        <h2 class="style-title-list">
-                            {{ $t('%ZaM') }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ $t('%Zaj') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
-                        <template #left>
-                            <IconContainer icon="bank" class="primary">
-                                <template #aside>
-                                    <span class="icon clock small" />
-                                </template>
-                            </IconContainer>
-                        </template>
-
-                        <h2 class="style-title-list">
-                            {{ $t('%hP') }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ $t("%hW") }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="payment.canChangeStatus && (payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)" :selectable="true" @click="markPaid">
-                        <template #left>
-                            <IconContainer icon="bank" class="success">
-                                <template #aside>
-                                    <span class="icon success small" />
-                                </template>
-                            </IconContainer>
-                        </template>
-
-                        <h2 class="style-title-list">
-                            {{ $t('%1JQ') }}
-                        </h2>
-                        <p v-if="payment.webshopIds.length" class="style-description-small">
-                            {{ $t('%hQ') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="payment.isSucceeded && payment.type === PaymentType.Payment && payment.canChangeStatus" :selectable="true" @click="markPending">
-                        <template #left>
-                            <IconContainer icon="bank" class="primary">
-                                <template #aside>
-                                    <span class="icon clock small" />
-                                </template>
-                            </IconContainer>
-                        </template>
-
-                        <h2 class="style-title-list">
-                            {{ $t('%hR') }}
-                        </h2>
-                        <p v-if="payment.method === 'Transfer'" class="style-description-small">
-                            {{ $t('%hS') }}
-                        </p>
-                        <p v-else class="style-description-small">
-                            {{ $t('%hT') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="!payment.invoiceId && payment.canChangeStatus && (payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation))" :selectable="true" @click="markFailed">
-                        <template #left>
-                            <IconContainer icon="bank" class="error">
-                                <template #aside>
-                                    <span class="icon canceled small" />
-                                </template>
-                            </IconContainer>
-                        </template>
-
-                        <h2 class="style-title-list">
-                            {{ $t('%1Lh') }}
-                        </h2>
-                        <p v-if="payment.type !== PaymentType.Payment" class="style-description-small">
-                            {{ $t('%hU') }}
-                        </p>
-                        <p v-else-if="payment.method === 'Transfer'" class="style-description-small">
-                            {{ $t('%1K0') }}
-                        </p>
-                        <p v-else class="style-description-small">
-                            {{ $t('%1K1') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="organization?.meta.invoicesEnabled && !payment.invoiceId" :selectable="true" @click="createInvoice">
-                        <template #left>
-                            <IconContainer icon="receipt" class="primary">
-                                <template #aside>
-                                    <span class="icon add small" />
-                                </template>
-                            </IconContainer>
-                        </template>
-
-                        <h2 class="style-title-list">
-                            {{ $t('%1K2') }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ $t('%1K3') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
+            <ActionButtonsBox :title="$t('%16X')" :actions="paymentActions" />
 
             <template v-if="payment.balanceItemPayments.length">
                 <hr><h2>{{ $t('%YI') }}</h2>
@@ -465,7 +332,6 @@ import { useBackForward } from '#hooks/useBackForward.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import IconContainer from '#icons/IconContainer.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
@@ -486,6 +352,8 @@ import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
 
 import PaymentItemsBox from './PaymentItemsBox.vue';
+import ActionButtonsBox from './components/ActionButtonsBox.vue';
+import type { ActionButton } from './components/ActionButtonsBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -515,6 +383,74 @@ const canRefundOnline = computed(() => {
         && props.payment.price + props.payment.refundedAmount + props.payment.pendingRefundAmount > 0
         && props.payment.organizationId === organization.value?.id;
 });
+
+// The action buttons are only shown for manual methods, when invoices are enabled or when an online refund is possible
+const canShowActions = computed(() => canWrite.value && (isManualMethod.value || !!organization.value?.meta.invoicesEnabled || canRefundOnline.value));
+
+const paymentActions = computed<ActionButton[]>(() => {
+    const payment = props.payment;
+    const canShow = canShowActions.value;
+
+    return [
+        {
+            name: $t('%ZaM'),
+            description: $t('%Zaj'),
+            icon: 'card',
+            iconClass: 'error',
+            asideIcon: 'undo small',
+            listItemClass: 'theme-error',
+            testId: 'refund-online-button',
+            enabled: canShow && canRefundOnline.value,
+            action: refundOnline,
+        },
+        {
+            name: $t('%hP'),
+            description: $t('%hW'),
+            icon: 'bank',
+            iconClass: 'primary',
+            asideIcon: 'clock small',
+            enabled: canShow && payment.isFailed && payment.type === PaymentType.Payment,
+            action: markPending,
+        },
+        {
+            name: $t('%1JQ'),
+            description: payment.webshopIds.length ? $t('%hQ') : undefined,
+            icon: 'bank',
+            iconClass: 'success',
+            asideIcon: 'success small',
+            enabled: canShow && ((payment.canChangeStatus && payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)),
+            action: markPaid,
+        },
+        {
+            name: $t('%hR'),
+            description: payment.method === PaymentMethod.Transfer ? $t('%hS') : $t('%hT'),
+            icon: 'bank',
+            iconClass: 'primary',
+            asideIcon: 'clock small',
+            enabled: canShow && payment.isSucceeded && payment.type === PaymentType.Payment && payment.canChangeStatus,
+            action: markPending,
+        },
+        {
+            name: $t('%1Lh'),
+            description: payment.type !== PaymentType.Payment ? $t('%hU') : (payment.method === PaymentMethod.Transfer ? $t('%1K0') : $t('%1K1')),
+            icon: 'bank',
+            iconClass: 'error',
+            asideIcon: 'canceled small',
+            enabled: canShow && !payment.invoiceId && payment.canChangeStatus && (payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation)),
+            action: markFailed,
+        },
+        {
+            name: $t('%1K2'),
+            description: $t('%1K3'),
+            icon: 'receipt',
+            iconClass: 'primary',
+            asideIcon: 'add small',
+            enabled: canShow && !!organization.value?.meta.invoicesEnabled && !payment.invoiceId,
+            action: createInvoice,
+        },
+    ];
+});
+
 const VATPercentage = 21; // todo
 const context = useContext();
 const owner = useRequestOwner();

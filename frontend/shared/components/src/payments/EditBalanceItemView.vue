@@ -227,69 +227,7 @@
                 </STList>
             </template>
 
-            <hr>
-            <h2>{{ $t('%16X') }}</h2>
-
-            <STList>
-                <STListItem v-if="balanceItem.status === BalanceItemStatus.Canceled" :selectable="true" @click="markDue">
-                    <template #left>
-                        <IconContainer icon="receive">
-                            <template #aside>
-                                <span class="icon undo stroke small" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%1Jn') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%1Jo') }}
-                    </p>
-
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="outstanding.pending === 0 && outstanding.paid === 0" :selectable="true" class="theme-error" @click="doDelete">
-                    <template #left>
-                        <IconContainer icon="receive" class="error">
-                            <template #aside>
-                                <span class="icon trash small stroke" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%go') }}
-                    </h2>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-else-if="balanceItem.status !== BalanceItemStatus.Canceled" :selectable="true" class="theme-error" @click="doCancel">
-                    <template #left>
-                        <IconContainer icon="receive" class="error">
-                            <template #aside>
-                                <span class="icon disabled small" />
-                            </template>
-                        </IconContainer>
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('%1Jp') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%1Jq') }}
-                    </p>
-
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+            <ActionButtonsBox :title="$t('%16X')" :actions="balanceItemActions" />
         </template>
     </SaveView>
 </template>
@@ -301,7 +239,6 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import IconContainer from '#icons/IconContainer.vue';
 import DateSelection from '#inputs/DateSelection.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
@@ -326,6 +263,8 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { GlobalEventBus } from '../EventBus';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
+import ActionButtonsBox from './components/ActionButtonsBox.vue';
+import type { ActionButton } from './components/ActionButtonsBox.vue';
 import PaymentRow from './components/PaymentRow.vue';
 
 const props = withDefaults(defineProps<{
@@ -442,6 +381,40 @@ const outstanding = computed(() => {
         pending,
         remaining,
     };
+});
+
+const balanceItemActions = computed<ActionButton[]>(() => {
+    const canDelete = outstanding.value.pending === 0 && outstanding.value.paid === 0;
+
+    return [
+        {
+            name: $t('%1Jn'),
+            description: $t('%1Jo'),
+            icon: 'receive',
+            asideIcon: 'undo stroke small',
+            enabled: balanceItem.value.status === BalanceItemStatus.Canceled,
+            action: markDue,
+        },
+        {
+            name: $t('%go'),
+            icon: 'receive',
+            iconClass: 'error',
+            asideIcon: 'trash small stroke',
+            listItemClass: 'theme-error',
+            enabled: canDelete,
+            action: doDelete,
+        },
+        {
+            name: $t('%1Jp'),
+            description: $t('%1Jq'),
+            icon: 'receive',
+            iconClass: 'error',
+            asideIcon: 'disabled small',
+            listItemClass: 'theme-error',
+            enabled: !canDelete && balanceItem.value.status !== BalanceItemStatus.Canceled,
+            action: doCancel,
+        },
+    ];
 });
 
 async function toggleVATExcempt(event: MouseEvent) {
