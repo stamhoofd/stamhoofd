@@ -32,6 +32,11 @@
                     })"
                 />
                 <p v-else class="pre-wrap style-description-block" v-text="$t('%17q')" />
+
+                <p v-if="fromPeriod && fromPeriod.settings.bundleDiscounts.length > 0" class="warning-box">
+                    {{ $t('Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige werkjaar.', { period: period.name }) }}
+                </p>
+
                 <hr v-if="rows.length > 0 && fromPeriod">
 
                 <STGrid v-if="rows.length > 0 && fromPeriod" class="split">
