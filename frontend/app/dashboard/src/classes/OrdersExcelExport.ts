@@ -1,7 +1,7 @@
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { PrivateOrder, Webshop } from '@stamhoofd/structures';
-import { CartItem, CartItemOption, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, ProductType, ReservedSeat } from '@stamhoofd/structures';
+import { CartItem, CartItemOption, CheckoutMethodType, Gender, getGenderName, OrderStatusHelper, PaymentMethodHelper, ProductType, ReservedSeat } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
@@ -22,6 +22,27 @@ function cartItemGroupingString(item: CartItem) {
 }
 
 export class OrdersExcelExport {
+    /**
+     * Extra customer columns (birth day, gender, address) shown after the phone number.
+     */
+    private static get customerColumnHeaders(): RowValue[] {
+        return [$t(`Geboortedatum`), $t(`Geslacht`), $t(`Adres klant`)];
+    }
+
+    private static customerColumnValues(order: PrivateOrder): RowValue[] {
+        const customer = order.data.customer;
+        return [
+            customer.birthDay
+                ? {
+                        value: customer.birthDay,
+                        format: 'dd/mm/yyyy',
+                    }
+                : '',
+            customer.gender === Gender.Other ? '' : getGenderName(customer.gender),
+            customer.address ? customer.address.toString() : '',
+        ];
+    }
+
     /**
      * List of all products for every order
      */
@@ -162,6 +183,7 @@ export class OrdersExcelExport {
                 $t(`%1MU`),
                 $t(`%xB`),
                 $t(`%18Z`),
+                ...this.customerColumnHeaders,
                 ...answerNames,
                 $t(`%Ve`),
                 $t(`%M4`),
@@ -288,6 +310,7 @@ export class OrdersExcelExport {
                     showDetails ? order.data.customer.lastName : '',
                     showDetails ? order.data.customer.email : '',
                     showDetails ? order.data.customer.phone : '',
+                    ...(showDetails ? OrdersExcelExport.customerColumnValues(order) : ['', '', '']),
                     ...answers,
                     showDetails ? order.data.comments : '',
                     {
@@ -432,6 +455,7 @@ export class OrdersExcelExport {
                 $t(`%1MU`),
                 $t(`%xB`),
                 $t(`%18Z`),
+                ...this.customerColumnHeaders,
                 ...answerNames,
                 $t(`%Ve`),
                 $t(`%xE`),
@@ -507,6 +531,7 @@ export class OrdersExcelExport {
                 order.data.customer.lastName,
                 order.data.customer.email,
                 order.data.customer.phone,
+                ...OrdersExcelExport.customerColumnValues(order),
                 ...answers,
                 order.data.comments,
                 checkoutType,
