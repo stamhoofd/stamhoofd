@@ -235,7 +235,7 @@ export class StripeReportInvoicer {
                 sellingOrganization,
                 type: 'services',
             });
-            item.VATIncluded = true;
+            item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches the charged amount
             item.quantity = 1;
             item.unitPrice = applicationFee.serviceFee;
             item.createdAt = new Date();
@@ -265,7 +265,7 @@ export class StripeReportInvoicer {
                 sellingOrganization,
                 type: 'services',
             });
-            item.VATIncluded = true;
+            item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches the charged amount
             item.quantity = 1;
             item.unitPrice = applicationFee.transferFee;
             item.createdAt = new Date();
