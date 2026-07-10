@@ -11,9 +11,11 @@ import type { TableAction, TableActionSelection } from '@stamhoofd/components/ta
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { PrivateOrderWithTickets } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, ExcelExportType, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { Formatter } from '@stamhoofd/utility';
 import type { WebshopManager } from '../WebshopManager';
+import { getSelectableWorkbook } from './getSelectableWorkbook.ts';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 export class OrderActionBuilder {
@@ -217,14 +219,14 @@ export class OrderActionBuilder {
                     })]
                 : []),
 
-            new InMemoryTableAction({
+            new AsyncTableAction({
                 name: $t(`%V8`),
                 enabled: () => this.webshopManager.hasRead,
                 icon: 'download',
                 priority: 8,
                 groupIndex: 3,
-                handler: async (orders: PrivateOrder[]) => {
-                    await this.exportToExcel(orders);
+                handler: async (selection: TableActionSelection<PrivateOrder>) => {
+                    await this.exportToExcel(selection);
                 },
             }),
 
@@ -312,23 +314,47 @@ export class OrderActionBuilder {
         });
     }
 
-    async exportToExcel(orders: PrivateOrder[]) {
+    // async exportToExcel(orders: PrivateOrder[]) {
+    //     if (!this.webshopManager.webshop) {
+    //         new Toast($t(`%17l`), 'error red').show();
+    //         return;
+    //     }
+
+    //     const hasCanceledOrders = !!orders.find(o => o.status === OrderStatus.Canceled);
+    //     const hasNotCanceled = !!orders.find(o => o.status !== OrderStatus.Canceled);
+    //     if (hasCanceledOrders && hasNotCanceled) {
+    //         const excludeCanceled = await CenteredMessage.confirm($t(`%VC`), $t(`%VD`), $t(`%VE`), $t(`%VF`), true);
+    //         if (excludeCanceled) {
+    //             orders = orders.filter(o => o.status !== OrderStatus.Canceled);
+    //         }
+    //     }
+    //     const d = await import(/* webpackChunkName: "OrdersExcelExport" */ '../../../../classes/OrdersExcelExport');
+    //     const OrdersExcelExport = d.OrdersExcelExport;
+    //     OrdersExcelExport.export(this.webshopManager.webshop, orders);
+    // }
+
+    private async exportToExcel(selection: TableActionSelection<PrivateOrder>) {
         if (!this.webshopManager.webshop) {
             new Toast($t(`%17l`), 'error red').show();
             return;
         }
 
-        const hasCanceledOrders = !!orders.find(o => o.status === OrderStatus.Canceled);
-        const hasNotCanceled = !!orders.find(o => o.status !== OrderStatus.Canceled);
-        if (hasCanceledOrders && hasNotCanceled) {
-            const excludeCanceled = await CenteredMessage.confirm($t(`%VC`), $t(`%VD`), $t(`%VE`), $t(`%VF`), true);
-            if (excludeCanceled) {
-                orders = orders.filter(o => o.status !== OrderStatus.Canceled);
-            }
-        }
-        const d = await import(/* webpackChunkName: "OrdersExcelExport" */ '../../../../classes/OrdersExcelExport');
-        const OrdersExcelExport = d.OrdersExcelExport;
-        OrdersExcelExport.export(this.webshopManager.webshop, orders);
+        // todo: add logic for canceled orders
+
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                        type: ExcelExportType.Orders,
+                        filter: selection.filter,
+                        workbook: getSelectableWorkbook(),
+                        configurationId: 'orders',
+                        title: Formatter.fileSlug(this.webshopManager.webshop.meta.name),
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async markAs(orders: PrivateOrder[], status: OrderStatus) {

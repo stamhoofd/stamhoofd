@@ -10,6 +10,7 @@ export enum ExcelExportType {
     EventNotifications = 'event-notifications',
     BalanceItems = 'BalanceItems',
     PlatformMemberships = 'platform-memberships',
+    Orders = 'orders',
 }
 
 export class ExcelSheetColumnFilter extends AutoEncoder {

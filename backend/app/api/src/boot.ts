@@ -13,6 +13,7 @@ import { StyledText } from '@simonbackx/simple-logging';
 import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
+import { QueryableModel } from '@stamhoofd/sql';
 import { resumeEmails } from './helpers/EmailResumer.js';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
@@ -27,7 +28,6 @@ import { PlatformMembershipService } from './services/PlatformMembershipService.
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueMemberNumberService } from './services/UniqueMemberNumberService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
-import { QueryableModel } from '@stamhoofd/sql';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -156,6 +156,7 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     // Register Excel loaders
     await import('./excel-loaders/index.js');
+    await import('./excel-loaders/orders.js');
 
     // Register Email Recipient loaders
     await import('./email-recipient-loaders/members.js');
