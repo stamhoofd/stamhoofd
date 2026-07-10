@@ -24,7 +24,7 @@
 
         <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`Geboortedatum`)" :validator="errors.validator" :required="true" />
 
-        <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Geslacht`)">
+        <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Gender`)">
             <RadioGroup>
                 <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
                     {{ $t('%XK') }}

@@ -32,7 +32,7 @@
 
             <BirthDayInput v-if="customerBirthDay || birthDayEnabled" v-model="customerBirthDay" :title="$t(`Geboortedatum`)" :validator="errors.validator" :required="false" />
 
-            <STInputBox v-if="customerGender !== 'Other' || genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Geslacht`)">
+            <STInputBox v-if="customerGender !== Gender.Other || genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Gender`)">
                 <RadioGroup>
                     <Radio v-model="customerGender" :value="Gender.Male" autocomplete="sex" name="customer-sex">
                         {{ $t('%XK') }}
@@ -46,7 +46,7 @@
                 </RadioGroup>
             </STInputBox>
 
-            <AddressInput v-if="(customerAddress || addressEnabled) && selectedMethod?.type !== 'Delivery'" v-model="customerAddress" :required="false" :validator="errors.validator" :validate-server="server" :title="$t(`%Cn`)" />
+            <AddressInput v-if="(customerAddress || addressEnabled) && selectedMethod?.type !== CheckoutMethodType.Delivery" v-model="customerAddress" :required="false" :validator="errors.validator" :validate-server="server" :title="$t(`%Cn`)" />
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 

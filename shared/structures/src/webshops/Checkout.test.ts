@@ -130,4 +130,26 @@ describe('Checkout.validateDeliveryAddress', () => {
         checkout.validateDeliveryAddress(webshop, organizationMeta);
         expect(checkout.customer.address).toStrictEqual(address);
     });
+
+    it('keeps the delivery address as the customer address when addressEnabled and does not re-require it', () => {
+        // validateCustomer relies on validateDeliveryAddress having run first: the delivery
+        // address is copied onto the customer, so the addressEnabled check must not throw even
+        // though the customer never filled in a separate address.
+        const address = createAddress();
+        const checkoutMethod = WebshopDeliveryMethod.create({
+            countries: [address.country],
+        });
+        const webshop = createWebshop({ addressEnabled: true });
+        const checkout = Checkout.create({
+            customer: createValidCustomer(),
+            checkoutMethod,
+            address,
+            cart: Cart.create({}),
+        });
+
+        // Same order as Checkout.validate()
+        checkout.validateDeliveryAddress(webshop, organizationMeta);
+        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
+        expect(checkout.customer.address).toStrictEqual(address);
+    });
 });

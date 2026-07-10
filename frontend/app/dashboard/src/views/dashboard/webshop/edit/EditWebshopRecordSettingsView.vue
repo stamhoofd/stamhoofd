@@ -67,7 +67,7 @@
                     <Checkbox v-model="genderEnabled" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('Geslacht') }}
+                    {{ $t('Gender') }}
                 </p>
             </STListItem>
         </STList>

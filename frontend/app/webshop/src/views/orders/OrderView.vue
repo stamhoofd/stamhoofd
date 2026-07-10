@@ -170,9 +170,9 @@
                                     {{ formatDate(order.data.customer.birthDay) }}
                                 </p>
                             </STListItem>
-                            <STListItem v-if="order.data.customer.gender !== 'Other'" class="right-description">
+                            <STListItem v-if="order.data.customer.gender !== Gender.Other" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('Geslacht') }}
+                                    {{ $t('Gender') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -384,7 +384,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { Payment } from '@stamhoofd/structures';
-import { getGenderName, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import { Gender, getGenderName, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 

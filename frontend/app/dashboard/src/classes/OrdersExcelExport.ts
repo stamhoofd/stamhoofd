@@ -26,7 +26,7 @@ export class OrdersExcelExport {
      * Extra customer columns (birth day, gender, address) shown after the phone number.
      */
     private static get customerColumnHeaders(): RowValue[] {
-        return [$t(`Geboortedatum`), $t(`Geslacht`), $t(`Adres klant`)];
+        return [$t(`Geboortedatum`), $t(`Gender`), $t(`Adres klant`)];
     }
 
     private static customerColumnValues(order: PrivateOrder): RowValue[] {
@@ -310,7 +310,7 @@ export class OrdersExcelExport {
                     showDetails ? order.data.customer.lastName : '',
                     showDetails ? order.data.customer.email : '',
                     showDetails ? order.data.customer.phone : '',
-                    ...(showDetails ? OrdersExcelExport.customerColumnValues(order) : ['', '', '']),
+                    ...(showDetails ? OrdersExcelExport.customerColumnValues(order) : OrdersExcelExport.customerColumnHeaders.map(() => '')),
                     ...answers,
                     showDetails ? order.data.comments : '',
                     {
