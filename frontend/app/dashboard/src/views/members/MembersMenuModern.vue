@@ -370,7 +370,7 @@ const canSetDefaultPeriod = computed(() => {
 
     return (
         (period.value.period.startDate >= platform.value.period.startDate && !period.value.period.locked)
-        && (period.value.period.startDate > organization.value.period.period.startDate && !period.value.period.locked && (period.value.period.switchDate === null || period.value.period.switchDate < new Date()))
+        && (!period.value.period.locked && (period.value.period.switchDate === null || period.value.period.switchDate < new Date()))
     );
 });
 
