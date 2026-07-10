@@ -77,7 +77,8 @@ function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterR
     return (val) => {
         const b = normalizeValue(assertFilterCompareValue(filter));
 
-        // in the backend, if a property does not exist and comparing against null, the result is true
+        // in the backend, if a property does not exist and comparing against null, the result is true (if column type JSONArray)
+        // if not comparing against a json column the value can never be undefined in the backend (would be null)
         if (b === null && (val === null || val === undefined)) {
             return true;
         }
