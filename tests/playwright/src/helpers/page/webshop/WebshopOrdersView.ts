@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import type { PaymentMethod, Product } from '@stamhoofd/structures';
+import type { TestAddress, TestBirthDay } from '../../../flows/WebshopOrderFlow.js';
 import { TableHelper } from '../TableHelper.js';
 import { EditOrderView } from './EditOrderView.js';
 
@@ -7,13 +8,13 @@ export class WebshopOrdersView {
     constructor(public readonly page: Page) {
     }
 
-    async addOrder({ firstName, lastName, email, phone, product, amount, paymentMethod }: { firstName: string; lastName: string; email: string; phone?: string; product: Product; amount?: number; paymentMethod?: PaymentMethod }) {
+    async addOrder({ firstName, lastName, email, phone, product, amount, paymentMethod, birthDay, gender, address }: { firstName: string; lastName: string; email: string; phone?: string; product: Product; amount?: number; paymentMethod?: PaymentMethod; birthDay?: TestBirthDay; gender?: 'Male' | 'Female' | 'Other'; address?: TestAddress }) {
         // table
         const table = new TableHelper(this.page);
         await table.clickAction('Bestelling toevoegen');
 
         const editOrderView = new EditOrderView(this.page);
-        await editOrderView.fillCustomerData({ firstName, lastName, email, phone });
+        await editOrderView.fillCustomerData({ firstName, lastName, email, phone, birthDay, gender, address });
         await editOrderView.addProduct({
             product,
             amount: amount ?? 1,

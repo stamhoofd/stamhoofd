@@ -22,22 +22,45 @@
 
         <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`%Xu`)" />
 
+        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`Geboortedatum`)" :validator="errors.validator" :required="true" />
+
+        <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Geslacht`)">
+            <RadioGroup>
+                <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
+                    {{ $t('%XK') }}
+                </Radio>
+                <Radio v-model="gender" :value="Gender.Female" autocomplete="sex" name="sex">
+                    {{ $t('%XM') }}
+                </Radio>
+                <Radio v-model="gender" :value="Gender.Other" autocomplete="sex" name="sex">
+                    {{ $t('%1JG') }}
+                </Radio>
+            </RadioGroup>
+        </STInputBox>
+
+        <AddressInput v-if="addressEnabled && !hasDeliveryAddress" v-model="address" :required="true" :validator="errors.validator" :validate-server="unscopedServer" :title="$t(`%Cn`)" />
+
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import BirthDayInput from '@stamhoofd/components/inputs/BirthDayInput.vue';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
 import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { WebshopTicketType } from '@stamhoofd/structures';
+import type { Address, ValidatedAddress } from '@stamhoofd/structures';
+import { Gender, WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
@@ -53,7 +76,15 @@ const context = useContext();
 const webshop = computed(() => webshopManager.webshop);
 const navigationActions = useNavigationActions();
 const phoneEnabled = computed(() => webshop.value.meta.phoneEnabled);
+const birthDayEnabled = computed(() => webshop.value.meta.birthDayEnabled);
+const addressEnabled = computed(() => webshop.value.meta.addressEnabled);
+const genderEnabled = computed(() => webshop.value.meta.genderEnabled);
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
+const unscopedServer = computed(() => webshopManager.unscopedServer);
+
+// When a delivery method is chosen, its address is already collected in a separate step
+// and stored on the customer, so we don't ask for the address a second time.
+const hasDeliveryAddress = computed(() => checkoutManager.checkout.deliveryMethod !== null);
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
@@ -99,6 +130,30 @@ const phone = computed({
     get: () => checkoutManager.checkout.customer.phone,
     set: (phone: string) => {
         checkoutManager.checkout.customer.phone = phone;
+        checkoutManager.saveCheckout();
+    },
+});
+
+const birthDay = computed({
+    get: () => checkoutManager.checkout.customer.birthDay,
+    set: (birthDay: Date | null) => {
+        checkoutManager.checkout.customer.birthDay = birthDay;
+        checkoutManager.saveCheckout();
+    },
+});
+
+const gender = computed({
+    get: () => checkoutManager.checkout.customer.gender,
+    set: (gender: Gender) => {
+        checkoutManager.checkout.customer.gender = gender;
+        checkoutManager.saveCheckout();
+    },
+});
+
+const address = computed({
+    get: () => checkoutManager.checkout.customer.address,
+    set: (address: Address | ValidatedAddress | null) => {
+        checkoutManager.checkout.customer.address = address;
         checkoutManager.saveCheckout();
     },
 });

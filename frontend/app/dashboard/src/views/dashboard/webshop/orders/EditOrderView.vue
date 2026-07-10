@@ -30,6 +30,24 @@
 
             <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :required="false" :placeholder="$t(`%Uz`)" />
 
+            <BirthDayInput v-if="customerBirthDay || birthDayEnabled" v-model="customerBirthDay" :title="$t(`Geboortedatum`)" :validator="errors.validator" :required="false" />
+
+            <STInputBox v-if="customerGender !== 'Other' || genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Geslacht`)">
+                <RadioGroup>
+                    <Radio v-model="customerGender" :value="Gender.Male" autocomplete="sex" name="customer-sex">
+                        {{ $t('%XK') }}
+                    </Radio>
+                    <Radio v-model="customerGender" :value="Gender.Female" autocomplete="sex" name="customer-sex">
+                        {{ $t('%XM') }}
+                    </Radio>
+                    <Radio v-model="customerGender" :value="Gender.Other" autocomplete="sex" name="customer-sex">
+                        {{ $t('%1JG') }}
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
+
+            <AddressInput v-if="(customerAddress || addressEnabled) && selectedMethod?.type !== 'Delivery'" v-model="customerAddress" :required="false" :validator="errors.validator" :validate-server="server" :title="$t(`%Cn`)" />
+
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 
             <div v-for="category in recordCategories.filter(c => c.isEnabled(patchedOrder.data))" :key="category.id" class="container">
@@ -166,9 +184,11 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import BirthDayInput from '@stamhoofd/components/inputs/BirthDayInput.vue';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -183,8 +203,8 @@ import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionLi
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import type { CartItem, CheckoutMethod, DiscountCode, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { CheckoutMethodType, Customer, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import type { Address, CartItem, CheckoutMethod, DiscountCode, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { CheckoutMethodType, Customer, Gender, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
@@ -255,6 +275,10 @@ const recordCategories = computed(() => {
 const phoneEnabed = computed(() => {
     return webshop.meta.phoneEnabled;
 });
+
+const birthDayEnabled = computed(() => webshop.meta.birthDayEnabled);
+const addressEnabled = computed(() => webshop.meta.addressEnabled);
+const genderEnabled = computed(() => webshop.meta.genderEnabled);
 
 const emailPlaceholder = computed(() => {
     if (webshop.meta.ticketType !== WebshopTicketType.None) {
@@ -338,6 +362,45 @@ const phone = computed({
             data: OrderData.patch({
                 customer: Customer.patch({
                     phone: phone ?? '',
+                }),
+            }),
+        });
+    },
+});
+
+const customerBirthDay = computed({
+    get: () => patchedOrder.value.data.customer.birthDay,
+    set: (birthDay: Date | null) => {
+        addPatch({
+            data: OrderData.patch({
+                customer: Customer.patch({
+                    birthDay,
+                }),
+            }),
+        });
+    },
+});
+
+const customerGender = computed({
+    get: () => patchedOrder.value.data.customer.gender,
+    set: (gender: Gender) => {
+        addPatch({
+            data: OrderData.patch({
+                customer: Customer.patch({
+                    gender,
+                }),
+            }),
+        });
+    },
+});
+
+const customerAddress = computed({
+    get: () => patchedOrder.value.data.customer.address,
+    set: (address: Address | ValidatedAddress | null) => {
+        addPatch({
+            data: OrderData.patch({
+                customer: Customer.patch({
+                    address,
                 }),
             }),
         });

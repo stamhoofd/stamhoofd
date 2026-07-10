@@ -157,10 +157,14 @@ export class CheckoutStepsManager {
         const loggedIn = this.$context.isComplete() ?? false;
         const user = loggedIn ? (this.$context.user ?? null) : null;
 
+        // When a delivery method is chosen, the address is collected in the Address step, so we don't
+        // need to ask for the customer address again.
+        const hasDeliveryAddress = checkoutMethod !== null && checkoutMethod.type === CheckoutMethodType.Delivery;
+
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
             url: '/checkout/' + CheckoutStepType.Customer.toLowerCase(),
-            active: !loggedIn || webshop.meta.phoneEnabled || !user?.firstName || !user?.lastName,
+            active: !loggedIn || webshop.meta.phoneEnabled || webshop.meta.birthDayEnabled || webshop.meta.genderEnabled || (webshop.meta.addressEnabled && !hasDeliveryAddress) || !user?.firstName || !user?.lastName,
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {})),
             validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (this.$context.user ?? null) : null),
         }));

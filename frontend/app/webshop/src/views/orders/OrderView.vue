@@ -161,6 +161,33 @@
                                     {{ order.data.customer.email }}
                                 </p>
                             </STListItem>
+                            <STListItem v-if="order.data.customer.birthDay" class="right-description">
+                                <h3 class="style-definition-label">
+                                    {{ $t('Geboortedatum') }}
+                                </h3>
+
+                                <p class="style-definition-text">
+                                    {{ formatDate(order.data.customer.birthDay) }}
+                                </p>
+                            </STListItem>
+                            <STListItem v-if="order.data.customer.gender !== 'Other'" class="right-description">
+                                <h3 class="style-definition-label">
+                                    {{ $t('Geslacht') }}
+                                </h3>
+
+                                <p class="style-definition-text">
+                                    {{ getGenderName(order.data.customer.gender) }}
+                                </p>
+                            </STListItem>
+                            <STListItem v-if="order.data.customer.address && !order.data.address" class="right-description">
+                                <h3 class="style-definition-label">
+                                    {{ $t('%Cn') }}
+                                </h3>
+
+                                <p class="style-definition-text">
+                                    {{ order.data.customer.address }}
+                                </p>
+                            </STListItem>
                             <STListItem v-for="(payment, index) in order.payments" :key="payment.id" class="right-description right-stack" :selectable="isPaymentTransfer(payment)" @click="openTransferView(payment)">
                                 <h3 class="style-definition-label">
                                     {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
@@ -357,7 +384,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { Payment } from '@stamhoofd/structures';
-import { Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import { getGenderName, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 

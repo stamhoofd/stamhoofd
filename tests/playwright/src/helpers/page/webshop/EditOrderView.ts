@@ -1,12 +1,17 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import type { PaymentMethod, Product } from '@stamhoofd/structures';
 import { ProductType } from '@stamhoofd/structures';
+import type { TestAddress, TestBirthDay } from '../../../flows/WebshopOrderFlow.js';
 
 export class EditOrderView {
     constructor(public readonly page: Page) {
     }
 
-    async fillCustomerData({firstName, lastName, email, phone}: Partial<{firstName: string, lastName: string, email: string, phone: string}>) {
+    private get view(): Locator {
+        return this.page.getByTestId('edit-order-view');
+    }
+
+    async fillCustomerData({ firstName, lastName, email, phone, birthDay, gender, address }: Partial<{ firstName: string; lastName: string; email: string; phone: string; birthDay: TestBirthDay; gender: 'Male' | 'Female' | 'Other'; address: TestAddress }>) {
         if (firstName) {
             await this.fillFirstName(firstName);
         }
@@ -21,6 +26,24 @@ export class EditOrderView {
 
         if (phone) {
             await this.phone(phone);
+        }
+
+        if (birthDay) {
+            await this.view.getByTestId('day-select').selectOption({ label: String(birthDay.day) });
+            await this.view.getByTestId('month-select').selectOption({ index: birthDay.month });
+            await this.view.getByTestId('year-select').selectOption({ label: String(birthDay.year) });
+        }
+
+        if (gender) {
+            await this.view.locator('label.radio', { has: this.page.locator(`input[name="customer-sex"][value="${gender}"]`) }).click();
+        }
+
+        if (address) {
+            await this.view.locator('select[name="country"]').selectOption(address.country);
+            await this.view.locator('input[name="street-address"]').fill(`${address.street} ${address.number}`);
+            await this.view.locator('input[name="postal-code"]').fill(address.postalCode);
+            await this.view.locator('input[name="city"]').fill(address.city);
+            await this.view.locator('input[name="city"]').blur();
         }
     }
 

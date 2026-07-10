@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :title="$t(`%Xn`)" @save="goNext">
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field data-testid="address-step" :title="$t(`%Xn`)" @save="goNext">
         <h1>{{ $t('%Xn') }}</h1>
         <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
             {{ $t('%Ut', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
