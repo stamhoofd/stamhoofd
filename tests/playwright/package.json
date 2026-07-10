@@ -19,6 +19,7 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
+        "@simonbackx/simple-encoding": "*",
         "pino": "10.1.1"
     },
     "devDependencies": {

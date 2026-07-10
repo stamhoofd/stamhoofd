@@ -19,7 +19,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.10",
+        "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/vue-app-navigation": "2.23.0",
         "@stamhoofd/components": "*",
         "@stamhoofd/networking": "*",
