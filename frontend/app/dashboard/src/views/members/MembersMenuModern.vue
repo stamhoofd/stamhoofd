@@ -115,6 +115,7 @@ enum Routes {
     Checklist = 'checklist',
     Settings = 'instellingen',
     All = 'all',
+    AllMembers = 'allMembers',
     Category = 'category',
     Group = 'group',
     Period = 'Period',
@@ -234,6 +235,20 @@ defineRoute({
                 },
             }
         : undefined,
+});
+
+defineRoute({
+    url: 'alle-leden',
+    name: Routes.AllMembers,
+    show: 'detail',
+    component: async () => (await import('@stamhoofd/components/members/MembersTableView.vue')).default,
+    defaultProperties: () => {
+        // No periodId and no customFilter: the backend automatically scopes to
+        // members of the current organization (all periods) in organization mode.
+        return {
+            customTitle: $t('Alle leden (alle werkjaren)'),
+        };
+    },
 });
 
 const checkRoute = useCheckRoute();
@@ -445,6 +460,19 @@ const allActions = computed(() => {
             title: $t('%L8'),
             route: Routes.All,
         });
+
+        // Lists every member of the organization across all periods (organization mode only).
+        // In platform mode members are not scoped to a single organization, so this makes no sense.
+        // Only shown on the current period menu (!props.period): when viewing a specific historical
+        // period an all-periods list would be confusing.
+        if (STAMHOOFD.userMode === 'organization' && !props.period) {
+            list.push({
+                icon: 'group',
+                title: $t('Alle leden (alle werkjaren)'),
+                route: Routes.AllMembers,
+                hidden: true,
+            });
+        }
     }
 
     if (rootCategory.value && auth.canCreateGroupInCategory(rootCategory.value)) {
