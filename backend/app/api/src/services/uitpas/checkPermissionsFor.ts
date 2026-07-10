@@ -74,7 +74,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         });
     });
     assertIsPermissionsResponse(json);
-    const neededPermissions = organizationId
+    const neededPermissions = !organizationId
         ? [{
                 permission: 'PASSES_READ',
                 human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
