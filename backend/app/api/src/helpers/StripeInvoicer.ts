@@ -276,6 +276,17 @@ export class StripeReportInvoicer {
             balanceItems.push(item);
         }
 
+        let total = 0;
+        for (const balanceItem of balanceItems) {
+            total += balanceItem.priceWithVAT;
+        }
+        if (total !== applicationFee.amount) {
+            throw new SimpleError({
+                code: 'price_mismatched',
+                message: 'The charged amount does not match the total application fee for the payment',
+            });
+        }
+
         const systemUser = await User.getSystem();
 
         // Done validation
