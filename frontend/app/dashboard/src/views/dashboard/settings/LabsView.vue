@@ -437,7 +437,7 @@ async function applyDiscountCode() {
                 saveHandler: async (code: string) => {
                     await context.value.authenticatedServer.request({
                         method: 'POST',
-                        path: '/organization/register-code',
+                        path: '/billing/register-code',
                         body: {
                             registerCode: code,
                         },
