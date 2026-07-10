@@ -5,7 +5,11 @@
     "type": "module",
     "exports": {
         ".": "./vite.config.shared.ts",
-        "./svgNamespacePlugin": "./svgNamespacePlugin.ts"
+        "./svgNamespacePlugin": "./svgNamespacePlugin.ts",
+        "./hmrReconnectPlugin": "./hmrReconnectPlugin.ts"
+    },
+    "scripts": {
+        "test": "vitest run"
     },
     "dependencies": {
         "@stamhoofd/assets": "*",

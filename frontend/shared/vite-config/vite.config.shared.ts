@@ -8,6 +8,7 @@ import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import type { ViteUserConfig } from 'vitest/config';
 import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
 import svgNamespacePlugin from '@stamhoofd/vite-config/svgNamespacePlugin';
+import hmrReconnectPlugin from '@stamhoofd/vite-config/hmrReconnectPlugin';
 
 // https://vitejs.dev/config/
 export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
@@ -83,6 +84,9 @@ export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calc
             ],
         },
         plugins: [
+            // Keeps the page from full-reloading when the HMR socket drops
+            // (e.g. on a Caddy config reload). Dev-only via apply: 'serve'.
+            hmrReconnectPlugin(),
             viteSvgToWebfont({
                 ...iconConfig,
                 context: resolve(frontendDir, './shared/assets/images/icons/'),
