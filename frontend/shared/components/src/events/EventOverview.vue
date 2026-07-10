@@ -264,18 +264,17 @@
 </template>
 
 <script setup lang="ts">
-import { LoadComponent } from '#containers/AsyncComponent.ts';
+import { AsyncComponent, LoadComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { AccessRight, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -291,15 +290,15 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import IconContainer from '../icons/IconContainer.vue';
 import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import RegistrationCountSpan from '#members/components/RegistrationCountSpan.vue';
+import IconContainer from '../icons/IconContainer.vue';
 
+import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
-import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { countAll } from '#tables/classes/ObjectFetcher.ts';
@@ -436,10 +435,18 @@ const levelPrefix = computed(() => {
 });
 
 const link = computed(() => {
+    let registrationHost: string;
+
     if (!eventOrganization.value) {
-        return '';
+        if (STAMHOOFD.userMode !== 'platform') {
+            return '';
+        }
+        registrationHost = getAppHost('registration', null, false);
+    } else {
+        registrationHost = eventOrganization.value.getRegistrationHost(false);
     }
-    return `https://${eventOrganization.value.getRegistrationHost(false)}/activiteiten/${props.event.slug}`;
+
+    return `https://${registrationHost}/activiteiten/${props.event.slug}`;
 });
 
 enum Routes {
