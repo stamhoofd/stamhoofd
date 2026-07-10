@@ -46,6 +46,30 @@
                     {{ $t('%2k') }}
                 </p>
             </STListItem>
+            <STListItem element-name="label" :selectable="true">
+                <template #left>
+                    <Checkbox v-model="birthDayEnabled" />
+                </template>
+                <p class="style-title-list">
+                    {{ $t('Geboortedatum') }}
+                </p>
+            </STListItem>
+            <STListItem element-name="label" :selectable="true">
+                <template #left>
+                    <Checkbox v-model="addressEnabled" />
+                </template>
+                <p class="style-title-list">
+                    {{ $t('Adres') }}
+                </p>
+            </STListItem>
+            <STListItem element-name="label" :selectable="true">
+                <template #left>
+                    <Checkbox v-model="genderEnabled" />
+                </template>
+                <p class="style-title-list">
+                    {{ $t('Gender') }}
+                </p>
+            </STListItem>
         </STList>
 
         <hr>
@@ -89,6 +113,39 @@ const phoneEnabled = computed({
         addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
                 phoneEnabled,
+            }),
+        }));
+    },
+});
+
+const birthDayEnabled = computed({
+    get: () => webshop.value.meta.birthDayEnabled,
+    set: (birthDayEnabled: boolean) => {
+        addPatch(PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                birthDayEnabled,
+            }),
+        }));
+    },
+});
+
+const addressEnabled = computed({
+    get: () => webshop.value.meta.addressEnabled,
+    set: (addressEnabled: boolean) => {
+        addPatch(PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                addressEnabled,
+            }),
+        }));
+    },
+});
+
+const genderEnabled = computed({
+    get: () => webshop.value.meta.genderEnabled,
+    set: (genderEnabled: boolean) => {
+        addPatch(PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                genderEnabled,
             }),
         }));
     },

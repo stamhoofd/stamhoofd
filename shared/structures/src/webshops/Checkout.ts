@@ -7,6 +7,7 @@ import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import type { I18n } from '../I18nInterface.js';
+import { Gender } from '../members/Gender.js';
 import type { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
 import type { RecordAnswer } from '../members/records/RecordAnswer.js';
 import { RecordAnswerDecoder, RecordAnswerMapDecoder } from '../members/records/RecordAnswer.js';
@@ -354,6 +355,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             });
         }
 
+        // Always store the delivery address on the customer too (even if addressEnabled is false),
+        // so we don't ask for the same address twice.
+        this.customer.address = this.address;
+
         // Check country
         if (this.checkoutMethod.countries.includes(this.address.country)) {
             return;
@@ -480,6 +485,38 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             }
         } else {
             this.customer.phone = '';
+        }
+
+        if (webshop.meta.birthDayEnabled) {
+            if (!this.customer.birthDay && !asAdmin) {
+                throw new SimpleError({
+                    code: 'invalid_birth_day',
+                    message: 'Invalid birth day',
+                    human: $t(`Vul de geboortedatum in`),
+                    field: 'customer.birthDay',
+                });
+            }
+        } else {
+            this.customer.birthDay = null;
+        }
+
+        if (webshop.meta.addressEnabled) {
+            if (!this.customer.address && !asAdmin) {
+                throw new SimpleError({
+                    code: 'invalid_address',
+                    message: 'Invalid address',
+                    human: $t(`Vul het adres in`),
+                    field: 'customer.address',
+                });
+            }
+        } else if (!this.address) {
+            // Only clear the customer address when there is no delivery address:
+            // a delivery address is always stored on the customer.
+            this.customer.address = null;
+        }
+
+        if (!webshop.meta.genderEnabled) {
+            this.customer.gender = Gender.Other;
         }
 
         const regex = /^[\w.!#$%&'*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;

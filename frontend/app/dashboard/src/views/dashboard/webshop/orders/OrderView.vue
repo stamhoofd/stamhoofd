@@ -213,8 +213,10 @@
                     <h3 class="style-definition-label">
                         {{ $t('%1Os') }}
                     </h3>
-                    <p class="style-definition-text">
-                        {{ order.data.customer.name }}
+                    <p class="style-definition-text with-icons">
+                        <span>{{ order.data.customer.name }}</span>
+                        <span v-if="order.data.customer.gender === Gender.Male" v-tooltip="$t('%XK')" class="icon male blue" />
+                        <span v-if="order.data.customer.gender === Gender.Female" v-tooltip="$t('%XM')" class="icon female pink" />
                     </p>
                 </STListItem>
 
@@ -233,6 +235,24 @@
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.phone }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="order.data.customer.birthDay">
+                    <h3 class="style-definition-label">
+                        {{ $t('Geboortedatum') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatDate(order.data.customer.birthDay) }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="order.data.customer.address && !order.data.address">
+                    <h3 class="style-definition-label">
+                        {{ $t('%Cn') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.address }}
                     </p>
                 </STListItem>
 
@@ -311,7 +331,7 @@ import type { TableActionSelection } from '@stamhoofd/components/tables/classes/
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { AccessRight, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, Gender, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';

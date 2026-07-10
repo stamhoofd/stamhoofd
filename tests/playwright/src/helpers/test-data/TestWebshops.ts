@@ -1,6 +1,7 @@
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { WebshopFactory } from '@stamhoofd/models';
-import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import type { Country } from '@stamhoofd/types/Country';
 import { CaddyConfigHelper } from '../../setup/helpers/CaddyConfigHelper.js';
 import { WorkerData } from '../worker/WorkerData.js';
 
@@ -25,6 +26,14 @@ export interface CreateWebshopOptions {
     /** Optional uri suffix on the custom domain (tickets.domain.com/<domainUri>) */
     domainUri?: string;
     name?: string;
+    /** Ask for the customer's birth day during checkout */
+    birthDayEnabled?: boolean;
+    /** Ask for the customer's address during checkout */
+    addressEnabled?: boolean;
+    /** Ask for the customer's gender during checkout */
+    genderEnabled?: boolean;
+    /** Add a delivery checkout method covering the given countries (enables the delivery address step) */
+    deliveryCountries?: Country[];
 }
 
 export class TestWebshops {
@@ -45,6 +54,10 @@ export class TestWebshops {
             customDomainPrefix,
             domainUri,
             name = `Testwebshop ${WorkerData.id}`,
+            birthDayEnabled = false,
+            addressEnabled = false,
+            genderEnabled = false,
+            deliveryCountries,
         } = options;
 
         let meta = WebshopMetaData.patch({});
@@ -83,7 +96,17 @@ export class TestWebshops {
             cartEnabled,
             // Keep the customer step minimal so the order flow doesn't require a phone number
             phoneEnabled: false,
+            birthDayEnabled,
+            addressEnabled,
+            genderEnabled,
         });
+
+        if (deliveryCountries) {
+            meta.checkoutMethods.addPut(WebshopDeliveryMethod.create({
+                name: 'Levering',
+                countries: deliveryCountries,
+            }));
+        }
 
         const privateMeta = WebshopPrivateMetaData.patch({
             paymentConfiguration: PrivatePaymentConfiguration.patch({ stripeAccountId }),
