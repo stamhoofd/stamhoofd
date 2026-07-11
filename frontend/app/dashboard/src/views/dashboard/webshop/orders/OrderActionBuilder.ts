@@ -10,7 +10,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { PrivateOrderWithTickets } from '@stamhoofd/structures';
+import type { ExcelExportRequest, PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, ExcelExportType, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -347,9 +347,13 @@ export class OrderActionBuilder {
                     root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
                         type: ExcelExportType.Orders,
                         filter: selection.filter,
-                        workbook: getSelectableWorkbook(),
-                        configurationId: 'orders',
+                        workbook: getSelectableWorkbook(this.webshopManager.webshop),
+                        configurationId: 'orders-test1',
                         title: Formatter.fileSlug(this.webshopManager.webshop.meta.name),
+                        customExport: (request: ExcelExportRequest) => {
+                            console.log('custom export');
+                            return;
+                        },
                     }),
                 }),
             ],

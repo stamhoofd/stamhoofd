@@ -38,23 +38,23 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import DataSelector from '@stamhoofd/components/export/DataSelector.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
-import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
-import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import type { ExcelExportType, LimitedFilteredRequest} from '@stamhoofd/structures';
+import type { ExcelExportType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { ExcelExportRequest, ExcelExportResponse, ExcelWorkbookFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, ref } from 'vue';
@@ -67,9 +67,11 @@ const props = withDefaults(
         filter: LimitedFilteredRequest;
         workbook: SelectableWorkbook;
         configurationId: string; // How to store the filters for easy reuse
+        customExport?: (request: ExcelExportRequest) => Promise<ExcelExportResponse> | null;
     }>(),
     {
         title: null,
+        customExport: undefined,
     },
 );
 
@@ -94,8 +96,7 @@ onMounted(async () => {
                 props.workbook.from(filter.data);
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load filter', e);
     }
 });
@@ -106,8 +107,7 @@ async function saveFilter() {
 
     try {
         await Storage.keyValue.setItem('excel-filter-' + props.configurationId, JSON.stringify(encoded));
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to save filter', e);
     }
 }
@@ -122,8 +122,7 @@ async function startExport() {
     try {
         await saveFilter();
         await doExport();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -133,14 +132,22 @@ async function startExport() {
 async function doExport() {
     try {
         let title = Formatter.fileSlug(props.title ?? props.type);
+        const body = ExcelExportRequest.create({
+            filter: props.filter,
+            workbookFilter: props.workbook.getFilter(),
+            title: title,
+        });
+
+        if (props.customExport) {
+            await props.customExport(body);
+            await pop();
+            return;
+        }
+
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
             path: `/export/excel/${props.type}`,
-            body: ExcelExportRequest.create({
-                filter: props.filter,
-                workbookFilter: props.workbook.getFilter(),
-                title: title,
-            }),
+            body,
             decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
             shouldRetry: false,
         });
@@ -148,7 +155,7 @@ async function doExport() {
         if (response.data.url) {
             const url = new URL(response.data.url);
             if (url.searchParams.has('name')) {
-                title = Formatter.fileSlug(url.searchParams.get('name')!)
+                title = Formatter.fileSlug(url.searchParams.get('name')!);
             }
             new Toast($t('%1B6'), 'download')
                 .setButton(
@@ -161,14 +168,12 @@ async function doExport() {
                 .setHide(null)
                 .setForceButtonClick()
                 .show();
-        }
-        else {
+        } else {
             Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show();
         }
 
         await pop();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
