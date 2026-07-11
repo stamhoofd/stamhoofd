@@ -5,12 +5,13 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { PrivateOrderWithTickets } from '@stamhoofd/structures';
+import type { ExcelWorkbookFilter, PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { WebshopManager } from '../WebshopManager';
@@ -223,7 +224,7 @@ export class OrderActionBuilder {
                 icon: 'download',
                 priority: 8,
                 groupIndex: 3,
-                handler: async (orders: PrivateOrder[]) => {
+                handler: async (orders: PrivateOrderWithTickets[]) => {
                     await this.exportToExcel(orders);
                 },
             }),
@@ -314,8 +315,10 @@ export class OrderActionBuilder {
         });
     }
 
-    async exportToExcel(orders: PrivateOrder[]) {
-        if (!this.webshopManager.webshop) {
+    async exportToExcel(orders: PrivateOrderWithTickets[]) {
+        const webshop = this.webshopManager.webshop;
+        const organization = this.organizationManager.organization;
+        if (!webshop) {
             new Toast($t(`%17l`), 'error red').show();
             return;
         }
@@ -328,9 +331,33 @@ export class OrderActionBuilder {
                 orders = orders.filter(o => o.status !== OrderStatus.Canceled);
             }
         }
-        const d = await import(/* webpackChunkName: "OrdersExcelExport" */ '../../../../classes/OrdersExcelExport');
-        const OrdersExcelExport = d.OrdersExcelExport;
-        OrdersExcelExport.export(this.webshopManager.webshop, orders);
+
+        const { getSelectableWorkbook } = await import('./excel/getSelectableWorkbook');
+
+        if (!manualFeatureFlag('webshop-orders-excel-export-ui', this.organizationManager.$context)) {
+            // Export immediately with all columns and sheets, without the settings UI
+            // (same behaviour as before the settings UI existed, so without the tickets sheet)
+            const { exportOrdersToExcel } = await import('./excel/exportOrdersToExcel');
+            const workbook = getSelectableWorkbook(webshop, orders, organization, { includeTickets: false });
+            await exportOrdersToExcel({ webshop, orders, organization, filter: workbook.getFilter() });
+            return;
+        }
+
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                        workbook: getSelectableWorkbook(webshop, orders, organization),
+                        configurationId: 'webshop-orders-' + webshop.id,
+                        localExporter: async (workbookFilter: ExcelWorkbookFilter) => {
+                            const { exportOrdersToExcel } = await import('./excel/exportOrdersToExcel');
+                            await exportOrdersToExcel({ webshop, orders, organization, filter: workbookFilter });
+                        },
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async markAs(orders: PrivateOrder[], status: OrderStatus) {

@@ -23,6 +23,7 @@
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/document-helper": "*",
+        "@stamhoofd/excel-writer": "*",
         "@stamhoofd/frontend-excel-export": "*",
         "@stamhoofd/frontend-i18n": "*",
         "@stamhoofd/frontend-pdf-builder": "*",
