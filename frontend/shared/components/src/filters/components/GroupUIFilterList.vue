@@ -19,8 +19,8 @@
                     <GroupUIFilterList :filter="child" @click.stop @replace="setFilter(index, child, $event)" />
                 </div>
 
-                <div v-if="index < filters.length - 1" class="group-ui-filter-mode" @click.stop>
-                    <Dropdown :model-value="filter.mode" @update:model-value="setFilterMode($event, index)">
+                <div v-if="index > 0 && index <= filters.length - 1" class="group-ui-filter-mode" @click.stop>
+                    <Dropdown :model-value="filter.mode" @update:model-value="setFilterMode($event, index - 1)">
                         <option :value="GroupUIFilterMode.And">
                             {{ $t('%bv') }}
                         </option>
@@ -32,7 +32,6 @@
 
                 <template v-if="!isGroup(child)" #right>
                     <button class="button icon trash gray" type="button" @click="deleteFilter(index, child)" />
-                    <span class="icon edit gray" />
                     <span v-if="filters.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
                 </template>
             </STListItem>
@@ -44,15 +43,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useShow } from '@simonbackx/vue-app-navigation';
 
 import { computed } from 'vue';
 import Dropdown from '../../inputs/Dropdown.vue';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { GroupUIFilter, GroupUIFilterMode } from '../GroupUIFilter';
 import type { StyledDescriptionChoice, UIFilter } from '../UIFilter';
-
 
 const props = defineProps<{
     filter: GroupUIFilter;
@@ -172,9 +170,9 @@ function setFilterMode(mode: GroupUIFilterMode, index: number) {
 
 .group-ui-filter-mode {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: var(--st-horizontal-padding, 40px);
-    transform: translateY(50%);
+    transform: translateY(-50%);
     z-index: 10;
     transition: opacity 0.2s;
 
