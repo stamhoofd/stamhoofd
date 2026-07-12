@@ -1,18 +1,5 @@
 # Review methodology
 
-> **This file is the knob.** Edit it to change how `/self-review` reviews code — the
-> criteria, the severity bar, the output format, whether it runs tooling. The review
-> sub-agent reads this file and follows it verbatim, so changes take effect on the next
-> run with no other edits needed.
-
-## Settings
-
-- **Depth:** balanced — surface real problems, don't nitpick style the linter already catches.
-- **Run tooling:** off by default (static review only). Flip to *on* to have the reviewer
-  run `yarn typecheck` / `yarn lint` / the relevant `yarn stam test ...` and fold failures
-  into the findings.
-- **Findings:** no hard cap, but merge duplicates and lead with what matters.
-
 ## What to check
 
 Review the changes in scope against these, most important first:
@@ -37,6 +24,7 @@ Review the changes in scope against these, most important first:
    organizations/tenants, unsafe input handling.
 6. **Performance** — N+1 queries, work repeated in loops, oversized payloads — only when
    it's a real concern, not speculative.
+7. Vue hooks: Any function that calls a hook must also be treated as a hook and start with use. The use prefix may also be added in advance when a function is expected to use hooks later. Only the function that directly calls, or is intended to call, a hook needs the prefix.
 
 ## Maintainability
 
