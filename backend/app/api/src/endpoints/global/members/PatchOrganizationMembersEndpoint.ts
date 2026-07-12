@@ -603,7 +603,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'membershipTypeId',
                             message: 'Incompatible membership type',
-                            human: $t('Dit lid heeft in deze periode al een aansluiting die niet gecombineerd kan worden met deze aansluiting.'),
+                            human: $t('Dit lid heeft al een aansluiting die niet gecombineerd kan worden met deze aansluiting.'),
                         });
                     }
                 }
