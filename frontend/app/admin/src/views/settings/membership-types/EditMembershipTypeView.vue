@@ -44,7 +44,7 @@
         </p>
 
         <hr><h2>{{ $t('Niet-combineerbare aansluitingen') }}</h2>
-        <p>{{ $t('Selecteer aansluitingstypes die niet samen met dit type in dezelfde periode toegevoegd kunnen worden. Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode.') }}</p>
+        <p>{{ $t('Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode.') }}</p>
 
         <p v-if="otherMembershipTypes.length === 0" class="info-box">
             {{ $t('Er zijn geen andere aansluitingstypes om uit te kiezen.') }}
