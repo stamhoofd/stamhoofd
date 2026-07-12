@@ -29,7 +29,7 @@
     "@capacitor/share": "^8.0.0",
     "@capacitor/status-bar": "^8.0.0",
     "@capgo/capacitor-updater": "8.49.4",
-    "@simonbackx/simple-encoding": "2.26.10",
+    "@simonbackx/simple-encoding": "2.26.11",
     "@simonbackx/simple-networking": "1.23.0",
     "@simonbackx/vue-app-navigation": "2.23.0",
     "@stamhoofd/assets": "*",

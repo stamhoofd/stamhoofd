@@ -24,7 +24,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "2.26.10"
+        "@simonbackx/simple-encoding": "2.26.11"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.133.0",
