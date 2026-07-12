@@ -85,7 +85,7 @@
             <div v-if="(patchedBalanceItem.unitPrice >= 0 && balanceItem.status === BalanceItemStatus.Due) || dueAt !== null">
                 <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`%Cj`)">
                     <template #right>
-                        <span v-tooltip="$t('%94')" class="style-tooltip"><span class="icon small gray help" /></span>
+                        <span v-tooltip="$t('Stel de betaling uit, bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, via “Betalingen en openstaande rekening” in het ledenportaal (iets meer verstopt).')" class="style-tooltip"><span class="icon small gray help" /></span>
                     </template>
                     <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`%gr`)" />
                 </STInputBox>
