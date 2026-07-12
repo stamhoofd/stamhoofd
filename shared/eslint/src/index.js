@@ -13,10 +13,12 @@ import node from './configs/node.js';
 import typescript from './configs/typescript.js';
 import asyncComponentWithProperties from './rules/async-component-with-properties.js';
 import asyncRouteComponents from './rules/async-route-components.js';
+import preferDefineRoute from './rules/prefer-define-route.js';
 
 const rules = {
     'async-component-with-properties': asyncComponentWithProperties,
     'async-route-components': asyncRouteComponents,
+    'prefer-define-route': preferDefineRoute,
 };
 const stamhoofdPlugin = {
     rules,
@@ -163,6 +165,7 @@ export default {
                         ],
                     }],
                     'stamhoofd/async-route-components': 'error',
+                    'stamhoofd/prefer-define-route': 'warn',
                     // TODO: restore to 'error' once the existing dependency cycles are resolved.
                     'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false, allowUnsafeDynamicCyclicDependency: true }],
                     // Disallow importing from barrel files (index files that only re-export).
