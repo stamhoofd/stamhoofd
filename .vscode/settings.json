@@ -93,7 +93,8 @@
         ".yarn/releases": true,
         "LICENSE": true,
         ".worktrees": true,
-        "tests/playwright/playwright.log": true
+        "tests/playwright/playwright.log": true,
+        ".development/cli": true,
     },
     "search.useIgnoreFiles": false,
     "js/ts.tsdk.promptToUseWorkspaceVersion": true,
