@@ -2,8 +2,8 @@ import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
-import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
+import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
+import { AuditLogType, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { DateFilterBuilder } from './DateUIFilter';
@@ -12,8 +12,10 @@ import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterFormat } from './NumberFilterFormat';
 import { NumberFilterBuilder } from './NumberUIFilter';
+import { useEventGroupsRelationFetcher } from './relation-fetchers/event-groups';
 import { useGroupsRelationFetcher } from './relation-fetchers/groups';
 import { useRegistrationPeriodsRelationFetcher } from './relation-fetchers/useRegistrationPeriodsRelationFetcher';
+import { useWebshopsRelationFetcher } from './relation-fetchers/webshops';
 import { RelationFilterBuilder } from './RelationUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
@@ -64,7 +66,56 @@ export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
-export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
+/**
+ * The registration, event and webshop relation filters of a balance item. Shared between the balance
+ * items and payments filter builders, which only differ in how the balance item is wrapped.
+ */
+export function useBalanceItemRelationFilterBuilders() {
+    const groupsRelationFetcher = useGroupsRelationFetcher();
+    const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
+    const webshopsRelationFetcher = useWebshopsRelationFetcher();
+
+    return ({ registrationWrapper, orderWrapper }: { registrationWrapper: WrapperFilter; orderWrapper: WrapperFilter }): UIFilterBuilders => {
+        return [
+            new RelationFilterBuilder({
+                name: $t('%14Z'),
+                type: GroupType.Membership,
+                key: 'groupId',
+                wrapper: registrationWrapper,
+                relationFetcher: groupsRelationFetcher({ type: GroupType.Membership }),
+            }),
+            new RelationFilterBuilder({
+                name: $t('%1IR'),
+                type: GroupType.EventRegistration,
+                key: 'groupId',
+                wrapper: registrationWrapper,
+                relationFetcher: eventGroupsRelationFetcher(),
+            }),
+            new RelationFilterBuilder({
+                name: $t('%1AV'),
+                key: 'webshopId',
+                wrapper: orderWrapper,
+                relationFetcher: webshopsRelationFetcher,
+            }),
+        ];
+    };
+}
+
+export const useBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
+    const organization = useOrganization();
+    const platform = usePlatform();
+    const getRelationFilterBuilders = useBalanceItemRelationFilterBuilders();
+
+    const applicableRelationTypes = getApplicableBalanceItemRelationTypes(organization.value, platform.value);
+
+    // Filters on the associated registration/order of a balance item (see the balance items SQL filters in the backend)
+    const registrationWrapper: WrapperFilter = {
+        registration: FilterWrapperMarker,
+    };
+    const orderWrapper: WrapperFilter = {
+        order: FilterWrapperMarker,
+    };
+
     const builders: UIFilterBuilders = [
         new MultipleChoiceFilterBuilder({
             name: $t(`%1A`),
@@ -80,7 +131,7 @@ export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
 
         new MultipleChoiceFilterBuilder({
             name: $t(`%1LP`),
-            options: Object.values(BalanceItemType).map((method) => {
+            options: getApplicableBalanceItemTypes(organization.value, platform.value).map((method) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(getBalanceItemTypeName(method)), method);
             }),
             wrapper: {
@@ -89,6 +140,8 @@ export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
                 },
             },
         }),
+
+        ...getRelationFilterBuilders({ registrationWrapper, orderWrapper }),
 
         new NumberFilterBuilder({
             name: $t(`%1IP`),
@@ -107,6 +160,23 @@ export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
             key: 'createdAt',
         }),
     ];
+
+    // The membership type is only relevant for the membership organization of a platform
+    if (applicableRelationTypes.includes(BalanceItemRelationType.MembershipType)) {
+        builders.push(
+            new MultipleChoiceFilterBuilder({
+                name: getBalanceItemRelationTypeName(BalanceItemRelationType.MembershipType),
+                options: platform.value.config.membershipTypes.map((membershipType) => {
+                    return new MultipleChoiceUIFilterOption(membershipType.name, membershipType.id);
+                }),
+                wrapper: {
+                    membershipType: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+        );
+    }
 
     builders.unshift(
         new GroupUIFilterBuilder({

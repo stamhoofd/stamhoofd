@@ -4,7 +4,7 @@ import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableCol
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 import type { Organization, Platform } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
+import { getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 /**
@@ -20,16 +20,7 @@ export function useSelectableWorkbook() {
 }
 
 export function getSelectableWorkbook(organization: Organization | null, platform: Platform) {
-    let exportableRelations = Object.values(BalanceItemRelationType).filter(t => ![BalanceItemRelationType.STPackage, BalanceItemRelationType.STPricingType, BalanceItemRelationType.PaymentProvider, BalanceItemRelationType.MembershipType].includes(t));
-
-    if (organization === null || organization.id  === platform.membershipOrganizationId) {
-        if (STAMHOOFD.userMode === 'platform') {
-            // Still hide packages
-            exportableRelations = Object.values(BalanceItemRelationType).filter(t => ![BalanceItemRelationType.STPackage, BalanceItemRelationType.STPricingType, BalanceItemRelationType.PaymentProvider].includes(t));
-        } else {
-            exportableRelations = Object.values(BalanceItemRelationType);
-        }
-    }
+    const exportableRelations = getApplicableBalanceItemRelationTypes(organization, platform);
 
     return new SelectableWorkbook({
         sheets: [
@@ -46,7 +37,7 @@ export function getSelectableWorkbook(organization: Organization | null, platfor
                     new SelectableColumn({
                         id: 'type',
                         name: $t(`%1B`),
-                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
+                        description: Formatter.joinLast(getApplicableBalanceItemTypes(organization, platform).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
                     }),
 
                     new SelectableColumn({

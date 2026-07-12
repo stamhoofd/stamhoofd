@@ -1,5 +1,6 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { balanceItemFilterCompilers } from './balance-items.js';
 
 export const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -13,59 +14,6 @@ export const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
-    balanceItem: {
-        ...baseSQLFilterCompilers,
-        id: createColumnFilter({
-            expression: SQL.column('balance_items', 'id'),
-            type: SQLValueType.String,
-            nullable: false,
-        }),
-        description: createColumnFilter({
-            expression: SQL.column('balance_items', 'description'),
-            type: SQLValueType.String,
-            nullable: false,
-        }),
-        payingOrganizationId: createColumnFilter({
-            expression: SQL.column('balance_items', 'payingOrganizationId'),
-            type: SQLValueType.String,
-            nullable: true,
-        }),
-        type: createColumnFilter({
-            expression: SQL.column('balance_items', 'type'),
-            type: SQLValueType.String,
-            nullable: false,
-        }),
-        registration: createExistsFilter(
-            SQL.select()
-                .from(SQL.table('registrations'))
-                .where(
-                    SQL.column('registrations', 'id'),
-                    SQL.column('balance_items', 'registrationId'),
-                ),
-            {
-                ...baseSQLFilterCompilers,
-                groupId: createColumnFilter({
-                    expression: SQL.column('registrations', 'groupId'),
-                    type: SQLValueType.String,
-                    nullable: false,
-                }),
-            },
-        ),
-        order: createExistsFilter(
-            SQL.select()
-                .from(SQL.table('webshop_orders'))
-                .where(
-                    SQL.column('webshop_orders', 'id'),
-                    SQL.column('balance_items', 'orderId'),
-                ),
-            {
-                ...baseSQLFilterCompilers,
-                webshopId: createColumnFilter({
-                    expression: SQL.column('webshop_orders', 'webshopId'),
-                    type: SQLValueType.String,
-                    nullable: false,
-                }),
-            },
-        ),
-    },
+    // Reuse the shared balance item filters (type, webshop, group, membership type, ...)
+    balanceItem: balanceItemFilterCompilers,
 };

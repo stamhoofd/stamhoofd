@@ -23,15 +23,16 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
-import { getBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 
 import type { BalanceItem, BalanceItemType, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemStatus, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
+import { BalanceItemStatus, ExcelExportType, getApplicableBalanceItemRelationTypes, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
@@ -52,8 +53,9 @@ const configurationId = computed(() => {
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
-const filterBuilders = getBalanceItemsUIFilterBuilders();
+const filterBuilders = useBalanceItemsUIFilterBuilders();
 const organization = useOrganization();
+const platform = usePlatform();
 const title = computed(() => {
     return $t('%1LA');
 });
@@ -211,7 +213,7 @@ const allColumns: Column<ObjectType, any>[] = [
             ]
         : []),
 
-    ...[...Object.values(BalanceItemRelationType)].map((type) => {
+    ...getApplicableBalanceItemRelationTypes(organization.value, platform.value).map((type) => {
         return new Column<ObjectType, string>({
             id: `balanceItem.relations.${type}`,
             name: getBalanceItemRelationTypeName(type),

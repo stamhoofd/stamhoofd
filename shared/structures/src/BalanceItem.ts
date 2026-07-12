@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 import { getPricingTypeSuffix, STPricingType } from './billing/STPackage.js';
 import { Payment, PrivatePayment } from './members/Payment.js';
+import type { Organization } from './Organization.js';
+import type { Platform } from './Platform.js';
 import type { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
@@ -173,7 +175,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOptionMenu: return $t(`%Tb`);
         case BalanceItemRelationType.GroupOption: return $t(`%TE`);
         case BalanceItemRelationType.Member: return $t(`%1PM`);
-        case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
+        case BalanceItemRelationType.MembershipType: return $t('Aansluitingstype');
         case BalanceItemRelationType.RegistrationPeriod: return $t('%7Z');
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
@@ -190,13 +192,71 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.GroupOptionMenu: return $t(`%lh`);
         case BalanceItemRelationType.GroupOption: return $t(`%li`);
         case BalanceItemRelationType.Member: return $t(`%lj`);
-        case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
+        case BalanceItemRelationType.MembershipType: return $t('Naam van het aansluitingstype geassocieerd aan dit item');
         case BalanceItemRelationType.RegistrationPeriod: return $t('%Zbp');
         case BalanceItemRelationType.Discount: return $t(`%177`);
         case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
         case BalanceItemRelationType.STPricingType: return $t(`%1Xo`);
         case BalanceItemRelationType.PaymentProvider: return $t(`%1bJ`);
     }
+}
+
+/**
+ * Determines which categories of balance items are relevant to list or filter for the given organization and platform.
+ */
+function getBalanceItemVisibility(organization: Organization | null, platform: Platform): { showStamhoofdBilling: boolean; showMembership: boolean } {
+    // A null organization means we are looking at the platform/membership organization itself (e.g. platform-wide views)
+    const isMembershipOrganization = organization === null || organization.id === platform.membershipOrganizationId;
+
+    return {
+        // Packages, referral discounts and transaction/service fees are only billed to the Stamhoofd membership organization itself
+        showStamhoofdBilling: STAMHOOFD.platformName.toLocaleLowerCase() === 'stamhoofd' && STAMHOOFD.userMode === 'organization' && isMembershipOrganization,
+        // Platform memberships are only relevant for the membership organization of a platform
+        showMembership: STAMHOOFD.userMode === 'platform' && isMembershipOrganization,
+    };
+}
+
+/**
+ * Returns the balance item types that are relevant to list or filter for the given organization and platform.
+ * Non-applicable types (packages, referral discounts, transaction/service fees and platform memberships) are hidden.
+ */
+export function getApplicableBalanceItemTypes(organization: Organization | null, platform: Platform): BalanceItemType[] {
+    const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(organization, platform);
+
+    return Object.values(BalanceItemType).filter((type) => {
+        switch (type) {
+            case BalanceItemType.STPackage:
+            case BalanceItemType.ReferralDiscount:
+            case BalanceItemType.TransferFee:
+            case BalanceItemType.ServiceFee:
+                return showStamhoofdBilling;
+            case BalanceItemType.PlatformMembership:
+                return showMembership;
+            default:
+                return true;
+        }
+    });
+}
+
+/**
+ * Returns the balance item relation types that are relevant to list or filter for the given organization and platform.
+ * Non-applicable relations (packages, pricing types, payment providers and membership types) are hidden.
+ */
+export function getApplicableBalanceItemRelationTypes(organization: Organization | null, platform: Platform): BalanceItemRelationType[] {
+    const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(organization, platform);
+
+    return Object.values(BalanceItemRelationType).filter((type) => {
+        switch (type) {
+            case BalanceItemRelationType.STPackage:
+            case BalanceItemRelationType.STPricingType:
+            case BalanceItemRelationType.PaymentProvider:
+                return showStamhoofdBilling;
+            case BalanceItemRelationType.MembershipType:
+                return showMembership;
+            default:
+                return true;
+        }
+    });
 }
 
 /**

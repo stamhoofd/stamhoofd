@@ -1,20 +1,17 @@
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import type { WrapperFilter } from '@stamhoofd/structures';
-import { BalanceItemType, FilterWrapperMarker, GroupType, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, getBalanceItemTypeName } from '@stamhoofd/structures';
+import { FilterWrapperMarker, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, getApplicableBalanceItemTypes, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
-import { getCustomerUIFilterBuilders } from '../filterBuilders';
+import { getCustomerUIFilterBuilders, useBalanceItemRelationFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import { RelationFilterBuilder } from '../RelationUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
-import { useEventGroupsRelationFetcher } from '../relation-fetchers/event-groups';
-import { useGroupsRelationFetcher } from '../relation-fetchers/groups';
 import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
-import { useWebshopsRelationFetcher } from '../relation-fetchers/webshops';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { usePlatform } from '#hooks/usePlatform.ts';
 
@@ -120,9 +117,7 @@ export class PaymentFilterBuilders {
 export function usePaymentsUIFilterBuilders() {
     const organization = useOrganization();
     const platform = usePlatform();
-    const groupsRelationFetcher = useGroupsRelationFetcher();
-    const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
-    const webshopsRelationFetcher = useWebshopsRelationFetcher();
+    const getRelationFilterBuilders = useBalanceItemRelationFilterBuilders();
     const organizationsRelationFetcher = useOrganizationsRelationFetcher();
     const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
 
@@ -131,11 +126,16 @@ export function usePaymentsUIFilterBuilders() {
             registration: FilterWrapperMarker,
         },
     };
+    const balanceItemOrderWrapper: WrapperFilter = {
+        balanceItem: {
+            order: FilterWrapperMarker,
+        },
+    };
 
     const balanceItemBuilders: UIFilterBuilders = [
         new MultipleChoiceFilterBuilder({
             name: $t('%1B'),
-            options: Object.values(BalanceItemType).map(type => new MultipleChoiceUIFilterOption(getBalanceItemTypeName(type), type)),
+            options: getApplicableBalanceItemTypes(organization.value, platform.value).map(type => new MultipleChoiceUIFilterOption(getBalanceItemTypeName(type), type)),
             wrapper: {
                 balanceItem: {
                     type: {
@@ -144,26 +144,7 @@ export function usePaymentsUIFilterBuilders() {
                 },
             },
         }),
-        new RelationFilterBuilder({
-            name: $t('%14Z'),
-            type: GroupType.Membership,
-            key: 'groupId',
-            wrapper: balanceItemRegistrationWrapper,
-            relationFetcher: groupsRelationFetcher({ type: GroupType.Membership }),
-        }),
-        new RelationFilterBuilder({
-            name: $t('%1IR'),
-            type: GroupType.EventRegistration,
-            key: 'groupId',
-            wrapper: balanceItemRegistrationWrapper,
-            relationFetcher: eventGroupsRelationFetcher(),
-        }),
-        new RelationFilterBuilder({
-            name: $t('%1AV'),
-            key: 'webshopId',
-            wrapper: { balanceItem: { order: FilterWrapperMarker } } as WrapperFilter,
-            relationFetcher: webshopsRelationFetcher,
-        }),
+        ...getRelationFilterBuilders({ registrationWrapper: balanceItemRegistrationWrapper, orderWrapper: balanceItemOrderWrapper }),
     ];
 
     balanceItemBuilders.unshift(new GroupUIFilterBuilder({ builders: balanceItemBuilders }));
