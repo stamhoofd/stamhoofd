@@ -35,7 +35,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
     const getRegistrationFilters: RegistrationFilterBuilderFactory = ({ periodId }: RegistrationFilterBuilderFactoryOptions = {}) => computed(() => {
         const platform = $platform.value;
         const user = $user.value;
-        const hasPlatformPermissions = (user?.permissions?.platform !== null);
+        const hasPlatformPermissions = (STAMHOOFD.userMode === 'platform' || app === 'admin') && (user?.permissions?.platform !== null);
 
         const all: UIFilterBuilder[] = [];
 
