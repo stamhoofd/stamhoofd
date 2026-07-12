@@ -57,7 +57,7 @@
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
             <STList class="illustration-list">
-                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" data-testid="open-orders-button" @click="openOrders(true)">
+                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" data-testid="open-orders-button" @click="$navigate(Routes.Orders)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                     </template>
@@ -72,7 +72,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="openSeating(true)">
+                <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="$navigate(Routes.Seating)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     </template>
@@ -87,7 +87,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" data-testid="scan-tickets-button" @click="openTickets(true)">
+                <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" data-testid="scan-tickets-button" @click="$navigate(Routes.Tickets)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/scanner.svg">
                     </template>
@@ -102,7 +102,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openStatistics(true)">
+                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="$navigate(Routes.Statistics)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                     </template>
@@ -138,7 +138,7 @@
                 <h2>{{ $t('%xU') }}</h2>
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditGeneral)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                         </template>
@@ -153,7 +153,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
+                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="$navigate(Routes.EditProducts)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/edit-package.svg">
                         </template>
@@ -168,7 +168,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-else :selectable="true" class="left-center" @click="editProducts(true)">
+                    <STListItem v-else :selectable="true" class="left-center" @click="$navigate(Routes.EditProducts)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/tickets.svg">
                         </template>
@@ -183,7 +183,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editPaymentMethods(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditPaymentMethods)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
@@ -198,7 +198,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
+                    <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="$navigate(Routes.EditInputFields)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
@@ -215,7 +215,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-else :selectable="true" class="left-center" @click="editRecordSettings(true)">
+                    <STListItem v-else :selectable="true" class="left-center" @click="$navigate(Routes.EditRecordSettings)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
@@ -230,7 +230,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
+                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="$navigate(Routes.EditCheckoutMethods)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/bike.svg">
                         </template>
@@ -245,7 +245,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditDiscounts)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
@@ -260,7 +260,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditPermissions)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
@@ -275,7 +275,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editNotifications(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditNotifications)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                         </template>
@@ -294,7 +294,7 @@
                 <hr><h2>{{ $t('%ty') }}</h2>
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center" @click="editPage(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditPage)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
@@ -309,7 +309,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editLink(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditLink)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/compass.svg">
                         </template>
@@ -324,7 +324,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem data-testid="webshop-email-templates-button" :selectable="true" class="left-center" @click="editEmails(true)">
+                    <STListItem data-testid="webshop-email-templates-button" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
@@ -463,10 +463,7 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, useCanDismiss, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-
-import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, useSplitViewController } from '@simonbackx/vue-app-navigation';
 
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -484,16 +481,6 @@ import { AccessRight, EmailTemplate, EmailTemplateType, PaymentMethod, Permissio
 import { Country } from '@stamhoofd/types/Country';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
-import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
-import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
-import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
-import EditWebshopLinkView from './edit/EditWebshopLinkView.vue';
-import EditWebshopNotificationsView from './edit/EditWebshopNotificationsView.vue';
-import EditWebshopPageView from './edit/EditWebshopPageView.vue';
-import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
-import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
-import EditWebshopRecordSettingsView from './edit/EditWebshopRecordSettingsView.vue';
 
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import { WebshopManager } from './WebshopManager';
@@ -502,11 +489,8 @@ const props = defineProps<{ preview: WebshopPreview }>();
 const context = useContext();
 const organizationManager = useOrganizationManager();
 const organization = useRequiredOrganization();
-const show = useShow();
-const present = usePresent();
 const pop = usePop();
 const canPop = useCanPop();
-const canDismiss = useCanDismiss();
 const splitViewController = useSplitViewController();
 const owner = useRequestOwner();
 const platform = usePlatform();
@@ -516,6 +500,241 @@ const openTodoList = ref(true);
 
 const webshopManager = ref(new WebshopManager(context.value, props.preview));
 const webshop = computed(() => webshopManager.value.webshop);
+
+enum Routes {
+    Orders = 'bestellingen',
+    Seating = 'zaalplan',
+    Tickets = 'tickets-scannen',
+    Statistics = 'statistieken',
+    EditGeneral = 'algemeen',
+    EditPage = 'vormgeving',
+    EditLink = 'link',
+    EditProducts = 'artikels',
+    EditDiscounts = 'kortingen',
+    EditPaymentMethods = 'betaalmethodes',
+    EditInputFields = 'vragen',
+    EditRecordSettings = 'gegevens',
+    EditCheckoutMethods = 'afhaal-en-levering',
+    EditNotifications = 'notificaties',
+    EditPermissions = 'toegang',
+    EditEmails = 'e-mails',
+    Packages = 'functionaliteiten',
+    Duplicate = 'dupliceren',
+}
+
+// Make sure we have an up to date webshop before opening an edit view
+async function loadWebshopProperties() {
+    await webshopManager.value.loadWebshopIfNeeded(false, true);
+    return {
+        webshopManager: webshopManager.value,
+    };
+}
+
+defineRoute({
+    url: Routes.Orders,
+    component: async () => (await import('./orders/WebshopOrdersView.vue')).default,
+    defaultProperties: () => ({ webshopManager: webshopManager.value }),
+});
+
+defineRoute({
+    url: Routes.Seating,
+    component: async () => (await import('./orders/WebshopSeatingView.vue')).default,
+    defaultProperties: () => ({ webshopManager: webshopManager.value }),
+});
+
+defineRoute({
+    url: Routes.Tickets,
+    component: async () => (await import('./tickets/TicketScannerSetupView.vue')).default,
+    defaultProperties: () => ({ webshopManager: webshopManager.value }),
+});
+
+defineRoute({
+    url: Routes.Statistics,
+    component: async () => (await import('./statistics/WebshopStatisticsView.vue')).default,
+    defaultProperties: () => ({ webshopManager: webshopManager.value }),
+});
+
+defineRoute({
+    url: Routes.EditGeneral,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopGeneralView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditPage,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopPageView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditLink,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopLinkView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditProducts,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopProductsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditDiscounts,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopDiscountsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditPaymentMethods,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopPaymentMethodsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditInputFields,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopInputFieldsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditRecordSettings,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopRecordSettingsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditCheckoutMethods,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopCheckoutMethodsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditNotifications,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopNotificationsView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditPermissions,
+    present: 'popup',
+    component: async () => (await import('@stamhoofd/components/admins/EditResourceRolesView.vue')).default,
+    defaultProperties: () => ({
+        description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
+        resource: {
+            id: props.preview.id,
+            name: props.preview.meta.name,
+            type: PermissionsResourceType.Webshops,
+        },
+        configurableAccessRights: props.preview.hasTickets ? [AccessRight.WebshopScanTickets] : [],
+    }),
+});
+
+defineRoute({
+    url: Routes.EditEmails,
+    present: 'popup',
+    component: async () => (await import('@stamhoofd/components/email/EditEmailTemplatesView.vue')).default,
+    defaultProperties: () => ({
+        groups: null,
+        webshopId: props.preview.id,
+        allowEditGenerated: false,
+        types: [
+            EmailTemplateType.OrderConfirmationOnline,
+            EmailTemplateType.OrderConfirmationTransfer,
+            EmailTemplateType.OrderConfirmationPOS,
+            EmailTemplateType.OrderReceivedTransfer,
+            EmailTemplateType.TicketsConfirmation,
+            EmailTemplateType.TicketsConfirmationTransfer,
+            EmailTemplateType.TicketsConfirmationPOS,
+            EmailTemplateType.TicketsReceivedTransfer,
+        ].filter(t => EmailTemplate.allowOrganizationLevel(t, organization.value, platform.value)),
+    }),
+});
+
+defineRoute({
+    url: Routes.Packages,
+    present: 'popup',
+    component: async () => (await import('../settings/packages/PackageSettingsView.vue')).default,
+});
+
+defineRoute({
+    url: Routes.Duplicate,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopGeneralView.vue')).default,
+    defaultProperties: async () => {
+        // Make sure we have an up to date webshop
+        const webshop = await webshopManager.value.loadWebshopIfNeeded(false);
+        const duplicate = PrivateWebshop.create({
+            ...webshop.clone(),
+            id: undefined,
+        }).patch({
+            meta: WebshopMetaData.patch({
+                status: WebshopStatus.Open,
+            }),
+        });
+
+        // Set usedStock to 0
+        duplicate.clearStock();
+
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/email-templates',
+            query: { webshopId: webshop.id },
+            shouldRetry: false,
+            owner,
+            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
+        });
+        const templates = response.data;
+
+        return {
+            initialWebshop: duplicate,
+            savedHandler: async (duplicateWebshop: PrivateWebshop) => {
+                // Copy over the templates
+                try {
+                    const patchedArray: PatchableArrayAutoEncoder<EmailTemplate> = new PatchableArray();
+                    for (const t of templates) {
+                        if (t.webshopId !== webshop.id) {
+                            // Skip default templates
+                            continue;
+                        }
+
+                        // Create a new duplicate
+                        const template = EmailTemplate.create({
+                            ...t,
+                            webshopId: duplicateWebshop.id,
+                            id: undefined,
+                        });
+                        patchedArray.addPut(template);
+                    }
+
+                    if (patchedArray.getPuts().length > 0) {
+                        await context.value.authenticatedServer.request({
+                            method: 'PATCH',
+                            path: '/email-templates',
+                            body: patchedArray,
+                            shouldRetry: false,
+                            owner,
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                    new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show();
+                }
+            },
+        };
+    },
+});
+
+const $navigate = useNavigate();
 
 function reload() {
     loading.value = true;
@@ -552,14 +771,7 @@ function openPackages() {
         return;
     }
 
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('../settings/packages/PackageSettingsView.vue'), {}),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
+    $navigate(Routes.Packages).catch(console.error);
 }
 
 function openWebshopUrl() {
@@ -583,165 +795,6 @@ function toggleTodoList() {
     }
 }
 
-function openOrders(animated = true) {
-    show({
-        animated,
-        adjustHistory: animated,
-        components: [
-            AsyncComponent(() => import('./orders/WebshopOrdersView.vue'), {
-                webshopManager: webshopManager.value,
-            }),
-        ],
-    }).catch(console.error);
-}
-
-function openSeating(animated = true) {
-    show({
-        animated,
-        adjustHistory: animated,
-        components: [
-            AsyncComponent(() => import('./orders/WebshopSeatingView.vue'), {
-                webshopManager: webshopManager.value,
-            }),
-        ],
-    }).catch(console.error);
-}
-
-function openStatistics(animated = true) {
-    show({
-        animated,
-        adjustHistory: animated,
-        components: [
-            AsyncComponent(() => import('./statistics/WebshopStatisticsView.vue'), {
-                webshopManager: webshopManager.value,
-            }),
-        ],
-    }).catch(console.error);
-}
-
-function openTickets(animated = true) {
-    show({
-        animated,
-        adjustHistory: animated,
-        components: [
-            AsyncComponent(() => import('./tickets/TicketScannerSetupView.vue'), {
-                webshopManager: webshopManager.value,
-            }),
-        ],
-    }).catch(console.error);
-}
-
-function editGeneral(animated = true) {
-    displayEditComponent(EditWebshopGeneralView, animated);
-}
-
-function editPage(animated = true) {
-    displayEditComponent(EditWebshopPageView, animated);
-}
-
-function editLink(animated = true) {
-    displayEditComponent(EditWebshopLinkView, animated);
-}
-
-function editProducts(animated = true) {
-    displayEditComponent(EditWebshopProductsView, animated);
-}
-
-function editDiscounts(animated = true) {
-    displayEditComponent(EditWebshopDiscountsView, animated);
-}
-
-function editPaymentMethods(animated = true) {
-    displayEditComponent(EditWebshopPaymentMethodsView, animated);
-}
-
-function editInputFields(animated = true) {
-    displayEditComponent(EditWebshopInputFieldsView, animated);
-}
-
-function editRecordSettings(animated = true) {
-    displayEditComponent(EditWebshopRecordSettingsView, animated);
-}
-
-function editCheckoutMethods(animated = true) {
-    displayEditComponent(EditWebshopCheckoutMethodsView, animated);
-}
-
-function editPermissions(animated = true) {
-    present({
-        animated,
-        adjustHistory: animated,
-        modalDisplayStyle: 'popup',
-        components: [
-            AsyncComponent(() => import('@stamhoofd/components/admins/EditResourceRolesView.vue'), {
-                description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
-                resource: {
-                    id: props.preview.id,
-                    name: props.preview.meta.name,
-                    type: PermissionsResourceType.Webshops,
-                },
-                configurableAccessRights: props.preview.hasTickets ? [AccessRight.WebshopScanTickets] : [],
-            }),
-        ],
-    }).catch(console.error);
-}
-
-async function editEmails(animated = true) {
-    await present({
-        components: [
-            AsyncComponent(() => import('@stamhoofd/components/email/EditEmailTemplatesView.vue'), {
-                groups: null,
-                webshopId: props.preview.id,
-                allowEditGenerated: false,
-                types: [
-                    EmailTemplateType.OrderConfirmationOnline,
-                    EmailTemplateType.OrderConfirmationTransfer,
-                    EmailTemplateType.OrderConfirmationPOS,
-                    EmailTemplateType.OrderReceivedTransfer,
-                    EmailTemplateType.TicketsConfirmation,
-                    EmailTemplateType.TicketsConfirmationTransfer,
-                    EmailTemplateType.TicketsConfirmationPOS,
-                    EmailTemplateType.TicketsReceivedTransfer,
-                ].filter(t => EmailTemplate.allowOrganizationLevel(t, organization.value, platform.value)),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-        animated,
-    });
-}
-
-function editNotifications(animated = true) {
-    displayEditComponent(EditWebshopNotificationsView, animated);
-}
-
-function displayEditComponent(component: any, animated = true) {
-    const displayedComponent = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                try {
-                    // Make sure we have an up to date webshop
-                    await webshopManager.value.loadWebshopIfNeeded(false, true);
-                    return new ComponentWithProperties(component, {
-                        webshopManager: webshopManager.value,
-                    });
-                } catch (e) {
-                    Toast.fromError(e).show();
-                    throw e;
-                }
-            },
-        }),
-    });
-
-    present({
-        animated,
-        adjustHistory: animated,
-        modalDisplayStyle: 'popup',
-        components: [
-            displayedComponent,
-        ],
-    }).catch(console.error);
-}
-
 const canCreateWebshops = computed(() => context.value.organizationAuth.hasAccessRight(AccessRight.OrganizationCreateWebshops));
 
 function duplicateWebshop() {
@@ -750,86 +803,7 @@ function duplicateWebshop() {
         return;
     }
 
-    const displayedComponent = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                try {
-                    // Make sure we have an up to date webshop
-                    const webshop = await webshopManager.value.loadWebshopIfNeeded(false);
-                    const duplicate = PrivateWebshop.create({
-                        ...webshop.clone(),
-                        id: undefined,
-                    }).patch({
-                        meta: WebshopMetaData.patch({
-                            status: WebshopStatus.Open,
-                        }),
-                    });
-
-                    // Set usedStock to 0
-                    duplicate.clearStock();
-
-                    const response = await context.value.authenticatedServer.request({
-                        method: 'GET',
-                        path: '/email-templates',
-                        query: { webshopId: webshop.id },
-                        shouldRetry: false,
-                        owner,
-                        decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
-                    });
-                    const templates = response.data;
-
-                    return AsyncComponent(() => import('./edit/EditWebshopGeneralView.vue'), {
-                        initialWebshop: duplicate,
-                        savedHandler: async (duplicateWebshop: PrivateWebshop) => {
-                            // Copy over the templates
-                            try {
-                                const patchedArray: PatchableArrayAutoEncoder<EmailTemplate> = new PatchableArray();
-                                for (const t of templates) {
-                                    if (t.webshopId !== webshop.id) {
-                                        // Skip default templates
-                                        continue;
-                                    }
-
-                                    // Create a new duplicate
-                                    const template = EmailTemplate.create({
-                                        ...t,
-                                        webshopId: duplicateWebshop.id,
-                                        id: undefined,
-                                    });
-                                    patchedArray.addPut(template);
-                                }
-
-                                if (patchedArray.getPuts().length > 0) {
-                                    await context.value.authenticatedServer.request({
-                                        method: 'PATCH',
-                                        path: '/email-templates',
-                                        body: patchedArray,
-                                        shouldRetry: false,
-                                        owner,
-                                    });
-                                }
-                            } catch (e) {
-                                console.error(e);
-                                new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show();
-                            }
-                        },
-                    });
-                } catch (e) {
-                    Toast.fromError(e).show();
-                    throw e;
-                }
-            },
-        }),
-    });
-
-    present({
-        animated: true,
-        adjustHistory: true,
-        modalDisplayStyle: 'popup',
-        components: [
-            displayedComponent,
-        ],
-    }).catch(console.error);
+    $navigate(Routes.Duplicate).catch(console.error);
 }
 
 async function closeWebshop() {
@@ -953,7 +927,7 @@ const todoList = computed(() => {
         subIcon: 'add',
         title: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Voeg tickets toe aan je webshop' : 'Voeg artikels toe aan je webshop',
         description: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.' : 'Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.',
-        action: () => editProducts(),
+        action: () => $navigate(Routes.EditProducts),
         done: !!webshop.value?.products && webshop.value.products.length > 0,
     });
 
@@ -973,7 +947,7 @@ const todoList = computed(() => {
             subIcon: 'add',
             title: 'Stel afhaal of leveringsmethodes in',
             description: 'Stel in hoe, waar en wanneer bestellers hun bestelling kunnen afhalen of geleverd krijgen.',
-            action: () => editCheckoutMethods(),
+            action: () => $navigate(Routes.EditCheckoutMethods),
             done: webshopManager.value.preview.meta.checkoutMethods.length > 0,
         });
     }
@@ -983,7 +957,7 @@ const todoList = computed(() => {
             icon: 'image',
             title: 'Stel een omslagfoto, logo, kleur en beschrijving in',
             description: 'Maak je webshop helemaal professioneel door deze in te stellen.',
-            action: () => editPage(),
+            action: () => $navigate(Routes.EditPage),
             done: webshopManager.value.preview.meta.description.text.length > 0
                 || !!webshopManager.value.preview.meta.useLogo
                 || !!webshopManager.value.preview.meta.color
@@ -995,7 +969,7 @@ const todoList = computed(() => {
         icon: 'bank',
         title: 'Stel online betalingen in',
         description: organization.value.address?.country === Country.Netherlands ? $t('%1We') : $t('%1YS'),
-        action: () => editPaymentMethods(),
+        action: () => $navigate(Routes.EditPaymentMethods),
         done: webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard)
             || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.iDEAL)
             || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Bancontact)
@@ -1008,7 +982,7 @@ const todoList = computed(() => {
             icon: 'clock',
             title: 'Open je webshop als je er klaar voor bent',
             description: 'Je kan je webshop openen op een bepaald tijdstip, of manueel via de knop onderaan.',
-            action: () => editGeneral(),
+            action: () => $navigate(Routes.EditGeneral),
             done: false,
         });
     }
