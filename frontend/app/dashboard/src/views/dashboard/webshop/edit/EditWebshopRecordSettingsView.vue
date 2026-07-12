@@ -18,7 +18,7 @@
         <STList>
             <STListItem element-name="label" :selectable="false">
                 <template #left>
-                    <Checkbox :checked="true" :disabled="true" />
+                    <Checkbox :model-value="true" :disabled="true" />
                 </template>
                 <p class="style-title-list">
                     {{ $t('%1Os') }}
@@ -29,7 +29,7 @@
             </STListItem>
             <STListItem element-name="label" :selectable="false">
                 <template #left>
-                    <Checkbox :checked="true" :disabled="true" />
+                    <Checkbox :model-value="true" :disabled="true" />
                 </template>
                 <p class="style-title-list">
                     {{ $t('%1FK') }}
