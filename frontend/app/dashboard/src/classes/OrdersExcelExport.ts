@@ -26,7 +26,7 @@ export class OrdersExcelExport {
      * Extra customer columns (birth day, gender, address) shown after the phone number.
      */
     private static get customerColumnHeaders(): RowValue[] {
-        return [$t(`Geboortedatum`), $t(`Gender`), $t(`Adres klant`)];
+        return [$t(`Geboortedatum`), $t(`Gender`), $t(`Adres`)];
     }
 
     private static customerColumnValues(order: PrivateOrder): RowValue[] {
@@ -213,8 +213,7 @@ export class OrdersExcelExport {
             if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
                 checkoutType = $t(`%xG`);
                 address = order.data.checkoutMethod.name;
-            }
-            else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
+            } else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
                 checkoutType = $t(`%xH`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
@@ -268,17 +267,14 @@ export class OrdersExcelExport {
 
                             if (typeof value === 'object' && !(value instanceof Date)) {
                                 value.value = value.value + ', ' + option.option.name;
-                            }
-                            else {
+                            } else {
                                 if (typeof value === 'string') {
                                     options[index] = value + ', ' + option.option.name;
-                                }
-                                else {
+                                } else {
                                     // invalid!
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             options[index] = option.option.name;
                         }
                     }
@@ -482,8 +478,7 @@ export class OrdersExcelExport {
             if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
                 checkoutType = $t(`%xG`);
                 address = order.data.checkoutMethod.name;
-            }
-            else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
+            } else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
                 checkoutType = $t(`%xH`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
@@ -604,8 +599,7 @@ export class OrdersExcelExport {
                     existing.total = settlement.amount;
                     existing.amount += order.payment.price;
                     existing.fees += settlement.fee;
-                }
-                else {
+                } else {
                     counter.set(settlement.id, {
                         id: settlement.id,
                         reference: settlement.reference,
@@ -871,8 +865,7 @@ export class OrdersExcelExport {
             AppManager.shared.downloadFile(blob, fileName).catch((e) => {
                 Toast.fromError(e).show();
             });
-        }
-        else {
+        } else {
             XLSX.writeFile(wb, fileName);
         }
     }
