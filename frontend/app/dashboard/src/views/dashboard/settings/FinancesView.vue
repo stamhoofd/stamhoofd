@@ -89,7 +89,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="STAMHOOFD.environment === 'development' && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
+                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/box.svg">
                         </template>
@@ -97,7 +97,7 @@
                             {{ $t('%1Ls') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%1Lt') }}
+                            {{ $t('Alle afzonderlijke items die werden aangerekend (betaald of niet)') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
