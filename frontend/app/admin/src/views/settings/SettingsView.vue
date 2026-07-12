@@ -125,7 +125,7 @@
                 >
                     <template #left>
                         <img
-                            src="@stamhoofd/assets/images/illustrations/discount.svg"
+                            src="@stamhoofd/assets/images/illustrations/financial-support.svg"
                         >
                     </template>
                     <h2 class="style-title-list">

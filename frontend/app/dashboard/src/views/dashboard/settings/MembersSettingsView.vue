@@ -124,7 +124,7 @@
 
                 <STListItem v-if="!props.period && !isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                        <img src="@stamhoofd/assets/images/illustrations/financial-support.svg">
                     </template>
                     <h2 class="style-title-list">
                         {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
