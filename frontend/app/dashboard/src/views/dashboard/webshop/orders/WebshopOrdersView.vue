@@ -541,11 +541,11 @@ function openOrder(order: PrivateOrder) {
         root: AsyncComponent(() => import('./OrderView.vue'), {
             initialOrder: order,
             webshopManager: props.webshopManager,
-            getNextOrder: (order: PrivateOrder) => {
+            getNext: (order: PrivateOrder) => {
                 const currentIndex = getCurrentIndex(order);
                 return tableObjectFetcher.objects[currentIndex + 1];
             },
-            getPreviousOrder: (order: PrivateOrder) => {
+            getPrevious: (order: PrivateOrder) => {
                 const currentIndex = getCurrentIndex(order);
                 return tableObjectFetcher.objects[currentIndex - 1];
             },

@@ -2,8 +2,8 @@
     <div class="st-view order-view" data-testid="order-view">
         <STNavigationBar :title="$t(`%x3`) + order.number">
             <template #right>
-                <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('%VO')" @click="goBack" />
-                <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('%VP')" @click="goNext" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%VO')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%VP')" @click="goForward" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
@@ -314,12 +314,12 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import { useArrowUpDown } from '@stamhoofd/components/hooks/useArrowUpDown.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
@@ -343,22 +343,18 @@ import { OrderActionBuilder } from './OrderActionBuilder';
 const props = withDefaults(defineProps<{
     initialOrder: PrivateOrderWithTickets;
     webshopManager: WebshopManager;
-    getNextOrder?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
-    getPreviousOrder?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
+    getNext?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
+    getPrevious?: ((order: PrivateOrderWithTickets) => PrivateOrderWithTickets) | null;
 }>(), {
-    getNextOrder: null,
-    getPreviousOrder: null,
+    getNext: null,
+    getPrevious: null,
 });
 
 const present = usePresent();
 const pop = usePop();
 const organizationManager = useOrganizationManager();
-const show = useShow();
 
-useArrowUpDown({
-    down: () => goNext(),
-    up: () => goBack(),
-});
+const { hasNext, hasPrevious, goBack, goForward } = useBackForward('initialOrder', props);
 
 const webshop = computed(() => props.webshopManager.webshop);
 const auth = useAuth();
@@ -426,20 +422,6 @@ function openPayment(payment: PrivatePayment) {
         modalDisplayStyle: 'popup',
     }).catch(console.error);
 }
-
-const hasNextOrder = computed(() => {
-    if (!props.getNextOrder || !order.value) {
-        return false;
-    }
-    return !!props.getNextOrder(order.value);
-});
-
-const hasPreviousOrder = computed(() => {
-    if (!props.getPreviousOrder || !order.value) {
-        return false;
-    }
-    return !!props.getPreviousOrder(order.value);
-});
 
 const hasPaymentsWrite = computed(() => {
     if (auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
@@ -620,44 +602,6 @@ function recheckTickets() {
             downloadNewTickets();
         });
     }
-}
-
-function goBack() {
-    const o = props.getPreviousOrder?.(order.value);
-    if (!o) {
-        return;
-    }
-    const component = AsyncComponent(() => import('./OrderView.vue'), {
-        initialOrder: o,
-        webshopManager: props.webshopManager,
-        getNextOrder: props.getNextOrder,
-        getPreviousOrder: props.getPreviousOrder,
-    });
-
-    show({
-        components: [component],
-        replace: 1,
-        reverse: true,
-        animated: false,
-    }).catch(console.error);
-}
-
-function goNext() {
-    const o = props.getNextOrder?.(order.value);
-    if (!o) {
-        return;
-    }
-    const component = AsyncComponent(() => import('./OrderView.vue'), {
-        initialOrder: o,
-        webshopManager: props.webshopManager,
-        getNextOrder: props.getNextOrder,
-        getPreviousOrder: props.getPreviousOrder,
-    });
-    show({
-        components: [component],
-        replace: 1,
-        animated: false,
-    }).catch(console.error);
 }
 
 function getName(paymentMethod: PaymentMethod): string {
