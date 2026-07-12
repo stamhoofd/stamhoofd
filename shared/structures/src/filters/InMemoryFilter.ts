@@ -77,9 +77,20 @@ function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterR
     return (val) => {
         const b = normalizeValue(assertFilterCompareValue(filter));
 
+        // in the backend, if a property does not exist and comparing against null, the result is true (if column type JSONArray)
+        // if not comparing against a json column the value can never be undefined in the backend (would be null)
+        if (b === null && (val === null || val === undefined)) {
+            return true;
+        }
+
         if (Array.isArray(val)) {
             // To match backend logic where these things are required for optimizations
             // + also match MongoDB behavior
+
+            // in the backend comparing null against an empty array returns true
+            if (b === null && val.length === 0) {
+                return true;
+            }
 
             for (const v of val) {
                 const a = normalizeValue(assertFilterCompareValue(v));
