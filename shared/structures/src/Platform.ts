@@ -285,6 +285,14 @@ export class PlatformMembershipType extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
     requiredDefaultAgeGroupIds: string[] | null = null;
 
+    /**
+     * Membership types that cannot be combined with this type in the same period.
+     * When manually adding a membership of this type, the member may not already
+     * have a membership of one of these types in the same period.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    incompatibleMembershipTypeIds: string[] = [];
+
     getPrice(periodId: string, date: Date, tagIds: string[], isReduced: boolean) {
         const period = this.periods.get(periodId);
         if (!period) {

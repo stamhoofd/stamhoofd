@@ -67,6 +67,25 @@ export const duplicateCheckLimiter = new RateLimiter({
 });
 
 /**
+ * A where clause that matches memberships whose [startDate, endDate] range overlaps
+ * with the given [startDate, endDate] range.
+ */
+function membershipDateRangeOverlaps(startDate: Date, endDate: Date) {
+    return SQL.where(
+        SQL.where('startDate', SQLWhereSign.LessEqual, startDate)
+            .and('endDate', SQLWhereSign.GreaterEqual, startDate),
+    )
+        .or(
+            SQL.where('startDate', SQLWhereSign.LessEqual, endDate)
+                .and('endDate', SQLWhereSign.GreaterEqual, endDate),
+        )
+        .or(
+            SQL.where('startDate', SQLWhereSign.GreaterEqual, startDate)
+                .and('endDate', SQLWhereSign.LessEqual, endDate),
+        );
+}
+
+/**
  * One endpoint to create, patch and delete members and their registrations and payments
  */
 
@@ -568,26 +587,34 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Correct price and dates
                 await membership.calculatePrice(member);
 
+                // Block if the member already has an incompatible membership type overlapping these dates.
+                // Uses the requested dates (like the duplicate check below) so the two checks stay consistent.
+                if (membershipType.incompatibleMembershipTypeIds.length > 0) {
+                    const incompatible = await MemberPlatformMembership.select()
+                        .where('memberId', member.id)
+                        .where('membershipTypeId', membershipType.incompatibleMembershipTypeIds)
+                        .where('periodId', put.periodId)
+                        .where('deletedAt', null)
+                        .where(membershipDateRangeOverlaps(put.startDate, put.endDate))
+                        .first(false);
+
+                    if (incompatible) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'membershipTypeId',
+                            message: 'Incompatible membership type',
+                            human: $t('Dit lid heeft al een aansluiting die niet gecombineerd kan worden met deze aansluiting.'),
+                        });
+                    }
+                }
+
                 // Check duplicate memberships after correcting the dates
                 const existing = await MemberPlatformMembership.select()
                     .where('memberId', member.id)
                     .where('membershipTypeId', put.membershipTypeId)
                     .where('periodId', put.periodId)
                     .where('deletedAt', null)
-                    .where(
-                        SQL.where(
-                            SQL.where('startDate', SQLWhereSign.LessEqual, put.startDate)
-                                .and('endDate', SQLWhereSign.GreaterEqual, put.startDate),
-                        )
-                            .or(
-                                SQL.where('startDate', SQLWhereSign.LessEqual, put.endDate)
-                                    .and('endDate', SQLWhereSign.GreaterEqual, put.endDate),
-                            )
-                            .or(
-                                SQL.where('startDate', SQLWhereSign.GreaterEqual, put.startDate)
-                                    .and('endDate', SQLWhereSign.LessEqual, put.endDate),
-                            ),
-                    )
+                    .where(membershipDateRangeOverlaps(put.startDate, put.endDate))
                     .first(false);
 
                 if (existing && (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days || !existing.generated || existing.locked || existing.price < membership.price)) {

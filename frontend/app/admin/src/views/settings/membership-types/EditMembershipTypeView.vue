@@ -43,6 +43,18 @@
             </button>
         </p>
 
+        <hr><h2>{{ $t('Niet-combineerbare aansluitingen') }}</h2>
+        <p>{{ $t('Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode.') }}</p>
+
+        <p v-if="otherMembershipTypes.length === 0" class="info-box">
+            {{ $t('Er zijn geen andere aansluitingstypes om uit te kiezen.') }}
+        </p>
+        <MultipleChoiceInput
+            v-else
+            v-model="incompatibleMembershipTypeIds"
+            :items="otherMembershipTypes.map(t => ({ name: t.name, value: t.id }))"
+        />
+
         <hr><h2>{{ $t("%1CP") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
@@ -91,11 +103,13 @@ import DefaultAgeGroupIdsInput from '@stamhoofd/components/inputs/DefaultAgeGrou
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import JumpToContainer from '@stamhoofd/components/containers/JumpToContainer.vue';
+import MultipleChoiceInput from '@stamhoofd/components/inputs/MultipleChoiceInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
@@ -111,6 +125,7 @@ const saving = ref(false);
 const deleting = ref(false);
 
 const platformManager = usePlatformManager();
+const platform = usePlatform();
 const owner = useRequestOwner();
 const loading = ref(false);
 const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
@@ -213,6 +228,13 @@ const description = computed({
 const behaviour = computed({
     get: () => patched.value.behaviour,
     set: behaviour => addPatch({ behaviour }),
+});
+
+const otherMembershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.id !== props.type.id));
+
+const incompatibleMembershipTypeIds = computed({
+    get: () => patched.value.incompatibleMembershipTypeIds,
+    set: incompatibleMembershipTypeIds => addPatch({ incompatibleMembershipTypeIds: incompatibleMembershipTypeIds as any }),
 });
 
 const requiredTagIdsEnabled = computed({
