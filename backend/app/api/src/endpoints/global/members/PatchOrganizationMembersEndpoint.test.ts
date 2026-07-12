@@ -3,10 +3,10 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
-import { Address, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -4032,6 +4032,136 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
                 });
             });
+        });
+    });
+
+    describe('Incompatible platform membership types', () => {
+        async function setup({ incompatibleWithB, existingRange, putRange }: {
+            incompatibleWithB: boolean;
+            existingRange?: { startDate: Date; endDate: Date };
+            putRange?: { startDate: Date; endDate: Date };
+        }) {
+            const period = await new RegistrationPeriodFactory({
+                startDate: new Date(2024, 0, 1, 0, 0, 0, 0),
+                endDate: new Date(2024, 11, 31, 23, 59, 59, 0),
+            }).create();
+
+            const organization = await new OrganizationFactory({ period }).create();
+
+            const typeB = PlatformMembershipType.create({
+                name: 'Type B',
+                periods: new Map([
+                    [period.id, PlatformMembershipTypeConfig.create({
+                        startDate: period.startDate,
+                        endDate: period.endDate,
+                    })],
+                ]),
+            });
+
+            const typeA = PlatformMembershipType.create({
+                name: 'Type A',
+                incompatibleMembershipTypeIds: incompatibleWithB ? [typeB.id] : [],
+                periods: new Map([
+                    [period.id, PlatformMembershipTypeConfig.create({
+                        startDate: period.startDate,
+                        endDate: period.endDate,
+                    })],
+                ]),
+            });
+
+            const platform = await Platform.getForEditing();
+            platform.periodId = period.id;
+            platform.config.membershipTypes = [typeA, typeB];
+            await platform.save();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+            const token = await Token.createToken(user);
+
+            const member = await new MemberFactory({ organization }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+            await new RegistrationFactory({ member, group }).create();
+
+            // The member already has a membership of type B in this period
+            const existing = new MemberPlatformMembership();
+            existing.memberId = member.id;
+            existing.membershipTypeId = typeB.id;
+            existing.organizationId = organization.id;
+            existing.periodId = period.id;
+            existing.startDate = existingRange?.startDate ?? period.startDate;
+            existing.endDate = existingRange?.endDate ?? period.endDate;
+            await existing.save();
+
+            const arr: Body = new PatchableArray();
+            const memberPatch = MemberWithRegistrationsBlob.patch({ id: member.id });
+            memberPatch.platformMemberships.addPut(MemberPlatformMembershipStruct.create({
+                memberId: member.id,
+                membershipTypeId: typeA.id,
+                organizationId: organization.id,
+                periodId: period.id,
+                startDate: putRange?.startDate ?? period.startDate,
+                endDate: putRange?.endDate ?? period.endDate,
+            }));
+            arr.addPatch(memberPatch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            return { period, organization, typeA, typeB, member, request };
+        }
+
+        test('Blocks adding a membership type the member already has an incompatible type for in the same period', async () => {
+            const { typeA, member, request } = await setup({ incompatibleWithB: true });
+
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.simpleError({
+                code: 'invalid_field',
+                field: 'membershipTypeId',
+                message: 'Incompatible membership type',
+            }));
+
+            // The incompatible membership was not created
+            const memberships = await MemberPlatformMembership.select()
+                .where('memberId', member.id)
+                .where('membershipTypeId', typeA.id)
+                .where('deletedAt', null)
+                .fetch();
+            expect(memberships.length).toBe(0);
+        });
+
+        test('Allows adding a membership type that is not marked incompatible with a type the member already has', async () => {
+            const { typeA, member, request } = await setup({ incompatibleWithB: false });
+
+            const result = await testServer.test(endpoint, request);
+            expect(result.status).toBe(200);
+
+            const memberships = await MemberPlatformMembership.select()
+                .where('memberId', member.id)
+                .where('membershipTypeId', typeA.id)
+                .where('deletedAt', null)
+                .fetch();
+            expect(memberships.length).toBe(1);
+        });
+
+        test('Allows adding an incompatible membership type when the dates do not overlap', async () => {
+            const { typeA, member, request } = await setup({
+                incompatibleWithB: true,
+                // Existing membership covers the first half of the period
+                existingRange: { startDate: new Date(2024, 0, 1, 0, 0, 0, 0), endDate: new Date(2024, 5, 30, 23, 59, 59, 0) },
+                // New membership covers the second half, so there is no overlap
+                putRange: { startDate: new Date(2024, 6, 1, 0, 0, 0, 0), endDate: new Date(2024, 11, 31, 23, 59, 59, 0) },
+            });
+
+            const result = await testServer.test(endpoint, request);
+            expect(result.status).toBe(200);
+
+            const memberships = await MemberPlatformMembership.select()
+                .where('memberId', member.id)
+                .where('membershipTypeId', typeA.id)
+                .where('deletedAt', null)
+                .fetch();
+            expect(memberships.length).toBe(1);
         });
     });
 });
