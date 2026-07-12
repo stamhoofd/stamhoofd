@@ -290,7 +290,7 @@ if (props.route) {
                         id: params.id,
                     },
                     limit: 1,
-                    sort: [],
+                    sort: props.tableObjectFetcher.objectFetcher.extendSort ? props.tableObjectFetcher.objectFetcher.extendSort([]) : [],
                 }),
             );
 

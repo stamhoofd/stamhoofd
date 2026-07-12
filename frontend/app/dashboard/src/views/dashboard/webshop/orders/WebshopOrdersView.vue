@@ -10,7 +10,7 @@
         :prefix-column="allColumns[0]"
         :default-sort-column="preview.privateMeta.numberingType === WebshopNumberingType.Random ? allColumns.find(c => c.id === 'validAt') : allColumns.find(c => c.id === 'number')"
         :default-sort-direction="SortItemDirection.DESC"
-        @click="$event => openOrder($event)"
+        :route="route"
     >
         <template #empty>
             {{ $t('%75') }}
@@ -65,6 +65,14 @@ const preview = computed(() => props.webshopManager.preview);
 const hasSingleTickets = computed(() => preview.value.hasSingleTickets);
 const hasTickets = computed(() => preview.value.hasTickets);
 const configurationId = 'WebshopOrdersRepo-' + preview.value.privateMeta.numberingType;
+
+const route = {
+    component: async () => (await import('./OrderView.vue')).default,
+    objectKey: 'initialOrder',
+    getProperties: () => ({
+        webshopManager: props.webshopManager,
+    }),
+};
 
 const actions = computed(() => {
     const builder = new OrderActionBuilder({
