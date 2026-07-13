@@ -55,7 +55,7 @@ export class ProductSelector extends AutoEncoder {
                 return OptionSelectionRequirement.Optional;
             } else {
                 for (const o of optionMenu.options) {
-                    if (this.optionIds.get(o.id) ?? OptionSelectionRequirement.Optional !== OptionSelectionRequirement.Optional) {
+                    if ((this.optionIds.get(o.id) ?? OptionSelectionRequirement.Optional) !== OptionSelectionRequirement.Optional) {
                         return OptionSelectionRequirement.Excluded;
                     }
                 }

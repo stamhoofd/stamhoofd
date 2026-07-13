@@ -18,10 +18,10 @@ function createProduct() {
     });
 }
 
-function createProductWithOptions() {
+function createProductWithOptions(multipleChoice = true) {
     const optionMenu = OptionMenu.create({
         name: "Kies je extra's",
-        multipleChoice: true,
+        multipleChoice,
         options: [
             Option.create({ name: 'Opdruk' }),
             Option.create({ name: 'Naam' }),
@@ -159,6 +159,54 @@ describe('ProductSelector.doesMatch', () => {
 
         expect(selector.doesMatch(withRequiredOption)).toBe(true);
         expect(selector.doesMatch(withoutRequiredOption)).toBe(false);
+    });
+});
+
+describe('ProductSelector.getOptionRequirement', () => {
+    it('defaults to optional for options that are not listed in a multiple choice menu', () => {
+        const { product, optionMenu, optionA, optionB } = createProductWithOptions();
+        const selector = ProductSelector.create({
+            productId: product.id,
+            optionIds: new Map([[optionA.id, OptionSelectionRequirement.Excluded]]),
+        });
+
+        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(OptionSelectionRequirement.Optional);
+    });
+
+    it('defaults to optional in a choose one menu when all listed options are optional', () => {
+        const { product, optionMenu, optionA, optionB } = createProductWithOptions(false);
+        const selector = ProductSelector.create({
+            productId: product.id,
+            optionIds: new Map([[optionA.id, OptionSelectionRequirement.Optional]]),
+        });
+
+        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(OptionSelectionRequirement.Optional);
+    });
+
+    it('defaults to excluded in a choose one menu when another option is required', () => {
+        const { product, optionMenu, optionA, optionB } = createProductWithOptions(false);
+        const selector = ProductSelector.create({
+            productId: product.id,
+            optionIds: new Map([[optionA.id, OptionSelectionRequirement.Required]]),
+        });
+
+        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(OptionSelectionRequirement.Excluded);
+    });
+
+    it('matches a cart item with an unlisted option in a choose one menu of optional options', () => {
+        const { product, optionMenu, optionA, optionB } = createProductWithOptions(false);
+        const selector = ProductSelector.create({
+            productId: product.id,
+            optionIds: new Map([[optionA.id, OptionSelectionRequirement.Optional]]),
+        });
+
+        const cartItem = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            options: [CartItemOption.create({ optionMenu, option: optionB })],
+        });
+
+        expect(selector.doesMatch(cartItem)).toBe(true);
     });
 });
 
