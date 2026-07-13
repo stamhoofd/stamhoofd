@@ -157,11 +157,23 @@ defineRoute({
             },
         };
     },
-    isDefault: {
-        properties: {
-            preview: visibleWebshops.value[0],
-        },
-    },
+    isDefault: visibleWebshops.value.length
+        ? {
+                properties: {
+                    preview: visibleWebshops.value[0],
+                },
+            }
+        : undefined,
+});
+
+defineRoute({
+    url: 'archief',
+    name: Routes.Archive,
+    show: 'detail',
+    component: async () =>
+        (await import('../dashboard/webshop/WebshopArchiveView.vue'))
+            .default,
+    isDefault: hasWebshopArchive.value ? {} : undefined,
 });
 
 defineRoute({
@@ -185,12 +197,4 @@ defineRoute({
     },
 });
 
-defineRoute({
-    url: 'archief',
-    name: Routes.Archive,
-    show: 'detail',
-    component: async () =>
-        (await import('../dashboard/webshop/WebshopArchiveView.vue'))
-            .default,
-});
 </script>
