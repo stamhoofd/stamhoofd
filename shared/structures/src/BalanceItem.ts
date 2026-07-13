@@ -332,6 +332,19 @@ export function doBalanceItemRelationsMatch(a: Map<BalanceItemRelationType, Bala
     return true;
 }
 
+/**
+ * The VAT for a group of balance items sharing the same VAT rate (and exemption).
+ */
+export type BalanceItemVATSubtotal = {
+    VATPercentage: number;
+    VATExcempt: VATExcemptReason | null;
+    /**
+     * Value on which the VAT is calculated (taxable amount, excluding VAT)
+     */
+    taxablePrice: number;
+    VAT: number;
+};
+
 export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -421,6 +434,18 @@ export class BalanceItem extends AutoEncoder {
     }
 
     /**
+     * Total price excluding VAT that needs to be paid.
+     *
+     * The difference with priceWithoutVAT is that it takes into account canceled and hidden balance items
+     */
+    get payablePriceWithoutVAT() {
+        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+            return 0;
+        }
+        return this.priceWithoutVAT;
+    }
+
+    /**
      * Difference here is that when the VAT is excempt, this is still set, while VAT will be zero.
      */
     get calculatedVAT() {
@@ -476,6 +501,13 @@ export class BalanceItem extends AutoEncoder {
             return 0;
         }
         return STMath.round(this.priceWithVAT / this.amount);
+    }
+
+    get unitPriceWithoutVAT() {
+        if (this.amount === 0) {
+            return 0;
+        }
+        return STMath.round(this.priceWithoutVAT / this.amount);
     }
 
     /**
@@ -624,6 +656,42 @@ export class BalanceItem extends AutoEncoder {
             priceOpen: totalOpen,
             pricePaid: totalPaid,
         };
+    }
+
+    /**
+     * Groups the VAT of the given balance items per VAT rate (and exemption).
+     * Sums the payable prices: taxablePrice + VAT = the payable price including VAT of each group.
+     * Items without VAT and empty groups are left out.
+     */
+    static getPayableVATBreakdown(items: BalanceItem[]): BalanceItemVATSubtotal[] {
+        const map = new Map<string, BalanceItemVATSubtotal>();
+
+        for (const item of items) {
+            if (!item.VATPercentage && !item.VATExcempt) {
+                continue;
+            }
+
+            // Exempt items are grouped per exemption reason with a 0% rate, like on invoices
+            const VATPercentage = item.VATExcempt ? 0 : (item.VATPercentage ?? 0);
+            const key = VATPercentage + '-' + (item.VATExcempt ?? '');
+            let subtotal = map.get(key);
+            if (!subtotal) {
+                subtotal = {
+                    VATPercentage,
+                    VATExcempt: item.VATExcempt,
+                    taxablePrice: 0,
+                    VAT: 0,
+                };
+                map.set(key, subtotal);
+            }
+
+            subtotal.taxablePrice += item.payablePriceWithoutVAT;
+            subtotal.VAT += item.payablePriceWithVAT - item.payablePriceWithoutVAT;
+        }
+
+        return Array.from(map.values())
+            .filter(subtotal => subtotal.taxablePrice !== 0 || subtotal.VAT !== 0)
+            .sort((a, b) => Sorter.byNumberValue(a.VATPercentage, b.VATPercentage));
     }
 
     static filterBalanceItems(items: BalanceItem[]) {
@@ -987,7 +1055,7 @@ export class BalanceItem extends AutoEncoder {
             } else if (item.status === BalanceItemStatus.Canceled) {
                 prefix = $t(`%gg`);
                 prefixClass = 'error';
-            } else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
+            } else if (item.priceOpen < 0 && item.pricePaid > item.payablePriceWithVAT && item.pricePaid > 0) {
                 prefix = $t(`%gh`);
             } else if (item.priceOpen < 0) {
                 prefix = $t(`%10a`);
@@ -999,7 +1067,7 @@ export class BalanceItem extends AutoEncoder {
                 price = Formatter.price(item.priceOpen);
             }
 
-            if (item.price === item.amount * item.unitPrice) {
+            if (item.payablePriceWithVAT === item.amount * item.unitPrice) {
                 if (description) {
                     description += `\n`;
                 }
@@ -1008,7 +1076,7 @@ export class BalanceItem extends AutoEncoder {
                 if (description) {
                     description += `\n`;
                 }
-                description += `<span class="email-style-discount-old-price">${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}</span><span class="email-style-discount-price">${Formatter.escapeHtml(Formatter.price(item.price))}</span>`;
+                description += `<span class="email-style-discount-old-price">${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}</span><span class="email-style-discount-price">${Formatter.escapeHtml(Formatter.price(item.payablePriceWithVAT))}</span>`;
             }
 
             if (item.pricePaid !== 0 && item.pricePaid !== (item.amount * item.unitPrice)) {
@@ -1109,15 +1177,19 @@ export class GroupedBalanceItems {
         return this.items.reduce((acc, item) => acc + item.priceOpen, 0);
     }
 
-    get price() {
+    get payablePriceWithVAT() {
         return this.items.reduce((acc, item) => acc + item.payablePriceWithVAT, 0);
+    }
+
+    get payablePriceWithoutVAT() {
+        return this.items.reduce((acc, item) => acc + item.payablePriceWithoutVAT, 0);
     }
 
     get unitPriceWithVAT() {
         if (this.amount === 0) {
             return 0;
         }
-        return Math.round(this.price / this.amount);
+        return Math.round(this.payablePriceWithVAT / this.amount);
     }
 
     get pricePending() {
@@ -1164,8 +1236,11 @@ export class GroupedBalanceItems {
         return this.items[0].unitPrice;
     }
 
-    get unitPriceWithAT() {
-        return this.items[0].unitPriceWithVAT;
+    get unitPriceWithoutVAT() {
+        if (this.amount === 0) {
+            return 0;
+        }
+        return Math.round(this.payablePriceWithoutVAT / this.amount);
     }
 
     get dueAt() {

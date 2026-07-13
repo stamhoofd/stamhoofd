@@ -463,10 +463,13 @@ export class Formatter {
     }
 
     static price(value: number, removeZeroDecimals = true): string {
+        // We store prices with up to 4 digits after the decimal point for correct VAT calculations,
+        // but we never display more than 2 digits: users confuse 5,012 euro with 5.012 euro.
+        // The extra digits are rounded away here.
         const formatted = new Intl.NumberFormat('nl-BE', {
             style: 'currency',
             currency: 'EUR',
-            maximumFractionDigits: 4,
+            maximumFractionDigits: 2,
             minimumFractionDigits: 2,
         }).format(Math.abs(value) / 100_00);
 

@@ -4,7 +4,7 @@
             <BalanceItemIcon :item="item" :is-payable="isPayable" />
         </template>
 
-        <BalanceItemTitleBox :item="item" :is-payable="isPayable" />
+        <BalanceItemTitleBox :item="item" :is-payable="isPayable" :exclude-vat="excludeVat" />
 
         <template v-if="item.status === BalanceItemStatus.Canceled || item.amount" #middleRight>
             <p v-if="item.status === BalanceItemStatus.Canceled" class="style-price-base negative">
@@ -17,14 +17,14 @@
         </template>
 
         <template #right>
-            <p v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
-                ({{ formatPrice(item.price) }})
+            <p v-if="!item.isDue" v-tooltip="item.dueAt ? $t('Te betalen tegen {date}', {date: formatDate(item.dueAt)}) : undefined" class="style-price-base disabled style-tooltip">
+                ({{ formatPrice(displayPrice) }})
             </p>
-            <p v-else class="style-price-base" :class="{negative: item.price < 0}">
-                {{ formatPrice(item.price) }}
+            <p v-else class="style-price-base" :class="{negative: displayPrice < 0}">
+                {{ formatPrice(displayPrice) }}
             </p>
 
-            <p v-if="item.pricePaid < 0 && item.price < 0" class="style-price-base negative small">
+            <p v-if="item.pricePaid < 0 && item.payablePriceWithVAT < 0" class="style-price-base negative small">
                 {{ $t('%1UY', {price: formatPrice(-item.pricePaid )}) }}
             </p>
 
@@ -71,14 +71,22 @@ const props = withDefaults(
         item: BalanceItem | GroupedBalanceItems;
         isPayable: boolean;
         hasWrite?: boolean;
+
+        /**
+         * Show the price excluding VAT (used together with a separate VAT overview).
+         */
+        excludeVat?: boolean;
     }>(),
     {
         hasWrite: true,
+        excludeVat: false,
     },
 );
 
 const context = useContext();
 const present = usePresent();
+
+const displayPrice = computed(() => props.excludeVat ? props.item.payablePriceWithoutVAT : props.item.payablePriceWithVAT);
 
 const canClick = computed(() => {
     return props.hasWrite && !props.isPayable && props.item instanceof BalanceItem;
@@ -154,7 +162,7 @@ function showContextMenu(event: MouseEvent) {
 async function editBalanceItem(balanceItem: BalanceItem) {
     const component = AsyncComponent(() => import('#payments/EditBalanceItemView.vue'), {
         balanceItem,
-        isNew: false
+        isNew: false,
     });
     await present({
         components: [
