@@ -1180,7 +1180,7 @@ onBeforeUnmount(() => {
 function doRefresh() {
     if (document.visibilityState === 'visible') {
         // Only refresh after 1 minute minimum
-        if (lastRefresh.value.getTime() + 1000 * 60 < new Date().getTime()) {
+        if (STAMHOOFD.environment === 'development' || lastRefresh.value.getTime() + 1000 * 60 < new Date().getTime()) {
             refresh();
         }
     }
