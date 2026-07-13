@@ -8,11 +8,7 @@
 
         <main>
             <h1>
-                {{
-                    isLoggedIn
-                        ? $t("%1Ur")
-                        : $t("%1aO")
-                }}
+                {{ isLoggedIn ? $t("%1Ur") : $t("%1aO") }}
             </h1>
             <p>
                 {{ $t("%1da") }}
@@ -25,42 +21,27 @@
             </p>
             <template v-else>
                 <p
-                    v-if="
-                        organization.privateMeta?.externalSyncData
-                            ?.lastExternalSync
-                    "
+                    v-if="organization.privateMeta?.externalSyncData?.lastExternalSync"
                     :class="
-                        isToday(
-                            organization.privateMeta.externalSyncData
-                                .lastExternalSync,
-                        )
+                        isToday(organization.privateMeta.externalSyncData.lastExternalSync)
                             ? 'success-box'
                             : 'info-box'
                     "
                 >
                     {{
                         $t("%1VL", {
-                            date: formatDate(
-                                organization.privateMeta.externalSyncData
-                                    .lastExternalSync,
-                            ),
-                            name:
-                                organization.privateMeta.externalSyncData
-                                    .lastSyncedBy || "?",
+                            date: formatDate(organization.privateMeta.externalSyncData.lastExternalSync),
+                            name: organization.privateMeta.externalSyncData.lastSyncedBy || "?",
                         })
                     }}
                 </p>
                 <p v-else class="warning-box">
                     {{ $t("%1XZ") }}
                 </p>
-                <p
-                    v-if="organization.privateMeta?.externalGroupNumber"
-                    class="info-box"
-                >
+                <p v-if="organization.privateMeta?.externalGroupNumber" class="info-box">
                     {{
                         $t("%1W7", {
-                            groupNumber:
-                                organization.privateMeta.externalGroupNumber,
+                            groupNumber: organization.privateMeta.externalGroupNumber,
                         })
                     }}
                 </p>
@@ -119,13 +100,10 @@ import {
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import {
-    SGVGroupAdministration,
-} from '../SGVGroupAdministration';
-import {
-    SGVOAuth,
-} from '../SGVOAuth';
+import { SGVGroupAdministration } from '../SGVGroupAdministration';
+import { SGVOAuth } from '../SGVOAuth';
 import { SGVSyncReport } from '../SGVSyncReport.ts';
+import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 
 const props = defineProps<{
     code?: string;
@@ -249,6 +227,8 @@ async function loadOrganizationMembers() {
     return platformMembers.map(platformMember => platformMember.member);
 }
 
+const patchOrganization = usePatchOrganization();
+
 /** Persists organization-level sync metadata only for successful runs so warnings are based on trusted data. */
 async function saveExternalSyncData(sgv: SGVGroupAdministration, report: SGVSyncReport) {
     if (report.errors.length > 0) {
@@ -262,7 +242,7 @@ async function saveExternalSyncData(sgv: SGVGroupAdministration, report: SGVSync
         return;
     }
 
-    await organizationManager.value.patch(
+    await patchOrganization(
         Organization.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 externalSyncData,
