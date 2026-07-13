@@ -30,21 +30,43 @@ export default new Migration(async () => {
             );
             const organizations = organizationIds.length ? await Organization.getByIDs(...organizationIds) : [];
 
-            for (const payment of payments) {
-                if (!payment.organizationId) {
-                    console.warn('Payment without organizationId, skipping', payment.id);
-                    continue;
-                }
+            // Load the attached balance item payments of this batch in bulk, to decide which
+            // payments actually move money and therefore need the PaymentService side effects.
+            const { balanceItemPayments } = await Payment.loadBalanceItems(payments);
 
-                const organization = organizations.find(o => o.id === payment.organizationId);
-                if (!organization) {
-                    console.warn('Organization not found for payment, skipping', payment.id, payment.organizationId);
-                    continue;
-                }
+            for (const payment of payments) {
+                // Only route through the PaymentService (which marks balance items as paid, flushes
+                // caches, ...) when the payment moves money on at least one balance item. When all
+                // attached balance item payments are zero (or there are none), update the status
+                // directly to avoid those side effects.
+                const hasNonZeroBalanceItemPayment = balanceItemPayments.some(
+                    bip => bip.paymentId === payment.id && bip.price !== 0,
+                );
 
                 try {
-                    // Attribute the payment to its original date instead of the migration run date.
-                    await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded, payment.createdAt);
+                    if (hasNonZeroBalanceItemPayment) {
+                        if (!payment.organizationId) {
+                            console.warn('Payment without organizationId, skipping', payment.id);
+                            continue;
+                        }
+
+                        const organization = organizations.find(o => o.id === payment.organizationId);
+                        if (!organization) {
+                            console.warn('Organization not found for payment, skipping', payment.id, payment.organizationId);
+                            continue;
+                        }
+
+                        // Attribute the payment to its original date instead of the migration run date.
+                        await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded, payment.createdAt);
+                    } else {
+                        // No side effects needed: update the status directly.
+                        payment.status = PaymentStatus.Succeeded;
+                        payment.paidAt = payment.createdAt;
+                        await payment.save({
+                            skipMarkSaved: true,
+                            skipSendEvents: true,
+                        });
+                    }
                     succeeded++;
                 } catch (e) {
                     // Isolate failures per payment: one bad row should not abort (and wedge) the whole migration.
