@@ -143,11 +143,11 @@
                 <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" :show-invoice-status="invoicesEnabled" />
             </STList>
 
-            <template v-if="detailedItem.invoices.length">
+            <template v-if="invoices.length">
                 <hr><h2>{{ $t('%1JA') }}</h2>
 
                 <STList>
-                    <InvoiceRow v-for="invoice of detailedItem.invoices" :key="invoice.id" :invoice="invoice" :invoices="detailedItem.invoices" />
+                    <InvoiceRow v-for="invoice of invoices" :key="invoice.id" :invoice="invoice" :invoices="invoices" />
                 </STList>
             </template>
 
@@ -237,6 +237,10 @@ const pendingPayments = computed(() => {
 
 const succeededPayments = computed(() => {
     return detailedItem.value?.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt)) ?? [];
+});
+
+const invoices = computed(() => {
+    return detailedItem.value?.invoices.slice().sort((a, b) => Sorter.byDateValue(a.invoicedAt ?? a.createdAt, b.invoicedAt ?? b.createdAt)) ?? [];
 });
 
 const invoicesEnabled = computed(() => app === 'dashboard' && (organization.value?.meta.invoicesEnabled ?? false));
