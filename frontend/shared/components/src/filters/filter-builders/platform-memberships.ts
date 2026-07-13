@@ -14,7 +14,6 @@ import { useGetOrganizationUIFilterBuilders } from './organizations';
 
 export function useGetPlatformMembershipsUIFilterBuilders() {
     const platform = usePlatform();
-    const loading = ref(true);
     const organizationFilterBuilders = useGetOrganizationUIFilterBuilders({ onlyBaseFilters: true });
     const registrationPeriodsRelationFetcher = useRegistrationPeriodsRelationFetcher();
 
@@ -111,5 +110,5 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
         return builders;
     };
 
-    return { loading, getWebshopUIFilterBuilders };
+    return { getWebshopUIFilterBuilders };
 }

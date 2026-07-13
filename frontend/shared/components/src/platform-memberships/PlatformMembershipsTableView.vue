@@ -1,28 +1,24 @@
 <template>
-    <LoadingViewTransition>
-        <ModernTableView
-            v-if="!loading"
-            ref="modernTableView"
-            :table-object-fetcher="tableObjectFetcher"
-            :filter-builders="filterBuilders"
-            :title="title"
-            :column-configuration-id="configurationId"
-            :default-filter="defaultFilter"
-            :actions="actions"
-            :all-columns="allColumns"
-            :default-sort-column="defaultSortColumn"
-            :default-sort-direction="defaultSortDirection"
-            :route
-        >
-            <template #empty>
-                {{ $t('%1OS') }}
-            </template>
-        </ModernTableView>
-    </LoadingViewTransition>
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :filter-builders="filterBuilders"
+        :title="title"
+        :column-configuration-id="configurationId"
+        :default-filter="defaultFilter"
+        :actions="actions"
+        :all-columns="allColumns"
+        :default-sort-column="defaultSortColumn"
+        :default-sort-direction="defaultSortDirection"
+        :route
+    >
+        <template #empty>
+            {{ $t('%1OS') }}
+        </template>
+    </ModernTableView>
 </template>
 
 <script lang="ts" setup>
-import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { TableAction } from '#tables/classes/TableAction.ts';
@@ -50,7 +46,7 @@ const props = withDefaults(
     },
 );
 
-const { getWebshopUIFilterBuilders, loading } = useGetPlatformMembershipsUIFilterBuilders();
+const { getWebshopUIFilterBuilders } = useGetPlatformMembershipsUIFilterBuilders();
 const filterBuilders = computed(() => getWebshopUIFilterBuilders());
 
 const title = props.customTitle ?? $t('%1Nt');
@@ -58,7 +54,11 @@ const title = props.customTitle ?? $t('%1Nt');
 const platform = usePlatform();
 
 const defaultFilter: StamhoofdFilter = {
-    periodId: platform.value.period.id,
+    periodId: {
+        $: '$rel',
+        value: platform.value.period.id,
+        name: platform.value.period.name,
+    },
 };
 
 useGlobalEventListener('members-deleted', async () => {
