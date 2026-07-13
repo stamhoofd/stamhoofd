@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 
 import { AccessRight } from '../AccessRight.js';
@@ -567,8 +567,14 @@ export class PlatformFamily {
     }
 }
 
+// Note: extending a non-autoencodeable object from an autoencodeable object is a bad pattern
+// this causes issues with built in methods that won't work on PlatformRegistration
 export class PlatformRegistration extends Registration {
     member: PlatformMember;
+
+    updateFrom(object: PlatformRegistration) {
+        this.member.family.copyFromClone(object.member.family);
+    }
 
     static createSingles(blob: RegistrationsBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformRegistration[] {
         const results: PlatformRegistration[] = [];
@@ -707,6 +713,10 @@ export class PlatformMember implements ObjectWithRecords {
         this.family = data.family;
         this.isNew = data.isNew ?? false;
         this.hasFullAccess = (data.hasFullAccess ?? false) || this.isNew;
+    }
+
+    updateFrom(object: PlatformMember) {
+        this.family.copyFromClone(object.family);
     }
 
     clone() {

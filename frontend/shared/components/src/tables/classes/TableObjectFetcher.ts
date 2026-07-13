@@ -4,6 +4,7 @@ import { CountFilteredRequest, LimitedFilteredRequest, isEmptyFilter, isEqualFil
 import { onBeforeUnmount, reactive } from 'vue';
 import type { ObjectFetcher } from './ObjectFetcher';
 import { AutoEncoder } from '@simonbackx/simple-encoding';
+import { isUpdatableObject } from '@stamhoofd/structures/UpdatableObject.js';
 
 export function useTableObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
     const fetcher = reactive(new TableObjectFetcher<O>({
@@ -327,7 +328,10 @@ export class TableObjectFetcher<O extends { id: string }> {
 
                 const objects = data.results.map((o) => {
                     const cachedReference = this._objectReferenceCache.get(o.id);
-                    if (cachedReference && cachedReference instanceof AutoEncoder && o instanceof AutoEncoder) {
+                    if (cachedReference && isUpdatableObject(cachedReference) && Object.getPrototypeOf(cachedReference) === Object.getPrototypeOf(o)) {
+                        cachedReference.updateFrom(o as typeof cachedReference);
+                        return cachedReference;
+                    } else if (cachedReference && cachedReference instanceof AutoEncoder && o instanceof AutoEncoder) {
                         cachedReference.deepSet(o);
                         return cachedReference;
                     }
