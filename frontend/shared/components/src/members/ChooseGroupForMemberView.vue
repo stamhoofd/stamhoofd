@@ -6,64 +6,82 @@
         <main class="center">
             <h1>{{ $t('%di', {member: member.patchedMember.firstName}) }}</h1>
 
-            <ScrollableSegmentedControl v-if="allowChangingOrganization" v-model="selectedOrganization" :items="items" :labels="labels">
+            <ScrollableSegmentedControl v-if="showControl" v-model="selectedControlTab" :items="controlItems" :labels="controlLabels" data-testid="register-tabs">
                 <template #right>
-                    <button v-tooltip="$t('%dj')" class="button icon gray add" type="button" @click="searchOrganization" />
+                    <button v-if="allowChangingOrganization" v-tooltip="$t('%dj')" class="button icon gray add" type="button" @click="searchOrganization" />
                 </template>
             </ScrollableSegmentedControl>
 
-            <p v-if="differentOrganization" class="info-box icon basket">
-                {{ $t('%dk') }} {{ selectedOrganization.name }}.
-            </p>
+            <RegisterMemberEventsBox v-if="isEventsActive" :member="member" :organization="selectedOrganization" @select="openEvent" />
 
             <template v-else>
-                <p v-if="alreadyRegisteredMessage" class="info-box">
-                    {{ alreadyRegisteredMessage }}
+                <p v-if="differentOrganization" class="info-box icon basket">
+                    {{ $t('%dk') }} {{ selectedOrganization.name }}.
                 </p>
-                <p v-if="noGroupsMessage" class="info-box">
-                    {{ noGroupsMessage }}
+
+                <template v-else>
+                    <p v-if="alreadyRegisteredMessage" class="info-box">
+                        {{ alreadyRegisteredMessage }}
+                    </p>
+                    <p v-if="noGroupsMessage" class="info-box">
+                        {{ noGroupsMessage }}
+                    </p>
+                </template>
+
+                <div v-if="showGroupSearch" class="input-with-buttons">
+                    <div>
+                        <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
+                            <input v-model="groupSearchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="group-search-input" :placeholder="$t('Zoek een groep')">
+                        </form>
+                    </div>
+                </div>
+
+                <div v-for="({ category, groups }, index) of filteredCategories" :key="category.id" class="container">
+                    <hr v-if="index > 0 || !showControl"><h2 class="style-with-button">
+                        <div>
+                            {{ category.settings.name }}
+                            <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('%dl')" />
+                        </div>
+                        <div>
+                            <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>
+                        </div>
+                    </h2>
+                    <STList class="illustration-list">
+                        <RegisterMemberGroupRow v-for="group in groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" data-testid="group-button" @click="openGroup(group)" />
+                    </STList>
+                </div>
+
+                <p v-if="showGroupSearch && groupSearchQuery && filteredCategories.length === 0" class="info-box">
+                    {{ $t('Geen groepen gevonden.') }}
                 </p>
             </template>
-
-            <div v-for="(category, index) of tree.categories" :key="category.id" class="container">
-                <hr v-if="index > 0 || !allowChangingOrganization"><h2 class="style-with-button">
-                    <div>
-                        {{ category.settings.name }}
-                        <span v-if="!category.settings.public" class="icon lock gray" v-tooltip="$t('%dl')" />
-                    </div>
-                    <div>
-                        <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>
-                    </div>
-                </h2>
-                <STList class="illustration-list">
-                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" data-testid="group-button" @click="openGroup(group)" />
-                </STList>
-            </div>
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
+import { useEventsEnabled } from '#hooks/useEventsEnabled.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '#overlays/Toast.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { Group, Organization, PlatformMember } from '@stamhoofd/structures';
+import { usePresent } from '@simonbackx/vue-app-navigation';
+import type { Event, Group, Organization, PlatformMember } from '@stamhoofd/structures';
 import { GroupCategoryTree, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
+import RegisterMemberEventsBox from './components/group/RegisterMemberEventsBox.vue';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import SearchOrganizationView from './SearchOrganizationView.vue';
 
 const props = defineProps<{
     member: PlatformMember;
-    selectionHandler: (data: { group: Group; groupOrganization: Organization }, navigate: NavigationActions) => Promise<void> | void;
+    selectionHandler: (data: { group: Group; groupOrganization?: Organization }, navigate: NavigationActions) => Promise<void> | void;
     defaultOrganization?: Organization;
 }>();
 
@@ -86,8 +104,7 @@ function checkOrganization() {
         if (!organization.value) {
             // Administration panel: register as organizing organization
             props.member.family.checkout.asOrganizationId = selectedOrganization.value?.id ?? null;
-        }
-        else {
+        } else {
             props.member.family.checkout.asOrganizationId = organization.value.id;
         }
         props.member.family.checkout.defaultOrganization = selectedOrganization.value;
@@ -98,20 +115,87 @@ onMounted(() => {
     checkOrganization();
 });
 
-const items = computed(() => {
-    return props.member.organizations;
+const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app === 'admin') && !STAMHOOFD.singleOrganization;
+
+// A single segmented control combines organization switching (when allowed) and, when the events feature
+// is enabled, an extra 'Activiteiten' tab to register the member for an event. Never show two controls at once.
+const GROUPS_TAB = 'groups';
+const EVENTS_TAB = 'events';
+const eventsEnabled = useEventsEnabled();
+const isEventsTab = ref(false);
+const isEventsActive = computed(() => isEventsTab.value && eventsEnabled.value);
+
+// The control is shown when there is something to switch between: organizations and/or the events tab
+const showControl = computed(() => allowChangingOrganization || eventsEnabled.value);
+
+// Items are organization ids (when switching is allowed) or a single 'groups' tab, plus the 'events' tab when enabled
+const controlItems = computed(() => {
+    const list = allowChangingOrganization ? props.member.organizations.map(o => o.id) : [GROUPS_TAB];
+    if (eventsEnabled.value) {
+        list.push(EVENTS_TAB);
+    }
+    return list;
 });
 
-const labels = computed(() => {
-    return items.value.map(o => o.name);
+const controlLabels = computed(() => controlItems.value.map((id) => {
+    if (id === EVENTS_TAB) {
+        return $t('Activiteiten');
+    }
+    if (id === GROUPS_TAB) {
+        return $t('Groepen');
+    }
+    return props.member.organizations.find(o => o.id === id)?.name ?? '';
+}));
+
+const selectedControlTab = computed<string>({
+    get() {
+        if (isEventsActive.value) {
+            return EVENTS_TAB;
+        }
+        if (!allowChangingOrganization) {
+            return GROUPS_TAB;
+        }
+        return selectedOrganization.value?.id ?? GROUPS_TAB;
+    },
+    set(value: string) {
+        if (value === EVENTS_TAB) {
+            isEventsTab.value = true;
+            return;
+        }
+        isEventsTab.value = false;
+        if (value !== GROUPS_TAB) {
+            const organization = props.member.organizations.find(o => o.id === value);
+            if (organization) {
+                selectedOrganization.value = organization;
+            }
+        }
+    },
 });
-const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app === 'admin') && !STAMHOOFD.singleOrganization;
 
 const tree = computed(() => treeFactory({
     filterGroups: (g) => {
         return props.member.family.checkout.isAdminFromSameOrganization || props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!);
     },
 }));
+
+// Search within the listed groups, only offered when the list gets long
+const groupSearchQuery = ref('');
+const totalGroupCount = computed(() => tree.value.categories.reduce((sum, category) => sum + category.groups.length, 0));
+const showGroupSearch = computed(() => totalGroupCount.value > 5);
+
+const filteredCategories = computed(() => {
+    // Ignore the query when the search field is hidden (e.g. after switching to an organization with few groups)
+    const query = showGroupSearch.value ? Formatter.slug(groupSearchQuery.value.trim()) : '';
+
+    return tree.value.categories
+        .map((category) => {
+            const groups = query.length === 0
+                ? category.groups
+                : category.groups.filter(g => Formatter.slug(g.settings.name.toString()).includes(query));
+            return { category, groups };
+        })
+        .filter(entry => entry.groups.length > 0);
+});
 
 const alreadyRegisteredGroups = computed(() => {
     const organizationId = selectedOrganization.value?.id;
@@ -170,6 +254,8 @@ const noGroupsMessage = computed(() => {
 function addOrganization(organization: Organization) {
     props.member.insertOrganization(organization);
     selectedOrganization.value = organization;
+    // Selecting an organization always shows its groups, not the events tab
+    isEventsTab.value = false;
 }
 
 if (props.defaultOrganization) {
@@ -179,10 +265,24 @@ if (props.defaultOrganization) {
 async function openGroup(group: Group) {
     try {
         await props.selectionHandler({ group, groupOrganization: selectedOrganization.value! }, navigate);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
+}
+
+async function openEvent(event: Event) {
+    if (!event.group) {
+        return;
+    }
+    try {
+        await props.selectionHandler({ group: event.group, groupOrganization: props.member.family.getOrganization(event.group.organizationId) }, navigate);
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+function blurFocus() {
+    (document.activeElement as HTMLElement)?.blur();
 }
 
 async function searchOrganization() {
