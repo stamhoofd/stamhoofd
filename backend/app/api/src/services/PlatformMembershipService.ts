@@ -4,7 +4,7 @@ import { Group, Member, MemberPlatformMembership, Organization, Platform, Regist
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { AuditLogSource, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Formatter, sleep, Sorter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';
 import { MemberNumberService } from './MemberNumberService.js';
 
@@ -50,6 +50,7 @@ export class PlatformMembershipService {
             console.log('Starting updateAllMemberships');
             await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
                 while (true) {
+                    await sleep(200);
                     const rawMembers = await Member.where({
                         id: {
                             value: id,

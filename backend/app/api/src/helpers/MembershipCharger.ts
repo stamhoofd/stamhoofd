@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 
 export const MembershipCharger = {
     async charge() {
@@ -178,6 +178,7 @@ export const MembershipCharger = {
         const chunkSize = 100;
 
         while (true) {
+            await sleep(200);
             const q = MemberPlatformMembership.select()
                 .where('id', SQLWhereSign.Greater, lastId)
                 .where('balanceItemId', null)
