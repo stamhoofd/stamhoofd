@@ -19,7 +19,7 @@
                 </div>
             </h2>
 
-            <input :v-tooltip="$t('%Ip')" class="input" :value="organization.registerUrl" readonly @click="copyElement"><p class="info-box">
+            <input v-tooltip="$t('%Ip')" class="input" :value="organization.registerUrl" readonly @click="copyElement"><p class="info-box">
                 {{ $t('%2u') }}
             </p>
 

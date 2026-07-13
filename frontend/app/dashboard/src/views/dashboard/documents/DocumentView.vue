@@ -2,8 +2,8 @@
     <div class="st-view document-view">
         <STNavigationBar :title="$t(`%1U`)">
             <template #right>
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%Ko')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%Kp')" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" v-tooltip="$t('%Ko')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" v-tooltip="$t('%Kp')" @click="goForward" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>

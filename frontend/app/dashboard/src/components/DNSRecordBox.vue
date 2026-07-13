@@ -10,12 +10,12 @@
             <dd>{{ record.type }}</dd>
 
             <dt>{{ $t('%1Os') }}</dt>
-            <dd v-copyable class="selectable" :v-tooltip="$t('%Ip')">
+            <dd v-copyable class="selectable" v-tooltip="$t('%Ip')">
                 {{ record.name }}
             </dd>
 
             <dt>{{ $t('%Iq') }}</dt>
-            <dd v-copyable class="selectable" :v-tooltip="$t('%Ip')">
+            <dd v-copyable class="selectable" v-tooltip="$t('%Ip')">
                 {{ record.value }}
             </dd>
 

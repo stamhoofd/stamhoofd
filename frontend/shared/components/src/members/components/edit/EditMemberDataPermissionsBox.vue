@@ -10,7 +10,7 @@
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('%fC') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('%fD')" @click="clear">
+            {{ $t('%fC') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" v-tooltip="$t('%fD')" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>

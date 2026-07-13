@@ -26,7 +26,7 @@
                 <template v-if="isAdmin && trackingYear">
                     <TrackingYearInput v-model="trackingYear" :required="false" :validator="validator">
                         <template #right>
-                            <button :v-tooltip="$t('%fH')" class="button icon trash small gray" type="button" @click="deleteTrackingYear" />
+                            <button v-tooltip="$t('%fH')" class="button icon trash small gray" type="button" @click="deleteTrackingYear" />
                         </template>
                     </TrackingYearInput>
                     <p class="style-description-small">
@@ -51,7 +51,7 @@
                 <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
                 <EmailInput v-if="!(member.isNew) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
                     <template #right>
-                        <button :v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
+                        <button v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
                 <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :placeholder="$t(`%fP`)" :validator="validator" @update:model-value="setEmail(n - 1, $event ?? '')">
@@ -102,7 +102,7 @@
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('%1NN', {date: formatDate(reviewDate)}) }}. <button :v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
+            {{ $t('%1NN', {date: formatDate(reviewDate)}) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>

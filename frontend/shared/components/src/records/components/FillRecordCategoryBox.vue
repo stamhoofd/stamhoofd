@@ -19,7 +19,7 @@
                 </span>
             </div>
             <div>
-                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" :v-tooltip="$t('%j9')" @click="clearAnswers" />
+                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" v-tooltip="$t('%j9')" @click="clearAnswers" />
             </div>
         </h2>
 

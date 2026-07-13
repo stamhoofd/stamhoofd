@@ -43,19 +43,19 @@
                         <tbody>
                             <tr>
                                 <td>{{ $t('%1JL') }}</td>
-                                <td v-copyable="payment.price/100" class="style-copyable" :v-tooltip="$t('%Ip')">
+                                <td v-copyable="payment.price/100" class="style-copyable" v-tooltip="$t('%Ip')">
                                     {{ formatPrice(payment.price) }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td>{{ $t('%J5') }}</td>
-                                <td v-copyable="creditor" class="style-copyable" :v-tooltip="$t('%Ip')">
+                                <td v-copyable="creditor" class="style-copyable" v-tooltip="$t('%Ip')">
                                     {{ creditor }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td>{{ $t('%kc') }}</td>
-                                <td v-copyable="iban" class="style-copyable" :v-tooltip="$t('%Ip')">
+                                <td v-copyable="iban" class="style-copyable" v-tooltip="$t('%Ip')">
                                     {{ iban }}
                                 </td>
                             </tr>
@@ -69,7 +69,7 @@
                                 <td v-else>
                                     {{ $t('%J8') }}
                                 </td>
-                                <td v-copyable="transferDescription" class="style-copyable" :v-tooltip="$t('%Ip')">
+                                <td v-copyable="transferDescription" class="style-copyable" v-tooltip="$t('%Ip')">
                                     {{ formattedTransferDescription }}
                                 </td>
                             </tr>

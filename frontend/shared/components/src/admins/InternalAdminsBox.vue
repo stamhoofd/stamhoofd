@@ -20,11 +20,11 @@
     <STList v-else>
         <STListItem v-for="member in filteredLimitedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
             <template #left>
-                <span v-if="memberHasFullAccess(member)" class="icon layered" :v-tooltip="$t('%Yb')">
+                <span v-if="memberHasFullAccess(member)" class="icon layered" v-tooltip="$t('%Yb')">
                     <span class="icon user-admin-layer-1" />
                     <span class="icon user-admin-layer-2 yellow" />
                 </span>
-                <span v-else-if="memberHasNoRoles(member)" class="icon layered" :v-tooltip="$t('%Yc')">
+                <span v-else-if="memberHasNoRoles(member)" class="icon layered" v-tooltip="$t('%Yc')">
                     <span class="icon user-blocked-layer-1" />
                     <span class="icon user-blocked-layer-2 red" />
                 </span>
@@ -45,7 +45,7 @@
                 <span v-if="member.id === me?.memberId" class="style-tag">
                     {{ $t('%Yd') }}
                 </span>
-                <span v-else-if="!member.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('%Ye')" />
+                <span v-else-if="!member.users.find(u => u.hasAccount)" class="icon email gray" v-tooltip="$t('%Ye')" />
                 <span><span class="icon gray edit" /></span>
             </template>
         </STListItem>

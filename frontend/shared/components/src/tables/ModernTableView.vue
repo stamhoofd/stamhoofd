@@ -17,7 +17,7 @@
             </template>
             <template #right>
                 <template v-if="!(isIOS && showSelection)">
-                    <button v-for="(action, index) of filteredActions" :key="index" type="button" :class="'button icon '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" :v-tooltip="action.tooltip" @click="handleAction(action, $event)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" type="button" :class="'button icon '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" v-tooltip="action.tooltip" @click="handleAction(action, $event)" />
                 </template>
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
@@ -79,7 +79,7 @@
                                     />
                                 </button>
                                 <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="(event) => handleDragStart(event, column)" @touchstart="(event) => handleDragStart(event, column)" /></span>
-                                <button v-else-if="canCollapse" type="button" class="button light-gray icon collapse-left" :v-tooltip="$t(`%je`)" @click="collapse" />
+                                <button v-else-if="canCollapse" type="button" class="button light-gray icon collapse-left" v-tooltip="$t(`%je`)" @click="collapse" />
                             </div>
                         </div>
                     </div>

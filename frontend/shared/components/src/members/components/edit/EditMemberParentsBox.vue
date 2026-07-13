@@ -78,7 +78,7 @@
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('%fD')" @click="clear">
+            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" v-tooltip="$t('%fD')" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>

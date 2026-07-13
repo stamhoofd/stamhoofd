@@ -30,11 +30,11 @@
     <STList v-else-if="filteredAdmins.length > 0">
         <STListItem v-for="admin of filteredLimitedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
             <template #left>
-                <span v-if="hasFullAccess(admin)" class="icon layered" :v-tooltip="$t('%Yb')">
+                <span v-if="hasFullAccess(admin)" class="icon layered" v-tooltip="$t('%Yb')">
                     <span class="icon user-admin-layer-1" />
                     <span class="icon user-admin-layer-2 yellow" />
                 </span>
-                <span v-else-if="hasEmptyAccess(admin)" class="icon layered" :v-tooltip="$t('%Yc')">
+                <span v-else-if="hasEmptyAccess(admin)" class="icon layered" v-tooltip="$t('%Yc')">
                     <span class="icon user-blocked-layer-1" />
                     <span class="icon user-blocked-layer-2 red" />
                 </span>
@@ -58,7 +58,7 @@
                 <span v-if="admin.id === me?.id" class="style-tag">
                     {{ $t('%Yd') }}
                 </span>
-                <span v-else-if="!admin.hasAccount" class="icon email gray" :v-tooltip="$t('%Ye')" />
+                <span v-else-if="!admin.hasAccount" class="icon email gray" v-tooltip="$t('%Ye')" />
                 <span><span class="icon gray edit" /></span>
             </template>
         </STListItem>

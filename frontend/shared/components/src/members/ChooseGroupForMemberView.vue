@@ -8,7 +8,7 @@
 
             <ScrollableSegmentedControl v-if="allowChangingOrganization" v-model="selectedOrganization" :items="items" :labels="labels">
                 <template #right>
-                    <button :v-tooltip="$t('%dj')" class="button icon gray add" type="button" @click="searchOrganization" />
+                    <button v-tooltip="$t('%dj')" class="button icon gray add" type="button" @click="searchOrganization" />
                 </template>
             </ScrollableSegmentedControl>
 
@@ -29,7 +29,7 @@
                 <hr v-if="index > 0 || !allowChangingOrganization"><h2 class="style-with-button">
                     <div>
                         {{ category.settings.name }}
-                        <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('%dl')" />
+                        <span v-if="!category.settings.public" class="icon lock gray" v-tooltip="$t('%dl')" />
                     </div>
                     <div>
                         <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>

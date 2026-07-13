@@ -4,10 +4,10 @@
             <span class="icon user small" />
         </template>
         <template v-else-if="user.hasAccount && !user.verified" #left>
-            <span class="icon email small" :v-tooltip="$t('%fg')" />
+            <span class="icon email small" v-tooltip="$t('%fg')" />
         </template>
         <template v-else #left>
-            <span class="icon email small" :v-tooltip="$t('%fh')" />
+            <span class="icon email small" v-tooltip="$t('%fh')" />
         </template>
         <template v-if="(user.firstName || user.lastName)">
             <h3 v-if="user.firstName || user.lastName" class="style-title-list">

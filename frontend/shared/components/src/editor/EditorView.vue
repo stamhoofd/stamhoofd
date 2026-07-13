@@ -63,7 +63,7 @@
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('%a8')" @mousedown.stop @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" v-tooltip="$t('%a8')" @mousedown.stop @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -72,12 +72,12 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" :v-tooltip="$t('%a9')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('%aA')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
-                    <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-                    <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click.prevent="openLinkEditor()" @mousedown.stop />
+                    <button class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" v-tooltip="$t('%a9')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
+                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" v-tooltip="$t('%aA')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+                    <button class="button icon hr" type="button" v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+                    <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" v-tooltip="$t('%aC')" @click.prevent="openLinkEditor()" @mousedown.stop />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.stop>
-                        <div class="button icon image" type="button" :v-tooltip="$t('%aD')" />
+                        <div class="button icon image" type="button" v-tooltip="$t('%aD')" />
                     </UploadButton>
                     <slot name="buttons" />
                 </div>
@@ -91,12 +91,12 @@
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.stop>
-            <button class="button icon text-style" type="button" :v-tooltip="$t('%a9')" @click.prevent="openTextStyles($event)" @mousedown.stop />
-            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('%aE')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
-            <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-            <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click="openLinkEditor()" @mousedown.stop />
+            <button class="button icon text-style" type="button" v-tooltip="$t('%a9')" @click.prevent="openTextStyles($event)" @mousedown.stop />
+            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" v-tooltip="$t('%aE')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+            <button class="button icon hr" type="button" v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+            <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" v-tooltip="$t('%aC')" @click="openLinkEditor()" @mousedown.stop />
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
-                <div class="button icon image" type="button" :v-tooltip="$t('%aD')" />
+                <div class="button icon image" type="button" v-tooltip="$t('%aD')" />
             </UploadButton>
             <slot name="buttons" />
         </STButtonToolbar>

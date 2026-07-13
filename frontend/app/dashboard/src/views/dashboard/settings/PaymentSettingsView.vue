@@ -250,13 +250,13 @@
                             </p>
 
                             <template v-if="profile.status === 'verified'" #right>
-                                <span class="icon success green" :v-tooltip="$t('%O1')" />
+                                <span class="icon success green" v-tooltip="$t('%O1')" />
                             </template>
                             <template v-else-if="profile.status === 'unverified'" #right>
-                                <span class="icon clock gray" :v-tooltip="$t('%O2')" />
+                                <span class="icon clock gray" v-tooltip="$t('%O2')" />
                             </template>
                             <template v-else #right>
-                                <span class="icon canceled red" :v-tooltip="$t('%O3')" />
+                                <span class="icon canceled red" v-tooltip="$t('%O3')" />
                             </template>
                         </STListItem>
                     </STList>

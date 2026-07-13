@@ -9,7 +9,7 @@
         <UitpasNumberInputWithStatus v-model="uitpasNumberDetails" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`%wF`)" error-fields="uitpasNumber" />
 
         <p v-if="!willMarkReviewed && isAdmin && reviewDate" class="style-description-small">
-            {{ $t('%fY') }} {{ formatDate(reviewDate) }}. <button :v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
+            {{ $t('%fY') }} {{ formatDate(reviewDate) }}. <button v-tooltip="$t('%fD')" type="button" class="inline-link" @click="clear">
                 {{ $t('%fE') }}
             </button>.
         </p>

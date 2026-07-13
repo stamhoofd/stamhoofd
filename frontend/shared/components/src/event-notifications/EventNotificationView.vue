@@ -84,7 +84,7 @@
                     <PatchListText :items="diffList" />
 
                     <template #right>
-                        <button class="button icon eye gray" type="button" :v-tooltip="$t('%ah')" @click="showOriginalAnswers" />
+                        <button class="button icon eye gray" type="button" v-tooltip="$t('%ah')" @click="showOriginalAnswers" />
                     </template>
                 </STListItem>
             </STList>

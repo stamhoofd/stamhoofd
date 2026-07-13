@@ -30,7 +30,7 @@
 
                 <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`%1FK`) " :validator="errors.validator" :placeholder="$t(`%fc`)">
                     <template #right>
-                        <button :v-tooltip="$t('%fI')" class="button icon add gray" type="button" @click="addEmail" />
+                        <button v-tooltip="$t('%fI')" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
                 <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" :placeholder="$t(`%fc`)" @update:model-value="setEmail(n - 1, $event ?? '')">

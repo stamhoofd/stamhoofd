@@ -15,20 +15,20 @@
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('%a8')" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" v-tooltip="$t('%a8')" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
             </form>
 
             <div v-else class="small editor-button-bar sticky">
-                <button class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" :v-tooltip="$t('%aG')" @click="editor.chain().focus().toggleBold().run()" />
-                <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" :v-tooltip="$t('%aH')" @click="editor.chain().focus().toggleItalic().run()" />
-                <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" :v-tooltip="$t('%aI')" @click="editor.chain().focus().toggleUnderline().run()" />
+                <button class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" v-tooltip="$t('%aG')" @click="editor.chain().focus().toggleBold().run()" />
+                <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" v-tooltip="$t('%aH')" @click="editor.chain().focus().toggleItalic().run()" />
+                <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" v-tooltip="$t('%aI')" @click="editor.chain().focus().toggleUnderline().run()" />
 
-                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" :v-tooltip="$t('%vC')" @click="openTextStyles" />
-                <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-                <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click.prevent.stop="openLinkEditor()" @mousedown.stop />
+                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" v-tooltip="$t('%vC')" @click="openTextStyles" />
+                <button class="button icon hr" type="button" v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+                <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" v-tooltip="$t('%aC')" @click.prevent.stop="openLinkEditor()" @mousedown.stop />
             </div>
         </div>
     </div>

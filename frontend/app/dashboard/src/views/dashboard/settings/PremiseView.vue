@@ -33,7 +33,7 @@
 
                         <template #right>
                             <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" :v-tooltip="$t('%OR')" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" v-tooltip="$t('%OR')" />
                         </template>
                     </STListItem>
                     <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">

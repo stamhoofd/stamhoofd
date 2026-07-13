@@ -210,7 +210,7 @@
                         </p>
 
                         <template #right>
-                            <span class="icon error " :v-tooltip="$t('%Pq')" />
+                            <span class="icon error " v-tooltip="$t('%Pq')" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>

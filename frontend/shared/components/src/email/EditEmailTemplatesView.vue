@@ -26,9 +26,9 @@
                                 <span class="icon email" />
                             </figure>
                             <aside>
-                                <span v-if="!emailTemplate.id && !emailTemplate.html" :v-tooltip="$t('%9c')" class="icon disabled error small stroke" />
-                                <span v-else-if="!emailTemplate.id" :v-tooltip="$t('%9d')" class="icon lightning small stroke" />
-                                <span v-else :v-tooltip="$t('%9e')" class="icon lightning primary small stroke " />
+                                <span v-if="!emailTemplate.id && !emailTemplate.html" v-tooltip="$t('%9c')" class="icon disabled error small stroke" />
+                                <span v-else-if="!emailTemplate.id" v-tooltip="$t('%9d')" class="icon lightning small stroke" />
+                                <span v-else v-tooltip="$t('%9e')" class="icon lightning primary small stroke " />
                             </aside>
                         </figure>
                     </template>
