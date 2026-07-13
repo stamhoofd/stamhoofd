@@ -975,55 +975,103 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(trialUntil!.getFullYear()).toBe(2023);
                 expect(trialUntil!.getMonth()).toBe(4);
                 expect(trialUntil!.getDate()).toBe(19);
+
+                // Nothing is paid during the trial, but the balance item should be due (not hidden)
+                // so it is still billed once the trial ends.
+                const balanceItems = await BalanceItem.where({ registrationId: dbRegistration!.id });
+                expect(balanceItems.length).toBe(1);
+                expect(balanceItems[0]).toMatchObject({
+                    status: BalanceItemStatus.Due,
+                    dueAt: dbRegistration!.trialUntil,
+                    pricePaid: 0,
+                });
             } finally {
                 vitest.useRealTimers();
             }
         }, 20_00000);
 
-        test('Register for group with trial should activate the registration in userMode organization', async () => {
-            TestUtils.setEnvironment('userMode', 'organization');
-
+        test('A trial registration is activated immediately, while a paid registration in the same cart waits for the online payment', async () => {
+            // #region arrange
             const { member, group, groupPrice, organization, token } = await initData();
+            await initPayconiq({ organization });
+
+            // The trial group also limits its members, so a reservedUntil is set and has to be cleared again
             group.settings.trialDays = 5;
+            group.settings.maxMembers = 1;
             await group.save();
+
+            const paidGroup = await new GroupFactory({
+                organization,
+                price: 1500,
+                maxMembers: 1,
+            }).create();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [
                         IDRegisterItem.create({
                             id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
                             groupPrice,
                             organizationId: organization.id,
                             groupId: group.id,
                             memberId: member.id,
                             trial: true,
                         }),
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice: paidGroup.settings.prices[0],
+                            organizationId: organization.id,
+                            groupId: paidGroup.id,
+                            memberId: member.id,
+                        }),
                     ],
-                    balanceItems: [],
-                    deleteRegistrationIds: [],
                 }),
-                administrationFee: 0,
-                freeContribution: 0,
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 0,
-                customer: null,
+                paymentMethod: PaymentMethod.Payconiq,
+                redirectUrl: new URL('https://www.example.com'),
+                cancelUrl: new URL('https://www.example.com'),
+                // Only the non-trial registration has to be paid now
+                totalPrice: 1500,
             });
+            // #endregion
 
+            // act
             const response = await post(body, organization, token);
 
-            expect(response.body).toBeDefined();
-            expect(response.body.registrations.length).toBe(1);
-            expect(response.body.registrations[0]).toMatchObject({
+            // assert
+            expect(response.body.registrations.length).toBe(2);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+
+            // The trial is free, so it is activated right away and its reservation is released
+            const trialRegistration = response.body.registrations.find(r => r.group.id === group.id)!;
+            expect(trialRegistration).toMatchObject({
                 registeredAt: expect.any(Date),
                 deactivatedAt: null,
+                reservedUntil: null,
+                trialUntil: expect.any(Date),
             });
-            expect(response.body.registrations[0].trialUntil).not.toBeNull();
 
-            const dbRegistration = await Registration.getByID(response.body.registrations[0].id);
-            expect(dbRegistration?.registeredAt).not.toBeNull();
-            expect(dbRegistration?.deactivatedAt).toBeNull();
+            const trialBalanceItems = await BalanceItem.where({ registrationId: trialRegistration.id });
+            expect(trialBalanceItems.length).toBe(1);
+            expect(trialBalanceItems[0]).toMatchObject({
+                status: BalanceItemStatus.Due,
+                pricePaid: 0,
+            });
+
+            // The paid registration is not activated: it still waits for the online payment
+            const paidRegistration = response.body.registrations.find(r => r.group.id === paidGroup.id)!;
+            expect(paidRegistration).toMatchObject({
+                registeredAt: null,
+                deactivatedAt: null,
+                reservedUntil: expect.any(Date),
+            });
+
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(1);
+            expect(group.settings.reservedMembers).toBe(0);
+
+            await paidGroup.refresh();
+            expect(paidGroup.settings.registeredMembers).toBe(0);
+            expect(paidGroup.settings.reservedMembers).toBe(1);
         });
 
         test('Should update group stock reservations', async () => {

@@ -889,13 +889,16 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 await BalanceItemService.updatePaidAndPending(createdBalanceItems);
             }
 
-            // Trial registrations have only deferred balance items (dueAt = trialUntil), so they are
-            // never part of the payment above. Nothing is due during the trial, but the registration
-            // should still be activated immediately (otherwise it stays invisible in the member portal
-            // and registration lists). We keep the trial (paid: false) so it isn't shortened.
-            for (const { registration } of payRegistrations) {
-                if (registration.trialUntil) {
-                    await RegistrationService.markValid(registration.id, { paid: false });
+            // Deferred balance items (dueAt is set: the trial period) are never part of the payment
+            // above - nothing is due during the trial. They still need to be marked due, so they get
+            // billed once the trial ends, and so their registration is marked valid: otherwise the
+            // registration stays invisible in the member portal and the registration lists.
+            // Passing no payment means paid: false, so the trial period isn't shortened.
+            // Note: this activates trial registrations immediately, even if a payment for the other
+            // items in the same cart is still pending or fails. That is intentional: a trial is free.
+            for (const balanceItem of markValidList) {
+                if (balanceItem.dueAt !== null) {
+                    await BalanceItemService.markPaid(balanceItem, null, organization);
                 }
             }
         } else {
