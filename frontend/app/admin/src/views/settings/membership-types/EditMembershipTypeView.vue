@@ -44,7 +44,7 @@
         </p>
 
         <hr><h2>{{ $t('Niet-combineerbare aansluitingen') }}</h2>
-        <p>{{ $t('Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode.') }}</p>
+        <p>{{ $t('Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode. Dit geldt maar in één richting (tenzij in beide richtingen toegevoegd) en wordt niet gecontroleerd door door automatisch aangemaakte aansluitingen.') }}</p>
 
         <p v-if="otherMembershipTypes.length === 0" class="info-box">
             {{ $t('Er zijn geen andere aansluitingstypes om uit te kiezen.') }}
@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
@@ -115,7 +115,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 import PlatformMembershipTypeConfigRow from './components/PlatformMembershipTypeConfigRow.vue';
@@ -159,8 +159,7 @@ async function loadData() {
     try {
         originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner);
         loading.value = false;
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
         await pop({ force: true });
         return;
@@ -183,8 +182,7 @@ const save = async () => {
 
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -207,8 +205,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -333,8 +330,7 @@ async function addConfigForPeriod(period: RegistrationPeriod) {
                 price.startDate.setFullYear(price.startDate.getFullYear() + yearDifference);
             }
         }
-    }
-    else {
+    } else {
         config.startDate = period.startDate;
         config.endDate = period.endDate;
     }

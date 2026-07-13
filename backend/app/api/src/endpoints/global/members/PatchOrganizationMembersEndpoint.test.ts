@@ -4035,11 +4035,17 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
         });
     });
 
-    describe('Incompatible platform membership types', () => {
-        async function setup({ incompatibleWithB, existingRange, putRange }: {
-            incompatibleWithB: boolean;
+    describe('Overlapping and incompatible platform memberships', () => {
+        // Two non-overlapping halves of the same period (werkjaar).
+        const firstHalf = { startDate: new Date(2024, 0, 1, 0, 0, 0, 0), endDate: new Date(2024, 5, 30, 23, 59, 59, 0) };
+        const secondHalf = { startDate: new Date(2024, 6, 1, 0, 0, 0, 0), endDate: new Date(2024, 11, 31, 23, 59, 59, 0) };
+
+        async function setup({ incompatibleWithB = false, existingRange, putRange, existingLocked = false, existingGenerated = false }: {
+            incompatibleWithB?: boolean;
             existingRange?: { startDate: Date; endDate: Date };
             putRange?: { startDate: Date; endDate: Date };
+            existingLocked?: boolean;
+            existingGenerated?: boolean;
         }) {
             const period = await new RegistrationPeriodFactory({
                 startDate: new Date(2024, 0, 1, 0, 0, 0, 0),
@@ -4092,6 +4098,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             existing.periodId = period.id;
             existing.startDate = existingRange?.startDate ?? period.startDate;
             existing.endDate = existingRange?.endDate ?? period.endDate;
+            existing.locked = existingLocked;
+            existing.generated = existingGenerated;
             await existing.save();
 
             const arr: Body = new PatchableArray();
@@ -4112,56 +4120,106 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             return { period, organization, typeA, typeB, member, request };
         }
 
-        test('Blocks adding a membership type the member already has an incompatible type for in the same period', async () => {
-            const { typeA, member, request } = await setup({ incompatibleWithB: true });
-
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.simpleError({
-                code: 'invalid_field',
-                field: 'membershipTypeId',
-                message: 'Incompatible membership type',
-            }));
-
-            // The incompatible membership was not created
-            const memberships = await MemberPlatformMembership.select()
-                .where('memberId', member.id)
-                .where('membershipTypeId', typeA.id)
+        async function getTypeAMemberships(memberId: string, membershipTypeId: string) {
+            return await MemberPlatformMembership.select()
+                .where('memberId', memberId)
+                .where('membershipTypeId', membershipTypeId)
                 .where('deletedAt', null)
                 .fetch();
-            expect(memberships.length).toBe(0);
-        });
+        }
 
-        test('Allows adding a membership type that is not marked incompatible with a type the member already has', async () => {
-            const { typeA, member, request } = await setup({ incompatibleWithB: false });
+        describe('Overlapping memberships of a different type are never allowed', () => {
+            test('Blocks an overlapping membership of an incompatible type', async () => {
+                const { typeA, member, request } = await setup({ incompatibleWithB: true });
 
-            const result = await testServer.test(endpoint, request);
-            expect(result.status).toBe(200);
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
+                    code: 'invalid_field',
+                    field: 'membershipTypeId',
+                    message: 'Overlapping membership type',
+                }));
 
-            const memberships = await MemberPlatformMembership.select()
-                .where('memberId', member.id)
-                .where('membershipTypeId', typeA.id)
-                .where('deletedAt', null)
-                .fetch();
-            expect(memberships.length).toBe(1);
-        });
-
-        test('Allows adding an incompatible membership type when the dates do not overlap', async () => {
-            const { typeA, member, request } = await setup({
-                incompatibleWithB: true,
-                // Existing membership covers the first half of the period
-                existingRange: { startDate: new Date(2024, 0, 1, 0, 0, 0, 0), endDate: new Date(2024, 5, 30, 23, 59, 59, 0) },
-                // New membership covers the second half, so there is no overlap
-                putRange: { startDate: new Date(2024, 6, 1, 0, 0, 0, 0), endDate: new Date(2024, 11, 31, 23, 59, 59, 0) },
+                // The overlapping membership was not created
+                expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
             });
 
-            const result = await testServer.test(endpoint, request);
-            expect(result.status).toBe(200);
+            test('Blocks an overlapping membership even when the type is not marked incompatible', async () => {
+                const { typeA, member, request } = await setup({ incompatibleWithB: false });
 
-            const memberships = await MemberPlatformMembership.select()
-                .where('memberId', member.id)
-                .where('membershipTypeId', typeA.id)
-                .where('deletedAt', null)
-                .fetch();
-            expect(memberships.length).toBe(1);
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
+                    code: 'invalid_field',
+                    field: 'membershipTypeId',
+                    message: 'Overlapping membership type',
+                }));
+
+                // The overlapping membership was not created
+                expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
+            });
+        });
+
+        describe('Non-overlapping memberships in the same period', () => {
+            test('Blocks an incompatible type even when the dates do not overlap', async () => {
+                const { typeA, member, request } = await setup({
+                    incompatibleWithB: true,
+                    existingRange: firstHalf,
+                    putRange: secondHalf,
+                });
+
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
+                    code: 'invalid_field',
+                    field: 'membershipTypeId',
+                    message: 'Incompatible membership type',
+                }));
+
+                // The incompatible membership was not created
+                expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
+            });
+
+            test('Allows a compatible type when the dates do not overlap', async () => {
+                const { typeA, member, request } = await setup({
+                    incompatibleWithB: false,
+                    existingRange: firstHalf,
+                    putRange: secondHalf,
+                });
+
+                const result = await testServer.test(endpoint, request);
+                expect(result.status).toBe(200);
+
+                expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(1);
+            });
+
+            test('Reports a locked incompatible membership with a specific message', async () => {
+                const { typeA, member, request } = await setup({
+                    incompatibleWithB: true,
+                    existingRange: firstHalf,
+                    putRange: secondHalf,
+                    existingLocked: true,
+                });
+
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
+                    code: 'invalid_field',
+                    field: 'membershipTypeId',
+                    message: 'Incompatible locked membership type',
+                }));
+
+                expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
+            });
+
+            test('Reports a generated incompatible membership with a specific message', async () => {
+                const { typeA, member, request } = await setup({
+                    incompatibleWithB: true,
+                    existingRange: firstHalf,
+                    putRange: secondHalf,
+                    existingGenerated: true,
+                });
+
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
+                    code: 'invalid_field',
+                    field: 'membershipTypeId',
+                    message: 'Incompatible generated membership type',
+                }));
+
+                expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
+            });
         });
     });
 });

@@ -587,23 +587,54 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Correct price and dates
                 await membership.calculatePrice(member);
 
-                // Block if the member already has an incompatible membership type overlapping these dates.
-                // Uses the requested dates (like the duplicate check below) so the two checks stay consistent.
+                const incompatible = await MemberPlatformMembership.select()
+                    .where('memberId', member.id)
+                    .whereNot('membershipTypeId', put.membershipTypeId) // same type is checked later and might be auto-deleted
+                    .where('periodId', put.periodId)
+                    .where('deletedAt', null)
+                    .where(membershipDateRangeOverlaps(put.startDate, put.endDate))
+                    .first(false);
+
+                if (incompatible) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Overlapping membership type',
+                        human: $t('Dit lid heeft al een aansluiting die overlapt met de nieuwe aansluiting.'),
+                    });
+                }
+
+                // Not overlapping, but in same period.
                 if (membershipType.incompatibleMembershipTypeIds.length > 0) {
                     const incompatible = await MemberPlatformMembership.select()
                         .where('memberId', member.id)
                         .where('membershipTypeId', membershipType.incompatibleMembershipTypeIds)
                         .where('periodId', put.periodId)
                         .where('deletedAt', null)
-                        .where(membershipDateRangeOverlaps(put.startDate, put.endDate))
                         .first(false);
 
                     if (incompatible) {
+                        if (incompatible.locked) {
+                            throw new SimpleError({
+                                code: 'invalid_field',
+                                field: 'membershipTypeId',
+                                message: 'Incompatible locked membership type',
+                                human: $t('Dit lid heeft al een (vergrendelde) aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting.'),
+                            });
+                        }
+                        if (incompatible.generated) {
+                            throw new SimpleError({
+                                code: 'invalid_field',
+                                field: 'membershipTypeId',
+                                message: 'Incompatible generated membership type',
+                                human: $t('Dit lid heeft al een (automatische) aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting. Pas eventueel de startdatum van de bijhorende inschrijving aan.'),
+                            });
+                        }
                         throw new SimpleError({
                             code: 'invalid_field',
                             field: 'membershipTypeId',
                             message: 'Incompatible membership type',
-                            human: $t('Dit lid heeft al een aansluiting die niet gecombineerd kan worden met deze aansluiting.'),
+                            human: $t('Dit lid heeft al een aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting. Verwijder of pas de bestaande aansluiting aan.'),
                         });
                     }
                 }
