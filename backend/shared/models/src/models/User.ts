@@ -1,14 +1,14 @@
 import { column, Database } from '@simonbackx/simple-database';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
-import type { LoginProviderType, NewUser} from '@stamhoofd/structures';
+import type { LoginProviderType, NewUser } from '@stamhoofd/structures';
 import { Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import type {Organization} from './Organization.js';
+import type { Organization } from './Organization.js';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -193,12 +193,11 @@ export class User extends QueryableModel {
     async merge(other: User) {
         if (other.hasAccount()) {
             // We are going to merge accounts!
-            if (this.organizationPermissions && other.organizationPermissions) {
-                this.organizationPermissions.add(other.organizationPermissions);
-            }
-            else {
-                if (!this.organizationPermissions && other.organizationPermissions) {
-                    this.organizationPermissions = other.organizationPermissions;
+            if (this.permissions && other.permissions) {
+                this.permissions = UserPermissions.add(this.permissions, other.permissions);
+            } else {
+                if (!this.permissions && other.permissions) {
+                    this.permissions = other.permissions;
                 }
             }
             await this.save();
@@ -218,8 +217,13 @@ export class User extends QueryableModel {
         const members = await Member.getMembersWithRegistrationForUser(other);
 
         if (members.length > 0) {
-            console.log('Moving members from user ' + other.id + ' to ' + this.id);
-            await Member.users.reverse('members').link(this, members);
+            const existingMembers = await Member.getMembersWithRegistrationForUser(this);
+            const addMembers = members.filter(m => !existingMembers.find(ee => ee.id === m.id));
+
+            if (addMembers.length) {
+                console.log('Moving members from user ' + other.id + ' to ' + this.id);
+                await Member.users.reverse('members').link(this, addMembers);
+            }
         }
 
         // Update balance items
@@ -239,6 +243,17 @@ export class User extends QueryableModel {
 
         // Update email recipients
         await Database.update('UPDATE email_recipients SET userId = ? WHERE userId = ?', [this.id, other.id]);
+
+        // Update orders
+        const queries = [
+            'UPDATE event_notifications SET createdBy = ? WHERE createdBy = ?',
+            'UPDATE event_notifications SET submittedBy = ? WHERE submittedBy = ?',
+            'UPDATE audit_logs SET userId = ? WHERE userId = ?',
+
+        ];
+        for (const q of queries) {
+            await Database.update(q, [this.id, other.id]);
+        }
 
         await other.delete();
     }
@@ -264,8 +279,7 @@ export class User extends QueryableModel {
             if (await argon2.verify(user.password, password)) {
                 return user;
             }
-        }
-        catch (e) {
+        } catch (e) {
             // internal failure
             console.error(e);
         }
@@ -395,8 +409,7 @@ export class User extends QueryableModel {
 
         try {
             await user.save();
-        }
-        catch (e) {
+        } catch (e) {
             // Duplicate key probably
             if (e.code && e.code == 'ER_DUP_ENTRY') {
                 return;
@@ -444,8 +457,7 @@ export class User extends QueryableModel {
 
         try {
             await user.save();
-        }
-        catch (e) {
+        } catch (e) {
             // Duplicate key probably
             if (e.code && e.code == 'ER_DUP_ENTRY') {
                 return;
@@ -470,8 +482,7 @@ export class User extends QueryableModel {
                     statusCode: 400,
                 });
             }
-        }
-        else {
+        } else {
             if (this.hasAccount() && !allowAdditional) {
                 // Do not allow this (security reasons - might need to work out a secure flow for this edge case)
                 throw new SimpleError({
@@ -501,8 +512,7 @@ export class User extends QueryableModel {
             if (organization) {
                 throw new Error('Unexpected organization');
             }
-        }
-        else {
+        } else {
             if (!organization) {
                 throw new Error('Missing organization');
             }
@@ -519,8 +529,7 @@ export class User extends QueryableModel {
 
         try {
             await user.save();
-        }
-        catch (e) {
+        } catch (e) {
             // Duplicate key probably
             if (e.code && e.code === 'ER_DUP_ENTRY') {
                 return;

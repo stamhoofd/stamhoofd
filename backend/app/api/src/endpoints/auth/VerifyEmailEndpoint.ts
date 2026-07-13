@@ -6,6 +6,7 @@ import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
 import { Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { BalanceItemService } from '../../services/BalanceItemService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -77,6 +78,9 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (other) {
                 // Delete the other user, but merge data
                 await user.merge(other);
+                if (user.organizationId) {
+                    BalanceItemService.scheduleUserUpdate(user.organizationId, user.id);
+                }
             }
 
             // change user email
