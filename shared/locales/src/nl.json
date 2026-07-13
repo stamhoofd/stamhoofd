@@ -4487,7 +4487,7 @@
   "%1CT": "Deze functie is ongeldig omdat {name} niet is ingeschreven voor een standaard leeftijdsgroep. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
   "%1CU": "Berekenen...",
   "%1CV": "Door een evenement uit de UiTdatabank te koppelen kan #platform een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.",
-  "%1CW": "Wil je de UiTPAS-nummers niet doorsturen en zelf het tarief instellen, <button>klik dan hier</button>.",
+  "%1CW": "Wil je de UiTPAS-inschrijvingen niet doorsturen naar je UiTPAS-regio voor dit evenement (bv. het komt niet in aanmerking voor een terugbetaling), <button>klik dan hier</button>.",
   "%1CX": "Zoek op naam, locatie, beschrijving, ...",
   "%1CY": "Geen evenementen gevonden.",
   "%1CZ": "UiTPAS-evenement zoeken",

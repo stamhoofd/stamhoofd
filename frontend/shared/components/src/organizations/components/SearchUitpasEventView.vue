@@ -4,10 +4,10 @@
 
         <main>
             <h1>{{ t }}</h1>
-            <p class="style-description-small">
+            <p class="style-description-block">
                 {{ $t('%1CV') }}
             </p>
-            <p v-if="showNoteAboutNonOfficialFlow" class="style-description-small">
+            <p v-if="showNoteAboutNonOfficialFlow" class="style-description-block">
                 <I18nComponent :t="$t('%1CW')">
                     <template #button="{content}">
                         <button class="inline-link" type="button" @click="doSelectEvent(null)">
@@ -16,11 +16,11 @@
                     </template>
                 </I18nComponent>
             </p>
-            <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search small gray" @submit.prevent>
                 <input ref="input" v-model="text" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('%1CX')">
             </form>
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <Spinner v-if="loadingResults || (loadingAfterEventSelect && !selectedEventUrl)" class="gray center" />
             <STList v-else>
