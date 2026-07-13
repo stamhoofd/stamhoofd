@@ -240,7 +240,7 @@
 
                 <STListItem v-if="order.data.customer.birthDay">
                     <h3 class="style-definition-label">
-                        {{ $t('Geboortedatum') }}
+                        {{ $t('%17w') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(order.data.customer.birthDay) }}

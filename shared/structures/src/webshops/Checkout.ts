@@ -492,7 +492,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_birth_day',
                     message: 'Invalid birth day',
-                    human: $t(`Vul de geboortedatum in`),
+                    human: $t(`%yq`),
                     field: 'customer.birthDay',
                 });
             }
@@ -505,7 +505,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_address',
                     message: 'Invalid address',
-                    human: $t(`Vul het adres in`),
+                    human: $t(`%ZdB`),
                     field: 'customer.address',
                 });
             }

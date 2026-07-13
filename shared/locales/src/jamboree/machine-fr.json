@@ -1579,6 +1579,22 @@
     "original": "Let op: bundelkortingen worden pas toegepast als je {period} hebt ingesteld als het huidige scoutsjaar.",
     "translation": "Attention : les réductions pour plusieurs inscriptions ne s'appliquent que si vous avez défini {period} comme année scoute en cours."
   },
+  "%Zcx": {
+    "original": "Dit lid heeft al een (automatische) aansluiting in dit scoutsjaar die niet gecombineerd kan worden met deze aansluiting. Pas eventueel de startdatum van de bijhorende inschrijving aan.",
+    "translation": "Ce membre possède déjà une affiliation (automatique) pour cette année scoute, qui ne peut pas être cumulée avec celle-ci. Modifiez si nécessaire la date de début de l'inscription correspondante."
+  },
+  "%Zcz": {
+    "original": "Alle leden (alle scoutsjaren)",
+    "translation": "Tous les membres (toutes les années scoutes)"
+  },
+  "%Zd1": {
+    "original": "Dit lid heeft al een (vergrendelde) aansluiting in dit scoutsjaar die niet gecombineerd kan worden met deze aansluiting.",
+    "translation": "Ce membre a déjà une affiliation (verrouillée) pour cette année scoute qui ne peut pas être cumulée avec celle-ci."
+  },
+  "%ZdA": {
+    "original": "Dit lid heeft al een aansluiting in dit scoutsjaar die niet gecombineerd kan worden met deze aansluiting. Verwijder of pas de bestaande aansluiting aan.",
+    "translation": "Ce membre a déjà une affiliation pour cette année scoute qui ne peut pas être cumulée avec celle-ci. Supprimez ou modifiez l'affiliation existante."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"

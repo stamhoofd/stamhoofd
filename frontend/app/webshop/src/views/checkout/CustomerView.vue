@@ -22,9 +22,9 @@
 
         <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`%Xu`)" />
 
-        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`Geboortedatum`)" :validator="errors.validator" :required="true" />
+        <BirthDayInput v-if="birthDayEnabled" v-model="birthDay" :title="$t(`%17w`)" :validator="errors.validator" :required="true" />
 
-        <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`Gender`)">
+        <STInputBox v-if="genderEnabled" error-fields="gender" :error-box="errors.errorBox" :title="$t(`%Zd4`)">
             <RadioGroup>
                 <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
                     {{ $t('%XK') }}

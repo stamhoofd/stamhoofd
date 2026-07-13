@@ -246,7 +246,7 @@ defineRoute({
         // No periodId and no customFilter: the backend automatically scopes to
         // members of the current organization (all periods) in organization mode.
         return {
-            customTitle: $t('Alle leden (alle werkjaren)'),
+            customTitle: $t('%Zcz'),
         };
     },
 });
@@ -468,7 +468,7 @@ const allActions = computed(() => {
         if (STAMHOOFD.userMode === 'organization' && !props.period) {
             list.push({
                 icon: 'group',
-                title: $t('Alle leden (alle werkjaren)'),
+                title: $t('%Zcz'),
                 route: Routes.AllMembers,
                 hidden: true,
             });

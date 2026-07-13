@@ -939,10 +939,6 @@
     "original": "Als een andere groep schulden aan jouw groep heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
     "translation": "If another group owes your group money, you can also send automatic emails for this. This is done based on roles that you can set below."
   },
-  "%94": {
-    "original": "Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
-    "translation": "You can postpone an outstanding amount - e.g. for staggered payments or a trial period. It only appears as a quick action in 'My account' from one week before this date (together with any automatic email) and must be paid by the entered date. It is possible to pay it earlier, but certainly not obligatory."
-  },
   "%9A": {
     "original": "Lijst van alle groepen die nog een openstaand bedrag hebben tegenover {name}",
     "translation": "List of all groups that still have an open amount owed to {name}"
@@ -1318,6 +1314,10 @@
   "%Zbm": {
     "original": "Filter op groepen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
     "translation": "Filter by groups with a document template that meets certain criteria."
+  },
+  "%Zd7": {
+    "original": "Stel de betaling uit, bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, via “Betalingen en openstaande rekening” in ‘Mijn account’ (iets meer verstopt).",
+    "translation": "Postpone the payment, for example for paying in installments or for a trial period. It will only appear as a quick action in ‘My account’ from one week before this date (along with any automatic email), and must be paid by the specified date. You can also choose to pay it earlier via 'Payments and open accounts' in ‘My account’ (which is a bit more hidden)."
   },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",

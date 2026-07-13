@@ -600,7 +600,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Overlapping membership type',
-                        human: $t('Dit lid heeft al een aansluiting die overlapt met de nieuwe aansluiting.'),
+                        human: $t('%Zd9'),
                     });
                 }
 
@@ -619,7 +619,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                                 code: 'invalid_field',
                                 field: 'membershipTypeId',
                                 message: 'Incompatible locked membership type',
-                                human: $t('Dit lid heeft al een (vergrendelde) aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting.'),
+                                human: $t('%Zd1'),
                             });
                         }
                         if (incompatible.generated) {
@@ -627,14 +627,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                                 code: 'invalid_field',
                                 field: 'membershipTypeId',
                                 message: 'Incompatible generated membership type',
-                                human: $t('Dit lid heeft al een (automatische) aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting. Pas eventueel de startdatum van de bijhorende inschrijving aan.'),
+                                human: $t('%Zcx'),
                             });
                         }
                         throw new SimpleError({
                             code: 'invalid_field',
                             field: 'membershipTypeId',
                             message: 'Incompatible membership type',
-                            human: $t('Dit lid heeft al een aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting. Verwijder of pas de bestaande aansluiting aan.'),
+                            human: $t('%ZdA'),
                         });
                     }
                 }

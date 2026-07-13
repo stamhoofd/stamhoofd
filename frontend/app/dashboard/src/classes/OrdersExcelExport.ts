@@ -26,7 +26,7 @@ export class OrdersExcelExport {
      * Extra customer columns (birth day, gender, address) shown after the phone number.
      */
     private static get customerColumnHeaders(): RowValue[] {
-        return [$t(`Geboortedatum`), $t(`Gender`), $t(`Adres`)];
+        return [$t(`%17w`), $t(`%Zd4`), $t(`%Cn`)];
     }
 
     private static customerColumnValues(order: PrivateOrder): RowValue[] {

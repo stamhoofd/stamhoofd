@@ -5375,10 +5375,6 @@
     "original": "Individuele aanrekeningen",
     "translation": "Facturations individuelles"
   },
-  "%1Lt": {
-    "original": "Alle items die werden aangerekend, los van of ze al betaald werden of niet.",
-    "translation": "Tous les articles facturés, que le paiement ait été effectué ou non."
-  },
   "%1Lv": {
     "original": "Proefperiode geldig tot {dateTime}.",
     "translation": "Période d’essai valable jusqu’à {dateTime}."
@@ -10886,10 +10882,6 @@
   "%93": {
     "original": "Als een andere vereniging schulden aan jouw vereniging heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
     "translation": "Si une autre association a des dettes envers votre association, vous pouvez également envoyer des e-mails automatiques. Cela se fait sur la base des fonctions que vous pouvez configurer ci-dessous."
-  },
-  "%94": {
-    "original": "Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
-    "translation": "Vous pouvez reporter un montant dû - par exemple pour un paiement échelonné ou une période d'essai. Il n'apparaît comme action rapide dans le portail des membres qu'à partir d'une semaine avant cette date (avec un éventuel e-mail automatique) et doit être payé à la date saisie. Il est possible de payer plus tôt, mais ce n'est pas obligatoire."
   },
   "%95": {
     "original": "Betalingen exporteren",
@@ -17947,9 +17939,65 @@
     "original": "Wie?",
     "translation": "Qui ?"
   },
+  "%Zcw": {
+    "original": "Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode. Dit geldt maar in één richting (tenzij in beide richtingen toegevoegd) en wordt niet gecontroleerd door door automatisch aangemaakte aansluitingen.",
+    "translation": "Lorsqu'on ajoute manuellement ce type, le système vérifie que le membre n’a pas encore ce type pour la même période. Cette vérification est à sens unique (à moins d'être ajoutée dans les deux sens) et n'est pas effectuée pour les affiliations créées automatiquement."
+  },
+  "%Zcx": {
+    "original": "Dit lid heeft al een (automatische) aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting. Pas eventueel de startdatum van de bijhorende inschrijving aan.",
+    "translation": "Ce membre possède déjà une affiliation (automatique) pour cette année associative, qui ne peut pas être cumulée avec celle-ci. Modifiez si nécessaire la date de début de l'inscription correspondante."
+  },
+  "%Zcz": {
+    "original": "Alle leden (alle werkjaren)",
+    "translation": "Tous les membres (toutes les années associatives)"
+  },
   "%Zd": {
     "original": "E-mailadressen met deze domeinnamen kunnen deze login methode niet gebruiken.",
     "translation": "Les adresses e-mail avec ces noms de domaine ne peuvent pas utiliser cette méthode de connexion."
+  },
+  "%Zd0": {
+    "original": "Er zijn geen andere aansluitingstypes om uit te kiezen.",
+    "translation": "Il n'existe pas d'autres types d'affiliation à sélectionner."
+  },
+  "%Zd1": {
+    "original": "Dit lid heeft al een (vergrendelde) aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting.",
+    "translation": "Ce membre a déjà une affiliation (verrouillée) pour cette année associative qui ne peut pas être cumulée avec celle-ci."
+  },
+  "%Zd4": {
+    "original": "Gender",
+    "translation": "Genre"
+  },
+  "%Zd5": {
+    "original": "Naam van het aansluitingstype geassocieerd aan dit item",
+    "translation": "Nom du type d'affiliation associé à cet élément"
+  },
+  "%Zd6": {
+    "original": "Aansluitingstype",
+    "translation": "Type d'affiliation"
+  },
+  "%Zd7": {
+    "original": "Stel de betaling uit, bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, via “Betalingen en openstaande rekening” in het ledenportaal (iets meer verstopt).",
+    "translation": "Reporter le paiement, par exemple pour un paiement échelonné ou une période d'essai. L'option ne sera accessible dans le portail des membres qu'à partir d'une semaine avant cette date (en même temps qu'un éventuel e-mail automatique), et le paiement doit être effectué avant cette date. Il est toutefois possible de payer plus tôt via « Paiements et compte en attente » dans le portail des membres (cette option est un peu plus cachée)."
+  },
+  "%Zd8": {
+    "original": "Niet-combineerbare aansluitingen",
+    "translation": "Affiliations non cumulables"
+  },
+  "%Zd9": {
+    "original": "Dit lid heeft al een aansluiting die overlapt met de nieuwe aansluiting.",
+    "translation": "Ce membre bénéficie déjà d'une affiliation qui chevauche la nouvelle affiliation."
+  },
+  "%ZdA": {
+    "original": "Dit lid heeft al een aansluiting in dit werkjaar die niet gecombineerd kan worden met deze aansluiting. Verwijder of pas de bestaande aansluiting aan.",
+    "translation": "Ce membre a déjà une affiliation pour cette année associative qui ne peut pas être cumulée avec celle-ci. Supprimez ou modifiez l'affiliation existante."
+  },
+  "%ZdB": {
+    "original": "Vul het adres in",
+    "translation": "Indiquez l'adresse"
+  },
+  "%ZdC": {
+    "original": "Alle afzonderlijke items die werden aangerekend (betaald of niet)",
+    "translation": "Toutes les lignes individuelles facturées (payées ou non)"
   },
   "%Ze": {
     "original": "Login methode configuratie",

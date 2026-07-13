@@ -51,7 +51,7 @@
                     <Checkbox v-model="birthDayEnabled" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('Geboortedatum') }}
+                    {{ $t('%17w') }}
                 </p>
             </STListItem>
             <STListItem element-name="label" :selectable="true">
@@ -59,7 +59,7 @@
                     <Checkbox v-model="addressEnabled" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('Adres') }}
+                    {{ $t('%Cn') }}
                 </p>
             </STListItem>
             <STListItem element-name="label" :selectable="true">
@@ -67,7 +67,7 @@
                     <Checkbox v-model="genderEnabled" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('Gender') }}
+                    {{ $t('%Zd4') }}
                 </p>
             </STListItem>
         </STList>

@@ -43,11 +43,11 @@
             </button>
         </p>
 
-        <hr><h2>{{ $t('Niet-combineerbare aansluitingen') }}</h2>
-        <p>{{ $t('Bij het handmatig toevoegen van dit type wordt gecontroleerd of het lid nog geen van deze types heeft in dezelfde periode. Dit geldt maar in één richting (tenzij in beide richtingen toegevoegd) en wordt niet gecontroleerd door door automatisch aangemaakte aansluitingen.') }}</p>
+        <hr><h2>{{ $t('%Zd8') }}</h2>
+        <p>{{ $t('%Zcw') }}</p>
 
         <p v-if="otherMembershipTypes.length === 0" class="info-box">
-            {{ $t('Er zijn geen andere aansluitingstypes om uit te kiezen.') }}
+            {{ $t('%Zd0') }}
         </p>
         <MultipleChoiceInput
             v-else

@@ -943,10 +943,6 @@
     "original": "Als een andere groep schulden aan jouw groep heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
     "translation": "Si un autre groupe a des dettes envers votre groupe, vous pouvez également envoyer des e-mails automatiques à ce sujet. Cela se fait sur la base des fonctions que vous pouvez définir ci-dessous."
   },
-  "%94": {
-    "original": "Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
-    "translation": "Vous pouvez reporter un montant dû - par exemple, pour un paiement échelonné ou une période d'essai. Il n'apparaît comme action rapide dans « Mon compte » qu'à partir d'une semaine avant cette date (avec un éventuel e-mail automatique) et doit être payé à la date indiquée. Il est possible de payer plus tôt, mais ce n'est certainement pas obligatoire."
-  },
   "%9A": {
     "original": "Lijst van alle groepen die nog een openstaand bedrag hebben tegenover {name}",
     "translation": "Liste de tous les groupes avec un solde ouvert envers {name}"
@@ -1486,6 +1482,10 @@
   "%Zbm": {
     "original": "Filter op groepen met een documentsjabloon dat aan bepaalde voorwaarden voldoet.",
     "translation": "Filtrez sur les groupes qui utilisent un modèle de document répondant à certains critères."
+  },
+  "%Zd7": {
+    "original": "Stel de betaling uit, bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, via “Betalingen en openstaande rekening” in ‘Mijn account’ (iets meer verstopt).",
+    "translation": "Reporter le paiement, par exemple pour un paiement échelonné ou une période d'essai. L'option ne sera visible comme action rapide dans « Mon compte » qu'à partir d'une semaine avant cette date (en même temps qu'un éventuel e-mail automatique) et doit être réglée avant la date indiquée. Il est cependant possible de payer plus tôt via « Paiements et compte en attente » dans « Mon compte » (cette option est un peu plus cachée)."
   },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",

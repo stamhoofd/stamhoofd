@@ -163,7 +163,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.birthDay" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('Geboortedatum') }}
+                                    {{ $t('%17w') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -172,7 +172,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.gender !== Gender.Other" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('Gender') }}
+                                    {{ $t('%Zd4') }}
                                 </h3>
 
                                 <p class="style-definition-text">

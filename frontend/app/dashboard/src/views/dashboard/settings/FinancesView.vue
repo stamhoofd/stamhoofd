@@ -97,7 +97,7 @@
                             {{ $t('%1Ls') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Alle afzonderlijke items die werden aangerekend (betaald of niet)') }}
+                            {{ $t('%ZdC') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
