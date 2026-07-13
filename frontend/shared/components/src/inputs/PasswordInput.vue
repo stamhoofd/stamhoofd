@@ -1,14 +1,14 @@
 <template>
-    <STInputBox :title="title" error-fields="password" :error-box="errorBox ?? errors.errorBox" data-testId="password-box">
-        <template #right>
-            <button v-tooltip="visible ? 'Verberg wachtwoord' : 'Toon wachtwoord'" class="button icon small" :class="visible ? 'eye-off enabled' : 'eye'" type="button" tabindex="-1" @click.prevent="visible = !visible" />
+    <STInputBox :title="title" :error-fields="errorFields" :error-box="errorBox ?? errors.errorBox" data-testId="password-box">
+        <template v-if="canRevealPassword" #right>
+            <button v-tooltip="visible ? hideText : showText" class="button icon small" :class="visible ? 'eye-off enabled' : 'eye'" type="button" tabindex="-1" @click.prevent="visible = !visible" />
         </template>
         <input
             v-model="passwordRaw"
-            name="new-password"
+            :name="name"
             class="input"
-            placeholder="Kies een wachtwoord"
-            autocomplete="new-password"
+            :placeholder="placeholder"
+            :autocomplete="autocomplete"
             :type="visible ? 'text' : 'password'"
             data-testId="password-input"
             @input="onInput"
@@ -30,13 +30,31 @@ const props = withDefaults(defineProps<{ title?: string; validator?: Validator |
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
-    nullable?: boolean; disabled?: boolean; }>(), {
+    nullable?: boolean; disabled?: boolean;
+    /**
+     * Whether the user can reveal the entered value by toggling the eye button.
+     * Set to false for values that cannot be revealed, e.g. censored secrets coming from the backend.
+     */
+    canRevealPassword?: boolean;
+    errorFields?: string;
+    placeholder?: string;
+    autocomplete?: string;
+    name?: string;
+    showText?: string;
+    hideText?: string; }>(), {
     title: () => $t('Wachtwoord'),
     validator: null,
     errorBox: null,
     required: true,
     nullable: false,
     disabled: false,
+    canRevealPassword: true,
+    errorFields: 'password',
+    placeholder: () => $t('Kies een wachtwoord'),
+    autocomplete: 'new-password',
+    name: 'new-password',
+    showText: () => $t('Toon wachtwoord'),
+    hideText: () => $t('Verberg wachtwoord'),
 });
 
 const visible = ref(false);

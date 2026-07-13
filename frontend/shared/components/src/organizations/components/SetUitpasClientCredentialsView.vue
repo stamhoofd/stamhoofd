@@ -14,9 +14,7 @@
                 <input ref="firstInput" v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t('%1Ci')">
             </STInputBox>
 
-            <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('%1Cj')">
-                <input ref="secondInput" v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t('%1Ck')">
-            </STInputBox>
+            <PasswordInput v-model="clientSecret" error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('%1Cj')" :placeholder="$t('%1Ck')" autocomplete="off" :can-reveal-password="clientSecret !== UitpasClientIdAndSecret.placeholderClientSecret" :show-text="$t('Toon client secret')" :hide-text="$t('Verberg client secret')" />
         </SaveView>
     </LoadingViewTransition>
 </template>
@@ -31,6 +29,7 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STInputBox from '#inputs/STInputBox.vue';
+import PasswordInput from '#inputs/PasswordInput.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';

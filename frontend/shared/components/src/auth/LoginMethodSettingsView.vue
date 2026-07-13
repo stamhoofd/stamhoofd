@@ -159,20 +159,18 @@
                     >
                 </STInputBox>
 
-                <STInputBox
+                <PasswordInput
+                    v-model="clientSecret"
                     error-fields="clientSecret"
                     :error-box="errors.errorBox"
                     class="max"
                     :title="$t(`%1E`)"
-                >
-                    <input
-                        v-model="clientSecret"
-                        class="input"
-                        type="text"
-                        autocomplete="off"
-                        :placeholder="$t(`%Zw`)"
-                    >
-                </STInputBox>
+                    :placeholder="$t(`%Zw`)"
+                    autocomplete="off"
+                    :can-reveal-password="canRevealClientSecret"
+                    :show-text="$t('Toon client secret')"
+                    :hide-text="$t('Verberg client secret')"
+                />
 
                 <STInputBox
                     :error-box="errors.errorBox"
@@ -297,6 +295,7 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { usePatchMap } from '#hooks/usePatchMap.ts';
 import ArrayInput from '#inputs/ArrayInput.vue';
 import Checkbox from '#inputs/Checkbox.vue';
+import PasswordInput from '#inputs/PasswordInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type {
@@ -466,6 +465,13 @@ const clientSecret = computed({
     get: () => patchedOpenIdConfiguration.value.clientSecret,
     set: (value: string) =>
         addOpenIdConfigurationPatch({ clientSecret: value }),
+});
+
+// The client secret is censored on the backend, so it can only be revealed once
+// the user has altered the value that was retrieved from the backend.
+const canRevealClientSecret = computed(() => {
+    const original = ssoConfiguration.value?.clientSecret ?? '';
+    return original === '' || clientSecret.value !== original;
 });
 
 const redirectUri = computed({
