@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, WebshopAuthType, WebshopMetaData } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -28,6 +29,16 @@ describe('Endpoint.GetWebshop', () => {
 
         expect(response.body.id).toEqual(webshop.id);
         expect((response.body as any).privateMeta).toBeUndefined();
+    });
+
+    test('Webshop defaults to Dutch as its default language', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
+
+        const r = Request.buildJson('GET', '/webshop/' + webshop.id, organization.getApiHost());
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.body.meta.defaultLanguage).toBe(Language.Dutch);
     });
 
     test('Allow access without organization scope', async () => {

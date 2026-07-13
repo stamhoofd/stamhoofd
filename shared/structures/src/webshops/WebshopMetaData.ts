@@ -5,6 +5,7 @@ import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { Address } from '../addresses/Address.js';
 import { City } from '../addresses/City.js';
 import { CountryDecoder } from '../addresses/CountryDecoder.js';
@@ -615,6 +616,12 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 374 })
     customCode: string | null = null;
+
+    /**
+     * The default language used when loading the webshop (instead of the hardcoded Dutch default).
+     */
+    @field({ decoder: new EnumDecoder(Language), ...NextVersion })
+    defaultLanguage: Language = Language.Dutch;
 
     /**
      * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not

@@ -90,7 +90,9 @@ const root = new ComponentWithProperties(PromiseView, {
                 }
             }
 
-            I18nController.skipUrlPrefixForLocale = 'nl-' + response.data.organization.address.country;
+            const webshopLanguage = response.data.webshop?.meta.defaultLanguage ?? Language.Dutch;
+
+            I18nController.skipUrlPrefixForLocale = webshopLanguage + '-' + response.data.organization.address.country;
 
             // Set session
             const session = new SessionContext(response.data.organization);
@@ -99,12 +101,12 @@ const root = new ComponentWithProperties(PromiseView, {
             await I18nController.loadDefault({
                 $context: session,
                 defaultCountry: response.data.organization.address.country,
-                defaultLanguage: Language.Dutch,
+                defaultLanguage: webshopLanguage,
                 country: response.data.organization.address.country,
                 locales: {
-                    // For now always force the default locale
+                    // For now always force the webshop's default language
                     // if we add translations to webshops, we should add all the setup languages here
-                    [response.data.organization.address.country]: [Language.Dutch],
+                    [response.data.organization.address.country]: [webshopLanguage],
                 },
             });
 
