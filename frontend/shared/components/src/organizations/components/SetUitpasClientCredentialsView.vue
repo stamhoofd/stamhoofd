@@ -39,7 +39,8 @@ import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
-import { ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 
 const errors = useErrors();
 const pop = usePop();
@@ -53,6 +54,7 @@ const organization = useRequiredOrganization();
 const navigationActions = useNavigationActions();
 
 let originaClientId: string;
+let originalClientSecret: string;
 
 const props = withDefaults(
     defineProps<{
@@ -87,6 +89,7 @@ onMounted(async () => {
         else {
             clientSecret.value = UitpasClientIdAndSecret.placeholderClientSecret;
         }
+        originalClientSecret = clientSecret.value;
     }
     catch (e) {
         if (!Request.isAbortError(e)) {
@@ -175,4 +178,22 @@ async function save() {
         }
     }
 }
+
+const hasChanges = computed(() => {
+    if (isInitialLoading.value) {
+        return false;
+    }
+    return clientId.value !== originaClientId || clientSecret.value !== originalClientSecret;
+});
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
