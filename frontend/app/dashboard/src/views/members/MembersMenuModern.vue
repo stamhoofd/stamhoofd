@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePop, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -71,7 +71,7 @@ import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/h
 import { Organization } from '@stamhoofd/structures/Organization.js';
 import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, onActivated, watch } from 'vue';
 
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
@@ -254,6 +254,42 @@ defineRoute({
 const checkRoute = useCheckRoute();
 const fetchPeriods = useFetchOrganizationRegistrationPeriods();
 const present = usePresent();
+const splitViewController = useSplitViewController();
+
+// When this menu follows the organization's current period (no explicit period prop),
+// the shown period can change while the menu is kept alive in the background (e.g. after
+// marking another period as the current one from that period's own menu). The visible
+// detail then still shows the old period, so we open the members overview of the new
+// period. On a collapsed split view (e.g. mobile) the menu itself is shown and there is
+// no detail to update, so we don't navigate.
+let shouldOpenOverviewForNewPeriod = false;
+
+function openOverviewForNewPeriodIfExpanded() {
+    if (!shouldOpenOverviewForNewPeriod) {
+        return;
+    }
+    // shouldCollapse() measures the split view width, so it is only meaningful while this
+    // menu is actually on screen. While it is detached (kept alive in the background) we
+    // keep the pending flag and retry once the menu is activated again.
+    if (!splitViewController.value || splitViewController.value.$el?.isConnected !== true) {
+        return;
+    }
+    shouldOpenOverviewForNewPeriod = false;
+    if (!splitViewController.value.shouldCollapse()) {
+        $navigate(Routes.All).catch(console.error);
+    }
+}
+
+watch(() => period.value.id, () => {
+    // Only the current-period menu (no explicit period prop) follows organization.period.
+    if (props.period) {
+        return;
+    }
+    shouldOpenOverviewForNewPeriod = true;
+    openOverviewForNewPeriodIfExpanded();
+});
+
+onActivated(openOverviewForNewPeriodIfExpanded);
 
 async function startPeriod(p: RegistrationPeriod) {
     await present({
