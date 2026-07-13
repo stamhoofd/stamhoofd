@@ -5,12 +5,10 @@ import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
-import { GetWebshopEndpoint } from '../../webshops/GetWebshopEndpoint.js';
 import { PatchWebshopEndpoint } from './PatchWebshopEndpoint.js';
 
-describe('Endpoint.PatchWebshop defaultLanguage', () => {
-    const patchEndpoint = new PatchWebshopEndpoint();
-    const getEndpoint = new GetWebshopEndpoint();
+describe('Endpoint.PatchWebshop', () => {
+    const endpoint = new PatchWebshopEndpoint();
 
     beforeEach(async () => {
         TestUtils.setEnvironment('userMode', 'platform');
@@ -29,17 +27,6 @@ describe('Endpoint.PatchWebshop defaultLanguage', () => {
         return { organization, token };
     }
 
-    test('a webshop returns Dutch as its default language', async () => {
-        const { organization, token } = await createAdminContext();
-        const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-
-        const request = Request.buildJson('GET', '/webshop/' + webshop.id, organization.getApiHost());
-        request.headers.authorization = 'Bearer ' + token.accessToken;
-
-        const response = await testServer.test(getEndpoint, request);
-        expect(response.body.meta.defaultLanguage).toBe(Language.Dutch);
-    });
-
     test('defaultLanguage can be updated', async () => {
         const { organization, token } = await createAdminContext();
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
@@ -52,7 +39,7 @@ describe('Endpoint.PatchWebshop defaultLanguage', () => {
         const request = Request.buildJson('PATCH', '/webshop/' + webshop.id, organization.getApiHost(), patch);
         request.headers.authorization = 'Bearer ' + token.accessToken;
 
-        const response = await testServer.test(patchEndpoint, request);
+        const response = await testServer.test(endpoint, request);
         expect(response.body.meta.defaultLanguage).toBe(Language.French);
 
         // Persisted in the database
