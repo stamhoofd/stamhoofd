@@ -290,7 +290,7 @@ export class PlatformMembershipType extends AutoEncoder {
      * When manually adding a membership of this type, the member may not already
      * have a membership of one of these types in the same period.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 403 })
     incompatibleMembershipTypeIds: string[] = [];
 
     getPrice(periodId: string, date: Date, tagIds: string[], isReduced: boolean) {

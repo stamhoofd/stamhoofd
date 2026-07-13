@@ -16,13 +16,13 @@ export class Customer extends AutoEncoder {
     @field({ decoder: StringDecoder })
     phone = '';
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 403 })
     birthDay: Date | null = null;
 
-    @field({ decoder: Address, nullable: true, ...NextVersion })
+    @field({ decoder: Address, nullable: true, version: 403 })
     address: Address | null = null;
 
-    @field({ decoder: new EnumDecoder(Gender), defaultValue: () => Gender.Other, isDefaultValue: v => v === Gender.Other, ...NextVersion })
+    @field({ decoder: new EnumDecoder(Gender), defaultValue: () => Gender.Other, isDefaultValue: v => v === Gender.Other, version: 403 })
     gender: Gender = Gender.Other;
 
     get name() {

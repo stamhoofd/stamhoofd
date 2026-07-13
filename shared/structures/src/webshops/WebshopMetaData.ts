@@ -449,13 +449,13 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     phoneEnabled = true;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 403 })
     birthDayEnabled = false;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 403 })
     addressEnabled = false;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 403 })
     genderEnabled = false;
 
     @field({ decoder: BooleanDecoder, version: 242 })
