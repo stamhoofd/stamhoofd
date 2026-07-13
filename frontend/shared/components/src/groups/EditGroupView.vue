@@ -137,7 +137,12 @@
                         {{ getGroupStatusName(virtualOpenStatus, registrationStartDate) }}
                     </p>
                 </template>
+
                 <p>{{ $t('%cQ') }}</p>
+
+                <p v-if="blockCreatingNewMembers" class="warning-box">
+                    {{ $t('Leden of ouders kunnen geen nieuwe gezinsleden toevoegen en ook nieuwe accounts kunnen geen leden toevoegen. Je kan dit aanpassen via Instellingen > Experimenten.') }}
+                </p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -805,6 +810,8 @@ const props = withDefaults(
 
 const platform = usePlatform();
 const organization = useOrganization();
+const blockCreatingNewMembers = computed(() => organization.value?.meta.blockCreatingNewMembers ?? false);
+
 const { patched: patchedPeriod, hasChanges, addPatch, addDependingPatch, patch } = usePatch(props.period);
 if (props.initialPatch) {
     addPatch(props.initialPatch);
