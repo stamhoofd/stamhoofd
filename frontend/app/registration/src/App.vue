@@ -11,22 +11,19 @@ import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
-import { useEventTypes } from '@stamhoofd/components/hooks/useEventTypes.ts';
-import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useEventsEnabled } from '@stamhoofd/components/hooks/useEventsEnabled.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
 import { computed } from 'vue';
 import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
 import { AppRoute } from '@stamhoofd/structures';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 
 const context = useContext();
 const memberManager = useMemberManager();
 const getLoginRoot = useLoginRoot();
-const eventTypes = useEventTypes();
+const eventsEnabled = useEventsEnabled();
 const membersPackage = useMembersPackage();
 const appNavigate = useAppNavigate();
-const organization = useOrganization();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
     return new ComponentWithProperties(ModalStackComponent, { root: component });
@@ -39,10 +36,6 @@ const root = new ComponentWithProperties(AuthenticatedView, {
 const component = useCurrentComponent();
 if (component?.checkRoutes) {
     root.setCheckRoutes();
-}
-
-function areEventsEnabled(): boolean {
-    return eventTypes.value.length > 0 && !manualFeatureFlag('disable-events', context.value) && (!organization.value || STAMHOOFD.userMode === 'platform' || organization.value.meta.enableCalendar === true || (organization.value.meta.enableCalendar === null && organization.value.hasFutureEvents));
 }
 
 function getRoot() {
@@ -95,7 +88,7 @@ function getRoot() {
                         name: $t(`%I`),
                         component: startView,
                     }),
-                    ...(areEventsEnabled() ? [calendarTab] : []),
+                    ...(eventsEnabled.value ? [calendarTab] : []),
                     communicationTab,
                     new TabBarItem({
                         id: 'cart',

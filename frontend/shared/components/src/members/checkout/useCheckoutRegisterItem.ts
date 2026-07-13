@@ -435,7 +435,7 @@ export async function chooseGroupForMember({ member, navigate, context, displayO
                 root: AsyncComponent(() => import('#members/ChooseGroupForMemberView.vue'), {
                     member,
                     defaultOrganization,
-                    selectionHandler: async ({ group, groupOrganization }: { group: Group; groupOrganization: Organization }, navigate: NavigationActions) => {
+                    selectionHandler: async ({ group, groupOrganization }: { group: Group; groupOrganization?: Organization }, navigate: NavigationActions) => {
                         await checkoutDefaultItem({
                             member,
                             group,
