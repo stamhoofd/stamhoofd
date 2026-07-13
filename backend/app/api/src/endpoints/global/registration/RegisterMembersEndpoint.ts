@@ -888,6 +888,16 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
                 await BalanceItemService.updatePaidAndPending(createdBalanceItems);
             }
+
+            // Trial registrations have only deferred balance items (dueAt = trialUntil), so they are
+            // never part of the payment above. Nothing is due during the trial, but the registration
+            // should still be activated immediately (otherwise it stays invisible in the member portal
+            // and registration lists). We keep the trial (paid: false) so it isn't shortened.
+            for (const { registration } of payRegistrations) {
+                if (registration.trialUntil) {
+                    await RegistrationService.markValid(registration.id, { paid: false });
+                }
+            }
         } else {
             // Mark as paid/valid without creating a payment
             for (const balanceItem of markValidList) {

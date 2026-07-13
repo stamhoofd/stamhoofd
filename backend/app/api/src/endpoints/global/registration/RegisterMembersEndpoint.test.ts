@@ -960,6 +960,15 @@ describe('Endpoint.RegisterMembers', () => {
                 // assert
                 expect(response.body).toBeDefined();
                 expect(response.body.registrations.length).toBe(1);
+                // Nothing is due during a trial, but the registration should still be activated
+                // (marked valid) so it is visible in the registration lists and member portal.
+                expect(response.body.registrations[0]).toMatchObject({
+                    registeredAt: expect.any(Date),
+                    deactivatedAt: null,
+                });
+                const dbRegistration = await Registration.getByID(response.body.registrations[0].id);
+                expect(dbRegistration?.registeredAt).not.toBeNull();
+                expect(dbRegistration?.deactivatedAt).toBeNull();
                 const trialUntil = response.body.registrations[0].trialUntil;
                 expect(trialUntil).not.toBeNull();
                 // 2023-05-14
@@ -970,6 +979,52 @@ describe('Endpoint.RegisterMembers', () => {
                 vitest.useRealTimers();
             }
         }, 20_00000);
+
+        test('Register for group with trial should activate the registration in userMode organization', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+
+            const { member, group, groupPrice, organization, token } = await initData();
+            group.settings.trialDays = 5;
+            await group.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                            trial: true,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 0,
+                customer: null,
+            });
+
+            const response = await post(body, organization, token);
+
+            expect(response.body).toBeDefined();
+            expect(response.body.registrations.length).toBe(1);
+            expect(response.body.registrations[0]).toMatchObject({
+                registeredAt: expect.any(Date),
+                deactivatedAt: null,
+            });
+            expect(response.body.registrations[0].trialUntil).not.toBeNull();
+
+            const dbRegistration = await Registration.getByID(response.body.registrations[0].id);
+            expect(dbRegistration?.registeredAt).not.toBeNull();
+            expect(dbRegistration?.deactivatedAt).toBeNull();
+        });
 
         test('Should update group stock reservations', async () => {
             // #region arrange
