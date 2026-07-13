@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<{ title?: string; validator?: Validator |
      * Only used if required = false
      */
     nullable?: boolean; disabled?: boolean; }>(), {
-    title: 'Wachtwoord',
+    title: () => $t('Wachtwoord'),
     validator: null,
     errorBox: null,
     required: true,
@@ -100,8 +100,7 @@ function validate(final = true, silent = false) {
 
         if (props.nullable && model.value !== null) {
             model.value = null;
-        }
-        else if (model.value !== '') {
+        } else if (model.value !== '') {
             model.value = '';
         }
         return false;
