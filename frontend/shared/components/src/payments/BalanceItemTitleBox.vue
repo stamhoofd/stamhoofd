@@ -4,11 +4,11 @@
             <span>{{ $t('%gg') }}</span>
             <span class="icon disabled tiny" />
         </p>
-        <p v-else-if="item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0" class="style-title-prefix-list">
+        <p v-else-if="item.priceOpen < 0 && item.pricePaid > item.payablePriceWithVAT && item.pricePaid > 0" class="style-title-prefix-list">
             <span>{{ $t('%gh') }}</span>
             <span class="icon undo small" />
         </p>
-        <p v-else-if="item.price >= 0 && item.priceOpen < 0" class="style-title-prefix-list">
+        <p v-else-if="item.payablePriceWithVAT >= 0 && item.priceOpen < 0" class="style-title-prefix-list">
             <span v-if="isPayable">{{ $t('%10a') }}</span>
             <span v-else>{{ $t('%10b') }}</span>
             <span class="icon undo small" />
@@ -18,7 +18,7 @@
     <h3 class="style-title-list">
         {{ item.itemTitle }}
     </h3>
-    <p v-if="paymentStatus === null && item.dueAt && item.price >= 0" class="style-description-small" :class="{error: item.isOverDue}">
+    <p v-if="paymentStatus === null && item.dueAt && item.payablePriceWithVAT >= 0" class="style-description-small" :class="{error: item.isOverDue}">
         <span>{{ $t('%gf', {date: formatDate(item.dueAt)}) }}</span>
         <span v-if="item.isOverDue" class="icon error gray tiny" />
     </p>
@@ -30,10 +30,10 @@
                 {{ formatPrice(item.unitPrice) }} {{ item.unitPriceSuffix }} {{ $t('%1ZM') }}
             </p>
             <p v-else-if="item.unitPriceSuffix" class="style-description-small">
-                {{ formatPrice(item.unitPriceWithVAT) }} {{ item.unitPriceSuffix }}
+                {{ formatPrice(unitPriceDisplay) }} {{ item.unitPriceSuffix }}
             </p>
             <p v-else-if="item.amount !== 1" class="style-description-small">
-                {{ $t('%1J3', {price: formatPrice(item.unitPriceWithVAT)}) }}
+                {{ $t('%1J3', {price: formatPrice(unitPriceDisplay)}) }}
             </p>
         </template>
 
@@ -54,8 +54,9 @@
 <script lang="ts" setup>
 import type { GroupedBalanceItems, PaymentStatus } from '@stamhoofd/structures';
 import { BalanceItem, BalanceItemStatus } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         item: BalanceItem | GroupedBalanceItems;
         isPayable: boolean;
@@ -64,12 +65,20 @@ withDefaults(
         price?: number | null;
         paymentStatus?: PaymentStatus | null;
         showPrices?: boolean;
+
+        /**
+         * Show the unit price excluding VAT (used together with a separate VAT overview).
+         */
+        excludeVat?: boolean;
     }>(),
     {
         price: null,
         paymentStatus: null,
         showPrices: true,
+        excludeVat: false,
     },
 );
+
+const unitPriceDisplay = computed(() => props.excludeVat ? props.item.unitPriceWithoutVAT : props.item.unitPriceWithVAT);
 
 </script>
