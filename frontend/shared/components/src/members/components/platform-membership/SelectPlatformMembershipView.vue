@@ -23,12 +23,7 @@
                 :labels="availableOrganizations.map((o) => o.name)"
             />
 
-            <template
-                v-if="
-                    selectedOrganization.id !==
-                        platform.membershipOrganizationId
-                "
-            >
+            <template v-if=" selectedOrganization.id !== platform.membershipOrganizationId">
                 <p v-if="organization" class="style-description-block">
                     {{ $t("%3v") }}
                 </p>
@@ -68,14 +63,7 @@
                         {{ type.description }}
                     </p>
 
-                    <div
-                        v-if="
-                            selectedMembershipType.id === type.id &&
-                                type.behaviour ===
-                                PlatformMembershipTypeBehaviour.Days
-                        "
-                        class="split-inputs"
-                    >
+                    <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="split-inputs">
                         <STInputBox
                             :title="$t('%5M')"
                             :error-box="errors.errorBox"
@@ -86,10 +74,7 @@
                                 class="option"
                                 :min="minimumStartDateForDaysTypes"
                             />
-                            <p
-                                v-if="maximumDaysDescription"
-                                class="style-description-small"
-                            >
+                            <p v-if="maximumDaysDescription" class="style-description-small">
                                 {{ maximumDaysDescription }}
                             </p>
                         </STInputBox>
@@ -115,34 +100,17 @@
                             <DateSelection
                                 v-model="customStartDate"
                                 class="option"
-                                :min="
-                                    selectedMembershipType.periods.get(
-                                        period.id,
-                                    )?.startDate ?? undefined
-                                "
-                                :max="
-                                    selectedMembershipType.periods.get(
-                                        period.id,
-                                    )?.endDate ?? undefined
-                                "
+                                :min="selectedMembershipType.periods.get(period.id,)?.startDate ?? undefined"
+                                :max="selectedMembershipType.periods.get(period.id,)?.endDate ?? undefined"
                             />
                         </STInputBox>
                     </div>
 
                     <template #right>
-                        <span
-                            v-if="
-                                getTypePriceNormalPrice(type) ===
-                                    getTypePriceDescription(type)
-                            "
-                        >{{ getTypePriceDescription(type) }}</span>
+                        <span v-if="getTypePriceNormalPrice(type) === getTypePriceDescription(type)">{{ getTypePriceDescription(type) }}</span>
                         <template v-else>
-                            <span class="style-discount-old-price">{{
-                                getTypePriceNormalPrice(type)
-                            }}</span>
-                            <span class="style-discount-price">{{
-                                getTypePriceDescription(type)
-                            }}</span>
+                            <span class="style-discount-old-price">{{ getTypePriceNormalPrice(type) }}</span>
+                            <span class="style-discount-price">{{ getTypePriceDescription(type) }}</span>
                         </template>
                     </template>
                 </STListItem>
