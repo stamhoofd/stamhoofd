@@ -10,6 +10,14 @@
             <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`%Rc`)" />
         </STInputBox>
 
+        <STInputBox error-fields="meta.defaultLanguage" :error-box="errors.errorBox" :title="$t(`Taal`)">
+            <Dropdown v-model="defaultLanguage">
+                <option v-for="language in languages" :key="language" :value="language">
+                    {{ LanguageHelper.getNativeName(language) }}
+                </option>
+            </Dropdown>
+        </STInputBox>
+
         <hr><h2>{{ $t('%2A') }}</h2>
 
         <STList>
@@ -153,6 +161,7 @@ import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
@@ -165,7 +174,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import type { DarkMode, Image, RichText, SponsorConfig} from '@stamhoofd/structures';
-import { Cart, CartItem, CartReservedSeat, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import { Cart, CartItem, CartReservedSeat, LanguageHelper, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 
 import { computed } from 'vue';
 import EditSponsorsBox from '../../sponsors/EditSponsorsBox.vue';
@@ -242,6 +252,16 @@ const layout = computed({
     get: () => webshop.value.meta.layout,
     set: (layout: WebshopLayout) => {
         const patch = WebshopMetaData.patch({ layout });
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+const languages = Object.values(Language);
+
+const defaultLanguage = computed({
+    get: () => webshop.value.meta.defaultLanguage,
+    set: (defaultLanguage: Language) => {
+        const patch = WebshopMetaData.patch({ defaultLanguage });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });
