@@ -70,7 +70,7 @@ export class ProductSelector extends AutoEncoder {
             return false;
         }
 
-        if (this.productPriceIds.includes(cartItem.productPrice.id)) {
+        if (this.productPriceIds.length > 0 && !this.productPriceIds.includes(cartItem.productPrice.id)) {
             return false;
         }
 
