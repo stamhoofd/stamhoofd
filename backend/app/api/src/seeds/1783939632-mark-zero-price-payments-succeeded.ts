@@ -30,18 +30,20 @@ export default new Migration(async () => {
             );
             const organizations = organizationIds.length ? await Organization.getByIDs(...organizationIds) : [];
 
-            // Load the attached balance item payments of this batch in bulk, to decide which
-            // payments actually move money and therefore need the PaymentService side effects.
+            // Load the attached balance item payments of this batch in bulk, and collect the ids of
+            // the payments that move money on at least one balance item. Those need the PaymentService
+            // side effects (marking balance items as paid, flushing caches, ...); the rest can be
+            // updated directly.
             const { balanceItemPayments } = await Payment.loadBalanceItems(payments);
+            const paymentIdsWithNonZeroBalanceItemPayment = new Set(
+                balanceItemPayments.filter(bip => bip.price !== 0).map(bip => bip.paymentId),
+            );
 
             for (const payment of payments) {
-                // Only route through the PaymentService (which marks balance items as paid, flushes
-                // caches, ...) when the payment moves money on at least one balance item. When all
-                // attached balance item payments are zero (or there are none), update the status
-                // directly to avoid those side effects.
-                const hasNonZeroBalanceItemPayment = balanceItemPayments.some(
-                    bip => bip.paymentId === payment.id && bip.price !== 0,
-                );
+                // Only route through the PaymentService when the payment moves money on at least one
+                // balance item. When all attached balance item payments are zero (or there are none),
+                // update the status directly to avoid those side effects.
+                const hasNonZeroBalanceItemPayment = paymentIdsWithNonZeroBalanceItemPayment.has(payment.id);
 
                 try {
                     if (hasNonZeroBalanceItemPayment) {
