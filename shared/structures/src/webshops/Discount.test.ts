@@ -1,21 +1,40 @@
 import { describe, expect, it } from 'vitest';
 
 import { Cart } from './Cart.js';
-import { CartItem } from './CartItem.js';
+import { CartItem, CartItemOption } from './CartItem.js';
 import { Checkout } from './Checkout.js';
-import { Discount, ProductDiscount, ProductDiscountSettings, ProductSelector, ProductsSelector } from './Discount.js';
-import { Product, ProductPrice } from './Product.js';
+import { Discount, OptionSelectionRequirement, ProductDiscount, ProductDiscountSettings, ProductSelector, ProductsSelector } from './Discount.js';
+import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { WebshopMetaData } from './WebshopMetaData.js';
-
-const smallPrice = ProductPrice.create({ name: 'Klein', price: 10_00_00 });
-const largePrice = ProductPrice.create({ name: 'Groot', price: 20_00_00 });
 
 function createProduct() {
     return Product.create({
         name: 'T-shirt',
-        prices: [smallPrice, largePrice],
+        prices: [
+            ProductPrice.create({ name: 'Klein', price: 10_00_00 }),
+            ProductPrice.create({ name: 'Groot', price: 20_00_00 }),
+        ],
     });
+}
+
+function createProductWithOptions() {
+    const optionMenu = OptionMenu.create({
+        name: "Kies je extra's",
+        multipleChoice: true,
+        options: [
+            Option.create({ name: 'Opdruk' }),
+            Option.create({ name: 'Naam' }),
+        ],
+    });
+
+    const product = Product.create({
+        name: 'T-shirt',
+        prices: [ProductPrice.create({ name: 'Klein', price: 10_00_00 })],
+        optionMenus: [optionMenu],
+    });
+
+    return { product, optionMenu, optionA: optionMenu.options[0], optionB: optionMenu.options[1] };
 }
 
 /**
@@ -69,6 +88,7 @@ function createCheckout(webshop: Webshop, product: Product, productPrice: Produc
 describe('ProductSelector.doesMatch', () => {
     it('matches every product price when productPriceIds is empty', () => {
         const product = createProduct();
+        const [smallPrice, largePrice] = product.prices;
         const selector = ProductSelector.create({ productId: product.id });
 
         expect(selector.doesMatch(CartItem.create({ product, productPrice: smallPrice }))).toBe(true);
@@ -77,6 +97,7 @@ describe('ProductSelector.doesMatch', () => {
 
     it('only matches the selected product prices', () => {
         const product = createProduct();
+        const [smallPrice, largePrice] = product.prices;
         const selector = ProductSelector.create({
             productId: product.id,
             productPriceIds: [smallPrice.id],
@@ -91,13 +112,60 @@ describe('ProductSelector.doesMatch', () => {
         const otherProduct = createProduct();
         const selector = ProductSelector.create({ productId: product.id });
 
-        expect(selector.doesMatch(CartItem.create({ product: otherProduct, productPrice: smallPrice }))).toBe(false);
+        expect(selector.doesMatch(CartItem.create({ product: otherProduct, productPrice: otherProduct.prices[0] }))).toBe(false);
+    });
+
+    it('does not match a cart item that contains an excluded option', () => {
+        const { product, optionMenu, optionA, optionB } = createProductWithOptions();
+        const selector = ProductSelector.create({
+            productId: product.id,
+            optionIds: new Map([[optionA.id, OptionSelectionRequirement.Excluded]]),
+        });
+
+        const withExcludedOption = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            options: [CartItemOption.create({ optionMenu, option: optionA })],
+        });
+
+        const withOtherOption = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            options: [CartItemOption.create({ optionMenu, option: optionB })],
+        });
+
+        expect(selector.doesMatch(withExcludedOption)).toBe(false);
+        expect(selector.doesMatch(withOtherOption)).toBe(true);
+    });
+
+    it('does not match a cart item that is missing a required option', () => {
+        const { product, optionMenu, optionA, optionB } = createProductWithOptions();
+        const selector = ProductSelector.create({
+            productId: product.id,
+            optionIds: new Map([[optionA.id, OptionSelectionRequirement.Required]]),
+        });
+
+        const withRequiredOption = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            options: [CartItemOption.create({ optionMenu, option: optionA })],
+        });
+
+        const withoutRequiredOption = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            options: [CartItemOption.create({ optionMenu, option: optionB })],
+        });
+
+        expect(selector.doesMatch(withRequiredOption)).toBe(true);
+        expect(selector.doesMatch(withoutRequiredOption)).toBe(false);
     });
 });
 
 describe('Discount.applyToCheckout', () => {
     it('applies a discount configured for a specific product price to that product price', () => {
         const product = createProduct();
+        const [smallPrice] = product.prices;
         const webshop = createWebshop(product, [smallPrice.id]);
         const checkout = createCheckout(webshop, product, smallPrice);
 
@@ -106,6 +174,7 @@ describe('Discount.applyToCheckout', () => {
 
     it('does not apply a discount configured for a specific product price to other product prices', () => {
         const product = createProduct();
+        const [smallPrice, largePrice] = product.prices;
         const webshop = createWebshop(product, [smallPrice.id]);
         const checkout = createCheckout(webshop, product, largePrice);
 
@@ -114,6 +183,7 @@ describe('Discount.applyToCheckout', () => {
 
     it('applies a discount without product prices to all product prices', () => {
         const product = createProduct();
+        const [smallPrice, largePrice] = product.prices;
         const webshop = createWebshop(product, []);
 
         expect(createCheckout(webshop, product, smallPrice).cart.priceWithDiscounts).toBe(5_00_00);
