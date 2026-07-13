@@ -52,10 +52,12 @@ async function createInvoicesFor(organization: Organization) {
     const today = Formatter.luxon();
     const startDate = today.day <= 15 ? today.minus({ month: 2 }).startOf('month') : today.minus({ month: 1 }).startOf('month');
 
-    // Don't invoice below 10 euro - unless we reached the timeout date for invoices (end of month + 15 days - 5 days margin)
-    const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 10_0000;
+    // Don't invoice below 4 euro - unless we reached the timeout date for invoices (end of month + 15 days - 5 days margin) OR + 15 day offset
+    const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 4_0000;
     function getPaymentTimeoutDate(p: Payment) {
-        return Formatter.luxon(p.paidAt ?? p.createdAt).plus({ month: 1 }).set({ day: 10 }).startOf('day').toJSDate();
+        const a = Formatter.luxon(p.paidAt ?? p.createdAt).plus({ month: 1 }).set({ day: 10 }).startOf('day').toJSDate();
+        const b = Formatter.luxon(p.paidAt ?? p.createdAt).plus({ days: 15 }).startOf('day').toJSDate();
+        return new Date(Math.min(a.getTime(), b.getTime()));
     }
 
     console.log('Fetching all payments between ' + Formatter.dateTime(startDate.toJSDate()) + ' and now for ' + organization.name);
