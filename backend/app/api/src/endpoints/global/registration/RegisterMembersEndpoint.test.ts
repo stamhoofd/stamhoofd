@@ -240,6 +240,53 @@ describe('Endpoint.RegisterMembers', () => {
             ]);
         });
 
+        test('Should pay a balance item that is due soon (dueAt in the near future)', async () => {
+            const { member, user, organization, token } = await initData();
+
+            // Items that are due within 7 days are part of the outstanding balance, so a member
+            // can pay them before their due date.
+            const dueAt = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                type: BalanceItemType.Registration,
+                amount: 10,
+                unitPrice: 200,
+                dueAt,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        BalanceItemCartItem.create({
+                            item: balanceItem1.getStructure(),
+                            price: 2000,
+                        }),
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 2000,
+                customer: null,
+            });
+
+            const response = await post(body, organization, token);
+
+            // The member really has to pay it: it must be part of the payment
+            expect(response.body.payment).not.toBeNull();
+            expect(response.body.payment!.price).toBe(2000);
+
+            // Point of sale isn't paid right away, but the amount is pending in the payment
+            await balanceItem1.refresh();
+            expect(balanceItem1.pricePending).toBe(2000);
+        });
+
         test('Should fail if balance item deleted', async () => {
             const { member, user, organization, token } = await initData();
 

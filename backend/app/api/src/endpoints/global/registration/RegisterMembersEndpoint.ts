@@ -835,9 +835,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const mappedBalanceItems = new Map<BalanceItem, number>();
 
             for (const item of createdBalanceItems) {
-                if (item.dueAt === null) {
-                    mappedBalanceItems.set(item, item.price);
-                }
+                // Items that aren't due yet (the trial period) are not paid now, so they are passed
+                // along with an amount of 0: createPayment keeps them out of the payment itself, but
+                // does mark them due + valid (which activates the registration).
+                mappedBalanceItems.set(item, item.dueAt !== null ? 0 : item.price);
             }
 
             for (const item of checkout.cart.balanceItems) {
@@ -887,19 +888,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             } finally {
                 // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
                 await BalanceItemService.updatePaidAndPending(createdBalanceItems);
-            }
-
-            // Deferred balance items (dueAt is set: the trial period) are never part of the payment
-            // above - nothing is due during the trial. They still need to be marked due, so they get
-            // billed once the trial ends, and so their registration is marked valid: otherwise the
-            // registration stays invisible in the member portal and the registration lists.
-            // Passing no payment means paid: false, so the trial period isn't shortened.
-            // Note: this activates trial registrations immediately, even if a payment for the other
-            // items in the same cart is still pending or fails. That is intentional: a trial is free.
-            for (const balanceItem of markValidList) {
-                if (balanceItem.dueAt !== null) {
-                    await BalanceItemService.markPaid(balanceItem, null, organization);
-                }
             }
         } else {
             // Mark as paid/valid without creating a payment

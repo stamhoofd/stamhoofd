@@ -1208,16 +1208,38 @@ export class PaymentService {
         privatePaymentConfiguration: PrivatePaymentConfiguration;
         adminUserId?: string | null;
     }) {
-        if (balanceItems.size === 0) {
+        // Balance items that aren't due yet and that aren't being paid now (amount 0) are not part of
+        // this payment: a registration in its trial period is the main example, nothing is due during
+        // the trial. They still have to be marked due and valid, so the registration is activated and
+        // the amount is billed once the trial ends. Marking them via markPaid means the 'paid' side
+        // effects run exactly once (guarded by the paidAt column), also when they are really paid later.
+        //
+        // Items that the caller does pay (a non-zero amount) are always part of the payment, even when
+        // they have a dueAt: balance items that are due soon are part of the outstanding balance and
+        // can be paid before their due date (and are charged by direct debit).
+        const notDueYetBalanceItems = [...balanceItems.keys()].filter(item => item.dueAt !== null && item.dueAt > new Date() && (balanceItems.get(item) ?? 0) === 0);
+        const payableBalanceItems = new Map([...balanceItems].filter(([item]) => !notDueYetBalanceItems.includes(item)));
+
+        // Passing no payment keeps paid: false, so a trial period isn't shortened.
+        const markNotDueYetValid = async () => {
+            for (const balanceItem of notDueYetBalanceItems) {
+                await BalanceItemService.markPaid(balanceItem, null, organization);
+            }
+        };
+
+        if (payableBalanceItems.size === 0) {
+            // Nothing to pay now, so no payment is created. The not-due-yet items still need to be
+            // marked valid, otherwise their registration stays invisible.
+            await markNotDueYetValid();
             return null;
         }
 
         // Calculate total price to pay
-        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems, organization, members });
+        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems: payableBalanceItems, organization, members });
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
         const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization });
-        this.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
+        this.validateVATRates({ customer, sellingOrganization: organization, balanceItems: payableBalanceItems });
 
         const { method, type, mandate } = await this.validatePaymentMethod({
             method: checkout.paymentMethod ?? PaymentMethod.Unknown,
@@ -1226,7 +1248,7 @@ export class PaymentService {
             customer,
             price,
             hasNegative,
-            balanceItems,
+            balanceItems: payableBalanceItems,
             paymentConfiguration,
             user,
             payingOrganization: payingOrganization ?? null,
@@ -1283,7 +1305,7 @@ export class PaymentService {
 
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
-        await ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
+        await ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...payableBalanceItems.entries()].map(([_, p]) => p));
         await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount });
 
         // Add transfer description
@@ -1320,7 +1342,7 @@ export class PaymentService {
         const description = organization.name + ' ' + payment.id;
 
         try {
-            for (const [balanceItem, price] of balanceItems) {
+            for (const [balanceItem, price] of payableBalanceItems) {
                 // Create one balance item payment to pay it in one payment
                 const balanceItemPayment = new BalanceItemPayment();
                 balanceItemPayment.balanceItemId = balanceItem.id;
@@ -1332,7 +1354,7 @@ export class PaymentService {
             }
 
             // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
-            await BalanceItemService.updatePaidAndPending([...balanceItems.keys()]);
+            await BalanceItemService.updatePaidAndPending([...payableBalanceItems.keys()]);
 
             // Update balance items
             if (payment.method === PaymentMethod.Transfer) {
@@ -1445,6 +1467,9 @@ export class PaymentService {
             throw e;
         }
 
+        // The items that aren't due yet are not paid by this payment, so they are marked valid separately
+        await markNotDueYetValid();
+
         // TypeScript thinks status cannot change to Failed, but it can.
         if (payment.status === PaymentStatus.Succeeded || (payment.status as PaymentStatus) === PaymentStatus.Failed) {
             // force update
@@ -1454,7 +1479,7 @@ export class PaymentService {
         } else if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
             // Mark valid (not same as paid) if needed
             let hasBundleDiscount = false;
-            for (const [balanceItem] of balanceItems) {
+            for (const [balanceItem] of payableBalanceItems) {
                 // Mark valid
                 await BalanceItemService.markPaid(balanceItem, payment, organization);
 
