@@ -22,28 +22,15 @@
             <template v-else>
                 <p
                     v-if="organization.privateMeta?.externalSyncData?.lastExternalSync"
-                    :class="
-                        isToday(organization.privateMeta.externalSyncData.lastExternalSync)
-                            ? 'success-box'
-                            : 'info-box'
-                    "
+                    :class="isToday(organization.privateMeta.externalSyncData.lastExternalSync)? 'success-box': 'info-box'"
                 >
-                    {{
-                        $t("%1VL", {
-                            date: formatDate(organization.privateMeta.externalSyncData.lastExternalSync),
-                            name: organization.privateMeta.externalSyncData.lastSyncedBy || "?",
-                        })
-                    }}
+                    {{ $t("%1VL", {date: formatDate(organization.privateMeta.externalSyncData.lastExternalSync),name: organization.privateMeta.externalSyncData.lastSyncedBy || "?",}) }}
                 </p>
                 <p v-else class="warning-box">
                     {{ $t("%1XZ") }}
                 </p>
                 <p v-if="organization.privateMeta?.externalGroupNumber" class="info-box">
-                    {{
-                        $t("%1W7", {
-                            groupNumber: organization.privateMeta.externalGroupNumber,
-                        })
-                    }}
+                    {{ $t("%1W7", { groupNumber: organization.privateMeta.externalGroupNumber}) }}
                 </p>
                 <p class="info-box">
                     {{ $t("%1dZ") }}
@@ -89,6 +76,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
@@ -103,7 +91,6 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { SGVGroupAdministration } from '../SGVGroupAdministration';
 import { SGVOAuth } from '../SGVOAuth';
 import { SGVSyncReport } from '../SGVSyncReport.ts';
-import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 
 const props = defineProps<{
     code?: string;
