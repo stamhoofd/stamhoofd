@@ -240,6 +240,53 @@ describe('Endpoint.RegisterMembers', () => {
             ]);
         });
 
+        test('Should pay a balance item that is due soon (dueAt in the near future)', async () => {
+            const { member, user, organization, token } = await initData();
+
+            // Items that are due within 7 days are part of the outstanding balance, so a member
+            // can pay them before their due date.
+            const dueAt = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                type: BalanceItemType.Registration,
+                amount: 10,
+                unitPrice: 200,
+                dueAt,
+                status: BalanceItemStatus.Due,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        BalanceItemCartItem.create({
+                            item: balanceItem1.getStructure(),
+                            price: 2000,
+                        }),
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 2000,
+                customer: null,
+            });
+
+            const response = await post(body, organization, token);
+
+            // The member really has to pay it: it must be part of the payment
+            expect(response.body.payment).not.toBeNull();
+            expect(response.body.payment!.price).toBe(2000);
+
+            // Point of sale isn't paid right away, but the amount is pending in the payment
+            await balanceItem1.refresh();
+            expect(balanceItem1.pricePending).toBe(2000);
+        });
+
         test('Should fail if balance item deleted', async () => {
             const { member, user, organization, token } = await initData();
 
@@ -960,16 +1007,119 @@ describe('Endpoint.RegisterMembers', () => {
                 // assert
                 expect(response.body).toBeDefined();
                 expect(response.body.registrations.length).toBe(1);
+                // Nothing is due during a trial, but the registration should still be activated
+                // (marked valid) so it is visible in the registration lists and member portal.
+                expect(response.body.registrations[0]).toMatchObject({
+                    registeredAt: expect.any(Date),
+                    deactivatedAt: null,
+                });
+                const dbRegistration = await Registration.getByID(response.body.registrations[0].id);
+                expect(dbRegistration?.registeredAt).not.toBeNull();
+                expect(dbRegistration?.deactivatedAt).toBeNull();
                 const trialUntil = response.body.registrations[0].trialUntil;
                 expect(trialUntil).not.toBeNull();
                 // 2023-05-14
                 expect(trialUntil!.getFullYear()).toBe(2023);
                 expect(trialUntil!.getMonth()).toBe(4);
                 expect(trialUntil!.getDate()).toBe(19);
+
+                // Nothing is paid during the trial, but the balance item should be due (not hidden)
+                // so it is still billed once the trial ends.
+                const balanceItems = await BalanceItem.where({ registrationId: dbRegistration!.id });
+                expect(balanceItems.length).toBe(1);
+                expect(balanceItems[0]).toMatchObject({
+                    status: BalanceItemStatus.Due,
+                    dueAt: dbRegistration!.trialUntil,
+                    pricePaid: 0,
+                });
             } finally {
                 vitest.useRealTimers();
             }
         }, 20_00000);
+
+        test('A trial registration is activated immediately, while a paid registration in the same cart waits for the online payment', async () => {
+            // #region arrange
+            const { member, group, groupPrice, organization, token } = await initData();
+            await initPayconiq({ organization });
+
+            // The trial group also limits its members, so a reservedUntil is set and has to be cleared again
+            group.settings.trialDays = 5;
+            group.settings.maxMembers = 1;
+            await group.save();
+
+            const paidGroup = await new GroupFactory({
+                organization,
+                price: 1500,
+                maxMembers: 1,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                            trial: true,
+                        }),
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            groupPrice: paidGroup.settings.prices[0],
+                            organizationId: organization.id,
+                            groupId: paidGroup.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                paymentMethod: PaymentMethod.Payconiq,
+                redirectUrl: new URL('https://www.example.com'),
+                cancelUrl: new URL('https://www.example.com'),
+                // Only the non-trial registration has to be paid now
+                totalPrice: 1500,
+            });
+            // #endregion
+
+            // act
+            const response = await post(body, organization, token);
+
+            // assert
+            expect(response.body.registrations.length).toBe(2);
+            expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
+
+            // The trial is free, so it is activated right away and its reservation is released
+            const trialRegistration = response.body.registrations.find(r => r.group.id === group.id)!;
+            expect(trialRegistration).toMatchObject({
+                registeredAt: expect.any(Date),
+                deactivatedAt: null,
+                reservedUntil: null,
+                trialUntil: expect.any(Date),
+            });
+
+            const trialBalanceItems = await BalanceItem.where({ registrationId: trialRegistration.id });
+            expect(trialBalanceItems.length).toBe(1);
+            expect(trialBalanceItems[0]).toMatchObject({
+                status: BalanceItemStatus.Due,
+                pricePaid: 0,
+            });
+
+            // The paid registration is not activated: it still waits for the online payment
+            const paidRegistration = response.body.registrations.find(r => r.group.id === paidGroup.id)!;
+            expect(paidRegistration).toMatchObject({
+                registeredAt: null,
+                deactivatedAt: null,
+                reservedUntil: expect.any(Date),
+            });
+
+            await group.refresh();
+            expect(group.settings.registeredMembers).toBe(1);
+            expect(group.settings.reservedMembers).toBe(0);
+
+            await paidGroup.refresh();
+            expect(paidGroup.settings.registeredMembers).toBe(0);
+            expect(paidGroup.settings.reservedMembers).toBe(1);
+        });
 
         test('Should update group stock reservations', async () => {
             // #region arrange

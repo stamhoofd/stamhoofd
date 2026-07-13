@@ -835,9 +835,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const mappedBalanceItems = new Map<BalanceItem, number>();
 
             for (const item of createdBalanceItems) {
-                if (item.dueAt === null) {
-                    mappedBalanceItems.set(item, item.price);
-                }
+                // Items that aren't due yet (the trial period) are not paid now, so they are passed
+                // along with an amount of 0: createPayment keeps them out of the payment itself, but
+                // does mark them due + valid (which activates the registration).
+                mappedBalanceItems.set(item, item.dueAt !== null ? 0 : item.price);
             }
 
             for (const item of checkout.cart.balanceItems) {
