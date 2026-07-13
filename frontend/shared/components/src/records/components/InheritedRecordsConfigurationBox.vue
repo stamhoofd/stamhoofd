@@ -15,7 +15,7 @@
             </template>
             <p class="style-title-list">
                 {{ financialSupportSettings.title }}
-                <span v-tooltip="$t('%jF')" class="gray small icon privacy" />
+                <span v-tooltip="$t('%jF')" class="gray icon text-size privacy" />
             </p>
         </STListItem>
 
@@ -63,7 +63,7 @@
             </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}
-                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="$t('%jF')" class="gray icon privacy small" />
+                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="$t('%jF')" class="gray icon privacy text-size" />
             </p>
             <template #right>
                 <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />
@@ -204,8 +204,7 @@ const financialSupport = {
                 addPatch({
                     financialSupport: true,
                 });
-            }
-            else {
+            } else {
                 addPatch({
                     financialSupport: false,
                 });
@@ -223,8 +222,7 @@ function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, op
             if (value) {
                 // Show dialog
                 editPropertyFilterConfiguration(property, title, options).catch(console.error);
-            }
-            else {
+            } else {
                 setEnableProperty(property, value);
             }
         },
@@ -263,8 +261,7 @@ function setEnableProperty(property: MemberPropertyWithFilter, enable: boolean) 
         addPatch({
             [property]: props.recordsConfiguration[property] ?? PropertyFilter.createDefault(),
         });
-    }
-    else {
+    } else {
         addPatch({
             [property]: null,
         });
@@ -330,8 +327,7 @@ function buildRefForInheritedCategory(categoryId: string) {
                     // Reuse saved one in case of accidental disable - enable
                     props.recordsConfiguration.inheritedRecordCategories.get(categoryId) ?? PropertyFilter.createDefault(),
                 );
-            }
-            else {
+            } else {
                 // Remove
                 patchMap.set(categoryId, null);
             }

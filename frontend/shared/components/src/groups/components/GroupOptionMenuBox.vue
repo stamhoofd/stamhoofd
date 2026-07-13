@@ -77,7 +77,7 @@
 
                     <template #right>
                         <StepperInput v-if="option.allowAmount" />
-                        <span v-if="option.hidden" v-tooltip="$t('%UC')" class="icon gray eye-off" />
+                        <span v-if="option.hidden" v-tooltip="$t('%UC')" class="icon tiny gray eye-off" />
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>
@@ -103,8 +103,6 @@ import StepperInput from '../../inputs/StepperInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
-
-
 
 const props = withDefaults(
     defineProps<{

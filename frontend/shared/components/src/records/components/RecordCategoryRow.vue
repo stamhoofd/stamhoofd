@@ -24,9 +24,9 @@
         </p>
 
         <template #right>
-            <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('%jJ')" />
-            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('%170')" class="button icon eye-off gray" />
-            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('%171')" class="button icon no-edit gray" />
+            <span v-if="category.containsSensitiveData" class="icon tiny privacy gray" :v-tooltip="$t('%jJ')" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('%170')" class="button icon tiny eye-off gray" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('%171')" class="button icon tiny no-edit gray" />
 
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />

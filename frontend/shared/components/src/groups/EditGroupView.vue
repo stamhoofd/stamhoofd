@@ -261,7 +261,7 @@
                             </p>
 
                             <template #right>
-                                <span v-if="price.hidden" :v-tooltip="$t('%UC')" class="icon gray eye-off" />
+                                <span v-if="price.hidden" v-tooltip="$t('%UC')" class="icon tiny gray eye-off" />
                                 <span class="button icon drag gray" @click.stop @contextmenu.stop />
                                 <span class="icon arrow-right-small gray" />
                             </template>

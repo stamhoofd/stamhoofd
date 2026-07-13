@@ -36,7 +36,7 @@
         </p>
 
         <template #right>
-            <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('%UC')" />
+            <span v-if="!event.meta.visible" class="icon gray tiny eye-off" :v-tooltip="$t('%UC')" />
             <span v-if="event.id" class="icon arrow-right-small gray" />
             <span v-else class="icon add gray" />
         </template>

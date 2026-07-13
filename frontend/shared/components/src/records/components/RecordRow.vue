@@ -24,8 +24,8 @@
         </p>
 
         <template #right>
-            <span v-if="record.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('%172')" class="button icon eye-off gray" />
-            <span v-if="record.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('%171')" class="button icon no-edit gray" />
+            <span v-if="record.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('%172')" class="button icon tiny eye-off gray" />
+            <span v-if="record.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('%171')" class="button icon tiny no-edit gray" />
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import type { RecordSettings} from '@stamhoofd/structures';
+import type { RecordSettings } from '@stamhoofd/structures';
 import { PermissionLevel, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
@@ -173,8 +173,7 @@ function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
             records: patch,
         });
         addRootPatch(categoryPatch);
-    }
-    else {
+    } else {
         // Find the root category that contains this category
         const rootCategory = props.rootCategories.find(c => c.childCategories.find(r => r.id === props.category.id));
         if (rootCategory) {
@@ -191,8 +190,7 @@ function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
                 childCategories: arr,
             });
             addRootPatch(categoryPatch);
-        }
-        else {
+        } else {
             console.warn('Could not find root category to patch for this record');
         }
     }
@@ -269,23 +267,23 @@ function showContextMenu(event: MouseEvent) {
                             },
                             childMenu: category.childCategories.length > 0
                                 ? new ContextMenu([
-                                    [
-                                        new ContextMenuItem({
-                                            name: $t(`%123`),
-                                            action: () => {
-                                                moveTo(category);
-                                            },
+                                        [
+                                            new ContextMenuItem({
+                                                name: $t(`%123`),
+                                                action: () => {
+                                                    moveTo(category);
+                                                },
+                                            }),
+                                        ],
+                                        category.childCategories.map((childCategory) => {
+                                            return new ContextMenuItem({
+                                                name: childCategory.name.toString(),
+                                                action: () => {
+                                                    moveTo(childCategory);
+                                                },
+                                            });
                                         }),
-                                    ],
-                                    category.childCategories.map((childCategory) => {
-                                        return new ContextMenuItem({
-                                            name: childCategory.name.toString(),
-                                            action: () => {
-                                                moveTo(childCategory);
-                                            },
-                                        });
-                                    }),
-                                ])
+                                    ])
                                 : undefined,
                         });
                     }),
