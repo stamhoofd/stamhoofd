@@ -20,6 +20,10 @@ interface RegistrationData {
 interface MemberImporterContext {
     readonly isWaitingList: boolean;
     readonly paid: boolean | null;
+    /**
+     * Allow new members to be imported without registering them for any group.
+     */
+    readonly allowMembersWithoutRegistration?: boolean;
 }
 
 export class MemberImporter {
@@ -54,7 +58,16 @@ export class MemberImporter {
     }
 
     async importResults(importMemberResults: ImportMemberResult[], importContext: MemberImporterContext, onProgress?: (progress: number) => void) {
-        if (importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
+        // A new member reaches this point without a group only when no group column was matched:
+        // an unmatched or empty group column value throws while parsing (ColumnMatcher.setValue) and
+        // routes to the error view, so it never gets here. Creating such members without a
+        // registration is therefore only allowed when the admin explicitly opted in — and never in
+        // platform mode, where members without a registration don't surface anywhere and admins
+        // wouldn't have access to them. The UI already hides the option in platform mode; this keeps
+        // the guarantee even if that ever changes.
+        const allowMembersWithoutRegistration = importContext.allowMembersWithoutRegistration && STAMHOOFD.userMode !== 'platform';
+
+        if (!allowMembersWithoutRegistration && importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
             throw new SimpleError({
                 code: 'no_group',
                 message: $t(`%1AE`),

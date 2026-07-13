@@ -78,11 +78,35 @@
                 <hr>
                 <h2>{{ $t('%1IL') }}</h2>
 
-                <p class="warning-box">
+                <p v-if="!skipUnmatchedGroups" class="warning-box">
                     {{ membersNeedingAssignment.length }} {{ $t('%18z') }}
                 </p>
 
-                <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`%19E`)">
+                <!-- Not available in platform mode: members without registrations don't surface anywhere and admins wouldn't have access to them -->
+                <STList v-if="STAMHOOFD.userMode !== 'platform'">
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="skipUnmatchedGroups" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('Deze leden niet inschrijven voor een groep') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Leden zonder een kolom die de inschrijvingsgroep bepaalt, worden aangemaakt of bijgewerkt, maar niet ingeschreven voor een groep.') }}
+                        </p>
+                    </STListItem>
+                </STList>
+
+                <p v-if="skipUnmatchedGroups && newMembersNeedingAssignment.length > 0" class="warning-box">
+                    <template v-if="newMembersNeedingAssignment.length === 1">
+                        {{ $t('Er wordt 1 nieuw lid aangemaakt, maar niet ingeschreven voor een groep. Zonder inschrijving is dit lid moeilijk terug te vinden in het systeem.') }}
+                    </template>
+                    <template v-else>
+                        {{ $t('{count} nieuwe leden worden aangemaakt, maar niet ingeschreven voor een groep. Zonder inschrijving zijn deze leden moeilijk terug te vinden in het systeem.', {count: newMembersNeedingAssignment.length}) }}
+                    </template>
+                </p>
+
+                <STInputBox v-if="!skipUnmatchedGroups" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`%19E`)">
                     <RadioGroup>
                         <Radio v-model="autoAssign" :value="true">
                             {{ $t('%190') }}
@@ -100,7 +124,7 @@
                     </template>
                 </STInputBox>
 
-                <template v-if="autoAssign">
+                <template v-if="autoAssign && !skipUnmatchedGroups">
                     <STInputBox v-if="membersWithMultipleGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`%19F`)">
                         <p class="info-box">
                             {{ $t('%19p', {
@@ -150,7 +174,7 @@
                         </template>
                     </STInputBox>
                 </template>
-                <template v-else>
+                <template v-else-if="!skipUnmatchedGroups">
                     <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`%19H`)">
                         <Dropdown v-model="defaultGroup">
                             <option v-for="group in groups" :key="group.id" :value="group">
@@ -181,6 +205,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
@@ -221,6 +246,7 @@ const saving = ref(false);
 const paid = ref<boolean | null>(null);
 const isWaitingList = ref(false);
 const autoAssign = ref(true);
+const skipUnmatchedGroups = ref(false);
 const groups = props.period.groups;
 const defaultGroup = ref(groups[0]) as unknown as Ref<Group>;
 const multipleGroups = ref(calculateMultipleGroups(groups)) as unknown as Ref<Group[]>;
@@ -238,7 +264,7 @@ const memberImporter = new MemberImporter({
     requestOwner: owner,
 });
 
-watch([autoAssign, defaultGroup], () => {
+watch([autoAssign, defaultGroup, skipUnmatchedGroups], () => {
     autoAssignMembers(props.importMemberResults);
 });
 
@@ -259,6 +285,13 @@ const membersNeedingAssignment = computed(() => {
         return shouldAssignRegistrationToMember(m);
     });
 });
+
+/**
+ * New members (not yet in the system) that need a group assignment.
+ * When skipUnmatchedGroups is enabled these are created without any registration,
+ * which makes them hard to find in the system.
+ */
+const newMembersNeedingAssignment = computed(() => membersNeedingAssignment.value.filter(m => !m.isExisting));
 
 const waitingListWarning = computed(() => {
     if (!isWaitingList.value) {
@@ -363,6 +396,12 @@ function calculateMultipleGroups(groups: Group[]) {
 function autoAssignMembers(members: ImportMemberResult[]) {
     for (const member of members) {
         if (!shouldAssignRegistrationToMember(member)) {
+            member.importRegistrationResult.autoAssignedGroup = null;
+            continue;
+        }
+
+        if (skipUnmatchedGroups.value) {
+            // Do not register members that have no group defined in a column
             member.importRegistrationResult.autoAssignedGroup = null;
             continue;
         }
@@ -668,6 +707,7 @@ async function goNext() {
         const reports = await memberImporter.importResults(props.importMemberResults, {
             isWaitingList: isWaitingList.value,
             paid: paid.value,
+            allowMembersWithoutRegistration: skipUnmatchedGroups.value,
         }, progress => toast.setProgress(progress));
 
         toast.hide();
