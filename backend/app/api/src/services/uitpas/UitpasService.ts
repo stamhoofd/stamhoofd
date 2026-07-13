@@ -368,14 +368,13 @@ export class UitpasService {
     }
 
     /**
-     * Store the uitpas client credentials if they are valid
+     * Store the uitpas client credentials if they are valid, throws otherwise
      * @param organizationId null for platform
      * @param clientId
      * @param clientSecret
-     * @returns wether the credentials were valid and thus stored successfully
      */
-    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<boolean> {
-        return await UitpasTokenRepository.storeIfValid(organizationId, clientId, clientSecret);
+    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<void> {
+        await UitpasTokenRepository.storeIfValid(organizationId, clientId, clientSecret);
     }
 
     static async clearClientCredentialsFor(organizationId: string | null) {

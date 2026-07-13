@@ -84,14 +84,7 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
 
         // store the client credentials and store new status in one operation
         if (!reEvaluation) {
-            const valid = await UitpasService.storeIfValid(organization.id, request.body.clientId, request.body.clientSecret);
-            if (!valid) {
-                throw new SimpleError({
-                    message: 'The provided client credentials are not valid',
-                    code: 'invalid_client_credentials',
-                    human: $t('%1BG'),
-                });
-            }
+            await UitpasService.storeIfValid(organization.id, request.body.clientId, request.body.clientSecret);
         }
         organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotChecked;
         await organization.save();

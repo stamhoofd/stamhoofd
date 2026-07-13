@@ -39,26 +39,27 @@ export class UitpasTokenRepository {
         return await QueueHandler.schedule('uitpas/token-' + (organizationId ?? 'platform'), handler);
     }
 
-    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<boolean> {
+    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<void> {
         if (!clientId || !clientSecret) { // empty strings
-            return false; // not valid
+            throw new SimpleError({
+                statusCode: 400,
+                code: 'invalid_uitpas_client_credentials',
+                message: `Empty UiTPAS client credentials`,
+                human: $t(`Vul zowel de Client id als Client secret in.`),
+            });
         }
+
         let model = new UitpasClientCredential();
         model.organizationId = organizationId;
         model.clientId = clientId;
         model.clientSecret = clientSecret;
-        return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
-            let repo = new UitpasTokenRepository(model);
-            try {
-                await repo.getNewAccessToken();
-            } catch (e) {
-                return false; // not valid
-            }
+        await UitpasTokenRepository.handleInQueue(organizationId, async () => {
+            const repo = new UitpasTokenRepository(model);
+            await repo.getNewAccessToken();
             // valid -> store
             model = await UitpasTokenRepository.setModelInDb(organizationId, model);
             repo.uitpasClientCredential = model; // update the uitpasClientCredential in the repo
-            repo = UitpasTokenRepository.setRepoInMemory(organizationId, repo);
-            return true;
+            UitpasTokenRepository.setRepoInMemory(organizationId, repo);
         });
     }
 
