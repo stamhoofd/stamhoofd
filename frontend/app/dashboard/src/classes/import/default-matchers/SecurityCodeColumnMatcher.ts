@@ -14,7 +14,7 @@ export class SecurityCodeColumnMatcher implements ColumnMatcher {
     doesMatch(columnName: string, _examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase();
 
-        const possibleMatch = ['code'];
+        const possibleMatch = ['beveiligingscode', 'security code'];
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
