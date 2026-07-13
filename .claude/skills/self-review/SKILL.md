@@ -18,24 +18,17 @@ Use the argument passed to the skill if there is one. Otherwise auto-detect, in 
    untracked files via `git status --porcelain`.
 2. **Branch commits** — otherwise review commits on this branch that aren't on `main`:
    `git log --oneline main..HEAD` and `git diff main...HEAD`.
-3. If both are empty, tell the user there's nothing to review and stop.
-
-Interpret natural-language arguments sensibly: "last commit" → `HEAD~1..HEAD`,
-"staged" → `git diff --cached`, a PR number → `gh pr diff <n>`, an explicit ref/range → use it directly.
 
 ## 2. Spawn the review sub-agent
 
-Launch **one** sub-agent with the Agent tool (`subagent_type: general-purpose`,
+Do **not** review the code yourself in the main thread — the whole point is a fresh pair of eyes. Launch **one** sub-agent with the Agent tool (`subagent_type: general-purpose`,
 description like "Review current diff"). Its prompt must contain:
 
 - The exact scope you resolved (the git command(s) that reproduce the diff, or the branch/range).
 - This instruction, verbatim:
   > Read `.claude/skills/self-review/methodology.md` and follow it exactly. Review **only**
-  > the changes in the scope below. Do not modify any files and do not spawn further agents.
-  > Return your findings in the format the methodology specifies.
+  > the changes in the scope below. Do not modify any files.
 - The scope details.
-
-Do **not** review the code yourself in the main thread — the whole point is a fresh pair of eyes.
 
 ## 3. Relay the findings
 
