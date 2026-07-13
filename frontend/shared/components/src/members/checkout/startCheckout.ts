@@ -121,6 +121,7 @@ async function silentRegister({ checkout, context, admin, members }: { checkout:
 async function register({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     const organization = checkout.singleOrganization!;
     const server = context.getAuthenticatedServerForOrganization(organization.id);
+    const clonedCheckout = checkout.clone(); // copy before we clear the checkout
     const idCheckout = getIdCheckout({ checkout, admin });
 
     const response = await server.request({
@@ -185,11 +186,17 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
     clearAndEmit();
 
+    if (!payment) {
+        Toast.success(fallback(registrations, clonedCheckout).description || fallback(registrations, clonedCheckout).title).setTestId('registration-checkout-succeeded').show();
+        await navigate.dismiss({ force: true });
+        return;
+    }
+
     await navigate.show({
         components: [
             AsyncComponent(() => import('../../payments/PaymentSuccessView.vue'), {
                 payment,
-                fallback: fallback(registrations),
+                fallback: fallback(registrations, clonedCheckout),
             }),
         ],
         replace: 100,
@@ -197,34 +204,63 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     });
 }
 
-function fallback(registrations: RegistrationWithTinyMember[]) {
+function fallback(registrations: RegistrationWithTinyMember[], checkout: RegisterCheckout) {
     const names = Formatter.uniqueArray(registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
     const waitingListNames = Formatter.uniqueArray(registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
 
     const t = $t(`%1cZ`);
     let d = '';
 
-    if (names.length > 0) {
-        if (names.length > 3) {
-            d += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
-        } else if (names.length > 1) {
-            d += Formatter.joinLast(names, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
-        } else {
-            d += names.join('') + ' ' + $t(`%zp`);
+    if (names.length + waitingListNames.length === 0) {
+        if (checkout.cart.deleteRegistrations.length >= 1) {
+            const names = Formatter.uniqueArray(checkout.cart.deleteRegistrations.map(r => r.member.patchedMember.firstName));
+            if (names.length === 1) {
+                d += $t(`{name} is uitgeschreven voor {group}`, {
+                    name: names.join('') + waitingListNames.join(''),
+                    group: checkout.cart.deleteRegistrations.map(r => r.group.settings.name).join(', '),
+                });
+            } else {
+                d += $t(`{jamesAndAnna} zijn uitgeschreven`, {
+                    jamesAndAnna: Formatter.joinLastLimited(names, {
+                        separator: ', ',
+                        lastSeparator: ' ' + $t('en') + ' ',
+                        maxLength: 70,
+                        maxCount: 2,
+                        textIfOverflow(notIncludedCount) {
+                            return notIncludedCount + ' ' + $t(`%zn`);
+                        },
+                    }),
+                });
+            }
         }
-    }
-
-    if (waitingListNames.length > 0) {
+    } else if (names.length + waitingListNames.length === 1) {
+        d += $t(`{name} is ingeschreven voor {group}`, {
+            name: names.join('') + waitingListNames.join(''),
+            group: registrations[0].group.settings.name,
+        });
+    } else {
         if (names.length > 0) {
-            d += ' ' + $t(`%M1`) + ' ';
+            if (names.length > 3) {
+                d += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
+            } else if (names.length > 1) {
+                d += Formatter.joinLast(names, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
+            } else {
+                d += names.join('') + ' ' + $t(`%zp`);
+            }
         }
 
-        if (waitingListNames.length > 3) {
-            d += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
-        } else if (waitingListNames.length > 1) {
-            d += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
-        } else {
-            d += waitingListNames.join('') + ' ' + $t(`%zr`);
+        if (waitingListNames.length > 0) {
+            if (names.length > 0) {
+                d += ' ' + $t(`%M1`) + ' ';
+            }
+
+            if (waitingListNames.length > 3) {
+                d += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
+            } else if (waitingListNames.length > 1) {
+                d += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
+            } else {
+                d += waitingListNames.join('') + ' ' + $t(`%zr`);
+            }
         }
     }
 

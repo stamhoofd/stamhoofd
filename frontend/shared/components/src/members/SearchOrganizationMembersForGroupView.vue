@@ -32,7 +32,7 @@
             </p>
 
             <STList v-if="fetcher.objects.length">
-                <RegisterItemCheckboxRow v-for="member in fetcher.objects" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" />
+                <RegisterItemCheckboxRow v-for="member in fetcher.objects" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" :checkout="props.checkout" />
             </STList>
             <InfiniteObjectFetcherEnd :empty-message="$t('%eI')" :fetcher="fetcher">
                 <template #empty>

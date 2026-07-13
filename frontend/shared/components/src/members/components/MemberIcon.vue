@@ -10,7 +10,7 @@
             <span>{{ member.patchedMember.details.getShortCode(2) }}</span>
         </figure>
         <aside>
-            <span v-if="icon" class="icon gray small" :class="icon" />
+            <span v-if="icon" class="icon gray tiny " :class="icon" />
         </aside>
     </figure>
 </template>

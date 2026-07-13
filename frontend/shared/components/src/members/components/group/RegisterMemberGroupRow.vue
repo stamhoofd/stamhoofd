@@ -21,7 +21,7 @@
         </p>
 
         <template #right>
-            <span v-if="validationWarning" v-tooltip="validationWarning" class="icon warning yellow" />
+            <span v-if="validationWarning" v-tooltip="validationWarning" class="icon tiny warning yellow" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>

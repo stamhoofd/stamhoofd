@@ -11,7 +11,7 @@
             </p>
 
             <STList>
-                <RegisterItemCheckboxRow v-for="member in family.members" :key="member.id" :member="member" :group="group" :group-organization="groupOrganization" />
+                <RegisterItemCheckboxRow v-for="member in family.members" :key="member.id" :checkout="checkout" :member="member" :group="group" :group-organization="groupOrganization" />
             </STList>
         </SaveView>
     </ExternalOrganizationContainer>

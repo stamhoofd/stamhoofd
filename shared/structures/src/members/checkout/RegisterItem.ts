@@ -364,7 +364,7 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     get showItemView() {
-        return !!this.replaceRegistrations.length || this.group.settings.prices.length !== 1 || this.group.settings.optionMenus.length > 0 || this.group.type === GroupType.WaitingList || this.group.settings.description.length > 2 || this.group.settings.prices[0].price.price > 0 || (!this.isInCart && !this.isValid);
+        return this.checkout.isAdminFromSameOrganization || !!this.replaceRegistrations.length || this.group.settings.prices.length !== 1 || this.group.settings.optionMenus.length > 0 || this.group.type === GroupType.WaitingList || this.group.settings.description.length > 2 || this.group.settings.prices[0].price.price > 0 || (!this.isInCart && !this.isValid);
     }
 
     calculatePrice() {
@@ -783,6 +783,14 @@ export class RegisterItem implements ObjectWithRecords {
 
         for (const option of this.options) {
             descriptions.push(option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : ''));
+        }
+
+        if (this.customStartDate) {
+            descriptions.push($t('Vanaf {date}', { date: Formatter.startDate(this.calculatedStartDate) }));
+        }
+
+        if (this.customEndDate) {
+            descriptions.push($t('Tot en met {date}', { date: Formatter.endDate(this.calculatedEndDate) }));
         }
 
         return descriptions.filter(d => !!d).join('\n');

@@ -106,7 +106,7 @@
                 {{ $t('%fE') }}
             </button>.
         </p>
-        <p v-if="!willMarkReviewed && !reviewDate && isAdmin" class="style-description-small">
+        <p v-if="!willMarkReviewed && !reviewDate && isAdmin && !member.isNew" class="style-description-small">
             {{ $t('%1NO') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 {{ $t('%jC') }}
             </button>

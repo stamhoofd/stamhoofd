@@ -13,7 +13,7 @@
             {{ $t('%1DQ') }}
         </h1>
 
-        <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
+        <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization && checkout.cart.items.length" class="info-box">
             {{ $t('%do') }}
         </p>
 
@@ -56,7 +56,7 @@
             </p>
 
             <PermyriadInputBox v-model="checkout.cancellationFeePercentage" :title="$t(`%2I`)" :min="0" :max="10000" :placeholder="$t(`%L`)" :validator="errors.validator" :error-box="errors.errorBox" />
-            
+
             <p v-if="checkout.cancellationFeePercentage !== 0 && checkout.cancellationFeePercentage !== 10000" class="style-description-small">
                 {{ $t('%dt') }}
             </p>
@@ -105,8 +105,7 @@ onMounted(() => {
     // Initially show errors as soon as it is possible
     try {
         props.checkout.validate({});
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     props.checkout.cart.calculatePrices();
@@ -228,11 +227,9 @@ async function goToCheckout() {
             members: props.members,
             displayOptions: { action: 'show' },
         }, navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }
