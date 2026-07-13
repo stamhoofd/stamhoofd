@@ -3,7 +3,7 @@
         <div class="input-with-buttons">
             <div>
                 <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
-                    <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="event-search-input" :placeholder="$t(`%KC`)">
+                    <input v-model="searchQuery" v-autofocus="true" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="event-search-input" :placeholder="$t(`%KC`)">
                 </form>
             </div>
             <div>
@@ -56,6 +56,7 @@ defineEmits<{
 
 type ObjectType = Event;
 
+const app = useAppContext();
 const searchQuery = ref('');
 const platform = usePlatform();
 const { presentPositionableSheet } = usePositionableSheet();
@@ -106,15 +107,18 @@ async function editFilter(event: MouseEvent) {
 
 function getRequiredFilter(): StamhoofdFilter | null {
     const filter: StamhoofdFilter = {
-        'startDate': {
+        startDate: {
             $gt: new Date(),
         },
-        'meta.visible': true,
         // Only events that can actually be registered for
-        'groupId': {
+        groupId: {
             $neq: null,
         },
     };
+
+    if (app === 'registration') {
+        filter['meta.visible'] = true;
+    }
 
     // In organization mode there is only ever a single organization, so scope to it
     if (STAMHOOFD.userMode === 'organization' && organizations.value.length === 1) {

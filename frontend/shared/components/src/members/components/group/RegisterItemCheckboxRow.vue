@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="!disabled" :disabled="disabled" class="right-stack" @click="editRegisterItem">
+    <STListItem :selectable="!disabled" :disabled="disabled" class="right-stack" @click="toggleRow">
         <template #left>
             <Checkbox v-model="checked" :disabled="disabled" @click.stop />
         </template>
@@ -12,29 +12,30 @@
             <p v-if="member.patchedMember.details.birthDay" class="style-description-small">
                 {{ formatDate(member.patchedMember.details.birthDay, true) }}
             </p>
-            <p class="style-description-small">
+            <p class="style-description-small" v-if="!checked">
                 {{ member.registrationDescription }}
             </p>
         </template>
 
-        <p v-if="validationError" class="style-description-small">
+        <p v-if="!checked && validationError" class="style-description-small">
             {{ validationError }}
         </p>
 
-        <p v-if="validationWarning" class="style-description-small">
+        <p v-if="!checked && validationWarning" class="style-description-small">
             {{ validationWarning }}
         </p>
 
         <p v-if="checked && registerItem && registerItem.description" class="style-description-small pre-wrap" v-text="registerItem.description" />
+
         <template #right>
-            <span v-if="(registerItem?.group.type === GroupType.WaitingList) || (!disabled && validationError)" class="icon clock gray" />
-            <span v-if="checked && registerItem?.showItemView" class="button icon edit gray" />
+            <span v-if="(registerItem?.group.type === GroupType.WaitingList) || (!disabled && validationError)" class="icon tiny clock gray" />
+            <button v-if="checked && registerItem?.showItemView" type="button" class="button icon edit gray" @click.stop="editRegisterItem" />
         </template>
     </STListItem>
 </template>
 
 <script setup lang="ts">
-import type { Group, Organization, PlatformMember} from '@stamhoofd/structures';
+import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
@@ -44,6 +45,7 @@ const props = defineProps<{
     group: Group;
     member: PlatformMember;
     groupOrganization: Organization;
+    checkout: RegisterCheckout;
 }>();
 
 const app = useAppContext();
@@ -86,20 +88,32 @@ const checked = computed({
             if (props.group.waitingList) {
                 props.member.family.checkout.removeMemberAndGroup(props.member.id, props.group.waitingList.id);
             }
-        }
-        else {
-            editRegisterItem().catch(console.error);
+        } else {
+            const item = registerItem.value;
+            if (app === 'registration' || item.validationError) {
+                editRegisterItem().catch(console.error);
+                return;
+            }
+            props.checkout.add(item);
         }
     },
 });
 
-async function editRegisterItem() {
-    if (checked.value && !registerItem.value?.showItemView) {
+async function toggleRow() {
+    if (checked.value) {
         // Deselect
         checked.value = false;
         return;
     }
 
+    if (disabled.value) {
+        return;
+    }
+
+    checked.value = true;
+}
+
+async function editRegisterItem() {
     if (disabled.value) {
         return;
     }

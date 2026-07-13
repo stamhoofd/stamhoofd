@@ -48,12 +48,12 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox :title="$t('%1Of')" error-fields="customStartDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="customStartDate" :required="false" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
+                        <DateSelection v-model="customStartDate" :required="false" :time="{hours: 0}" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>
                 <div>
                     <STInputBox :title="$t('%1P8')" error-fields="customEndDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="customEndDate" :required="false" :placeholder-date="item.defaultEndDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
+                        <DateSelection v-model="customEndDate" :required="false" :time="{hours: 23, minutes: 59}" :placeholder-date="item.defaultEndDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>
             </div>

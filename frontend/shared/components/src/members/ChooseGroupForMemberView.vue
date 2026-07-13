@@ -31,13 +31,13 @@
                 <div v-if="showGroupSearch" class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
-                            <input v-model="groupSearchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="group-search-input" :placeholder="$t('Zoek een groep')">
+                            <input v-model="groupSearchQuery" v-autofocus="true" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="group-search-input" :placeholder="$t('Zoek een groep')">
                         </form>
                     </div>
                 </div>
 
                 <div v-for="({ category, groups }, index) of filteredCategories" :key="category.id" class="container">
-                    <hr v-if="index > 0 || !showControl"><h2 class="style-with-button">
+                    <hr v-if="index > 0 || !showControl || showGroupSearch"><h2 class="style-with-button">
                         <div>
                             {{ category.settings.name }}
                             <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('%dl')" />
@@ -142,7 +142,7 @@ const controlLabels = computed(() => controlItems.value.map((id) => {
         return $t('Activiteiten');
     }
     if (id === GROUPS_TAB) {
-        return $t('Groepen');
+        return tree.value?.categories.length === 1 && selectedOrganization.value ? tree.value?.categories[0].getName(selectedOrganization.value.period) : $t('Groepen');
     }
     return props.member.organizations.find(o => o.id === id)?.name ?? '';
 }));
@@ -208,6 +208,10 @@ const alreadyRegisteredGroups = computed(() => {
 });
 
 const alreadyRegisteredMessage = computed(() => {
+    if (props.member.family.checkout.isAdminFromSameOrganization) {
+        return null;
+    }
+
     const groups = alreadyRegisteredGroups.value;
 
     if (groups.length > 0) {

@@ -924,11 +924,11 @@ test.describe('Registration', () => {
                 await page.getByTestId('save-button').click();
 
                 await test.step('should show success view listing every registered member', async () => {
-                    const successView = page.getByTestId('payment-success-view');
-                    await test.expect(successView).toBeVisible();
+                    const toast = page.getByTestId('registration-checkout-succeeded');
+                    await test.expect(toast).toBeVisible();
 
                     await test
-                        .expect(successView)
+                        .expect(toast)
                         .toContainText('en 2 andere leden zijn ingeschreven', { ignoreCase: true });
                 });
             });
@@ -1009,14 +1009,14 @@ test.describe('Registration', () => {
                 await page.getByTestId('save-button').click();
 
                 await test.step('should show success view listing every registered member', async () => {
-                    const successView = page.getByTestId('payment-success-view');
-                    await test.expect(successView).toBeVisible();
+                    const toast = page.getByTestId('registration-checkout-succeeded');
+                    await test.expect(toast).toBeVisible();
 
                     // The admin checkout returns no payment, so the success view
                     // renders the registrations fallback which lists first names.
                     for (const member of members) {
                         await test
-                            .expect(successView)
+                            .expect(toast)
                             .toContainText(member.details.firstName, { ignoreCase: true });
                     }
                 });

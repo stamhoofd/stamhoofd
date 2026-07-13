@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack">
         <template #left>
-            <GroupIconWithWaitingList :group="registration.registration.group" icon="canceled" />
+            <MemberIcon :member="registration.member" icon="red canceled" />
         </template>
 
         <h3 class="style-title-list">
@@ -13,7 +13,7 @@
         </p>
 
         <template #right>
-            <p v-if="balance" class="style-price">
+            <p v-if="balance && (balance.amountOpen + balance.amountPaid + balance.amountPending !== 0)" class="style-price negative">
                 {{ formatPrice(balance.amountOpen + balance.amountPaid + balance.amountPending) }}
             </p>
 
@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import type { RegisterCheckout, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
+import MemberIcon from '../MemberIcon.vue';
 
 const props = withDefaults(
     defineProps<{

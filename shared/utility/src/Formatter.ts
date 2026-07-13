@@ -565,8 +565,8 @@ export class Formatter {
      * @param options
      * @returns
      */
-    static joinLastLimited<T extends string | number>(array: T[], options: { separator?: string; lastSeparator?: string; maxLength?: number; textIfOverflow?: (notIncludedCount: number) => string }): string {
-        if (!options.maxLength) {
+    static joinLastLimited<T extends string | number>(array: T[], options: { separator?: string; lastSeparator?: string; maxCount?: number; maxLength?: number; textIfOverflow?: (notIncludedCount: number) => string }): string {
+        if (!options.maxLength && !options.maxCount) {
             return Formatter.joinLast(array, options.separator, options.lastSeparator);
         }
 
@@ -575,10 +575,14 @@ export class Formatter {
 
         for (const item of array) {
             totalLength += item.toString().length;
-            if (totalLength > options.maxLength) {
+            if ((options.maxCount && itemsToInclude.length >= options.maxCount) || (options.maxLength && totalLength > options.maxLength)) {
                 const notIncludedCount = array.length - itemsToInclude.length;
-                const lastText = options.textIfOverflow ? options.textIfOverflow(notIncludedCount) : $t('%1bw', { count: notIncludedCount });
-                itemsToInclude.push(lastText);
+                if (notIncludedCount > 1) {
+                    const lastText = options.textIfOverflow ? options.textIfOverflow(notIncludedCount) : $t('%1bw', { count: notIncludedCount });
+                    itemsToInclude.push(lastText);
+                    break;
+                }
+                itemsToInclude.push(item);
                 break;
             }
 
