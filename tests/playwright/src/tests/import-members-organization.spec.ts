@@ -163,6 +163,43 @@ test.describe('Import members with an ID column (organization mode) @import-memb
         expect(newMember.details.lastName).toBe('Lid');
     });
 
+    test('new members can be imported without registering them for a group', async ({ page }) => {
+        test.setTimeout(90_000);
+        const scenario = await seedScenario('skip-group');
+        const { organization } = scenario;
+
+        // Two new members without an id and without a group column: they need a group assignment
+        const csv = [
+            'ID,Voornaam,Achternaam',
+            ',Nieuw,Lid1',
+            ',Nieuw,Lid2',
+        ].join('\n');
+
+        await openImportViewAndUpload({ page, scenario, csv });
+
+        await expect(page.getByRole('heading', { name: 'Importeer instellingen' })).toBeVisible();
+
+        // Choose not to register these members for a group
+        await page.getByText('Deze leden niet inschrijven voor een groep').click();
+
+        // A warning explains the new members will be created but not registered
+        await expect(page.getByText('moeilijk terug te vinden in het systeem')).toBeVisible();
+
+        await page.getByRole('button', { name: 'Importeer 2 leden' }).click();
+
+        await expect(page.getByText('Importeren voltooid')).toBeVisible({ timeout: 30_000 });
+
+        // Both members were created
+        const members = await Member.select().where('organizationId', organization.id).fetch();
+        expect(members).toHaveLength(2);
+
+        // ...but no registrations were created for them
+        for (const member of members) {
+            const registrations = await Registration.select().where('memberId', member.id).fetch();
+            expect(registrations).toHaveLength(0);
+        }
+    });
+
     test('an unknown id is a hard error and blocks the import', async ({ page }) => {
         const scenario = await seedScenario('unknown-id');
         const { organization, group } = scenario;
