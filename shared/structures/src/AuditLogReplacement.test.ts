@@ -23,6 +23,7 @@ describe('AuditLogReplacement', () => {
             'EventNotificationStatus',
             'Gender',
             'GroupStatus',
+            'Language',
             'OrderStatus',
             'OrganizationType',
             'ParentType',
@@ -35,7 +36,8 @@ describe('AuditLogReplacement', () => {
 
         expect(getAuditLogPatchKeyName(PaymentStatus.Pending)).toBe('%mu');
         expect(AuditLogReplacement.create({ value: PaymentStatus.Pending, type: AuditLogReplacementType.Key }).toString()).toBe('%mu');
-        expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(getRegisteredAuditLogEnums().length - 1);
+        // EventNotificationStatus and Language are not registered as legacy enums
+        expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(getRegisteredAuditLogEnums().length - 2);
         expect(AuditLogReplacement.enum('EventNotificationStatus', EventNotificationStatus.Accepted)?.toString()).toBe('%B1');
     });
 

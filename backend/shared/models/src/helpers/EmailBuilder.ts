@@ -1,7 +1,8 @@
 import type { EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email, EmailAddress } from '@stamhoofd/email';
-import type { EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient } from '@stamhoofd/structures';
+import type { EmailContent, EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient } from '@stamhoofd/structures';
 import { BalanceItem as BalanceItemStruct, getAppHost, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -228,6 +229,7 @@ async function getEmailBuilderForTemplate(organization: Organization | null, opt
         ...options,
         subject: template.subject,
         html: template.html,
+        translations: template.translations,
     });
 }
 
@@ -238,6 +240,12 @@ export type EmailBuilderOptions = {
     replyTo?: EmailInterfaceRecipient | null;
     subject: string;
     html: string;
+
+    /**
+     * Full content overrides per language. Recipients with a language that has an override
+     * receive that content, all others receive the default subject/html.
+     */
+    translations?: Map<Language, EmailContent>;
     attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[];
     type?: 'transactional' | 'broadcast';
     unsubscribeType?: 'all' | 'marketing';
@@ -340,9 +348,28 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
     let emailIndex = 0;
 
-    for (const s of email.replaceAll ?? []) {
-        email.html = email.html.replaceAll(s.from, s.to);
-    }
+    // The subject and html can differ per recipient language
+    const contentCache = new Map<Language | null, { subject: string; html: string }>();
+    const resolveContent = (language: Language | null) => {
+        const cached = contentCache.get(language);
+        if (cached) {
+            return cached;
+        }
+
+        // Strict selection: only use a translation of this email, never fall back to
+        // a different template for a missing language (content correctness above language)
+        const translation = language !== null ? email.translations?.get(language) : undefined;
+        const subject = translation ? translation.subject : email.subject;
+        let html = translation ? translation.html : email.html;
+
+        for (const s of email.replaceAll ?? []) {
+            html = html.replaceAll(s.from, s.to);
+        }
+
+        const result = { subject, html };
+        contentCache.set(language, result);
+        return result;
+    };
 
     if (queue.length === 0) {
         if (email.callback) {
@@ -360,8 +387,9 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             return undefined;
         }
 
-        const replacedHtml = replaceEmailHtml(email.html, recipient.replacements);
-        const replacedSubject = replaceEmailText(email.subject, recipient.replacements);
+        const content = resolveContent(recipient.language ?? null);
+        const replacedHtml = replaceEmailHtml(content.html, recipient.replacements);
+        const replacedSubject = replaceEmailText(content.subject, recipient.replacements);
 
         emailIndex += 1;
 

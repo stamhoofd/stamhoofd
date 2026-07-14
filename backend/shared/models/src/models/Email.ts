@@ -1,9 +1,11 @@
 import { column } from '@simonbackx/simple-database';
 import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
-import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import { EmailAttachment, EmailContent, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LanguageHelper, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import type { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
-import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
@@ -104,6 +106,10 @@ export class Email extends QueryableModel {
 
     @column({ type: 'string', nullable: true })
     text: string | null = null;
+
+    /** Full content overrides per language. The default content (subject/html/text/json) is used for all recipients without a matching override */
+    @column({ type: 'json', decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>) })
+    translations: Map<Language, EmailContent> = new Map();
 
     @column({ type: 'string', nullable: true })
     fromAddress: string | null = null;
@@ -257,6 +263,16 @@ export class Email extends QueryableModel {
             });
         }
 
+        for (const [language, content] of this.translations) {
+            if (content.subject.length === 0 || content.text.length === 0 || content.html.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Missing subject, text or html in translation ' + language,
+                    human: $t('De vertaling in het {language} is onvolledig. Vul het onderwerp en de inhoud aan of verwijder de vertaling.', { language: LanguageHelper.getName(language) }),
+                });
+            }
+        }
+
         if (this.fromAddress == null || this.fromAddress.length == 0) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -304,6 +320,17 @@ export class Email extends QueryableModel {
                     message: 'Missing unsubscribe button',
                     human: $t(`%DS`),
                     field: 'html',
+                });
+            }
+        }
+
+        for (const [language, content] of this.translations) {
+            if ((content.html && !content.html.includes(replacement)) || (content.text && !content.text.includes(replacement))) {
+                throw new SimpleError({
+                    code: 'missing_unsubscribe_button',
+                    message: 'Missing unsubscribe button in translation ' + language,
+                    human: $t(`%DS`),
+                    field: 'translations',
                 });
             }
         }
@@ -436,8 +463,16 @@ export class Email extends QueryableModel {
         this.text = defaultTemplate.text;
         this.subject = defaultTemplate.subject;
         this.json = defaultTemplate.json;
+        this.translations = new Map([...defaultTemplate.translations.entries()].map(([language, content]) => [language, content.clone()]));
 
         return true;
+    }
+
+    /**
+     * The html of all languages combined - only used to check which replacements are in use.
+     */
+    getCombinedHtml(): string {
+        return [this.html ?? '', ...[...this.translations.values()].map(content => content.html)].join(' ');
     }
 
     async lock<T>(callback: (upToDate: Email, options: QueueHandlerOptions) => Promise<T> | T): Promise<T> {
@@ -729,6 +764,7 @@ export class Email extends QueryableModel {
             replyTo: data.replyTo,
             subject: this.subject!,
             html: this.html!,
+            translations: this.translations,
             type: this.emailType ? 'transactional' : 'broadcast',
             attachments: data.attachments,
             callback(error: Error | null) {
@@ -1159,6 +1195,7 @@ export class Email extends QueryableModel {
 
             const membersSet = new Set<string>();
             const emailsSet = new Set<string>();
+            const combinedHtml = upToDate.getCombinedHtml();
 
             let count = 0;
             let countWithoutEmail = 0;
@@ -1207,6 +1244,7 @@ export class Email extends QueryableModel {
                             recipient.email = item.email;
                             recipient.firstName = item.firstName;
                             recipient.lastName = item.lastName;
+                            recipient.language = item.language ?? null;
                             recipient.replacements = item.replacements;
                             recipient.memberId = item.memberId ?? null;
                             recipient.userId = item.userId ?? null;
@@ -1219,7 +1257,7 @@ export class Email extends QueryableModel {
                                 replyTo: null,
                                 forPreview: false,
                             });
-                            recipient.replacements = removeUnusedReplacements(upToDate.html ?? '', recipient.replacements);
+                            recipient.replacements = removeUnusedReplacements(combinedHtml, recipient.replacements);
 
                             let duplicateOfRecipientId: string | null = null;
                             if (item.email && emailsSet.has(item.email)) {
@@ -1345,6 +1383,7 @@ export class Email extends QueryableModel {
                             recipient.email = item.email;
                             recipient.firstName = item.firstName;
                             recipient.lastName = item.lastName;
+                            recipient.language = item.language ?? null;
                             recipient.replacements = item.replacements;
                             recipient.memberId = item.memberId ?? null;
                             recipient.userId = item.userId ?? null;
@@ -1477,7 +1516,7 @@ export class Email extends QueryableModel {
                 organization,
             });
             if (this.html) {
-                struct.replacements = removeUnusedReplacements(this.html, struct.replacements);
+                struct.replacements = removeUnusedReplacements(this.getCombinedHtml(), struct.replacements);
             }
         }
 

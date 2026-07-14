@@ -215,16 +215,14 @@ const editableList = computed(() => {
                     defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === orgId) ?? defaultTemplate ?? null;
                 }
 
-                base.push(
-                    EmailTemplate.create({
-                        ...defaultTemplate,
-                        id: '', // clear
-                        organizationId: organization.value?.id ?? null,
-                        groupId: group?.id ?? null,
-                        webshopId: props.webshopId,
-                        type,
-                    }),
-                );
+                // Clone to avoid sharing object references (e.g. the translations map) with the default template
+                const seeded = defaultTemplate?.clone() ?? EmailTemplate.create({});
+                seeded.id = ''; // clear
+                seeded.organizationId = organization.value?.id ?? null;
+                seeded.groupId = group?.id ?? null;
+                seeded.webshopId = props.webshopId;
+                seeded.type = type;
+                base.push(seeded);
             }
         }
     }

@@ -1,7 +1,9 @@
 import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { AccessRight, AccessRightHelper } from '../AccessRight.js';
 import { CountryHelper } from '../addresses/CountryDecoder.js';
 import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditLogReplacement.js';
+import { LanguageHelper } from '../Language.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
@@ -34,5 +36,6 @@ registerAuditLogEnum('Gender', Gender, getGenderName, { legacy: true });
 registerAuditLogEnum('SetupStepType', SetupStepType, getSetupStepName, { legacy: true });
 registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTypeTitle, { legacy: true });
 registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
+registerAuditLogEnum('Language', Language, LanguageHelper.getName);
 
 AuditLogReplacementDependencies.uuidToName = uuidToName;

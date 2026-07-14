@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%1Op')" :replacements="replacements" :title="$t(`%aP`)" @save="save">
+    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%1Op')" :loading="contentLanguage.switching.value" :replacements="replacements" :title="$t(`%aP`)" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             {{ $t('%aM') }}
@@ -17,11 +17,14 @@
                     <span class="list-input">{{ EmailTemplate.getTypeTitle(emailTemplate.type) }}</span>
                 </div>
             </STListItem>
-            <STListItem class="no-padding" element-name="label">
+            <STListItem class="no-padding right-stack" element-name="label">
                 <div class="list-input-box">
                     <span>{{ $t('%aO') }}:</span>
                     <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
                 </div>
+                <template #right>
+                    <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
+                </template>
             </STListItem>
         </template>
     </EditorView>
@@ -32,16 +35,17 @@ import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
-import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import EmailLanguageButton from './EmailLanguageButton.vue';
+import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
 
 const props = withDefaults(
     defineProps<{
@@ -63,15 +67,17 @@ const pop = usePop();
 const organization = useOrganization();
 const platform = usePlatform();
 
+const contentLanguage = useEmailContentLanguage({
+    editor: () => editor.value,
+    patched: () => patched.value,
+    addPatch,
+});
+const subject = contentLanguage.subject;
+
 onMounted(() => {
     if (props.emailTemplate.json && (props.emailTemplate.json as any).type) {
         editor.value?.commands.setContent(props.emailTemplate.json);
     }
-});
-
-const subject = computed({
-    get: () => patched.value.subject,
-    set: subject => addPatch({ subject }),
 });
 
 const replacements = computed(() => {
@@ -95,30 +101,29 @@ const emailBlock = computed(() => {
     return EmailTemplate.canAddEmailOnlyContent(patched.value.type);
 });
 
-async function getHTML() {
-    const e = editor.value;
-    if (!e) {
-        // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
-        return {
-            text: '',
-            html: '',
-            json: {},
-        };
+async function confirmStaleTranslations(): Promise<boolean> {
+    if (props.isNew) {
+        // On creation it doesn't matter that only one language received content
+        return true;
     }
-
-    const base: string = e.getHTML();
-    return {
-        ...await EmailStyler.format(base, subject.value),
-        json: e.getJSON(),
-    };
+    return await confirmStaleEmailContentLanguages(props.emailTemplate, patched.value, {
+        ignoreText: $t('Toch opslaan'),
+        switchTo: language => contentLanguage.switchTo(language),
+    });
 }
 
 async function save() {
+    if (contentLanguage.switching.value) {
+        return;
+    }
     try {
-        addPatch({
-            ...(await getHTML()),
-        });
+        await contentLanguage.flush();
         await nextTick();
+
+        if (!await confirmStaleTranslations()) {
+            return;
+        }
+
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }
@@ -128,7 +133,8 @@ async function save() {
 }
 
 const shouldNavigateAway = async () => {
-    if (!hasChanges.value && (await getHTML()).text === patched.value.text) {
+    const derived = await contentLanguage.getDerivedContent();
+    if (!hasChanges.value && (!derived || derived.text === contentLanguage.contentFor(derived.language).text)) {
         return true;
     }
     return await CenteredMessage.confirm($t('%A0'), $t('%4X'));

@@ -6,7 +6,8 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { Organization, User } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { EmailTemplateType, PermissionLevel, Permissions, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { EmailContent, EmailTemplateType, PermissionLevel, Permissions, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { Pages } from '../helpers/index.js';
 
@@ -18,6 +19,11 @@ test.describe('Settings email templates', () => {
 
     test.beforeAll(async () => {
         TestUtils.setPermanentEnvironment('userMode', 'organization');
+
+        // Multiple languages are needed to test email template translations.
+        // English is excluded: the browser locale of Playwright is English, and the
+        // dashboard would switch to English while the tests assert Dutch texts.
+        TestUtils.setPermanentEnvironment('locales', { BE: [Language.Dutch, Language.French] });
 
         organization = await new OrganizationFactory({}).create();
 
@@ -500,6 +506,168 @@ test.describe('Settings email templates', () => {
             expectedSubject: 'Platform webshop subject',
             expectedText: 'Platform webshop body',
         });
+    });
+
+    async function openLanguageMenu(page: Page) {
+        const popup = activePopup(page);
+        await popup.getByTestId('email-language-button').click();
+        const menu = page.locator('.context-menu-container:visible').last();
+        await expect(menu.locator('.context-menu-item').first()).toBeVisible();
+        return menu;
+    }
+
+    async function selectLanguageMenuItem(page: Page, name: string) {
+        const menu = await openLanguageMenu(page);
+        await menu.locator('.context-menu-item', { hasText: name }).first().click();
+    }
+
+    test('a translation can be added to an email template', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        const template = new EmailTemplate();
+        template.subject = 'Default subject';
+        template.type = EmailTemplateType.RegistrationConfirmation;
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        template.html = '<p>default body</p>';
+        template.text = 'default body';
+        template.json = editorJson('default body');
+        await template.save();
+
+        await login(page, pages);
+        await pages.groupOverview({ group, organization }).goto();
+        await openGroupEmailTemplates(page);
+        await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+        const popup = activePopup(page);
+        const subjectInput = popup.locator('#mail-subject');
+        await expect(subjectInput).toHaveValue('Default subject');
+
+        // Add French: seeds the translation from the current content and switches to it
+        await selectLanguageMenuItem(page, 'Frans');
+        await expect(subjectInput).toHaveValue('Default subject');
+        await subjectInput.fill('Sujet français');
+
+        // Switching back to the default content restores the default subject
+        await selectLanguageMenuItem(page, 'Standaardtekst');
+        await expect(subjectInput).toHaveValue('Default subject');
+
+        // And back to French
+        await selectLanguageMenuItem(page, 'Frans');
+        await expect(subjectInput).toHaveValue('Sujet français');
+
+        await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
+        await expect(subjectInput).toHaveCount(0);
+        await saveTemplateList(page);
+
+        await expect.poll(async () => {
+            await template.refresh();
+            return {
+                subject: template.subject,
+                frenchSubject: template.translations.get(Language.French)?.subject,
+                frenchText: template.translations.get(Language.French)?.text,
+            };
+        }).toMatchObject({
+            subject: 'Default subject',
+            frenchSubject: 'Sujet français',
+            frenchText: expect.stringContaining('default body'),
+        });
+    });
+
+    test('warns when only one language of a translated template was changed', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        const template = new EmailTemplate();
+        template.subject = 'Default subject';
+        template.type = EmailTemplateType.RegistrationConfirmation;
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        template.html = '<p>default body</p>';
+        template.text = 'default body';
+        template.json = editorJson('default body');
+        template.translations = new Map([
+            [Language.French, EmailContent.create({
+                subject: 'Sujet existant',
+                html: '<p>corps français</p>',
+                text: 'corps français',
+                json: editorJson('corps français'),
+            })],
+        ]);
+        await template.save();
+
+        await login(page, pages);
+        await pages.groupOverview({ group, organization }).goto();
+        await openGroupEmailTemplates(page);
+        await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+        const popup = activePopup(page);
+        const subjectInput = popup.locator('#mail-subject');
+        await expect(subjectInput).toHaveValue('Default subject');
+
+        // Only change the default content
+        await subjectInput.fill('Updated default subject');
+        await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
+
+        // A warning should appear because the French translation was not updated
+        const message = page.getByTestId('centered-message');
+        await expect(message).toBeVisible();
+        await message.getByRole('button', { name: 'Toch opslaan' }).click();
+
+        await expect(subjectInput).toHaveCount(0);
+        await saveTemplateList(page);
+
+        await expect.poll(async () => {
+            await template.refresh();
+            return {
+                subject: template.subject,
+                frenchSubject: template.translations.get(Language.French)?.subject,
+            };
+        }).toMatchObject({
+            subject: 'Updated default subject',
+            frenchSubject: 'Sujet existant',
+        });
+    });
+
+    test('does not warn when the template has no translations', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        const template = new EmailTemplate();
+        template.subject = 'Default subject';
+        template.type = EmailTemplateType.RegistrationConfirmation;
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        template.html = '<p>default body</p>';
+        template.text = 'default body';
+        template.json = editorJson('default body');
+        await template.save();
+
+        await login(page, pages);
+        await pages.groupOverview({ group, organization }).goto();
+        await openGroupEmailTemplates(page);
+        await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+        const popup = activePopup(page);
+        const subjectInput = popup.locator('#mail-subject');
+        await subjectInput.fill('Updated without translations');
+        await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
+
+        // Saves directly, without a warning
+        await expect(subjectInput).toHaveCount(0);
+        await saveTemplateList(page);
+
+        await expect.poll(async () => {
+            await template.refresh();
+            return template.subject;
+        }).toBe('Updated without translations');
     });
 
     test('organization new template inherits platform defaults', async ({ page, pages }) => {

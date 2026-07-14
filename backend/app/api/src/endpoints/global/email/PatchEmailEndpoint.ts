@@ -114,6 +114,10 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             model.json = request.body.json;
         }
 
+        if (request.body.translations !== undefined) {
+            model.translations = patchObject(model.translations, request.body.translations);
+        }
+
         if (request.body.recipientFilter) {
             if (model.status !== EmailStatus.Draft) {
                 throw new SimpleError({

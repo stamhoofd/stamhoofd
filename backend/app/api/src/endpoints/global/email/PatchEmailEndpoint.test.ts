@@ -1,8 +1,10 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
+import { AccessRight, EmailContent, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEmailEndpoint } from './PatchEmailEndpoint.js';
@@ -1198,5 +1200,121 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         for (const sentEmail of sentEmails) {
             expect(sentEmail.html).toContain('Identical Email');
         }
+    });
+
+    describe('Translations', () => {
+        const createDraftEmail = async () => {
+            const email = new Email();
+            email.subject = 'Default subject';
+            email.status = EmailStatus.Draft;
+            email.text = 'Default text';
+            email.html = '<p>Default html</p>';
+            email.json = {};
+            email.userId = user.id;
+            email.organizationId = organization.id;
+            email.senderId = sender.id;
+            await email.save();
+            return email;
+        };
+
+        test('a translation can be added to a draft email', async () => {
+            const email = await createDraftEmail();
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                translations: new PatchMap([[Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })]]),
+            });
+
+            const response = await patchEmail(body, token, organization);
+            expect(response.body.translations.get(Language.French)!.subject).toBe('Sujet français');
+
+            const saved = await Email.getByID(email.id);
+            expect(saved!.translations.get(Language.French)!.subject).toBe('Sujet français');
+            expect(saved!.subject).toBe('Default subject');
+        });
+
+        test('a translation can be removed from a draft email', async () => {
+            const email = await createDraftEmail();
+            email.translations = new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français' })],
+                [Language.English, EmailContent.create({ subject: 'English subject' })],
+            ]);
+            await email.save();
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                translations: new PatchMap([[Language.French, null]]),
+            });
+
+            await patchEmail(body, token, organization);
+
+            const saved = await Email.getByID(email.id);
+            expect(saved!.translations.size).toBe(1);
+            expect(saved!.translations.get(Language.English)!.subject).toBe('English subject');
+        });
+
+        test('patching the subject keeps the translations', async () => {
+            const email = await createDraftEmail();
+            email.translations = new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français' })],
+            ]);
+            await email.save();
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                subject: 'New default subject',
+            });
+
+            await patchEmail(body, token, organization);
+
+            const saved = await Email.getByID(email.id);
+            expect(saved!.subject).toBe('New default subject');
+            expect(saved!.translations.get(Language.French)!.subject).toBe('Sujet français');
+        });
+
+        const createSendableEmail = async () => {
+            const email = new Email();
+            email.subject = 'Default subject';
+            email.status = EmailStatus.Draft;
+            email.text = 'Default text {{unsubscribeUrl}}';
+            email.html = '<!DOCTYPE html><html><body><p>Default html</p>{{unsubscribeUrl}}</body></html>';
+            email.json = {};
+            email.userId = user.id;
+            email.organizationId = organization.id;
+            email.senderId = sender.id;
+            return email;
+        };
+
+        test('cannot send an email with an incomplete translation', async () => {
+            const email = await createSendableEmail();
+            email.translations = new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français', text: '', html: '' })],
+            ]);
+            await email.save();
+
+            const body = EmailStruct.patch({ id: email.id, status: EmailStatus.Sending });
+
+            await expect(patchEmail(body, token, organization))
+                .rejects
+                .toThrow(STExpect.errorWithCode('invalid_field'));
+        });
+
+        test('cannot send an email when a translation misses the unsubscribe button', async () => {
+            const email = await createSendableEmail();
+            email.translations = new Map([
+                [Language.French, EmailContent.create({
+                    subject: 'Sujet français',
+                    text: 'Texte français',
+                    html: '<!DOCTYPE html><html><body><p>Français</p></body></html>',
+                })],
+            ]);
+            await email.save();
+
+            const body = EmailStruct.patch({ id: email.id, status: EmailStatus.Sending });
+
+            await expect(patchEmail(body, token, organization))
+                .rejects
+                .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
+        });
     });
 });

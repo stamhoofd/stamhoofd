@@ -1,5 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement, TinyMember } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -43,6 +44,12 @@ export class EmailRecipient extends QueryableModel {
 
     @column({ type: 'string', nullable: true })
     email: string | null = null;
+
+    /**
+     * Preferred language of this recipient, used to select the email content translation.
+     */
+    @column({ type: 'string', nullable: true })
+    language: Language | null = null;
 
     @column({ type: 'json', decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = [];

@@ -144,6 +144,7 @@ export * from './endpoints/UitpasNumbersGetDetailsRequest.js';
 export * from './email/EditorSmartButton.js';
 export * from './email/EditorSmartVariable.js';
 export * from './email/Email.js';
+export * from './email/EmailContent.js';
 
 // Grouping
 export * from './grouping/PaginatedResponse.js';
