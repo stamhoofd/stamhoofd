@@ -65,6 +65,11 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: false,
     }),
+    'lastRegisteredAt': createColumnFilter({
+        expression: SQL.column(membersTable, 'lastRegisteredAt'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
     'organizationName': createColumnFilter({
         expression: SQL.column('organizations', 'name'),
         type: SQLValueType.String,

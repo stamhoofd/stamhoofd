@@ -70,6 +70,11 @@ export const RegistrationService = {
             const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
             registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
             await Document.updateForRegistration(registration.setRelation(registrationMemberRelation, member));
+
+            // update lastRegisteredAt (should not be awaited)
+            member.tryUpdateLastRegisteredAt(registration)
+                // errors should never stop other logic, lastRegisteredAt is only used for sorting
+                .catch(console.error);
         }
 
         // Update group occupancy

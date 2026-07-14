@@ -1,8 +1,9 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { RegistrationPeriod } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordTextAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import type { SortList } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -1956,6 +1957,227 @@ describe('Endpoint.GetMembersEndpoint', () => {
             expect(returnedMember.registrations).toIncludeSameMembers([
                 expect.objectContaining({ id: accessRegistration.id, deactivatedAt: null }),
                 expect.objectContaining({ id: deactivatedRegistration.id, deactivatedAt: deactivatedRegistration.deactivatedAt }),
+            ]);
+        });
+    });
+
+    describe('Sorting', () => {
+        // Deliberately not in chronological order, so a passing test cannot be explained by insertion order
+        const january = new Date(Date.UTC(2023, 0, 10, 8, 30, 0));
+        const february = new Date(Date.UTC(2023, 1, 1, 0, 0, 0));
+        const march = new Date(Date.UTC(2023, 2, 5, 12, 0, 0));
+        const may = new Date(Date.UTC(2023, 4, 15, 16, 45, 0));
+        const june = new Date(Date.UTC(2023, 5, 20, 22, 15, 0));
+
+        /**
+         * Creates one member per passed value, all registered in the same group of a new organization,
+         * and returns an admin with full access to that organization.
+         */
+        async function setupMembers(lastRegisteredAtValues: (Date | null)[]) {
+            const organization = await new OrganizationFactory({ period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const token = await Token.createToken(user);
+            const group = await new GroupFactory({ organization, period }).create();
+
+            const members: MemberWithUsersRegistrationsAndGroups[] = [];
+
+            for (const lastRegisteredAt of lastRegisteredAtValues) {
+                const member = await new MemberFactory({}).create();
+                await new RegistrationFactory({ member, group }).create();
+
+                // The registration factory does not maintain lastRegisteredAt (only RegistrationService does),
+                // so we set it explicitly to get deterministic values - including legacy members that never got one.
+                member.lastRegisteredAt = lastRegisteredAt;
+                await member.save();
+
+                members.push(member);
+            }
+
+            return { host: organization.getApiHost(), token, members };
+        }
+
+        /**
+         * Requests every page by following the 'next' request the endpoint returns, exactly like the frontend does.
+         * That next request is built from the sorter's getValue, so this covers the full sort + pagination flow:
+         * getValue -> page filter -> encoded in the query -> decoded -> compiled back to SQL.
+         *
+         * Returns the ids of all members across all pages, in the order they were received.
+         */
+        async function fetchAllPages({ host, token, sort, limit }: { host: string; token: Token; sort: SortList; limit: number }) {
+            const ids: string[] = [];
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit });
+            let pages = 0;
+
+            while (query) {
+                const request = Request.get({
+                    path: baseUrl,
+                    host,
+                    query,
+                    headers: {
+                        authorization: 'Bearer ' + token.accessToken,
+                    },
+                });
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
+                ids.push(...response.body.results.members.map(m => m.id));
+                query = response.body.next;
+                pages += 1;
+
+                if (pages > 10) {
+                    throw new Error('Pagination did not terminate');
+                }
+            }
+
+            return ids;
+        }
+
+        test('Members are sorted by lastRegisteredAt ascending across all pages', async () => {
+            const { host, token, members } = await setupMembers([march, january, june, february, may]);
+            const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
+
+            // A limit lower than the total forces the endpoint to build a next page filter from getValue
+            const ids = await fetchAllPages({
+                host,
+                token,
+                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
+                limit: 2,
+            });
+
+            expect(ids).toEqual([
+                januaryMember.id,
+                februaryMember.id,
+                marchMember.id,
+                mayMember.id,
+                juneMember.id,
+            ]);
+        });
+
+        test('Members are sorted by lastRegisteredAt descending across all pages', async () => {
+            const { host, token, members } = await setupMembers([march, january, june, february, may]);
+            const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
+
+            const ids = await fetchAllPages({
+                host,
+                token,
+                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.DESC }],
+                limit: 2,
+            });
+
+            expect(ids).toEqual([
+                juneMember.id,
+                mayMember.id,
+                marchMember.id,
+                februaryMember.id,
+                januaryMember.id,
+            ]);
+        });
+
+        test('Members without a lastRegisteredAt are sorted first when ascending', async () => {
+            const { host, token, members } = await setupMembers([march, null, january]);
+            const [marchMember, neverRegisteredMember, januaryMember] = members;
+
+            // A limit of 1 puts the page boundary right after the member without a lastRegisteredAt,
+            // so the next page filter is built from a null value.
+            const ids = await fetchAllPages({
+                host,
+                token,
+                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
+                limit: 1,
+            });
+
+            expect(ids).toEqual([
+                neverRegisteredMember.id,
+                januaryMember.id,
+                marchMember.id,
+            ]);
+        });
+
+        test('Members without a lastRegisteredAt are sorted last when descending', async () => {
+            const { host, token, members } = await setupMembers([march, null, january]);
+            const [marchMember, neverRegisteredMember, januaryMember] = members;
+
+            const ids = await fetchAllPages({
+                host,
+                token,
+                sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.DESC }],
+                limit: 1,
+            });
+
+            expect(ids).toEqual([
+                marchMember.id,
+                januaryMember.id,
+                neverRegisteredMember.id,
+            ]);
+        });
+
+        test('The next page filter compares lastRegisteredAt as a UTC datetime string', async () => {
+            const { host, token, members } = await setupMembers([january, february]);
+            const [januaryMember] = members;
+
+            const request = Request.get({
+                path: baseUrl,
+                host,
+                query: new LimitedFilteredRequest({
+                    sort: [{ key: 'lastRegisteredAt', order: SortItemDirection.ASC }],
+                    limit: 1,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+
+            // The value has to be formatted in UTC, because that is how MySQL stores the datetime column.
+            // Comparing against a raw Date or a localized string would shift the page boundary.
+            expect(response.body.next?.pageFilter).toMatchObject({
+                $or: [
+                    { lastRegisteredAt: { $gt: '2023-01-10 08:30:00' } },
+                    {
+                        $and: [
+                            { lastRegisteredAt: '2023-01-10 08:30:00' },
+                            { id: { $gt: januaryMember.id } },
+                        ],
+                    },
+                ],
+            });
+        });
+
+        test('Members are sorted by createdAt across all pages, even if they never registered', async () => {
+            const { host, token, members } = await setupMembers([null, null, null]);
+            const [first, second, third] = members;
+
+            // createdAt keeps an explicitly set value on save
+            first.createdAt = march;
+            second.createdAt = january;
+            third.createdAt = february;
+
+            await first.save();
+            await second.save();
+            await third.save();
+
+            const ids = await fetchAllPages({
+                host,
+                token,
+                sort: [{ key: 'createdAt', order: SortItemDirection.ASC }],
+                limit: 1,
+            });
+
+            expect(ids).toEqual([
+                second.id,
+                third.id,
+                first.id,
             ]);
         });
     });

@@ -47,83 +47,85 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 50,
             recommendedWidth: 120,
         }),
-        isPlatform ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
-            id: 'membership',
-            name: $t(`%1Ny`),
-            enabled: !waitingList,
-            getValue: (member) => {
-                return {
-                    status: member.membershipStatus,
-                    hasFutureMembership: member.hasFutureMembership,
-                };
-            },
-            format: ({ status }) => {
-                switch (status) {
-                    case MembershipStatus.Trial:
-                        return $t(`%1IH`);
-                    case MembershipStatus.Active:
-                        return $t(`%1H0`);
-                    case MembershipStatus.Expiring:
-                        return $t(`%7F`);
-                    case MembershipStatus.Temporary:
-                        return $t(`%zU`);
-                    case MembershipStatus.Inactive:
-                        return $t(`%zV`);
-                }
-            },
-            getStyle: ({ status, hasFutureMembership }) => {
-                switch (status) {
-                    case MembershipStatus.Trial:
-                        return 'secundary';
-                    case MembershipStatus.Active:
-                        return 'success';
-                    case MembershipStatus.Expiring:
-                        return 'warn';
-                    case MembershipStatus.Temporary:
-                        return 'secundary';
-                    case MembershipStatus.Inactive: {
-                        if (hasFutureMembership) {
-                            return 'warn';
+        isPlatform
+            ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
+                    id: 'membership',
+                    name: $t(`%1Ny`),
+                    enabled: !waitingList,
+                    getValue: (member) => {
+                        return {
+                            status: member.membershipStatus,
+                            hasFutureMembership: member.hasFutureMembership,
+                        };
+                    },
+                    format: ({ status }) => {
+                        switch (status) {
+                            case MembershipStatus.Trial:
+                                return $t(`%1IH`);
+                            case MembershipStatus.Active:
+                                return $t(`%1H0`);
+                            case MembershipStatus.Expiring:
+                                return $t(`%7F`);
+                            case MembershipStatus.Temporary:
+                                return $t(`%zU`);
+                            case MembershipStatus.Inactive:
+                                return $t(`%zV`);
                         }
+                    },
+                    getStyle: ({ status, hasFutureMembership }) => {
+                        switch (status) {
+                            case MembershipStatus.Trial:
+                                return 'secundary';
+                            case MembershipStatus.Active:
+                                return 'success';
+                            case MembershipStatus.Expiring:
+                                return 'warn';
+                            case MembershipStatus.Temporary:
+                                return 'secundary';
+                            case MembershipStatus.Inactive: {
+                                if (hasFutureMembership) {
+                                    return 'warn';
+                                }
 
-                        return 'error';
-                    }
-                }
-            },
-            minimumWidth: 120,
-            recommendedWidth: 140,
-            allowSorting: false,
-        }) : null,
+                                return 'error';
+                            }
+                        }
+                    },
+                    minimumWidth: 120,
+                    recommendedWidth: 140,
+                    allowSorting: false,
+                })
+            : null,
         isPlatform && dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
-                id: 'continuousMembership',
-                name: 'Doorlopende aansluiting',
-                getValue: member => member.getContinuousMembershipStatus(dateRange!),
-                format: (status) => {
-                    switch (status) {
-                        case ContinuousMembershipStatus.Full:
-                            return 'Volledig';
-                        case ContinuousMembershipStatus.Partial:
-                            return 'Gedeeltelijk';
-                        case ContinuousMembershipStatus.None:
-                            return 'Geen aansluiting';
-                    }
-                },
-                getStyle: (status) => {
-                    switch (status) {
-                        case ContinuousMembershipStatus.Full:
-                            return 'success';
-                        case ContinuousMembershipStatus.Partial:
-                            return 'warn';
-                        case ContinuousMembershipStatus.None:
-                            return 'error';
-                    }
-                },
-                minimumWidth: 120,
-                recommendedWidth: 140,
-                allowSorting: false,
-                enabled: false,
-            })
+                    id: 'continuousMembership',
+                    name: 'Doorlopende aansluiting',
+                    getValue: member => member.getContinuousMembershipStatus(dateRange!),
+                    format: (status) => {
+                        switch (status) {
+                            case ContinuousMembershipStatus.Full:
+                                return 'Volledig';
+                            case ContinuousMembershipStatus.Partial:
+                                return 'Gedeeltelijk';
+                            case ContinuousMembershipStatus.None:
+                                return 'Geen aansluiting';
+                        }
+                    },
+                    getStyle: (status) => {
+                        switch (status) {
+                            case ContinuousMembershipStatus.Full:
+                                return 'success';
+                            case ContinuousMembershipStatus.Partial:
+                                return 'warn';
+                            case ContinuousMembershipStatus.None:
+                                return 'error';
+                        }
+                    },
+                    minimumWidth: 120,
+                    recommendedWidth: 140,
+                    allowSorting: false,
+                    enabled: false,
+                })
             : null,
         new Column<ObjectType, string[]>({
             name: $t(`%7D`),
@@ -271,8 +273,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
                     if (!member.patchedMember.details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
                         base.push($t(`%19Q`));
-                    }
-                    else {
+                    } else {
                         if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
                             base.push($t(`%zb`));
                         }
@@ -462,31 +463,38 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 },
                 getStyle: v => v.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
-                recommendedWidth: 200
-            })
-        )
+                recommendedWidth: 200,
+            }),
+        );
     }
 
     allColumns.push(
-        new Column<ObjectType, Date | null>({
-            name: waitingList ? $t(`%zf`) : $t(`%zg`),
-            allowSorting: false,
+        new Column<ObjectType, Date | null | undefined>({
+            id: 'lastRegisteredAt',
+            name: $t(`Laatst ingeschreven op`),
+            allowSorting: true,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
-
-                if (registrations.length === 0) {
-                    return null;
+                const lastRegisteredAt = v.member.lastRegisteredAt;
+                if (lastRegisteredAt) {
+                    return lastRegisteredAt;
                 }
 
-                const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime());
-
-                if (filtered.length === 0) {
-                    return null;
+                if (v.filterRegistrations({}).length > 0) {
+                    return undefined;
                 }
-                return new Date(Math.min(...filtered));
+
+                return null;
             },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`),
-            getStyle: v => v === null ? 'gray' : '',
+            format: (v, width) => {
+                if (v === null) {
+                    return $t('Niet ingeschreven');
+                }
+                if (v === undefined) {
+                    return $t('Onbekend');
+                }
+                return width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true));
+            },
+            getStyle: v => v ? '' : 'gray',
             minimumWidth: 80,
             recommendedWidth: 220,
         }),
