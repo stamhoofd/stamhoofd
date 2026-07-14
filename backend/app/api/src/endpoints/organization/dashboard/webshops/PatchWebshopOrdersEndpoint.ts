@@ -123,6 +123,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 model.status = struct.status;
                 model.data = struct.data;
 
+                // Manually created orders have no customer request language, so use the webshop's
+                // default language for any future emails to this order.
+                model.consumerLanguage = webshop.meta.defaultLanguage;
+
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
                 // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
                 // -> the user doesn't need to download the ticket again

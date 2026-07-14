@@ -17,6 +17,7 @@ import { TicketPrivate } from './Ticket.js';
 import type { WebshopPreview } from './Webshop.js';
 import type { WebshopTakeoutMethod } from './WebshopMetaData.js';
 import { CheckoutMethodType } from './WebshopMetaData.js';
+import { Language } from '@stamhoofd/types/Language';
 
 export enum OrderStatusV103 {
     Created = 'Created',
@@ -67,9 +68,6 @@ export class OrderStatusHelper {
 }
 
 export class OrderData extends Checkout {
-    @field({ decoder: StringDecoder, version: 129 })
-    consumerLanguage = 'nl';
-
     @field({ decoder: StringDecoder, version: 158 })
     comments = '';
 
@@ -139,6 +137,9 @@ export class Order extends AutoEncoder {
      */
     @field({ decoder: Payment, nullable: true })
     payment: Payment | null = null;
+
+    @field({ decoder: new EnumDecoder(Language), ...NextVersion })
+    consumerLanguage = Language.Dutch;
 
     @field({ decoder: DateDecoder })
     createdAt: Date = new Date();

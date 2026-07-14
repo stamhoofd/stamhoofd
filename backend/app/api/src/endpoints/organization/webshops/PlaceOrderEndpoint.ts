@@ -3,6 +3,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -132,6 +133,13 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             const order = new Order().setRelation(Order.webshop, webshop);
             order.data = request.body; // TODO: validate
+
+            // Store the language the customer used while placing the order, so future emails to
+            // this order are rendered in the same language. Fall back to the webshop's default
+            // language when it can't be determined from the request.
+            const consumerLanguage = I18n.getLanguageFromRequest(request) ?? webshop.meta.defaultLanguage;
+            order.consumerLanguage = consumerLanguage;
+
             order.organizationId = organization.id;
             order.createdAt = new Date();
             order.createdAt.setMilliseconds(0);

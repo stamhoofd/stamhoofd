@@ -17,7 +17,7 @@ export class GlobalHelper {
 
     static loadGlobalTranslateFunction() {
         function getI18n() {
-            return ContextInstance.optional?.i18n ?? new I18n(I18n.defaultLanguage, STAMHOOFD.fixedCountry ?? I18n.defaultCountry);
+            return I18n.override ?? ContextInstance.optional?.i18n ?? new I18n(I18n.defaultLanguage, STAMHOOFD.fixedCountry ?? I18n.defaultCountry);
         }
         (global as any).$t = (key: string, replace?: Record<string, string>) => getI18n().$t(key, replace);
         (global as any).$getLanguage = () => getI18n().language;

@@ -35,7 +35,6 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler.ts';
 import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { Payment } from '@stamhoofd/structures';
 import { OrderData, OrderResponse, PaymentMethod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -123,7 +122,7 @@ async function goNext() {
         // Place order
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const data = OrderData.create(checkoutManager.checkout as any);
-        data.consumerLanguage = I18nController.shared?.language ?? 'nl';
+        // The consumer language is determined server-side from the request language when placing the order.
         const response = await webshopManager.optionalAuthenticatedServer.request({
             method: 'POST',
             path: '/webshop/' + webshop.value.id + '/order',

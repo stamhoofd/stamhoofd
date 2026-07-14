@@ -1,7 +1,9 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { QueueHandler } from '@stamhoofd/queues';
+import { Language } from '@stamhoofd/types/Language';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { TransferSettings, WebshopTimeSlot } from '@stamhoofd/structures';
 import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
@@ -76,6 +78,13 @@ export class Order extends QueryableModel {
     status = OrderStatus.Created;
 
     /**
+     * The language the customer used while placing the order, so future emails to this order
+     * are rendered in the same language.
+     */
+    @column({ type: 'string' })
+    consumerLanguage: Language = Language.Dutch;
+
+    /**
      * Cached value for faster in database filtering
      */
     @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
@@ -119,9 +128,9 @@ export class Order extends QueryableModel {
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
         // Country locales are disabled on webshops (always the same country). But we need to add the language if it isn't the same as the organization default language
         let locale = '';
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-        if (this.data.consumerLanguage !== this.webshop.organization.i18n.language) {
-            locale = '/' + this.data.consumerLanguage;
+
+        if (this.consumerLanguage !== this.webshop.organization.i18n.language) {
+            locale = '/' + this.consumerLanguage;
         }
 
         return 'https://' + this.webshop.getHost() + locale + '/order/' + this.id;
@@ -794,6 +803,7 @@ export class Order extends QueryableModel {
             number: this.number,
             data: this.data,
             status: this.status,
+            consumerLanguage: this.consumerLanguage,
             balanceItems: [],
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
@@ -900,28 +910,34 @@ export class Order extends QueryableModel {
             return;
         }
 
-        let recipient = (await this.getStructure()).getRecipient(
-            this.webshop.organization.getBaseStructure(),
-            WebshopPreview.create(this.webshop),
-        );
+        // Render all $t's (recipient replacements, order tables, template...) in the language
+        // the customer used while placing the order, instead of the current request language.
+        const i18n = new I18n(this.consumerLanguage, this.webshop.organization.address.country);
 
-        if (data.to) {
-            // Clear first and last name
-            recipient.firstName = null;
-            recipient.lastName = null;
-            recipient.replacements = recipient.replacements.filter(r => !['firstName', 'lastName'].includes(r.token));
-            data.to.merge(recipient);
-            recipient = data.to;
-        }
+        await I18n.runWithLocale(i18n, async () => {
+            let recipient = (await this.getStructure()).getRecipient(
+                this.webshop.organization.getBaseStructure(),
+                WebshopPreview.create(this.webshop),
+            );
 
-        // Create e-mail builder
-        await sendEmailTemplate(this.webshop.organization, {
-            recipients: [recipient],
-            template: {
-                type: data.type,
-                webshop: this.webshop,
-            },
-            type: 'transactional',
+            if (data.to) {
+                // Clear first and last name
+                recipient.firstName = null;
+                recipient.lastName = null;
+                recipient.replacements = recipient.replacements.filter(r => !['firstName', 'lastName'].includes(r.token));
+                data.to.merge(recipient);
+                recipient = data.to;
+            }
+
+            // Create e-mail builder
+            await sendEmailTemplate(this.webshop.organization, {
+                recipients: [recipient],
+                template: {
+                    type: data.type,
+                    webshop: this.webshop,
+                },
+                type: 'transactional',
+            });
         });
     }
 

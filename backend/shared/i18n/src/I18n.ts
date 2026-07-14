@@ -7,6 +7,7 @@ import path from 'path';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import type { LocalizedDomain } from '@stamhoofd/types/Localized';
+import { AsyncLocalStorage } from 'async_hooks';
 import { createRequire } from 'node:module';
 
 // Polyfill require.resolve, since import.meta.resolve is not supported by vitest
@@ -16,6 +17,25 @@ export class I18n {
     static loadedLocales: Map<string, Map<string, string>> = new Map();
     static defaultLanguage = Language.Dutch;
     static defaultCountry = Country.Belgium;
+
+    /**
+     * Temporary i18n override, scoped to an async execution context. When set, global $t
+     * evaluation should prefer this over the request/context i18n. Used e.g. to render
+     * order emails in the language of the customer instead of the current request language.
+     */
+    static overrideStorage = new AsyncLocalStorage<I18n>();
+
+    static get override(): I18n | null {
+        return this.overrideStorage.getStore() ?? null;
+    }
+
+    /**
+     * Run a handler with a temporary i18n override. All global $t calls made during the
+     * handler will use the given i18n instead of the current request/context one.
+     */
+    static async runWithLocale<T>(i18n: I18n, handler: () => Promise<T>): Promise<T> {
+        return await this.overrideStorage.run(i18n, handler);
+    }
 
     static async load() {
         await logger.setContext({
@@ -157,20 +177,19 @@ export class I18n {
         this.messages = m;
     }
 
-    static fromRequest(request: Request | DecodedRequest<any, any, any>): I18n {
-        if ((request as any)._cached_i18n) {
-            return (request as any)._cached_i18n;
-        }
-
+    /**
+     * Parse the locale (language + optional country) explicitly provided in the request
+     * headers (X-Locale or Accept-Language). Returns nulls when nothing valid is present,
+     * so callers can decide their own fallback. Country is only known for full 5-char locales.
+     */
+    private static localeFromRequestHeaders(request: Request | DecodedRequest<any, any, any>): { language: Language | null; country: Country | null } {
         // Try using custom property
         const localeHeader = request.headers['x-locale'];
         if (localeHeader && typeof localeHeader === 'string' && this.isValidLocale(localeHeader)) {
-            const l = localeHeader.substr(0, 2).toLowerCase() as Language;
-            const c = localeHeader.substr(3, 2).toUpperCase() as Country;
-
-            const i18n = new I18n(l, c);
-            (request as any)._cached_i18n = i18n;
-            return i18n;
+            return {
+                language: localeHeader.substr(0, 2).toLowerCase() as Language,
+                country: localeHeader.substr(3, 2).toUpperCase() as Country,
+            };
         }
 
         // Try using accept-language defaults
@@ -184,29 +203,39 @@ export class I18n {
                 const localeSplit = trimmed.split(';');
                 const locale = localeSplit[0];
 
-                if (locale.length === 2) {
-                    // Language
-                    if (languages.includes(locale as Language)) {
-                        // Use a default country
-                        // Country can get overriden when matching a organization
-                        // using .setCountry(country) method
-                        const i18n = new I18n(locale as Language, Country.Belgium);
-                        (request as any)._cached_i18n = i18n;
-                        return i18n;
-                    }
+                if (locale.length === 2 && languages.includes(locale as Language)) {
+                    // Language only: the country can get overridden later when matching an organization
+                    return { language: locale as Language, country: null };
                 }
-                else if (locale.length === 5 && this.isValidLocale(locale)) {
-                    const l = locale.substr(0, 2).toLowerCase() as Language;
-                    const c = locale.substr(3, 2).toUpperCase() as Country;
 
-                    // Lang + country
-                    const i18n = new I18n(l, c);
-                    (request as any)._cached_i18n = i18n;
-                    return i18n;
+                if (locale.length === 5 && this.isValidLocale(locale)) {
+                    return {
+                        language: locale.substr(0, 2).toLowerCase() as Language,
+                        country: locale.substr(3, 2).toUpperCase() as Country,
+                    };
                 }
             }
         }
-        const i18n = new I18n(this.defaultLanguage, this.defaultCountry);
+
+        return { language: null, country: null };
+    }
+
+    /**
+     * Determine the language explicitly provided in the request. Returns null when it can't be
+     * determined, so callers can fall back to their own default (instead of the hardcoded default
+     * language, which is what fromRequest(request).language would resolve to).
+     */
+    static getLanguageFromRequest(request: Request | DecodedRequest<any, any, any>): Language | null {
+        return this.localeFromRequestHeaders(request).language;
+    }
+
+    static fromRequest(request: Request | DecodedRequest<any, any, any>): I18n {
+        if ((request as any)._cached_i18n) {
+            return (request as any)._cached_i18n;
+        }
+
+        const { language, country } = this.localeFromRequestHeaders(request);
+        const i18n = new I18n(language ?? this.defaultLanguage, country ?? this.defaultCountry);
         (request as any)._cached_i18n = i18n;
         return i18n;
     }

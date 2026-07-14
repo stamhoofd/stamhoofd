@@ -6,8 +6,10 @@ import type { Organization, StripeAccount, User } from '@stamhoofd/models';
 import { Order, OrganizationFactory, Payment, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
 import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
-import { STExpect } from '@stamhoofd/test-utils';
+import { I18n } from '@stamhoofd/backend-i18n';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -571,6 +573,71 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
             // The payment customer should match the order's customer billing details
             expect(payment.customer!.equals(orderModel.data.customer.toPaymentCustomer())).toBe(true);
+        });
+    });
+
+    describe('Order language', () => {
+        function buildFreeOrderData() {
+            return OrderData.create({
+                paymentMethod: PaymentMethod.Unknown,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: freeProductPrice,
+                            amount: 1,
+                        }),
+                    ],
+                }),
+                customer,
+            });
+        }
+
+        test('Stores the request language on a placed order', async () => {
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildFreeOrderData());
+            r.headers['accept-language'] = 'en';
+
+            const response = await testServer.test(endpoint, r);
+            expect(response.body.order.consumerLanguage).toEqual('en');
+
+            // Persisted in the dedicated column
+            const orderModel = (await Order.getByID(response.body.order.id))!;
+            expect(orderModel.consumerLanguage).toEqual('en');
+        });
+
+        test('Falls back to the webshop default language when the request language is unknown', async () => {
+            webshop.meta.defaultLanguage = Language.French;
+            await webshop.save();
+
+            // The struct default is Dutch, so the server-side fallback to the webshop default is observable.
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildFreeOrderData());
+
+            const response = await testServer.test(endpoint, r);
+            expect(response.body.order.consumerLanguage).toEqual(Language.French);
+
+            const orderModel = (await Order.getByID(response.body.order.id))!;
+            expect(orderModel.consumerLanguage).toEqual(Language.French);
+        });
+
+        test('runWithLocale overrides the global language used for $t evaluation', async () => {
+            // Allow French to be a valid locale for this test (test env has no locales configured).
+            TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+
+            const i18n = new I18n(Language.French, Country.Belgium);
+
+            expect(I18n.override).toBeNull();
+            expect((global as any).$getLanguage()).toEqual(Language.Dutch);
+
+            await I18n.runWithLocale(i18n, async () => {
+                expect(I18n.override).toBe(i18n);
+                expect((global as any).$getLanguage()).toEqual(Language.French);
+            });
+
+            // Restored afterwards
+            expect(I18n.override).toBeNull();
+            expect((global as any).$getLanguage()).toEqual(Language.Dutch);
         });
     });
 });
