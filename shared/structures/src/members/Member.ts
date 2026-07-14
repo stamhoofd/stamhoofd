@@ -50,7 +50,7 @@ export class Member extends AutoEncoder {
     /**
      * The last time the member was registered.
      */
-    @field({ decoder: DateDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: DateDecoder, version: 405, nullable: true })
     lastRegisteredAt: Date | null = null;
 
     get tiny() {
