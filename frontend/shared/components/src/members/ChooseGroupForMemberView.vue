@@ -40,7 +40,7 @@
                     <hr v-if="index > 0 || !showControl || showGroupSearch"><h2 class="style-with-button">
                         <div>
                             {{ category.settings.name }}
-                            <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('%dl')" />
+                            <span v-if="!category.settings.public" v-tooltip="$t('%dl')" class="icon tiny lock gray" />
                         </div>
                         <div>
                             <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>
@@ -62,9 +62,9 @@
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
+import { useScopedAuth } from '#hooks/useAuth.ts';
 import { useEventsEnabled } from '#hooks/useEventsEnabled.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '#overlays/Toast.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
@@ -86,7 +86,7 @@ const props = defineProps<{
 }>();
 
 const selectedOrganization = ref((props.member.organizations[0] ?? null) as any) as Ref<Organization | null>;
-const auth = useUninheritedPermissions({ patchedOrganization: selectedOrganization });
+const auth = useScopedAuth(selectedOrganization);
 const present = usePresent();
 const app = useAppContext();
 
