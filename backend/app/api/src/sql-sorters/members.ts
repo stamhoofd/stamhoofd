@@ -69,7 +69,7 @@ export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGr
     },
     createdAt: {
         getValue(a) {
-            return a.createdAt;
+            return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -80,7 +80,7 @@ export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGr
     },
     lastRegisteredAt: {
         getValue(a) {
-            return a.lastRegisteredAt;
+            return a.lastRegisteredAt ? Formatter.dateTimeIso(a.lastRegisteredAt, 'UTC') : null;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({

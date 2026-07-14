@@ -532,9 +532,7 @@ export class Member extends QueryableModel {
 
         if (this.lastRegisteredAt === null || this.lastRegisteredAt < registration.registeredAt) {
             this.lastRegisteredAt = new Date(registration.registeredAt.getTime());
-
-            // only update lastRegisteredAt -> prevent side effects
-            await Member.update().set('lastRegisteredAt', this.lastRegisteredAt).where('id', this.id).update();
+            await this.save();
         }
     }
 }
