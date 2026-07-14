@@ -380,6 +380,11 @@ export class MemberUserSyncerStatic {
                         }
                     }
 
+                    if (setMemberId && member.organizationId !== user.organizationId) {
+                        // Don't allow linking across scopes
+                        setMemberId = false;
+                    }
+
                     if (setMemberId) {
                         if (name) {
                             user.firstName = name.firstName;

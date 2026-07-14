@@ -437,7 +437,14 @@ export class Member extends QueryableModel {
             ids.push(id);
         }
 
-        return await this.getByIDs(...ids);
+        const members = await this.getByIDs(...ids);
+
+        const member = members.find(r => r.id === id);
+        if (member) {
+            return members.filter(r => r.organizationId === member.organizationId);
+        }
+
+        return members;
     }
 
     /**

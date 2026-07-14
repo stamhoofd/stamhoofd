@@ -406,6 +406,15 @@ export class AuthenticatedStructures {
         const members = await Member.getMembersWithRegistrationForUser(user);
         const filtered: MemberWithUsersRegistrationsAndGroups[] = [];
         for (const member of members) {
+            if (STAMHOOFD.userMode === 'organization') {
+                if (!Context.organization) {
+                    // Don't list any members
+                    continue;
+                }
+                if (member.organizationId !== Context.organization.id) {
+                    continue;
+                }
+            }
             if (await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
                 filtered.push(member);
             }
