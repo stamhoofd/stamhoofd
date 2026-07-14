@@ -156,7 +156,7 @@
                             {{ $t('%Qc') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('%29') }}
+                            1, 2, 3, ...
                         </p>
                     </STListItem>
                     <STListItem :selectable="true" element-name="label" class="left-center">
@@ -167,7 +167,7 @@
                             {{ $t('%Qd') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('%1L') }}
+                            964824335, 116455337, 228149715, ...
                         </p>
                     </STListItem>
                 </STList>
