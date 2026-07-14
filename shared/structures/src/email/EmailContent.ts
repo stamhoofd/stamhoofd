@@ -54,7 +54,7 @@ export function validateEmailTranslations({ language, translations }: { language
         throw new SimpleError({
             code: 'invalid_translations',
             message: 'Translations require a default language',
-            human: $t('De vertalingen konden niet worden opgeslagen omdat de standaardtaal ontbreekt. Herlaad de pagina en probeer opnieuw.'),
+            human: $t('%ZeG'),
             field: 'translations',
         });
     }
@@ -63,7 +63,7 @@ export function validateEmailTranslations({ language, translations }: { language
         throw new SimpleError({
             code: 'invalid_translations',
             message: 'Translations cannot contain the default language',
-            human: $t('De vertalingen konden niet worden opgeslagen omdat de standaardtaal ook een vertaling bevat. Herlaad de pagina en probeer opnieuw.'),
+            human: $t('%Ze2'),
             field: 'translations',
         });
     }

@@ -594,7 +594,7 @@ async function confirmStaleTranslations(): Promise<boolean> {
         return true;
     }
     return await confirmStaleEmailContentLanguages(initialEmail, patchedEmail.value, {
-        ignoreText: $t('Toch verzenden'),
+        ignoreText: $t('%Zdr'),
         switchTo: language => contentLanguage.switchTo(language),
     });
 }

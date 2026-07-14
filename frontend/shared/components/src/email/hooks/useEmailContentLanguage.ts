@@ -273,7 +273,7 @@ export function useEmailContentLanguage(options: {
             options.addPatch(patch);
             if (patch.translations) {
                 seeded = { language, content: displayed.clone() };
-                Toast.success($t('Je bekijkt nu de versie in het {language}. Pas de huidige inhoud aan om alles te vertalen.', { language: LanguageHelper.getName(language) })).show();
+                Toast.success($t('%Zdt', { language: LanguageHelper.getName(language) })).show();
             }
             currentLanguage.value = language;
         } finally {
@@ -291,14 +291,14 @@ export function useEmailContentLanguage(options: {
 
         let description: string;
         if (isDefault && remaining.length === 0) {
-            description = $t('De tekst blijft behouden als standaardtekst, maar is niet langer gemarkeerd als deze taal.');
+            description = $t('%ZeA');
         } else if (isDefault) {
-            description = $t('De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal.');
+            description = $t('%ZeH');
         } else {
-            description = $t('De inhoud van deze taal gaat verloren. Ontvangers in deze taal ontvangen daarna de standaardtekst.');
+            description = $t('%Zdz');
         }
 
-        if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze taal wilt verwijderen?'), $t('Verwijderen'), description)) {
+        if (!await CenteredMessage.confirm($t('%ZeD'), $t('%CJ'), description)) {
             return;
         }
         // The switching guard stops onEditorUpdate from writing a patch while the editor content is replaced
@@ -386,11 +386,11 @@ export async function confirmStaleEmailContentLanguages(original: EmailContentHo
     }
 
     const option = await CenteredMessage.show({
-        title: $t('Andere talen nakijken?'),
-        description: $t('Je hebt niet alle talen van deze e-mail aangepast. Kijk de andere vertalingen na zodat de inhoud in elke taal hetzelfde blijft.'),
+        title: $t('%Ze1'),
+        description: $t('%ZeC'),
         buttons: [
             {
-                text: $t('Vertalingen nakijken'),
+                text: $t('%Ze6'),
                 type: 'primary',
                 value: 'review',
             },

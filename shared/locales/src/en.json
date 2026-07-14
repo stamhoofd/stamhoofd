@@ -67,8 +67,6 @@
   "%1H": "Badminton",
   "%1I": "Sport",
   "%1J": "https://",
-  "%1K": "Demoshop",
-  "%1L": "964824335, 116455337, 228149715, ...",
   "%1M": "Stripe Dashboard",
   "%1N": "Production",
   "%1O": "Single-Sign-On",
@@ -114,7 +112,6 @@
   "%26": "DNS",
   "%27": "Golf",
   "%28": "Open",
-  "%29": "1, 2, 3, ...",
   "%2A": "Layout",
   "%2B": "Ctrl",
   "%2C": "tags",
@@ -137,9 +134,11 @@
   "%2T": "tag",
   "%2U": "Total",
   "%2V": "Shops",
+  "%2c": "Smith",
+  "%58": "John Smith",
+  "%59": "Emma and John Smith",
   "%13Y": "Hi John,",
   "%13Z": "John",
-  "%2c": "Smith",
   "%13a": "john.smith@example.com",
   "%13d": "John Smith",
   "%13f": "Peter Jones",
@@ -148,7 +147,5 @@
   "%13i": "Anderson",
   "%13l": "Registration of Lucas and Peter",
   "%13m": "Lucas and Peter",
-  "%ZbK": "lucas.anderson@example.com",
-  "%58": "John Smith",
-  "%59": "Emma and John Smith"
+  "%ZbK": "lucas.anderson@example.com"
 }

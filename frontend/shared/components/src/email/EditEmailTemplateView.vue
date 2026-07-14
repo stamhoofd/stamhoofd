@@ -108,7 +108,7 @@ async function confirmStaleTranslations(): Promise<boolean> {
         return true;
     }
     return await confirmStaleEmailContentLanguages(props.emailTemplate, patched.value, {
-        ignoreText: $t('Toch opslaan'),
+        ignoreText: $t('%Zdp'),
         switchTo: language => contentLanguage.switchTo(language),
     });
 }

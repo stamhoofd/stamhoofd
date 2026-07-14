@@ -31,7 +31,6 @@
   "%1H": "Badminton",
   "%1I": "Sport",
   "%1J": "https://",
-  "%1L": "964824335, 116455337, 228149715, ...",
   "%1N": "Production",
   "%1R": "FOS Open Scouting",
   "%1S": "Bancontact",
@@ -55,7 +54,6 @@
   "%25": "Drip",
   "%26": "DNS",
   "%27": "Golf",
-  "%29": "1, 2, 3, ...",
   "%2B": "Ctrl",
   "%2D": "Logo",
   "%2K": "Ticket",
@@ -74,6 +72,8 @@
   "%2d": "{number}e",
   "%2e": "E-mail",
   "%2f": "+ 0 euro",
+  "%58": "Jean Dupont",
+  "%59": "Marie et Jean Dupont",
   "%13Y": "Bonjour Jean,",
   "%13Z": "Jean",
   "%13a": "jean.dupont@exemple.com",
@@ -84,7 +84,5 @@
   "%13i": "Martin",
   "%13l": "Inscription de Luc et Pierre",
   "%13m": "Luc et Pierre",
-  "%ZbK": "luc.martin@exemple.com",
-  "%58": "Jean Dupont",
-  "%59": "Marie et Jean Dupont"
+  "%ZbK": "luc.martin@exemple.com"
 }

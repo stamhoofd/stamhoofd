@@ -101,11 +101,11 @@
                     <Checkbox :model-value="getFeatureFlag('email-translations')" @update:model-value="setFeatureFlag('email-translations', !!$event)" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Vertalingen voor e-mails') }}
+                    {{ $t('%Zdy') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t('Wanneer ingeschakeld kan je vertalingen toevoegen aan e-mails en e-mailsjablonen. Bestaande vertalingen blijven altijd bewerkbaar.') }}
+                    {{ $t('%Zdw') }}
                 </p>
             </STListItem>
         </STList>

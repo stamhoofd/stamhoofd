@@ -851,10 +851,6 @@
     "original": "Bakkerij",
     "translation": "Bakery"
   },
-  "%13Q": {
-    "original": "Demostraat",
-    "translation": "Demo"
-  },
   "%13R": {
     "original": "Gent",
     "translation": "Ghent"
@@ -11188,8 +11184,8 @@
     "translation": "Email sent to the petitioner (and the association's designated contact persons) when a camp notification is rejected"
   },
   "%Aq": {
-    "original": "Demovereniging op Stamhoofd",
-    "translation": "Demo Association at Stamhoofd"
+    "original": "De Voorbeeldige Vrienden op Stamhoofd",
+    "translation": "The Exemplary Friends on Stamhoofd"
   },
   "%Ar": {
     "original": "Zomerkamp",
@@ -11204,8 +11200,8 @@
     "translation": "Members' names"
   },
   "%Au": {
-    "original": "Demowinkel",
-    "translation": "Demo shop"
+    "original": "Voorbeeldshop",
+    "translation": "Sample shop"
   },
   "%Av": {
     "original": "Geen feedback gegeven",
@@ -11716,8 +11712,8 @@
     "translation": "You forgot to fill in the name of your organisation"
   },
   "%D": {
-    "original": "Demovereniging",
-    "translation": "Demo Association"
+    "original": "De Voorbeeldige Vrienden",
+    "translation": "The Exemplary Friends"
   },
   "%D0": {
     "original": "Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.",
@@ -17907,9 +17903,109 @@
     "original": "Vanaf {dateTime}",
     "translation": "From {dateTime}"
   },
+  "%Zdp": {
+    "original": "Toch opslaan",
+    "translation": "Save anyway"
+  },
+  "%Zdr": {
+    "original": "Toch verzenden",
+    "translation": "Send anyway"
+  },
+  "%Zds": {
+    "original": "Vertaling toevoegen",
+    "translation": "Add translation"
+  },
+  "%Zdt": {
+    "original": "Je bekijkt nu de versie in het {language}. Pas de huidige inhoud aan om alles te vertalen.",
+    "translation": "You are now viewing the version in {language}. Adjust the current content to translate everything."
+  },
+  "%Zdw": {
+    "original": "Wanneer ingeschakeld kan je vertalingen toevoegen aan e-mails en e-mailsjablonen. Bestaande vertalingen blijven altijd bewerkbaar.",
+    "translation": "If enabled, you can add translations to emails and email templates. Existing translations are always editable."
+  },
+  "%Zdx": {
+    "original": "Standaardvertaling",
+    "translation": "Default translation"
+  },
+  "%Zdy": {
+    "original": "Vertalingen voor e-mails",
+    "translation": "Translations for emails"
+  },
+  "%Zdz": {
+    "original": "De inhoud van deze taal gaat verloren. Ontvangers in deze taal ontvangen daarna de standaardtekst.",
+    "translation": "The content in this language will be lost. Recipients for this language will then receive the default text."
+  },
   "%Ze": {
     "original": "Login methode configuratie",
     "translation": "Login method configuration"
+  },
+  "%Ze1": {
+    "original": "Andere talen nakijken?",
+    "translation": "Check other languages?"
+  },
+  "%Ze2": {
+    "original": "De vertalingen konden niet worden opgeslagen omdat de standaardtaal ook een vertaling bevat. Herlaad de pagina en probeer opnieuw.",
+    "translation": "The translations could not be saved because the default language also contains a translation. Reload the page and try again."
+  },
+  "%Ze3": {
+    "original": "Jan",
+    "translation": "John"
+  },
+  "%Ze4": {
+    "original": "jan.janssens@voorbeeld.com",
+    "translation": "john.smith@voorbeeld.com"
+  },
+  "%Ze5": {
+    "original": "Vertalingen verwijderen",
+    "translation": "Delete translations"
+  },
+  "%Ze6": {
+    "original": "Vertalingen nakijken",
+    "translation": "Check translations"
+  },
+  "%Ze7": {
+    "original": "Slagroomtaart",
+    "translation": "Cream cake"
+  },
+  "%Ze8": {
+    "original": "Spaghettisaus 1L",
+    "translation": "Spaghetti sauce 1L"
+  },
+  "%Ze9": {
+    "original": "De vertaling in het {language} is onvolledig. Vul het onderwerp en de inhoud aan of verwijder de vertaling.",
+    "translation": "The translation in {language} is incomplete. Complete the subject and content or remove the translation."
+  },
+  "%ZeA": {
+    "original": "De tekst blijft behouden als standaardtekst, maar is niet langer gemarkeerd als deze taal.",
+    "translation": "The text will be kept as default, but is no longer marked for this language."
+  },
+  "%ZeB": {
+    "original": "Instellen als",
+    "translation": "Set as"
+  },
+  "%ZeC": {
+    "original": "Je hebt niet alle talen van deze e-mail aangepast. Kijk de andere vertalingen na zodat de inhoud in elke taal hetzelfde blijft.",
+    "translation": "You have not updated all languages for this email. Check the other translations to ensure the content remains the same in every language."
+  },
+  "%ZeD": {
+    "original": "Ben je zeker dat je deze taal wilt verwijderen?",
+    "translation": "Are you sure you want to remove this language?"
+  },
+  "%ZeE": {
+    "original": "Vertaling verwijderen",
+    "translation": "Delete translation"
+  },
+  "%ZeF": {
+    "original": "Janssens",
+    "translation": "Smith"
+  },
+  "%ZeG": {
+    "original": "De vertalingen konden niet worden opgeslagen omdat de standaardtaal ontbreekt. Herlaad de pagina en probeer opnieuw.",
+    "translation": "The translations could not be saved because the default language is missing. Reload the page and try again."
+  },
+  "%ZeH": {
+    "original": "De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal.",
+    "translation": "The content in this language will be lost. The next available translation will become the new default language."
   },
   "%Zf": {
     "original": "Korte naam",

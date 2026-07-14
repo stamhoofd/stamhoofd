@@ -59,7 +59,7 @@ async function showMenu(event: MouseEvent) {
         // Only without a language: once a language is set, the default content is that language
         groups.push([
             new ContextMenuItem({
-                name: $t('Standaardvertaling'),
+                name: $t('%Zdx'),
                 disabled: true,
                 action: () => {
                     modelValue.value = null;
@@ -69,7 +69,7 @@ async function showMenu(event: MouseEvent) {
 
         groups.push([
             new ContextMenuItem({
-                name: $t('Instellen als'),
+                name: $t('%ZeB'),
                 childMenu: new ContextMenu([
                     listedLanguages.map((language) => {
                         const exists = props.languages.includes(language);
@@ -104,7 +104,7 @@ async function showMenu(event: MouseEvent) {
             return new ContextMenuItem({
                 name: LanguageHelper.getName(language),
                 selected: isCurrent,
-                rightText: (isDefault && props.languages.length > 1 ? $t('Standaard') : ''),
+                rightText: (isDefault && props.languages.length > 1 ? $t('%v6') : ''),
                 action: () => {
                     if (!isCurrent) {
                         modelValue.value = language;
@@ -121,7 +121,7 @@ async function showMenu(event: MouseEvent) {
         if (untranslatedLanguages.length) {
             group.push(
                 new ContextMenuItem({
-                    name: $t('Vertaling toevoegen'),
+                    name: $t('%Zds'),
                     icon: 'plus',
                     childMenu: new ContextMenu([
                         untranslatedLanguages.map((language) => {
@@ -140,7 +140,7 @@ async function showMenu(event: MouseEvent) {
         if (props.languages.length === 1) {
             group.push(
                 new ContextMenuItem({
-                    name: $t('Vertalingen verwijderen'),
+                    name: $t('%Ze5'),
                     icon: 'trash',
                     destructive: true,
                     action: () => {
@@ -151,7 +151,7 @@ async function showMenu(event: MouseEvent) {
         } else {
             group.push(
                 new ContextMenuItem({
-                    name: $t('Vertaling verwijderen'),
+                    name: $t('%ZeE'),
                     icon: 'trash',
                     destructive: true,
                     childMenu: new ContextMenu([

@@ -43,9 +43,9 @@ function fillReplacements(replacements: Replacement[]) {
         number: 15,
         data: OrderData.create({
             customer: Customer.create({
-                firstName: $t('Jan'),
-                lastName: $t('Janssens'),
-                email: $t('jan.janssens@voorbeeld.com'),
+                firstName: $t('%Ze3'),
+                lastName: $t('%ZeF'),
+                email: $t('%Ze4'),
                 phone: $getCountry() === Country.Netherlands ? '+31 XXXXXXXXX' : '+32 XXX XX XX XX',
             }),
             timeSlot: WebshopTimeSlot.create({
@@ -56,7 +56,7 @@ function fillReplacements(replacements: Replacement[]) {
             checkoutMethod: WebshopTakeoutMethod.create({
                 name: $t(`%13P`),
                 address: Address.create({
-                    street: $t(`%13Q`),
+                    street: $t(`%IE`),
                     number: '12',
                     postalCode: '9000',
                     city: $t(`%13R`),
@@ -64,7 +64,7 @@ function fillReplacements(replacements: Replacement[]) {
                 }),
             }),
             address: ValidatedAddress.create({
-                street: $t(`%13Q`),
+                street: $t(`%IE`),
                 number: '12',
                 postalCode: '9000',
                 city: $t(`%13R`),
@@ -119,7 +119,7 @@ function fillReplacements(replacements: Replacement[]) {
         address: Address.createDefault(Country.Belgium),
     }), WebshopPreview.create({
         meta: WebshopMetaData.create({
-            name: $t('Voorbeeldshop'),
+            name: $t('%Au'),
         }),
     }));
 

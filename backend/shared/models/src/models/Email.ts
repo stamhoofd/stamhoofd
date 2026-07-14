@@ -274,7 +274,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Missing subject, text or html in translation ' + language,
-                    human: $t('De vertaling in het {language} is onvolledig. Vul het onderwerp en de inhoud aan of verwijder de vertaling.', { language: LanguageHelper.getName(language) }),
+                    human: $t('%Ze9', { language: LanguageHelper.getName(language) }),
                 });
             }
         }

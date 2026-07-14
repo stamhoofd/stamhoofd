@@ -56,13 +56,13 @@ function getReplacements() {
     const textPlaceholder = $t(`%13X`);
 
     const exampleBalanceItem = BalanceItem.create({
-        description: $t('Spaghettisaus 1L'),
+        description: $t('%Ze8'),
         amount: 3,
         unitPrice: 80000,
     });
 
     const exampleBalanceItem2 = BalanceItem.create({
-        description: $t('Slagroomtaart'),
+        description: $t('%Ze7'),
         amount: 1,
         unitPrice: 150000,
     });
@@ -190,7 +190,7 @@ function getReplacements() {
         securityCode: Replacement.create({
             token: 'securityCode',
             html: `<p class="style-code-large">${
-                Formatter.injectPattern(Formatter.escapeHtml($t('Voorbeeld').toLocaleUpperCase().padEnd(16, '0')), [
+                Formatter.injectPattern(Formatter.escapeHtml($t('%ID').toLocaleUpperCase().padEnd(16, '0')), [
                     { length: 4 },
                     '-',
                     { length: 4 },
@@ -330,7 +330,7 @@ function getReplacements() {
         }),
         webshopName: Replacement.create({
             token: 'webshopName',
-            value: $t('Voorbeeldshop'),
+            value: $t('%Au'),
         }),
 
         errors: Replacement.create({
