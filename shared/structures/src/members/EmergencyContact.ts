@@ -40,6 +40,19 @@ export class EmergencyContact extends AutoEncoder {
         this.title = Formatter.capitalizeFirstLetter(this.title);
     }
 
+    /**
+     * A single line representation, e.g. 'Oma: An Peeters (0470 12 34 56)'. Parts that are missing are left out.
+     */
+    toString() {
+        const name = this.title && this.name ? `${this.title}: ${this.name}` : (this.title || this.name);
+
+        if (this.phone) {
+            return name ? `${name} (${this.phone})` : this.phone;
+        }
+
+        return name;
+    }
+
     isEqual(other: EmergencyContact) {
         this.cleanData();
         other.cleanData();

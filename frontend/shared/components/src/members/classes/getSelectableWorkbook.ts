@@ -194,6 +194,40 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             ];
         }),
 
+        // emergency contacts
+        new SelectableColumn({
+            id: 'emergencyContacts',
+            name: $t(`Alle noodcontacten`),
+            description: $t(`Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.`),
+            enabled: false,
+        }),
+        ...[1, 2].flatMap((contactNumber, contactIndex) => {
+            const getId = (value: string) => `emergencyContact.${contactIndex}.${value}`;
+            const category = `Noodcontact ${contactNumber}`;
+            const enabled = false;
+
+            return [
+                new SelectableColumn({
+                    id: getId('name'),
+                    name: $t(`Naam`),
+                    category,
+                    enabled,
+                }),
+                new SelectableColumn({
+                    id: getId('title'),
+                    name: $t(`Relatie`),
+                    category,
+                    enabled,
+                }),
+                new SelectableColumn({
+                    id: getId('phone'),
+                    name: $t(`%wD`),
+                    category,
+                    enabled,
+                }),
+            ];
+        }),
+
         // unverified data
         new SelectableColumn({
             id: 'unverifiedPhones',
