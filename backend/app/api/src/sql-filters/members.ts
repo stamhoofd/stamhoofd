@@ -509,6 +509,11 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                     type: SQLValueType.JSONScalar, // Can be string, number or boolean
                     nullable: true,
                 }),
+                dateValue: createColumnFilter({
+                    expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.dateValue`, true),
+                    type: SQLValueType.JSONDate,
+                    nullable: true,
+                }),
             }),
             {
                 checkPermission: async (key: string) => {

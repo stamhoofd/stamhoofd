@@ -27,6 +27,12 @@ export enum SQLValueType {
     /** MySQL Datetime */
     Datetime = 'Datetime',
 
+    /**
+     * Column with type number, containing a date as a unix timestamp in milliseconds.
+     * Compare values are Dates, which are converted to milliseconds before comparing.
+     */
+    DateNumber = 'DateNumber',
+
     /** Column with type number */
     Number = 'Number',
 
@@ -37,6 +43,12 @@ export enum SQLValueType {
     JSONBoolean = 'JSONBoolean',
     JSONString = 'JSONString',
     JSONNumber = 'JSONNumber',
+
+    /**
+     * A date in JSON. Dates are encoded as a unix timestamp in milliseconds (see DateDecoder), so this is
+     * stored as a JSON number. Normalizes to DateNumber.
+     */
+    JSONDate = 'JSONDate',
 
     /**
      * Either boolean, string, number or null (if nullable). Only use this if you cannot determine the type at compile time.
@@ -265,6 +277,14 @@ export function normalizeColumn(column: SQLCurrentColumn, hint?: StamhoofdCompar
         return {
             expression: new SQLJsonValue(column.expression, 'SIGNED'),
             type: SQLValueType.Number,
+            nullable: column.nullable,
+        };
+    }
+
+    if (column.type === SQLValueType.JSONDate) {
+        return {
+            expression: new SQLJsonValue(column.expression, 'SIGNED'),
+            type: SQLValueType.DateNumber,
             nullable: column.nullable,
         };
     }

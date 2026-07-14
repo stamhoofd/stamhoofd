@@ -1,3 +1,4 @@
+import { DateFilterBuilder } from '#filters/DateUIFilter.ts';
 import { NumberFilterFormat } from '#filters/NumberFilterFormat.ts';
 import type { RecordCategory } from '@stamhoofd/structures';
 import { FilterWrapperMarker, RecordType } from '@stamhoofd/structures';
@@ -132,6 +133,20 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                                             },
                                         },
                                     },
+                                },
+                            },
+                        }),
+                    );
+                    break;
+                }
+                case RecordType.Date: {
+                    allForCategory.push(
+                        new DateFilterBuilder({
+                            name: prefix + categoryPrefix + record.name,
+                            key: 'dateValue',
+                            wrapper: {
+                                recordAnswers: {
+                                    [record.id]: FilterWrapperMarker,
                                 },
                             },
                         }),

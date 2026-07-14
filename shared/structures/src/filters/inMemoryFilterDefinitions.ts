@@ -15,6 +15,7 @@ export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
         id: createInMemoryFilterCompiler('selectedChoices.*.id'),
     },
     value: createInMemoryFilterCompiler('value'),
+    dateValue: createInMemoryFilterCompiler('dateValue'),
 };
 
 export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {

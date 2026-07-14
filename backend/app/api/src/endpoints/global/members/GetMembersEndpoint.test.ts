@@ -3,7 +3,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import type { SortList } from '@stamhoofd/structures';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -1446,6 +1446,124 @@ describe('Endpoint.GetMembersEndpoint', () => {
     });
 
     describe('Record answer filtering', () => {
+        test('A user can filter members on the date of a date record answer', async () => {
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Date,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            const record = recordCategory.records[0];
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+
+            // The member we are looking for: answered with a time of day that is not midnight
+            const member1 = await new MemberFactory({}).create();
+            const answer1 = RecordDateAnswer.create({ settings: record });
+            answer1.dateValue = new Date(2023, 5, 10, 14, 30, 15);
+            member1.details.recordAnswers.set(record.id, answer1);
+            await member1.save();
+
+            // Answered with a different date
+            const member2 = await new MemberFactory({}).create();
+            const answer2 = RecordDateAnswer.create({ settings: record });
+            answer2.dateValue = new Date(2023, 5, 11, 14, 30, 15);
+            member2.details.recordAnswers.set(record.id, answer2);
+            await member2.save();
+
+            // Did not answer the question
+            const member3 = await new MemberFactory({}).create();
+
+            const group = await new GroupFactory({ organization, period }).create();
+
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            resources.set(
+                PermissionsResourceType.RecordCategories, new Map([[
+                    recordCategory.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            await new RegistrationFactory({ member: member1, group }).create();
+            await new RegistrationFactory({ member: member2, group }).create();
+            await new RegistrationFactory({ member: member3, group }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                        details: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    // Same filter as the date filter in the UI builds for 'equals'
+                                    $and: [
+                                        {
+                                            dateValue: {
+                                                $gte: new Date(2023, 5, 10),
+                                            },
+                                        },
+                                        {
+                                            dateValue: {
+                                                $lte: new Date(2023, 5, 10, 23, 59, 59, 999),
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+            ]);
+        });
+
         test('[REGRESSION] A user with minimal access can also view platform record answers in platform scope', async () => {
             /**
              * When fetching members via the admin api, without organization scope, we need to calculate which records to return and which not.
