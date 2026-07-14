@@ -36,7 +36,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
@@ -74,11 +74,7 @@ const contentLanguage = useEmailContentLanguage({
 });
 const subject = contentLanguage.subject;
 
-onMounted(() => {
-    if (props.emailTemplate.json && (props.emailTemplate.json as any).type) {
-        editor.value?.commands.setContent(props.emailTemplate.json);
-    }
-});
+// The editor content is loaded by useEmailContentLanguage once the editor is available
 
 const replacements = computed(() => {
     const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
@@ -126,8 +122,7 @@ async function save() {
 
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

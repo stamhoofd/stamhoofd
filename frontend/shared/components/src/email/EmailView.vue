@@ -404,21 +404,6 @@ watch(patch, (newValue, oldValue) => {
     doThrottledPatch();
 }, {});
 
-watch(editor, (e) => {
-    if (!e) {
-        return;
-    }
-    const handler = () => {
-        // save json of the language that is currently being edited
-        contentLanguage.onEditorUpdate();
-    };
-    e.on('update', handler);
-
-    return () => {
-        e.off('update', handler);
-    };
-}, { deep: false });
-
 onMounted(() => {
     // Create the email
     createEmail().catch((e) => {
@@ -441,11 +426,7 @@ async function createEmail() {
         email.value = props.editEmail;
         creatingEmail.value = false;
 
-        await nextTick();
-
-        if (props.editEmail.json) {
-            editor.value?.commands.setContent(props.editEmail.json);
-        }
+        // The editor content is loaded by useEmailContentLanguage once the editor is available
         return;
     }
 
@@ -469,11 +450,7 @@ async function createEmail() {
         email.value = response.data;
         creatingEmail.value = false;
 
-        await nextTick();
-
-        if (response.data.json) {
-            editor.value?.commands.setContent(response.data.json);
-        }
+        // The editor content is loaded by useEmailContentLanguage once the editor is available
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
         return;

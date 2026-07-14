@@ -4,7 +4,7 @@ import { EmailContent } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import type { Editor, JSONContent } from '@tiptap/core';
 import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { EmailStyler } from '../../editor/EmailStyler';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 
@@ -48,6 +48,12 @@ export function useEmailContentLanguage(options: {
      * Guards against interleaving language switches: deriving html/text from the editor is async
      */
     const switching = ref(false);
+
+    /**
+     * True while we programmatically replace the editor content, so the resulting 'update' event
+     * (TipTap emits one on setContent) is not written back to the patch.
+     */
+    let suppressUpdate = false;
 
     const languages = computed(() => [...options.patched().translations.keys()]);
 
@@ -124,11 +130,15 @@ export function useEmailContentLanguage(options: {
             return;
         }
         const content = contentFor(language);
-        if (content.json && (content.json as { type?: string }).type) {
-            editor.commands.setContent(content.json as JSONContent);
-        }
-        else {
-            editor.commands.clearContent();
+        suppressUpdate = true;
+        try {
+            if (content.json && (content.json as { type?: string }).type) {
+                editor.commands.setContent(content.json as JSONContent);
+            } else {
+                editor.commands.clearContent();
+            }
+        } finally {
+            suppressUpdate = false;
         }
     }
 
@@ -141,8 +151,7 @@ export function useEmailContentLanguage(options: {
             await flush();
             currentLanguage.value = language;
             loadEditor(language);
-        }
-        finally {
+        } finally {
             switching.value = false;
         }
     }
@@ -158,8 +167,7 @@ export function useEmailContentLanguage(options: {
             // Seed the new translation with the content that is currently displayed
             options.addPatch({ translations: new PatchMap([[language, contentFor(currentLanguage.value).clone()]]) });
             currentLanguage.value = language;
-        }
-        finally {
+        } finally {
             switching.value = false;
         }
     }
@@ -179,24 +187,36 @@ export function useEmailContentLanguage(options: {
                 currentLanguage.value = null;
                 loadEditor(null);
             }
-        }
-        finally {
+        } finally {
             switching.value = false;
         }
     }
 
     /**
-     * Call on TipTap 'update' events to keep the json in the patch up to date (used for auto-saving).
-     * The html/text are not derived here because that is async and expensive: use flush() or
-     * patchDerivedContent() before actually using them.
+     * Keep the json of the currently edited language in the patch on every editor change (used for
+     * auto-saving). The html/text are not derived here because that is async and expensive: use
+     * flush() or patchDerivedContent() before actually using them.
      */
     function onEditorUpdate() {
         const editor = options.editor();
-        if (!editor || switching.value) {
+        if (!editor || switching.value || suppressUpdate) {
             return;
         }
         applyContentPatch(currentLanguage.value, { json: editor.getJSON() });
     }
+
+    // This composable owns the editor <-> patch synchronisation: when the editor becomes available it
+    // loads the current language's content and then stores every change back into the patch, so views
+    // don't have to wire this up (and can't forget to).
+    watch(options.editor, (editor, _oldEditor, onCleanup) => {
+        if (!editor) {
+            return;
+        }
+        loadEditor(currentLanguage.value);
+        const handler = () => onEditorUpdate();
+        editor.on('update', handler);
+        onCleanup(() => editor.off('update', handler));
+    }, { immediate: true });
 
     /**
      * Merge derived html/text (+ json) into a detached patch (one that is about to be sent to the server),
@@ -223,7 +243,6 @@ export function useEmailContentLanguage(options: {
         switchTo,
         addLanguage,
         removeLanguage,
-        onEditorUpdate,
         patchDerivedContent,
     };
 }
