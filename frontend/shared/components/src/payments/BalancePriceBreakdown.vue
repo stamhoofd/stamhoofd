@@ -54,11 +54,11 @@ const priceBreakdown = computed((): PriceBreakdown => {
         },
         {
             name: paid >= 0 ? $t(`%ly`) : $t('%1Yy'),
-            price: paid, // don't include discounts here
+            price: -paid, // don't include discounts here
         },
         {
             name: $t(`%1OL`),
-            price: balance.pricePending + laterBalance.pricePending - discountBalance.pricePending, // don't include discounts here
+            price: -(balance.pricePending + laterBalance.pricePending - discountBalance.pricePending), // don't include discounts here
         },
     ].filter(a => a.price !== 0);
 
