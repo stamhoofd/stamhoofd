@@ -138,7 +138,7 @@ export class Order extends AutoEncoder {
     @field({ decoder: Payment, nullable: true })
     payment: Payment | null = null;
 
-    @field({ decoder: new EnumDecoder(Language), ...NextVersion })
+    @field({ decoder: new EnumDecoder(Language), version: 404 })
     consumerLanguage = Language.Dutch;
 
     @field({ decoder: DateDecoder })
