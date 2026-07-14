@@ -1,6 +1,8 @@
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailContent, EmailTemplateType, Recipient } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { EmailTemplateFactory } from '../factories/EmailTemplateFactory.js';
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { RegistrationPeriodFactory } from '../factories/RegistrationPeriodFactory.js';
@@ -62,6 +64,41 @@ describe('sendEmailTemplate with translations', () => {
 
         const unknown = emails.find(e => e.to.includes('unknown@example.com'))!;
         expect(unknown.subject).toBe('Default subject');
+    });
+
+    test('generates recipient replacements in the recipient language', async () => {
+        // French must be a valid locale, otherwise it gets corrected to the default language
+        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+
+        // The unsubscribe URL is localized per recipient (it is not part of the translatable content)
+        await new EmailTemplateFactory({
+            organization,
+            type,
+            subject: 'Subject',
+            html: '<p>{{greeting}} {{unsubscribeUrl}}</p>',
+            text: '{{greeting}} {{unsubscribeUrl}}',
+        }).create();
+
+        await sendEmailTemplate(organization, {
+            recipients: [
+                Recipient.create({ email: 'french@example.com', language: Language.French }),
+                Recipient.create({ email: 'dutch@example.com', language: Language.Dutch }),
+                Recipient.create({ email: 'unknown@example.com' }),
+            ],
+            template: { type },
+            type: 'transactional',
+        });
+
+        const emails = await EmailMocker.transactional.getSucceededEmails();
+        const french = emails.find(e => e.to.includes('french@example.com'))!;
+        const dutch = emails.find(e => e.to.includes('dutch@example.com'))!;
+        const unknown = emails.find(e => e.to.includes('unknown@example.com'))!;
+
+        // The unsubscribe page URL points to the recipient's localized page
+        expect(french.html).toContain('/fr-BE/unsubscribe');
+        expect(dutch.html).toContain('/nl-BE/unsubscribe');
+        // No language set: falls back to the ambient (default) locale
+        expect(unknown.html).toContain('/nl-BE/unsubscribe');
     });
 
     test('a missing language never falls back to the translation of a different template', async () => {

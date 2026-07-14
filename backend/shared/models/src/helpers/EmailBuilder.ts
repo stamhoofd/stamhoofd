@@ -309,7 +309,9 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 continue;
             }
 
-            const unsubscribeUrl = 'https://' + STAMHOOFD.domains.dashboard + '/' + (organization ? (organization.i18n.locale + '/') : '') + 'unsubscribe?id=' + encodeURIComponent(unsubscribe.id) + '&token=' + encodeURIComponent(unsubscribe.token) + '&type=' + encodeURIComponent(email.unsubscribeType ?? 'all');
+            // Localize the unsubscribe page to the recipient's language (Organization.i18n is always Dutch)
+            const unsubscribeLocale = organization ? getRecipientI18n(recipient, organization).locale : null;
+            const unsubscribeUrl = 'https://' + STAMHOOFD.domains.dashboard + '/' + (unsubscribeLocale ? (unsubscribeLocale + '/') : '') + 'unsubscribe?id=' + encodeURIComponent(unsubscribe.id) + '&token=' + encodeURIComponent(unsubscribe.token) + '&type=' + encodeURIComponent(email.unsubscribeType ?? 'all');
             recipient.replacements.push(Replacement.create({
                 token: 'unsubscribeUrl',
                 value: unsubscribeUrl,
@@ -581,6 +583,30 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
 }
 
 /**
+ * Build the I18n an email should be rendered in for a specific recipient.
+ *
+ * Falls back to the current (ambient) locale when the recipient has no language set — so flows
+ * that already established a locale (order emails wrapped in I18n.runWithLocale, or the request
+ * locale) keep working unchanged.
+ */
+export function getRecipientI18n(recipient: { language?: Language | null }, organization: Organization | null): I18n {
+    return new I18n(recipient.language ?? $getLanguage(), organization?.address.country ?? $getCountry());
+}
+
+/**
+ * Render everything inside `handler` in the recipient's language: all $t / $getLanguage /
+ * $getCountry calls (and therefore every generated replacement) use the recipient's locale.
+ *
+ * This is the single place that binds "a recipient" to "its language" when generating email
+ * content. Generate recipient replacements inside this wrapper so new replacements are localized
+ * automatically, and pass the provided i18n to helpers that take an explicit locale (e.g. getAppHost).
+ */
+export async function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => Promise<T>): Promise<T> {
+    const i18n = getRecipientI18n(recipient, organization);
+    return await I18n.runWithLocale(i18n, () => handler(i18n));
+}
+
+/**
  * @param options.forPreview if true, it will hide sensitive information in the preview that could leak information to admin users
  */
 export async function fillRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
@@ -595,181 +621,187 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
         options.platform = await Platform.getSharedPrivateStruct();
     }
     const { organization, platform, from, replyTo } = options;
-    let recipientUser: User | null | undefined = null;
-    recipient.replacements = recipient.replacements.slice();
-    if (options.forPreview) {
-        stripSensitiveRecipientReplacements(recipient, options);
-    }
 
-    if (!recipient.email && !recipient.userId) {
-        const signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/login';
-        recipient.replacements.push(Replacement.create({
-            token: 'signInUrl',
-            value: signInUrl,
-        }));
+    // Render every recipient replacement (greeting, loginDetails, balance table, URLs...) in the
+    // recipient's own language, so translated emails are consistent end-to-end. Any replacement
+    // added below is localized automatically; helpers with an explicit locale get the same i18n.
+    await runWithRecipientLocale(recipient, organization, async (i18n) => {
+        let recipientUser: User | null | undefined = null;
+        recipient.replacements = recipient.replacements.slice();
+        if (options.forPreview) {
+            stripSensitiveRecipientReplacements(recipient, options);
+        }
 
-        if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
+        if (!recipient.email && !recipient.userId) {
+            const signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/login';
             recipient.replacements.push(Replacement.create({
-                token: 'loginDetails',
-                value: '',
+                token: 'signInUrl',
+                value: signInUrl,
             }));
-        }
-    } else {
-        // Default signInUrl
-        recipientUser = recipient.userId ? await User.select().where('id', recipient.userId).first(false) : await User.getForAuthentication(organization?.id ?? null, recipient.email!, { allowWithoutAccount: true });
-        if (STAMHOOFD.userMode !== 'platform' && recipientUser && recipientUser.organizationId && recipientUser.organizationId !== (organization?.id ?? null)) {
-            console.warn('User organization does not match current organization, ignoring userId', recipient.userId, recipientUser.organizationId, organization?.id ?? null);
-            recipientUser = null;
-        }
 
-        let signInUrl: string;
-        if (!recipientUser || !recipientUser.hasAccount()) {
-            // We can create a special token
-            if (recipientUser) {
-                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipientUser?.email);
-            } else {
-                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/account-aanmaken';
+            if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
+                recipient.replacements.push(Replacement.create({
+                    token: 'loginDetails',
+                    value: '',
+                }));
             }
         } else {
-            signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipientUser.email);
+        // Default signInUrl
+            recipientUser = recipient.userId ? await User.select().where('id', recipient.userId).first(false) : await User.getForAuthentication(organization?.id ?? null, recipient.email!, { allowWithoutAccount: true });
+            if (STAMHOOFD.userMode !== 'platform' && recipientUser && recipientUser.organizationId && recipientUser.organizationId !== (organization?.id ?? null)) {
+                console.warn('User organization does not match current organization, ignoring userId', recipient.userId, recipientUser.organizationId, organization?.id ?? null);
+                recipientUser = null;
+            }
+
+            let signInUrl: string;
+            if (!recipientUser || !recipientUser.hasAccount()) {
+            // We can create a special token
+                if (recipientUser) {
+                    signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipientUser?.email);
+                } else {
+                    signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/account-aanmaken';
+                }
+            } else {
+                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipientUser.email);
+            }
+
+            recipient.replacements.push(Replacement.create({
+                token: 'signInUrl',
+                value: signInUrl,
+            }));
         }
 
-        recipient.replacements.push(Replacement.create({
-            token: 'signInUrl',
-            value: signInUrl,
-        }));
-    }
-
-    if (options.forceRefresh) {
+        if (options.forceRefresh) {
         // Remove loginDetails to force refresh
-        recipient.replacements = recipient.replacements.filter(r => r.token !== 'loginDetails');
-    }
+            recipient.replacements = recipient.replacements.filter(r => r.token !== 'loginDetails');
+        }
 
-    if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
-        if (recipientUser) {
-            const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
-            const suffixes: string[] = [];
-            const { Member } = await import('../models/Member.js');
-            const memberIds = await Member.getMemberIdsForUser(recipientUser);
-            const members = await Member.getByIDs(...memberIds);
-            if (members.length > 0) {
-                for (const member of members) {
-                    suffixes.push(
-                        $t('%1EC', {
-                            firstName: Formatter.escapeHtml(member.firstName),
-                            securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+        if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
+            if (recipientUser) {
+                const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
+                const suffixes: string[] = [];
+                const { Member } = await import('../models/Member.js');
+                const memberIds = await Member.getMemberIdsForUser(recipientUser);
+                const members = await Member.getByIDs(...memberIds);
+                if (members.length > 0) {
+                    for (const member of members) {
+                        suffixes.push(
+                            $t('%1EC', {
+                                firstName: Formatter.escapeHtml(member.firstName),
+                                securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+                            }),
+                        );
+                    }
+                } else {
+                    console.log('No member found for user', recipientUser.id);
+                }
+                const suffix = suffixes.length > 0 ? (' ' + suffixes.join(' ')) : '';
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'loginDetails',
+                        value: '',
+                        html: recipientUser.hasAccount()
+                            ? `<p class="description"><em>${$t('%1EA', { email: emailEscaped })}${suffix}</em></p>`
+                            : `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}${suffix}</em></p>`,
+                    }),
+                );
+            } else {
+                if (recipient.email) {
+                    const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
+                    console.log('No user found for email', recipient.email);
+                    recipient.replacements.push(
+                        Replacement.create({
+                            token: 'loginDetails',
+                            value: '',
+                            html: `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}</em></p>`,
+                        }),
+                    );
+                } else {
+                    recipient.replacements.push(
+                        Replacement.create({
+                            token: 'loginDetails',
+                            value: '',
+                            html: '',
                         }),
                     );
                 }
-            } else {
-                console.log('No member found for user', recipientUser.id);
-            }
-            const suffix = suffixes.length > 0 ? (' ' + suffixes.join(' ')) : '';
-            recipient.replacements.push(
-                Replacement.create({
-                    token: 'loginDetails',
-                    value: '',
-                    html: recipientUser.hasAccount()
-                        ? `<p class="description"><em>${$t('%1EA', { email: emailEscaped })}${suffix}</em></p>`
-                        : `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}${suffix}</em></p>`,
-                }),
-            );
-        } else {
-            if (recipient.email) {
-                const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
-                console.log('No user found for email', recipient.email);
-                recipient.replacements.push(
-                    Replacement.create({
-                        token: 'loginDetails',
-                        value: '',
-                        html: `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}</em></p>`,
-                    }),
-                );
-            } else {
-                recipient.replacements.push(
-                    Replacement.create({
-                        token: 'loginDetails',
-                        value: '',
-                        html: '',
-                    }),
-                );
             }
         }
-    }
 
-    if (options.forceRefresh) {
+        if (options.forceRefresh) {
         // Remove loginDetails to force refresh
-        recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance');
-    }
+            recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance');
+        }
 
-    // Load balance of this user
-    // todo: only if detected it is used
-    if (!recipient.replacements.find(r => r.token === 'balanceTable')) {
-        if (organization && recipientUser) {
-            const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user);
-            const balanceItems = balanceItemModels.map(i => i.getStructure());
+        // Load balance of this user
+        // todo: only if detected it is used
+        if (!recipient.replacements.find(r => r.token === 'balanceTable')) {
+            if (organization && recipientUser) {
+                const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user);
+                const balanceItems = balanceItemModels.map(i => i.getStructure());
 
-            // Get members
-            recipient.replacements.push(
-                Replacement.create({
-                    token: 'outstandingBalance',
-                    value: Formatter.price(balanceItems.reduce((sum, i) => sum + i.priceOpen, 0)),
-                }),
-                Replacement.create({
-                    token: 'balanceTable',
-                    value: '',
-                    html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
-                }),
-            );
+                // Get members
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'outstandingBalance',
+                        value: Formatter.price(balanceItems.reduce((sum, i) => sum + i.priceOpen, 0)),
+                    }),
+                    Replacement.create({
+                        token: 'balanceTable',
+                        value: '',
+                        html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
+                    }),
+                );
+            } else {
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'outstandingBalance',
+                        value: Formatter.price(0),
+                    }),
+                    Replacement.create({
+                        token: 'balanceTable',
+                        value: '',
+                        html: BalanceItemStruct.getDetailsHTMLTable([]),
+                    }),
+                );
+            }
+        }
+
+        if (from || replyTo) {
+            const fromAddress = replyTo?.email ?? from!.email;
+
+            if (fromAddress) {
+                recipient.replacements.push(Replacement.create({
+                    token: 'fromAddress',
+                    value: fromAddress,
+                }));
+            }
+
+            const name = replyTo?.name ?? from?.name;
+            if (name) {
+                recipient.replacements.push(Replacement.create({
+                    token: 'fromName',
+                    value: name,
+                }));
+            }
+        }
+
+        if (recipient instanceof EmailRecipient) {
+            recipient.replacements.push(...recipient.getRecipient().getDefaultReplacements());
         } else {
-            recipient.replacements.push(
-                Replacement.create({
-                    token: 'outstandingBalance',
-                    value: Formatter.price(0),
-                }),
-                Replacement.create({
-                    token: 'balanceTable',
-                    value: '',
-                    html: BalanceItemStruct.getDetailsHTMLTable([]),
-                }),
-            );
-        }
-    }
-
-    if (from || replyTo) {
-        const fromAddress = replyTo?.email ?? from!.email;
-
-        if (fromAddress) {
-            recipient.replacements.push(Replacement.create({
-                token: 'fromAddress',
-                value: fromAddress,
-            }));
+            recipient.replacements.push(...recipient.getDefaultReplacements());
         }
 
-        const name = replyTo?.name ?? from?.name;
-        if (name) {
-            recipient.replacements.push(Replacement.create({
-                token: 'fromName',
-                value: name,
-            }));
+        if (organization) {
+            const extra = organization.meta.getEmailReplacements(organization);
+            recipient.replacements.push(...extra);
         }
-    }
 
-    if (recipient instanceof EmailRecipient) {
-        recipient.replacements.push(...recipient.getRecipient().getDefaultReplacements());
-    } else {
-        recipient.replacements.push(...recipient.getDefaultReplacements());
-    }
-
-    if (organization) {
-        const extra = organization.meta.getEmailReplacements(organization);
+        // Defaults
+        const extra = platform.config.getEmailReplacements(platform);
         recipient.replacements.push(...extra);
-    }
 
-    // Defaults
-    const extra = platform.config.getEmailReplacements(platform);
-    recipient.replacements.push(...extra);
-
-    // Remove duplicates
-    cleanReplacements(recipient.replacements);
+        // Remove duplicates
+        cleanReplacements(recipient.replacements);
+    });
 }
