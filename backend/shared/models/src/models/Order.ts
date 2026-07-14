@@ -924,6 +924,7 @@ export class Order extends QueryableModel {
                 // Clear first and last name
                 recipient.firstName = null;
                 recipient.lastName = null;
+                recipient.language = this.webshop.meta.defaultLanguage;
                 recipient.replacements = recipient.replacements.filter(r => !['firstName', 'lastName'].includes(r.token));
                 data.to.merge(recipient);
                 recipient = data.to;

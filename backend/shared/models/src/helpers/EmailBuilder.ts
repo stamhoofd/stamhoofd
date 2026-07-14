@@ -601,9 +601,9 @@ export function getRecipientI18n(recipient: { language?: Language | null }, orga
  * content. Generate recipient replacements inside this wrapper so new replacements are localized
  * automatically, and pass the provided i18n to helpers that take an explicit locale (e.g. getAppHost).
  */
-export async function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => Promise<T>): Promise<T> {
+export function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => T): T {
     const i18n = getRecipientI18n(recipient, organization);
-    return await I18n.runWithLocale(i18n, () => handler(i18n));
+    return I18n.runWithLocale(i18n, () => handler(i18n));
 }
 
 /**

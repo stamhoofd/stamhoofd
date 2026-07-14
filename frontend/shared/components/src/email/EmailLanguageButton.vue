@@ -1,6 +1,7 @@
 <template>
-    <!-- Also visible when translations exist while the platform has a single language: they should remain manageable -->
-    <template v-if="hasLanguages || languages.length > 0">
+    <!-- Hidden by default; shown when translations are enabled (feature flag / admin app) or when
+         translations already exist, so existing translations remain manageable -->
+    <template v-if="languages.length > 0 || (hasLanguages && translationsEnabled)">
         <button class="button text small gray" type="button" :disabled="disabled" data-testid="email-language-button" @click="showMenu">
             <span class="icon language small" />
             <span v-if="modelValue" class="style-tag">{{ modelValue.toUpperCase() }}</span>
@@ -14,6 +15,7 @@ import { LanguageHelper } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
+import { useEmailTranslationsEnabled } from './hooks/useEmailTranslationsEnabled';
 
 const props = withDefaults(defineProps<{
     /**
@@ -35,6 +37,7 @@ const emit = defineEmits<{
  */
 const modelValue = defineModel<Language | null>({ required: true });
 const { hasLanguages } = useSwitchLanguage();
+const translationsEnabled = useEmailTranslationsEnabled();
 
 async function showMenu(event: MouseEvent) {
     const menu = new ContextMenu([

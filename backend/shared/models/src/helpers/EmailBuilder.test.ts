@@ -1,5 +1,5 @@
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailContent, EmailTemplateType, Recipient } from '@stamhoofd/structures';
+import { EmailContent, EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -9,7 +9,7 @@ import { RegistrationPeriodFactory } from '../factories/RegistrationPeriodFactor
 import { Email } from '../models/Email.js';
 import type { Organization } from '../models/Organization.js';
 import type { RegistrationPeriod } from '../models/RegistrationPeriod.js';
-import { sendEmailTemplate } from './EmailBuilder.js';
+import { removeUnusedReplacements, sendEmailTemplate } from './EmailBuilder.js';
 
 describe('sendEmailTemplate with translations', () => {
     let period: RegistrationPeriod;
@@ -158,5 +158,78 @@ describe('sendEmailTemplate with translations', () => {
         expect(email.subject).toBe('Default subject');
         expect(email.translations.size).toBe(1);
         expect(email.translations.get(Language.French)!.subject).toBe('Sujet français');
+    });
+
+    test('replaceAll is applied to the html of every language, not only the default', async () => {
+        await new EmailTemplateFactory({
+            organization,
+            type,
+            subject: 'Subject',
+            // The same placeholder appears in both the default and the translated html
+            html: '<p>Default __PLACEHOLDER__</p>',
+            text: 'Default __PLACEHOLDER__',
+            translations: new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet', html: '<p>Français __PLACEHOLDER__</p>', text: 'Français __PLACEHOLDER__' })],
+            ]),
+        }).create();
+
+        await sendEmailTemplate(organization, {
+            recipients: [
+                Recipient.create({ email: 'french@example.com', language: Language.French }),
+                Recipient.create({ email: 'default@example.com' }),
+            ],
+            template: { type },
+            type: 'transactional',
+            replaceAll: [{ from: '__PLACEHOLDER__', to: 'REPLACED' }],
+        });
+
+        const emails = await EmailMocker.transactional.getSucceededEmails();
+        const french = emails.find(e => e.to.includes('french@example.com'))!;
+        const fallback = emails.find(e => e.to.includes('default@example.com'))!;
+
+        // The replaceAll must reach the translated html too, otherwise the placeholder leaks
+        expect(french.html).toContain('Français REPLACED');
+        expect(french.html).not.toContain('__PLACEHOLDER__');
+        expect(fallback.html).toContain('Default REPLACED');
+        expect(fallback.html).not.toContain('__PLACEHOLDER__');
+    });
+});
+
+describe('Email.getCombinedHtml', () => {
+    test('combines the default html with the html of every translation', () => {
+        const email = new Email();
+        email.html = '<p>Default {{signInUrl}}</p>';
+        email.translations = new Map([
+            [Language.French, EmailContent.create({ html: '<p>Français {{balanceTable}}</p>' })],
+        ]);
+
+        const combined = email.getCombinedHtml();
+        expect(combined).toContain('{{signInUrl}}');
+        expect(combined).toContain('{{balanceTable}}');
+    });
+
+    test('keeps a replacement that is only used inside a translation', () => {
+        const email = new Email();
+        // The default html uses signInUrl, only the French translation uses balanceTable
+        email.html = '<p>Default {{signInUrl}}</p>';
+        email.translations = new Map([
+            [Language.French, EmailContent.create({ html: '<p>Français {{balanceTable}}</p>' })],
+        ]);
+
+        const replacements = [
+            Replacement.create({ token: 'signInUrl', value: 'https://example.com' }),
+            Replacement.create({ token: 'balanceTable', value: '', html: '<table></table>' }),
+            Replacement.create({ token: 'outstandingBalance', value: '€ 10' }),
+        ];
+
+        // Using only the default html would wrongly strip balanceTable (used only by the translation)
+        const usingDefaultHtml = removeUnusedReplacements(email.html ?? '', replacements).map(r => r.token);
+        expect(usingDefaultHtml).not.toContain('balanceTable');
+
+        // Using the combined html keeps every replacement that any language needs, and still drops the truly unused one
+        const usingCombinedHtml = removeUnusedReplacements(email.getCombinedHtml(), replacements).map(r => r.token);
+        expect(usingCombinedHtml).toContain('signInUrl');
+        expect(usingCombinedHtml).toContain('balanceTable');
+        expect(usingCombinedHtml).not.toContain('outstandingBalance');
     });
 });

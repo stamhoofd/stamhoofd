@@ -15,6 +15,7 @@
         "@stamhoofd/backend": "*",
         "@stamhoofd/backend-i18n": "*",
         "@stamhoofd/cli": "*",
+        "@stamhoofd/email": "*",
         "@stamhoofd/models": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",

@@ -33,8 +33,8 @@ export class I18n {
      * Run a handler with a temporary i18n override. All global $t calls made during the
      * handler will use the given i18n instead of the current request/context one.
      */
-    static async runWithLocale<T>(i18n: I18n, handler: () => Promise<T>): Promise<T> {
-        return await this.overrideStorage.run(i18n, handler);
+    static runWithLocale<T>(i18n: I18n, handler: () => T): T {
+        return this.overrideStorage.run(i18n, handler);
     }
 
     static async load() {
@@ -72,8 +72,7 @@ export class I18n {
             if (typeof (element) !== 'string') {
                 const map2 = this.loadRecursive(element, (prefix ? prefix + '.' : '') + key);
                 map2.forEach((val, key) => map.set(key, val));
-            }
-            else {
+            } else {
                 map.set((prefix ? prefix + '.' : '') + key, element);
             }
         }
