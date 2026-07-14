@@ -68,7 +68,7 @@ import { useIsMobile } from '#hooks/useIsMobile.ts';
 import type { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection } from '@stamhoofd/structures';
 import { CartReservedSeat, ReservedSeat, SeatingSizeConfiguration, SeatMarkings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watchEffect } from 'vue';
 
 import { Toast } from '../overlays/Toast';
 
@@ -132,15 +132,19 @@ const defaultSizeConfig = computed(() => {
     return config;
 });
 
+const sizeConfig = computed(() => props.sizeConfig ?? defaultSizeConfig.value);
 const rows = computed(() => props.seatingPlanSection.rows);
-const size = computed(() => props.seatingPlanSection.calculateSize(props.sizeConfig ?? defaultSizeConfig.value));
+const size = computed(() => props.seatingPlanSection.calculateSize(sizeConfig.value));
 
-function updatePositions() {
-    props.seatingPlanSection.updatePositions(props.sizeConfig ?? defaultSizeConfig.value);
-}
-
-updatePositions();
-watch(() => props.seatingPlanSection, updatePositions);
+/**
+ * The drawing positions are cached on the rows and seats themselves, and those are replaced with
+ * freshly decoded ones (with empty positions) every time the webshop is updated in place - e.g. when
+ * it is reloaded in the background while this view is open. Recalculate the positions whenever the
+ * rows or seats change, instead of only when the section itself is replaced.
+ */
+watchEffect(() => {
+    props.seatingPlanSection.updatePositions(sizeConfig.value);
+});
 
 if (props.amount && props.setSeats) {
     const updatedSeats = props.seats.filter(seat => props.seatingPlan.isValidSeat(seat, props.reservedSeats));
