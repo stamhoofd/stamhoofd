@@ -18,6 +18,8 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             switch (record.type) {
                 case RecordType.Text:
                 case RecordType.Textarea:
+                case RecordType.Email:
+                case RecordType.Phone:
                 {
                     allForCategory.push(
                         new StringFilterBuilder({
