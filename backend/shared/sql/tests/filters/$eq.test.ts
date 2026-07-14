@@ -317,7 +317,7 @@ describe('$eq', () => {
                 },
             },
             filters,
-            error: 'Cannot compare a date with a non-datetime column',
+            error: 'Cannot compare a date with a non-date column',
         });
     });
 
@@ -336,7 +336,7 @@ describe('$eq', () => {
                 },
             },
             filters,
-            error: 'Cannot compare a date with a non-datetime column',
+            error: 'Cannot compare a date with a non-date column',
         });
     });
 

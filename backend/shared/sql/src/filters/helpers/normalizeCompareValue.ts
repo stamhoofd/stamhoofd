@@ -22,7 +22,13 @@ export function normalizeCompareValue(val: StamhoofdCompareValue, againstType: S
         if (againstType === SQLValueType.Datetime) {
             return val;
         }
-        throw new Error('Cannot compare a date with a non-datetime column');
+
+        if (againstType === SQLValueType.DateNumber) {
+            // Dates are stored as a unix timestamp in milliseconds
+            return val.getTime();
+        }
+
+        throw new Error('Cannot compare a date with a non-date column');
     }
 
     if (typeof val === 'string') {

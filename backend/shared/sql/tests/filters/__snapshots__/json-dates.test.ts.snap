@@ -1,0 +1,109 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`JSON dates > MySQL Behaviour > Compares dates chronologically > SQL Query for filter: {"settings.date":{"$gt":"2025-06-09T00:00:00.000Z"}} 1`] = `
+{
+  "params": [
+    1749427200000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) > ?",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Compares dates chronologically > SQL Query for filter: {"settings.date":{"$lt":"2025-06-11T00:00:00.000Z"}} 1`] = `
+{
+  "params": [
+    1749600000000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) < ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Compares dates chronologically > SQL Query for not match filter: {"settings.date":{"$gt":"2025-06-10T23:59:59.999Z"}} 1`] = `
+{
+  "params": [
+    1749599999999,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) > ?",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Compares dates chronologically > SQL Query for not match filter: {"settings.date":{"$lt":"2025-06-10T00:00:00.000Z"}} 1`] = `
+{
+  "params": [
+    1749513600000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) < ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches a date on the same day, ignoring the time of day > SQL Query for filter: {"$and":[{"settings.date":{"$gte":"2025-06-10T00:00:00.000Z"}},{"settings.date":{"$lte":"2025-06-10T23:59:59.999Z"}}]} 1`] = `
+{
+  "params": [
+    1749513600000,
+    1749599999999,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) >= ? AND (JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL)",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches a date on the same day, ignoring the time of day > SQL Query for not match filter: {"$and":[{"settings.date":{"$gte":"2025-06-11T00:00:00.000Z"}},{"settings.date":{"$lte":"2025-06-11T23:59:59.999Z"}}]} 1`] = `
+{
+  "params": [
+    1749600000000,
+    1749686399999,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) >= ? AND (JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL)",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches a date on the same day, ignoring the time of day > SQL Query for not match filter: {"$or":[{"settings.date":{"$lt":"2025-06-10T00:00:00.000Z"}},{"settings.date":{"$gt":"2025-06-10T23:59:59.999Z"}}]} 1`] = `
+{
+  "params": [
+    1749513600000,
+    1749599999999,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) < ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL) OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) > ?",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches null if the date is not set > SQL Query for filter: {"settings.date":{"$eq":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches null if the date is not set > SQL Query for filter: {"settings.date":{"$lt":"2025-06-10T00:00:00.000Z"}} 1`] = `
+{
+  "params": [
+    1749513600000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) < ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches null if the date is not set > SQL Query for not match filter: {"$and":[{"settings.date":{"$gte":"2025-06-10T00:00:00.000Z"}},{"settings.date":{"$lte":"2025-06-10T23:59:59.999Z"}}]} 1`] = `
+{
+  "params": [
+    1749513600000,
+    1749599999999,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) >= ? AND (JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) <= ? OR JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NULL)",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches null if the date is not set > SQL Query for not match filter: {"settings.date":{"$gt":"2025-06-10T00:00:00.000Z"}} 1`] = `
+{
+  "params": [
+    1749513600000,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) > ?",
+}
+`;
+
+exports[`JSON dates > MySQL Behaviour > Matches null if the date is not set > SQL Query for not match filter: {"settings.date":{"$neq":null}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.date" RETURNING SIGNED NULL ON ERROR) IS NOT NULL",
+}
+`;

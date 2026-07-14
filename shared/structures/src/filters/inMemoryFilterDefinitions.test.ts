@@ -81,6 +81,30 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
             );
         });
 
+        it('supports filtering on a date record answer value', () => {
+            testFilter(
+                {
+                    recordAnswers: {
+                        'record-id-1': {
+                            // Same filter as the date filter in the UI builds for 'equals'
+                            $and: [
+                                { dateValue: { $gte: new Date(2023, 5, 10) } },
+                                { dateValue: { $lte: new Date(2023, 5, 10, 23, 59, 59, 999) } },
+                            ],
+                        },
+                    },
+                },
+                [
+                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { dateValue: new Date(2023, 5, 10, 14, 30, 15) } } } }),
+                ],
+                [
+                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { dateValue: new Date(2023, 5, 11, 14, 30, 15) } } } }),
+                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { dateValue: null } } } }),
+                    makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } }),
+                ],
+            );
+        });
+
         it('supports filtering on a single-choice record answer', () => {
             testFilter(
                 {
