@@ -547,7 +547,7 @@ export class Group extends AutoEncoder {
         if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockCreatingNewMembers) {
             tags.push({
                 icon: 'disabled',
-                title: $t('Nieuwe leden zijn uitgeschakeld'),
+                title: $t('%ZdL'),
                 style: 'warn',
             });
         }

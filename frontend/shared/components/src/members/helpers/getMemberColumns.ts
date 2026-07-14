@@ -471,7 +471,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
     allColumns.push(
         new Column<ObjectType, Date | null | undefined>({
             id: 'lastRegisteredAt',
-            name: $t(`Laatst ingeschreven op`),
+            name: $t(`%ZdP`),
             allowSorting: true,
             getValue: (v) => {
                 const lastRegisteredAt = v.member.lastRegisteredAt;
@@ -487,10 +487,10 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             },
             format: (v, width) => {
                 if (v === null) {
-                    return $t('Niet ingeschreven');
+                    return $t('%5D');
                 }
                 if (v === undefined) {
-                    return $t('Onbekend');
+                    return $t('%Gr');
                 }
                 return width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true));
             },

@@ -89,20 +89,20 @@
                             <Checkbox v-model="skipUnmatchedGroups" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Deze leden niet inschrijven voor een groep') }}
+                            {{ $t('%Zdh') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Leden zonder een kolom die de inschrijvingsgroep bepaalt, worden aangemaakt of bijgewerkt, maar niet ingeschreven voor een groep.') }}
+                            {{ $t('%ZdE') }}
                         </p>
                     </STListItem>
                 </STList>
 
                 <p v-if="skipUnmatchedGroups && newMembersNeedingAssignment.length > 0" class="warning-box">
                     <template v-if="newMembersNeedingAssignment.length === 1">
-                        {{ $t('Er wordt 1 nieuw lid aangemaakt, maar niet ingeschreven voor een groep. Zonder inschrijving is dit lid moeilijk terug te vinden in het systeem.') }}
+                        {{ $t('%Zdi') }}
                     </template>
                     <template v-else>
-                        {{ $t('{count} nieuwe leden worden aangemaakt, maar niet ingeschreven voor een groep. Zonder inschrijving zijn deze leden moeilijk terug te vinden in het systeem.', {count: newMembersNeedingAssignment.length}) }}
+                        {{ $t('%ZdJ', {count: newMembersNeedingAssignment.length}) }}
                     </template>
                 </p>
 
@@ -315,7 +315,7 @@ const waitingListWarning = computed(() => {
         return null;
     }
 
-    return $t('%1Bu', { groups: Formatter.joinLast(Array.from(groupMap.values()).map(g => g.settings.name.toString()), ', ', ' ' + $t('en') + ' ') });
+    return $t('%1Bu', { groups: Formatter.joinLast(Array.from(groupMap.values()).map(g => g.settings.name.toString()), ', ', ' ' + $t('%M1') + ' ') });
 });
 
 const membersWithNewRegistrations = computed(() => props.importMemberResults.filter(m => memberImporter.hasNewRegistration(m, isWaitingList.value)));

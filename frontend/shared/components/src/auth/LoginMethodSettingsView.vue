@@ -168,8 +168,8 @@
                     :placeholder="$t(`%Zw`)"
                     autocomplete="off"
                     :can-reveal-password="canRevealClientSecret"
-                    :show-text="$t('Toon client secret')"
-                    :hide-text="$t('Verberg client secret')"
+                    :show-text="$t('%Zdn')"
+                    :hide-text="$t('%Zdj')"
                 />
 
                 <STInputBox

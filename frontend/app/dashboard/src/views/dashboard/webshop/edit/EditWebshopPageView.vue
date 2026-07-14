@@ -10,7 +10,7 @@
             <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`%Rc`)" />
         </STInputBox>
 
-        <STInputBox error-fields="meta.defaultLanguage" :error-box="errors.errorBox" :title="$t(`Taal`)">
+        <STInputBox error-fields="meta.defaultLanguage" :error-box="errors.errorBox" :title="$t(`%14T`)">
             <Dropdown v-model="defaultLanguage">
                 <option v-for="language in languages" :key="language" :value="language">
                     {{ LanguageHelper.getNativeName(language) }}

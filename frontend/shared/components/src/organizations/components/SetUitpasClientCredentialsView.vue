@@ -14,7 +14,7 @@
                 <input ref="firstInput" v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t('%1Ci')">
             </STInputBox>
 
-            <PasswordInput v-model="clientSecret" error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('%1Cj')" :placeholder="$t('%1Ck')" autocomplete="off" :can-reveal-password="clientSecret !== UitpasClientIdAndSecret.placeholderClientSecret" :show-text="$t('Toon client secret')" :hide-text="$t('Verberg client secret')" />
+            <PasswordInput v-model="clientSecret" error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('%1Cj')" :placeholder="$t('%1Ck')" autocomplete="off" :can-reveal-password="clientSecret !== UitpasClientIdAndSecret.placeholderClientSecret" :show-text="$t('%Zdn')" :hide-text="$t('%Zdj')" />
         </SaveView>
     </LoadingViewTransition>
 </template>
@@ -190,7 +190,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

@@ -2779,10 +2779,6 @@
     "original": "Stel eerst een UiTPAS-organisator in.",
     "translation": "Veuillez d'abord définir un organisateur UiTPAS."
   },
-  "%1BG": {
-    "original": "De opgegeven client credentials zijn niet geldig.",
-    "translation": "Les identifiants client fournis ne sont pas valides."
-  },
   "%1BH": {
     "original": "Deze organisatie heeft nog geen UiTPAS-organisatie ingesteld. Stel dit in via de algemene instellingen.",
     "translation": "Cette association n'a pas encore d'organisation UiTPAS définie. Faites-le via les paramètres généraux."
@@ -3092,8 +3088,8 @@
     "translation": "En reliant un événement provenant de la base de données UiT, Stamhoofd peut enregistrer une vente avec tarif préférentiel dans votre région UiTPAS. Vous recevrez alors automatiquement un remboursement (partiel) et votre région fixera le tarif social."
   },
   "%1CW": {
-    "original": "Wil je de UiTPAS-nummers niet doorsturen en zelf het tarief instellen, <button>klik dan hier</button>.",
-    "translation": "Si vous ne souhaitez pas transmettre les numéros UiTPAS et déterminer vous-même le tarif, <button>cliquez ici</button>."
+    "original": "Wil je de UiTPAS-inschrijvingen niet doorsturen naar je UiTPAS-regio voor dit evenement (bv. het komt niet in aanmerking voor een terugbetaling), <button>klik dan hier</button>.",
+    "translation": "Si tu ne souhaites pas transmettre les inscriptions UiTPAS à ta région UiTPAS pour cet événement (par exemple, il ne donne pas droit à un remboursement), <button>clique ici</button>."
   },
   "%1CX": {
     "original": "Zoek op naam, locatie, beschrijving, ...",
@@ -17998,6 +17994,106 @@
   "%ZdC": {
     "original": "Alle afzonderlijke items die werden aangerekend (betaald of niet)",
     "translation": "Toutes les lignes individuelles facturées (payées ou non)"
+  },
+  "%ZdE": {
+    "original": "Leden zonder een kolom die de inschrijvingsgroep bepaalt, worden aangemaakt of bijgewerkt, maar niet ingeschreven voor een groep.",
+    "translation": "Les membres sans colonne déterminant le groupe d'inscription seront créés ou mis à jour, mais non inscrits dans un groupe."
+  },
+  "%ZdF": {
+    "original": "Verberg wachtwoord",
+    "translation": "Masquer le mot de passe"
+  },
+  "%ZdI": {
+    "original": "{jamesAndAnna} zijn uitgeschreven",
+    "translation": "{jamesAndAnna} sont désinscrits"
+  },
+  "%ZdJ": {
+    "original": "{count} nieuwe leden worden aangemaakt, maar niet ingeschreven voor een groep. Zonder inschrijving zijn deze leden moeilijk terug te vinden in het systeem.",
+    "translation": "{count} nouveaux membres seront créés sans être inscrits dans un groupe. Sans inscription, il sera difficile de les retrouver dans le système."
+  },
+  "%ZdL": {
+    "original": "Nieuwe leden zijn uitgeschakeld",
+    "translation": "Les nouveaux membres sont désactivés"
+  },
+  "%ZdM": {
+    "original": "Toegankelijk voor niet-leden",
+    "translation": "Accessible pour les non-membres"
+  },
+  "%ZdO": {
+    "original": "Zoek een groep",
+    "translation": "Chercher un groupe"
+  },
+  "%ZdP": {
+    "original": "Laatst ingeschreven op",
+    "translation": "Dernière inscription le"
+  },
+  "%ZdQ": {
+    "original": "{name} is uitgeschreven voor {group}",
+    "translation": "{name} est désinscrit du groupe {group}"
+  },
+  "%ZdR": {
+    "original": "Tot en met {date}",
+    "translation": "Jusqu'au {date}"
+  },
+  "%ZdS": {
+    "original": "Terugbetaling",
+    "translation": "Remboursement"
+  },
+  "%ZdT": {
+    "original": "Deelnemers hoeven geen actieve inschrijving te hebben om zich in te schrijven voor deze activiteit.",
+    "translation": "Les participants n'ont pas besoin d'une inscription active pour s'inscrire à cette activité."
+  },
+  "%ZdU": {
+    "original": "Vul zowel de Client id als Client secret in.",
+    "translation": "Renseigne l'identifiant client et le secret client."
+  },
+  "%ZdX": {
+    "original": "Leden of ouders kunnen geen nieuwe gezinsleden toevoegen en ook nieuwe accounts kunnen geen leden toevoegen. Je kan dit aanpassen via Instellingen > Experimenten.",
+    "translation": "Les membres ou parents ne peuvent pas ajouter de nouveaux membres familiaux, et les nouveaux comptes ne peuvent pas ajouter de membres non plus. Tu peux modifier cela via Paramètres > Expériences."
+  },
+  "%ZdY": {
+    "original": "Geen groepen gevonden.",
+    "translation": "Aucun groupe trouvé."
+  },
+  "%Zdd": {
+    "original": "Toon wachtwoord",
+    "translation": "Afficher le mot de passe"
+  },
+  "%Zdf": {
+    "original": "Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.",
+    "translation": "Les membres qui n'ont jamais été créés ne peuvent pas s'inscrire eux-mêmes. Tu peux modifier ceci via Paramètres > Expériences."
+  },
+  "%Zdg": {
+    "original": "Blokkeer aanmaken van nieuwe leden",
+    "translation": "Empêcher la création de nouveaux membres"
+  },
+  "%Zdh": {
+    "original": "Deze leden niet inschrijven voor een groep",
+    "translation": "Ne pas inscrire ces membres dans un groupe"
+  },
+  "%Zdi": {
+    "original": "Er wordt 1 nieuw lid aangemaakt, maar niet ingeschreven voor een groep. Zonder inschrijving is dit lid moeilijk terug te vinden in het systeem.",
+    "translation": "Un nouveau membre sera créé sans être inscrit dans un groupe. Sans inscription, il sera difficile de retrouver ce membre dans le système."
+  },
+  "%Zdj": {
+    "original": "Verberg client secret",
+    "translation": "Masquer le secret client"
+  },
+  "%Zdk": {
+    "original": "{name} is ingeschreven voor {group}",
+    "translation": "{name} est inscrit dans le groupe {group}"
+  },
+  "%Zdl": {
+    "original": "Wanneer ingeschakeld kunnen leden of ouders geen nieuwe gezinsleden toevoegen. Ook nieuwe accounts kunnen hierdoor geen leden toevoegen.",
+    "translation": "Lorsque cette option est activée, les membres ou parents ne peuvent pas ajouter de nouveaux membres familiaux. Les nouveaux comptes ne pourront donc pas ajouter de membres non plus."
+  },
+  "%Zdn": {
+    "original": "Toon client secret",
+    "translation": "Afficher le secret client"
+  },
+  "%Zdo": {
+    "original": "Vanaf {dateTime}",
+    "translation": "À partir du {dateTime}"
   },
   "%Ze": {
     "original": "Login methode configuratie",

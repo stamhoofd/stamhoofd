@@ -786,11 +786,11 @@ export class RegisterItem implements ObjectWithRecords {
         }
 
         if (this.customStartDate) {
-            descriptions.push($t('Vanaf {date}', { date: Formatter.startDate(this.calculatedStartDate) }));
+            descriptions.push($t('%kR', { date: Formatter.startDate(this.calculatedStartDate) }));
         }
 
         if (this.customEndDate) {
-            descriptions.push($t('Tot en met {date}', { date: Formatter.endDate(this.calculatedEndDate) }));
+            descriptions.push($t('%ZdR', { date: Formatter.endDate(this.calculatedEndDate) }));
         }
 
         return descriptions.filter(d => !!d).join('\n');

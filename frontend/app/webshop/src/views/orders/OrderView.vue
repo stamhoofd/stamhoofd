@@ -190,7 +190,7 @@
                             </STListItem>
                             <STListItem v-for="(payment, index) in order.payments" :key="payment.id" class="right-description right-stack" :selectable="isPaymentTransfer(payment)" @click="openTransferView(payment)">
                                 <h3 class="style-definition-label">
-                                    {{ payment.price >= 0 ? $t('Betaling') : $t('Terugbetaling') }} {{ order.payments.length > 1 ? index + 1 : '' }}
+                                    {{ payment.price >= 0 ? $t('%kP') : $t('%ZdS') }} {{ order.payments.length > 1 ? index + 1 : '' }}
                                 </h3>
 
                                 <p class="style-definition-text with-icons">

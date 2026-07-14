@@ -45,7 +45,7 @@ export class UitpasTokenRepository {
                 statusCode: 400,
                 code: 'invalid_uitpas_client_credentials',
                 message: `Empty UiTPAS client credentials`,
-                human: $t(`Vul zowel de Client id als Client secret in.`),
+                human: $t(`%ZdU`),
             });
         }
 

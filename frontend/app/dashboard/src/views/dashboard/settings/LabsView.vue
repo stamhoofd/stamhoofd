@@ -103,10 +103,10 @@
                     <Checkbox v-model="blockCreatingNewMembers" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Blokkeer aanmaken van nieuwe leden') }}
+                    {{ $t('%Zdg') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Wanneer ingeschakeld kunnen leden of ouders geen nieuwe gezinsleden toevoegen. Ook nieuwe accounts kunnen hierdoor geen leden toevoegen.') }}
+                    {{ $t('%Zdl') }}
                 </p>
             </STListItem>
         </STList>

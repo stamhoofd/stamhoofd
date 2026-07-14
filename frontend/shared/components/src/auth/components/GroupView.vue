@@ -243,7 +243,7 @@ const priceList = computed(() => {
 
     for (const price of props.group.settings.getFilteredPrices()) {
         const remainingStockText = getStockText(price);
-        const prefix = price.startDate ? $t('Vanaf {dateTime}', { dateTime: Formatter.startDate(price.startDate) }) + '\n' : '';
+        const prefix = price.startDate ? $t('%Zdo', { dateTime: Formatter.startDate(price.startDate) }) + '\n' : '';
 
         list.push({
             text: Formatter.capitalizeFirstLetter(price.name.toString()) || $t('%1IP'),

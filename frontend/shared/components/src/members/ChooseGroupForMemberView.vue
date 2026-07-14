@@ -31,7 +31,7 @@
                 <div v-if="showGroupSearch" class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
-                            <input v-model="groupSearchQuery" v-autofocus="true" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="group-search-input" :placeholder="$t('Zoek een groep')">
+                            <input v-model="groupSearchQuery" v-autofocus="true" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="group-search-input" :placeholder="$t('%ZdO')">
                         </form>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                 </div>
 
                 <p v-if="showGroupSearch && groupSearchQuery && filteredCategories.length === 0" class="info-box">
-                    {{ $t('Geen groepen gevonden.') }}
+                    {{ $t('%ZdY') }}
                 </p>
             </template>
         </main>
@@ -139,10 +139,10 @@ const controlItems = computed(() => {
 
 const controlLabels = computed(() => controlItems.value.map((id) => {
     if (id === EVENTS_TAB) {
-        return $t('Activiteiten');
+        return $t('%uB');
     }
     if (id === GROUPS_TAB) {
-        return tree.value?.categories.length === 1 && selectedOrganization.value ? tree.value?.categories[0].getName(selectedOrganization.value.period) : $t('Groepen');
+        return tree.value?.categories.length === 1 && selectedOrganization.value ? tree.value?.categories[0].getName(selectedOrganization.value.period) : $t('%wP');
     }
     return props.member.organizations.find(o => o.id === id)?.name ?? '';
 }));

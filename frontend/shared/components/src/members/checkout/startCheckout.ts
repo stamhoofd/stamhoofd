@@ -215,15 +215,15 @@ function fallback(registrations: RegistrationWithTinyMember[], checkout: Registe
         if (checkout.cart.deleteRegistrations.length >= 1) {
             const names = Formatter.uniqueArray(checkout.cart.deleteRegistrations.map(r => r.member.patchedMember.firstName));
             if (names.length === 1) {
-                d += $t(`{name} is uitgeschreven voor {group}`, {
+                d += $t(`%ZdQ`, {
                     name: names.join('') + waitingListNames.join(''),
                     group: checkout.cart.deleteRegistrations.map(r => r.group.settings.name).join(', '),
                 });
             } else {
-                d += $t(`{jamesAndAnna} zijn uitgeschreven`, {
+                d += $t(`%ZdI`, {
                     jamesAndAnna: Formatter.joinLastLimited(names, {
                         separator: ', ',
-                        lastSeparator: ' ' + $t('en') + ' ',
+                        lastSeparator: ' ' + $t('%M1') + ' ',
                         maxLength: 70,
                         maxCount: 2,
                         textIfOverflow(notIncludedCount) {
@@ -234,7 +234,7 @@ function fallback(registrations: RegistrationWithTinyMember[], checkout: Registe
             }
         }
     } else if (names.length + waitingListNames.length === 1) {
-        d += $t(`{name} is ingeschreven voor {group}`, {
+        d += $t(`%Zdk`, {
             name: names.join('') + waitingListNames.join(''),
             group: registrations[0].group.settings.name,
         });

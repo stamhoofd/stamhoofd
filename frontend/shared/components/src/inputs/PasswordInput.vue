@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<{ title?: string; validator?: Validator |
     name?: string;
     showText?: string;
     hideText?: string; }>(), {
-    title: () => $t('Wachtwoord'),
+    title: () => $t('%HK'),
     validator: null,
     errorBox: null,
     required: true,
@@ -50,11 +50,11 @@ const props = withDefaults(defineProps<{ title?: string; validator?: Validator |
     disabled: false,
     canRevealPassword: true,
     errorFields: 'password',
-    placeholder: () => $t('Kies een wachtwoord'),
+    placeholder: () => $t('%WV'),
     autocomplete: 'new-password',
     name: 'new-password',
-    showText: () => $t('Toon wachtwoord'),
-    hideText: () => $t('Verberg wachtwoord'),
+    showText: () => $t('%Zdd'),
+    hideText: () => $t('%ZdF'),
 });
 
 const visible = ref(false);

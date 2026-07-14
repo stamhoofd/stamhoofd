@@ -17,7 +17,7 @@
         </template>
 
         <template #right>
-            <p v-if="!item.isDue" v-tooltip="item.dueAt ? $t('Te betalen tegen {date}', {date: formatDate(item.dueAt)}) : undefined" class="style-price-base disabled style-tooltip">
+            <p v-if="!item.isDue" v-tooltip="item.dueAt ? $t('%gf', {date: formatDate(item.dueAt)}) : undefined" class="style-price-base disabled style-tooltip">
                 ({{ formatPrice(displayPrice) }})
             </p>
             <p v-else class="style-price-base" :class="{negative: displayPrice < 0}">

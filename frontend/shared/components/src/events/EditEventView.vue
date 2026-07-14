@@ -80,13 +80,13 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Toegankelijk voor niet-leden') }}
+                    {{ $t('%ZdM') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Deelnemers hoeven geen actieve inschrijving te hebben om zich in te schrijven voor deze activiteit.') }}
+                    {{ $t('%ZdT') }}
                 </p>
                 <p v-if="allowNonMembers && organization?.meta.blockCreatingNewMembers" class="warning-box">
-                    {{ $t('Leden die nog nooit zijn aangemaakt kunnen zichzelf niet registeren. Je kan dit aanpassen via Instellingen > Experimenten.') }}
+                    {{ $t('%Zdf') }}
                 </p>
             </STListItem>
         </STList>
