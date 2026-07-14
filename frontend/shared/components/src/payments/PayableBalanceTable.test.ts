@@ -99,7 +99,7 @@ test('the breakdown stays additive when partially paid', () => {
 
     // Every row follows from the rows above it:
     // total excl. VAT (5,00) + VAT (1,05) = total incl. VAT (6,05), minus paid (1,21) = to pay (4,84)
-    expect(breakdownPrices()).toEqual(['\u20AC\u00A05', '\u20AC\u00A01,05', '\u20AC\u00A06,05', '\u20AC\u00A01,21', '\u20AC\u00A04,84']);
+    expect(breakdownPrices()).toEqual(['\u20AC\u00A05', '\u20AC\u00A01,05', '\u20AC\u00A06,05', '- \u20AC\u00A01,21', '\u20AC\u00A04,84']);
 });
 
 test('VAT-inclusive items in the same basket also show unit prices excluding VAT', () => {
