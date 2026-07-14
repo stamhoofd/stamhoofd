@@ -3,7 +3,7 @@ import { setup, test } from '../test-fixtures/base.js';
 setup();
 
 // other imports
-import type { Download, Page } from '@playwright/test';
+import type { Download, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
@@ -97,16 +97,40 @@ async function readWorkbook(download: Download, saveAsPath: string): Promise<XLS
     return XLSX.read(buffer, { cellDates: true });
 }
 
-function getSheetRows(workbook: XLSX.WorkBook, sheetName: string): (string | number | Date | undefined)[][] {
+type Row = (string | number | Date | undefined)[];
+
+function getSheetRows(workbook: XLSX.WorkBook, sheetName: string): Row[] {
     const sheet = workbook.Sheets[sheetName];
     expect(sheet, `Expected sheet ${sheetName} to exist`).toBeDefined();
-    return XLSX.utils.sheet_to_json<(string | number | Date | undefined)[]>(sheet, { header: 1 });
+    return XLSX.utils.sheet_to_json<Row>(sheet, { header: 1 });
 }
 
-function getCell(rows: (string | number | Date | undefined)[][], row: (string | number | Date | undefined)[], header: string): string | number | Date | undefined {
-    const index = rows[0].indexOf(header);
+/**
+ * A sheet starts with a category row above the header row, unless the category row is turned off
+ * (which is the case for the export without the settings UI).
+ */
+function getSheet(workbook: XLSX.WorkBook, sheetName: string, options?: { withCategoryRow?: boolean }): { categories: Row; headers: Row; data: Row[] } {
+    const rows = getSheetRows(workbook, sheetName);
+    const withCategoryRow = options?.withCategoryRow ?? true;
+
+    return {
+        categories: withCategoryRow ? rows[0] : [],
+        headers: rows[withCategoryRow ? 1 : 0],
+        data: rows.slice(withCategoryRow ? 2 : 1),
+    };
+}
+
+function getCell(headers: Row, row: Row, header: string): string | number | Date | undefined {
+    const index = headers.indexOf(header);
     expect(index, `Expected column ${header} to exist`).toBeGreaterThanOrEqual(0);
     return row[index];
+}
+
+/** The columns are grouped per category, so every category has its own 'select all' checkbox. */
+async function deselectAllColumns(exportView: Locator) {
+    for (const selectAll of await exportView.locator('label.st-list-item').filter({ hasText: 'Alles selecteren' }).all()) {
+        await selectAll.getByTestId('checkbox').click();
+    }
 }
 
 async function selectTab(page: Page, tabId: string) {
@@ -173,6 +197,11 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         await expect(exportView.getByRole('button', { name: 'Bestelling per lijn' })).toBeVisible();
         await expect(exportView.getByRole('button', { name: 'Totalen' })).toBeVisible();
 
+        // The columns are grouped per category (a heading per category), and explained with a description where needed
+        await expect(exportView.getByRole('heading', { name: 'Klant', exact: true, level: 2 })).toBeVisible();
+        await expect(exportView.getByRole('heading', { name: 'Artikel', exact: true, level: 2 })).toBeVisible();
+        await expect(exportView.getByText('De prijs voor één stuk, inclusief de gekozen opties, maar zonder kortingen.')).toBeVisible();
+
         // Export with the default settings
         let downloadPromise = adminPage.waitForEvent('download');
         await exportView.getByTestId('save-button').click();
@@ -185,41 +214,58 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         expect(workbook.SheetNames).toEqual(['Artikel per lijn', 'Bestelling per lijn', 'Totalen']);
 
         // Sheet with one row per ordered article
-        const orderLineRows = getSheetRows(workbook, 'Artikel per lijn');
-        expect(orderLineRows[0]).toEqual(expect.arrayContaining(['Bestelnummer', 'Besteldatum', 'Voornaam', 'Achternaam', 'E-mail', 'Aantal', 'Stukprijs', 'Artikel', 'Betaalmethode', 'Betaald', 'Status']));
-        expect(orderLineRows).toHaveLength(3); // header + 2 order lines
+        const orderLines = getSheet(workbook, 'Artikel per lijn');
+        expect(orderLines.headers).toEqual(expect.arrayContaining(['Bestelnummer', 'Besteldatum', 'Voornaam', 'Achternaam', 'E-mail', 'Aantal', 'Stukprijs', 'Artikel', 'Betaalmethode', 'Betaald', 'Status']));
+        expect(orderLines.data).toHaveLength(2); // 2 order lines
 
-        const janeLine = orderLineRows.find(row => row.includes('Jane'))!;
+        // The category row is written above the headers, and only above the first column of each category
+        expect(orderLines.categories[orderLines.headers.indexOf('Bestelnummer')]).toBe('Bestelling');
+        expect(orderLines.categories[orderLines.headers.indexOf('Voornaam')]).toBe('Klant');
+        expect(orderLines.categories[orderLines.headers.indexOf('Achternaam')]).toBeUndefined();
+        expect(orderLines.categories[orderLines.headers.indexOf('Artikel')]).toBe('Artikel');
+        expect(orderLines.categories[orderLines.headers.indexOf('Betaalmethode')]).toBe('Betaling en status');
+
+        // The empty columns of the customer (phone, birth day, ...) are removed, and the category is
+        // merged over the columns that are left
+        expect(orderLines.headers).not.toContain('GSM-nummer');
+        const customerMerge = (workbook.Sheets['Artikel per lijn']['!merges'] ?? []).find(merge => merge.s.r === 0 && merge.s.c === orderLines.headers.indexOf('Voornaam'));
+        expect(customerMerge, 'Expected the customer category to be merged').toBeDefined();
+        expect(customerMerge!.e.c).toBe(orderLines.headers.indexOf('E-mail'));
+
+        const janeLine = orderLines.data.find(row => row.includes('Jane'))!;
         expect(janeLine).toBeDefined();
-        expect(getCell(orderLineRows, janeLine, 'Artikel')).toBe('Product 1');
-        expect(getCell(orderLineRows, janeLine, 'Aantal')).toBe(2);
-        expect(getCell(orderLineRows, janeLine, 'Stukprijs')).toBe(15);
-        expect(getCell(orderLineRows, janeLine, 'E-mail')).toBe('jane@test.be');
+        expect(getCell(orderLines.headers, janeLine, 'Artikel')).toBe('Product 1');
+        expect(getCell(orderLines.headers, janeLine, 'Aantal')).toBe(2);
+        expect(getCell(orderLines.headers, janeLine, 'Stukprijs')).toBe(15);
+        expect(getCell(orderLines.headers, janeLine, 'E-mail')).toBe('jane@test.be');
 
         // Sheet with one row per order, with an amount column per product combination
-        const orderRows = getSheetRows(workbook, 'Bestelling per lijn');
-        expect(orderRows[0]).toEqual(expect.arrayContaining(['Bestelnummer', 'Voornaam', 'Achternaam', 'E-mail', 'Totaal', 'Betaalmethode', 'Betaald', 'Status', 'Product 1', 'Product 2']));
-        expect(orderRows).toHaveLength(3); // header + 2 orders
+        const orders = getSheet(workbook, 'Bestelling per lijn');
+        expect(orders.headers).toEqual(expect.arrayContaining(['Bestelnummer', 'Voornaam', 'Achternaam', 'E-mail', 'Totaal', 'Betaalmethode', 'Betaald', 'Status', 'Product 1', 'Product 2']));
+        expect(orders.data).toHaveLength(2); // 2 orders
+
+        // The amount per product combination is grouped in its own category
+        expect(orders.categories[orders.headers.indexOf('Product 1')]).toBe('Bestelde artikels');
 
         // Columns without any data are not included in the file
-        expect(orderRows[0]).not.toContain('GSM-nummer');
-        expect(orderRows[0]).not.toContain('Notities');
-        expect(orderRows[0]).not.toContain('Kortingscode');
+        expect(orders.headers).not.toContain('GSM-nummer');
+        expect(orders.headers).not.toContain('Notities');
+        expect(orders.headers).not.toContain('Kortingscode');
 
-        const janeOrder = orderRows.find(row => row.includes('Jane'))!;
+        const janeOrder = orders.data.find(row => row.includes('Jane'))!;
         expect(janeOrder).toBeDefined();
-        expect(getCell(orderRows, janeOrder, 'Totaal')).toBe(30);
-        expect(getCell(orderRows, janeOrder, 'Product 1')).toBe(2);
-        const bobOrder = orderRows.find(row => row.includes('Bob'))!;
+        expect(getCell(orders.headers, janeOrder, 'Totaal')).toBe(30);
+        expect(getCell(orders.headers, janeOrder, 'Product 1')).toBe(2);
+        const bobOrder = orders.data.find(row => row.includes('Bob'))!;
         expect(bobOrder).toBeDefined();
-        expect(getCell(orderRows, bobOrder, 'Product 2')).toBe(1);
+        expect(getCell(orders.headers, bobOrder, 'Product 2')).toBe(1);
 
         // Sheet with the totals per product
-        const totalRows = getSheetRows(workbook, 'Totalen');
-        expect(totalRows[0]).toEqual(expect.arrayContaining(['Artikel', 'Totaal']));
-        const productOneTotal = totalRows.find(row => row.includes('Product 1'))!;
+        const totals = getSheet(workbook, 'Totalen');
+        expect(totals.headers).toEqual(expect.arrayContaining(['Artikel', 'Totaal']));
+        const productOneTotal = totals.data.find(row => row.includes('Product 1'))!;
         expect(productOneTotal).toBeDefined();
-        expect(getCell(totalRows, productOneTotal, 'Totaal')).toBe(2);
+        expect(getCell(totals.headers, productOneTotal, 'Totaal')).toBe(2);
 
         // Export again, but exclude the 'Artikel per lijn' sheet and the last name column
         await table.toggleSelectAllRows();
@@ -227,11 +273,12 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         await expect(exportView.getByRole('heading', { name: 'Exporteren naar Excel' })).toBeVisible();
 
         // Deselect all columns of the first sheet ('Artikel per lijn' is selected by default)
-        await exportView.locator('label.st-list-item').filter({ hasText: 'Alles selecteren' }).getByTestId('checkbox').click();
+        await deselectAllColumns(exportView);
 
-        // Deselect the last name column on the orders sheet
+        // Deselect the last name column on the orders sheet, and turn off the category row
         await exportView.getByRole('button', { name: 'Bestelling per lijn' }).click();
         await exportView.locator('label.st-list-item').filter({ hasText: 'Achternaam' }).getByTestId('checkbox').click();
+        await exportView.locator('label.st-list-item').filter({ hasText: 'Rij toevoegen met categorienaam' }).getByTestId('checkbox').click();
 
         downloadPromise = adminPage.waitForEvent('download');
         await exportView.getByTestId('save-button').click();
@@ -239,9 +286,12 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         workbook = await readWorkbook(download, test.info().outputPath('export-filtered.xlsx'));
 
         expect(workbook.SheetNames).toEqual(['Bestelling per lijn', 'Totalen']);
-        const filteredRows = getSheetRows(workbook, 'Bestelling per lijn');
-        expect(filteredRows[0]).toContain('Voornaam');
-        expect(filteredRows[0]).not.toContain('Achternaam');
+
+        // Without the category row, the headers are on the first row
+        const filtered = getSheet(workbook, 'Bestelling per lijn', { withCategoryRow: false });
+        expect(filtered.headers).toContain('Voornaam');
+        expect(filtered.headers).not.toContain('Achternaam');
+        expect(filtered.headers).not.toContain('Klant');
 
         await adminContext.close();
     });
@@ -292,19 +342,23 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         const workbook = await readWorkbook(download, test.info().outputPath('export-tickets.xlsx'));
 
         expect(workbook.SheetNames).toContain('Tickets');
-        const ticketRows = getSheetRows(workbook, 'Tickets');
-        expect(ticketRows[0]).toEqual(expect.arrayContaining(['Bestelnummer', 'Artikel', 'Voornaam', 'Achternaam', 'E-mail', 'Nummer', 'Prijs', 'Geheime code', 'Link']));
-        expect(ticketRows).toHaveLength(3); // header + 2 tickets
+        const ticketSheet = getSheet(workbook, 'Tickets');
+        expect(ticketSheet.headers).toEqual(expect.arrayContaining(['Bestelnummer', 'Artikel', 'Voornaam', 'Achternaam', 'E-mail', 'Nummer', 'Prijs', 'Geheime code', 'Link']));
+        expect(ticketSheet.data).toHaveLength(2); // 2 tickets
+
+        // The secret and the link are grouped in a QR-code category
+        expect(ticketSheet.categories[ticketSheet.headers.indexOf('Geheime code')]).toBe('QR-code');
+        expect(ticketSheet.categories[ticketSheet.headers.indexOf('Artikel')]).toBe('Ticket');
 
         for (const ticket of tickets) {
-            const row = ticketRows.find(r => r.includes(ticket.secret))!;
+            const row = ticketSheet.data.find(r => r.includes(ticket.secret))!;
             expect(row, `Expected a row for ticket ${ticket.secret}`).toBeDefined();
-            expect(getCell(ticketRows, row, 'Artikel')).toBe('Product 1');
-            expect(getCell(ticketRows, row, 'Voornaam')).toBe('Ann');
-            expect(getCell(ticketRows, row, 'Achternaam')).toBe('Ticketholder');
-            expect(getCell(ticketRows, row, 'E-mail')).toBe('ann@test.be');
-            expect(getCell(ticketRows, row, 'Prijs')).toBe(15);
-            expect(getCell(ticketRows, row, 'Link')).toContain('/tickets/' + ticket.secret);
+            expect(getCell(ticketSheet.headers, row, 'Artikel')).toBe('Product 1');
+            expect(getCell(ticketSheet.headers, row, 'Voornaam')).toBe('Ann');
+            expect(getCell(ticketSheet.headers, row, 'Achternaam')).toBe('Ticketholder');
+            expect(getCell(ticketSheet.headers, row, 'E-mail')).toBe('ann@test.be');
+            expect(getCell(ticketSheet.headers, row, 'Prijs')).toBe(15);
+            expect(getCell(ticketSheet.headers, row, 'Link')).toContain('/tickets/' + ticket.secret);
         }
 
         await adminContext.close();
@@ -352,14 +406,15 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         // All sheets are included, except the tickets sheet
         expect(workbook.SheetNames).toEqual(['Artikel per lijn', 'Bestelling per lijn', 'Totalen']);
 
-        // All columns are included
-        const orderRows = getSheetRows(workbook, 'Bestelling per lijn');
-        expect(orderRows[0]).toEqual(expect.arrayContaining(['Bestelnummer', 'Voornaam', 'Achternaam', 'E-mail', 'Totaal', 'Betaalmethode', 'Betaald', 'Status', 'Product 1']));
-        expect(orderRows).toHaveLength(2); // header + 1 order
+        // All columns are included, without a category row: the headers are on the first row
+        const legacyOrders = getSheet(workbook, 'Bestelling per lijn', { withCategoryRow: false });
+        expect(legacyOrders.headers).toEqual(expect.arrayContaining(['Bestelnummer', 'Voornaam', 'Achternaam', 'E-mail', 'Totaal', 'Betaalmethode', 'Betaald', 'Status', 'Product 1']));
+        expect(legacyOrders.headers).not.toContain('Klant');
+        expect(legacyOrders.data).toHaveLength(1); // 1 order
 
-        const annOrder = orderRows.find(row => row.includes('Ann'))!;
+        const annOrder = legacyOrders.data.find(row => row.includes('Ann'))!;
         expect(annOrder).toBeDefined();
-        expect(getCell(orderRows, annOrder, 'Totaal')).toBe(15);
+        expect(getCell(legacyOrders.headers, annOrder, 'Totaal')).toBe(15);
 
         // The organization enables the feature flag via the checkbox in the Labs settings
         await selectTab(adminPage, 'settings');

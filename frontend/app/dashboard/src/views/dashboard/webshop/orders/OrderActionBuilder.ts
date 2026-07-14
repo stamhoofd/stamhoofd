@@ -339,6 +339,12 @@ export class OrderActionBuilder {
             // (same behaviour as before the settings UI existed, so without the tickets sheet)
             const { exportOrdersToExcel } = await import('./excel/exportOrdersToExcel');
             const workbook = getSelectableWorkbook(webshop, orders, organization, { includeTickets: false });
+
+            // Keep the file as it was before the categories existed: only the header row
+            for (const sheet of workbook.sheets) {
+                sheet.withCategoryRow = false;
+            }
+
             await exportOrdersToExcel({ webshop, orders, organization, filter: workbook.getFilter() });
             return;
         }

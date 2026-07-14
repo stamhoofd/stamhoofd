@@ -69,11 +69,8 @@ export class SheetJsWriterAdapter implements XlsxWriterAdapter {
         const headerRowCount = this.headerRows.get(state.name) ?? 1;
         const rows = state.rows;
 
-        // Remove columns without any data (only when there is no category header row, as
-        // removing columns would break the merged category cells)
-        if (headerRowCount === 1) {
-            this.deleteEmptyColumns(rows, headerRowCount);
-        }
+        // Remove columns without any data
+        this.deleteEmptyColumns(rows, headerRowCount);
 
         const worksheet = XLSX.utils.aoa_to_sheet(rows.map(row => row.map(cell => cell.value)), { cellStyles: true, cellDates: true });
 
@@ -132,6 +129,11 @@ export class SheetJsWriterAdapter implements XlsxWriterAdapter {
             return;
         }
 
+        // Keep track of the category of every column, so the merged cells of the category row
+        // can be rebuilt for the columns that are left
+        const categoryRow = headerRowCount > 1 ? rows[0] : null;
+        const categoryPerColumn = categoryRow ? this.getCategoryPerColumn(categoryRow) : null;
+
         for (let columnIndex = rows[0].length - 1; columnIndex >= 0; columnIndex--) {
             let empty = true;
 
@@ -167,7 +169,58 @@ export class SheetJsWriterAdapter implements XlsxWriterAdapter {
                 for (const row of rows) {
                     row.splice(columnIndex, 1);
                 }
+                categoryPerColumn?.splice(columnIndex, 1);
             }
+        }
+
+        if (categoryRow && categoryPerColumn) {
+            this.rebuildCategoryRow(categoryRow, categoryPerColumn);
+        }
+    }
+
+    /**
+     * The category row only contains the name of a category above its first column, merged over all
+     * the columns of that category. Map every column to the cell that starts its category.
+     */
+    private getCategoryPerColumn(categoryRow: CellValue[]): (CellValue | null)[] {
+        let category: CellValue | null = null;
+
+        return categoryRow.map((cell) => {
+            if (cell.merge) {
+                category = cell;
+            }
+            return category;
+        });
+    }
+
+    /**
+     * Move the name of every category back to its first remaining column, and merge it over the
+     * columns of that category that were not deleted.
+     */
+    private rebuildCategoryRow(categoryRow: CellValue[], categoryPerColumn: (CellValue | null)[]) {
+        let columnIndex = 0;
+
+        while (columnIndex < categoryPerColumn.length) {
+            const category = categoryPerColumn[columnIndex];
+
+            let width = 1;
+            while (columnIndex + width < categoryPerColumn.length && categoryPerColumn[columnIndex + width] === category) {
+                width++;
+            }
+
+            for (let index = 0; index < width; index++) {
+                const cell = categoryRow[columnIndex + index];
+                delete cell.merge;
+
+                if (index === 0 && category) {
+                    cell.value = category.value;
+                    cell.merge = { width, height: 1 };
+                } else {
+                    cell.value = null;
+                }
+            }
+
+            columnIndex += width;
         }
     }
 }

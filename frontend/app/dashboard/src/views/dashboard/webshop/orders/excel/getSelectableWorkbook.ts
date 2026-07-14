@@ -21,6 +21,7 @@ export function getSelectableWorkbook(webshop: Webshop, orders: PrivateOrderWith
                         id: group.id,
                         name: group.name,
                         ...(group.description !== undefined ? { description: group.description } : {}),
+                        ...(group.category !== undefined ? { category: group.category } : {}),
                         ...(group.enabled !== undefined ? { enabled: group.enabled } : {}),
                     });
                 }),
