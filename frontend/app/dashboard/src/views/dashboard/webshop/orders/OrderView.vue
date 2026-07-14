@@ -2,8 +2,8 @@
     <div class="st-view order-view" data-testid="order-view">
         <STNavigationBar :title="$t(`%x3`) + order.number">
             <template #right>
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" v-tooltip="$t('%VO')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" v-tooltip="$t('%VP')" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('%VO')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('%VP')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
@@ -256,6 +256,15 @@
                     </p>
                 </STListItem>
 
+                <STListItem v-if="webshop && order.consumerLanguage !== webshop.meta.defaultLanguage">
+                    <h3 class="style-definition-label">
+                        {{ $t('Taal') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ LanguageHelper.getName(order.consumerLanguage) }}
+                    </p>
+                </STListItem>
+
                 <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id">
                     <h3 class="style-definition-label">
                         {{ a.field.name }}
@@ -331,7 +340,7 @@ import type { TableActionSelection } from '@stamhoofd/components/tables/classes/
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { AccessRight, Gender, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, Gender, LanguageHelper, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
