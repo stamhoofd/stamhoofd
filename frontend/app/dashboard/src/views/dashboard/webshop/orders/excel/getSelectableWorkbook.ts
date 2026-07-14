@@ -16,6 +16,7 @@ export function getSelectableWorkbook(webshop: Webshop, orders: PrivateOrderWith
                 id: sheet.id,
                 name: sheet.name,
                 description: sheet.description,
+                warning: sheet.warning,
                 columns: sheet.groups.map((group) => {
                     return new SelectableColumn({
                         id: group.id,

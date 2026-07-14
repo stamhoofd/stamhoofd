@@ -27,6 +27,10 @@ export type OrdersExcelSheet<R> = {
     id: string;
     name: string;
     description?: string;
+    /**
+     * Shown as a warning in the export settings, above the columns.
+     */
+    warning?: string;
     transform: (orders: PrivateOrderWithTickets[]) => R[];
     groups: OrdersExcelColumnGroup<R>[];
 };
@@ -731,6 +735,7 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): OrdersEx
         id: 'tickets',
         name: $t(`Tickets`),
         description: $t(`Bevat een rij per ticket, inclusief de geheime code waarmee de QR-code op het ticket kan aangemaakt worden.`),
+        warning: $t(`Maak je zelf QR-codes op basis van deze export? Zorg er dan voor dat elke QR-code exact de link uit de kolom Link bevat. Een QR-code met een andere inhoud, bijvoorbeeld enkel de geheime code, kan niet gescand worden.`),
         transform: orders => orders.flatMap(order =>
             order.tickets
                 .filter(ticket => !ticket.deletedAt)
@@ -770,7 +775,7 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): OrdersEx
             singleColumnGroup<TicketRow>({
                 id: 'indexText',
                 name: $t(`Nummer`),
-                description: $t(`Het volgnummer of de naam die op het ticket staat`),
+                description: $t(`Het volgnummer of de naam die op het ticket staat.`),
                 category: columnCategories.ticket,
                 getValue: row => ({ value: row.ticket.getIndexText() ?? '' }),
             }),
@@ -847,14 +852,14 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): OrdersEx
             singleColumnGroup<TicketRow>({
                 id: 'secret',
                 name: $t(`Geheime code`),
-                description: $t(`Unieke code van het ticket, kan gebruikt worden om zelf tickets met QR-code aan te maken`),
+                description: $t(`De unieke code van het ticket. Zet deze code niet in een QR-code: gebruik daarvoor de volledige link.`),
                 category: columnCategories.qrCode,
                 getValue: row => ({ value: row.ticket.secret }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'url',
                 name: $t(`Link`),
-                description: $t(`Link waarop het ticket kan geopend worden. Dit is ook de inhoud van de QR-code op een ticket.`),
+                description: $t(`De link waarop het ticket kan geopend worden. Maak je zelf tickets met een QR-code? Dan moet die QR-code exact deze link bevatten, anders kan hij niet gescand worden.`),
                 category: columnCategories.qrCode,
                 getValue: row => ({ value: 'https://' + webshop.getUrl(organization) + '/tickets/' + row.ticket.secret }),
             }),

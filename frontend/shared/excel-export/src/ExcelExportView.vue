@@ -16,6 +16,10 @@
             {{ visibleSheet.description }}
         </p>
 
+        <p v-if="visibleSheet.warning" class="warning-box">
+            {{ visibleSheet.warning }}
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-if="visibleSheet.withCategoryRow || visibleSheet.columns.find(c => c.category)">

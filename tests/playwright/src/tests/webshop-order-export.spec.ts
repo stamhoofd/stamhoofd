@@ -336,6 +336,10 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         const exportView = adminPage.getByTestId('save-view');
         await expect(exportView.getByRole('button', { name: 'Tickets' })).toBeVisible();
 
+        // Warn that a self made QR-code has to contain the exact link of the export, or it cannot be scanned
+        await exportView.getByRole('button', { name: 'Tickets' }).click();
+        await expect(exportView.locator('.warning-box')).toContainText('exact de link uit de kolom Link');
+
         const downloadPromise = adminPage.waitForEvent('download');
         await exportView.getByTestId('save-button').click();
         const download = await downloadPromise;
