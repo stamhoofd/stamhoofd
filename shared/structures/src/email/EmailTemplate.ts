@@ -1,6 +1,8 @@
-import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import type { Replacement } from '../endpoints/EmailRequest.js';
+import { EmailContent, getEmailContentForLanguage } from './EmailContent.js';
 import { EmailRecipientFilterType } from './EmailRecipientFilterType.js';
 import { ExampleReplacements } from './exampleReplacements.js';
 import type { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
@@ -178,6 +180,13 @@ export class EmailTemplate extends AutoEncoder {
     @field({ decoder: AnyDecoder })
     json = {};
 
+    /**
+     * Full content overrides per language. The default content (subject/html/text/json)
+     * is 'untranslated' and is used for all languages without an override.
+     */
+    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailContent), ...NextVersion })
+    translations: Map<Language, EmailContent> = new Map();
+
     @field({ decoder: StringDecoder, nullable: true })
     groupId: string | null = null;
 
@@ -189,6 +198,19 @@ export class EmailTemplate extends AutoEncoder {
 
     @field({ decoder: DateDecoder, optional: true })
     updatedAt: Date = new Date();
+
+    get defaultContent(): EmailContent {
+        return EmailContent.create({
+            subject: this.subject,
+            html: this.html,
+            text: this.text,
+            json: this.json,
+        });
+    }
+
+    getContentForLanguage(language: Language | null): EmailContent {
+        return getEmailContentForLanguage(this.defaultContent, this.translations, language);
+    }
 
     static getDefaultForRecipient(type: EmailRecipientFilterType): EmailTemplateType | null {
         if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents || type === EmailRecipientFilterType.RegistrationMembers || type === EmailRecipientFilterType.RegistrationParents) {

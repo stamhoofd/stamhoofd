@@ -45,11 +45,14 @@
                         <span v-else class="style-placeholder-skeleton" />
                     </template>
                 </STListItem>
-                <STListItem class="no-padding" element-name="label">
+                <STListItem class="no-padding right-stack" element-name="label">
                     <div class="list-input-box">
                         <span>{{ $t('%aO') }}:</span>
                         <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
                     </div>
+                    <template #right>
+                        <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="senders.length > 0" class="no-padding" element-name="label">
@@ -113,13 +116,14 @@
 
 <script setup lang="ts">
 import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { encodeObject, PatchableArray } from '@simonbackx/simple-encoding';
+import { encodeObject, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { EmailRecipientSubfilter, File } from '@stamhoofd/structures';
+import type { EmailContent, EmailRecipientSubfilter, File } from '@stamhoofd/structures';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailStatus, EmailTemplate, PermissionsResourceType } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
 import { Formatter, sleep, throttle } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -127,7 +131,6 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import EditorView from '../editor/EditorView.vue';
-import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { GlobalEventBus } from '../EventBus';
@@ -144,6 +147,8 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 
 import ProgressRing from '../icons/ProgressRing.vue';
+import EmailLanguageButton from './EmailLanguageButton.vue';
+import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -243,6 +248,12 @@ const patchedEmail = computed(() => {
 function addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Email>>) {
     patch.value = patch.value ? patch.value.patch(Email.patch(newPatch)) : Email.patch(newPatch);
 }
+
+const contentLanguage = useEmailContentLanguage({
+    editor: () => editor.value,
+    patched: () => patchedEmail.value ?? Email.create({}),
+    addPatch,
+});
 
 const recipientFilter = computed(() => {
     const filter = EmailRecipientFilter.create({});
@@ -355,12 +366,7 @@ async function doDelete() {
     }
 }
 
-const subject = computed({
-    get: () => patchedEmail.value?.subject || '',
-    set: (subject) => {
-        addPatch({ subject });
-    },
-});
+const subject = contentLanguage.subject;
 
 const senderId = computed({
     get: () => email.value?.senderId ?? null,
@@ -398,21 +404,6 @@ watch(patch, (newValue, oldValue) => {
     doThrottledPatch();
 }, {});
 
-watch(editor, (e) => {
-    if (!e) {
-        return;
-    }
-    const handler = () => {
-        // save json
-        addPatch({ json: e.getJSON() });
-    };
-    e.on('update', handler);
-
-    return () => {
-        e.off('update', handler);
-    };
-}, { deep: false });
-
 onMounted(() => {
     // Create the email
     createEmail().catch((e) => {
@@ -435,11 +426,7 @@ async function createEmail() {
         email.value = props.editEmail;
         creatingEmail.value = false;
 
-        await nextTick();
-
-        if (props.editEmail.json) {
-            editor.value?.commands.setContent(props.editEmail.json);
-        }
+        // The editor content is loaded by useEmailContentLanguage once the editor is available
         return;
     }
 
@@ -463,11 +450,7 @@ async function createEmail() {
         email.value = response.data;
         creatingEmail.value = false;
 
-        await nextTick();
-
-        if (response.data.json) {
-            editor.value?.commands.setContent(response.data.json);
-        }
+        // The editor content is loaded by useEmailContentLanguage once the editor is available
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
         return;
@@ -500,11 +483,11 @@ async function patchEmail(async = false) {
     let _savingPatch = patch.value;
 
     try {
-        const { text, html } = await getHTML();
-        _savingPatch = _savingPatch.patch({
-            text,
-            html,
-        });
+        const derived = await contentLanguage.getDerivedContent();
+        if (derived) {
+            // Merge the derived html/text into the language that is currently in the editor
+            _savingPatch = contentLanguage.patchDerivedContent(_savingPatch, derived);
+        }
     } catch (e) {
         console.error('failed to set text and html', e);
     }
@@ -580,27 +563,19 @@ async function manageEmails() {
     });
 }
 
-async function getHTML() {
-    const e = editor.value;
-    if (!e) {
-        // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
-        return {
-            text: '',
-            html: '',
-            JSON: {},
-        };
-    }
-
-    const base: string = e.getHTML();
-    return {
-        ...await EmailStyler.format(base, subject.value),
-        json: e.getJSON(),
-    };
-}
-
 const hasMoreSettings = computed(() => {
     return willSend.value && !!patchedEmail.value?.recipientFilter.canShowInMemberPortal;
 });
+
+async function confirmStaleTranslations(): Promise<boolean> {
+    if (!initialEmail || !patchedEmail.value) {
+        return true;
+    }
+    return await confirmStaleEmailContentLanguages(initialEmail, patchedEmail.value, {
+        ignoreText: $t('Toch verzenden'),
+        switchTo: language => contentLanguage.switchTo(language),
+    });
+}
 
 async function send() {
     if (sending.value) {
@@ -628,8 +603,14 @@ async function send() {
         return;
     }
 
-    if (subject.value.trim().length === 0) {
+    if ((patchedEmail.value?.subject ?? '').trim().length === 0) {
+        // The default (untranslated) subject is required, translations are optional
         Toast.error($t(`%1Ft`)).show();
+        return;
+    }
+
+    // Check before the (possible) hand-off to EmailSendSettingsView, which sends without this check
+    if (!await confirmStaleTranslations()) {
         return;
     }
 
@@ -680,17 +661,19 @@ async function send() {
     sending.value = true;
 
     try {
-        const { text, html } = await getHTML();
+        let body = Email.patch({
+            ...patch.value,
+            status: EmailStatus.Sending,
+        });
+        const derived = await contentLanguage.getDerivedContent();
+        if (derived) {
+            // Merge the derived html/text/json into the language that is currently in the editor
+            body = contentLanguage.patchDerivedContent(body, derived);
+        }
         const response = await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/email/' + email.value.id,
-            body: Email.patch({
-                ...patch.value,
-                status: EmailStatus.Sending,
-                text,
-                html,
-                json: editor.value?.getJSON(),
-            }),
+            body,
             decoder: EmailPreview as Decoder<EmailPreview>,
             owner,
             shouldRetry: false,
@@ -832,8 +815,10 @@ async function openTemplates() {
         return;
     }
 
-    const current = await getHTML();
-    const hasExistingContent = (current).text.length > 2 || subject.value.length > 0;
+    // Make sure the editor content is stored in the patch, so we can read the content of all languages
+    await contentLanguage.flush();
+    const defaultContent = contentLanguage.contentFor(null);
+    const hasExistingContent = defaultContent.text.length > 2 || defaultContent.subject.length > 0 || contentLanguage.languages.value.length > 0;
 
     await present({
         components: [
@@ -849,18 +834,36 @@ async function openTemplates() {
                             return false;
                         }
                     }
-                    // todo
-                    // set json and subject
+
+                    // Load the template in all languages: replace the existing translations with the ones of the template
+                    const translations: PatchMap<Language, EmailContent | null> = new PatchMap();
+                    for (const language of patchedEmail.value?.translations.keys() ?? []) {
+                        translations.set(language, null);
+                    }
+                    for (const [language, content] of template.translations) {
+                        translations.set(language, content.clone());
+                    }
+                    addPatch({ translations });
+
+                    // Set json and subject of the default content
+                    contentLanguage.currentLanguage.value = null;
                     editor.value?.commands.setContent(template.json);
                     subject.value = template.subject;
+
+                    // The loaded template is the new baseline to detect (partially) changed translations
+                    await nextTick();
+                    initialEmail = patchedEmail.value?.clone() ?? initialEmail;
 
                     return true;
                 },
                 createOption: hasExistingContent
                     ? EmailTemplate.create({
                             id: '',
-                            ...current,
-                            subject: subject.value,
+                            subject: defaultContent.subject,
+                            html: defaultContent.html,
+                            text: defaultContent.text,
+                            json: defaultContent.json,
+                            translations: new Map([...(patchedEmail.value?.translations ?? new Map<Language, EmailContent>())].map(([language, content]) => [language, content.clone()])),
                             type,
                         })
                     : null,
@@ -889,12 +892,15 @@ const shouldNavigateAway = async () => {
         if (!initialEmail) {
             return true;
         }
+        // Compare against the content of the language that is currently in the editor
+        const initialContent = initialEmail.getContentForLanguage(contentLanguage.currentLanguage.value);
+
         // encode object is added for reliable sorting the keys to compare
         const json = JSON.stringify(encodeObject(editor.value?.getJSON() ?? {}, { version: 0 }));
-        if (initialEmail.subject === subject.value && JSON.stringify(encodeObject(initialEmail.json, { version: 0 })) === json && initialEmail.attachments.length === patchedEmail.value?.attachments.length) {
+        if (initialContent.subject === subject.value && JSON.stringify(encodeObject(initialContent.json, { version: 0 })) === json && initialEmail.attachments.length === patchedEmail.value?.attachments.length) {
             return true;
         }
-        console.log('has changes because of json/subject', json, initialEmail.json);
+        console.log('has changes because of json/subject', json, initialContent.json);
     }
 
     if (autoSaveEnabled.value) {

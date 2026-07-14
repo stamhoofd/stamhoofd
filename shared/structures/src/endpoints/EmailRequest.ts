@@ -1,4 +1,5 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, EnumDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { File } from '../files/File.js';
@@ -108,6 +109,12 @@ export class Recipient extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 80 })
     userId: string | null = null;
 
+    /**
+     * Preferred language of this recipient, used to select the email content translation.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    language: Language | null = null;
+
     /// For reference and filtering
     /**
      * @deprecated
@@ -155,6 +162,7 @@ export class Recipient extends AutoEncoder {
             }
         }
         this.userId = this.userId ?? recipient.userId;
+        this.language = this.language ?? recipient.language;
         this.types = Formatter.uniqueArray(this.types.concat(recipient.types));
     }
 

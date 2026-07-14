@@ -1,7 +1,9 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
+import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailAttachment, Recipient, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
+import { EmailContent, getEmailContentForLanguage } from './EmailContent.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { TinyMember } from '../members/Member.js';
@@ -130,6 +132,13 @@ export class Email extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     html: string | null = null;
 
+    /**
+     * Full content overrides per language. The default content (subject/html/text/json)
+     * is 'untranslated' and is used for all recipients without a matching override.
+     */
+    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailContent), ...NextVersion })
+    translations: Map<Language, EmailContent> = new Map();
+
     @field({ decoder: StringDecoder, nullable: true })
     fromAddress: string | null = null;
 
@@ -195,17 +204,32 @@ export class Email extends AutoEncoder {
         return null;
     }
 
+    get defaultContent(): EmailContent {
+        return EmailContent.create({
+            subject: this.subject ?? '',
+            html: this.html ?? '',
+            text: this.text ?? '',
+            json: this.json,
+        });
+    }
+
+    getContentForLanguage(language: Language | null): EmailContent {
+        return getEmailContentForLanguage(this.defaultContent, this.translations, language);
+    }
+
     getSubjectFor(recipient: EmailRecipient | null) {
-        return replaceEmailText(this.subject || '', recipient?.replacements || []);
+        const content = this.getContentForLanguage(recipient?.language ?? null);
+        return replaceEmailText(content.subject, recipient?.replacements || []);
     }
 
     getSnippetFor(recipient: EmailRecipient | null) {
-        if (!this.text) {
+        const content = this.getContentForLanguage(recipient?.language ?? null);
+        if (!content.text) {
             return '';
         }
 
-        // Trim starting/ending whitespaces and newline from this.text
-        let stripped = this.text.trim();
+        // Trim starting/ending whitespaces and newline from the text
+        let stripped = content.text.trim();
 
         // Remove duplicate newlines
         stripped = stripped.replace(/\n+/g, '\n');
@@ -217,8 +241,8 @@ export class Email extends AutoEncoder {
 
         const stripStrings = ['{{greeting}}', 'Dag {{firstName}},', 'Beste,', 'Beste {{firstName}},', 'Geachte,', 'Hallo,'];
 
-        if (this.subject) {
-            stripStrings.push(this.subject);
+        if (content.subject) {
+            stripStrings.push(content.subject);
         }
 
         for (const str of stripStrings) {
@@ -290,6 +314,12 @@ export class EmailRecipient extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     userId: string | null = null;
+
+    /**
+     * Preferred language of this recipient, used to select the email content translation.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    language: Language | null = null;
 
     @field({ decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = [];

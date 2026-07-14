@@ -104,6 +104,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
@@ -112,7 +113,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { usePlatform } from '#hooks/usePlatform.ts';
-
 
 const props = withDefaults(
     defineProps<{
@@ -215,16 +215,24 @@ const editableList = computed(() => {
                     defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === orgId) ?? defaultTemplate ?? null;
                 }
 
-                base.push(
-                    EmailTemplate.create({
-                        ...defaultTemplate,
-                        id: '', // clear
-                        organizationId: organization.value?.id ?? null,
-                        groupId: group?.id ?? null,
-                        webshopId: props.webshopId,
-                        type,
-                    }),
-                );
+                // Seed the new override with the default template's content in the current language
+                // only, and deliberately without its translations map: most users won't keep extra
+                // translations up to date, and a stale translation is riskier than none. They can add
+                // translations explicitly in the editor.
+                const seeded = EmailTemplate.create({});
+                if (defaultTemplate) {
+                    const content = defaultTemplate.getContentForLanguage(I18nController.shared.language);
+                    seeded.subject = content.subject;
+                    seeded.html = content.html;
+                    seeded.text = content.text;
+                    seeded.json = content.json;
+                }
+                seeded.id = ''; // clear
+                seeded.organizationId = organization.value?.id ?? null;
+                seeded.groupId = group?.id ?? null;
+                seeded.webshopId = props.webshopId;
+                seeded.type = type;
+                base.push(seeded);
             }
         }
     }
@@ -277,8 +285,7 @@ async function editEmail(emailTemplate: EmailTemplate) {
                         patch.id = emailTemplate.id;
                         patch.updatedAt = new Date();
                         addPatch(patch);
-                    }
-                    else {
+                    } else {
                         // Create
                         const toCreate = emailTemplate.patch(patch);
                         toCreate.id = uuidv4();
@@ -339,8 +346,7 @@ async function loadTemplates() {
         });
         templates.value = response.data;
         loading.value = false;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -352,8 +358,7 @@ async function doSelectItem(item: EmailTemplate) {
                 await pop({ force: true });
             }
         }
-    }
-    else {
+    } else {
         await editEmail(item);
     }
 }
@@ -382,8 +387,7 @@ async function saveWithoutDismiss() {
         saving.value = false;
 
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

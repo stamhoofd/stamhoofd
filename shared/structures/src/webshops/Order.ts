@@ -225,7 +225,7 @@ export class Order extends AutoEncoder {
         const allFree = this.data.cart.items.every(i => i.getPriceWithoutDiscounts() === 0);
 
         if (allFree) {
-            let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`;
+            let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('%Sc')}</th><th>${$t('%M4')}</th></tr></thead><tbody>`;
 
             for (const item of this.data.cart.items) {
                 str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? '<p style="white-space: pre-wrap;">' + Formatter.escapeHtml(item.description) + '</p>' : ''}</td><td>${Formatter.escapeHtml(item.formattedAmount ?? '1')}</td></tr>`;
@@ -233,7 +233,7 @@ export class Order extends AutoEncoder {
             return str + '</tbody></table>';
         }
 
-        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`;
+        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('%Sc')}</th><th>${$t('%M4')}</th></tr></thead><tbody>`;
 
         for (const item of this.data.cart.items) {
             str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? '<p style="white-space: pre-wrap;">' + Formatter.escapeHtml(item.description) + '</p>' : ''}${'<p style="white-space: pre-wrap;">' + Formatter.escapeHtml(item.getFormattedPriceWithDiscount() || item.getFormattedPriceWithoutDiscount()) + '</p>'}</td><td>${Formatter.escapeHtml(item.formattedAmount ?? '1')}</td></tr>`;
@@ -351,6 +351,7 @@ export class Order extends AutoEncoder {
             lastName: customer.lastName,
             email,
             replacements: this.getRecipientReplacements(organization, webshop),
+            language: this.consumerLanguage ?? webshop.meta.defaultLanguage,
         });
     }
 
@@ -363,6 +364,7 @@ export class Order extends AutoEncoder {
             lastName: order.data.customer.lastName,
             email,
             replacements: this.getRecipientReplacements(organization, webshop, payment ? [payment] : order.payments),
+            language: this.consumerLanguage ?? webshop.meta.defaultLanguage,
         });
     }
 

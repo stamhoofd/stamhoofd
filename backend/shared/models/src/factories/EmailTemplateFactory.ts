@@ -2,8 +2,9 @@ import { Factory } from '@simonbackx/simple-database';
 
 import { EmailTemplate } from '../models/index.js';
 import type { Organization } from '../models/Organization.js';
-import type { EmailTemplateType} from '@stamhoofd/structures';
+import type { EmailContent, EmailTemplateType } from '@stamhoofd/structures';
 import { EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
 
 class Options {
     organization?: Organization;
@@ -14,6 +15,7 @@ class Options {
     subject?: string;
     html?: string;
     text?: string;
+    translations?: Map<Language, EmailContent>;
 }
 
 export class EmailTemplateFactory extends Factory<Options, EmailTemplate> {
@@ -40,6 +42,10 @@ export class EmailTemplateFactory extends Factory<Options, EmailTemplate> {
                 template.html += `<p>${replacement.token}: {{${replacement.token}}}</p>`;
                 template.text += `${replacement.token}: {{${replacement.token}}}\n`;
             }
+        }
+
+        if (this.options.translations) {
+            template.translations = this.options.translations;
         }
 
         await template.save();

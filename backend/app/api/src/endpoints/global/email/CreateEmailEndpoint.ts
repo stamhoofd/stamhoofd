@@ -83,6 +83,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.html = request.body.html;
         model.text = request.body.text;
         model.json = request.body.json;
+        model.translations = request.body.translations;
         model.status = request.body.status;
         model.attachments = request.body.attachments;
         model.sendAsEmail = request.body.sendAsEmail ?? true;

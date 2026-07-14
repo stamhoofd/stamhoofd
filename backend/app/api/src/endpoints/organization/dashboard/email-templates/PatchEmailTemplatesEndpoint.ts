@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { EmailTemplate, Group, Platform, Webshop } from '@stamhoofd/models';
@@ -51,6 +51,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.subject = patch.subject ?? template.subject;
             template.text = patch.text ?? template.text;
             template.json = patch.json ?? template.json;
+            template.translations = patchObject(template.translations, patch.translations);
 
             await template.save();
 
@@ -94,6 +95,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.subject = struct.subject;
             template.text = struct.text;
             template.json = struct.json;
+            template.translations = struct.translations;
 
             template.type = struct.type;
 

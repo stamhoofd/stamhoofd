@@ -1,8 +1,10 @@
 import { column } from '@simonbackx/simple-database';
-import { AnyDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { EmailTemplateType } from '@stamhoofd/structures';
-import { EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
+import { EmailContent, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -43,6 +45,10 @@ export class EmailTemplate extends QueryableModel {
 
     @column({ type: 'string' })
     text: string;
+
+    /** Full content overrides per language. The default content (subject/html/text/json) is used for all languages without an override */
+    @column({ type: 'json', decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>) })
+    translations: Map<Language, EmailContent> = new Map();
 
     @column({
         type: 'datetime', beforeSave() {
