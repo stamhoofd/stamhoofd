@@ -7,6 +7,19 @@ import type { CaddyRouteOptions } from '../runtime/manifest-store.js';
 import { listActiveRouteManifests, sharedDir } from '../runtime/manifest-store.js';
 import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, caddySetupHttpPort, caddySetupHttpsPort, localIpv4Host, localhostPort } from './shared-service-config.js';
 
+/**
+ * By default Caddy closes active streaming requests (WebSockets) immediately
+ * whenever its config is reloaded. In the CLI dev environment we reload Caddy
+ * often (starting an instance, restarting services, the `--watch` flag), which
+ * would tear down long-lived WebSockets such as the Vite HMR channel on every
+ * reload. Setting `stream_close_delay` on the reverse_proxy keeps those streams
+ * open across reloads: a non-zero value tells Caddy not to close streaming
+ * requests when the config is unloaded, but to keep them open until the delay
+ * elapses. We use a very large delay so, for the lifetime of a dev session,
+ * WebSockets effectively survive reloads.
+ */
+const streamCloseDelay = '24h';
+
 export type CaddyRoute = {
     group?: string;
     match: (
@@ -16,6 +29,7 @@ export type CaddyRoute = {
         {
             handler: 'reverse_proxy';
             upstreams: Array<{ dial: string }>;
+            stream_close_delay?: string;
             headers?: {
                 request?: {
                     add?: Record<string, string[]>;
@@ -103,7 +117,7 @@ async function writeReadableConfig(configPath: string, content: string): Promise
 function route(hosts: string[], port: number, proxyHost: string): CaddyRoute {
     return {
         match: [{ host: hosts }],
-        handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: `${proxyHost}:${port}` }] }],
+        handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: `${proxyHost}:${port}` }], stream_close_delay: streamCloseDelay }],
     };
 }
 

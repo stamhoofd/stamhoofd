@@ -45,6 +45,20 @@ describe('Caddy config', () => {
         expect(subjects).toContain('*.files.stamhoofd');
     });
 
+    it('keeps WebSockets alive across reloads by setting stream_close_delay on every reverse_proxy', async () => {
+        const config = await writeCaddyConfig(context(rootDir));
+        const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
+
+        const reverseProxies = caddyConfig.apps.http.servers.stamhoofd.routes
+            .flatMap((route: any) => route.handle)
+            .filter((handle: any) => handle.handler === 'reverse_proxy');
+
+        expect(reverseProxies.length).toBeGreaterThan(0);
+        for (const proxy of reverseProxies) {
+            expect(proxy.stream_close_delay).toBe('24h');
+        }
+    });
+
     it('can bind the admin API to the container interface', async () => {
         const config = await writeCaddyConfig(context(rootDir), { adminListenHost: '0.0.0.0' });
         const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
