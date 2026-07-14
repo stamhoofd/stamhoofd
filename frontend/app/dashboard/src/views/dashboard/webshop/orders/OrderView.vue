@@ -258,7 +258,7 @@
 
                 <STListItem v-if="webshop && order.consumerLanguage !== webshop.meta.defaultLanguage">
                     <h3 class="style-definition-label">
-                        {{ $t('Taal') }}
+                        {{ $t('%14T') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ LanguageHelper.getName(order.consumerLanguage) }}
