@@ -91,6 +91,7 @@ describe('Order confirmation email language', () => {
             subject: 'Standaard onderwerp',
             html: `<p>Standaard inhoud ${tables}</p>`,
             text: 'Standaard inhoud',
+            language: Language.Dutch,
             translations: new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet français', html: `<p>Contenu français ${tables}</p>`, text: 'Contenu français' })],
             ]),
@@ -137,7 +138,7 @@ describe('Order confirmation email language', () => {
         expect(frenchEmail.html).not.toContain(dutch.amountColumn);
         expect(frenchEmail.html).not.toContain(dutch.orderNumberTitle);
 
-        // Dutch order → no Dutch translation exists, so the default content is used
+        // Dutch order → Dutch is the default language, so the default content is used
         const dutchEmail = await placeFreeOrderInLanguage('nl');
         expect(dutchEmail.subject).toBe('Standaard onderwerp');
         expect(dutchEmail.html).toContain('Standaard inhoud');

@@ -1,6 +1,8 @@
 import { column } from '@simonbackx/simple-database';
-import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
+import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, Replacement, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
 import { EmailAttachment, EmailContent, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LanguageHelper, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';
+import type { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import type { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
@@ -13,7 +15,7 @@ import { Email as EmailClass } from '@stamhoofd/email';
 import type { QueueHandlerOptions } from '@stamhoofd/queues';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCount, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, runWithRecipientLocale, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailTemplate } from './EmailTemplate.js';
 import { Organization } from './Organization.js';
@@ -107,9 +109,13 @@ export class Email extends QueryableModel {
     @column({ type: 'string', nullable: true })
     text: string | null = null;
 
-    /** Full content overrides per language. The default content (subject/html/text/json) is used for all recipients without a matching override */
+    /** Full content overrides per language. The default content (subject/html/text/json) is used for all recipients without a matching override. Never contains `language` itself */
     @column({ type: 'json', decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>) })
     translations: Map<Language, EmailContent> = new Map();
+
+    /** The language of the default content (subject/html/text/json); null when the content is untranslated */
+    @column({ type: 'string', nullable: true })
+    language: Language | null = null;
 
     @column({ type: 'string', nullable: true })
     fromAddress: string | null = null;
@@ -464,6 +470,7 @@ export class Email extends QueryableModel {
         this.subject = defaultTemplate.subject;
         this.json = defaultTemplate.json;
         this.translations = new Map([...defaultTemplate.translations.entries()].map(([language, content]) => [language, content.clone()]));
+        this.language = defaultTemplate.language;
 
         return true;
     }
@@ -1411,33 +1418,102 @@ export class Email extends QueryableModel {
         return EmailStruct.create(this);
     }
 
-    async getPreviewStructure() {
+    /**
+     * The languages an example recipient should be generated for: every language the platform
+     * supports (the composer can add translations for those), plus every language the email
+     * already has content for.
+     *
+     * Languages the I18n would correct to a different language (no longer supported for this
+     * country) are excluded: their example values would be generated in the corrected language,
+     * which is more misleading than falling back to the single example recipient.
+     */
+    getExampleRecipientLanguages(country: Country): Language[] {
+        const languages = new Set<Language>();
+        for (const list of Object.values(I18n.validLocales)) {
+            for (const language of list) {
+                languages.add(language);
+            }
+        }
+        if (this.language) {
+            languages.add(this.language);
+        }
+        for (const language of this.translations.keys()) {
+            languages.add(language);
+        }
+        return [...languages].filter(language => new I18n(language, country).language === language);
+    }
+
+    /**
+     * @param options.allLanguages Also fill exampleRecipients: the same recipient with its
+     * replacements generated in each supported language. Only use this for detail endpoints,
+     * it repeats the replacement queries for every language.
+     */
+    async getPreviewStructure(options: { allLanguages?: boolean } = {}) {
         const emailRecipient = await EmailRecipient.select()
             .where('emailId', this.id)
             .where('email', '!=', null)
             .first(false);
 
-        let recipientRow: EmailRecipientStruct | undefined;
+        let baseRow: EmailRecipientStruct | undefined;
 
         if (emailRecipient) {
-            recipientRow = await emailRecipient.getStructure();
+            baseRow = await emailRecipient.getStructure();
         }
 
-        if (!recipientRow) {
-            recipientRow = getExampleRecipient();
+        if (!baseRow) {
+            baseRow = getExampleRecipient();
         }
 
-        const virtualRecipient = recipientRow.getRecipient();
         const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
 
-        await fillRecipientReplacements(virtualRecipient, {
-            organization,
-            from: this.getFromAddress(),
-            replyTo: null,
-            forPreview: true,
-            forceRefresh: !this.sentAt,
-        });
-        recipientRow.replacements = virtualRecipient.replacements;
+        const fillRow = async (row: EmailRecipientStruct) => {
+            const virtualRecipient = row.getRecipient();
+
+            await fillRecipientReplacements(virtualRecipient, {
+                organization,
+                from: this.getFromAddress(),
+                replyTo: null,
+                forPreview: true,
+                forceRefresh: !this.sentAt,
+            });
+            row.replacements = virtualRecipient.replacements;
+            return row;
+        };
+
+        const recipientRow = await fillRow(baseRow.clone());
+
+        // The same recipient in every supported language: the replacements are regenerated in
+        // each language (the recipient's own language is ignored), so the composer can show
+        // example values in the language that is being edited
+        const exampleRecipients = new Map<Language, EmailRecipientStruct>();
+        if (options.allLanguages) {
+            // The same country the recipient locale will resolve to (see getRecipientI18n)
+            const country = organization?.address?.country ?? $getCountry();
+            for (const language of this.getExampleRecipientLanguages(country)) {
+                const i18n = new I18n(language, country);
+                await I18n.runWithLocale(i18n, async () => {
+                    const clone = baseRow.clone();
+                    clone.language = language;
+
+                    if (baseRow.language !== language) {
+                        // Todo: this can be improved
+                        // Replace all replacements with defaults
+                        for (const replacement of clone.replacements) {
+                            const example: Replacement | undefined = ExampleReplacements.all[replacement.token];
+                            if (example) {
+                                replacement.html = example.html;
+                                replacement.value = example.value;
+                            }
+                        }
+
+                        clone.replacements = clone.replacements.filter(r => !['organizationName'].includes(r.token));
+                    }
+
+                    const rr = await fillRow(clone);
+                    exampleRecipients.set(language, rr);
+                });
+            }
+        }
 
         let user: UserStruct | null = null;
         if (this.userId) {
@@ -1457,10 +1533,24 @@ export class Email extends QueryableModel {
             user,
             organization: organizationStruct,
             exampleRecipient: recipientRow,
+            exampleRecipients,
         });
     }
 
-    async getStructureForUser(user: User, memberIds: string[]) {
+    /**
+     * Whether the email has content in this language (strict: the default content only counts
+     * for its own language, see getEmailContentForLanguage)
+     */
+    hasContentForLanguage(language: Language): boolean {
+        return language === this.language || this.translations.has(language);
+    }
+
+    /**
+     * @param options.language The language the caller is viewing in (from the request headers).
+     * Recipients are returned in this language when the email has content for it, otherwise in
+     * the language they received the email in.
+     */
+    async getStructureForUser(user: User, memberIds: string[], options: { language?: Language | null } = {}) {
         const emailRecipients = await EmailRecipient.select()
             .where('emailId', this.id)
             .where('memberId', memberIds)
@@ -1504,7 +1594,15 @@ export class Email extends QueryableModel {
             struct.email = user.email;
             struct.userId = user.id;
 
+            // Show the email in the language the caller is viewing in, but only when the email
+            // has content for it: otherwise keep the language the recipient received it in
+            // (better correct content in the wrong language than wrong content in the right language)
+            if (options.language && this.hasContentForLanguage(options.language)) {
+                struct.language = options.language;
+            }
+
             // We always refresh the data when we display it on the web (so everything is up to date)
+            // The replacements are regenerated in struct.language, so they match the displayed content
             await fillRecipientReplacements(struct, {
                 organization,
                 from: this.getFromAddress(),
@@ -1512,8 +1610,10 @@ export class Email extends QueryableModel {
                 forPreview: false,
                 forceRefresh: true,
             });
-            stripRecipientReplacementsForWebDisplay(struct, {
-                organization,
+            runWithRecipientLocale(struct, organization, () => {
+                stripRecipientReplacementsForWebDisplay(struct, {
+                    organization,
+                });
             });
             if (this.html) {
                 struct.replacements = removeUnusedReplacements(this.getCombinedHtml(), struct.replacements);

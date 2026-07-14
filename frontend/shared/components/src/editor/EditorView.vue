@@ -11,17 +11,16 @@
                 </template>
             </template>
 
-            <template v-if="$isMobile || $isIOS || $isAndroid" #right>
-                <LoadingButton :loading="loading">
+            <template #right>
+                <slot name="navigation-buttons" />
+                <LoadingButton v-if="$isMobile || $isIOS || $isAndroid" :loading="loading">
                     <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="disabled" type="submit" />
                     <button v-else-if="$isIOS" v-tooltip="saveText" :class="'button icon navigation highlight ' + (saveIcon ?? 'success')" :disabled="disabled" type="submit" data-testid="save-button" />
                     <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
                         {{ saveText }}
                     </button>
                 </LoadingButton>
-            </template>
-            <template v-else-if="canDismiss" #right>
-                <button class="button icon close" type="button" @click="dismiss()" />
+                <button v-else-if="canDismiss" class="button icon close" type="button" @click="dismiss()" />
             </template>
         </STNavigationBar>
         <main ref="main" class="flex">
@@ -63,7 +62,7 @@
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" v-tooltip="$t('%a8')" @mousedown.stop @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" v-tooltip="$t('%a8')" class="button icon trash gray" type="button" @mousedown.stop @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -72,12 +71,12 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" v-tooltip="$t('%a9')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" v-tooltip="$t('%aA')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
-                    <button class="button icon hr" type="button" v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-                    <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" v-tooltip="$t('%aC')" @click.prevent="openLinkEditor()" @mousedown.stop />
+                    <button v-tooltip="$t('%a9')" class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
+                    <hr><button v-if="smartVariables.length > 0" v-tooltip="$t('%aA')" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+                    <button v-tooltip="$t('%aB')" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+                    <button v-tooltip="$t('%aC')" class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.stop />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.stop>
-                        <div class="button icon image" type="button" v-tooltip="$t('%aD')" />
+                        <div v-tooltip="$t('%aD')" class="button icon image" type="button" />
                     </UploadButton>
                     <slot name="buttons" />
                 </div>
@@ -91,12 +90,12 @@
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.stop>
-            <button class="button icon text-style" type="button" v-tooltip="$t('%a9')" @click.prevent="openTextStyles($event)" @mousedown.stop />
-            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" v-tooltip="$t('%aE')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
-            <button class="button icon hr" type="button" v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-            <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" v-tooltip="$t('%aC')" @click="openLinkEditor()" @mousedown.stop />
+            <button v-tooltip="$t('%a9')" class="button icon text-style" type="button" @click.prevent="openTextStyles($event)" @mousedown.stop />
+            <button v-if="smartVariables.length > 0" v-tooltip="$t('%aE')" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+            <button v-tooltip="$t('%aB')" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+            <button v-tooltip="$t('%aC')" class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.stop />
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
-                <div class="button icon image" type="button" v-tooltip="$t('%aD')" />
+                <div v-tooltip="$t('%aD')" class="button icon image" type="button" />
             </UploadButton>
             <slot name="buttons" />
         </STButtonToolbar>
@@ -104,7 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Image, Replacement} from '@stamhoofd/structures';
+import type { Image, Replacement } from '@stamhoofd/structures';
 import { EditorSmartButton, EditorSmartVariable, ResolutionRequest } from '@stamhoofd/structures';
 import type { Content, JSONContent } from '@tiptap/core';
 import { Image as ImageExtension } from '@tiptap/extension-image';
@@ -243,8 +242,7 @@ function buildEditor(content: Content = '') {
             if (showLinkEditor.value) {
                 if (editor.isActive('link')) {
                     editLink.value = editor.getAttributes('link')?.href ?? '';
-                }
-                else {
+                } else {
                     if (editor.state.selection.empty) {
                         showLinkEditor.value = false;
                     }
@@ -293,8 +291,7 @@ function isValidHttpUrl(string: string) {
 
     try {
         url = new URL(string);
-    }
-    catch (_) {
+    } catch (_) {
         return false;
     }
 
@@ -312,8 +309,7 @@ async function saveLink() {
     if (!isValidHttpUrl(cleanedUrl)) {
         if (!cleanedUrl.startsWith('mailto:') && !cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://') && DataValidator.isEmailValid(cleanedUrl)) {
             cleanedUrl = 'mailto:' + cleanedUrl;
-        }
-        else if (isValidHttpUrl('http://' + cleanedUrl)) {
+        } else if (isValidHttpUrl('http://' + cleanedUrl)) {
             cleanedUrl = 'http://' + cleanedUrl;
         }
     }
@@ -531,8 +527,7 @@ async function showSmartVariableMenu(event: MouseEvent) {
                                         input.setRangeText(`{{${variable.id}}}`, input.selectionStart, input.selectionEnd, 'end');
                                         input.focus();
                                     }
-                                }
-                                else {
+                                } else {
                                     editor.value.chain().focus().insertSmartVariable(variable).run();
                                 }
 
@@ -672,12 +667,7 @@ defineExpose({
                 margin: 0 -2px;
                 //color: $color-gray-5;
                 white-space: nowrap;
-
-                &:empty {
-                    padding: 0;
-                    margin: 0;
-                    background: none;
-                }
+                cursor: pointer;
 
                 &.ProseMirror-selectednode {
                     color: $color-primary-contrast;
@@ -692,10 +682,24 @@ defineExpose({
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: $color-gray-3;
+                    background: $color-background-shade;
                     border-radius: $border-radius;
                     pointer-events: none;
                     z-index: -1;
+                }
+
+                @media (hover: hover) {
+                    &:hover {
+                        &:after {
+                            background: $color-background-shade-darker;
+                        }
+                    }
+                }
+
+                &:empty {
+                    padding: 0;
+                    margin: 0;
+                    background: none;
                 }
 
                 &.ProseMirror-selectednode {

@@ -194,6 +194,13 @@ export class I18nController {
         // If the same language
 
         const i18n = I18nController.getI18n();
+
+        await this.loadLocaleIntoMemory(locale);
+        i18n.setLocale(locale, this.language, this.countryCode);
+    }
+
+    private async loadLocaleIntoMemory(locale: string) {
+        const i18n = I18nController.getI18n();
         const namespace = this.namespace;
 
         if (!i18n.isLocaleLoaded(namespace, locale)) {
@@ -204,8 +211,32 @@ export class I18nController {
         } else {
             console.info('[I18n] Loading locale from memory ' + locale);
         }
+    }
 
-        i18n.setLocale(locale, this.language, this.countryCode);
+    /**
+     * The locale whose messages should be used for a language: the current country when that
+     * combination is valid, otherwise the first country that supports the language.
+     */
+    localeForLanguage(language: Language): string {
+        if (this.validLocales[this.countryCode]?.includes(language)) {
+            return language + '-' + this.countryCode;
+        }
+        for (const country of countries) {
+            if (this.validLocales[country]?.includes(language)) {
+                return language + '-' + country;
+            }
+        }
+        return language + '-' + this.countryCode;
+    }
+
+    /**
+     * Load the messages of a language into memory without switching the app locale, so they can
+     * be used with I18n.runWithLocale. Returns the locale the messages are registered under.
+     */
+    async loadLocaleForLanguage(language: Language): Promise<string> {
+        const locale = this.localeForLanguage(language);
+        await this.loadLocaleIntoMemory(locale);
+        return locale;
     }
 
     static setMessages(language: string, countryCode: CountryCode, messages: Record<string, string>) {

@@ -3465,7 +3465,7 @@
   },
   "%1E9": {
     "original": "Beste,",
-    "translation": "Dear,"
+    "translation": "Hello,"
   },
   "%1EA": {
     "original": "Je kan op het ledenportaal inloggen op {email}.",
@@ -11189,7 +11189,7 @@
   },
   "%Aq": {
     "original": "Demovereniging op Stamhoofd",
-    "translation": "Demo association at Stamhoofd"
+    "translation": "Demo Association at Stamhoofd"
   },
   "%Ar": {
     "original": "Zomerkamp",
@@ -11717,7 +11717,7 @@
   },
   "%D": {
     "original": "Demovereniging",
-    "translation": "Demo association"
+    "translation": "Demo Association"
   },
   "%D0": {
     "original": "Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.",
@@ -12009,7 +12009,7 @@
   },
   "%EA": {
     "original": "Beste, \nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \nNaam lid:",
-    "translation": "Dear,\nThe daily limit for security codes has been reached.\nMember name:"
+    "translation": "Hello,\nThe daily limit for security codes has been reached.\nMember name:"
   },
   "%EB": {
     "original": "Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.",
@@ -21961,7 +21961,7 @@
   },
   "%qP": {
     "original": "Dag {name},",
-    "translation": "Dear {name},"
+    "translation": "Hi {name},"
   },
   "%qQ": {
     "original": "Je hebt geen toegangsrechten om een activiteit te beheren.",

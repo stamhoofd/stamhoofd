@@ -1,6 +1,6 @@
 <template>
     <template v-if="hasLanguages">
-        <button class="button icon language small gray" type="button" @click="showMenu" />
+        <button class="button icon translate small gray" type="button" @click="showMenu" />
     </template>
 </template>
 
@@ -48,21 +48,18 @@ async function showMenu(event: MouseEvent) {
                         value.value = new TranslatedString({
                             [lang]: value.value.toString(),
                         });
-                    }
-                    else {
+                    } else {
                         value.value = value.value.patch({
                             [lang]: value.value.getIfExists(lang) ?? '',
                         });
                     }
-                }
-                else {
+                } else {
                     if (value.value.languages.length > 1) {
                         // Remove the language
                         value.value = value.value.patch({
                             [lang]: null,
                         });
-                    }
-                    else {
+                    } else {
                         // Set as untranslated
                         value.value = new TranslatedString(value.value.toString());
                     }

@@ -182,10 +182,18 @@ export class EmailTemplate extends AutoEncoder {
 
     /**
      * Full content overrides per language. The default content (subject/html/text/json)
-     * is 'untranslated' and is used for all languages without an override.
+     * is used for all languages without an override. When `language` is set, this map never
+     * contains that language: its content lives in the default content itself.
      */
     @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailContent), ...NextVersion })
     translations: Map<Language, EmailContent> = new Map();
+
+    /**
+     * The language of the default content (subject/html/text/json). null when the content is
+     * untranslated. See validateEmailTranslations for the states this can be in.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    language: Language | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
     groupId: string | null = null;

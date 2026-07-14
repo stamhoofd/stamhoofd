@@ -2,7 +2,7 @@ import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Enu
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailAttachment, Recipient, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
+import { EmailAttachment, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
 import { EmailContent, getEmailContentForLanguage } from './EmailContent.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
@@ -134,10 +134,18 @@ export class Email extends AutoEncoder {
 
     /**
      * Full content overrides per language. The default content (subject/html/text/json)
-     * is 'untranslated' and is used for all recipients without a matching override.
+     * is used for all recipients without a matching override. When `language` is set, this map
+     * never contains that language: its content lives in the default content itself.
      */
     @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailContent), ...NextVersion })
     translations: Map<Language, EmailContent> = new Map();
+
+    /**
+     * The language of the default content (subject/html/text/json). null when the content is
+     * untranslated. See validateEmailTranslations for the states this can be in.
+     */
+    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    language: Language | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
     fromAddress: string | null = null;
@@ -220,6 +228,11 @@ export class Email extends AutoEncoder {
     getSubjectFor(recipient: EmailRecipient | null) {
         const content = this.getContentForLanguage(recipient?.language ?? null);
         return replaceEmailText(content.subject, recipient?.replacements || []);
+    }
+
+    getHtmlFor(recipient: EmailRecipient | null) {
+        const content = this.getContentForLanguage(recipient?.language ?? null);
+        return replaceEmailHtml(content.html, recipient?.replacements || []);
     }
 
     getSnippetFor(recipient: EmailRecipient | null) {
@@ -428,14 +441,38 @@ export function bounceErrorToHuman(message: string) {
 }
 
 export class EmailPreview extends Email {
+    /**
+     * @deprecated Use exampleRecipientFor / exampleRecipients instead: this recipient has its
+     * replacements in its own language. It is still returned for the interface language and
+     * as a fallback for languages missing in exampleRecipients.
+     */
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;
+
+    /**
+     * The same example recipient, but with its replacements generated in each supported
+     * language (the recipient's own language is ignored). Only filled by the detail endpoints,
+     * not in email lists.
+     */
+    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailRecipient), ...NextVersion })
+    exampleRecipients: Map<Language, EmailRecipient> = new Map();
 
     @field({ decoder: User, nullable: true, version: 383 })
     user: User | null = null;
 
     @field({ decoder: BaseOrganization, nullable: true, version: 383 })
     organization: BaseOrganization | null = null;
+
+    /**
+     * The example recipient with its replacements generated in the given language,
+     * null uses the interface language
+     */
+    exampleRecipientFor(language: Language | null): EmailRecipient | null {
+        if (language !== null) {
+            return this.exampleRecipients.get(language) ?? this.exampleRecipient;
+        }
+        return this.exampleRecipient;
+    }
 
     get replacedSubject() {
         return this.getSubjectFor(this.exampleRecipient);

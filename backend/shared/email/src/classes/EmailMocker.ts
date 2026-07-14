@@ -53,6 +53,10 @@ export class EmailMocker {
             // We load async here because this is a dev dependency (otherwise Node will reach this and complain, breaking the boot)
             const sinon = await import('sinon');
 
+            // The stub outlives a single spec file (it is never restored), while this beforeAll
+            // runs again for every spec file the worker picks up: restore first so it stays idempotent
+            (Email.setupIfNeeded as unknown as { restore?: () => void }).restore?.();
+
             sinon.stub(Email, 'setupIfNeeded').callsFake(function (this: typeof Email) {
                 this.transporter = {
                     sendMail: async (data: InternalEmailData) => {

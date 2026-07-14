@@ -529,9 +529,68 @@ test.describe('Settings email templates', () => {
         return menu;
     }
 
-    async function selectLanguageMenuItem(page: Page, name: string) {
+    /**
+     * Hover a language-menu item that has a child menu and wait until the child menu opened
+     * (child menus open on hover; clicking the parent item does nothing on desktop).
+     */
+    async function openLanguageChildMenu(page: Page, parentName: string) {
+        const containers = page.locator('.context-menu-container:visible');
+        const menu = await openLanguageMenu(page);
+        const count = await containers.count();
+        await menu.locator('.context-menu-item', { hasText: parentName }).first().hover();
+        await expect(containers).toHaveCount(count + 1);
+        const child = containers.last();
+        await expect(child.locator('.context-menu-item').first()).toBeVisible();
+        return child;
+    }
+
+    /**
+     * Language switches are async (the editor is flushed first): the button shows the name of
+     * the language that is being edited once the switch actually completed.
+     */
+    async function expectCurrentLanguage(page: Page, name: string) {
+        await expect(activePopup(page).getByTestId('email-language-button')).toContainText(name);
+    }
+
+    /** Mark the untranslated content as its first language: 'Instellen als' > language */
+    async function setFirstLanguage(page: Page, name: string) {
+        const child = await openLanguageChildMenu(page, 'Instellen als');
+        await child.locator('.context-menu-item', { hasText: name }).first().click();
+        await expectCurrentLanguage(page, name);
+    }
+
+    /** Add a translation, seeded from the displayed content: 'Vertaling toevoegen' > language */
+    async function addTranslation(page: Page, name: string) {
+        const child = await openLanguageChildMenu(page, 'Vertaling toevoegen');
+        await child.locator('.context-menu-item', { hasText: name }).first().click();
+        await expectCurrentLanguage(page, name);
+    }
+
+    /** Switch to an existing language (a top-level menu item) */
+    async function switchToLanguage(page: Page, name: string) {
         const menu = await openLanguageMenu(page);
         await menu.locator('.context-menu-item', { hasText: name }).first().click();
+        await expectCurrentLanguage(page, name);
+    }
+
+    async function confirmLanguageRemoval(page: Page) {
+        const message = page.getByTestId('centered-message');
+        await expect(message).toBeVisible();
+        await message.getByRole('button', { name: 'Verwijderen' }).click();
+    }
+
+    /** Remove one of multiple languages: 'Vertaling verwijderen' > language, plus confirmation */
+    async function removeLanguage(page: Page, name: string) {
+        const child = await openLanguageChildMenu(page, 'Vertaling verwijderen');
+        await child.locator('.context-menu-item', { hasText: name }).first().click();
+        await confirmLanguageRemoval(page);
+    }
+
+    /** Remove the only language ('Vertalingen verwijderen' is a direct action), plus confirmation */
+    async function removeOnlyLanguage(page: Page) {
+        const menu = await openLanguageMenu(page);
+        await menu.locator('.context-menu-item', { hasText: 'Vertalingen verwijderen' }).first().click();
+        await confirmLanguageRemoval(page);
     }
 
     test('a translation can be added to an email template', async ({ page, pages }) => {
@@ -564,17 +623,21 @@ test.describe('Settings email templates', () => {
             const subjectInput = popup.locator('#mail-subject');
             await expect(subjectInput).toHaveValue('Default subject');
 
+            // Selecting the first language marks the existing content as Dutch (no translation is created)
+            await setFirstLanguage(page, 'Nederlands');
+            await expect(subjectInput).toHaveValue('Default subject');
+
             // Add French: seeds the translation from the current content and switches to it
-            await selectLanguageMenuItem(page, 'Frans');
+            await addTranslation(page, 'Frans');
             await expect(subjectInput).toHaveValue('Default subject');
             await subjectInput.fill('Sujet français');
 
-            // Switching back to the default content restores the default subject
-            await selectLanguageMenuItem(page, 'Standaardtekst');
+            // Switching back to the default language restores the default subject
+            await switchToLanguage(page, 'Nederlands');
             await expect(subjectInput).toHaveValue('Default subject');
 
             // And back to French
-            await selectLanguageMenuItem(page, 'Frans');
+            await switchToLanguage(page, 'Frans');
             await expect(subjectInput).toHaveValue('Sujet français');
 
             await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
@@ -585,14 +648,61 @@ test.describe('Settings email templates', () => {
                 await template.refresh();
                 return {
                     subject: template.subject,
+                    language: template.language,
                     frenchSubject: template.translations.get(Language.French)?.subject,
                     frenchText: template.translations.get(Language.French)?.text,
                 };
             }).toMatchObject({
                 subject: 'Default subject',
+                language: Language.Dutch,
                 frenchSubject: 'Sujet français',
                 frenchText: expect.stringContaining('default body'),
             });
+        } finally {
+            organization.privateMeta.featureFlags = [];
+            await organization.save();
+        }
+    });
+
+    test('the visible example values follow the language that is being edited', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        // Adding translations requires the 'email-translations' feature flag (the UI is hidden by default)
+        organization.privateMeta.featureFlags = ['email-translations'];
+        await organization.save();
+
+        try {
+            await login(page, pages);
+            await pages.groupOverview({ group, organization }).goto();
+            await openGroupEmailTemplates(page);
+
+            // No template exists yet: this opens a brand new template
+            await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+            const popup = activePopup(page);
+            const editor = popup.locator('.ProseMirror').first();
+            await expect(editor).toBeVisible();
+
+            // Typing {{firstNameMember}} inserts a smart variable chip that shows the example
+            // value in the language that is being edited (%13h: 'Klaas' in nl, 'Luc' in fr)
+            await editor.click();
+            await editor.pressSequentially('Hallo {{firstNameMember}}');
+            const chip = popup.locator('.ProseMirror span[data-type="smartVariable"]');
+            await expect(chip).toContainText('Klaas');
+
+            await setFirstLanguage(page, 'Nederlands');
+            await expect(chip).toContainText('Klaas');
+
+            // The French translation shows the French example values
+            await addTranslation(page, 'Frans');
+            await expect(chip).toContainText('Luc');
+
+            // And back
+            await switchToLanguage(page, 'Nederlands');
+            await expect(chip).toContainText('Klaas');
         } finally {
             organization.privateMeta.featureFlags = [];
             await organization.save();
@@ -622,25 +732,27 @@ test.describe('Settings email templates', () => {
             const editor = popup.locator('.ProseMirror').first();
             await expect(subjectInput).toBeVisible();
 
-            // Fill the default (untranslated) content
+            // Fill the default content and mark it as Dutch (the first language)
             await subjectInput.fill('Default subject');
             await setEditorContent(page, 'Default body');
+            await setFirstLanguage(page, 'Nederlands');
+            await expect(subjectInput).toHaveValue('Default subject');
 
             // Add French: seeded from the current (default) content, then give it its own content
-            await selectLanguageMenuItem(page, 'Frans');
+            await addTranslation(page, 'Frans');
             await expect(subjectInput).toHaveValue('Default subject');
             await expect(editor).toContainText('Default body');
             await subjectInput.fill('Sujet français');
             await setEditorContent(page, 'Corps français');
 
-            // Back to the default content: subject and editor show the default again, not the French one
-            await selectLanguageMenuItem(page, 'Standaardtekst');
+            // Back to the default language: subject and editor show the default again, not the French one
+            await switchToLanguage(page, 'Nederlands');
             await expect(subjectInput).toHaveValue('Default subject');
             await expect(editor).toContainText('Default body');
             await expect(editor).not.toContainText('Corps français');
 
             // And back to French: its own subject and editor content are restored
-            await selectLanguageMenuItem(page, 'Frans');
+            await switchToLanguage(page, 'Frans');
             await expect(subjectInput).toHaveValue('Sujet français');
             await expect(editor).toContainText('Corps français');
             await expect(editor).not.toContainText('Default body');
@@ -649,7 +761,7 @@ test.describe('Settings email templates', () => {
             await expect(subjectInput).toHaveCount(0);
             await saveTemplateList(page);
 
-            // The default and the French translation each keep their own subject / text / html
+            // The default language and the French translation each keep their own subject / text / html
             await expect.poll(async () => {
                 const templates = await EmailTemplate.where({
                     type: EmailTemplateType.RegistrationConfirmation,
@@ -663,6 +775,7 @@ test.describe('Settings email templates', () => {
                     count: templates.length,
                     subject: template?.subject,
                     text: template?.text,
+                    language: template?.language,
                     htmlHasDefault: template?.html?.includes('Default body') ?? false,
                     htmlHasFrench: template?.html?.includes('Corps français') ?? false,
                     frenchSubject: french?.subject,
@@ -674,6 +787,7 @@ test.describe('Settings email templates', () => {
                 count: 1,
                 subject: 'Default subject',
                 text: 'Default body',
+                language: Language.Dutch,
                 htmlHasDefault: true,
                 htmlHasFrench: false,
                 frenchSubject: 'Sujet français',
@@ -701,6 +815,7 @@ test.describe('Settings email templates', () => {
         template.html = '<p>default body</p>';
         template.text = 'default body';
         template.json = editorJson('default body');
+        template.language = Language.Dutch;
         template.translations = new Map([
             [Language.French, EmailContent.create({
                 subject: 'Sujet existant',
@@ -794,6 +909,7 @@ test.describe('Settings email templates', () => {
         template.html = '<p>default body</p>';
         template.text = 'default body';
         template.json = editorJson('default body');
+        template.language = Language.Dutch;
         template.translations = new Map([
             [Language.French, EmailContent.create({
                 subject: 'Sujet existant',
@@ -845,6 +961,7 @@ test.describe('Settings email templates', () => {
         template.html = '<p>default body</p>';
         template.text = 'default body';
         template.json = editorJson('default body');
+        template.language = Language.Dutch;
         template.translations = new Map([
             [Language.French, EmailContent.create({
                 subject: 'Sujet existant',
@@ -865,17 +982,14 @@ test.describe('Settings email templates', () => {
         const subjectInput = popup.locator('#mail-subject');
         await expect(subjectInput).toHaveValue('Default subject');
 
-        // Removing a translation is only offered for the language you are currently editing
-        await selectLanguageMenuItem(page, 'Frans');
+        // The existing translation can be viewed and removed via the language menu
+        await switchToLanguage(page, 'Frans');
         await expect(subjectInput).toHaveValue('Sujet existant');
 
-        // Clicking French again (now the current language) removes the translation
-        await selectLanguageMenuItem(page, 'Frans');
-        const message = page.getByTestId('centered-message');
-        await expect(message).toBeVisible();
-        await message.getByRole('button', { name: 'Verwijderen' }).click();
+        // Remove the French translation via the explicit remove menu
+        await removeLanguage(page, 'Frans');
 
-        // The editor returns to the default content
+        // The editor returns to the default language
         await expect(subjectInput).toHaveValue('Default subject');
 
         await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
@@ -884,8 +998,192 @@ test.describe('Settings email templates', () => {
 
         await expect.poll(async () => {
             await template.refresh();
-            return template.translations.size;
-        }).toBe(0);
+            return {
+                translationsCount: template.translations.size,
+                language: template.language,
+                subject: template.subject,
+            };
+        }).toEqual({
+            translationsCount: 0,
+            language: Language.Dutch,
+            subject: 'Default subject',
+        });
+    });
+
+    test('removing the default language makes the remaining translation the new default', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        const template = new EmailTemplate();
+        template.subject = 'Default subject';
+        template.type = EmailTemplateType.RegistrationConfirmation;
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        template.html = '<p>default body</p>';
+        template.text = 'default body';
+        template.json = editorJson('default body');
+        template.language = Language.Dutch;
+        template.translations = new Map([
+            [Language.French, EmailContent.create({
+                subject: 'Sujet existant',
+                html: '<p>corps français</p>',
+                text: 'corps français',
+                json: editorJson('corps français'),
+            })],
+        ]);
+        await template.save();
+
+        await login(page, pages);
+        await pages.groupOverview({ group, organization }).goto();
+        await openGroupEmailTemplates(page);
+        await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+        const popup = activePopup(page);
+        const subjectInput = popup.locator('#mail-subject');
+        await expect(subjectInput).toHaveValue('Default subject');
+        await expectCurrentLanguage(page, 'Nederlands');
+
+        // Removing Dutch (the current default language): the French translation
+        // moves into the default content and becomes the new default language
+        await removeLanguage(page, 'Nederlands');
+
+        await expect(subjectInput).toHaveValue('Sujet existant');
+        await expectCurrentLanguage(page, 'Frans');
+
+        await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
+        await expect(subjectInput).toHaveCount(0);
+        await saveTemplateList(page);
+
+        await expect.poll(async () => {
+            await template.refresh();
+            return {
+                translationsCount: template.translations.size,
+                language: template.language,
+                subject: template.subject,
+                text: template.text,
+            };
+        }).toEqual({
+            translationsCount: 0,
+            language: Language.French,
+            subject: 'Sujet existant',
+            text: 'corps français',
+        });
+    });
+
+    test('removing the last language keeps the content as default text', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        const template = new EmailTemplate();
+        template.subject = 'Default subject';
+        template.type = EmailTemplateType.RegistrationConfirmation;
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        template.html = '<p>default body</p>';
+        template.text = 'default body';
+        template.json = editorJson('default body');
+        template.language = Language.Dutch;
+        await template.save();
+
+        await login(page, pages);
+        await pages.groupOverview({ group, organization }).goto();
+        await openGroupEmailTemplates(page);
+        await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+        const popup = activePopup(page);
+        const subjectInput = popup.locator('#mail-subject');
+        await expect(subjectInput).toHaveValue('Default subject');
+        await expectCurrentLanguage(page, 'Nederlands');
+
+        // Removing the only language removes the language marker,
+        // the content itself is kept as untranslated default text
+        await removeOnlyLanguage(page);
+
+        await expect(subjectInput).toHaveValue('Default subject');
+
+        // Without a language and without the feature flag the button disappears
+        await expect(popup.getByTestId('email-language-button')).toHaveCount(0);
+
+        await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
+        await expect(subjectInput).toHaveCount(0);
+        await saveTemplateList(page);
+
+        await expect.poll(async () => {
+            await template.refresh();
+            return {
+                translationsCount: template.translations.size,
+                language: template.language,
+                subject: template.subject,
+                text: template.text,
+            };
+        }).toEqual({
+            translationsCount: 0,
+            language: null,
+            subject: 'Default subject',
+            text: 'default body',
+        });
+    });
+
+    test('an added language that was not changed is removed again when switching away', async ({ page, pages }) => {
+        const group = await new GroupFactory({ organization }).create();
+        const organizationPeriod = await organization.getPeriod();
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+
+        const template = new EmailTemplate();
+        template.subject = 'Default subject';
+        template.type = EmailTemplateType.RegistrationConfirmation;
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        template.html = '<p>default body</p>';
+        template.text = 'default body';
+        template.json = editorJson('default body');
+        await template.save();
+
+        organization.privateMeta.featureFlags = ['email-translations'];
+        await organization.save();
+
+        try {
+            await login(page, pages);
+            await pages.groupOverview({ group, organization }).goto();
+            await openGroupEmailTemplates(page);
+            await clickTemplate(page, EmailTemplateType.RegistrationConfirmation);
+
+            const popup = activePopup(page);
+            const subjectInput = popup.locator('#mail-subject');
+            await expect(subjectInput).toHaveValue('Default subject');
+
+            // Mark the content as Dutch and add a French copy, but don't change anything
+            await setFirstLanguage(page, 'Nederlands');
+            await addTranslation(page, 'Frans');
+
+            // Switching away from the untouched French copy removes it again
+            await switchToLanguage(page, 'Nederlands');
+
+            await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
+            await expect(subjectInput).toHaveCount(0);
+            await saveTemplateList(page);
+
+            await expect.poll(async () => {
+                await template.refresh();
+                return {
+                    translationsCount: template.translations.size,
+                    language: template.language,
+                    subject: template.subject,
+                };
+            }).toEqual({
+                translationsCount: 0,
+                language: Language.Dutch,
+                subject: 'Default subject',
+            });
+        } finally {
+            organization.privateMeta.featureFlags = [];
+            await organization.save();
+        }
     });
 
     test('hides the translation UI by default', async ({ page, pages }) => {
@@ -966,6 +1264,7 @@ test.describe('Settings email templates', () => {
         template.html = '<p>default body</p>';
         template.text = 'default body';
         template.json = editorJson('default body');
+        template.language = Language.Dutch;
         template.translations = new Map([
             [Language.French, EmailContent.create({
                 subject: 'Sujet existant',

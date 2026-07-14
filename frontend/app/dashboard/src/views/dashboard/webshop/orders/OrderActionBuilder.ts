@@ -302,6 +302,8 @@ export class OrderActionBuilder {
             root: AsyncComponent(() => import('@stamhoofd/components/email/EmailView.vue'), {
                 recipientFilterOptions: options,
                 defaultSenderId: this.webshopManager.preview?.privateMeta.defaultEmailId,
+                // The language of each order is known, so the email can be translated
+                supportsTranslations: true,
             }),
         });
         await this.present({

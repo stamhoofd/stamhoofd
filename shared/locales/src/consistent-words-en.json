@@ -92,5 +92,14 @@
     "niveau": "level",
     "indiener": "petitioner",
     "bundelkorting": "bundle discount",
-    "vragenlijst": "form"
+    "vragenlijst": "form",
+    "Jan": "John",
+    "Jansen": "Smith",
+    "Jansens": "Smith",
+    "Janssens": "Smith",
+    "Piet": "Peter",
+    "Pieters": "Jones",
+    "Klaas": "Lucas",
+    "Klaassen": "Anderson",
+    "Lies": "Emma"
   }

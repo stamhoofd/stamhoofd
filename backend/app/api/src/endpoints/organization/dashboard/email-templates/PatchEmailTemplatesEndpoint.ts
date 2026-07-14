@@ -3,7 +3,7 @@ import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/s
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { EmailTemplate, Group, Platform, Webshop } from '@stamhoofd/models';
-import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
+import { EmailTemplate as EmailTemplateStruct, PermissionLevel, validateEmailTranslations } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -53,6 +53,14 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.json = patch.json ?? template.json;
             template.translations = patchObject(template.translations, patch.translations);
 
+            if (patch.language !== undefined) {
+                template.language = patch.language;
+            }
+
+            if (patch.language !== undefined || patch.translations !== undefined) {
+                validateEmailTranslations(template);
+            }
+
             await template.save();
 
             templates.push(template);
@@ -96,6 +104,9 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.text = struct.text;
             template.json = struct.json;
             template.translations = struct.translations;
+            template.language = struct.language;
+
+            validateEmailTranslations(template);
 
             template.type = struct.type;
 

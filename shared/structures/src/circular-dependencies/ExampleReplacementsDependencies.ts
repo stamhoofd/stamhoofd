@@ -43,10 +43,10 @@ function fillReplacements(replacements: Replacement[]) {
         number: 15,
         data: OrderData.create({
             customer: Customer.create({
-                firstName: 'John',
-                lastName: 'Doe',
-                email: 'john@example.com',
-                phone: '+32 479 45 71 52',
+                firstName: $t('Jan'),
+                lastName: $t('Janssens'),
+                email: $t('jan.janssens@voorbeeld.com'),
+                phone: $getCountry() === Country.Netherlands ? '+31 XXXXXXXXX' : '+32 XXX XX XX XX',
             }),
             timeSlot: WebshopTimeSlot.create({
                 date: new Date(),
@@ -119,7 +119,7 @@ function fillReplacements(replacements: Replacement[]) {
         address: Address.createDefault(Country.Belgium),
     }), WebshopPreview.create({
         meta: WebshopMetaData.create({
-            name: $t('%Au'),
+            name: $t('Voorbeeldshop'),
         }),
     }));
 

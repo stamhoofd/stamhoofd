@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { EmailStatus, LimitedFilteredRequest, Replacement } from '@stamhoofd/structures';
+import { EmailContent, EmailStatus, LimitedFilteredRequest, Replacement } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetUserEmailsEndpoint } from './GetUserEmailsEndpoint.js';
@@ -752,5 +753,134 @@ describe('Endpoint.GetUserEmails', () => {
         });
 
         await expect(testServer.test(endpoint, request)).rejects.toThrow();
+    });
+
+    describe('Language of returned emails', () => {
+        // The web greeting translations looked up in shared/locales/dist/locales/digit/{nl,fr}-BE.json,
+        // hardcoded on purpose so we don't verify $t with the same $t machinery we're testing
+        const dutchGreeting = 'Beste,';
+        const frenchGreeting = 'Bonjour,';
+
+        /**
+         * A sent email with a Dutch default content and a French translation.
+         * The {{greeting}} in the html proves the replacements match the displayed content.
+         */
+        const createTranslatedEmail = async (options: { recipientLanguage?: Language | null } = {}) => {
+            const email = new Email();
+            email.subject = 'Nederlands onderwerp';
+            email.status = EmailStatus.Sent;
+            email.text = 'Nederlandse tekst';
+            email.html = '<p>{{greeting}} Nederlandse inhoud</p>';
+            email.json = {};
+            email.language = Language.Dutch;
+            email.translations = new Map([
+                [Language.French, EmailContent.create({
+                    subject: 'Sujet français',
+                    html: '<p>{{greeting}} Contenu français</p>',
+                    text: 'Texte français',
+                })],
+            ]);
+            email.organizationId = organization.id;
+            email.showInMemberPortal = true;
+            email.sentAt = new Date();
+            await email.save();
+
+            const emailRecipient = new EmailRecipient();
+            emailRecipient.emailId = email.id;
+            emailRecipient.memberId = member.id;
+            emailRecipient.userId = user.id;
+            emailRecipient.email = user.email;
+            emailRecipient.firstName = member.details.firstName;
+            emailRecipient.lastName = member.details.lastName;
+            emailRecipient.language = options.recipientLanguage ?? null;
+            emailRecipient.sentAt = new Date();
+            await emailRecipient.save();
+
+            return email;
+        };
+
+        const getUserEmailsViewedIn = async (language: string | null) => {
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ limit: 10 }),
+                headers: {
+                    'authorization': 'Bearer ' + userToken.accessToken,
+                    ...(language ? { 'accept-language': language } : {}),
+                },
+            });
+            const response = await testServer.test(endpoint, request);
+            expect(response.body.results).toHaveLength(1);
+            const result = response.body.results[0];
+            expect(result.recipients).toHaveLength(1);
+            return { result, recipient: result.recipients[0] };
+        };
+
+        test('the email is returned in the language the caller is viewing when a translation exists', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            // The recipient received the email in Dutch, but views the portal in French
+            await createTranslatedEmail({ recipientLanguage: Language.Dutch });
+
+            const { result, recipient } = await getUserEmailsViewedIn('fr');
+
+            // The recipient language switches to the viewing language, so subject, html, text
+            // and the regenerated replacements all resolve to the French content
+            expect(recipient.language).toBe(Language.French);
+            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(result.getSubjectFor(recipient)).toBe('Sujet français');
+            expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
+            expect(result.getContentForLanguage(recipient.language).text).toBe('Texte français');
+        });
+
+        test('the language the email was received in is kept when there is no translation for the viewing language', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            // The recipient received the email in French, but views the portal in English
+            await createTranslatedEmail({ recipientLanguage: Language.French });
+
+            const { result, recipient } = await getUserEmailsViewedIn('en');
+
+            expect(recipient.language).toBe(Language.French);
+            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(result.getSubjectFor(recipient)).toBe('Sujet français');
+            expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
+            expect(result.getContentForLanguage(recipient.language).text).toBe('Texte français');
+        });
+
+        test('the language the email was received in is kept when the caller has no explicit language', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            await createTranslatedEmail({ recipientLanguage: Language.French });
+
+            const { result, recipient } = await getUserEmailsViewedIn(null);
+
+            expect(recipient.language).toBe(Language.French);
+            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(result.getSubjectFor(recipient)).toBe('Sujet français');
+            expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
+        });
+
+        test('a recipient without a stored language is returned in the viewing language when a translation exists', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            await createTranslatedEmail({ recipientLanguage: null });
+
+            const { result, recipient } = await getUserEmailsViewedIn('fr');
+
+            expect(recipient.language).toBe(Language.French);
+            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(result.getSubjectFor(recipient)).toBe('Sujet français');
+            expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
+        });
+
+        test('a recipient without a stored language keeps the default content when the viewing language has no translation', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            await createTranslatedEmail({ recipientLanguage: null });
+
+            const { result, recipient } = await getUserEmailsViewedIn('en');
+
+            expect(recipient.language).toBeNull();
+            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(dutchGreeting);
+            expect(result.getSubjectFor(recipient)).toBe('Nederlands onderwerp');
+            expect(result.getHtmlFor(recipient)).toBe(`<p>${dutchGreeting} Nederlandse inhoud</p>`);
+            expect(result.getContentForLanguage(recipient.language).text).toBe('Nederlandse tekst');
+        });
     });
 });

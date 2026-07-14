@@ -1,5 +1,8 @@
 <template>
     <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%1Op')" :loading="contentLanguage.switching.value" :replacements="replacements" :title="$t(`%aP`)" @save="save">
+        <template #navigation-buttons>
+            <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :default-language="contentLanguage.defaultLanguage.value" :supports-translations="true" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
+        </template>
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             {{ $t('%aM') }}
@@ -22,9 +25,6 @@
                     <span>{{ $t('%aO') }}:</span>
                     <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
                 </div>
-                <template #right>
-                    <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
-                </template>
             </STListItem>
         </template>
     </EditorView>
@@ -46,6 +46,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import EmailLanguageButton from './EmailLanguageButton.vue';
 import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
+import { useReplacementsForLanguage } from './hooks/useReplacementsForLanguage';
 
 const props = withDefaults(
     defineProps<{
@@ -76,21 +77,25 @@ const subject = contentLanguage.subject;
 
 // The editor content is loaded by useEmailContentLanguage once the editor is available
 
-const replacements = computed(() => {
-    const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
+// The example values are shown in the language that is being edited
+const replacements = useReplacementsForLanguage({
+    language: () => contentLanguage.currentLanguage.value,
+    build: () => {
+        const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
 
-    if (platform.value) {
-        const defaultReplacements = platform.value.config.getEmailReplacements(platform.value, true);
-        base.unshift(...defaultReplacements);
-    }
+        if (platform.value) {
+            const defaultReplacements = platform.value.config.getEmailReplacements(platform.value, true);
+            base.unshift(...defaultReplacements);
+        }
 
-    // Change some defaults
-    if (organization.value) {
-        const defaultReplacements = organization.value.meta.getEmailReplacements(organization.value);
-        base.unshift(...defaultReplacements);
-    }
+        // Change some defaults
+        if (organization.value) {
+            const defaultReplacements = organization.value.meta.getEmailReplacements(organization.value);
+            base.unshift(...defaultReplacements);
+        }
 
-    return base;
+        return base;
+    },
 });
 
 const emailBlock = computed(() => {

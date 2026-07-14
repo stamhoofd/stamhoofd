@@ -216,9 +216,10 @@ const editableList = computed(() => {
                 }
 
                 // Seed the new override with the default template's content in the current language
-                // only, and deliberately without its translations map: most users won't keep extra
-                // translations up to date, and a stale translation is riskier than none. They can add
-                // translations explicitly in the editor.
+                // only, and deliberately without its translations map or a default language: most
+                // users won't keep extra translations up to date, and a stale translation is riskier
+                // than none. The copy starts as untranslated default text; they can mark a language
+                // and add translations explicitly in the editor.
                 const seeded = EmailTemplate.create({});
                 if (defaultTemplate) {
                     const content = defaultTemplate.getContentForLanguage(I18nController.shared.language);

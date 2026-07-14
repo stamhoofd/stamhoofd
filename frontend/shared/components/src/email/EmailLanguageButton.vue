@@ -1,10 +1,10 @@
 <template>
-    <!-- Hidden by default; shown when translations are enabled (feature flag / admin app) or when
-         translations already exist, so existing translations remain manageable -->
-    <template v-if="languages.length > 0 || (hasLanguages && translationsEnabled)">
-        <button class="button text small gray" type="button" :disabled="disabled" data-testid="email-language-button" @click="showMenu">
-            <span class="icon language small" />
-            <span v-if="modelValue" class="style-tag">{{ modelValue.toUpperCase() }}</span>
+    <template v-if="languages.length > 0 || (supportsTranslations && hasLanguages && translationsEnabled)">
+        <button v-if="!modelValue" class="button icon translate" type="button" :disabled="disabled" data-testid="email-language-button" @click="showMenu" />
+        <button v-else class="button text" type="button" :disabled="disabled" data-testid="email-language-button" @click="showMenu">
+            <span class="icon translate" />
+            <span>{{ LanguageHelper.getName(modelValue) }}</span>
+            <span class="icon arrow-down-small" />
         </button>
     </template>
 </template>
@@ -19,9 +19,20 @@ import { useEmailTranslationsEnabled } from './hooks/useEmailTranslationsEnabled
 
 const props = withDefaults(defineProps<{
     /**
-     * Languages for which a translation exists
+     * Languages that exist on the content: the default language (if set) and every translation
      */
     languages: Language[];
+
+    /**
+     * The language of the default content, null when the content is untranslated
+     */
+    defaultLanguage: Language | null;
+
+    /**
+     * Whether new translations can be added: only the case when the language of the recipients
+     * is known. Existing translations remain manageable regardless.
+     */
+    supportsTranslations: boolean;
     disabled?: boolean;
 }>(), {
     disabled: false,
@@ -33,47 +44,135 @@ const emit = defineEmits<{
 }>();
 
 /**
- * The language that is currently being edited (null = the default content)
+ * The language that is currently being edited (null = no language set on the content)
  */
 const modelValue = defineModel<Language | null>({ required: true });
 const { hasLanguages } = useSwitchLanguage();
 const translationsEnabled = useEmailTranslationsEnabled();
 
 async function showMenu(event: MouseEvent) {
-    const menu = new ContextMenu([
-        [
+    const groups: ContextMenuItem[][] = [];
+    const canAdd = props.supportsTranslations && translationsEnabled.value;
+    const listedLanguages = canAdd ? [...new Set([...I18nController.shared.availableLanguages, ...props.languages])] : [...props.languages];
+
+    if (props.defaultLanguage === null || props.languages.length === 0) {
+        // Only without a language: once a language is set, the default content is that language
+        groups.push([
             new ContextMenuItem({
-                name: $t('Standaardtekst'),
-                description: $t('Gebruikt voor alle talen zonder vertaling'),
-                selected: modelValue.value === null,
+                name: $t('Standaardvertaling'),
+                disabled: true,
                 action: () => {
                     modelValue.value = null;
                 },
             }),
-        ],
-        [...new Set([...I18nController.shared.availableLanguages, ...props.languages])].map((language) => {
-            const exists = props.languages.includes(language);
+        ]);
+
+        groups.push([
+            new ContextMenuItem({
+                name: $t('Instellen als'),
+                childMenu: new ContextMenu([
+                    listedLanguages.map((language) => {
+                        const exists = props.languages.includes(language);
+                        const isCurrent = modelValue.value === language;
+
+                        return new ContextMenuItem({
+                            name: LanguageHelper.getName(language),
+                            action: () => {
+                                if (!exists) {
+                                    emit('add', language);
+                                    return;
+                                }
+                                if (!isCurrent) {
+                                    modelValue.value = language;
+                                    return;
+                                }
+                                emit('remove', language);
+                            },
+                        });
+                    }),
+                ]),
+            }),
+        ]);
+    } else {
+        // Languages without a translation can only be added when adding translations is allowed
+
+        // Existing languages first
+        groups.push(props.languages.map((language) => {
             const isCurrent = modelValue.value === language;
+            const isDefault = props.defaultLanguage === language;
 
             return new ContextMenuItem({
                 name: LanguageHelper.getName(language),
                 selected: isCurrent,
-                icon: exists && !isCurrent ? 'success' : null,
-                description: !exists ? $t('Vertaling toevoegen') : (isCurrent ? $t('Klik om deze vertaling te verwijderen') : null) ?? undefined,
+                rightText: (isDefault && props.languages.length > 1 ? $t('Standaard') : ''),
                 action: () => {
-                    if (!exists) {
-                        emit('add', language);
-                        return;
-                    }
                     if (!isCurrent) {
                         modelValue.value = language;
                         return;
                     }
-                    emit('remove', language);
                 },
             });
-        }),
-    ]);
+        }));
+
+        const untranslatedLanguages = listedLanguages.filter(l => !props.languages.includes(l));
+
+        const group: ContextMenuItem[] = [];
+
+        if (untranslatedLanguages.length) {
+            group.push(
+                new ContextMenuItem({
+                    name: $t('Vertaling toevoegen'),
+                    icon: 'plus',
+                    childMenu: new ContextMenu([
+                        untranslatedLanguages.map((language) => {
+                            return new ContextMenuItem({
+                                name: LanguageHelper.getName(language),
+                                action: () => {
+                                    emit('add', language);
+                                },
+                            });
+                        }),
+                    ]),
+                }),
+            );
+        }
+
+        if (props.languages.length === 1) {
+            group.push(
+                new ContextMenuItem({
+                    name: $t('Vertalingen verwijderen'),
+                    icon: 'trash',
+                    destructive: true,
+                    action: () => {
+                        emit('remove', props.languages[0]);
+                    },
+                }),
+            );
+        } else {
+            group.push(
+                new ContextMenuItem({
+                    name: $t('Vertaling verwijderen'),
+                    icon: 'trash',
+                    destructive: true,
+                    childMenu: new ContextMenu([
+                        props.languages.map((language) => {
+                            return new ContextMenuItem({
+                                name: LanguageHelper.getName(language),
+                                action: () => {
+                                    emit('remove', language);
+                                },
+                            });
+                        }),
+                    ]),
+                }),
+            );
+        }
+        if (group.length) {
+            groups.push(group);
+        }
+    }
+
+    const menu = new ContextMenu(groups);
     await menu.show({
         button: event.currentTarget as HTMLButtonElement,
     });

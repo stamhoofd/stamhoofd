@@ -136,5 +136,19 @@
   "%2S": "account",
   "%2T": "tag",
   "%2U": "Total",
-  "%2V": "Shops"
+  "%2V": "Shops",
+  "%13Y": "Hi John,",
+  "%13Z": "John",
+  "%2c": "Smith",
+  "%13a": "john.smith@example.com",
+  "%13d": "John Smith",
+  "%13f": "Peter Jones",
+  "%13g": "Peter",
+  "%13h": "Lucas",
+  "%13i": "Anderson",
+  "%13l": "Registration of Lucas and Peter",
+  "%13m": "Lucas and Peter",
+  "%ZbK": "lucas.anderson@example.com",
+  "%58": "John Smith",
+  "%59": "Emma and John Smith"
 }

@@ -70,8 +70,21 @@
   "%2Z": "Mère",
   "%2a": "hallo@stamhoofd.be",
   "%2b": "Single-Sign-On (SSO)",
-  "%2c": "Jansen",
+  "%2c": "Dupont",
   "%2d": "{number}e",
   "%2e": "E-mail",
-  "%2f": "+ 0 euro"
+  "%2f": "+ 0 euro",
+  "%13Y": "Bonjour Jean,",
+  "%13Z": "Jean",
+  "%13a": "jean.dupont@exemple.com",
+  "%13d": "Jean Dupont",
+  "%13f": "Pierre Durand",
+  "%13g": "Pierre",
+  "%13h": "Luc",
+  "%13i": "Martin",
+  "%13l": "Inscription de Luc et Pierre",
+  "%13m": "Luc et Pierre",
+  "%ZbK": "luc.martin@exemple.com",
+  "%58": "Jean Dupont",
+  "%59": "Marie et Jean Dupont"
 }

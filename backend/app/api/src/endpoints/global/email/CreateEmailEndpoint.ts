@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform, RateLimiter } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
-import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
+import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct, validateEmailTranslations } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -84,6 +84,8 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.text = request.body.text;
         model.json = request.body.json;
         model.translations = request.body.translations;
+        model.language = request.body.language;
+        validateEmailTranslations(model);
         model.status = request.body.status;
         model.attachments = request.body.attachments;
         model.sendAsEmail = request.body.sendAsEmail ?? true;
@@ -160,6 +162,6 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await duplicate.save();
         }
 
-        return new Response(await model.getPreviewStructure());
+        return new Response(await model.getPreviewStructure({ allLanguages: true }));
     }
 }

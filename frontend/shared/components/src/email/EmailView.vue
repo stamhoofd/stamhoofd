@@ -1,6 +1,10 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :email-block="patchedEmail.recipientFilter.canShowInMemberPortal" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings || !willSend ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('%1DC') + '…') : (willSend ? (sendAsEmail ? $t('%1DC') : $t('%1Fe')) : $t('%1Op'))" :replacements="replacements" :title="title" @save="send">
+            <template #navigation-buttons>
+                <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :default-language="contentLanguage.defaultLanguage.value" :supports-translations="supportsTranslations" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
+            </template>
+
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
                 <ProgressRing :radius="7" :stroke="2" :loading="true" :opacity="showLoading ? 1 : 0" />
@@ -27,34 +31,6 @@
 
             <!-- List -->
             <template #list>
-                <STListItem v-if="!props.editEmail" class="no-padding right-stack">
-                    <div class="list-input-box">
-                        <span>{{ $t('%RV') }}:</span>
-
-                        <div v-if="onlyOption" class="list-input">
-                            {{ toDescription }}
-                        </div>
-                        <button v-else class="list-input dropdown" type="button" @click="showToMenu">
-                            <span>{{ toDescription }}</span>
-                            <span class="icon arrow-down-small gray" />
-                        </button>
-                    </div>
-                    <template #right>
-                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('%1Fp') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
-                        <span v-else-if="patchedEmail.emailRecipientsCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.emailRecipientsCount) }}</span>
-                        <span v-else class="style-placeholder-skeleton" />
-                    </template>
-                </STListItem>
-                <STListItem class="no-padding right-stack" element-name="label">
-                    <div class="list-input-box">
-                        <span>{{ $t('%aO') }}:</span>
-                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
-                    </div>
-                    <template #right>
-                        <EmailLanguageButton :model-value="contentLanguage.currentLanguage.value" :languages="contentLanguage.languages.value" :disabled="contentLanguage.switching.value" @update:model-value="contentLanguage.switchTo($event).catch(console.error)" @add="contentLanguage.addLanguage($event).catch(console.error)" @remove="contentLanguage.removeLanguage($event).catch(console.error)" />
-                    </template>
-                </STListItem>
-
                 <STListItem v-if="senders.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
                         <span>{{ $t('%TA') }}:</span>
@@ -74,6 +50,32 @@
                     <template v-if="auth.hasFullAccess()" #right>
                         <button class="button icon settings" type="button" @click="manageEmails" />
                     </template>
+                </STListItem>
+
+                <STListItem v-if="!props.editEmail" class="no-padding right-stack">
+                    <div class="list-input-box">
+                        <span>{{ $t('%RV') }}:</span>
+
+                        <div v-if="onlyOption" class="list-input">
+                            {{ toDescription }}
+                        </div>
+                        <button v-else class="list-input dropdown" type="button" @click="showToMenu">
+                            <span>{{ toDescription }}</span>
+                            <span class="icon arrow-down-small gray" />
+                        </button>
+                    </div>
+                    <template #right>
+                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('%1Fp') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
+                        <span v-else-if="patchedEmail.emailRecipientsCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.emailRecipientsCount) }}</span>
+                        <span v-else class="style-placeholder-skeleton" />
+                    </template>
+                </STListItem>
+
+                <STListItem class="no-padding right-stack" element-name="label">
+                    <div class="list-input-box">
+                        <span>{{ $t('%aO') }}:</span>
+                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
+                    </div>
                 </STListItem>
             </template>
 
@@ -149,16 +151,25 @@ import { Toast } from '../overlays/Toast';
 import ProgressRing from '../icons/ProgressRing.vue';
 import EmailLanguageButton from './EmailLanguageButton.vue';
 import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
+import { useReplacementsForLanguage } from './hooks/useReplacementsForLanguage';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
     recipientFilterOptions: (RecipientChooseOneOption | RecipientMultipleChoiceOption)[];
     defaultSenderId?: string | null;
     editEmail?: EmailPreview | null;
+
+    /**
+     * Whether translations can be added to this email. Only enable this when the language of the
+     * recipients is known, which is currently only the case for webshop orders. Existing
+     * translations remain manageable regardless.
+     */
+    supportsTranslations?: boolean;
 }>(), {
     defaultSubject: '',
     defaultSenderId: null,
     editEmail: null,
+    supportsTranslations: false,
 });
 
 export type RecipientChooseOneOption = {
@@ -190,9 +201,6 @@ const title = computed(() => props.editEmail ? (willSend.value ? $t('%1Fj') : $t
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
-const replacements = computed(() => {
-    return email.value ? (email.value.exampleRecipient?.getReplacements(organization.value, platform.value) ?? []) : [];
-});
 const errors = useErrors();
 const auth = useAuth();
 const $isMobile = useIsMobile();
@@ -253,6 +261,20 @@ const contentLanguage = useEmailContentLanguage({
     editor: () => editor.value,
     patched: () => patchedEmail.value ?? Email.create({}),
     addPatch,
+});
+
+// The example values are shown in the language that is being edited: the backend returns the
+// example recipient in every supported language, the frontend-generated replacements are
+// regenerated in that language by the hook
+const replacements = useReplacementsForLanguage({
+    language: () => contentLanguage.currentLanguage.value,
+    build: () => {
+        if (!email.value) {
+            return [];
+        }
+        const recipient = email.value.exampleRecipientFor(contentLanguage.currentLanguage.value);
+        return recipient?.getReplacements(organization.value, platform.value) ?? [];
+    },
 });
 
 const recipientFilter = computed(() => {
@@ -835,7 +857,8 @@ async function openTemplates() {
                         }
                     }
 
-                    // Load the template in all languages: replace the existing translations with the ones of the template
+                    // Load the template in all languages: replace the existing translations with
+                    // the ones of the template, and take over its default language
                     const translations: PatchMap<Language, EmailContent | null> = new PatchMap();
                     for (const language of patchedEmail.value?.translations.keys() ?? []) {
                         translations.set(language, null);
@@ -843,10 +866,10 @@ async function openTemplates() {
                     for (const [language, content] of template.translations) {
                         translations.set(language, content.clone());
                     }
-                    addPatch({ translations });
+                    addPatch({ translations, language: template.language });
 
-                    // Set json and subject of the default content
-                    contentLanguage.currentLanguage.value = null;
+                    // Set json and subject of the default content (the template's default language)
+                    contentLanguage.currentLanguage.value = template.language;
                     editor.value?.commands.setContent(template.json);
                     subject.value = template.subject;
 
@@ -863,6 +886,7 @@ async function openTemplates() {
                             html: defaultContent.html,
                             text: defaultContent.text,
                             json: defaultContent.json,
+                            language: patchedEmail.value?.language ?? null,
                             translations: new Map([...(patchedEmail.value?.translations ?? new Map<Language, EmailContent>())].map(([language, content]) => [language, content.clone()])),
                             type,
                         })

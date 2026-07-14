@@ -5,7 +5,9 @@ import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFi
 
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { Email, Member } from '@stamhoofd/models';
+import type { Language } from '@stamhoofd/types/Language';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';
@@ -103,7 +105,7 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest) {
+    static async buildData(requestQuery: LimitedFilteredRequest, options: { language?: Language | null } = {}) {
         const user = Context.user;
         if (!user) {
             throw new Error('Not authenticated');
@@ -133,7 +135,7 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         return new PaginatedResponse<EmailWithRecipients[], LimitedFilteredRequest>({
-            results: await Promise.all(emails.map(email => email.getStructureForUser(user, memberIds))),
+            results: await Promise.all(emails.map(email => email.getStructureForUser(user, memberIds, options))),
             next,
         });
     }
@@ -161,7 +163,10 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         return new Response(
-            await GetUserEmailsEndpoint.buildData(request.query),
+            await GetUserEmailsEndpoint.buildData(request.query, {
+                // The language the caller is viewing in: emails are returned in this language when possible
+                language: I18n.getLanguageFromRequest(request),
+            }),
         );
     }
 }

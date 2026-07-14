@@ -1203,13 +1203,14 @@ describe('Endpoint.PatchEmailEndpoint', () => {
     });
 
     describe('Translations', () => {
-        const createDraftEmail = async () => {
+        const createDraftEmail = async (options: { language?: Language } = {}) => {
             const email = new Email();
             email.subject = 'Default subject';
             email.status = EmailStatus.Draft;
             email.text = 'Default text';
             email.html = '<p>Default html</p>';
             email.json = {};
+            email.language = options.language ?? null;
             email.userId = user.id;
             email.organizationId = organization.id;
             email.senderId = sender.id;
@@ -1217,8 +1218,26 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             return email;
         };
 
-        test('a translation can be added to a draft email', async () => {
+        test('the first language can be set without creating a translation', async () => {
             const email = await createDraftEmail();
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                language: Language.Dutch,
+            });
+
+            const response = await patchEmail(body, token, organization);
+            expect(response.body.language).toBe(Language.Dutch);
+            expect(response.body.translations.size).toBe(0);
+
+            const saved = await Email.getByID(email.id);
+            expect(saved!.language).toBe(Language.Dutch);
+            expect(saved!.translations.size).toBe(0);
+            expect(saved!.subject).toBe('Default subject');
+        });
+
+        test('a translation can be added to a draft email', async () => {
+            const email = await createDraftEmail({ language: Language.Dutch });
 
             const body = EmailStruct.patch({
                 id: email.id,
@@ -1231,10 +1250,11 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             const saved = await Email.getByID(email.id);
             expect(saved!.translations.get(Language.French)!.subject).toBe('Sujet français');
             expect(saved!.subject).toBe('Default subject');
+            expect(saved!.language).toBe(Language.Dutch);
         });
 
         test('a translation can be removed from a draft email', async () => {
-            const email = await createDraftEmail();
+            const email = await createDraftEmail({ language: Language.Dutch });
             email.translations = new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet français' })],
                 [Language.English, EmailContent.create({ subject: 'English subject' })],
@@ -1251,10 +1271,54 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             const saved = await Email.getByID(email.id);
             expect(saved!.translations.size).toBe(1);
             expect(saved!.translations.get(Language.English)!.subject).toBe('English subject');
+            expect(saved!.language).toBe(Language.Dutch);
+        });
+
+        test('removing the default language applies the move-over patch atomically', async () => {
+            const email = await createDraftEmail({ language: Language.Dutch });
+            email.translations = new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+            ]);
+            await email.save();
+
+            // The UI removes the default language by moving the first remaining translation
+            // into the default content in a single patch
+            const body = EmailStruct.patch({
+                id: email.id,
+                language: Language.French,
+                subject: 'Sujet français',
+                html: '<p>Français</p>',
+                text: 'Français',
+                translations: new PatchMap([[Language.French, null]]),
+            });
+
+            await patchEmail(body, token, organization);
+
+            const saved = await Email.getByID(email.id);
+            expect(saved!.language).toBe(Language.French);
+            expect(saved!.subject).toBe('Sujet français');
+            expect(saved!.html).toBe('<p>Français</p>');
+            expect(saved!.translations.size).toBe(0);
+        });
+
+        test('removing the last language keeps the content', async () => {
+            const email = await createDraftEmail({ language: Language.Dutch });
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                language: null,
+            });
+
+            await patchEmail(body, token, organization);
+
+            const saved = await Email.getByID(email.id);
+            expect(saved!.language).toBeNull();
+            expect(saved!.subject).toBe('Default subject');
+            expect(saved!.html).toBe('<p>Default html</p>');
         });
 
         test('patching the subject keeps the translations', async () => {
-            const email = await createDraftEmail();
+            const email = await createDraftEmail({ language: Language.Dutch });
             email.translations = new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet français' })],
             ]);
@@ -1269,7 +1333,51 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             const saved = await Email.getByID(email.id);
             expect(saved!.subject).toBe('New default subject');
+            expect(saved!.language).toBe(Language.Dutch);
             expect(saved!.translations.get(Language.French)!.subject).toBe('Sujet français');
+        });
+
+        test('rejects a translation without a default language', async () => {
+            const email = await createDraftEmail();
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                translations: new PatchMap([[Language.French, EmailContent.create({ subject: 'Sujet français' })]]),
+            });
+
+            await expect(patchEmail(body, token, organization))
+                .rejects
+                .toThrow(STExpect.errorWithCode('invalid_translations'));
+        });
+
+        test('rejects a translation for the default language itself', async () => {
+            const email = await createDraftEmail({ language: Language.Dutch });
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                translations: new PatchMap([[Language.Dutch, EmailContent.create({ subject: 'Nederlands onderwerp' })]]),
+            });
+
+            await expect(patchEmail(body, token, organization))
+                .rejects
+                .toThrow(STExpect.errorWithCode('invalid_translations'));
+        });
+
+        test('rejects clearing the default language while translations remain', async () => {
+            const email = await createDraftEmail({ language: Language.Dutch });
+            email.translations = new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français' })],
+            ]);
+            await email.save();
+
+            const body = EmailStruct.patch({
+                id: email.id,
+                language: null,
+            });
+
+            await expect(patchEmail(body, token, organization))
+                .rejects
+                .toThrow(STExpect.errorWithCode('invalid_translations'));
         });
 
         const createSendableEmail = async () => {
@@ -1279,6 +1387,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             email.text = 'Default text {{unsubscribeUrl}}';
             email.html = '<!DOCTYPE html><html><body><p>Default html</p>{{unsubscribeUrl}}</body></html>';
             email.json = {};
+            email.language = Language.Dutch;
             email.userId = user.id;
             email.organizationId = organization.id;
             email.senderId = sender.id;
@@ -1315,6 +1424,126 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             await expect(patchEmail(body, token, organization))
                 .rejects
                 .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
+        });
+    });
+
+    describe('Example recipients per language', () => {
+        // The greeting translations looked up in shared/locales/dist/locales/digit/{nl,fr}-BE.json,
+        // hardcoded on purpose so we don't verify $t with the same $t machinery we're testing
+        const dutchGreeting = 'Dag';
+        const frenchGreeting = 'Bonjour';
+
+        const createDraftEmail = async (options: { language?: Language; translations?: Map<Language, EmailContent> } = {}) => {
+            const email = new Email();
+            email.subject = 'Default subject';
+            email.status = EmailStatus.Draft;
+            email.text = 'Default text';
+            email.html = '<p>Default html</p>';
+            email.json = {};
+            email.language = options.language ?? null;
+            email.translations = options.translations ?? new Map();
+            email.userId = user.id;
+            email.organizationId = organization.id;
+            email.senderId = sender.id;
+            await email.save();
+            return email;
+        };
+
+        const greetingOf = (recipient: { replacements: { token: string; value: string }[] }) => {
+            return recipient.replacements.find(r => r.token === 'greeting')?.value;
+        };
+
+        test('the same example recipient is returned with replacements in every supported language', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            const email = await createDraftEmail();
+
+            const response = await patchEmail(EmailStruct.patch({ id: email.id }), token, organization);
+            const preview = response.body;
+
+            expect([...preview.exampleRecipients.keys()].sort()).toEqual([Language.Dutch, Language.French].sort());
+
+            const dutch = preview.exampleRecipients.get(Language.Dutch)!;
+            const french = preview.exampleRecipients.get(Language.French)!;
+            expect(dutch.language).toBe(Language.Dutch);
+            expect(french.language).toBe(Language.French);
+
+            // The same recipient in every language: only the replacements differ
+            expect(french.firstName).toBe(dutch.firstName);
+            expect(french.lastName).toBe(dutch.lastName);
+            expect(french.email).toBe(dutch.email);
+
+            expect(greetingOf(dutch)).toBe(`${dutchGreeting} ${dutch.firstName},`);
+            expect(greetingOf(french)).toBe(`${frenchGreeting} ${french.firstName},`);
+
+            // The deprecated single example recipient is still returned
+            expect(preview.exampleRecipient).not.toBeNull();
+            expect(greetingOf(preview.exampleRecipient!)).toBe(`${dutchGreeting} ${dutch.firstName},`);
+        });
+
+        test('every language the email has content for is included when it is supported', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French, Language.English] });
+            const email = await createDraftEmail({
+                language: Language.Dutch,
+                translations: new Map([[Language.English, EmailContent.create({ subject: 'English subject', html: '<p>English</p>', text: 'English' })]]),
+            });
+
+            const response = await patchEmail(EmailStruct.patch({ id: email.id }), token, organization);
+            const preview = response.body;
+
+            expect([...preview.exampleRecipients.keys()].sort()).toEqual([Language.Dutch, Language.English, Language.French].sort());
+            const english = preview.exampleRecipients.get(Language.English)!;
+            expect(english.language).toBe(Language.English);
+
+            // The exact English text is machine-generated and can change between locale builds:
+            // assert it was generated in its own language (not in one of the other languages)
+            expect(greetingOf(english)).toBeDefined();
+            expect(greetingOf(english)).not.toBe(greetingOf(preview.exampleRecipients.get(Language.Dutch)!));
+            expect(greetingOf(english)).not.toBe(greetingOf(preview.exampleRecipients.get(Language.French)!));
+        });
+
+        test('a translation in a language the platform no longer supports gets no example recipient', async () => {
+            // Generating it anyway would silently produce values in the corrected (supported)
+            // language, which is more misleading than the frontend falling back
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            const email = await createDraftEmail({
+                language: Language.Dutch,
+                translations: new Map([[Language.English, EmailContent.create({ subject: 'English subject', html: '<p>English</p>', text: 'English' })]]),
+            });
+
+            const response = await patchEmail(EmailStruct.patch({ id: email.id }), token, organization);
+            const preview = response.body;
+
+            expect([...preview.exampleRecipients.keys()].sort()).toEqual([Language.Dutch, Language.French].sort());
+        });
+
+        test('the own language of a real example recipient is ignored', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
+            const email = await createDraftEmail();
+
+            // A real recipient that received (or will receive) the email in French
+            const recipient = new EmailRecipient();
+            recipient.emailId = email.id;
+            recipient.email = 'jean@example.com';
+            recipient.firstName = 'Jean';
+            recipient.lastName = 'Dupont';
+            recipient.language = Language.French;
+            recipient.organizationId = organization.id;
+            await recipient.save();
+
+            const response = await patchEmail(EmailStruct.patch({ id: email.id }), token, organization);
+            const preview = response.body;
+
+            // The per-language examples ignore the recipient's own language
+            const dutch = preview.exampleRecipients.get(Language.Dutch)!;
+            const french = preview.exampleRecipients.get(Language.French)!;
+            expect(dutch.firstName).toBe('Jean');
+            expect(dutch.language).toBe(Language.Dutch);
+            expect(greetingOf(dutch)).toBe(`${dutchGreeting} Jean,`);
+            expect(greetingOf(french)).toBe(`${frenchGreeting} Jean,`);
+
+            // The deprecated single example recipient still uses its own language
+            expect(preview.exampleRecipient!.language).toBe(Language.French);
+            expect(greetingOf(preview.exampleRecipient!)).toBe(`${frenchGreeting} Jean,`);
         });
     });
 });

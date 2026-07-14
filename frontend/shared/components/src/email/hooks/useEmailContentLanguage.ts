@@ -1,23 +1,26 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { encodeObject, PatchMap } from '@simonbackx/simple-encoding';
-import { EmailContent } from '@stamhoofd/structures';
+import { EmailContent, LanguageHelper } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import type { Editor, JSONContent } from '@tiptap/core';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
 import { EmailStyler } from '../../editor/EmailStyler';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
+import { Toast } from '#overlays/Toast.ts';
 
 /**
  * The fields shared by the Email and EmailTemplate structures that make up the translatable content.
- * The root subject/html/text/json is the default (untranslated) content, translations contains
- * full content overrides per language.
+ * The root subject/html/text/json holds the default content: the content of `language` when one is
+ * set, or untranslated content when `language` is null. `translations` contains full content
+ * overrides for every other language and never contains `language` itself.
  */
 export type EmailContentHolder = {
     subject: string | null;
     html: string | null;
     text: string | null;
     json: any;
+    language: Language | null;
     translations: Map<Language, EmailContent>;
 };
 
@@ -26,13 +29,72 @@ export type EmailContentPatch = {
     html?: string;
     text?: string;
     json?: any;
+    language?: Language | null;
     translations?: PatchMap<Language, EmailContent | AutoEncoderPatchType<EmailContent> | null>;
 };
 
 /**
+ * The content of a single language of the holder. The default language (or null when no language
+ * is set) reads from the root fields, every other language from the translations map.
+ */
+export function getEmailContentFor(holder: EmailContentHolder, language: Language | null): EmailContent {
+    if (language !== null && language !== holder.language) {
+        return holder.translations.get(language) ?? EmailContent.create({});
+    }
+    return EmailContent.create({
+        subject: holder.subject ?? '',
+        html: holder.html ?? '',
+        text: holder.text ?? '',
+        json: holder.json ?? {},
+    });
+}
+
+/**
+ * The patch that adds a language:
+ * - The first language only marks the existing content as that language (no translation is created)
+ * - Every next language becomes a translation, seeded with the content that is currently displayed
+ */
+export function createAddLanguagePatch(holder: EmailContentHolder, displayedContent: EmailContent, language: Language): EmailContentPatch {
+    if (holder.language === null) {
+        return { language };
+    }
+    return { translations: new PatchMap([[language, displayedContent.clone()]]) };
+}
+
+/**
+ * The patch that removes a language:
+ * - A translation is simply removed from the map
+ * - Removing the default language moves the first remaining translation into the default content
+ *   and makes it the new default language
+ * - Removing the last language keeps the content, it only stops being marked as that language
+ */
+export function createRemoveLanguagePatch(holder: EmailContentHolder, language: Language): EmailContentPatch {
+    if (language !== holder.language) {
+        return { translations: new PatchMap([[language, null]]) };
+    }
+
+    const remaining = [...holder.translations.keys()].filter(l => l !== language);
+    if (remaining.length === 0) {
+        return { language: null };
+    }
+
+    const newDefault = remaining[0];
+    const content = getEmailContentFor(holder, newDefault);
+    return {
+        language: newDefault,
+        subject: content.subject,
+        html: content.html,
+        text: content.text,
+        json: content.json,
+        translations: new PatchMap([[newDefault, null]]),
+    };
+}
+
+/**
  * Manages which language of an email (template) is being edited: keeps the subject input and the
- * TipTap editor in sync with either the default content (root fields) or a translation, and writes
- * all edits back into the patch of the view.
+ * TipTap editor in sync with the language that is being edited, and writes all edits back into the
+ * patch of the view — into the root fields for the default language, into the translations map for
+ * every other language.
  */
 export function useEmailContentLanguage(options: {
     editor: () => Editor | null | undefined;
@@ -40,9 +102,9 @@ export function useEmailContentLanguage(options: {
     addPatch: (patch: EmailContentPatch) => void;
 }) {
     /**
-     * null = editing the default (untranslated) content
+     * The language that is being edited. null when no language is set on the content (untranslated).
      */
-    const currentLanguage: Ref<Language | null> = ref(null);
+    const currentLanguage: Ref<Language | null> = ref(options.patched().language);
 
     /**
      * Guards against interleaving language switches: deriving html/text from the editor is async
@@ -55,19 +117,35 @@ export function useEmailContentLanguage(options: {
      */
     let suppressUpdate = false;
 
-    const languages = computed(() => [...options.patched().translations.keys()]);
+    /**
+     * The translation that was last seeded as a copy of another language. When the user leaves it
+     * without changing anything, it is removed again so an untouched duplicate language never lingers.
+     */
+    let seeded: { language: Language; content: EmailContent } | null = null;
+
+    const defaultLanguage = computed(() => options.patched().language);
+
+    const languages = computed(() => {
+        const patched = options.patched();
+        const list: Language[] = patched.language !== null ? [patched.language] : [];
+        for (const language of patched.translations.keys()) {
+            if (!list.includes(language)) {
+                list.push(language);
+            }
+        }
+        return list;
+    });
+
+    // The holder can receive its default language after the hook was created (e.g. the email is
+    // loaded asynchronously): move the edited language along, null is only valid without a language
+    watch(defaultLanguage, (language) => {
+        if (currentLanguage.value === null && language !== null) {
+            currentLanguage.value = language;
+        }
+    });
 
     function contentFor(language: Language | null): EmailContent {
-        const patched = options.patched();
-        if (language !== null) {
-            return patched.translations.get(language) ?? EmailContent.create({});
-        }
-        return EmailContent.create({
-            subject: patched.subject ?? '',
-            html: patched.html ?? '',
-            text: patched.text ?? '',
-            json: patched.json ?? {},
-        });
+        return getEmailContentFor(options.patched(), language);
     }
 
     function mergeContent(base: EmailContent, content: Partial<{ subject: string; html: string; text: string; json: any }>): EmailContent {
@@ -80,7 +158,7 @@ export function useEmailContentLanguage(options: {
     }
 
     function applyContentPatch(language: Language | null, content: Partial<{ subject: string; html: string; text: string; json: any }>) {
-        if (language === null) {
+        if (language === null || language === options.patched().language) {
             options.addPatch(content);
             return;
         }
@@ -142,15 +220,38 @@ export function useEmailContentLanguage(options: {
         }
     }
 
+    /**
+     * If the language we are about to leave was seeded as a copy and never changed, remove it
+     * again: an untouched copy should not survive as a separate language. Call after flush(), while
+     * currentLanguage still points to the language that is being left.
+     */
+    function cleanupSeededLanguage() {
+        const tracked = seeded;
+        seeded = null;
+        if (!tracked || tracked.language !== currentLanguage.value) {
+            return;
+        }
+        const patched = options.patched();
+        if (tracked.language === patched.language || !patched.translations.has(tracked.language)) {
+            return;
+        }
+        if (emailContentIsEqual(contentFor(tracked.language), tracked.content)) {
+            options.addPatch({ translations: new PatchMap([[tracked.language, null]]) });
+        }
+    }
+
     async function switchTo(language: Language | null) {
-        if (switching.value || language === currentLanguage.value) {
+        // null represents the default content: that is the default language when one is set
+        const target = language ?? defaultLanguage.value;
+        if (switching.value || target === currentLanguage.value) {
             return;
         }
         switching.value = true;
         try {
             await flush();
-            currentLanguage.value = language;
-            loadEditor(language);
+            cleanupSeededLanguage();
+            currentLanguage.value = target;
+            loadEditor(target);
         } finally {
             switching.value = false;
         }
@@ -164,8 +265,16 @@ export function useEmailContentLanguage(options: {
         try {
             await flush();
 
-            // Seed the new translation with the content that is currently displayed
-            options.addPatch({ translations: new PatchMap([[language, contentFor(currentLanguage.value).clone()]]) });
+            // Capture the displayed content before the cleanup possibly removes it
+            const displayed = contentFor(currentLanguage.value).clone();
+            cleanupSeededLanguage();
+
+            const patch = createAddLanguagePatch(options.patched(), displayed, language);
+            options.addPatch(patch);
+            if (patch.translations) {
+                seeded = { language, content: displayed.clone() };
+                Toast.success($t('Je bekijkt nu de versie in het {language}. Pas de huidige inhoud aan om alles te vertalen.', { language: LanguageHelper.getName(language) })).show();
+            }
             currentLanguage.value = language;
         } finally {
             switching.value = false;
@@ -176,16 +285,33 @@ export function useEmailContentLanguage(options: {
         if (switching.value) {
             return;
         }
-        if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze vertaling wilt verwijderen?'), $t('Verwijderen'), $t('De inhoud van deze taal gaat verloren. Ontvangers in deze taal ontvangen daarna de standaardtekst.'))) {
+        const patched = options.patched();
+        const isDefault = language === patched.language;
+        const remaining = [...patched.translations.keys()].filter(l => l !== language);
+
+        let description: string;
+        if (isDefault && remaining.length === 0) {
+            description = $t('De tekst blijft behouden als standaardtekst, maar is niet langer gemarkeerd als deze taal.');
+        } else if (isDefault) {
+            description = $t('De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal.');
+        } else {
+            description = $t('De inhoud van deze taal gaat verloren. Ontvangers in deze taal ontvangen daarna de standaardtekst.');
+        }
+
+        if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze taal wilt verwijderen?'), $t('Verwijderen'), description)) {
             return;
         }
         // The switching guard stops onEditorUpdate from writing a patch while the editor content is replaced
         switching.value = true;
         try {
-            options.addPatch({ translations: new PatchMap([[language, null]]) });
+            if (seeded?.language === language) {
+                seeded = null;
+            }
+            options.addPatch(createRemoveLanguagePatch(patched, language));
             if (currentLanguage.value === language) {
-                currentLanguage.value = null;
-                loadEditor(null);
+                const newCurrent = options.patched().language;
+                currentLanguage.value = newCurrent;
+                loadEditor(newCurrent);
             }
         } finally {
             switching.value = false;
@@ -224,7 +350,7 @@ export function useEmailContentLanguage(options: {
      */
     function patchDerivedContent<P extends { patch: (p: any) => P }>(base: P, derived: { language: Language | null; html: string; text: string; json?: any }): P {
         const { language, ...content } = derived;
-        if (language === null) {
+        if (language === null || language === options.patched().language) {
             return base.patch(content);
         }
         const patch: EmailContentPatch = { translations: new PatchMap([[language, mergeContent(contentFor(language), content)]]) };
@@ -233,6 +359,7 @@ export function useEmailContentLanguage(options: {
 
     return {
         currentLanguage,
+        defaultLanguage,
         switching,
         languages,
         subject,

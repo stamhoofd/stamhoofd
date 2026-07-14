@@ -52,6 +52,31 @@ export class I18n {
         return this.loadedNamespaces.has(namespace + ':' + locale);
     }
 
+    /**
+     * Evaluate a callback with $t and $getLanguage bound to another (already loaded) locale,
+     * without switching the app locale. Used e.g. to generate the example replacement values
+     * of an email in the language that is being edited instead of the interface language.
+     * The country is left unchanged: only the messages and language are swapped.
+     */
+    runWithLocale<T>(locale: string, fn: () => T): T {
+        const messages = this.loadedLocales.get(locale);
+        if (!messages || locale === this.locale) {
+            return fn();
+        }
+        const previous = { locale: this.locale, language: this.language, messages: this.messages };
+        this.locale = locale;
+        this.language = locale.substring(0, 2);
+        this.messages = messages;
+        try {
+            return fn();
+        }
+        finally {
+            this.locale = previous.locale;
+            this.language = previous.language;
+            this.messages = previous.messages;
+        }
+    }
+
     loadLocale(namespace: string, locale: string, messages: any) {
         this.loadedNamespaces.add(namespace + ':' + locale);
         const loaded = this.loadRecursive(messages);

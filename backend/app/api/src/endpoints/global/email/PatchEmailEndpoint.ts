@@ -2,7 +2,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
-import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
+import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel, validateEmailTranslations } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { patchObject } from '@simonbackx/simple-encoding';
@@ -118,6 +118,14 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             model.translations = patchObject(model.translations, request.body.translations);
         }
 
+        if (request.body.language !== undefined) {
+            model.language = request.body.language;
+        }
+
+        if (request.body.translations !== undefined || request.body.language !== undefined) {
+            validateEmailTranslations(model);
+        }
+
         if (request.body.recipientFilter) {
             if (model.status !== EmailStatus.Draft) {
                 throw new SimpleError({
@@ -196,6 +204,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             await model.queueForSending();
         }
 
-        return new Response(await model.getPreviewStructure());
+        return new Response(await model.getPreviewStructure({ allLanguages: true }));
     }
 }

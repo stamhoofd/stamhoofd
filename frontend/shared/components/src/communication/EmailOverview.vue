@@ -284,6 +284,7 @@ import { useInterval } from '#hooks/useInterval.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus, PermissionLevel } from '@stamhoofd/structures';
+import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { computed, ref } from 'vue';
 
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
@@ -291,7 +292,6 @@ import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { usePatchEmail } from './hooks/usePatchEmail';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
-
 
 const props = defineProps<{
     email: EmailPreview;
@@ -479,6 +479,9 @@ async function editEmail() {
                 root: AsyncComponent(() => import('#email/EmailView.vue'), {
                     recipientFilterOptions: [],
                     editEmail: props.email,
+                    // Translations are only supported when the language of the recipients is known,
+                    // which is currently only the case for webshop orders
+                    supportsTranslations: STAMHOOFD.environment === 'development' || (props.email.recipientFilter.filters.length > 0 && props.email.recipientFilter.filters.every(f => f.type === EmailRecipientFilterType.Orders)),
                 }),
             }),
         ],

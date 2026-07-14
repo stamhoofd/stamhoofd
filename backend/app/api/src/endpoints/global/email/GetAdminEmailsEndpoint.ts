@@ -158,7 +158,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
         }
 
         return new PaginatedResponse<EmailPreview[], LimitedFilteredRequest>({
-            results: await Promise.all(emails.map(email => email.getPreviewStructure())),
+            results: await Promise.all(emails.map(email => email.getPreviewStructure({ allLanguages: true }))),
             next,
         });
     }

@@ -16,6 +16,7 @@ class Options {
     html?: string;
     text?: string;
     translations?: Map<Language, EmailContent>;
+    language?: Language;
 }
 
 export class EmailTemplateFactory extends Factory<Options, EmailTemplate> {
@@ -46,6 +47,10 @@ export class EmailTemplateFactory extends Factory<Options, EmailTemplate> {
 
         if (this.options.translations) {
             template.translations = this.options.translations;
+        }
+
+        if (this.options.language) {
+            template.language = this.options.language;
         }
 
         await template.save();

@@ -35,6 +35,7 @@ describe('sendEmailTemplate with translations', () => {
             subject: 'Default subject',
             html: '<p>Default html</p>',
             text: 'Default text',
+            language: Language.Dutch,
             translations: new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
             ]),
@@ -43,6 +44,7 @@ describe('sendEmailTemplate with translations', () => {
         await sendEmailTemplate(organization, {
             recipients: [
                 Recipient.create({ email: 'french@example.com', language: Language.French }),
+                Recipient.create({ email: 'dutch@example.com', language: Language.Dutch }),
                 Recipient.create({ email: 'english@example.com', language: Language.English }),
                 Recipient.create({ email: 'unknown@example.com' }),
             ],
@@ -51,11 +53,16 @@ describe('sendEmailTemplate with translations', () => {
         });
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
-        expect(emails).toHaveLength(3);
+        expect(emails).toHaveLength(4);
 
         const french = emails.find(e => e.to.includes('french@example.com'))!;
         expect(french.subject).toBe('Sujet français');
         expect(french.html).toContain('Français');
+
+        // Dutch is the default language: its content lives in the default content, not in the translations
+        const dutch = emails.find(e => e.to.includes('dutch@example.com'))!;
+        expect(dutch.subject).toBe('Default subject');
+        expect(dutch.html).toContain('Default html');
 
         // English has no translation: falls back to the default content
         const english = emails.find(e => e.to.includes('english@example.com'))!;
@@ -108,6 +115,7 @@ describe('sendEmailTemplate with translations', () => {
             subject: 'Platform subject',
             html: '<p>Platform html</p>',
             text: 'Platform text',
+            language: Language.Dutch,
             translations: new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet plateforme', html: '<p>Plateforme</p>', text: 'Plateforme' })],
             ]),
@@ -139,13 +147,14 @@ describe('sendEmailTemplate with translations', () => {
         expect(emails[0].html).toContain('Organization html');
     });
 
-    test('setFromTemplate copies the translations of the template onto the email', async () => {
+    test('setFromTemplate copies the translations and default language of the template onto the email', async () => {
         await new EmailTemplateFactory({
             organization,
             type: EmailTemplateType.SavedMembersEmail,
             subject: 'Default subject',
             html: '<p>Default html</p>',
             text: 'Default text',
+            language: Language.Dutch,
             translations: new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
             ]),
@@ -156,6 +165,7 @@ describe('sendEmailTemplate with translations', () => {
         expect(await email.setFromTemplate(EmailTemplateType.SavedMembersEmail)).toBe(true);
 
         expect(email.subject).toBe('Default subject');
+        expect(email.language).toBe(Language.Dutch);
         expect(email.translations.size).toBe(1);
         expect(email.translations.get(Language.French)!.subject).toBe('Sujet français');
     });
@@ -168,6 +178,7 @@ describe('sendEmailTemplate with translations', () => {
             // The same placeholder appears in both the default and the translated html
             html: '<p>Default __PLACEHOLDER__</p>',
             text: 'Default __PLACEHOLDER__',
+            language: Language.Dutch,
             translations: new Map([
                 [Language.French, EmailContent.create({ subject: 'Sujet', html: '<p>Français __PLACEHOLDER__</p>', text: 'Français __PLACEHOLDER__' })],
             ]),

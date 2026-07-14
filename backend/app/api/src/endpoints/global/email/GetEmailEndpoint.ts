@@ -51,6 +51,6 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             throw Context.auth.error();
         }
 
-        return new Response(await model.getPreviewStructure());
+        return new Response(await model.getPreviewStructure({ allLanguages: true }));
     }
 }

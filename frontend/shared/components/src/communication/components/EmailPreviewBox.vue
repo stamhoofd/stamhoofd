@@ -23,8 +23,7 @@
 
 <script lang="ts" setup>
 import SafeHtmlBox from '#editor/SafeHtmlBox.vue';
-import type { EmailPreview, EmailRecipient, EmailWithRecipients} from '@stamhoofd/structures';
-import { replaceEmailHtml } from '@stamhoofd/structures';
+import type { EmailPreview, EmailRecipient, EmailWithRecipients } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
@@ -43,7 +42,9 @@ const replacedHtml = computed(() => {
     if (!props.email.html) {
         return props.email.html;
     }
-    return replaceEmailHtml(props.email.html, props.recipient?.replacements ?? props.email.exampleRecipient?.replacements ?? []);
+    // The content of the recipient's language, with the recipient's replacements
+    const recipient = props.recipient ?? props.email.exampleRecipient;
+    return props.email.getHtmlFor(recipient);
 });
 
 </script>

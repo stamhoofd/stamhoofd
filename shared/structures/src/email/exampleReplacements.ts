@@ -3,20 +3,6 @@ import { BalanceItem } from '../BalanceItem.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
-const exampleBalanceItem = BalanceItem.create({
-    // todo translations
-    description: 'Voorbeeld item 1',
-    amount: 5,
-    unitPrice: 1000,
-});
-
-const exampleBalanceItem2 = BalanceItem.create({
-    // todo translations
-    description: 'Voorbeeld item 2',
-    amount: 1,
-    unitPrice: 500,
-});
-
 let _injectedReplacementValues = (replacements: Replacement[]): void => {
     throw new Error('injectReplacementValues is not yet injected. Call injectReplacementValues to inject dependencies.');
 };
@@ -25,33 +11,38 @@ export function injectReplacementValues(injected: typeof _injectedReplacementVal
     _injectedReplacementValues = injected;
 }
 
-let filled = false;
-let _ExampleReplacements: ReturnType<typeof getReplacements> = {} as any;
+// The example values are built with $t, so they depend on the language that is active when
+// they are generated: cache them per language so temporary language overrides (e.g. previewing
+// an email template in the language that is being edited) get values in that language.
+const _replacementsByLanguage = new Map<string, ReturnType<typeof getReplacements>>();
 
-function fillReplacementsIfNeeded() {
-    if (!filled) {
-        _ExampleReplacements = getReplacements();
-        _injectedReplacementValues(Object.values(_ExampleReplacements));
-        filled = true;
+function getFilledReplacements() {
+    const language = $getLanguage();
+    const cached = _replacementsByLanguage.get(language);
+    if (cached) {
+        return cached;
     }
+    const replacements = getReplacements();
+    _injectedReplacementValues(Object.values(replacements));
+    _replacementsByLanguage.set(language, replacements);
+    return replacements;
 }
 
 export const ExampleReplacements = {
     get all() {
-        fillReplacementsIfNeeded();
-        return _ExampleReplacements;
+        return getFilledReplacements();
     },
 
     get default() {
-        fillReplacementsIfNeeded();
+        const replacements = getFilledReplacements();
         return [
-            _ExampleReplacements.greeting,
-            _ExampleReplacements.firstName,
-            _ExampleReplacements.lastName,
-            _ExampleReplacements.email,
-            _ExampleReplacements.organizationName,
-            _ExampleReplacements.fromAddress,
-            _ExampleReplacements.fromName,
+            replacements.greeting,
+            replacements.firstName,
+            replacements.lastName,
+            replacements.email,
+            replacements.organizationName,
+            replacements.fromAddress,
+            replacements.fromName,
         ];
     },
 };
@@ -63,6 +54,18 @@ function getReplacements() {
      */
     const htmlPlaceholder = `<p class="description">${$t('%13W')}</p>`;
     const textPlaceholder = $t(`%13X`);
+
+    const exampleBalanceItem = BalanceItem.create({
+        description: $t('Spaghettisaus 1L'),
+        amount: 3,
+        unitPrice: 80000,
+    });
+
+    const exampleBalanceItem2 = BalanceItem.create({
+        description: $t('Slagroomtaart'),
+        amount: 1,
+        unitPrice: 150000,
+    });
 
     return {
         greeting: Replacement.create({
@@ -186,7 +189,19 @@ function getReplacements() {
         }),
         securityCode: Replacement.create({
             token: 'securityCode',
-            html: `<p class="style-code-large">VOOR-BEEL-D000-0000</p>`,
+            html: `<p class="style-code-large">${
+                Formatter.injectPattern(Formatter.escapeHtml($t('Voorbeeld').toLocaleUpperCase().padEnd(16, '0')), [
+                    { length: 4 },
+                    '-',
+                    { length: 4 },
+                    '-',
+                    { length: 4 },
+                    '-',
+                    { length: 4 },
+                    '-',
+                    { length: 4 },
+                ])
+            }</p>`,
         }),
         registerUrl: Replacement.create({
             token: 'registerUrl',
@@ -315,7 +330,7 @@ function getReplacements() {
         }),
         webshopName: Replacement.create({
             token: 'webshopName',
-            value: $t(`%1K`),
+            value: $t('Voorbeeldshop'),
         }),
 
         errors: Replacement.create({

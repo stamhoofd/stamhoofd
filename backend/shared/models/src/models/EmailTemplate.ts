@@ -46,9 +46,13 @@ export class EmailTemplate extends QueryableModel {
     @column({ type: 'string' })
     text: string;
 
-    /** Full content overrides per language. The default content (subject/html/text/json) is used for all languages without an override */
+    /** Full content overrides per language. The default content (subject/html/text/json) is used for all languages without an override. Never contains `language` itself */
     @column({ type: 'json', decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>) })
     translations: Map<Language, EmailContent> = new Map();
+
+    /** The language of the default content (subject/html/text/json); null when the content is untranslated */
+    @column({ type: 'string', nullable: true })
+    language: Language | null = null;
 
     @column({
         type: 'datetime', beforeSave() {
