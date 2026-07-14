@@ -1,8 +1,0 @@
-echo "Clearing builds...";
-yarn;
-yarn clear;
-yarn clear-vite-cache;
-yarn build:shared;
-
-# Clear will also have cleared api backend dist folders
-yarn build:backend:apps;
