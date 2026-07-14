@@ -19,10 +19,22 @@ import { BalanceItemService } from '../services/BalanceItemService.js';
 export async function fixInvisibleTrialRegistrations() {
     let fixed = 0;
     let skipped = 0;
+    let expired = 0;
+
+    const now = new Date();
 
     const result = await SeedTools.loopBatched({
         // Keyset pagination on id: activating a registration drops it from this filter, but rows are
         // never skipped because each next batch is fetched by id > lastId.
+        //
+        // For now, only registrations whose trial is still running are activated. Activating one whose
+        // trial already ended would mark its balance item due right away (its dueAt is in the past), so
+        // the member would immediately owe the full price - as an overdue amount - for a trial they
+        // never got, since the registration was invisible to them the whole time. Most of the affected
+        // registrations are in that state, so this deliberately does not fix all of them yet: what
+        // should happen to them (bill them anyway, give them a new payment deadline, or don't charge
+        // them at all) is still to be decided. Leaving them untouched keeps that decision open, no data
+        // is lost and a later seed can still pick them up.
         query: Registration.select()
             .whereNot('trialUntil', null)
             .where('registeredAt', null)
@@ -38,6 +50,14 @@ export async function fixInvisibleTrialRegistrations() {
                     if (!organization) {
                         console.warn('Organization not found for registration, skipping', registration.id, registration.organizationId);
                         skipped++;
+                        continue;
+                    }
+
+                    // The trial already ended. Activating it now would mark the balance item due right
+                    // away (its dueAt is in the past), so the member would immediately owe the full
+                    // price for a trial they never got. Leave it alone.
+                    if (registration.trialUntil === null || registration.trialUntil <= now) {
+                        expired++;
                         continue;
                     }
 
@@ -84,6 +104,11 @@ export async function fixInvisibleTrialRegistrations() {
                         continue;
                     }
 
+                    // markValid stamps registeredAt with the current date. Attribute the registration to
+                    // the date it was really made instead of the date this migration runs.
+                    registration.registeredAt = registration.createdAt;
+                    await registration.save();
+
                     fixed++;
                 } catch (e) {
                     // Isolate failures per registration: one bad row should not abort (and wedge) the whole migration.
@@ -102,9 +127,9 @@ export async function fixInvisibleTrialRegistrations() {
         },
     });
 
-    console.log(`Finished fixing invisible trial registrations: ${fixed} fixed, ${skipped} skipped of ${result.total} registrations.`);
+    console.log(`Finished fixing invisible trial registrations: ${fixed} fixed, ${expired} left alone because their trial already ended, ${skipped} skipped of ${result.total} registrations.`);
 
-    return { fixed, skipped };
+    return { fixed, skipped, expired };
 }
 
 export default new Migration(async () => {
