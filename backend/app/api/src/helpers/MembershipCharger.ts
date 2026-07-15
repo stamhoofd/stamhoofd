@@ -8,10 +8,9 @@ export const MembershipCharger = {
     async charge() {
         console.log('Charging memberships...');
 
-        // Loop all
-        let lastId = '';
         const platform = await Platform.getShared();
         const chargeVia = platform.membershipOrganizationId;
+        const nextPeriodId = platform.nextPeriodId;
 
         if (!chargeVia) {
             throw new SimpleError({
@@ -46,27 +45,17 @@ export const MembershipCharger = {
 
         let createdCount = 0;
         let createdPrice = 0;
-        const chunkSize = 100;
+        let q = MemberPlatformMembership.select()
+            .where('deletedAt', null)
+            .where('locked', false)
+            .where(SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()));
 
-        while (true) {
-            const memberships = await MemberPlatformMembership.select()
-                .where('id', SQLWhereSign.Greater, lastId)
-                .where('deletedAt', null)
-                .where('locked', false)
-                .where(SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()))
-                .limit(chunkSize)
-                .orderBy(
-                    new SQLOrderBy({
-                        column: SQL.column('id'),
-                        direction: 'ASC',
-                    }),
-                )
-                .fetch();
+        if (nextPeriodId) {
+            q = q.where('periodId', '!=', nextPeriodId);
+        }
 
-            if (memberships.length === 0) {
-                break;
-            }
-
+        // allBatched() paginates by id ASC internally, so we must not set a custom order by here.
+        for await (const memberships of q.limit(100).allBatched()) {
             const memberIds = Formatter.uniqueArray(memberships.map(m => m.memberId));
             const members = await Member.getByIDs(...memberIds);
             const createdBalanceItems: BalanceItem[] = [];
@@ -152,17 +141,6 @@ export const MembershipCharger = {
 
                 createdCount += 1;
                 createdPrice += membership.price;
-            }
-
-            if (memberships.length < chunkSize) {
-                break;
-            }
-
-            const z = lastId;
-            lastId = memberships[memberships.length - 1].id;
-
-            if (lastId === z) {
-                throw new Error('Unexpected infinite loop found in MembershipCharger');
             }
         }
 

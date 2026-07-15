@@ -111,6 +111,13 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             query.whereNot(noTrial);
         }
 
+        const platform = await Platform.getShared();
+        const nextPeriodId = platform.nextPeriodId;
+
+        if (nextPeriodId) {
+            query.where('periodId', '!=', nextPeriodId);
+        }
+
         const result = await query.fetch();
         const members = result[0]['data']['members'] as number;
         const memberships = result[0]['data']['memberships'] as number;
