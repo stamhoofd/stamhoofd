@@ -324,7 +324,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             id: 'member.emergencyContacts',
             name: $t(`Alle noodcontacten`),
             description: $t(`Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.`),
-            enabled: false,
+            enabled: true,
         }),
         ...[1, 2].flatMap((contactNumber, contactIndex) => {
             const getId = (value: string) => `member.emergencyContact.${contactIndex}.${value}`;

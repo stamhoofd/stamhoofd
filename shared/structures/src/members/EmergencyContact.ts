@@ -53,6 +53,69 @@ export class EmergencyContact extends AutoEncoder {
         return name;
     }
 
+    private static looksLikePhone(value: string): boolean {
+        if (!/^[+\d][\d\s()/.+-]*$/.test(value)) {
+            return false;
+        }
+
+        const digitCount = (value.match(/\d/g) ?? []).length;
+        return digitCount >= 4;
+    }
+
+    /**
+     * Parses a single line representation (as produced by toString) back into an emergency contact, so exported
+     * contacts can be re-imported. Returns null when the line is empty. Because toString collapses title and name
+     * into one slot when only one of them is set, a line without a 'title: name' separator is treated as the name.
+     */
+    static fromString(str: string): EmergencyContact | null {
+        const trimmed = str.trim();
+        if (!trimmed) {
+            return null;
+        }
+
+        let rest = trimmed;
+        let phone: string | null = null;
+
+        // A trailing '(...)' only holds the phone when there is a name/title in front of it (see toString)
+        if (trimmed.endsWith(')')) {
+            const openIndex = trimmed.lastIndexOf('(');
+            if (openIndex > 0) {
+                const prefix = trimmed.substring(0, openIndex).trim();
+                const inner = trimmed.substring(openIndex + 1, trimmed.length - 1).trim();
+
+                if (prefix.length > 0 && inner.length > 0) {
+                    rest = prefix;
+                    phone = inner;
+                }
+            }
+        }
+
+        let title = '';
+        let name = '';
+
+        const separatorIndex = rest.indexOf(': ');
+        if (separatorIndex !== -1) {
+            title = rest.substring(0, separatorIndex).trim();
+            name = rest.substring(separatorIndex + 2).trim();
+        }
+        else if (rest.length > 0) {
+            if (phone === null && this.looksLikePhone(rest)) {
+                phone = rest;
+            }
+            else {
+                name = rest;
+            }
+        }
+
+        if (!name && !title && !phone) {
+            return null;
+        }
+
+        const contact = EmergencyContact.create({ name, title, phone });
+        contact.cleanData();
+        return contact;
+    }
+
     isEqual(other: EmergencyContact) {
         this.cleanData();
         other.cleanData();

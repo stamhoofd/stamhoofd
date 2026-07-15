@@ -199,7 +199,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             id: 'emergencyContacts',
             name: $t(`Alle noodcontacten`),
             description: $t(`Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.`),
-            enabled: false,
+            enabled: true,
         }),
         ...[1, 2].flatMap((contactNumber, contactIndex) => {
             const getId = (value: string) => `emergencyContact.${contactIndex}.${value}`;
