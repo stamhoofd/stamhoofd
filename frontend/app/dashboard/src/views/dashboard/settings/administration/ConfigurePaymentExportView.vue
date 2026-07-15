@@ -38,7 +38,7 @@
         </STList>
 
         <template v-if="allPaymentProviders.length">
-            <hr><h2>{{ $t('%40') }}</h2>
+            <hr><h2>{{ $t('Betaalproviders') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
@@ -90,7 +90,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
+import { ExcelExportType, getPaymentProviderName, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
@@ -270,7 +270,7 @@ async function loadStripeAccounts() {
 }
 
 function getProviderName(provider: PaymentProvider) {
-    return provider;
+    return getPaymentProviderName(provider);
 }
 
 function getMethodName(paymentMethod: PaymentMethod): string {

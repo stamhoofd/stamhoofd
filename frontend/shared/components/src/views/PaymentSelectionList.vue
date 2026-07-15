@@ -132,9 +132,7 @@ const hasOtherOnlinePaymentMethodBesidesBancontact = computed(() => {
 
 function getName(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Payconiq: return 'Bancontact Pay | Wero'; // not translateable
         case PaymentMethod.Transfer: return $t(`%12j`);
-        case PaymentMethod.DirectDebit: return $t(`%12k`);
     }
     return PaymentMethodHelper.getNameCapitalized(paymentMethod, props.context);
 }
