@@ -108,8 +108,8 @@ type CaddyMatcher = {
     not?: CaddyMatcher[];
 };
 
-type CaddyHandler =
-    | {
+type CaddyHandler
+    = | {
         handler: 'reverse_proxy';
         upstreams: Array<{ dial: string }>;
         stream_close_delay?: string;
@@ -337,6 +337,7 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
     const routes = [
         route([domains.renderer], ports.renderer, proxyHost),
         route([domains.api, `*.${domains.api}`], ports.api, proxyHost),
+        route([domains.docs], ports.docs, proxyHost),
         ...cspFrontendRoutes([domains.dashboard], ports.webApp, proxyHost, { customDomain: false }),
         ...cspFrontendRoutes([domains.registration, `*.${domains.registration}`], ports.webApp, proxyHost, { customDomain: false }),
         ...cspFrontendRoutes([domains.webshop], ports.webshop, proxyHost, { customDomain: false }),
@@ -353,6 +354,7 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
         domains.renderer,
         domains.registration,
         `*.${domains.registration}`,
+        domains.docs,
     ])];
 
     return {

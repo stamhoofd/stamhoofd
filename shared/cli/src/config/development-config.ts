@@ -141,6 +141,7 @@ function buildDevelopmentDomains(context: CliContext) {
         // request is a custom domain. CoreDNS already resolves every *.<domain> host to localhost,
         // so a custom domain such as `myshop.custom.stamhoofd` resolves without extra DNS config.
         customDomain: appDomain('custom'),
+        docs: appDomain('docs'),
         mail: `mail.${domain}`,
         files: `files.${domain}`,
         filesConsole: `files-console.${domain}`,

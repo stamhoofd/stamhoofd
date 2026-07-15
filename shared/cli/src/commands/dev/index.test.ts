@@ -4,7 +4,7 @@ import { DevTarget, runDev } from '../../workflows/start-dev.js';
 import { showHelp } from '../../runtime/show-help.js';
 import { checkNodeVersion, printNodeVersionStatus } from '../../workflows/setup-node.js';
 
-vi.mock('../../workflows/start-dev.js', async (importOriginal) => ({
+vi.mock('../../workflows/start-dev.js', async importOriginal => ({
     ...await importOriginal<typeof import('../../workflows/start-dev.js')>(),
     runDev: vi.fn(),
 }));
@@ -51,6 +51,21 @@ describe('Dev command', () => {
 
         expect(runDev).toHaveBeenCalledWith({ context: 'dev' }, DevTarget.Frontend, {
             services: false,
+            stripe: false,
+            open: false,
+        });
+    });
+
+    it('defaults services to true for the docs target', async () => {
+        const command = createCommand({
+            args: { target: DevTarget.Docs },
+            flags: { services: undefined, stripe: false, open: false },
+        });
+
+        await command.run();
+
+        expect(runDev).toHaveBeenCalledWith({ context: 'dev' }, DevTarget.Docs, {
+            services: true,
             stripe: false,
             open: false,
         });
