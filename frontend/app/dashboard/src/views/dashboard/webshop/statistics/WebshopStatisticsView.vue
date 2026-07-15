@@ -73,14 +73,14 @@
 </template>
 
 <script lang="ts" setup>
-import { DateOption } from '@stamhoofd/components/views/DateRange.ts';
-import GraphView from '@stamhoofd/components/views/GraphView.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { DateOption } from '@stamhoofd/components/views/DateRange.ts';
+import GraphView from '@stamhoofd/components/views/GraphView.vue';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Category, Order, TicketPrivate } from '@stamhoofd/structures';
@@ -594,5 +594,9 @@ onBeforeUnmount(() => {
             grid-template-columns: 1fr;
        }
     }
+}
+
+.style-price-big {
+    justify-content: right;
 }
 </style>
