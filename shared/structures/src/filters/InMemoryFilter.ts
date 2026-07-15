@@ -298,7 +298,19 @@ function normalizeValue(val: StamhoofdCompareValue): string | number | null {
     return val;
 }
 
-export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompiler {
+export type CreateInMemoryFilterCompilerOptions = {
+    /**
+     * By default a filter on a property that does not exist on the object always evaluates to false.
+     *
+     * When this is enabled, a missing property is instead treated as `null` and passed to the operators. This
+     * mirrors how the SQL filters behave: extracting a missing path from a JSON column (JSON_VALUE) yields SQL
+     * NULL, exactly like a stored `null`, so operators such as $lt/$lte/$eq(null) can match. Only enable this on
+     * scalar/nullable value paths (not on array/relation paths that feed $elemMatch or $length, which throw on null).
+     */
+    treatMissingAsNull?: boolean;
+};
+
+export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector, options?: CreateInMemoryFilterCompilerOptions): InMemoryFilterCompiler {
     const splitted = Array.isArray(path) ? path : path.split('.');
 
     return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
@@ -307,6 +319,11 @@ export function createInMemoryFilterCompiler(path: string | string[], overrideFi
         return (object) => {
             const value = objectPathValue(object, splitted);
             if (value === undefined) {
+                if (options?.treatMissingAsNull) {
+                    // A missing property behaves like a stored null (see treatMissingAsNull docs), so the
+                    // operators get to decide the result instead of short-circuiting to false.
+                    return runner(null);
+                }
                 // Cannot filter on property that does not exists
                 // (no need to continue here on the filters as these will throw on an undefined value)
                 return false;
@@ -316,10 +333,10 @@ export function createInMemoryFilterCompiler(path: string | string[], overrideFi
     };
 }
 
-export function createInMemoryWildcardCompilerSelector(overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompilerSelector {
+export function createInMemoryWildcardCompilerSelector(overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector, options?: CreateInMemoryFilterCompilerOptions): InMemoryFilterCompilerSelector {
     return (filter, parentCompiler, key: string) => {
         // Every key will match on this compiler
-        const compiler = createInMemoryFilterCompiler(key, overrideFilterDefinitions);
+        const compiler = createInMemoryFilterCompiler(key, overrideFilterDefinitions, options);
         return compiler(filter, compiler, key);
     };
 }

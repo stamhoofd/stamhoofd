@@ -3,23 +3,29 @@ import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemo
 
 // This should match the backend logica. Some things that might be possible in the 'in memory' compilers, are not possible in the SQL compilers.
 // so that is why we don't support $elemMatch inside selectedChoices - this has been replaced with a wildcard selector instead.
+//
+// A record answer that has not been given (a missing record id, or a missing/empty field on the answer) is treated
+// as null on every value path, via treatMissingAsNull. This mirrors the SQL filters, where extracting a missing path
+// from the JSON column yields SQL NULL: e.g. filtering '$lt some-date' or '$eq null' then also matches members that
+// never answered the question, exactly like the SQL query would.
+const nullableRecordValue = { treatMissingAsNull: true };
 export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
-    selected: createInMemoryFilterCompiler('selected'),
+    selected: createInMemoryFilterCompiler('selected', undefined, nullableRecordValue),
     selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
         ...baseInMemoryFilterCompilers,
-        id: createInMemoryFilterCompiler('id'),
-    }),
+        id: createInMemoryFilterCompiler('id', undefined, nullableRecordValue),
+    }, nullableRecordValue),
     selectedChoices: {
         ...baseInMemoryFilterCompilers,
-        id: createInMemoryFilterCompiler('selectedChoices.*.id'),
+        id: createInMemoryFilterCompiler('selectedChoices.*.id', undefined, nullableRecordValue),
     },
-    value: createInMemoryFilterCompiler('value'),
-    dateValue: createInMemoryFilterCompiler('dateValue'),
+    value: createInMemoryFilterCompiler('value', undefined, nullableRecordValue),
+    dateValue: createInMemoryFilterCompiler('dateValue', undefined, nullableRecordValue),
 };
 
 export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
-    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
+    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers, nullableRecordValue)),
 };
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -37,7 +43,7 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     gender: createInMemoryFilterCompiler('details.gender'),
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
     missingData: createInMemoryFilterCompiler('details.missingData'),
-    recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
+    recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers, nullableRecordValue)),
     registrations: createInMemoryFilterCompiler('registrations', registrationInMemoryFilterCompilers),
 };
 
@@ -168,7 +174,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
-    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
+    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers, nullableRecordValue)),
     amountToPay: createInMemoryFilterCompiler('amountToPay'),
     payments: createInMemoryFilterCompiler('payments', paymentFilterCompilers),
 };
