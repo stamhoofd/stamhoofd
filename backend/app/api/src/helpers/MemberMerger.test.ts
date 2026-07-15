@@ -1,10 +1,13 @@
 import {
     Address,
+    BalanceItemRelation,
+    BalanceItemRelationType,
     BooleanStatus,
     EmergencyContact,
     Gender,
     MemberDetails,
     Parent,
+    ReceivableBalanceType,
     RecordAnswer,
     RecordSettings,
     ReviewTime,
@@ -16,8 +19,10 @@ import {
 } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
-import { Member } from '@stamhoofd/models';
-import { mergeMemberDetails, selectBaseMember } from './MemberMerger.js';
+import { BalanceItem, BalanceItemFactory, CachedBalance, Member, MemberFactory, OrganizationFactory } from '@stamhoofd/models';
+import { TestUtils } from '@stamhoofd/test-utils';
+import { BalanceItemService } from '../services/BalanceItemService.js';
+import { mergeMemberDetails, mergeTwoMembers, selectBaseMember } from './MemberMerger.js';
 
 describe('member merge', () => {
     describe('mergeMemberDetails', () => {
@@ -912,5 +917,68 @@ describe('member merge', () => {
                 expect(m1.details.parentsHaveAccess?.value).toEqual(false);
             });
         });
+    });
+});
+
+describe('mergeTwoMembers balance items', () => {
+    beforeEach(() => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
+
+    const createBalanceItem = async (organizationId: string, member: Member, unitPrice: number) => {
+        return await new BalanceItemFactory({
+            organizationId,
+            memberId: member.id,
+            amount: 1,
+            unitPrice,
+            relations: new Map([
+                [
+                    BalanceItemRelationType.Member,
+                    BalanceItemRelation.create({
+                        id: member.id,
+                        name: new TranslatedString(member.details.name),
+                    }),
+                ],
+            ]),
+        }).create();
+    };
+
+    test('moves the balance items to the base member, rewrites the Member relation and recalculates cached balances', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const base = await new MemberFactory({ organization, firstName: 'Base', lastName: 'Member' }).create();
+        const other = await new MemberFactory({ organization, firstName: 'Other', lastName: 'Member' }).create();
+
+        const baseItem = await createBalanceItem(organization.id, base, 30_00);
+        const otherItem = await createBalanceItem(organization.id, other, 50_00);
+
+        // Warm up the cached balances so both members have a stale value before merging
+        await CachedBalance.updateForMembers(organization.id, [base.id, other.id]);
+
+        await mergeTwoMembers(base, other);
+
+        // The balance item of the removed member now belongs to the base member
+        const movedItem = await BalanceItem.getByID(otherItem.id);
+        expect(movedItem?.memberId).toBe(base.id);
+
+        // Its Member relation is rewritten to point to the base member
+        const relation = movedItem?.relations.get(BalanceItemRelationType.Member);
+        expect(relation?.id).toBe(base.id);
+        expect(relation?.name.toString()).toBe(base.details.name);
+
+        // The balance item that was already on the base member is untouched
+        const keptItem = await BalanceItem.getByID(baseItem.id);
+        expect(keptItem?.memberId).toBe(base.id);
+        expect(keptItem?.relations.get(BalanceItemRelationType.Member)?.id).toBe(base.id);
+
+        // Make sure all scheduled cached balance updates have run
+        await BalanceItemService.flushAll();
+
+        // The base member now owes both balance items
+        const [baseBalance] = await CachedBalance.getForObjects([base.id], organization.id, ReceivableBalanceType.member);
+        expect(baseBalance?.amountOpen).toBe(80_00);
+
+        // The removed member no longer has an outstanding cached balance
+        const [otherBalance] = await CachedBalance.getForObjects([other.id], organization.id, ReceivableBalanceType.member);
+        expect(otherBalance?.amountOpen ?? 0).toBe(0);
     });
 });

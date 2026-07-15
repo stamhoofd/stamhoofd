@@ -19,10 +19,14 @@ import type {
     UitpasNumberDetails,
 } from '@stamhoofd/structures';
 import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
     Gender,
     ParentType,
+    TranslatedString,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PlatformMembershipService } from '../services/PlatformMembershipService.js';
 import { RegistrationService } from '../services/RegistrationService.js';
 import { MemberUserSyncer } from './MemberUserSyncer.js';
@@ -214,7 +218,45 @@ async function mergeResponsibilities(base: Member, other: Member) {
 }
 
 async function mergeBalanceItems(base: Member, other: Member) {
-    await mergeModels(base, other, BalanceItem);
+    const otherModels = await BalanceItem.select()
+        .where('memberId', other.id)
+        .fetch();
+
+    // Keep track of every organization that had balance items for the removed member,
+    // so we can reset its cached balance afterwards.
+    const organizationIds = new Set<string>();
+
+    for (const otherModel of otherModels) {
+        organizationIds.add(otherModel.organizationId);
+
+        otherModel.memberId = base.id;
+
+        // The Member relation stores the member id + name. Update it so it points to the base member.
+        if (otherModel.relations.has(BalanceItemRelationType.Member) && otherModel.relations.get(BalanceItemRelationType.Member)?.id === other.id) {
+            otherModel.relations.set(
+                BalanceItemRelationType.Member,
+                BalanceItemRelation.create({
+                    id: base.id,
+                    name: new TranslatedString(base.details.name),
+                }),
+            );
+        }
+
+        await otherModel.save({
+            skipMarkSaved: true,
+            skipSendEvents: true,
+        });
+
+        // Recalculate the cached balance of the base member (+ related users/organizations/registrations).
+        // We skip the model events above, so we have to schedule the update manually.
+        BalanceItemService.scheduleUpdate(otherModel);
+    }
+
+    // Recalculate the cached balance of the removed member, otherwise stale amounts remain
+    // in the cached balances for a member that no longer exists.
+    for (const organizationId of organizationIds) {
+        BalanceItemService.scheduleMemberUpdate(organizationId, other.id);
+    }
 }
 
 async function mergeDocuments(base: Member, other: Member) {

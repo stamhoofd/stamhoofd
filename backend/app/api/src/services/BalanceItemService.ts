@@ -189,7 +189,7 @@ export class BalanceItemService {
         userUpdateQueue.addItem(organizationId, userId);
     }
 
-    static cheduleMemberUpdate(organizationId: string, memberId: string) {
+    static scheduleMemberUpdate(organizationId: string, memberId: string) {
         memberUpdateQueue.addItem(organizationId, memberId);
     }
 

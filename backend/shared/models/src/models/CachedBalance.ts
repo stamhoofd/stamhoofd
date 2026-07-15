@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
 import type { SQLWhere } from '@stamhoofd/sql';
 import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
@@ -101,6 +101,62 @@ export class CachedBalance extends QueryableModel {
         }
 
         return await query.fetch();
+    }
+
+    /**
+     * Delete cached balances that no longer have any balance item attached to them.
+     *
+     * A cached balance becomes orphaned when all the balance items of its object are moved or
+     * removed - e.g. when a member is merged into another member and their balance items are
+     * moved to the base member. The cached balance of the removed member then no longer
+     * corresponds to any balance item and should be cleaned up.
+     *
+     * Returns the number of deleted cached balances.
+     */
+    static async deleteOrphaned(): Promise<number> {
+        const biTable = BalanceItem.table;
+        const memberUserTable = MemberUser.table;
+
+        // For each object type, a cached balance is orphaned when no balance item references its
+        // object (via the column that corresponds to the object type) within the same organization.
+        const orphanConditions: { objectType: ReceivableBalanceType; condition: string }[] = [
+            {
+                objectType: ReceivableBalanceType.member,
+                condition: `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.memberId = cb.objectId)`,
+            },
+            {
+                objectType: ReceivableBalanceType.registration,
+                condition: `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.registrationId = cb.objectId)`,
+            },
+            {
+                objectType: ReceivableBalanceType.organization,
+                condition: `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.payingOrganizationId = cb.objectId)`,
+            },
+            {
+                objectType: ReceivableBalanceType.userWithoutMembers,
+                condition: `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.userId = cb.objectId AND bi.memberId IS NULL)`,
+            },
+            {
+                // A user balance is the sum of the user's own balance items (without a member) and
+                // the balances of all members linked to that user, so it is only orphaned when
+                // neither of those exists.
+                objectType: ReceivableBalanceType.user,
+                condition: `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.userId = cb.objectId AND bi.memberId IS NULL)`
+                    + ` AND NOT EXISTS (SELECT 1 FROM \`${memberUserTable}\` mu JOIN \`${biTable}\` bi2 ON bi2.memberId = mu.membersId AND bi2.organizationId = cb.organizationId WHERE mu.usersId = cb.objectId)`,
+            },
+        ];
+
+        let deleted = 0;
+
+        for (const { objectType, condition } of orphanConditions) {
+            const [result] = await Database.delete(
+                `DELETE cb FROM \`${this.table}\` cb WHERE cb.objectType = ? AND ${condition}`,
+                [objectType],
+            );
+            deleted += result.affectedRows;
+        }
+
+        return deleted;
     }
 
     static async updateForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
