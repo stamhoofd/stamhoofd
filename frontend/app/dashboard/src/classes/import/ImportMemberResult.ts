@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
-import type { Group, Organization, Parent, Platform, PlatformMember, RecordAnswer} from '@stamhoofd/structures';
+import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordAnswer } from '@stamhoofd/structures';
 import { MemberDetails, PlatformFamily, Version } from '@stamhoofd/structures';
 import { ImportRegistrationResult } from './ImportRegistrationResult';
 
@@ -122,7 +122,7 @@ export class ImportMemberResult {
          */
         readonly row: number, {
             existingMember,
-        organization,
+            organization,
         }: {
             existingMember: PlatformMember | null;
             organization: Organization;
@@ -132,8 +132,7 @@ export class ImportMemberResult {
         if (existingMember) {
             this.existingMember = existingMember;
             this.baseDetails = existingMember.member.details;
-        }
-        else {
+        } else {
             this.baseDetails = MemberDetails.create({});
         }
 
@@ -207,6 +206,33 @@ export class ImportMemberResult {
         return changedParents;
     }
 
+    getChangedEmergencyContacts(): EmergencyContact[] {
+        const changed: EmergencyContact[] = [];
+        const patched = this.patchedDetails;
+        const patch = this._patch;
+
+        if (patched.emergencyContacts.length) {
+            const changedIds = new Set();
+
+            for (const contactPatch of patch.emergencyContacts.getPatches()) {
+                changedIds.add(contactPatch.id);
+            }
+
+            for (const contactPut of patch.emergencyContacts.getPuts()) {
+                changedIds.add(contactPut.put.id);
+            }
+
+            for (const changedId of changedIds.values()) {
+                const contact = patched.emergencyContacts.find(p => p.id === changedId);
+                if (contact) {
+                    changed.push(contact);
+                }
+            }
+        }
+
+        return changed;
+    }
+
     getChangedRecordAnswers(): RecordAnswer[] {
         const changedRecordAnswers = new Set<RecordAnswer>();
         const existingRecordAnswers = [...(this.existingMember?.member.details.recordAnswers?.values() ?? [])];
@@ -218,8 +244,7 @@ export class ImportMemberResult {
 
             if (value.isPut()) {
                 changedRecordAnswers.add(value);
-            }
-            else {
+            } else {
                 const existingRecordAnswer = existingRecordAnswers.find(a => a.id === value.id);
                 if (existingRecordAnswer) {
                     changedRecordAnswers.add(existingRecordAnswer);

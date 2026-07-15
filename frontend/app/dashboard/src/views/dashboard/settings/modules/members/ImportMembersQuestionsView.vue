@@ -203,31 +203,30 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, OrganizationRegistrationPeriod, Parent, Registration } from '@stamhoofd/structures';
+import type { EmergencyContact, Group, OrganizationRegistrationPeriod, Parent, Registration } from '@stamhoofd/structures';
 import { getGenderName, GroupType, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
 import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
-
 
 import { MemberImporter } from './MemberImporter';
 
@@ -414,11 +413,9 @@ function autoAssignMembers(members: ImportMemberResult[]) {
         const g = member.patchedDetails.getMatchingGroups(groups);
         if (g.length === 0) {
             member.importRegistrationResult.autoAssignedGroup = defaultGroup.value;
-        }
-        else if (g.length === 1) {
+        } else if (g.length === 1) {
             member.importRegistrationResult.autoAssignedGroup = g[0];
-        }
-        else {
+        } else {
             // Get group that is first in the priority queue (= multipleGroups)
             member.importRegistrationResult.autoAssignedGroup = multipleGroups.value.find((group) => {
                 return (g.includes(group));
@@ -495,7 +492,7 @@ function openMultipleGroups() {
     }).setDisplayStyle('popup')).catch(console.error);
 }
 
-function getParentDescription(parent: Parent) {
+function getParentDescription(parent: Parent): string[] {
     const description: string[] = [];
     const type = ParentTypeHelper.getName(parent.type);
     if (parent.name.trim()) {
@@ -516,6 +513,13 @@ function getParentDescription(parent: Parent) {
     return description;
 }
 
+function getEmergencyContactDescription(emergencyContact: EmergencyContact, index: number): string[] {
+    if (index < 0) {
+        return [`${$t('Extra noodcontact')}: ${emergencyContact.toString()}`];
+    }
+    return [`${$t('Noodcontact')} ${index + 1}: ${emergencyContact.toString()}`];
+}
+
 function openResultView() {
     present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
         title: $t(`%19R`),
@@ -532,11 +536,9 @@ function openResultView() {
 
                 if (member.importRegistrationResult.paidPrice !== null) {
                     suffix = ` (${$t('%gi', { price: Formatter.price(member.importRegistrationResult.paidPrice) })})`;
-                }
-                else if (member.importRegistrationResult.paid || paid.value) {
+                } else if (member.importRegistrationResult.paid || paid.value) {
                     suffix = ` (${$t('%198')})`;
-                }
-                else {
+                } else {
                     suffix = ` (${$t('%199')})`;
                 }
 
@@ -544,8 +546,7 @@ function openResultView() {
                     if (registration !== null) {
                         if (registration.group.type === GroupType.WaitingList) {
                             description.push($t(`%1Bv`, { group: groupName }) + suffix);
-                        }
-                        else {
+                        } else {
                             description.push($t(`%19U`, { group: groupName }) + suffix);
                         }
 
@@ -555,23 +556,19 @@ function openResultView() {
                             const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t(`%19T`));
                             if (r.group.type === GroupType.WaitingList) {
                                 description.push($t(`%19V`, { group: groupName }));
-                            }
-                            else {
+                            } else {
                                 description.push($t(`%19W`, { group: groupName }));
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     if (registration.group.type === GroupType.WaitingList) {
                         description.push($t(`%1Bw`, { group: groupName }) + suffix);
-                    }
-                    else {
+                    } else {
                         description.push($t(`%19X`, { group: groupName }) + suffix);
                     }
                 }
-            }
-            else if (member.isExisting) {
+            } else if (member.isExisting) {
                 description.push($t(`%19Y`));
             }
 
@@ -614,11 +611,15 @@ function openResultView() {
                     description.push(...getParentDescription(parent));
                 }
 
+                for (const contact of member.getChangedEmergencyContacts()) {
+                    const index = existingDetails.emergencyContacts.findIndex(c => c.id === contact.id);
+                    description.push(...getEmergencyContactDescription(contact, index));
+                }
+
                 for (const answer of member.getChangedRecordAnswers()) {
                     description.push($t('%19A', { key: answer.settings.name, value: answer.stringValue }));
                 }
-            }
-            else {
+            } else {
                 const patched = member.patchedDetails;
 
                 if (patched.name) {
@@ -655,6 +656,10 @@ function openResultView() {
                 for (const parent of patched.parents) {
                     description.push(...getParentDescription(parent));
                 }
+
+                patched.emergencyContacts.forEach((contact, index) => {
+                    description.push(...getEmergencyContactDescription(contact, index));
+                });
 
                 for (const answer of patched.recordAnswers.values()) {
                     description.push($t('%19A', { key: answer.settings.name, value: answer.stringValue }));
@@ -719,13 +724,11 @@ async function goNext() {
                     pop()?.catch(console.error);
                 },
             })).catch(console.error);
-        }
-        else {
+        } else {
             new Toast($t(`%19n`), 'success green').show();
             navigate.dismiss({ force: true }).catch(console.error);
         }
-    }
-    catch (e) {
+    } catch (e) {
         toast.hide();
         console.error(e);
         Toast.fromError(e).show();
