@@ -10,7 +10,8 @@ import { CaddyService } from '../services/definitions/caddy-service.js';
 import { startServices, stopServices } from '../services/manager.js';
 import { sharedServicesRunning } from '../services/shared-services.js';
 import { checkSetup, isSetupReady, printSetupReport } from './setup-machine.js';
-import { DevTarget, runDev } from './start-dev.js';
+import { commandsForTarget, concurrentlyTargets, DevTarget, runDev } from './start-dev.js';
+import { buildPorts } from '../context/ports.js';
 
 vi.mock('node:child_process', () => ({
     spawn: vi.fn(),
@@ -405,6 +406,64 @@ describe.skip('runDev', () => {
         await expect(promise).resolves.toBeUndefined();
 
         expect(liveOutput.stop).toHaveBeenCalledWith({ persistStatus: true });
+    });
+});
+
+describe('commandsForTarget', () => {
+    const ports = buildPorts(context);
+
+    it('runs the standalone Nuxt docs server for the docs target', () => {
+        const commands = commandsForTarget(DevTarget.Docs, ports);
+
+        expect(commands).toHaveLength(1);
+        expect(commands[0]).toContain(`yarn --cwd docs dev --port ${ports.docs}`);
+        // Must bind all interfaces so the Dockerised Caddy can reach it via
+        // host.docker.internal; a loopback-only bind makes the proxy 502.
+        expect(commands[0]).toContain('--host 0.0.0.0');
+    });
+
+    it('installs the standalone docs dependencies on first run', () => {
+        // docs/ is outside the yarn workspaces, so the root install does not
+        // cover it; the command must install before starting Nuxt.
+        expect(commandsForTarget(DevTarget.Docs, ports)[0]).toContain('docs/node_modules');
+        expect(commandsForTarget(DevTarget.Docs, ports)[0]).toContain('yarn --cwd docs install');
+    });
+
+    it('starts docs alongside the full stack for the all target', () => {
+        const commands = commandsForTarget(DevTarget.All, ports);
+
+        expect(commands).toHaveLength(2);
+        expect(commands[0]).toContain('lerna run dev');
+        expect(commands.some(command => command.includes(`yarn --cwd docs dev --port ${ports.docs}`))).toBe(true);
+    });
+
+    it('does not start docs for backend or frontend targets', () => {
+        expect(commandsForTarget(DevTarget.Backend, ports).some(command => command.includes('--cwd docs'))).toBe(false);
+        expect(commandsForTarget(DevTarget.Frontend, ports).some(command => command.includes('--cwd docs'))).toBe(false);
+    });
+});
+
+describe('concurrentlyTargets', () => {
+    const ports = buildPorts(context);
+
+    it('runs the docs-only session without the shared build watcher', () => {
+        const targets = concurrentlyTargets(DevTarget.Docs, ports);
+
+        expect(targets).toHaveLength(1);
+        expect(targets.some(target => target.includes('nodemon') || target.includes('wait-on'))).toBe(false);
+    });
+
+    it('starts docs immediately in all while gating the Lerna processes on the shared build', () => {
+        const targets = concurrentlyTargets(DevTarget.All, ports);
+        const docsTarget = targets.find(target => target.includes('--cwd docs dev'));
+        const lernaTarget = targets.find(target => target.includes('lerna run dev'));
+
+        // Docs consumes no shared build output, so it must not wait on it...
+        expect(docsTarget).toBeDefined();
+        expect(docsTarget).not.toContain('wait-on');
+        // ...while the Lerna processes still do.
+        expect(lernaTarget).toContain('wait-on');
+        expect(targets.some(target => target.includes('nodemon'))).toBe(true);
     });
 });
 

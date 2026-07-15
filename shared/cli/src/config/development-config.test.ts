@@ -26,6 +26,7 @@ describe('buildDevelopmentConfig', () => {
 
         expect(config.domains.dashboard).toBe('dashboard.stamhoofd');
         expect(config.domains.api).toBe('api.stamhoofd');
+        expect(config.domains.docs).toBe('docs.stamhoofd');
         expect(config.backendEnv.DB_DATABASE).toBe('stamhoofd-development');
         expect(config.backendEnv.DB_HOST).toBe(localIpv4Host);
         expect(config.backendEnv.SPACES_KEY).toBe(localFilesAccessKey);

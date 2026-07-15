@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { buildBackendEnv, buildDomains } from '../config/build-config.js';
 import { successSymbol } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
+import { buildPorts } from '../context/ports.js';
 import type { StatusItem } from '../runtime/live-output.js';
 import { createLiveOutput } from '../runtime/live-output.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
@@ -31,6 +32,7 @@ export enum DevTarget {
     Instance = 'instance',
     Backend = 'backend',
     Frontend = 'frontend',
+    Docs = 'docs',
 }
 
 enum PrerequisiteState {
@@ -48,13 +50,14 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
     let startedStripe = false;
     const output = createLiveOutput();
     const domains = buildDomains(context);
+    const ports = buildPorts(context);
     let setupState: PrerequisiteState = PrerequisiteState.Ready;
     let servicesState: PrerequisiteState = PrerequisiteState.Ready;
     let servicesCheckInterval: NodeJS.Timeout | undefined;
     let servicesCheckPromise: Promise<void> | undefined;
 
     const setStatus = () => {
-        output.setStatus(buildStatusItems(domains, context.env, setupState, servicesState));
+        output.setStatus(buildStatusItems(domains, context.env, setupState, servicesState, target));
     };
 
     const refreshSetupState = async (): Promise<boolean> => {
@@ -133,7 +136,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
             }
         }
 
-        if (options.services && target !== DevTarget.Frontend) {
+        if (options.services && target !== DevTarget.Frontend && target !== DevTarget.Docs) {
             await setupDevelopmentS3Buckets(context);
         }
 
@@ -155,7 +158,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
             }, serviceCheckIntervalMs);
         }
 
-        const stripeEnv = options.stripe && target !== DevTarget.Frontend
+        const stripeEnv = options.stripe && target !== DevTarget.Frontend && target !== DevTarget.Docs
             ? await startStripe(context)
             : {};
         startedStripe = Object.keys(stripeEnv).length > 0;
@@ -165,14 +168,14 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         }
 
         if (options.open) {
-            openUrl(`https://${domains.dashboard}`);
-            output.log(`${successSymbol} Opened dashboard in your browser`);
+            const openDomain = target === DevTarget.Docs ? domains.docs : domains.dashboard;
+            openUrl(`https://${openDomain}`);
+            output.log(`${successSymbol} Opened ${target === DevTarget.Docs ? 'docs' : 'dashboard'} in your browser`);
         }
         output.log('Starting app processes...');
         output.log('Press Ctrl+C to stop this session.');
 
-        const command = commandForTarget(target);
-        const child = spawn('yarn', ['-s', 'concurrently', '-r', sharedBuildWatchCommand(), `${sharedBuildReadyCommand()} && ${command}`], {
+        const child = spawn('yarn', ['-s', 'concurrently', '-r', ...concurrentlyTargets(target, ports)], {
             cwd: context.rootDir,
             env: {
                 ...process.env,
@@ -296,10 +299,17 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
     }
 }
 
-function buildStatusItems(domains: ReturnType<typeof buildDomains>, env: string, setupState: PrerequisiteState, servicesState: PrerequisiteState): StatusItem[] {
+function buildStatusItems(domains: ReturnType<typeof buildDomains>, env: string, setupState: PrerequisiteState, servicesState: PrerequisiteState, target: DevTarget): StatusItem[] {
+    const domainItems = target === DevTarget.Docs
+        ? [buildDomainStatusItem(domains.docs, env)]
+        : [
+                buildDomainStatusItem(domains.dashboard, env),
+                buildDomainStatusItem(domains.api, env),
+                ...(target === DevTarget.All ? [buildDomainStatusItem(domains.docs, env)] : []),
+            ];
+
     return [
-        buildDomainStatusItem(domains.dashboard, env),
-        buildDomainStatusItem(domains.api, env),
+        ...domainItems,
         buildMissingPrerequisiteItem(MissingPrerequisite.Setup, setupState),
         buildMissingPrerequisiteItem(MissingPrerequisite.Services, servicesState),
     ].filter((item): item is StatusItem => item !== undefined);
@@ -360,12 +370,48 @@ function formatDomainLabel(domain: string, env: string): string {
     return parts.join('');
 }
 
-function commandForTarget(target: DevTarget): string {
+const backendCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --parallel --stream';
+const frontendCommand = 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+const fullStackCommand = 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+
+// The docs site is a standalone Nuxt app outside the Lerna workspaces, so it is
+// started directly through its own package rather than a lerna scope. Because it
+// is not part of the root workspaces, the root `yarn` does not install its
+// dependencies, so install them on first run (when node_modules is missing).
+//
+// `--host 0.0.0.0` is required: Caddy runs in Docker and reaches the dev servers
+// through `host.docker.internal`, so the server must listen on all interfaces.
+// Nuxt otherwise binds the loopback address only (`::1`), which the Caddy
+// container cannot reach, and every request to docs.<instance>.stamhoofd 502s.
+function docsCommand(ports: ReturnType<typeof buildPorts>): string {
+    return `([ -d docs/node_modules ] || yarn --cwd docs install --frozen-lockfile) && yarn --cwd docs dev --port ${ports.docs} --host 0.0.0.0`;
+}
+
+export function commandsForTarget(target: DevTarget, ports: ReturnType<typeof buildPorts>): string[] {
+    if (target === DevTarget.Docs) {
+        return [docsCommand(ports)];
+    }
     if (target === DevTarget.Backend) {
-        return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --parallel --stream';
+        return [backendCommand];
     }
     if (target === DevTarget.Frontend) {
-        return 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+        return [frontendCommand];
     }
-    return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/auto --scope @stamhoofd/admin --scope @stamhoofd/verify-email --scope @stamhoofd/web-app --scope @stamhoofd/webshop --parallel --stream';
+    if (target === DevTarget.All) {
+        return [fullStackCommand, docsCommand(ports)];
+    }
+    return [fullStackCommand];
+}
+
+// The docs site does not consume any @stamhoofd/* build output, so it never
+// waits for the shared build: a docs-only session skips the watcher entirely,
+// and in `all` the docs server starts immediately while the Lerna processes
+// wait for the shared build to be ready.
+export function concurrentlyTargets(target: DevTarget, ports: ReturnType<typeof buildPorts>): string[] {
+    const commands = commandsForTarget(target, ports);
+    if (target === DevTarget.Docs) {
+        return commands;
+    }
+    const docs = docsCommand(ports);
+    return [sharedBuildWatchCommand(), ...commands.map(command => command === docs ? command : `${sharedBuildReadyCommand()} && ${command}`)];
 }

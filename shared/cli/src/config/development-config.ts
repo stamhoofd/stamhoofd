@@ -109,6 +109,7 @@ function buildDevelopmentDomains(context: CliContext) {
         renderer: appDomain('renderer'),
         registration: appDomain('registration'),
         webshop: appDomain('shop'),
+        docs: appDomain('docs'),
         mail: `mail.${domain}`,
         files: `files.${domain}`,
         filesConsole: `files-console.${domain}`,

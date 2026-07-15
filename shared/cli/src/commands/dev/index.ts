@@ -16,6 +16,7 @@ export default class Dev extends BaseCommand {
         'stam dev all --env keeo --open',
         'stam dev backend --env keeo --name feature-payments --stripe',
         'stam dev frontend --name feature-payments --services',
+        'stam dev docs',
     ];
 
     static args = {
@@ -49,15 +50,11 @@ export default class Dev extends BaseCommand {
         }
 
         await runDev(await this.createContext(flags), target, {
-            services: flags.services ?? defaultServicesForTarget(target),
+            services: flags.services ?? target !== DevTarget.Frontend,
             stripe: flags.stripe,
             open: flags.open,
         });
     }
-}
-
-function defaultServicesForTarget(target: DevTarget): boolean {
-    return target !== DevTarget.Frontend;
 }
 
 function parseDevTarget(target: string): DevTarget {
