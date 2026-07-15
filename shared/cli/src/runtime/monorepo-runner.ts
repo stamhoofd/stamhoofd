@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { buildBackendEnv } from '../config/build-config.js';
 import { caddyRootCaPath, localIpv4Host, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
-import { buildBackendEnv } from '../config/build-config.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import * as docker from '../services/docker.js';
 import { startSharedServices } from '../services/shared-services.js';
@@ -57,23 +57,24 @@ export type UnitTestPackage = {
     path: string;
     /** Whether the package's tests connect to MySQL (checked via its vitest setup files). */
     needsDatabase: boolean;
+    typecheck?: boolean;
 };
 
 // The unit-test packages that `stam test unit` runs. To add a package: give it a `test` script that
 // runs vitest, then add it here with the correct `needsDatabase` (true if its vitest setup/tests
 // query `Database` from @simonbackx/simple-database).
 export const unitTestPackages: UnitTestPackage[] = [
-    { name: 'structures', path: 'shared/structures', needsDatabase: false },
+    { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
     { name: 'eslint', path: 'shared/eslint', needsDatabase: false },
     { name: 'utility', path: 'shared/utility', needsDatabase: false },
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
-    { name: 'models', path: 'backend/shared/models', needsDatabase: true },
-    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
-    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
+    { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
+    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },
+    { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
-    { name: 'api', path: 'backend/app/api', needsDatabase: true },
+    { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
@@ -140,6 +141,10 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
 
     try {
         for (const pkg of packages) {
+            if (pkg.typecheck) {
+                await run('yarn', ['typecheck'], { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+            }
+
             const args = ['vitest', 'run'];
             if (passWithNoTests) {
                 args.push('--passWithNoTests');
@@ -150,8 +155,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
             args.push(...(options.fileFilters ?? []));
             await run('yarn', args, { cwd: path.join(context.rootDir, pkg.path), env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
         }
-    }
-    finally {
+    } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
         if (needsDatabase) {
             await docker.removeContainer(testMysqlNames(context).container, context.verbose);
@@ -177,15 +181,13 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
             await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
         }
         await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
-    }
-    finally {
+    } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         await docker.removeContainer(e2eContainer, context.verbose);
         if (shouldRestoreCaddy) {
             try {
                 await CaddyService.reload(context);
-            }
-            catch (error) {
+            } catch (error) {
                 console.warn(`Failed to restore shared Caddy config: ${error instanceof Error ? error.message : String(error)}`);
             }
         }
@@ -227,8 +229,7 @@ async function cleanPackageChildren(root: string): Promise<void> {
     let entries: string[];
     try {
         entries = await fs.readdir(root);
-    }
-    catch {
+    } catch {
         return;
     }
 

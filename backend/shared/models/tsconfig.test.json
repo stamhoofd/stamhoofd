@@ -2,7 +2,8 @@
     "extends": "../../../tsconfig.test.json",
     "compilerOptions": {
         "rootDir": ".",
-        "outDir": "dist"
+        "outDir": "dist",
+        "noEmit": true
     },
     "references": [
         { "path": "./tsconfig.build.json" }

@@ -13,7 +13,7 @@ import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useShowPayment } from '#payments/hooks/useShowPayment.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import PromiseView from '#containers/PromiseView.vue';
 import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';

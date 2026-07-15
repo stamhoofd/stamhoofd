@@ -40,6 +40,7 @@
         "lint": "eslint",
         "migrations": "yarn -s build:full && node ./dist/migrations.js",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "typecheck": "tsc --build tsconfig.test.json",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
         "test:reset": "yarn -s build:full && yarn -s test"

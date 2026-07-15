@@ -17,6 +17,10 @@
         ".": "./dist/index.js",
         "./*.js": "./dist/*.js"
     },
+    "imports": {
+        "#*.ts": "./src/*.ts",
+        "#*": "./src/*.ts"
+    },
     "files": [
         "dist",
         "package.json"
@@ -24,6 +28,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint",
+        "typecheck": "tsc --build tsconfig.test.json",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },

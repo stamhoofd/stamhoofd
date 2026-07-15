@@ -17,6 +17,7 @@
         "dev:full": "yarn -s dev",
         "lint": "eslint",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "typecheck": "tsc --build tsconfig.test.json",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },

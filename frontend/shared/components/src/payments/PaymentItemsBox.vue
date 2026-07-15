@@ -27,9 +27,9 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import STGrid from '@stamhoofd/components/layout/STGrid.vue';
-import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
-import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import STGrid from '#layout/STGrid.vue';
+import STGridItem from '#layout/STGridItem.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { BalanceItem, PaymentGeneral } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';

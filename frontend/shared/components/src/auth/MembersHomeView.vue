@@ -64,8 +64,8 @@
 import GroupTreeVue from './components/GroupTree.vue';
 import { defineRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
 
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
+import { useRequiredOrganization } from '#hooks/useOrganization';
+import LegalFooter from '#navigation/LegalFooter.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -90,7 +90,7 @@ defineRoutes([
     {
         name: Routes.Signup,
         url: 'account-aanmaken',
-        component: async () => (await import('@stamhoofd/components/auth/SignupView.vue')).default as any,
+        component: async () => (await import('#auth/SignupView.vue')).default as any,
         present: 'popup',
         paramsToProps() {
             return {

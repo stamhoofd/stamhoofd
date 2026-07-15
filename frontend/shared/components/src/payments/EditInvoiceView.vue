@@ -116,19 +116,19 @@
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import RadioListItem from '@stamhoofd/components/inputs/RadioListItem.vue';
-import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
-import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useRequiredOrganization } from '#hooks/useOrganization.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import RadioListItem from '#inputs/RadioListItem.vue';
+import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
+import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import PaymentCustomerSelectionBox from '@stamhoofd/components/payments/components/PaymentCustomerSelectionBox.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import PaymentCustomerSelectionBox from '#payments/components/PaymentCustomerSelectionBox.vue';
 import type { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { Invoice } from '@stamhoofd/structures';
 
@@ -239,7 +239,7 @@ async function save() {
 async function editInvoiceSettings() {
     await present({
         components: [
-            AsyncComponent(() => import('@stamhoofd/components/organizations/GeneralSettingsView.vue'), {}),
+            AsyncComponent(() => import('#organizations/GeneralSettingsView.vue'), {}),
         ],
         modalDisplayStyle: 'popup',
     });

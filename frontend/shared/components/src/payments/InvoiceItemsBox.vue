@@ -43,11 +43,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
-import STGrid from '@stamhoofd/components/layout/STGrid.vue';
-import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
-import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
+import IconContainer from '#icons/IconContainer.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import STGrid from '#layout/STGrid.vue';
+import STGridItem from '#layout/STGridItem.vue';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import type { Invoice } from '@stamhoofd/structures';
 import { default as InvoiceVATDetailsBox } from './InvoiceVATDetailsBox.vue';

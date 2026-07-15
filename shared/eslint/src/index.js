@@ -13,11 +13,13 @@ import node from './configs/node.js';
 import typescript from './configs/typescript.js';
 import asyncComponentWithProperties from './rules/async-component-with-properties.js';
 import asyncRouteComponents from './rules/async-route-components.js';
+import noPackageSelfImport from './rules/no-package-self-import.js';
 import preferDefineRoute from './rules/prefer-define-route.js';
 
 const rules = {
     'async-component-with-properties': asyncComponentWithProperties,
     'async-route-components': asyncRouteComponents,
+    'no-package-self-import': noPackageSelfImport,
     'prefer-define-route': preferDefineRoute,
 };
 const stamhoofdPlugin = {
@@ -70,6 +72,17 @@ const baseRules = [
             'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false }],
             'import/no-extraneous-dependencies': ['error'],
             'import/no-relative-packages': 'error',
+        },
+    },
+    {
+        plugins: {
+            stamhoofd: stamhoofdPlugin,
+        },
+        rules: {
+            // Importing a package's own name from inside that package resolves through its
+            // "exports" (the built dist for some packages), which duplicates modules and
+            // breaks tsc project references. Use a relative or '#' subpath import instead.
+            'stamhoofd/no-package-self-import': 'error',
         },
     },
 

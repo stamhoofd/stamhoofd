@@ -786,7 +786,7 @@ import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSe
 import ImageInput from '#inputs/ImageInput.vue';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
-import { useOrganizationRegistrationRecordSettingsRoute } from '@stamhoofd/components/records/useOrganizationRegistrationRecordSettingsRoute.ts';
+import { useOrganizationRegistrationRecordSettingsRoute } from '#records/useOrganizationRegistrationRecordSettingsRoute.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(

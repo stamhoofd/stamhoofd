@@ -90,28 +90,28 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
-import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import SegmentedControl from '@stamhoofd/components/inputs/SegmentedControl.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import Spinner from '@stamhoofd/components/Spinner.vue';
-import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
-import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import EventRow from '#events/components/EventRow.vue';
+import type { UIFilter } from '#filters/UIFilter.ts';
+import GroupAvatar from '#GroupAvatar.vue';
+import SegmentedControl from '#inputs/SegmentedControl.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
+import Spinner from '#Spinner.vue';
+import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 
 import { useSwitchablePeriod } from '#hooks/useSwitchablePeriod.ts';
-import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
-import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
-import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
-import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
-import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
+import { useEventUIFilterBuilders } from '#filters/filterBuilders.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Event, Group, StamhoofdFilter } from '@stamhoofd/structures';
@@ -245,7 +245,7 @@ async function editFilter(event: MouseEvent) {
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('@stamhoofd/components/filters/UIFilterEditor.vue'), {
+                root: AsyncComponent(() => import('#filters/UIFilterEditor.vue'), {
                     filter,
                 }),
             }),

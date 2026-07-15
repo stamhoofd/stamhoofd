@@ -1,4 +1,4 @@
-import { AuditLogReplacement, AuditLogReplacementDependencies, AuditLogReplacementType, EventNotificationStatus, PaymentStatus, getAuditLogPatchKeyName, getRegisteredAuditLogEnums, registerAuditLogEnum } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementDependencies, AuditLogReplacementType, EventNotificationStatus, PaymentStatus, getAuditLogPatchKeyName, getRegisteredAuditLogEnums, registerAuditLogEnum } from '#/index.ts';
 
 enum TestAuditLogStatus {
     Pending = 'Pending',

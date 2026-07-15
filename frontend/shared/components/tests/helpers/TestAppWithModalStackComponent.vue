@@ -12,17 +12,17 @@
 <script lang="ts" setup>
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
-import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
-import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
+import ContextProvider from '#containers/ContextProvider.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import CenteredMessageView from '#overlays/CenteredMessageView.vue';
+import { ModalStackEventBus, ReplaceRootEventBus } from '#overlays/ModalStackEventBus.ts';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Ref } from 'vue';
 import { markRaw, onMounted, ref } from 'vue';
 import { Platform } from '@stamhoofd/structures';
-import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
+import ToastBox from '#overlays/ToastBox.vue';
 
 const props = withDefaults(defineProps<{
     root: ComponentWithProperties;

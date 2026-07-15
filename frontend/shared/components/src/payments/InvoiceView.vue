@@ -151,19 +151,19 @@
 </template>
 
 <script lang="ts" setup>
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { useBackForward } from '#hooks/useBackForward.ts';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
 import type { Invoice } from '@stamhoofd/structures';
 import { InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';
-import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
+import PaymentRow from '#payments/components/PaymentRow.vue';
 import { useDownloadInvoice } from './hooks/useDownloadInvoice.ts';
 
 const props = withDefaults(

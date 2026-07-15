@@ -7,7 +7,7 @@ import { playwright } from '@vitest/browser-playwright';
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import type { ViteUserConfig } from 'vitest/config';
 import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
-import svgNamespacePlugin from '@stamhoofd/vite-config/svgNamespacePlugin';
+import svgNamespacePlugin from './svgNamespacePlugin.ts';
 
 // https://vitejs.dev/config/
 export async function buildConfig(options: { name: 'web-app' | 'webshop' | 'calculator'; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {

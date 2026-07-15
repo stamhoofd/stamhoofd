@@ -43,8 +43,8 @@
 
 <script lang="ts" setup>
 import { usePopup } from '@simonbackx/vue-app-navigation';
-import STGrid from '@stamhoofd/components/layout/STGrid.vue';
-import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
+import STGrid from '#layout/STGrid.vue';
+import STGridItem from '#layout/STGridItem.vue';
 import type { Invoice } from '@stamhoofd/structures';
 import { getVATExcemptInvoiceNote } from '@stamhoofd/structures';
 
