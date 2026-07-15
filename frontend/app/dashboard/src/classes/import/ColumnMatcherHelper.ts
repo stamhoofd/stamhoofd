@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import type { PatchAnswers, RecordSettings} from '@stamhoofd/structures';
-import { Address, Parent, ParentType, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordTextAnswer } from '@stamhoofd/structures';
+import { Address, EmergencyContact, Parent, ParentType, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordTextAnswer } from '@stamhoofd/structures';
 import type { ImportMemberResult } from './ImportMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 
@@ -153,5 +153,35 @@ export class ColumnMatcherHelper {
         }
 
         return importResult.patchedDetails.parents[1]!;
+    }
+
+    static patchEmergencyContacts(importResult: ImportMemberResult, contacts: EmergencyContact[]) {
+        const patchArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+
+        // Compare against cleaned clones so we don't mutate the cached details and don't add contacts that already exist
+        const existing = importResult.patchedDetails.emergencyContacts.map((contact) => {
+            const clone = contact.clone();
+            clone.cleanData();
+            return clone;
+        });
+
+        let added = false;
+        for (const contact of contacts) {
+            if (existing.some(e => e.isEqual(contact))) {
+                continue;
+            }
+
+            existing.push(contact);
+            patchArray.addPut(contact);
+            added = true;
+        }
+
+        if (!added) {
+            return;
+        }
+
+        importResult.addPatch({
+            emergencyContacts: patchArray,
+        });
     }
 }

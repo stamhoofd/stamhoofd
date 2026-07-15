@@ -8,6 +8,7 @@ import { BirthDayColumnMatcher } from './default-matchers/BirthDayColumnMatcher'
 import { CityColumnMatcher } from './default-matchers/CityColumnMatcher';
 import { CityWithZipColumnMatcher } from './default-matchers/CityWithZipColumnMatcher';
 import { EmailColumnMatcher } from './default-matchers/EmailColumnMatcher';
+import { EmergencyContactsColumnMatcher } from './default-matchers/EmergencyContactsColumnMatcher';
 import { FirstNameColumnMatcher } from './default-matchers/FirstNameColumnMatcher';
 import { FullNameColumnMatcher } from './default-matchers/FullNameColumnMatcher';
 import { GenderColumnMatcher } from './default-matchers/GenderColumnMatcher';
@@ -102,6 +103,14 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
     new UitpasNumberColumnMatcher(),
     new NationalRegisterNumberColumnMatcher(MemberDetailsMatcherCategory.Member),
     new SecurityCodeColumnMatcher(),
+    new EmergencyContactsColumnMatcher({
+        name: 'Alle noodcontacten',
+        category: MemberDetailsMatcherCategory.Member,
+        required: false,
+        save: (contacts, importResult: ImportMemberResult) => {
+            ColumnMatcherHelper.patchEmergencyContacts(importResult, contacts);
+        },
+    }),
 ];
 
 export const parentMatchers1 = [

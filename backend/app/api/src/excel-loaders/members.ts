@@ -191,6 +191,23 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
 
     ...XlsxTransformerColumnHelper.creatColumnsForParents(),
 
+    // emergency contacts
+    {
+        id: 'emergencyContacts',
+        name: $t(`Alle noodcontacten`),
+        width: 40,
+        getValue: ({ patchedMember: object }: PlatformMember) => ({
+            // One contact per line so the cell stays readable, and wrap the text so all lines are visible
+            value: object.details.emergencyContacts.map(c => c.toString()).join('\n'),
+            style: {
+                alignment: {
+                    wrapText: true,
+                },
+            },
+        }),
+    },
+    ...XlsxTransformerColumnHelper.createColumnsForEmergencyContacts(),
+
     // unverified data
     {
         id: 'unverifiedPhones',

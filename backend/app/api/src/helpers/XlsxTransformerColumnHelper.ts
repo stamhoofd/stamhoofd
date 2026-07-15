@@ -1,6 +1,6 @@
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import type { Address, GroupCategory, Parent, PlatformMember, RecordAnswer, RecordSettings } from '@stamhoofd/structures';
+import type { Address, EmergencyContact, GroupCategory, Parent, PlatformMember, RecordAnswer, RecordSettings } from '@stamhoofd/structures';
 import { CountryHelper, ParentTypeHelper, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -21,6 +21,52 @@ export class XlsxTransformerColumnHelper {
         return [
             ...this.createColumnsForParent(0),
             ...this.createColumnsForParent(1),
+        ];
+    }
+
+    /**
+     * Emergency contacts are an unbounded array, so only the first two get their own columns. The combined
+     * 'emergencyContacts' column in the members loader lists all of them.
+     */
+    static createColumnsForEmergencyContacts(): XlsxTransformerColumn<PlatformMember>[] {
+        return [
+            ...this.createColumnsForEmergencyContact(0),
+            ...this.createColumnsForEmergencyContact(1),
+        ];
+    }
+
+    static createColumnsForEmergencyContact(contactIndex: number): XlsxTransformerColumn<PlatformMember>[] {
+        const getContact = (member: PlatformMember): EmergencyContact | null | undefined => member.patchedMember.details.emergencyContacts[contactIndex];
+
+        const identifier = `Noodcontact ${contactIndex + 1}`;
+        const getId = (value: string) => `emergencyContact.${contactIndex}.${value}`;
+        const getName = (value: string) => `${identifier} - ${value}`;
+
+        return [
+            {
+                id: getId('name'),
+                name: getName($t(`Naam`)),
+                width: 20,
+                getValue: (member: PlatformMember) => ({
+                    value: getContact(member)?.name ?? '',
+                }),
+            },
+            {
+                id: getId('title'),
+                name: getName($t(`Relatie`)),
+                width: 20,
+                getValue: (member: PlatformMember) => ({
+                    value: getContact(member)?.title ?? '',
+                }),
+            },
+            {
+                id: getId('phone'),
+                name: getName($t(`%wD`)),
+                width: 20,
+                getValue: (member: PlatformMember) => ({
+                    value: getContact(member)?.phone ?? '',
+                }),
+            },
         ];
     }
 

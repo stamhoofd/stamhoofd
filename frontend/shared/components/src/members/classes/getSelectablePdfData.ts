@@ -1,6 +1,6 @@
 import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { Group, Organization, Parent, PlatformMember, RecordSettings } from '@stamhoofd/structures';
+import type { EmergencyContact, Group, Organization, Parent, PlatformMember, RecordSettings } from '@stamhoofd/structures';
 import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, Platform, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
@@ -304,6 +304,45 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                     enabled,
                     getValue: (object: PlatformMember) => getParent(object)?.nationalRegisterNumber?.toString(),
                 }), [AccessRight.MemberManageNRN]),
+            ];
+        }),
+
+        new SelectablePdfData<PlatformMember>({
+            id: 'emergencyContacts',
+            name: $t(`Alle noodcontacten`),
+            description: $t(`Alle noodcontacten van het lid, ook als het er meer dan twee zijn.`),
+            enabled: false,
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.emergencyContacts.map(c => c.toString()).join('\n'),
+        }),
+
+        ...[1, 2].flatMap((contactNumber, contactIndex) => {
+            const getId = (value: string) => `emergencyContact.${contactIndex}.${value}`;
+            const category = `Noodcontact ${contactNumber}`;
+            const enabled = false;
+            const getContact = (member: PlatformMember): EmergencyContact | null | undefined => member.patchedMember.details.emergencyContacts[contactIndex];
+
+            return [
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('name'),
+                    name: $t(`Naam`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getContact(object)?.name,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('title'),
+                    name: $t(`Relatie`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getContact(object)?.title,
+                }),
+                new SelectablePdfData<PlatformMember>({
+                    id: getId('phone'),
+                    name: $t(`%wD`),
+                    category,
+                    enabled,
+                    getValue: (object: PlatformMember) => getContact(object)?.phone,
+                }),
             ];
         }),
 

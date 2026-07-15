@@ -1,6 +1,7 @@
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
 import {
+    EmergencyContact,
     Group,
     GroupCategory,
     GroupCategorySettings,
@@ -164,6 +165,68 @@ describe('XlsxTransformerColumnHelper', () => {
             const member = createMember(organization, [kapoenen, welpen]);
 
             expect(getColumn(ageGroupsCategory.id).getValue(member).value).toBe('Kapoenen, Welpen');
+        });
+    });
+
+    describe('createColumnsForEmergencyContacts', () => {
+        function createMember(emergencyContacts: EmergencyContact[]) {
+            const organization = Organization.create({});
+            const blob = MembersBlob.create({
+                organizations: [organization],
+                members: [
+                    MemberWithRegistrationsBlob.create({
+                        details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', emergencyContacts }),
+                    }),
+                ],
+            });
+
+            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            return family.members[0];
+        }
+
+        function getValue(member: PlatformMember, id: string) {
+            const columns = XlsxTransformerColumnHelper.createColumnsForEmergencyContacts();
+            const column = columns.find(c => 'id' in c && c.id === id) as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
+
+            if (!column) {
+                throw new Error(`Column ${id} not found`);
+            }
+
+            return column.getValue(member).value;
+        }
+
+        it('returns the values of the first two emergency contacts', () => {
+            const member = createMember([
+                EmergencyContact.create({ name: 'An Peeters', title: 'Oma', phone: '0470 12 34 56' }),
+                EmergencyContact.create({ name: 'Jan Janssens', title: 'Buur', phone: '0470 65 43 21' }),
+            ]);
+
+            expect(getValue(member, 'emergencyContact.0.name')).toBe('An Peeters');
+            expect(getValue(member, 'emergencyContact.0.title')).toBe('Oma');
+            expect(getValue(member, 'emergencyContact.0.phone')).toBe('0470 12 34 56');
+
+            expect(getValue(member, 'emergencyContact.1.name')).toBe('Jan Janssens');
+            expect(getValue(member, 'emergencyContact.1.title')).toBe('Buur');
+            expect(getValue(member, 'emergencyContact.1.phone')).toBe('0470 65 43 21');
+        });
+
+        it('returns empty values when the member has fewer emergency contacts', () => {
+            const member = createMember([
+                EmergencyContact.create({ name: 'An Peeters', title: 'Oma', phone: '0470 12 34 56' }),
+            ]);
+
+            expect(getValue(member, 'emergencyContact.1.name')).toBe('');
+            expect(getValue(member, 'emergencyContact.1.title')).toBe('');
+            expect(getValue(member, 'emergencyContact.1.phone')).toBe('');
+        });
+
+        it('returns an empty value for a contact without a phone number', () => {
+            const member = createMember([
+                EmergencyContact.create({ name: 'An Peeters', title: 'Oma', phone: null }),
+            ]);
+
+            expect(getValue(member, 'emergencyContact.0.name')).toBe('An Peeters');
+            expect(getValue(member, 'emergencyContact.0.phone')).toBe('');
         });
     });
 });
