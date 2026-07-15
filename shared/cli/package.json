@@ -22,7 +22,7 @@
         "stam": "NODE_OPTIONS=--use-system-ca ./bin/stam.js"
     },
     "scripts": {
-        "build": "rm -rf dist && tsc --build tsconfig.build.json --force",
+        "build": "tsc --build tsconfig.build.json",
         "lint": "eslint .",
         "test": "vitest run",
         "test:coverage": "vitest --coverage"
