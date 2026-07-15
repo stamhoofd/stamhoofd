@@ -16,7 +16,7 @@
                     {{ $t("%1EI") }}
                 </span>
             </button>
-            
+
             <button v-if="showMemberships" type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PlatformMemberships) }" @click="navigate(Routes.PlatformMemberships)">
                 <span class="icon membership-filled" />
                 <span>
@@ -31,8 +31,6 @@
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-
-
 
 import { computed } from 'vue';
 
@@ -72,6 +70,10 @@ const platform = usePlatform();
 const auth = useAuth();
 
 const showMemberships = computed(() => {
+    // platform memberships are not supported in user mode organization
+    if (STAMHOOFD.userMode === 'organization') {
+        return false;
+    }
     return auth.hasPlatformFullAccess();
-})
+});
 </script>
