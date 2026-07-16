@@ -276,9 +276,6 @@ export class UitpasTokenRepository {
     static async clearClientCredentialsFor(organizationId: string | null): Promise<boolean> {
         return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
             const cached = UitpasTokenRepository.getRepoFromMemory(organizationId);
-            if (cached === null) {
-                return false; // nothing to clear
-            }
             if (cached) {
                 // in memory, thus also in db
                 await cached.uitpasClientCredential.delete(); // remove from db
@@ -288,6 +285,9 @@ export class UitpasTokenRepository {
             // not in memory, maybe in db
             const model = await UitpasTokenRepository.getModelFromDb(organizationId);
             if (model) {
+                if (cached === null) {
+                    console.warn(`Clearing UiTPAS client credentials for organization with id ${organizationId} although it was not in memory, but found in database. This is a bug, memory and database are out of sync.`);
+                }
                 await model.delete(); // remove from database
                 return true;
             }
