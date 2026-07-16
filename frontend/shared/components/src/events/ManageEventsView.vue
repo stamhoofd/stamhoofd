@@ -56,16 +56,16 @@
 </template>
 
 <script setup lang="ts">
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
-import { useAppContext } from '#context/appContext.ts';
-import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '../filters/filterBuilders';
 import type { UIFilter } from '../filters/UIFilter';
 
@@ -74,11 +74,11 @@ import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
-import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
-import { Toast } from '../overlays/Toast';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
+import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
+import { Toast } from '../overlays/Toast';
 import EventRow from './components/EventRow.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
 

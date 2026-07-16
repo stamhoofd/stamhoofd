@@ -10,11 +10,13 @@ import {
     EventFactory,
     GroupFactory,
     OrganizationFactory,
+    RegistrationPeriodFactory,
     Token,
     UserFactory,
 } from '@stamhoofd/models';
 import {
     EventMeta,
+    GroupType,
     PermissionLevel,
     Permissions,
 } from '@stamhoofd/structures';
@@ -35,6 +37,16 @@ type Scenario = {
         invisibleOrganization: string;
     };
 };
+
+function eventRow(page: Page, eventName: string) {
+    return page.locator('#settings-view .st-list-item:visible h3 span').filter({
+        hasText: new RegExp(`^${escapeRegExp(eventName)}$`),
+    });
+}
+
+function escapeRegExp(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 test.describe('Events management', () => {
     const password = 'testAbc123456';
@@ -180,16 +192,6 @@ test.describe('Events management', () => {
         await expect(options.page.locator('#settings-view')).toBeVisible();
     }
 
-    function eventRow(page: Page, eventName: string) {
-        return page.locator('#settings-view .st-list-item:visible h3 span').filter({
-            hasText: new RegExp(`^${escapeRegExp(eventName)}$`),
-        });
-    }
-
-    function escapeRegExp(value: string) {
-        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
     async function assertScenarioVisibility(options: {
         page: Page;
         scenario: Scenario;
@@ -216,5 +218,170 @@ test.describe('Events management', () => {
             page,
             scenario,
         });
+    });
+});
+
+test.describe('Duplicate event', () => {
+    const password = 'testAbc123456';
+
+    test.afterEach(async () => {
+        await WorkerData.resetDatabase();
+    });
+
+    type DuplicateScenario = {
+        organizationUri: string;
+        email: string;
+        password: string;
+        eventName: string;
+        previousYear: number;
+    };
+
+    async function seedLockedPeriodScenario(options: {
+        seedId: string;
+    }): Promise<DuplicateScenario> {
+        TestUtils.setPermanentEnvironment('userMode', 'platform');
+
+        const uniqueId = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+        const runId = `${WorkerData.id}-${options.seedId}-${uniqueId}`;
+        const organizationUri = `duplicate-event-organization-${runId}`;
+        const email = `duplicate-event-${runId}@test.be`;
+        const previousYear = new Date().getFullYear() - 1;
+
+        const organization: Organization = await new OrganizationFactory({
+            name: `Duplicate Event Organization ${runId}`,
+            uri: organizationUri,
+        }).create();
+
+        const user: User = await new UserFactory({
+            firstName: 'John',
+            lastName: 'Doe',
+            email,
+            password,
+            organization,
+            globalPermissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+            permissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+        }).create();
+
+        await Token.createToken(user);
+
+        // A locked registration period in the past. The event and its registration group live
+        // in this period, so the registration group cannot be copied when the event is
+        // duplicated (creating a group in a locked period is refused by the backend).
+        const lockedPeriod = await new RegistrationPeriodFactory({
+            startDate: new Date(previousYear, 0, 1),
+            endDate: new Date(previousYear, 11, 31),
+            locked: true,
+        }).create();
+
+        const group = await new GroupFactory({
+            organization,
+            period: lockedPeriod,
+            type: GroupType.EventRegistration,
+        }).create();
+
+        const eventName = `Locked period event ${runId}`;
+
+        await new EventFactory({
+            organization,
+            name: eventName,
+            startDate: new Date(previousYear, 5, 10, 10, 0, 0),
+            endDate: new Date(previousYear, 5, 10, 12, 0, 0),
+            meta: EventMeta.create({ visible: true }),
+            group,
+        }).create();
+
+        return { organizationUri, email, password, eventName, previousYear };
+    }
+
+    function yearButton(page: Page, year: number) {
+        return page.locator('#settings-view .scrollable-segmented-control button.item').filter({
+            hasText: new RegExp(`^${year}$`),
+        });
+    }
+
+    async function duplicateEventUntilWarning(options: {
+        page: Page;
+        pages: Pages;
+        scenario: DuplicateScenario;
+        duplicateName: string;
+    }) {
+        const { page, pages, scenario } = options;
+
+        await pages.dashboard.login({
+            organizationUri: scenario.organizationUri,
+            email: scenario.email,
+            password: scenario.password,
+        });
+
+        await pages.dashboard.openTab(DashboardTab.Events);
+        await expect(page.locator('#settings-view')).toBeVisible();
+
+        // Events in the past are only visible when their year is selected
+        await yearButton(page, scenario.previousYear).click();
+        await eventRow(page, scenario.eventName).click();
+
+        // Open the duplicate popup from the event overview
+        await page.locator('.st-list-item:visible').filter({ hasText: 'Activiteit dupliceren' }).click();
+
+        const popup = page.locator('div.popup.focused').last();
+        await expect(popup.getByTestId('save-view')).toBeVisible();
+
+        // Give the copy a different name so the assertions can tell both events apart
+        await popup.locator('input[placeholder="Naam"]').first().fill(options.duplicateName);
+        await popup.getByTestId('save-button').click();
+
+        // The registration group cannot be created in the locked period: a warning should
+        // appear where the user can choose to continue without the group or cancel
+        const dialog = page.getByTestId('centered-message');
+        await expect(dialog).toBeVisible();
+        await expect(dialog).toContainText('Inschrijvingsinstellingen kunnen niet mee gekopieerd worden');
+        return dialog;
+    }
+
+    test('duplicating an event from a locked period warns and can continue without the registration group', async ({
+        page,
+        pages,
+    }) => {
+        const scenario = await seedLockedPeriodScenario({
+            seedId: 'duplicate-continue',
+        });
+        const duplicateName = `${scenario.eventName} copy`;
+
+        const dialog = await duplicateEventUntilWarning({ page, pages, scenario, duplicateName });
+
+        await page.getByTestId('centered-message-button').filter({ hasText: 'Dupliceren zonder inschrijvingen' }).click();
+        await expect(dialog).toHaveCount(0);
+
+        // The duplicated event is kept and opened, but without registration settings
+        await expect(page.locator('.st-view:visible h1').filter({ hasText: duplicateName }).first()).toBeVisible();
+        await expect(page.locator('.st-list-item:visible h2').filter({ hasText: 'Ingeschreven leden' })).toHaveCount(0);
+    });
+
+    test('duplicating an event from a locked period deletes the event again on cancel', async ({
+        page,
+        pages,
+    }) => {
+        const scenario = await seedLockedPeriodScenario({
+            seedId: 'duplicate-cancel',
+        });
+        const duplicateName = `${scenario.eventName} copy`;
+
+        const dialog = await duplicateEventUntilWarning({ page, pages, scenario, duplicateName });
+
+        await page.getByTestId('centered-message-button').filter({ hasText: 'Annuleren' }).click();
+        await expect(dialog).toHaveCount(0);
+
+        // The duplicated event was deleted again: only the original event remains.
+        // Navigate back from the event overview to the events list.
+        await page.locator('[data-testid="close-button"]:visible').click();
+        await expect(page.locator('#settings-view')).toBeVisible();
+        await yearButton(page, scenario.previousYear).click();
+
+        await expect(eventRow(page, scenario.eventName)).toHaveCount(1);
+        await expect(eventRow(page, duplicateName)).toHaveCount(0);
     });
 });

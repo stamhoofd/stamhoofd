@@ -267,8 +267,10 @@
 import { AsyncComponent, LoadComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
+import { GlobalEventBus } from '#EventBus.ts';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
@@ -822,7 +824,11 @@ function duplicateEvent() {
         return;
     }
 
-    async function duplicateGroupForEvent(event: Event, groupToDuplicate: Group, emailTemplates: EmailTemplate[]) {
+    /**
+     * Returns false when the user cancelled the duplication because the registration group
+     * could not be copied: the duplicated event is deleted again in that case.
+     */
+    async function duplicateGroupForEvent(event: Event, groupToDuplicate: Group, emailTemplates: EmailTemplate[]): Promise<boolean> {
         let duplicateGroup: Group | undefined;
 
         try {
@@ -854,11 +860,55 @@ function duplicateEvent() {
             await directPatch(patch, event);
         } catch (e) {
             console.error(e);
-            new Toast('Er ging iets mis bij het overnemen van de inschrijvingsgroep voor de nieuwe activiteit', 'warning').show();
+
+            // The backend refuses to create the group when the registration period that
+            // contains the event's start date is locked or not accessible (e.g. when
+            // duplicating an event from an old period). Give the user the choice between
+            // duplicating without the registration settings or cancelling the duplication.
+            const errors = isSimpleError(e) ? new SimpleErrors(e) : (isSimpleErrors(e) ? e : null);
+
+            if (errors !== null && (errors.hasCode('invalid_period') || errors.hasCode('permission_denied'))) {
+                let human = errors.getHuman();
+                if (!human.endsWith('.')) {
+                    human += '.';
+                }
+                if (await CenteredMessage.confirm({
+                    title: $t('Inschrijvingsinstellingen kunnen niet mee gekopieerd worden'),
+                    description: human + ' ' + $t('Je kan de activiteit dupliceren zonder de inschrijvingsinstellingen, of de duplicatie annuleren.'),
+                    confirmText: $t('Dupliceren zonder inschrijvingen'),
+                    cancelText: $t('Annuleren'),
+                })) {
+                    return true;
+                }
+
+                // Delete the duplicated event again
+                try {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+                    arr.addDelete(event.id);
+
+                    await context.value.authenticatedServer.request({
+                        method: 'PATCH',
+                        path: '/events',
+                        body: arr,
+                        decoder: new ArrayDecoder(Event as Decoder<Event>),
+                        shouldRetry: false,
+                    });
+
+                    GlobalEventBus.sendEvent('event-deleted', event).catch(console.error);
+                } catch (deleteError) {
+                    console.error(deleteError);
+                    Toast.fromError(deleteError).show();
+                }
+
+                return false;
+            }
+
+            Toast.fromError(e).show();
+            return true;
         }
 
         if (!duplicateGroup) {
-            return;
+            return true;
         }
 
         // Copy email templates
@@ -892,6 +942,8 @@ function duplicateEvent() {
             console.error(e);
             new Toast('Er ging iets mis bij het overnemen van de e-mails voor de nieuwe activiteit', 'warning').show();
         }
+
+        return true;
     }
 
     const displayedComponent = new ComponentWithProperties(NavigationController, {
@@ -930,7 +982,10 @@ function duplicateEvent() {
                         isNew: true,
                         callback: async () => {
                             if (fetchedEvent.group) {
-                                await duplicateGroupForEvent(duplicateEvent, fetchedEvent.group, templates);
+                                if (!await duplicateGroupForEvent(duplicateEvent, fetchedEvent.group, templates)) {
+                                    // The user cancelled the duplication and the event was deleted again
+                                    return;
+                                }
                             }
 
                             if (props.onSaveDuplicate) {
