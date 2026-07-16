@@ -90,7 +90,7 @@ const present = usePresent();
 const selectedYear = ref(null) as Ref<number | null>;
 const years = computed(() => {
     const currentYear = Formatter.year(new Date());
-    return [null, currentYear, currentYear - 1, currentYear - 2, currentYear - 3];
+    return [null, currentYear, currentYear - 1, currentYear - 2];
 });
 const user = useUser();
 const organization = useOrganization();
