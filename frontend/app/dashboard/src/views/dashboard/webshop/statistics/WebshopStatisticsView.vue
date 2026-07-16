@@ -594,6 +594,10 @@ onBeforeUnmount(() => {
             grid-template-columns: 1fr;
        }
     }
+
+    .style-price-big {
+        justify-content: right;
+    }
 }
 
 .style-price-big {
