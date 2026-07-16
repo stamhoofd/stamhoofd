@@ -135,6 +135,7 @@
       "backend/shared/*",
       "shared/*",
       "tests/*",
+      "docs",
       ".development/*"
     ]
   }
