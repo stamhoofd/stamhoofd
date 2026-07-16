@@ -75,7 +75,8 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                     human: $t('%189'),
                 });
             }
-            await UitpasService.checkUitpasNumbers(request.body.uitpasNumbers); // Throws if invalid
+            const organization = await Context.setOrganizationScope({ willAuthenticate: false });
+            await UitpasService.checkUitpasNumbers(organization.id, request.body.uitpasNumbers); // Throws if invalid
             const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
                 prices: request.body.uitpasNumbers.map(_ => reducedPrice), // All reduced prices are the same in this non-official flow
             });

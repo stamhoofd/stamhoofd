@@ -175,6 +175,17 @@ export class UitpasTokenRepository {
         return model; // return new model
     }
 
+    static async getAccessTokenForWithPlatformFallback(orgId: string, forceRefresh: boolean = false): Promise<string> {
+        try {
+            return await UitpasTokenRepository.getAccessTokenFor(orgId, forceRefresh);
+        } catch (error) {
+            if (error instanceof SimpleError && error.code === 'uitpas_api_not_configured_for_this_organization') {
+                return await UitpasTokenRepository.getAccessTokenFor(null, forceRefresh); // fallback to platform
+            }
+            throw error;
+        }
+    }
+
     /**
      * Get the access token for the organization or platform.
      * @param organizationId the organization ID for which to get the access token. If null, it means the platform.
