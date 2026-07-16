@@ -230,16 +230,36 @@ export class UitpasTokenRepository {
         });
     }
 
-    static async getClientIdFor(organizationId: string | null): Promise<string> {
-        const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
-        if (!repo) {
-            const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
-            if (!model) {
-                return ''; // no client ID and secret configured
+    static async getClientIdFor(organizationId: string): Promise<string> {
+        const tryFromMemory = (): string | undefined => {
+            const cached = UitpasTokenRepository.getRepoFromMemory(organizationId);
+            if (cached === null) {
+                return '';
             }
-            return model.clientId; // client ID configured, but not in memory
+            if (cached) {
+                return cached.uitpasClientCredential.clientId;
+            }
+        };
+
+        const memoryResult = tryFromMemory();
+        if (typeof memoryResult === 'string') {
+            return memoryResult; // client ID found in memory
         }
-        return repo.uitpasClientCredential.clientId; // client ID configured and in memory
+
+        return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
+            // re-search memory, as another call to this function might have populated it while we were waiting in the queue
+            const memoryResult = tryFromMemory();
+            if (typeof memoryResult === 'string') {
+                return memoryResult; // client ID found in memory
+            }
+            const model = await UitpasTokenRepository.getModelFromDb(organizationId);
+            if (!model) {
+                UitpasTokenRepository.setRepoInMemory(organizationId, null); // remember there are no creds configured
+                return '';
+            }
+            UitpasTokenRepository.setRepoInMemory(organizationId, new UitpasTokenRepository(model)); // store in memory
+            return model.clientId; // client ID configured, now also in memory
+        });
     }
 
     static async clearClientCredentialsFor(organizationId: string | null): Promise<boolean> {

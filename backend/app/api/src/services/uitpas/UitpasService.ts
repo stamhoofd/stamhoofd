@@ -327,7 +327,7 @@ export class UitpasService {
      * @param organizationId
      * @returns clientId or empty string if not configured
      */
-    static async getClientIdFor(organizationId: string | null): Promise<string> {
+    static async getClientIdFor(organizationId: string): Promise<string> {
         // Get the uitpas client credentials for the organization
         return await UitpasTokenRepository.getClientIdFor(organizationId);
     }
