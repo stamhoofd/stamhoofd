@@ -282,7 +282,7 @@ export class UitpasTokenRepository {
             if (cached) {
                 // in memory, thus also in db
                 await cached.uitpasClientCredential.delete(); // remove from db
-                UitpasTokenRepository.knownTokens.delete(organizationId); // remove from memory
+                UitpasTokenRepository.setRepoInMemory(organizationId, null); // remove from memory
                 return true;
             }
             // not in memory, maybe in db
