@@ -154,22 +154,6 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
-    /**
-     * Whether groups in this registration period can be accessed or created: only the
-     * organization's current period (and the platform period on platform mode) is accessible
-     * without full access. Mirrors AdminPermissionChecker.canAccessGroupsInPeriod on the backend.
-     */
-    canAccessGroupsInPeriod(periodId: string, organization: Organization) {
-        if (periodId !== organization.period.period.id) {
-            if (STAMHOOFD.userMode === 'organization' || periodId !== this.platform.period.id) {
-                if (!this.hasFullAccess()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;
@@ -179,8 +163,12 @@ export class ContextPermissions {
             return this.hasFullPlatformAccess();
         }
 
-        if (!this.canAccessGroupsInPeriod(group.periodId, organization)) {
-            return false;
+        if (group.periodId !== organization.period.period.id) {
+            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
+                if (!this.hasFullAccess()) {
+                    return false;
+                }
+            }
         }
 
         const permissions = this.getPermissionsForOrganization(organization);

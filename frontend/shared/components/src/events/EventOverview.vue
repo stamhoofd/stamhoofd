@@ -265,12 +265,14 @@
 
 <script setup lang="ts">
 import { AsyncComponent, LoadComponent } from '#containers/AsyncComponent.ts';
+import PromiseView from '#containers/PromiseView.vue';
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
+import { GlobalEventBus } from '#EventBus.ts';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
-import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
@@ -321,7 +323,6 @@ const pop = usePop();
 const auth = useAuth();
 const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
-const getPeriods = useGetPeriods();
 const owner = useRequestOwner();
 const featureFlag = useFeatureFlag();
 const invitationsCount = ref<number | null>(props.event.group ? null : 0);
@@ -818,59 +819,16 @@ async function loadEvent(event: Event): Promise<Event> {
     Toast.error($t(`%yc`)).show();
     throw new Error('Event not found');
 }
-/**
- * The registration group of a duplicated event is created in the registration period that
- * contains the event's start date (PatchEventsEndpoint.putEventGroup). Mirror the checks that
- * can make this fail — a locked period (createGroup) or no access to the period
- * (canAccessGroupsInPeriod) — so the user can be warned before the duplicated event is saved,
- * while the start date can still be changed.
- */
-async function getDuplicateGroupBlockedReason(event: Event, group: Group): Promise<string | null> {
-    const groupOrganization = eventOrganization.value;
-
-    // Resolve the registration period that contains the (possibly edited) start date, out of
-    // the periods the duplicate can realistically land in: the organization's current period,
-    // the platform period and the period of the original group (when the start date was kept)
-    const containsStartDate = (p: { startDate: Date; endDate: Date }) => p.startDate <= event.startDate && p.endDate >= event.startDate;
-    const localPeriods = [
-        ...(groupOrganization ? [groupOrganization.period.period] : []),
-        ...(STAMHOOFD.userMode !== 'organization' ? [platform.value.period] : []),
-    ];
-
-    let period = localPeriods.find(containsStartDate) ?? null;
-
-    if (!period) {
-        period = (await getPeriods([group.periodId], false)).find(containsStartDate) ?? null;
-    }
-
-    if (!period) {
-        // The start date is not in a period we know about: let the backend decide (an error
-        // will be shown if copying the group fails)
-        return null;
-    }
-
-    if (period.locked) {
-        return $t('Het werkjaar waarin deze activiteit valt ({period}) is vergrendeld, waardoor de inschrijvingsinstellingen niet mee gekopieerd kunnen worden.', { period: period.name });
-    }
-
-    if (!groupOrganization) {
-        // Not enough information to check: let the backend decide (an error will be shown if copying the group fails)
-        return null;
-    }
-
-    if (!auth.canAccessGroupsInPeriod(period.id, groupOrganization)) {
-        return $t('Je hebt geen toegang tot het werkjaar waarin deze activiteit valt ({period}), waardoor de inschrijvingsinstellingen niet mee gekopieerd kunnen worden.', { period: period.name });
-    }
-
-    return null;
-}
-
-async function duplicateEvent() {
+function duplicateEvent() {
     if (!props.onSaveDuplicate) {
         return;
     }
 
-    async function duplicateGroupForEvent(event: Event, groupToDuplicate: Group, emailTemplates: EmailTemplate[]) {
+    /**
+     * Returns false when the user cancelled the duplication because the registration group
+     * could not be copied: the duplicated event is deleted again in that case.
+     */
+    async function duplicateGroupForEvent(event: Event, groupToDuplicate: Group, emailTemplates: EmailTemplate[]): Promise<boolean> {
         let duplicateGroup: Group | undefined;
 
         try {
@@ -902,14 +860,55 @@ async function duplicateEvent() {
             await directPatch(patch, event);
         } catch (e) {
             console.error(e);
-            // Surface the real reason (e.g. a locked or inaccessible registration period for
-            // events from an old period) instead of a generic warning, so the user can adjust
-            // the event's dates and duplicate again.
+
+            // The backend refuses to create the group when the registration period that
+            // contains the event's start date is locked or not accessible (e.g. when
+            // duplicating an event from an old period). Give the user the choice between
+            // duplicating without the registration settings or cancelling the duplication.
+            const errors = isSimpleError(e) ? new SimpleErrors(e) : (isSimpleErrors(e) ? e : null);
+
+            if (errors !== null && (errors.hasCode('invalid_period') || errors.hasCode('permission_denied'))) {
+                let human = errors.getHuman();
+                if (!human.endsWith('.')) {
+                    human += '.';
+                }
+                if (await CenteredMessage.confirm({
+                    title: $t('Inschrijvingsinstellingen kunnen niet mee gekopieerd worden'),
+                    description: human + ' ' + $t('Je kan de activiteit dupliceren zonder de inschrijvingsinstellingen, of de duplicatie annuleren.'),
+                    confirmText: $t('Dupliceren zonder inschrijvingen'),
+                    cancelText: $t('Annuleren'),
+                })) {
+                    return true;
+                }
+
+                // Delete the duplicated event again
+                try {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+                    arr.addDelete(event.id);
+
+                    await context.value.authenticatedServer.request({
+                        method: 'PATCH',
+                        path: '/events',
+                        body: arr,
+                        decoder: new ArrayDecoder(Event as Decoder<Event>),
+                        shouldRetry: false,
+                    });
+
+                    GlobalEventBus.sendEvent('event-deleted', event).catch(console.error);
+                } catch (deleteError) {
+                    console.error(deleteError);
+                    Toast.fromError(deleteError).show();
+                }
+
+                return false;
+            }
+
             Toast.fromError(e).show();
+            return true;
         }
 
         if (!duplicateGroup) {
-            return;
+            return true;
         }
 
         // Copy email templates
@@ -943,90 +942,73 @@ async function duplicateEvent() {
             console.error(e);
             new Toast('Er ging iets mis bij het overnemen van de e-mails voor de nieuwe activiteit', 'warning').show();
         }
+
+        return true;
     }
 
-    try {
-        // Make sure we have an up to date event
-        const fetchedEvent = await loadEvent(props.event);
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                try {
+                    // Make sure we have an up to date event
+                    const fetchedEvent = await loadEvent(props.event);
 
-        let groupToDuplicate = fetchedEvent.group;
+                    const duplicateEvent = Event.create({
+                        ...fetchedEvent.clone(),
+                        // will be set later
+                        group: null,
+                        webshopId: null,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        id: undefined,
+                    });
 
-        const duplicateEvent = Event.create({
-            ...fetchedEvent.clone(),
-            // will be set later
-            group: null,
-            webshopId: null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            id: undefined,
-        });
+                    let templates: EmailTemplate[] = [];
 
-        let templates: EmailTemplate[] = [];
+                    if (fetchedEvent.group) {
+                        const response = await context.value.authenticatedServer.request({
+                            method: 'GET',
+                            path: '/email-templates',
+                            query: { groupIds: [fetchedEvent.group.id] },
+                            shouldRetry: false,
+                            owner,
+                            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
+                        });
+                        templates = response.data;
+                    }
 
-        if (groupToDuplicate) {
-            const response = await context.value.authenticatedServer.request({
-                method: 'GET',
-                path: '/email-templates',
-                query: { groupIds: [groupToDuplicate.id] },
-                shouldRetry: false,
-                owner,
-                decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
-            });
-            templates = response.data;
-        }
-
-        await present({
-            animated: true,
-            adjustHistory: true,
-            modalDisplayStyle: 'popup',
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import('./EditEventView.vue'), {
+                    return AsyncComponent(() => import('./EditEventView.vue'), {
                         event: duplicateEvent,
                         isNew: true,
-                        beforeSave: async (patchedEvent: Event) => {
-                            if (!groupToDuplicate) {
-                                return true;
-                            }
-
-                            // The registration group is copied into the registration period that
-                            // matches the chosen start date, so check right before saving (the
-                            // start date can still be edited, e.g. when duplicating last year's
-                            // event to a future date) and give the user the choice to continue
-                            // without the registration settings if copying them would fail.
-                            const blockedReason = await getDuplicateGroupBlockedReason(patchedEvent, groupToDuplicate);
-
-                            if (blockedReason === null) {
-                                return true;
-                            }
-
-                            if (!await CenteredMessage.confirm({
-                                title: $t('Inschrijvingsinstellingen kunnen niet mee gekopieerd worden'),
-                                description: blockedReason + ' ' + $t('Je kan de startdatum aanpassen, of de activiteit dupliceren zonder de inschrijvingsinstellingen.'),
-                                confirmText: $t('Dupliceren zonder inschrijvingen'),
-                            })) {
-                                return false;
-                            }
-
-                            groupToDuplicate = null;
-                            return true;
-                        },
                         callback: async () => {
-                            if (groupToDuplicate) {
-                                await duplicateGroupForEvent(duplicateEvent, groupToDuplicate, templates);
+                            if (fetchedEvent.group) {
+                                if (!await duplicateGroupForEvent(duplicateEvent, fetchedEvent.group, templates)) {
+                                    // The user cancelled the duplication and the event was deleted again
+                                    return;
+                                }
                             }
 
                             if (props.onSaveDuplicate) {
                                 props.onSaveDuplicate(duplicateEvent);
                             }
                         },
-                    }),
-                }),
-            ],
-        });
-    } catch (e) {
-        Toast.fromError(e).show();
-    }
+                    });
+                } catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
+
+    present({
+        animated: true,
+        adjustHistory: true,
+        modalDisplayStyle: 'popup',
+        components: [
+            displayedComponent,
+        ],
+    }).catch(console.error);
 }
 
 const invitationsFetcher = useRegistrationInvitationsObjectFetcher(props.event.group
