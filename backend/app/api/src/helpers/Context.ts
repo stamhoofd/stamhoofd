@@ -1,8 +1,7 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import type { User } from '@stamhoofd/models';
-import { Organization, Platform, RateLimiter, Token } from '@stamhoofd/models';
+import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
@@ -318,6 +317,60 @@ export class ContextInstance {
         await this.insecurelyAuthenticateAs(user);
 
         return { user, token };
+    }
+
+    /**
+     * Like authenticate(), but additionally requires the access token to be "fresh"
+     * (minted by a real authentication within the FRESH_WINDOW, not via a refresh).
+     * Used to gate sensitive actions such as managing 2FA methods.
+     */
+    async authenticateFresh(options: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token }> {
+        const result = await this.authenticate(options);
+        if (!result.token.isFresh()) {
+            throw new SimpleError({
+                code: 'require_fresh_auth',
+                message: 'A recent authentication is required for this action',
+                human: $t('Bevestig je identiteit opnieuw om deze actie uit te voeren.'),
+                statusCode: 403,
+            });
+        }
+        return result;
+    }
+
+    /**
+     * Authorize a 2FA enrollment/management action. Accepts either a fresh full session
+     * (Bearer access token) or a setup token (Authorization: MFASetup <token>) issued
+     * during forced enrollment, before a session exists.
+     */
+    async authenticateMFAEnrollment(): Promise<{ user: User; setupToken: MFAToken | null }> {
+        const header = this.request.headers.authorization;
+        if (header && header.startsWith('MFASetup ')) {
+            const raw = header.substring('MFASetup '.length);
+            const setupToken = await MFAToken.getValid(raw, 'setup');
+            if (!setupToken) {
+                throw new SimpleError({
+                    code: 'mfa_setup_expired',
+                    message: 'The MFA setup session is invalid or expired',
+                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    statusCode: 401,
+                });
+            }
+            const user = await User.getByID(setupToken.userId);
+            if (!user) {
+                throw new SimpleError({
+                    code: 'mfa_setup_expired',
+                    message: 'The MFA setup session is invalid or expired',
+                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    statusCode: 401,
+                });
+            }
+            this.user = user;
+            await this.insecurelyAuthenticateAs(user);
+            return { user, setupToken };
+        }
+
+        const { user } = await this.authenticateFresh();
+        return { user, setupToken: null };
     }
 
     async insecurelyAuthenticateAs(user: User) {

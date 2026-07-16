@@ -1,15 +1,19 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
-import type { ChallengeGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
-import { CreateTokenStruct, LoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+import { EmailVerificationCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, WebauthnCredential } from '@stamhoofd/models';
+import type { ChallengeGrantStruct, MFAGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
+import { CreateTokenStruct, LoginMethod, MFAMethodType, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
+import { TOTPHelper } from '../../helpers/TOTPHelper.js';
+import { mfaVerificationRateLimiter, TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
+import { WebauthnHelper } from '../../helpers/WebauthnHelper.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct;
+type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct | MFAGrantStruct;
 type ResponseBody = TokenStruct;
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -140,7 +144,12 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                const token = await Token.createToken(user);
+                // Second factor / forced enrollment: block the session until the user
+                // completes (or first sets up) a second factor. Shared with every other
+                // grant that mints a session from a single primary credential.
+                await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion());
+
+                const token = await Token.createToken(user, new Date());
 
                 if (!token) {
                     throw new SimpleError({
@@ -151,6 +160,96 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
+                const st = new TokenStruct(token);
+                return new Response(st);
+            }
+
+            case 'mfa': {
+                const mfaToken = await MFAToken.getValid(request.body.mfaToken, 'login');
+                if (!mfaToken) {
+                    throw new SimpleError({
+                        code: 'invalid_mfa_token',
+                        message: 'The MFA session is invalid or expired',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 400,
+                    });
+                }
+
+                const user = await User.getByID(mfaToken.userId);
+                if (!user) {
+                    await mfaToken.consume();
+                    throw new SimpleError({
+                        code: 'invalid_mfa_token',
+                        message: 'The MFA session is invalid or expired',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 400,
+                    });
+                }
+
+                // Scope check (same rules as refresh/password_token)
+                if ((organization && user.organizationId && user.organizationId !== organization.id) || (!organization && user.organizationId)) {
+                    throw new SimpleError({
+                        code: 'invalid_mfa_token',
+                        message: 'The MFA session is invalid or expired',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 400,
+                    });
+                }
+
+                // Aggregate brute-force protection across ALL of this user's MFA tokens
+                // (the per-token counter alone can be bypassed by minting new tokens).
+                // This MUST run before verification so that, once the limit is hit, even a
+                // correct code is rejected — otherwise a lucky/leaked code would still let
+                // an attacker through after unlimited guesses.
+                mfaVerificationRateLimiter.track(user.id);
+
+                let verified = false;
+                if (request.body.method === MFAMethodType.TOTP) {
+                    const code = request.body.code ?? '';
+                    for (const totp of await MFATOTP.getConfirmedForUser(user.id)) {
+                        const counter = TOTPHelper.verify(code, totp.secret);
+                        // Reject a still-valid code that was already accepted before (replay).
+                        if (counter !== null && (totp.lastUsedCounter === null || counter > totp.lastUsedCounter)) {
+                            totp.lastUsedAt = new Date();
+                            totp.lastUsedCounter = counter;
+                            await totp.save();
+                            verified = true;
+                            break;
+                        }
+                    }
+                } else if (request.body.method === MFAMethodType.RecoveryCode) {
+                    verified = await RecoveryCodeHelper.consume(user.id, request.body.code ?? '');
+                } else if (request.body.method === MFAMethodType.Passkey) {
+                    const assertion = request.body.assertion;
+                    const credentialId = assertion?.id;
+                    if (mfaToken.webauthnChallenge && assertion && credentialId) {
+                        const credential = await WebauthnCredential.getByCredentialId(credentialId);
+                        if (credential && credential.userId === user.id) {
+                            const newCounter = await WebauthnHelper.verifyAuthentication(assertion, mfaToken.webauthnChallenge, credential);
+                            if (newCounter !== null) {
+                                credential.counter = newCounter;
+                                credential.lastUsedAt = new Date();
+                                await credential.save();
+                                verified = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!verified) {
+                    const locked = await mfaToken.registerFailedAttempt();
+                    throw new SimpleError({
+                        code: locked ? 'too_many_attempts' : 'invalid_mfa_code',
+                        message: locked ? 'Too many attempts' : 'Invalid code',
+                        human: locked ? $t('Te veel pogingen. Meld je opnieuw aan.') : $t('De ingevoerde code is ongeldig.'),
+                        statusCode: locked ? 429 : 400,
+                        field: 'code',
+                    });
+                }
+
+                await mfaToken.consume();
+
+                const token = await Token.createToken(user, new Date());
                 const st = new TokenStruct(token);
                 return new Response(st);
             }
@@ -187,8 +286,14 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
+                // A valid password-reset/magic-link token is a single primary credential:
+                // enforce the same second-factor gate as the password grant, otherwise
+                // anyone with a reset link (i.e. email access) could bypass the user's 2FA
+                // and even wipe their factors with the resulting fresh session.
+                await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion());
+
                 // Important to create a new token before adjusting the old token
-                const token = await Token.createToken(passwordToken.user);
+                const token = await Token.createToken(passwordToken.user, new Date());
 
                 // TODO: make token short lived until renewal
 

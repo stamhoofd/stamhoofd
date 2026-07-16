@@ -5,6 +5,7 @@ import { nextTick } from 'vue';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 
+import { FormatInputDirective } from '../directives/FormatInputDirective';
 import AgeInput from './AgeInput.vue';
 import Checkbox from './Checkbox.vue';
 import CodeInput from './CodeInput.vue';
@@ -55,6 +56,7 @@ function renderInput(component: any, props: Record<string, unknown> = {}, slots?
             directives: {
                 autofocus: {},
                 tooltip: {},
+                formatInput: FormatInputDirective,
             },
         },
     });
@@ -97,18 +99,27 @@ test('Checkbox and Radio emit their selected values', async () => {
     expect(document.querySelector('.radio.with-text')).not.toBeNull();
 });
 
-test('CodeInput normalizes characters, updates the model, and emits complete', async () => {
+test('CodeInput normalizes characters, formats with dashes, updates the model, and emits complete', async () => {
     const result = renderInput(CodeInput, {
         modelValue: '',
         codeLength: 4,
         numbersOnly: false,
     });
-    const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('.code-input input'));
+    const input = document.querySelector<HTMLInputElement>('.code-input input')!;
 
-    await userEvent.click(inputs[0]);
-    await userEvent.keyboard('a1b2');
+    await userEvent.click(input);
+    await userEvent.keyboard('a1');
 
     await vi.waitFor(() => {
+        expect(input.value).toBe('A1');
+        expect(document.querySelector('.code-input .suffix')!.textContent).toBe('_-_');
+    });
+
+    await userEvent.keyboard('b2');
+
+    await vi.waitFor(() => {
+        expect(input.value).toBe('A1B-2');
+        expect(document.querySelector('.code-input .suffix')!.textContent).toBe('');
         expect(lastModelValue<string>(result)).toBe('A1B2');
         expect(result.emitted('complete')).toHaveLength(1);
     });
