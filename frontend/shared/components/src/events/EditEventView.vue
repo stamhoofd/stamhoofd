@@ -313,9 +313,15 @@ const props = withDefaults(
         isNew: boolean;
         event: Event;
         callback?: (() => void) | null;
+        /**
+         * Called with the patched event right before it is saved. Return false to cancel
+         * the save and keep the editor open (e.g. so the user can adjust the dates first).
+         */
+        beforeSave?: ((event: Event) => Promise<boolean>) | null;
     }>(),
     {
         callback: null,
+        beforeSave: null,
     },
 );
 
@@ -724,6 +730,11 @@ async function save() {
             });
         }
         // #endregion
+
+        if (props.beforeSave && !await props.beforeSave(patched.value)) {
+            saving.value = false;
+            return;
+        }
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
 
