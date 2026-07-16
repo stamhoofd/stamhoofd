@@ -372,7 +372,7 @@ test.describe('Duplicate event', () => {
 
         const dialog = await duplicateEventUntilWarning({ page, pages, scenario, duplicateName });
 
-        await page.getByTestId('centered-message-button').filter({ hasText: 'Duplicatie annuleren' }).click();
+        await page.getByTestId('centered-message-button').filter({ hasText: 'Annuleren' }).click();
         await expect(dialog).toHaveCount(0);
 
         // The duplicated event was deleted again: only the original event remains.
