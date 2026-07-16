@@ -66,13 +66,13 @@ export class UitpasTokenRepository {
     /**
      * organizationId (null means platform) -> UitpasTokenRepository or null if no creds are configured for this org/platform
      */
-    private static knownTokens: Map<string | null, UitpasTokenRepository | null> = new Map();
+    private static knownRepos: Map<string | null, UitpasTokenRepository | null> = new Map();
 
     /**
      * @returns null if no creds configured, undefined if not found in memory, UitpasTokenRepository if found in memory
      */
     private static getRepoFromMemory(organizationId: string | null): UitpasTokenRepository | undefined | null {
-        return UitpasTokenRepository.knownTokens.get(organizationId);
+        return UitpasTokenRepository.knownRepos.get(organizationId);
     }
 
     private static async getModelFromDb(organizationId: string | null) {
@@ -158,7 +158,7 @@ export class UitpasTokenRepository {
     }
 
     private static setRepoInMemory(organizationId: string | null, repo: UitpasTokenRepository | null) {
-        UitpasTokenRepository.knownTokens.set(organizationId, repo);
+        UitpasTokenRepository.knownRepos.set(organizationId, repo);
     }
 
     private static async setModelInDb(organizationId: string | null, model: UitpasClientCredential) {
