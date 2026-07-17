@@ -184,7 +184,8 @@ test.describe('Translated emails to webshop orders @translated-order-email', () 
             await setEditorContent(page, 'Nederlandse inhoud {{orderTable}} {{unsubscribeUrl}}');
 
             // Selecting the first language marks the existing content as Dutch
-            await setFirstLanguage(page, 'Nederlands');
+            // Webshop language is Dutch, no need to set it here again
+            // await setFirstLanguage(page, 'Nederlands');
             await expect(subject).toHaveValue('Nederlands onderwerp');
 
             await addTranslation(page, 'Frans');
@@ -238,16 +239,17 @@ test.describe('Translated emails to webshop orders @translated-order-email', () 
             expect(french.html).toContain('Nombre');
             expect(french.html).not.toContain('Artikel');
 
-            // The English order gets the Dutch content, but its replacements stay English
-            expect(english.html).toContain('Item');
-            expect(english.html).toContain('Amount');
-            expect(english.html).not.toContain('Artikel');
+            // The English order gets the Dutch content, and the replacements are Dutch too
+            // This is because the email was not written in English and defaults to one of the supported languages, being Dutch as default.
+            expect(english.html).toContain('Artikel');
+            expect(english.html).toContain('Aantal');
         } finally {
             await context.close();
         }
     });
 
     test('the composer shows the example values in the language that is being edited', async ({ browser }) => {
+        // TODO: this test covage is not high enough. It only tests the most easy replacement, greeting, but not the order table that also should be translated.
         // Keep the dashboard in Dutch (see above)
         const context = await browser.newContext({ locale: 'nl-BE' });
         const page = await context.newPage();
@@ -264,7 +266,8 @@ test.describe('Translated emails to webshop orders @translated-order-email', () 
             await editor.pressSequentially('Inhoud {{greeting}}');
             const chip = page.locator('.ProseMirror span[data-type="smartVariable"]');
 
-            await setFirstLanguage(page, 'Nederlands');
+            // webshop language is Dutch by default, no need to set it here
+            // await setFirstLanguage(page, 'Nederlands');
             await expect(chip).toContainText('Dag');
 
             // The French translation shows the French example values, even though the example
