@@ -18,5 +18,8 @@ export default defineAppConfig({
                 },
             },
         },
+        colors: {
+            primary: 'blue',
+        },
     },
 });
