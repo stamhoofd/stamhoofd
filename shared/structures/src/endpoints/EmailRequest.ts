@@ -112,7 +112,7 @@ export class Recipient extends AutoEncoder {
     /**
      * Preferred language of this recipient, used to select the email content translation.
      */
-    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 406 })
     language: Language | null = null;
 
     /// For reference and filtering

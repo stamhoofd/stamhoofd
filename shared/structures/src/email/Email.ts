@@ -137,14 +137,14 @@ export class Email extends AutoEncoder {
      * is used for all recipients without a matching override. When `language` is set, this map
      * never contains that language: its content lives in the default content itself.
      */
-    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailContent), ...NextVersion })
+    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailContent), version: 406 })
     translations: Map<Language, EmailContent> = new Map();
 
     /**
      * The language of the default content (subject/html/text/json). null when the content is
      * untranslated. See validateEmailTranslations for the states this can be in.
      */
-    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 406 })
     language: Language | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
@@ -331,7 +331,7 @@ export class EmailRecipient extends AutoEncoder {
     /**
      * Preferred language of this recipient, used to select the email content translation.
      */
-    @field({ decoder: new EnumDecoder(Language), nullable: true, ...NextVersion })
+    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 406 })
     language: Language | null = null;
 
     @field({ decoder: new ArrayDecoder(Replacement) })
@@ -454,7 +454,7 @@ export class EmailPreview extends Email {
      * language (the recipient's own language is ignored). Only filled by the detail endpoints,
      * not in email lists.
      */
-    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailRecipient), ...NextVersion })
+    @field({ decoder: new MapDecoder(new EnumDecoder(Language), EmailRecipient), version: 406 })
     exampleRecipients: Map<Language, EmailRecipient> = new Map();
 
     @field({ decoder: User, nullable: true, version: 383 })
