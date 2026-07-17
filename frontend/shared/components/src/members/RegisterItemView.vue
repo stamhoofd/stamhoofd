@@ -37,7 +37,7 @@
         </p>
 
         <template v-if="item.replaceRegistrations.length === 0">
-            <p v-if="item.group.settings.description.toString()" class="style-description-block" v-text="item.group.settings.description.toString()" />
+            <p v-if="item.group.settings.description.toString()" class="style-description-block pre-wrap" v-text="item.group.settings.description.toString()" />
             <p v-else class="style-description-block" v-text="$t('%e9', {member: item.member.patchedMember.firstName})" />
         </template>
 
