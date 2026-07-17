@@ -188,7 +188,7 @@ describe('sendEmailTemplate with translations', () => {
         expect(await email.setFromTemplate(EmailTemplateType.SavedMembersEmail)).toBe(true);
 
         expect(email.subject).toBe('Sujet français');
-        expect(email.language).toBe(null);
+        expect(email.language).toBe(Language.French);
         expect(email.translations.size).toBe(0);
     });
 
@@ -211,7 +211,7 @@ describe('sendEmailTemplate with translations', () => {
         expect(await email.setFromTemplate(EmailTemplateType.SavedMembersEmail)).toBe(true);
 
         expect(email.subject).toBe('Default subject');
-        expect(email.language).toBe(null);
+        expect(email.language).toBe(Language.Dutch);
         expect(email.translations.size).toBe(0);
     });
 
