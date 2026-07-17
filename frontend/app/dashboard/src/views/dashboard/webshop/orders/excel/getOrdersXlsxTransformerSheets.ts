@@ -1,6 +1,6 @@
-import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
-import type { SelectableXlsxTransformerColumn } from '@stamhoofd/frontend-excel-export/SelectableXlsxTransformerColumn';
+import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import type { SelectableXlsxTransformerSheet } from '@stamhoofd/frontend-excel-export/SelectableXlsxTransformerSheet';
+import { toTransformerColumn } from '@stamhoofd/frontend-excel-export/toTransformerColumn';
 import type { Organization, PrivateOrderWithTickets, Webshop } from '@stamhoofd/structures';
 import { getOrdersSelectableXlsxTransformerSheets } from './getOrdersSelectableXlsxTransformerSheets';
 
@@ -15,15 +15,4 @@ export function getOrdersXlsxTransformerSheets(webshop: Webshop, orders: Private
         transform: sheet.transform,
         columns: sheet.expandableColumns.map(group => toTransformerColumn(group)),
     }));
-}
-
-function toTransformerColumn<R>(group: SelectableXlsxTransformerColumn<R>): XlsxTransformerColumn<R> {
-    if (group.columns.length === 1 && group.columns[0].id === group.id) {
-        return group.columns[0];
-    }
-
-    // A group that expands to multiple Excel columns (e.g. address records): match on the group id
-    return {
-        match: (id: string) => id === group.id ? group.columns.map(column => ({ ...column })) : undefined,
-    };
 }
