@@ -309,8 +309,8 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
 
         new SelectablePdfData<PlatformMember>({
             id: 'emergencyContacts',
-            name: $t(`Alle noodcontacten`),
-            description: $t(`Alle noodcontacten van het lid, ook als het er meer dan twee zijn.`),
+            name: $t(`%ZeJ`),
+            description: $t(`%ZeS`),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.emergencyContacts.map(c => c.toString()).join('\n'),
         }),
@@ -324,14 +324,14 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             return [
                 new SelectablePdfData<PlatformMember>({
                     id: getId('name'),
-                    name: $t(`Naam`),
+                    name: $t(`%1Os`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getContact(object)?.name,
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('title'),
-                    name: $t(`Relatie`),
+                    name: $t(`%f5`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getContact(object)?.title,

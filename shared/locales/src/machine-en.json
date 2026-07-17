@@ -683,10 +683,6 @@
     "original": "Via overschrijving",
     "translation": "By bank transfer"
   },
-  "%12k": {
-    "original": "Domiciliëring",
-    "translation": "Direct debit"
-  },
   "%12l": {
     "original": "Betaal met je Bancontact Pay-app of met je bankapp die Bancontact of Wero-betalingen ondersteunt",
     "translation": "Pay with your Bancontact Pay app or with your banking app that supports Bancontact or Wero payments"
@@ -18006,6 +18002,38 @@
   "%ZeH": {
     "original": "De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal.",
     "translation": "The content in this language will be lost. The next available translation will become the new default language."
+  },
+  "%ZeI": {
+    "original": "Je kan de activiteit dupliceren zonder de inschrijvingsinstellingen, of de duplicatie annuleren.",
+    "translation": "You can duplicate the activity without the registration settings, or cancel the duplication."
+  },
+  "%ZeJ": {
+    "original": "Alle noodcontacten",
+    "translation": "All emergency contacts"
+  },
+  "%ZeN": {
+    "original": "Inschrijvingsinstellingen kunnen niet mee gekopieerd worden",
+    "translation": "Registration settings cannot be copied"
+  },
+  "%ZeO": {
+    "original": "Extra noodcontact",
+    "translation": "Additional emergency contact"
+  },
+  "%ZeP": {
+    "original": "Betaalproviders",
+    "translation": "Payment providers"
+  },
+  "%ZeR": {
+    "original": "Dupliceren zonder inschrijvingen",
+    "translation": "Duplicate without registrations"
+  },
+  "%ZeS": {
+    "original": "Alle noodcontacten van het lid, ook als het er meer dan twee zijn.",
+    "translation": "All emergency contacts for the member, even if there are more than two."
+  },
+  "%ZeT": {
+    "original": "Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.",
+    "translation": "All of the member's emergency contacts in a single column, even if there are more than two."
   },
   "%Zf": {
     "original": "Korte naam",

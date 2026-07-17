@@ -515,9 +515,9 @@ function getParentDescription(parent: Parent): string[] {
 
 function getEmergencyContactDescription(emergencyContact: EmergencyContact, index: number): string[] {
     if (index < 0) {
-        return [`${$t('Extra noodcontact')}: ${emergencyContact.toString()}`];
+        return [`${$t('%ZeO')}: ${emergencyContact.toString()}`];
     }
-    return [`${$t('Noodcontact')} ${index + 1}: ${emergencyContact.toString()}`];
+    return [`${$t('%17y')} ${index + 1}: ${emergencyContact.toString()}`];
 }
 
 function openResultView() {

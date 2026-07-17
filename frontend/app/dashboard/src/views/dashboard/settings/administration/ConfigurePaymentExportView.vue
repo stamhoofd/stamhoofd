@@ -38,7 +38,7 @@
         </STList>
 
         <template v-if="allPaymentProviders.length">
-            <hr><h2>{{ $t('Betaalproviders') }}</h2>
+            <hr><h2>{{ $t('%ZeP') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">

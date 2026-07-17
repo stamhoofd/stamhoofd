@@ -687,10 +687,6 @@
     "original": "Via overschrijving",
     "translation": "Par virement"
   },
-  "%12k": {
-    "original": "Domiciliëring",
-    "translation": "Domiciliation"
-  },
   "%12l": {
     "original": "Betaal met je Bancontact Pay-app of met je bankapp die Bancontact of Wero-betalingen ondersteunt",
     "translation": "Payez avec votre application Bancontact Pay ou avec l'application bancaire qui prend en charge les paiements Bancontact ou Wero"
@@ -18190,6 +18186,38 @@
   "%ZeH": {
     "original": "De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal.",
     "translation": "Le contenu dans cette langue sera perdu. La première traduction suivante deviendra la nouvelle langue par défaut."
+  },
+  "%ZeI": {
+    "original": "Je kan de activiteit dupliceren zonder de inschrijvingsinstellingen, of de duplicatie annuleren.",
+    "translation": "Vous pouvez dupliquer l'activité sans les paramètres d'inscription, ou annuler la duplication."
+  },
+  "%ZeJ": {
+    "original": "Alle noodcontacten",
+    "translation": "Tous les contacts d'urgence"
+  },
+  "%ZeN": {
+    "original": "Inschrijvingsinstellingen kunnen niet mee gekopieerd worden",
+    "translation": "Les paramètres d'inscription ne peuvent pas être copiés"
+  },
+  "%ZeO": {
+    "original": "Extra noodcontact",
+    "translation": "Contact d'urgence supplémentaire"
+  },
+  "%ZeP": {
+    "original": "Betaalproviders",
+    "translation": "Fournisseurs de paiement"
+  },
+  "%ZeR": {
+    "original": "Dupliceren zonder inschrijvingen",
+    "translation": "Dupliquer sans inscriptions"
+  },
+  "%ZeS": {
+    "original": "Alle noodcontacten van het lid, ook als het er meer dan twee zijn.",
+    "translation": "Tous les contacts d'urgence du membre, même s'il y en a plus de deux."
+  },
+  "%ZeT": {
+    "original": "Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.",
+    "translation": "Tous les contacts d'urgence du membre dans une seule colonne, même s'il y en a plus de deux."
   },
   "%Zf": {
     "original": "Korte naam",

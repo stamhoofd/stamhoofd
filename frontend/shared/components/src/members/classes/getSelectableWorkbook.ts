@@ -197,8 +197,8 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // emergency contacts
         new SelectableColumn({
             id: 'emergencyContacts',
-            name: $t(`Alle noodcontacten`),
-            description: $t(`Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.`),
+            name: $t(`%ZeJ`),
+            description: $t(`%ZeT`),
             enabled: true,
         }),
         ...[1, 2].flatMap((contactNumber, contactIndex) => {
@@ -209,13 +209,13 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             return [
                 new SelectableColumn({
                     id: getId('name'),
-                    name: $t(`Naam`),
+                    name: $t(`%1Os`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('title'),
-                    name: $t(`Relatie`),
+                    name: $t(`%f5`),
                     category,
                     enabled,
                 }),

@@ -3887,7 +3887,6 @@
   "%12h": "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer (daar kan je de QR-code scannen) of selecteer een andere betaalmethode.",
   "%12i": "Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.",
   "%12j": "Via overschrijving",
-  "%12k": "Domiciliëring",
   "%12l": "Betaal met je Bancontact Pay-app of met je bankapp die Bancontact of Wero-betalingen ondersteunt",
   "%12m": "Betaalbevestiging kan enkele dagen duren",
   "%12n": "Meest gebruikte betaalmethode.",
@@ -6223,5 +6222,13 @@
   "%ZeE": "Vertaling verwijderen",
   "%ZeF": "Janssens",
   "%ZeG": "De vertalingen konden niet worden opgeslagen omdat de standaardtaal ontbreekt. Herlaad de pagina en probeer opnieuw.",
-  "%ZeH": "De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal."
+  "%ZeH": "De inhoud van deze taal gaat verloren. De eerstvolgende vertaling wordt de nieuwe standaardtaal.",
+  "%ZeI": "Je kan de activiteit dupliceren zonder de inschrijvingsinstellingen, of de duplicatie annuleren.",
+  "%ZeJ": "Alle noodcontacten",
+  "%ZeN": "Inschrijvingsinstellingen kunnen niet mee gekopieerd worden",
+  "%ZeO": "Extra noodcontact",
+  "%ZeP": "Betaalproviders",
+  "%ZeR": "Dupliceren zonder inschrijvingen",
+  "%ZeS": "Alle noodcontacten van het lid, ook als het er meer dan twee zijn.",
+  "%ZeT": "Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn."
 }

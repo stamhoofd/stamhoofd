@@ -873,10 +873,10 @@ function duplicateEvent() {
                     human += '.';
                 }
                 if (await CenteredMessage.confirm({
-                    title: $t('Inschrijvingsinstellingen kunnen niet mee gekopieerd worden'),
-                    description: human + ' ' + $t('Je kan de activiteit dupliceren zonder de inschrijvingsinstellingen, of de duplicatie annuleren.'),
-                    confirmText: $t('Dupliceren zonder inschrijvingen'),
-                    cancelText: $t('Annuleren'),
+                    title: $t('%ZeN'),
+                    description: human + ' ' + $t('%ZeI'),
+                    confirmText: $t('%ZeR'),
+                    cancelText: $t('%1Lh'),
                 })) {
                     return true;
                 }

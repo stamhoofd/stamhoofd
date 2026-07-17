@@ -194,7 +194,7 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
     // emergency contacts
     {
         id: 'emergencyContacts',
-        name: $t(`Alle noodcontacten`),
+        name: $t(`%ZeJ`),
         width: 40,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             // One contact per line so the cell stays readable, and wrap the text so all lines are visible

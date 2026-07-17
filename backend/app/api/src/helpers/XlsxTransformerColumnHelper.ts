@@ -45,7 +45,7 @@ export class XlsxTransformerColumnHelper {
         return [
             {
                 id: getId('name'),
-                name: getName($t(`Naam`)),
+                name: getName($t(`%1Os`)),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getContact(member)?.name ?? '',
@@ -53,7 +53,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('title'),
-                name: getName($t(`Relatie`)),
+                name: getName($t(`%f5`)),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getContact(member)?.title ?? '',
