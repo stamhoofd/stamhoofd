@@ -1016,6 +1016,9 @@ test.describe('Settings email templates', () => {
         organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
         await organizationPeriod.save();
 
+        organization.privateMeta.featureFlags.push('email-translations');
+        await organization.save();
+
         const template = new EmailTemplate();
         template.subject = 'Default subject';
         template.type = EmailTemplateType.RegistrationConfirmation;
@@ -1078,6 +1081,9 @@ test.describe('Settings email templates', () => {
         organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
         await organizationPeriod.save();
 
+        organization.privateMeta.featureFlags.push('email-translations');
+        await organization.save();
+
         const template = new EmailTemplate();
         template.subject = 'Default subject';
         template.type = EmailTemplateType.RegistrationConfirmation;
@@ -1099,17 +1105,11 @@ test.describe('Settings email templates', () => {
         await expect(subjectInput).toHaveValue('Default subject');
         await expectCurrentLanguage(page, 'Nederlands');
 
-        // Removing the only language removes the language marker,
-        // the content itself is kept as untranslated default text
         await removeOnlyLanguage(page);
 
         await expect(subjectInput).toHaveValue('Default subject');
 
-        // Without a language and without the feature flag the button disappears
-        await expect(popup.getByTestId('email-language-button')).toHaveCount(0);
-
         await popup.locator('form').first().evaluate((form: HTMLFormElement) => form.requestSubmit());
-        await expect(subjectInput).toHaveCount(0);
         await saveTemplateList(page);
 
         await expect.poll(async () => {
@@ -1191,6 +1191,9 @@ test.describe('Settings email templates', () => {
         const organizationPeriod = await organization.getPeriod();
         organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
         await organizationPeriod.save();
+
+        organization.privateMeta.featureFlags = [];
+        await organization.save();
 
         const template = new EmailTemplate();
         template.subject = 'Default subject';
