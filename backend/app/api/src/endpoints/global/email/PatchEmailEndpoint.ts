@@ -115,11 +115,18 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.translations !== undefined) {
+            const lang = [...model.translations.keys()];
             model.translations = patchObject(model.translations, request.body.translations);
+            const after = [...model.translations.keys()];
+
+            if (JSON.stringify(lang.sort()) && JSON.stringify(after.sort())) {
+                rebuild = true;
+            }
         }
 
         if (request.body.language !== undefined) {
             model.language = request.body.language;
+            rebuild = true;
         }
 
         if (request.body.translations !== undefined || request.body.language !== undefined) {

@@ -589,8 +589,18 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
  * that already established a locale (order emails wrapped in I18n.runWithLocale, or the request
  * locale) keep working unchanged.
  */
-export function getRecipientI18n(recipient: { language?: Language | null }, organization: Organization | null): I18n {
-    return new I18n(recipient.language ?? $getLanguage(), organization?.address.country ?? $getCountry());
+export function getRecipientI18n(recipient: { language?: Language | null }, organization: Organization | null, options?: { allowedLanguages?: Language[] | null }): I18n {
+    let lang = recipient.language ?? $getLanguage();
+    if (options?.allowedLanguages && options.allowedLanguages.length) {
+        if (!options.allowedLanguages.includes(lang)) {
+            if (options.allowedLanguages.includes($getLanguage())) {
+                lang = $getLanguage();
+            } else {
+                lang = options.allowedLanguages[0];
+            }
+        }
+    }
+    return new I18n(lang, organization?.address.country ?? $getCountry());
 }
 
 /**
@@ -601,8 +611,8 @@ export function getRecipientI18n(recipient: { language?: Language | null }, orga
  * content. Generate recipient replacements inside this wrapper so new replacements are localized
  * automatically, and pass the provided i18n to helpers that take an explicit locale (e.g. getAppHost).
  */
-export function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => T): T {
-    const i18n = getRecipientI18n(recipient, organization);
+export function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => T, options?: { allowedLanguages?: Language[] | null }): T {
+    const i18n = getRecipientI18n(recipient, organization, options);
     return I18n.runWithLocale(i18n, () => handler(i18n));
 }
 
@@ -616,6 +626,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
     replyTo: EmailInterfaceRecipient | null;
     forPreview?: boolean;
     forceRefresh?: boolean;
+    allowedLanguages?: Language[] | null;
 }) {
     if (!options.platform) {
         options.platform = await Platform.getSharedPrivateStruct();
@@ -803,5 +814,5 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
 
         // Remove duplicates
         cleanReplacements(recipient.replacements);
-    });
+    }, options);
 }

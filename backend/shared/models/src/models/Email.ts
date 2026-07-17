@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, Replacement, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
-import { EmailAttachment, EmailContent, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LanguageHelper, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import { EmailAttachment, EmailContent, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getEmailContentForLanguage, getExampleRecipient, isSoftEmailRecipientError, LanguageHelper, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';
 import type { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -46,7 +46,7 @@ export type RecipientLoader<BeforeFetchAllResult = any> = {
      * The result of this function will be passed to the `fetch` function.
      */
     beforeFetchAll?: (request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => Promise<BeforeFetchAllResult>;
-    fetch(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
+    fetch(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult, options?: { allowedLanguages?: Language[] | null }): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
     count(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<number>;
 };
 
@@ -469,8 +469,16 @@ export class Email extends QueryableModel {
         this.text = defaultTemplate.text;
         this.subject = defaultTemplate.subject;
         this.json = defaultTemplate.json;
-        this.translations = new Map([...defaultTemplate.translations.entries()].map(([language, content]) => [language, content.clone()]));
-        this.language = defaultTemplate.language;
+
+        if (this.language !== null && this.language !== defaultTemplate.language) {
+            const content = defaultTemplate.translations.get(this.language);
+            if (content) {
+                this.html = content.html;
+                this.text = content.text;
+                this.subject = content.subject;
+                this.json = content.json;
+            }
+        }
 
         return true;
     }
@@ -1165,6 +1173,10 @@ export class Email extends QueryableModel {
         }).catch(console.error);
     }
 
+    getLanguages() {
+        return this.language ? [this.language, ...this.translations.keys()] : null;
+    }
+
     async buildRecipients() {
         const id = this.id;
         await QueueHandler.schedule('email-build-recipients-' + this.id, async function ({ abort }) {
@@ -1237,7 +1249,7 @@ export class Email extends QueryableModel {
 
                     while (request) {
                         abort.throwIfAborted();
-                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult);
+                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult, { allowedLanguages: upToDate.getLanguages() });
 
                         for (const item of response.results) {
                             if (!item.email && !item.memberId && !item.userId) {
@@ -1263,6 +1275,7 @@ export class Email extends QueryableModel {
                                 from: upToDate.getFromAddress(),
                                 replyTo: null,
                                 forPreview: false,
+                                allowedLanguages: upToDate.getLanguages(),
                             });
                             recipient.replacements = removeUnusedReplacements(combinedHtml, recipient.replacements);
 
@@ -1377,7 +1390,7 @@ export class Email extends QueryableModel {
                     const beforeFetchAllResult = loader.beforeFetchAll ? await loader.beforeFetchAll(request, subfilter.subfilter) : undefined;
 
                     while (request) {
-                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult);
+                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult, { allowedLanguages: upToDate.getLanguages() });
 
                         // Note: it is possible that a result in the database doesn't return a recipient (in memory filtering)
                         // so we do need pagination
@@ -1465,6 +1478,7 @@ export class Email extends QueryableModel {
         }
 
         const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
+        const allowedLanguages = this.getLanguages();
 
         const fillRow = async (row: EmailRecipientStruct) => {
             const virtualRecipient = row.getRecipient();
@@ -1475,6 +1489,7 @@ export class Email extends QueryableModel {
                 replyTo: null,
                 forPreview: true,
                 forceRefresh: !this.sentAt,
+                allowedLanguages,
             });
             row.replacements = virtualRecipient.replacements;
             return row;
@@ -1486,10 +1501,10 @@ export class Email extends QueryableModel {
         // each language (the recipient's own language is ignored), so the composer can show
         // example values in the language that is being edited
         const exampleRecipients = new Map<Language, EmailRecipientStruct>();
-        if (options.allLanguages) {
+        if (allowedLanguages && allowedLanguages.length > 1) {
             // The same country the recipient locale will resolve to (see getRecipientI18n)
             const country = organization?.address?.country ?? $getCountry();
-            for (const language of this.getExampleRecipientLanguages(country)) {
+            for (const language of allowedLanguages) {
                 const i18n = new I18n(language, country);
                 await I18n.runWithLocale(i18n, async () => {
                     const clone = baseRow.clone();
@@ -1609,6 +1624,7 @@ export class Email extends QueryableModel {
                 replyTo: null,
                 forPreview: false,
                 forceRefresh: true,
+                allowedLanguages: this.getLanguages(),
             });
             runWithRecipientLocale(struct, organization, () => {
                 stripRecipientReplacementsForWebDisplay(struct, {

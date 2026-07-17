@@ -304,6 +304,7 @@ export class OrderActionBuilder {
                 defaultSenderId: this.webshopManager.preview?.privateMeta.defaultEmailId,
                 // The language of each order is known, so the email can be translated
                 supportsTranslations: true,
+                defaultLanguage: this.webshopManager.preview.meta.defaultLanguage,
             }),
         });
         await this.present({

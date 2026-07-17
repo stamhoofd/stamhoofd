@@ -7,7 +7,7 @@ import { Context } from '../helpers/Context.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
-    fetch: async (query: LimitedFilteredRequest) => {
+    fetch: async (query: LimitedFilteredRequest, _subfilter, _beforeFetchAllResult, options) => {
         const organization = Context.organization;
         if (organization === undefined) {
             throw new Error('Organization is undefined');
@@ -35,9 +35,11 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
 
         for (const order of result.results) {
             const webshopPreview = webshopPreviewMap.get(order.webshopId)!;
-            runWithRecipientLocale({ language: order.consumerLanguage }, organization, () => {
-                recipients.push(order.getEmailRecipient(organizationStruct, webshopPreview));
-            });
+            runWithRecipientLocale({ language: order.consumerLanguage }, organization, (i18n) => {
+                const r = order.getEmailRecipient(organizationStruct, webshopPreview);
+                r.language = i18n.language;
+                recipients.push(r);
+            }, options);
         }
 
         return new PaginatedResponse({

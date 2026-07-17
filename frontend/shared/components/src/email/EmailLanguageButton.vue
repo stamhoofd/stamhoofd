@@ -1,5 +1,5 @@
 <template>
-    <template v-if="languages.length > 0 || (supportsTranslations && hasLanguages && translationsEnabled)">
+    <template v-if="languages.length > 1 || (supportsTranslations && hasLanguages && translationsEnabled)">
         <button v-if="!modelValue" class="button icon translate" type="button" :disabled="disabled" data-testid="email-language-button" @click="showMenu" />
         <button v-else class="button text" type="button" :disabled="disabled" data-testid="email-language-button" @click="showMenu">
             <span class="icon translate" />

@@ -165,11 +165,13 @@ const props = withDefaults(defineProps<{
      * translations remain manageable regardless.
      */
     supportsTranslations?: boolean;
+    defaultLanguage?: Language | null;
 }>(), {
     defaultSubject: '',
     defaultSenderId: null,
     editEmail: null,
     supportsTranslations: false,
+    defaultLanguage: null,
 });
 
 export type RecipientChooseOneOption = {
@@ -462,6 +464,7 @@ async function createEmail() {
                 senderId: (props.defaultSenderId ? senders.value.find(s => s.id === props.defaultSenderId)?.id : null) ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
+                language: props.defaultLanguage,
             }),
             decoder: EmailPreview as Decoder<EmailPreview>,
             owner,
