@@ -2,7 +2,7 @@ import { XlsxColumnFilterer, XlsxTransformer } from '@stamhoofd/excel-writer/cor
 import type { ExcelWorkbookFilter, Organization, PrivateOrderWithTickets, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SheetJsWriterAdapter } from '../../../../../classes/SheetJsWriterAdapter';
-import { getOrdersExcelDefinitions } from './ordersExcelSheets';
+import { getOrdersXlsxTransformerSheets } from './getOrdersXlsxTransformerSheets';
 
 /**
  * Generate and download the Excel export of webshop orders in the browser.
@@ -15,22 +15,21 @@ export async function exportOrdersToExcel({ webshop, orders, organization, filte
     organization: Organization;
     filter: ExcelWorkbookFilter;
 }): Promise<void> {
-    const definitions = getOrdersExcelDefinitions(webshop, orders, organization);
-    const sheets = new XlsxColumnFilterer(definitions).filterColumns(filter);
+    const transformerSheets = getOrdersXlsxTransformerSheets(webshop, orders, organization);
+    const concreteTransformerSheets = new XlsxColumnFilterer(transformerSheets).filterColumns(filter);
 
     const writer = new SheetJsWriterAdapter({
         fileName: Formatter.fileSlug(webshop.meta.name) + '.xlsx',
-        headerRows: new Map(sheets.map(sheet => [sheet.name, sheet.columns.some(column => !!column.category) ? 2 : 1])),
+        headerRows: new Map(concreteTransformerSheets.map(sheet => [sheet.name, sheet.columns.some(column => !!column.category) ? 2 : 1])),
         defaultColumnWidth: 13,
     });
 
     try {
-        const transformer = new XlsxTransformer(sheets, writer);
+        const transformer = new XlsxTransformer(concreteTransformerSheets, writer);
         await transformer.init();
         await transformer.process([orders]);
         await writer.close();
-    }
-    catch (e) {
+    } catch (e) {
         await writer.abort();
         throw e;
     }

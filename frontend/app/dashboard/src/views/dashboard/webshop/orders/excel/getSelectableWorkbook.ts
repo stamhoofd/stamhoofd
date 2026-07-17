@@ -2,7 +2,7 @@ import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableCol
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 import type { Organization, PrivateOrderWithTickets, Webshop } from '@stamhoofd/structures';
-import { getOrdersExcelSheets } from './ordersExcelSheets';
+import { getOrdersSelectableXlsxTransformerSheets } from './getOrdersSelectableXlsxTransformerSheets';
 
 /**
  * Build the workbook with selectable sheets and columns for the Excel export of webshop orders.
@@ -11,13 +11,13 @@ import { getOrdersExcelSheets } from './ordersExcelSheets';
  */
 export function getSelectableWorkbook(webshop: Webshop, orders: PrivateOrderWithTickets[], organization: Organization, options?: { includeTickets?: boolean }): SelectableWorkbook {
     return new SelectableWorkbook({
-        sheets: getOrdersExcelSheets(webshop, orders, organization, options).map((sheet) => {
+        sheets: getOrdersSelectableXlsxTransformerSheets(webshop, orders, organization, options).map((sheet) => {
             return new SelectableSheet({
                 id: sheet.id,
                 name: sheet.name,
                 description: sheet.description,
                 warning: sheet.warning,
-                columns: sheet.groups.map((group) => {
+                columns: sheet.expandableColumns.map((group) => {
                     return new SelectableColumn({
                         id: group.id,
                         name: group.name,

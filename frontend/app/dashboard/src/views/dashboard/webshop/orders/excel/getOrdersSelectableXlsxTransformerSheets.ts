@@ -1,39 +1,9 @@
-import type { CellValue, XlsxTransformerColumn, XlsxTransformerConcreteColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer/core';
+import type { CellValue } from '@stamhoofd/excel-writer/core';
+import type { SelectableXlsxTransformerColumn } from '@stamhoofd/frontend-excel-export/SelectableXlsxTransformerColumn';
+import type { SelectableXlsxTransformerSheet } from '@stamhoofd/frontend-excel-export/SelectableXlsxTransformerSheet';
 import type { Organization, PrivateOrder, PrivateOrderWithTickets, Product, TicketPublicPrivate, Webshop } from '@stamhoofd/structures';
 import { CartItem, CartItemOption, CheckoutMethodType, Gender, getGenderName, OrderStatusHelper, PaymentMethodHelper, ProductType, RecordCategory, ReservedSeat, TicketPublic } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-
-/**
- * A column as shown in the export settings (ExcelExportView). One selectable column can
- * expand to multiple concrete Excel columns (e.g. address records).
- */
-export type OrdersExcelColumnGroup<R> = {
-    id: string;
-    name: string;
-    description?: string;
-    /**
-     * Groups the column in the export settings, and is written as a category row above the
-     * headers in the Excel file (unless the category row is turned off).
-     */
-    category?: string;
-    /**
-     * Default enabled state in the UI (defaults to true)
-     */
-    enabled?: boolean;
-    columns: XlsxTransformerConcreteColumn<R>[];
-};
-
-export type OrdersExcelSheet<R> = {
-    id: string;
-    name: string;
-    description?: string;
-    /**
-     * Shown as a warning in the export settings, above the columns.
-     */
-    warning?: string;
-    transform: (orders: PrivateOrderWithTickets[]) => R[];
-    groups: OrdersExcelColumnGroup<R>[];
-};
 
 type OrderLineRow = {
     order: PrivateOrder;
@@ -126,7 +96,7 @@ function singleColumnGroup<R>(data: {
     enabled?: boolean;
     width?: number;
     getValue: (row: R) => CellValue;
-}): OrdersExcelColumnGroup<R> {
+}): SelectableXlsxTransformerColumn<R> {
     return {
         id: data.id,
         name: data.name,
@@ -146,8 +116,8 @@ function singleColumnGroup<R>(data: {
  * Columns are grouped per category, in the order the categories first occur. The Excel category row
  * merges consecutive columns of the same category, so the columns of one category have to stay together.
  */
-function groupColumnsByCategory<R>(groups: OrdersExcelColumnGroup<R>[]): OrdersExcelColumnGroup<R>[] {
-    const byCategory = new Map<string, OrdersExcelColumnGroup<R>[]>();
+function groupColumnsByCategory<R>(groups: SelectableXlsxTransformerColumn<R>[]): SelectableXlsxTransformerColumn<R>[] {
+    const byCategory = new Map<string, SelectableXlsxTransformerColumn<R>[]>();
 
     for (const group of groups) {
         const category = group.category ?? '';
@@ -187,7 +157,7 @@ function getCheckoutAddressString(order: PrivateOrder): string {
  * Base order columns (order number, date and customer details), shared by the
  * 'orderLines' and 'orders' sheets.
  */
-function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): OrdersExcelColumnGroup<R>[] {
+function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): SelectableXlsxTransformerColumn<R>[] {
     return [
         singleColumnGroup<R>({
             id: 'number',
@@ -277,8 +247,8 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): OrdersExce
  * Order level answers: custom order fields (legacy) and record answers.
  * Deleted fields and records that still have answers in the exported orders are included as well.
  */
-function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: (row: R) => PrivateOrder): OrdersExcelColumnGroup<R>[] {
-    const groups: OrdersExcelColumnGroup<R>[] = [];
+function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: (row: R) => PrivateOrder): SelectableXlsxTransformerColumn<R>[] {
+    const groups: SelectableXlsxTransformerColumn<R>[] = [];
     const fieldIds = new Set<string>();
     const recordIds = new Set<string>();
 
@@ -348,7 +318,7 @@ function getAnswerGroups<R>(webshop: Webshop, orders: PrivateOrder[], getOrder: 
  * One column per cart item option: product price choice, ticket date, option menus and
  * open questions of products. Deduplicated by name, exactly like the answers are entered.
  */
-function getCartItemOptionGroups(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelColumnGroup<OrderLineRow>[] {
+function getCartItemOptionGroups(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerColumn<OrderLineRow>[] {
     const names = new Map<string, string>(); // slug -> first seen name
 
     const addName = (name: string) => {
@@ -429,7 +399,7 @@ function getCartItemOptionValue(item: CartItem, slug: string): string {
  * One column per product combination (product + price + options) containing the ordered amount,
  * used in the 'orders' sheet.
  */
-function getItemAmountGroups(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelColumnGroup<PrivateOrder>[] {
+function getItemAmountGroups(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerColumn<PrivateOrder>[] {
     const names = new Map<string, string>(); // slug -> group name
 
     const addGroupingString = (group: string) => {
@@ -492,13 +462,13 @@ function getItemAmountGroups(webshop: Webshop, orders: PrivateOrder[]): OrdersEx
 /**
  * Sheet with one row per ordered cart item.
  */
-function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelSheet<OrderLineRow> {
+function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, OrderLineRow> {
     return {
         id: 'orderLines',
         name: $t(`%xP`),
         description: $t(`Bevat een rij per besteld artikel. Een bestelling met meerdere artikels wordt over meerdere rijen verdeeld.`),
         transform: orders => orders.flatMap(order => order.data.cart.items.map(item => ({ order, item }))),
-        groups: [
+        expandableColumns: [
             ...getOrderDetailGroups<OrderLineRow>(row => row.order),
             ...getAnswerGroups<OrderLineRow>(webshop, orders, row => row.order),
             singleColumnGroup<OrderLineRow>({
@@ -579,7 +549,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): OrdersExc
     };
 }
 
-function getCheckoutDetailGroups<R>(getOrder: (row: R) => PrivateOrder): OrdersExcelColumnGroup<R>[] {
+function getCheckoutDetailGroups<R>(getOrder: (row: R) => PrivateOrder): SelectableXlsxTransformerColumn<R>[] {
     return [
         singleColumnGroup<R>({
             id: 'checkoutMethod',
@@ -616,7 +586,7 @@ function getCheckoutDetailGroups<R>(getOrder: (row: R) => PrivateOrder): OrdersE
     ];
 }
 
-function getOrderStatusGroups<R>(getOrder: (row: R) => PrivateOrder): OrdersExcelColumnGroup<R>[] {
+function getOrderStatusGroups<R>(getOrder: (row: R) => PrivateOrder): SelectableXlsxTransformerColumn<R>[] {
     return [
         singleColumnGroup<R>({
             id: 'paymentMethod',
@@ -651,13 +621,13 @@ function getOrderStatusGroups<R>(getOrder: (row: R) => PrivateOrder): OrdersExce
 /**
  * Sheet with one row per order.
  */
-function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelSheet<PrivateOrder> {
+function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, PrivateOrder> {
     return {
         id: 'orders',
         name: $t(`%xQ`),
         description: $t(`Bevat een rij per bestelling, met een kolom per artikelcombinatie.`),
         transform: orders => orders,
-        groups: [
+        expandableColumns: [
             ...getOrderDetailGroups<PrivateOrder>(order => order),
             ...getAnswerGroups<PrivateOrder>(webshop, orders, order => order),
             singleColumnGroup<PrivateOrder>({
@@ -730,7 +700,7 @@ type TicketRow = {
 /**
  * Sheet with one row per ticket.
  */
-function getTicketsSheet(webshop: Webshop, organization: Organization): OrdersExcelSheet<TicketRow> {
+function getTicketsSheet(webshop: Webshop, organization: Organization): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, TicketRow> {
     return {
         id: 'tickets',
         name: $t(`Tickets`),
@@ -743,7 +713,7 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): OrdersEx
                 .sort(TicketPublic.sort)
                 .map(ticket => ({ order, ticket })),
         ),
-        groups: [
+        expandableColumns: [
             singleColumnGroup<TicketRow>({
                 id: 'number',
                 name: $t(`%xA`),
@@ -898,13 +868,13 @@ function getProductTotalRows(orders: PrivateOrder[]): ProductTotalRow[] {
  * Sheet with the total ordered amount per product combination.
  * Only included if there is at least one combination that differs from the product name itself.
  */
-function getProductsSheet(): OrdersExcelSheet<ProductTotalRow> {
+function getProductsSheet(): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, ProductTotalRow> {
     return {
         id: 'products',
         name: $t(`%15p`),
         description: $t(`Bevat het totaal besteld aantal per combinatie van artikel, prijskeuze en opties.`),
         transform: orders => getProductTotalRows(orders),
-        groups: [
+        expandableColumns: [
             singleColumnGroup<ProductTotalRow>({
                 id: 'product',
                 name: $t(`%Sc`),
@@ -985,7 +955,7 @@ function getOptionTotalRows(webshop: Webshop, orders: PrivateOrder[]): OptionTot
 /**
  * Sheet with the total ordered amount per product, with a column per price choice and option.
  */
-function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelSheet<OptionTotalRow> {
+function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, OptionTotalRow> {
     const productPriceNames = new Map<string, string>(); // slug -> name
     const optionNames = new Map<string, string>(); // slug -> name
 
@@ -1033,7 +1003,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelS
         name: $t(`%xR`),
         description: $t(`Bevat het totaal besteld aantal per artikel, met een kolom per prijskeuze en optie.`),
         transform: orders => getOptionTotalRows(webshop, orders),
-        groups: [
+        expandableColumns: [
             singleColumnGroup<OptionTotalRow>({
                 id: 'product',
                 name: $t(`%Sc`),
@@ -1083,8 +1053,8 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): OrdersExcelS
 /**
  * All the sheets (with selectable column groups) available in the Excel export of webshop orders.
  */
-export function getOrdersExcelSheets(webshop: Webshop, orders: PrivateOrderWithTickets[], organization: Organization, options?: { includeTickets?: boolean }): OrdersExcelSheet<any>[] {
-    const sheets: OrdersExcelSheet<any>[] = [
+export function getOrdersSelectableXlsxTransformerSheets(webshop: Webshop, orders: PrivateOrderWithTickets[], organization: Organization, options?: { includeTickets?: boolean }): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, any>[] {
+    const sheets: SelectableXlsxTransformerSheet<PrivateOrderWithTickets, any>[] = [
         getOrderLinesSheet(webshop, orders),
         getOrdersSheet(webshop, orders),
     ];
@@ -1104,30 +1074,6 @@ export function getOrdersExcelSheets(webshop: Webshop, orders: PrivateOrderWithT
 
     return sheets.map(sheet => ({
         ...sheet,
-        groups: groupColumnsByCategory(sheet.groups),
+        groups: groupColumnsByCategory(sheet.expandableColumns),
     }));
-}
-
-/**
- * Convert the sheets to the format of `@stamhoofd/excel-writer`, so the export
- * can be generated with the same code as the backend Excel exports.
- */
-export function getOrdersExcelDefinitions(webshop: Webshop, orders: PrivateOrderWithTickets[], organization: Organization): XlsxTransformerSheet<PrivateOrderWithTickets[], unknown>[] {
-    return getOrdersExcelSheets(webshop, orders, organization).map((sheet: OrdersExcelSheet<any>) => ({
-        id: sheet.id,
-        name: sheet.name,
-        transform: sheet.transform,
-        columns: sheet.groups.map(group => toTransformerColumn(group)),
-    }));
-}
-
-function toTransformerColumn<R>(group: OrdersExcelColumnGroup<R>): XlsxTransformerColumn<R> {
-    if (group.columns.length === 1 && group.columns[0].id === group.id) {
-        return group.columns[0];
-    }
-
-    // A group that expands to multiple Excel columns (e.g. address records): match on the group id
-    return {
-        match: (id: string) => id === group.id ? group.columns.map(column => ({ ...column })) : undefined,
-    };
 }
