@@ -22,4 +22,5 @@ export default defineAppConfig({
             primary: 'blue',
         },
     },
+    github: false,
 });
