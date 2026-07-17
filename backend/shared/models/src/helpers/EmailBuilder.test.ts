@@ -147,7 +147,7 @@ describe('sendEmailTemplate with translations', () => {
         expect(emails[0].html).toContain('Organization html');
     });
 
-    test('setFromTemplate copies the translations and default language of the template onto the email', async () => {
+    test('setFromTemplate copies only the default language of the template onto the email if no language chosen for email', async () => {
         await new EmailTemplateFactory({
             organization,
             type: EmailTemplateType.SavedMembersEmail,
@@ -165,9 +165,54 @@ describe('sendEmailTemplate with translations', () => {
         expect(await email.setFromTemplate(EmailTemplateType.SavedMembersEmail)).toBe(true);
 
         expect(email.subject).toBe('Default subject');
-        expect(email.language).toBe(Language.Dutch);
-        expect(email.translations.size).toBe(1);
-        expect(email.translations.get(Language.French)!.subject).toBe('Sujet français');
+        expect(email.language).toBe(null);
+        expect(email.translations.size).toBe(0);
+    });
+
+    test('setFromTemplate copies only the correct language of the template onto the email', async () => {
+        await new EmailTemplateFactory({
+            organization,
+            type: EmailTemplateType.SavedMembersEmail,
+            subject: 'Default subject',
+            html: '<p>Default html</p>',
+            text: 'Default text',
+            language: Language.Dutch,
+            translations: new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+            ]),
+        }).create();
+
+        const email = new Email();
+        email.language = Language.French;
+        email.organizationId = organization.id;
+        expect(await email.setFromTemplate(EmailTemplateType.SavedMembersEmail)).toBe(true);
+
+        expect(email.subject).toBe('Sujet français');
+        expect(email.language).toBe(null);
+        expect(email.translations.size).toBe(0);
+    });
+
+    test('setFromTemplate copies only the default language of the template onto the email if languages match', async () => {
+        await new EmailTemplateFactory({
+            organization,
+            type: EmailTemplateType.SavedMembersEmail,
+            subject: 'Default subject',
+            html: '<p>Default html</p>',
+            text: 'Default text',
+            language: Language.Dutch,
+            translations: new Map([
+                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+            ]),
+        }).create();
+
+        const email = new Email();
+        email.language = Language.Dutch;
+        email.organizationId = organization.id;
+        expect(await email.setFromTemplate(EmailTemplateType.SavedMembersEmail)).toBe(true);
+
+        expect(email.subject).toBe('Default subject');
+        expect(email.language).toBe(null);
+        expect(email.translations.size).toBe(0);
     });
 
     test('replaceAll is applied to the html of every language, not only the default', async () => {
