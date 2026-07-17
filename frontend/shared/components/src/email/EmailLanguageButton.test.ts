@@ -52,9 +52,9 @@ test('hidden when translations are supported but the feature flag is disabled', 
     expect(queryButton()).toBeNull();
 });
 
-test('existing translations remain manageable when translations are not supported', () => {
+test('existing translations (if more than 1) remain manageable when translations are not supported', () => {
     enableMultipleLanguages();
-    renderButton({ languages: [Language.French], supportsTranslations: false });
+    renderButton({ languages: [Language.French, Language.English], supportsTranslations: false });
     expect(queryButton()).not.toBeNull();
 });
 
