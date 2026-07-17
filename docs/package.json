@@ -12,5 +12,8 @@
     "docus": "^5.12.3",
     "better-sqlite3": "^12.11.1",
     "nuxt": "^4.4.8"
+  },
+  "devDependencies": {
+    "eslint-plugin-stamhoofd": "2.135.0"
   }
 }
