@@ -599,8 +599,4 @@ onBeforeUnmount(() => {
         justify-content: right;
     }
 }
-
-.style-price-big {
-    justify-content: right;
-}
 </style>
