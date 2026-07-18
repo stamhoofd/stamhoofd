@@ -145,11 +145,11 @@ if (orgInDomain) {
     });
 } else {
     const ignoreUris = [
-        // TODO: we should also use TranslatedUrls for tabs, so resolving is consistent and does not depend on language
-        $t('%1Ul'),
-        $t('%1cj'),
-        $t('%1Wy'),
-        $t('%1c5'),
+        buildTranslatedUrl({ nl: 'berichten', fr: 'messages', en: 'messages' }),
+        buildTranslatedUrl({ nl: 'start', fr: 'debut', en: 'start' }),
+        buildTranslatedUrl({ nl: 'mandje', fr: 'panier', en: 'basket' }),
+        buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
+        'reset-password',
     ];
 
     defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
