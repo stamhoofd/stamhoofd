@@ -24,7 +24,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
-import { useDismiss, useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
+import { ReactiveUrl, useDismiss, useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -86,7 +86,9 @@ async function goToOrder(id: string, args: NavigationActions) {
             components: [
                 AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
                     provide: {
-                        reactive_navigation_url: 'order/' + id,
+                        reactive_navigation_url: new ReactiveUrl({
+                            url: 'order/' + id,
+                        }),
                     },
                 }),
             ],
@@ -101,7 +103,9 @@ async function goToOrder(id: string, args: NavigationActions) {
             components: [
                 AsyncComponent(() => import('../orders/OrderView.vue'), { orderId: id, success: true }, {
                     provide: {
-                        reactive_navigation_url: 'order/' + id,
+                        reactive_navigation_url: new ReactiveUrl({
+                            url: 'order/' + id,
+                        }),
                     },
                 }),
             ],

@@ -308,6 +308,7 @@ import ImageComponent from '../views/ImageComponent.vue';
 
 import EventInfoTable from './components/EventInfoTable.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
+import { buildTranslatedUrl } from '#containers/TranslatedUrl.ts';
 
 const props = defineProps<{
     event: Event;
@@ -448,7 +449,8 @@ const link = computed(() => {
         registrationHost = eventOrganization.value.getRegistrationHost(false);
     }
 
-    return `https://${registrationHost}/activiteiten/${props.event.slug}`;
+    const url = buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' });
+    return `https://${registrationHost}/${url[$getLanguage()] ?? url['']}/${props.event.slug}`;
 });
 
 enum Routes {

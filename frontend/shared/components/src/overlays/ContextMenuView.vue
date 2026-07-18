@@ -7,15 +7,18 @@
             :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"
             @click.stop=""
         >
+            <div v-if="STAMHOOFD.environment === 'development' && (ComponentWithProperties.debug || HistoryManager.debug)" class="debug-overlay">
+                {{ url.getUrl() }} {{ url.getQuery() }} @ {{ historyIndex }} (own: {{ component?.ownsHistoryIndex() }}) (focus: {{ focused }})
+            </div>
             <slot />
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
+import { ComponentWithProperties, HistoryManager, useCurrentComponent, useFocused, usePop, useUrl } from '@simonbackx/vue-app-navigation';
+import { inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
+import type { Ref } from 'vue';
 
 import { ViewportHelper } from '../ViewportHelper';
 import type { ContextMenuItemApi } from './ContextMenuItemView.vue';
@@ -40,6 +43,15 @@ function triangleContains(ax: number, ay: number, bx: number, by: number, cx: nu
 defineOptions({
     inheritAttrs: false,
 });
+const url = useUrl();
+const historyIndex = inject('navigation_historyIndex', null) as Ref<number | undefined> | null;
+const component = useCurrentComponent();
+const focused = useFocused();
+
+if (component) {
+    // We can have focus. This prevents underlying views to handle on e.g. ESC key
+    component.forceCanHaveFocus.value = true;
+}
 
 const props = withDefaults(defineProps<{
     x?: number;
@@ -641,12 +653,14 @@ async function pop(popParents = false) {
 
 function onKey(event: KeyboardEvent) {
     if (event.defaultPrevented || event.repeat) {
+        console.log('on key prevented');
         return;
     }
 
     const key = event.key || event.keyCode;
 
     if (key === 'Escape' || key === 'Esc' || key === 27) {
+        console.log('Pop with ESC');
         pop(true).catch(console.error);
         event.preventDefault();
     }

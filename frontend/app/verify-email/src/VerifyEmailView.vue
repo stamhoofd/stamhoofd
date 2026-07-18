@@ -42,20 +42,19 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from 'vue';
-import CodeInput from '@stamhoofd/components/inputs/CodeInput.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
+import CodeInput from '@stamhoofd/components/inputs/CodeInput.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { AppRoute } from '@stamhoofd/structures';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { onDeactivated, onMounted, onUnmounted, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -77,11 +76,12 @@ const retrying = ref(false);
 const errorBox = ref<ErrorBox | null>(null);
 
 async function navigateAway() {
+    stopTimer();
     const org = context.value.organization;
     if (org) {
-        await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } });
+        await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org }, adjustHistory: false });
     } else {
-        await appNavigate(AppRoute.UnscopedAuto);
+        await appNavigate(AppRoute.UnscopedAuto, { adjustHistory: false });
     }
 }
 
@@ -108,6 +108,14 @@ async function doPoll() {
     pollTimer = setTimeout(() => void doPoll(), Math.max(pollCount * 1000, 5000));
 }
 
+function stopTimer() {
+    if (pollTimer) {
+        clearTimeout(pollTimer);
+        pollTimer = null;
+    }
+    polling = false;
+}
+
 onMounted(async () => {
     if (props.code) {
         codeInput.value = props.code;
@@ -115,13 +123,12 @@ onMounted(async () => {
     }
     pollTimer = setTimeout(() => void doPoll(), 10_000);
 });
-
+onDeactivated(() => {
+    console.log('Deactivated VerifyEmailView');
+});
 onUnmounted(() => {
-    if (pollTimer) {
-        clearTimeout(pollTimer);
-        pollTimer = null;
-    }
-    polling = false;
+    console.log('Unmounted VerifyEmailView');
+    stopTimer();
 });
 
 async function retry() {

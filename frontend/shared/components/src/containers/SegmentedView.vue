@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-navigation';
 import { defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -105,10 +105,10 @@ async function selectItem(item: Item, appendHistory: boolean = true) {
 
     // Set url namespace of the tab
     const tabUrl = Formatter.slug(unref(item.name));
-    item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
+    item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(new ReactiveUrl({ url: tabUrl })));
 
     if (appendHistory) {
-        HistoryManager.pushState(undefined, old
+        HistoryManager.pushState(null, old
             ? async () => {
                 await selectItem(old, false);
             }

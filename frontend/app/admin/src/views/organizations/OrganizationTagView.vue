@@ -52,7 +52,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 
-
 const props = defineProps<{
     tag: OrganizationTag;
 }>();

@@ -3,37 +3,37 @@
 </template>
 
 <script setup lang="ts">
-import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, inject, unref } from 'vue';
 
 // The InheritComponent allows you to define comonents in the 'provide' context tree, and display one of those components if it is present
 // This allows you to keep logic outside of components and 'inject' them
 
 const props = defineProps<{
-    name: string,
-    overrideProps?: Record<string, any>
-}>()
+    name: string;
+    overrideProps?: Record<string, any>;
+}>();
 
-const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties>|undefined> | undefined;
+const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties> | undefined> | undefined;
 const root = computed(() => {
     const injected = unref(injectedComponents);
     if (injected && injected[props.name]) {
         // We need to clone here, because the component might be in multiple places
-        const unreffed = unref(injected[props.name])
-        const c = unreffed?.clone() ?? null
+        const unreffed = unref(injected[props.name]);
+        const c = unreffed?.deepClone() ?? null;
         if (c) {
             if (props.overrideProps) {
                 c.properties = {
                     ...c.properties,
-                    ...props.overrideProps
-                }
+                    ...props.overrideProps,
+                };
             }
-            return c
+            return c;
         }
     }
-    return null
-})
+    return null;
+});
 
 </script>

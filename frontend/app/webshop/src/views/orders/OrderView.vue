@@ -366,7 +366,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, setUrl, usePop, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, ReactiveUrl, setUrl, usePop, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -421,13 +421,13 @@ const isPaid = computed(() => order.value && (order.value.payment === null || or
 const isTransfer = computed(() => getDefaultTransferPayment() !== null);
 
 // Make sure the url is overriden
-setUrl('order/' + (order.value?.id ?? props.orderId), null, 'Bestelling ' + (order.value?.number ?? ''));
+setUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), 'Bestelling ' + (order.value?.number ?? ''));
 
 const urlHelpers = useUrl();
 
 watch(() => order.value, () => {
     // Change if we loaded the order id or number
-    urlHelpers.overrideUrl('order/' + (order.value?.id ?? props.orderId), null, 'Bestelling ' + (order.value?.number ?? ''));
+    urlHelpers.overrideUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), 'Bestelling ' + (order.value?.number ?? ''));
 });
 
 function isPaymentTransfer(payment: Payment) {

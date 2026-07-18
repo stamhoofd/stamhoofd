@@ -68,7 +68,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { useDismiss, usePopup } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, ReactiveUrl, usePresent } from '@simonbackx/vue-app-navigation';
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
@@ -186,7 +186,9 @@ async function openCheckout(animated = true) {
         }
 
         const nextComponent = await nextStep.getComponent();
-        nextComponent.provide.reactive_navigation_url = nextStep.url;
+        nextComponent.provide.reactive_navigation_url = new ReactiveUrl({
+            url: nextStep.url,
+        });
 
         present({
             animated,
@@ -212,7 +214,9 @@ function openCart(animated = true, components: ComponentWithProperties[] = []) {
 
     const getCartComponentWithUrl = () => {
         const cartComponent = AsyncComponent(() => import('./checkout/CartView.vue'), {});
-        cartComponent.provide.reactive_navigation_url = 'cart';
+        cartComponent.provide.reactive_navigation_url = new ReactiveUrl({
+            url: 'cart',
+        });
         return cartComponent;
     };
 
@@ -405,7 +409,9 @@ async function resumeStep(destination: string, animated = true) {
 
             const getComponentAndSetUrl = async () => {
                 const component = await nextStep.getComponent();
-                component.provide.reactive_navigation_url = nextStep.url;
+                component.provide.reactive_navigation_url = new ReactiveUrl({
+                    url: nextStep.url,
+                });
                 return component;
             };
 

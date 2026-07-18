@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, onCheckRoutes, ReactiveUrl, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -47,7 +47,7 @@ export function useGlobalRoutes() {
                     root: component,
                 }, {
                     provide: {
-                        reactive_navigation_url: currentPath,
+                        reactive_navigation_url: new ReactiveUrl({ url: currentPath }),
                     },
                 }),
             ],

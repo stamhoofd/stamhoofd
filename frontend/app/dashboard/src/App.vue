@@ -16,6 +16,7 @@ import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { AccessRight, getEventTypes, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';
+import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 
 const context = useContext();
 const platformManager = usePlatformManager();
@@ -72,6 +73,7 @@ function getRoot() {
         id: 'onboarding',
         icon: 'home',
         name: $t(`%1XI`),
+        url: buildTranslatedUrl({ nl: 'onboarding', fr: 'onboarding', en: 'onboarding' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/onboarding/OnboardingStartView.vue'), {}),
         }),
@@ -81,6 +83,7 @@ function getRoot() {
         id: 'members',
         icon: 'group',
         name: $t(`%1EH`),
+        url: buildTranslatedUrl({ nl: 'leden', fr: 'membres', en: 'members' }),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(SplitViewController, {
                 root: AsyncComponent(() => import('./views/members/MembersMenuModern.vue'), {}),
@@ -92,6 +95,7 @@ function getRoot() {
         id: 'events',
         icon: 'calendar',
         name: $t(`%uB`),
+        url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/events/ManageEventsView.vue'), {}),
         }),
@@ -125,6 +129,7 @@ function getRoot() {
         id: 'settings',
         icon: 'settings',
         name: $t(`%xU`),
+        url: buildTranslatedUrl({ nl: 'instellingen', fr: 'parametres', en: 'settings' }),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {}),
         }),
@@ -161,6 +166,7 @@ function getRoot() {
         id: 'communication',
         icon: 'email-filled',
         name: $t(`%1DK`),
+        url: buildTranslatedUrl({ nl: 'berichten', fr: 'messages', en: 'messages' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/communication/CommunicationView.vue'), {}),
         }),

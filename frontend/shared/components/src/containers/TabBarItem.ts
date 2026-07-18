@@ -1,23 +1,26 @@
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import type { ComponentPublicInstance, Ref} from 'vue';
+import type { ComponentPublicInstance, Ref } from 'vue';
 import { markRaw, unref } from 'vue';
+import type { TranslatedUrl } from './TranslatedUrl';
 
 export class TabBarItem {
     id: string;
     name: string = '';
+    url?: TranslatedUrl;
     icon = '';
     badge: string | Ref<string> | null = '';
     component?: ComponentWithProperties;
     action?: (this: ComponentPublicInstance) => Promise<void> | void;
     savedScrollPositions: WeakMap<HTMLElement, number> = new WeakMap();
 
-    constructor(options: { id?: string; name: string; icon: string; badge?: string | Ref<string> | null; component?: ComponentWithProperties; action?: (this: ComponentPublicInstance) => Promise<void> | void }) {
+    constructor(options: { id?: string; name: string; icon: string; url?: TranslatedUrl; badge?: string | Ref<string> | null; component?: ComponentWithProperties; action?: (this: ComponentPublicInstance) => Promise<void> | void }) {
         this.id = options.id ?? Formatter.slug(options.name);
         this.name = options.name;
         this.icon = options.icon;
         this.component = options.component;
         this.badge = options.badge ?? '';
+        this.url = options.url;
         this.action = options.action;
 
         // Not reactive because we need === operator to know what the active tab is

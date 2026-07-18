@@ -19,6 +19,7 @@ import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import { useAdminAuditLogRenderers } from './views/organizations/useAdminAuditLogRenderers';
+import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 
 const getLoginRoot = useLoginRoot();
 const context = useContext();
@@ -84,6 +85,7 @@ function getRoot() {
         id: 'members',
         icon: 'group',
         name: $t(`%1EH`),
+        url: buildTranslatedUrl({ nl: 'leden', fr: 'membres', en: 'members' }),
         component: membersTableView,
     });
 
@@ -98,6 +100,7 @@ function getRoot() {
         id: 'events',
         icon: 'calendar',
         name: $t(`%uB`),
+        url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/events/ManageEventsView.vue'), {}),
         }),
@@ -116,6 +119,7 @@ function getRoot() {
         id: 'event-notifications',
         icon: 'notification',
         name: $t(`%CV`),
+        url: buildTranslatedUrl({ nl: 'kampmeldingen', fr: 'event-notifications', en: 'event-notifications' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/event-notifications/EventNotificationsTableView.vue'), {}),
         }),
@@ -145,6 +149,7 @@ function getRoot() {
         id: 'settings',
         icon: 'settings',
         name: $t(`%xU`),
+        url: buildTranslatedUrl({ nl: 'instellingen', fr: 'parametres', en: 'settings' }),
         component: settingsView,
     });
 
@@ -152,6 +157,7 @@ function getRoot() {
         id: 'communication',
         icon: 'email-filled',
         name: $t(`%1DK`),
+        url: buildTranslatedUrl({ nl: 'berichten', fr: 'messages', en: 'messages' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/communication/CommunicationView.vue'), {}),
         }),

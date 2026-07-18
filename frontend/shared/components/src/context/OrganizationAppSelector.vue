@@ -122,7 +122,6 @@ const hasAdmin = computed(() => {
 
 const searchOrganizations = async () => {
     await appNavigate(AppRoute.UnscopedAuto);
-    throw new Error('Should have been navigated away');
 };
 
 </script>

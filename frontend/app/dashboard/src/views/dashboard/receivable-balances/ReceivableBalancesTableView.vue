@@ -311,7 +311,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
 actions.push(new AsyncTableAction({
     name: 'E-mailen',
-    icon: 'email',
+    icon: 'send',
     priority: 12,
     groupIndex: 3,
     handler: async (selection: TableActionSelection<ObjectType>) => {

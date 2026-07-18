@@ -51,7 +51,7 @@ export class DocumentActionBuilder {
 
             new AsyncTableAction({
                 name: $t(`%1GW`),
-                icon: 'email',
+                icon: 'send',
                 priority: 6,
                 groupIndex: 2,
                 handler: async (selection: TableActionSelection<DocumentStruct>) => {

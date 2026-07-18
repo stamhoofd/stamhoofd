@@ -24,7 +24,7 @@ import RouterAppView from './RouterAppView.vue';
 
 const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
 HistoryManager.activate();
-HistoryManager.debug = STAMHOOFD.environment === 'test';
+HistoryManager.debug = STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development';
 
 if (STAMHOOFD.environment === 'development') {
     Error.stackTraceLimit = Infinity; // unlimited stack trace to debug infinite loops
@@ -109,6 +109,18 @@ onMounted(async () => {
     });
 });
 
+if (STAMHOOFD.environment === 'development') {
+    function pagePrerendered() {
+        return (
+            (document as any).prerendering
+            || (self.performance?.getEntriesByType?.('navigation')[0] as any)?.activationStart > 0
+        );
+    }
+
+    if (pagePrerendered()) {
+        Toast.info('Page was prerendered').setHide(null).show();
+    }
+}
 </script>
 
 <style lang="scss">

@@ -71,6 +71,8 @@ function run() {
             throw new Error('Missing component in promise');
         }
 
+        console.log('Promise view resolved');
+
         const c = value;
         if (passRoutes) {
             passRoutes = false;
@@ -79,9 +81,10 @@ function run() {
         if (component && component.historyIndex !== null && component.ownsHistoryIndex()) {
             // Transfer ownership to child
             c.historyIndex = component.historyIndex;
-            ComponentWithProperties.historyIndexOwners.set(component.historyIndex, c);
+            ComponentWithProperties.historyIndexOwners.set(component.historyIndex.index, c);
         }
         applyContentChange(() => {
+            console.log('Resolved', c);
             root.value = c;
         });
     }).catch((e) => {
@@ -100,6 +103,7 @@ function run() {
 }
 
 function reload() {
+    console.info('Reloading PromiseView');
     root.value = null;
     run();
 }

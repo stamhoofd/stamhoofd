@@ -651,7 +651,7 @@ if (auth.hasPlatformFullAccess()) {
 
     actions.push(new AsyncTableAction({
         name: $t(`%Gb`),
-        icon: 'email',
+        icon: 'send',
         priority: 12,
         groupIndex: 3,
         handler: async (selection: TableActionSelection<Organization>) => {

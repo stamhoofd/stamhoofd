@@ -176,7 +176,6 @@ async function goNext() {
             console.error('Failed to add organization to storage', e);
         }
 
-        await dismiss({ force: true });
         const appNavigate = useAppNavigate();
         await appNavigate(AppRoute.VerifyEmail, {
             properties: {
@@ -184,6 +183,7 @@ async function goNext() {
                 token,
                 email: email.value,
             },
+            adjustHistory: false,
         });
 
         // Show popup to confirm e-mail

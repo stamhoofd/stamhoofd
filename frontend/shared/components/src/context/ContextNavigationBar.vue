@@ -11,7 +11,9 @@
 </template>
 
 <script setup lang="ts">
+import { useInheritCheckRoutes } from '@simonbackx/vue-app-navigation';
 import InheritComponent from '../containers/InheritComponent.vue';
+useInheritCheckRoutes();
 
 </script>
 

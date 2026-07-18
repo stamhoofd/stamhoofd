@@ -100,8 +100,7 @@ const groupedActions = computed(() => {
             const group = acc[acc.length - 1];
             if (group && group[0].groupIndex === action.groupIndex) {
                 group.push(action);
-            }
-            else {
+            } else {
                 acc.push([action]);
             }
             return acc;
@@ -120,7 +119,8 @@ function getChildContextMenu(action: TableAction<any>) {
     return new ComponentWithProperties(Self, {
         actions: action.getChildActions(),
         selection: props.selection,
-    });
+
+    }).setDisplayStyle('overlay');
 }
 
 function pop(popParents = false) {

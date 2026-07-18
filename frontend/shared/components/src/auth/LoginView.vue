@@ -72,7 +72,7 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, onCheckRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { computed, ref } from 'vue';
@@ -131,14 +131,12 @@ defineRoutes([
 
 const errors = useErrors();
 const $context = useContext();
-const dismiss = useDismiss();
 const $navigate = useNavigate();
 const appNavigate = useAppNavigate();
 
 const loading = ref(false);
 const email = ref(props.initialEmail);
 const password = ref('');
-const animating = ref(true);
 const emailInput = ref<InstanceType<typeof EmailInput> | null>(null);
 const showVersionFooter = computed(() => {
     return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev';
@@ -246,9 +244,8 @@ async function submit() {
                     email: email.value,
                     organization: $context.value.organization,
                 },
+                adjustHistory: false,
             });
-        } else {
-            await dismiss({ force: true });
         }
     } catch (e) {
         errors.errorBox = new ErrorBox(e);

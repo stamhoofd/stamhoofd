@@ -14,12 +14,14 @@ import typescript from './configs/typescript.js';
 import asyncComponentWithProperties from './rules/async-component-with-properties.js';
 import asyncRouteComponents from './rules/async-route-components.js';
 import noPackageSelfImport from './rules/no-package-self-import.js';
+import noTRouteUrl from './rules/no-t-route-url.js';
 import preferDefineRoute from './rules/prefer-define-route.js';
 
 const rules = {
     'async-component-with-properties': asyncComponentWithProperties,
     'async-route-components': asyncRouteComponents,
     'no-package-self-import': noPackageSelfImport,
+    'no-t-route-url': noTRouteUrl,
     'prefer-define-route': preferDefineRoute,
 };
 const stamhoofdPlugin = {
@@ -178,6 +180,7 @@ export default {
                         ],
                     }],
                     'stamhoofd/async-route-components': 'error',
+                    'stamhoofd/no-t-route-url': 'error',
                     'stamhoofd/prefer-define-route': 'warn',
                     // TODO: restore to 'error' once the existing dependency cycles are resolved.
                     'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false, allowUnsafeDynamicCyclicDependency: true }],

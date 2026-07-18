@@ -7,13 +7,14 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
-import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
+import { Formatter } from '@stamhoofd/utility';
 import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
-import type { SharedOptions } from './wrapAndReplace';
-import { wrap, wrapAndReplace } from './wrapAndReplace';
+import { wrap } from './wrapAndReplace';
+import { buildTranslatedUrl, extendTranslatedUrl, getUrls } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 
 provideAppNavigate(useNavigate());
 
@@ -63,30 +64,24 @@ const orgInUriParams = {
     }),
 };
 
-async function replaceWithAdmin(options: SharedOptions) {
+async function loadAdmin() {
     const admin = await import('@stamhoofd/admin-frontend');
-    await wrapAndReplace(null, 'admin', new ComponentWithProperties(admin.App, {}), options);
+    return await wrap(null, 'admin', new ComponentWithProperties(admin.App, {}));
 }
 
-async function replaceWithDashboard(organization: Organization, options: SharedOptions) {
+async function loadDashboard(organization: Organization) {
     const dashboard = await import('@stamhoofd/dashboard');
-    console.error('Loading dashboard after', organization.clone());
-    await wrapAndReplace(organization, 'dashboard', new ComponentWithProperties(dashboard.App, {}), options);
+    return await wrap(organization, 'dashboard', new ComponentWithProperties(dashboard.App, {}));
 }
 
-async function replaceWithRegistration(organization: Organization | null, options: SharedOptions) {
+async function loadRegistration(organization: Organization | null) {
     const registration = await import('@stamhoofd/registration');
-    await wrapAndReplace(organization, 'registration', new ComponentWithProperties(registration.App, {}), options);
+    return await wrap(organization, 'registration', new ComponentWithProperties(registration.App, {}));
 }
 
-async function loadAuto(organization: Organization | null, options: SharedOptions) {
-    console.error('Loading auto after', organization?.clone());
+async function loadAuto(organization: Organization | null) {
     const auto = await import('@stamhoofd/auto');
-    return await wrap(organization, 'auto', new ComponentWithProperties(auto.App, {}), options);
-}
-
-async function replaceWithSpinner() {
-    await ReplaceRootEventBus.sendEvent('replace', new ComponentWithProperties(LoadingView, {}));
+    return await wrap(organization, 'auto', new ComponentWithProperties(auto.App, {}));
 }
 
 async function loadVerifyEmail(organization: Organization | null, componentProperties: { token: string; email: string | null; code: string | null }) {
@@ -98,83 +93,86 @@ async function loadVerifyEmail(organization: Organization | null, componentPrope
 if (isDashboardDomain) {
     defineRoute({
         name: AppRoute.Admin,
-        url: $t('%1Wn'),
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithAdmin(options);
+        url: 'platform',
+        component: async () => {
+            return await loadAdmin();
         },
     });
 }
 
 // DASHBOARD
+const DashboardUrl = buildTranslatedUrl({
+    nl: 'beheerders',
+    en: 'dashboard',
+    fr: 'dashboard',
+});
+
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.Dashboard,
-        url: $t('%1Uh'),
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithDashboard(await orgInDomain(), options);
+        ...getUrls(DashboardUrl),
+        component: async () => {
+            return await loadDashboard(await orgInDomain());
         },
     });
 } else {
-    defineRoute({
+    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.Dashboard,
-        url: $t('%1Uh') + '/@organizationUri',
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithDashboard(options.componentProperties.organization, options);
+        ...getUrls(extendTranslatedUrl(DashboardUrl, '@organizationUri')),
+        component: async (props) => {
+            return await loadDashboard(props.organization);
         },
         ...orgInUriParams,
     });
 }
 
 // REGISTRATION
+const RegistrationsUrl = buildTranslatedUrl({
+    nl: 'leden',
+    en: 'members',
+    fr: 'membres',
+});
+
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.OrgScopedRegistration,
-        url: $t('%It'),
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithRegistration(await orgInDomain(), options);
+        force: true,
+        replace: 100,
+        ...getUrls(RegistrationsUrl),
+        component: async () => {
+            return await loadRegistration(await orgInDomain());
         },
     });
 } else {
-    if (STAMHOOFD.userMode === 'platform') {
-        const ignoreUris = [$t('%1Ul'), $t('%1cj'), $t('%1Wy'), $t('%1c5')];
-        for (const uri of ignoreUris) {
-            defineRoute({
-                // no name, because we should not really reference these routes
-                url: $t('%It') + '/' + uri,
-                // TODO: move to component pattern (see verify-email)
-                handler: async (options) => {
-                    await replaceWithSpinner();
-                    await replaceWithRegistration(null, { ...options, url: $t('%It') });
-                },
-            });
-        }
-    }
-    defineRoute({
+    const ignoreUris = [
+        // TODO: we should also use TranslatedUrls for tabs, so resolving is consistent and does not depend on language
+        $t('%1Ul'),
+        $t('%1cj'),
+        $t('%1Wy'),
+        $t('%1c5'),
+    ];
+
+    defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.OrgScopedRegistration,
-        url: $t('%It') + '/@organizationUri',
-        // TODO: move to component pattern (see verify-email)
-        handler: async (options) => {
-            await replaceWithSpinner();
-            await replaceWithRegistration(options.componentProperties.organization, options);
+        ...getUrls(extendTranslatedUrl(RegistrationsUrl, '@organizationUri')),
+        ignoreUrls: Formatter.uniqueArray(ignoreUris.flatMap((uri) => {
+            return Object.values(extendTranslatedUrl(RegistrationsUrl, uri));
+        })),
+        force: true,
+        replace: 100,
+        component: async (props) => {
+            return await loadRegistration(props.organization);
         },
         ...orgInUriParams,
     });
     if (STAMHOOFD.userMode === 'platform') {
         defineRoute({
             name: AppRoute.UnscopedRegistration,
-            url: $t('%It'),
-            // TODO: move to component pattern (see verify-email)
-            handler: async (options) => {
-                await replaceWithSpinner();
-                await replaceWithRegistration(null, options);
+            ...getUrls(RegistrationsUrl),
+            force: true,
+            replace: 100,
+            component: async () => {
+                return await loadRegistration(null);
             },
         });
     }
@@ -213,7 +211,9 @@ function getEmailVerifyQuery(props: ReturnType<typeof parseEmailVerifyQuery>) {
 if (orgInDomain) {
     defineRoute({
         name: AppRoute.VerifyEmail,
-        url: $t('%1ba'),
+        url: 'verify-email',
+        force: true,
+        replace: 100,
         defaultProperties: parseEmailVerifyQuery,
         propsToParams: props => ({
             query: getEmailVerifyQuery(props),
@@ -225,7 +225,9 @@ if (orgInDomain) {
 } else if (STAMHOOFD.userMode === 'platform') {
     defineRoute({
         name: AppRoute.VerifyEmail,
-        url: $t('%1ba'),
+        url: 'verify-email',
+        force: true,
+        replace: 100,
         defaultProperties: query => ({
             ...parseEmailVerifyQuery(query),
         }),
@@ -243,6 +245,8 @@ if (orgInDomain) {
         name: AppRoute.VerifyEmail,
         url: 'verify-email/@organizationUri',
         params: { organizationUri: String },
+        force: true,
+        replace: 100,
         paramsToProps: async (params, query) => {
             return {
                 organization: await paramsToRequiredOrganization(params),
@@ -269,15 +273,17 @@ if (orgInDomain) {
         force: true,
         replace: 100,
         component: async () => {
-            return await loadAuto(await orgInDomain(), {});
+            return await loadAuto(await orgInDomain());
         },
     });
 } else {
     defineRoute<{ organizationUri: StringConstructor }, { organization: Organization }>({
         name: AppRoute.OrgScopedAuto,
         url: 'auto/@organizationUri',
+        force: true,
+        replace: 100,
         component: async (properties) => {
-            return await loadAuto(properties.organization, {});
+            return await loadAuto(properties.organization);
         },
         ...orgInUriParams,
     });
@@ -288,7 +294,7 @@ if (orgInDomain) {
         force: true,
         replace: 100,
         component: async () => {
-            return await loadAuto(null, {});
+            return await loadAuto(null);
         },
     });
 }

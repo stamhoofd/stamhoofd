@@ -4,7 +4,6 @@ import ContextNavigationBar from '@stamhoofd/components/context/ContextNavigatio
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import CustomHooksContainer from '@stamhoofd/components/containers/CustomHooksContainer.vue';
 import OrganizationSwitcher from '@stamhoofd/components/context/OrganizationSwitcher.vue';
-import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
@@ -21,7 +20,7 @@ function wrapWithModalStack(component: ComponentWithProperties) {
 }
 export type SharedOptions = { url?: string | null | Ref<string | null>; query?: URLSearchParams | null | Ref<URLSearchParams | null>; checkRoutes?: boolean };
 
-export async function wrap(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options?: SharedOptions) {
+export async function wrap(organization: Organization | null = null, app: AppType, component: ComponentWithProperties) {
     const onOurDomain = AppManager.shared.isOnDashboardDomain || Object.values(STAMHOOFD.domains.registration ?? {}).includes(UrlHelper.shared.url.host);
 
     if ((STAMHOOFD.singleOrganization || organization?.resolvedRegisterDomain) && !onOurDomain) {
@@ -54,8 +53,6 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
                 'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
             },
             stamhoofd_app: app,
-            reactive_navigation_url: options?.url,
-            reactive_navigation_query: options?.query,
         }),
         root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {
             root: component,
@@ -66,13 +63,4 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
     });
 
     return root;
-}
-
-export async function wrapAndReplace(organization: Organization | null = null, app: AppType, component: ComponentWithProperties, options: SharedOptions) {
-    const root = await wrap(organization, app, component, options);
-    if (options.checkRoutes) {
-        root.setCheckRoutes();
-    }
-
-    await ReplaceRootEventBus.sendEvent('replace', root);
 }

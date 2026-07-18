@@ -86,7 +86,11 @@ const itemApi: ContextMenuItemApi = {
         return elRef.value;
     },
     present: (component: ComponentWithProperties) => {
-        present(component).catch(console.error);
+        present({
+            components: [component],
+            modalDisplayStyle: 'overlay',
+            adjustHistory: false,
+        }).catch(console.error);
     },
     emitClick: (event: Event) => {
         emit('click', event);

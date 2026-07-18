@@ -123,6 +123,7 @@ async function submit() {
                 token,
                 email: email.value,
             },
+            adjustHistory: false,
         });
         return;
     } catch (e) {

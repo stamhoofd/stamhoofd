@@ -195,7 +195,7 @@ export class OrderActionBuilder {
             new AsyncTableAction({
                 name: $t(`%Gb`),
                 enabled: () => this.webshopManager.hasRead,
-                icon: 'email',
+                icon: 'send',
                 priority: 10,
                 groupIndex: 3,
                 handler: async (selection: TableActionSelection<PrivateOrder>) => {

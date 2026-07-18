@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ReactiveUrl, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -126,8 +126,7 @@ export class CheckoutStepsManager {
                     // Use default or set to null if none available
                     if (this.$checkoutManager.checkout.checkoutMethod && this.$checkoutManager.checkout.checkoutMethod.timeSlots.timeSlots.length == 1) {
                         this.$checkoutManager.checkout.timeSlot = this.$checkoutManager.checkout.checkoutMethod.timeSlots.timeSlots[0];
-                    }
-                    else {
+                    } else {
                         this.$checkoutManager.checkout.timeSlot = null;
                     }
 
@@ -224,8 +223,7 @@ export class CheckoutStepsManager {
 
         try {
             this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta);
-        }
-        finally {
+        } finally {
             this.$checkoutManager.checkout.update(this.$webshopManager.webshop);
         }
 
@@ -264,8 +262,7 @@ export class CheckoutStepsManager {
         // Force a save if nothing changed (to fix timeSlot + updated data)
         try {
             nextStep = await this.getNextStep(step, true);
-        }
-        catch (error) {
+        } catch (error) {
             if (isSimpleError(error) || isSimpleErrors(error)) {
                 if (error.hasFieldThatStartsWith('cart')) {
                     // A cart error: force a reload and go back to the cart.
@@ -273,20 +270,17 @@ export class CheckoutStepsManager {
 
                     if (webshop.shouldEnableCart) {
                         navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
-                    }
-                    else {
+                    } else {
                         navigate.dismiss({ force: true }).catch(console.error);
                     }
                     Toast.fromError(error).show();
-                }
-                else if (error.hasFieldThatStartsWith('fieldAnswers')) {
+                } else if (error.hasFieldThatStartsWith('fieldAnswers')) {
                     // A cart error: force a reload and go back to the cart.
                     await this.$webshopManager.reload();
 
                     if (webshop.shouldEnableCart) {
                         navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
-                    }
-                    else {
+                    } else {
                         navigate.dismiss({ force: true }).catch(console.error);
                     }
 
@@ -304,7 +298,9 @@ export class CheckoutStepsManager {
         }
 
         const nextComponent = await nextStep.getComponent();
-        nextComponent.provide.reactive_navigation_url = nextStep.url;
+        nextComponent.provide.reactive_navigation_url = new ReactiveUrl({
+            url: nextStep.url,
+        });
 
         navigate.show({
             components: [nextComponent],

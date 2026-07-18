@@ -29,20 +29,19 @@
             </div>
 
             <div v-if="STAMHOOFD.environment === 'development' && (ComponentWithProperties.debug || HistoryManager.debug)" class="debug-overlay">
-                {{ url.getUrl() }} {{ url.getQuery() }} @ {{ historyIndex }}
+                {{ url.getUrl()?.url }} ({{ url.getUrl()?.matched !== url.getUrl()?.url ? url.getUrl()?.matched : '"' }}) {{ url.getQuery() }} @ {{ historyIndex }} (own: {{ component?.ownsHistoryIndex() }})  (focus: {{ focused }})
             </div>
         </div>
     </header>
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, HistoryManager, useCanDismiss, useCanPop, useDismiss, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, useCanDismiss, useCanPop, useCurrentComponent, useDismiss, useFocused, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
 import type { Ref } from 'vue';
 import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots, useTemplateRef, watch } from 'vue';
 
 import { useElementSize } from '#hooks/useElementSize.ts';
 import { useIsAndroid } from '#hooks/useIsAndroid.ts';
-import { useIsIOS } from '#hooks/useIsIOS.ts';
 import { useParentElement } from '#hooks/useParentElement.ts';
 import InheritComponent from '../containers/InheritComponent.vue';
 import BackButton from './BackButton.vue';
@@ -52,6 +51,8 @@ const popup = usePopup();
 const url = useUrl();
 const historyIndex = inject('navigation_historyIndex', null) as Ref<number | undefined> | null;
 const scrolled = ref(false);
+const component = useCurrentComponent();
+const focused = useFocused();
 
 const barElement = useTemplateRef('bar');
 const footerElement = useTemplateRef('footer');

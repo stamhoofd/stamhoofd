@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { buildTranslatedUrl, getUrls } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
@@ -193,28 +194,28 @@ const auth = useAuth();
 
 defineRoute({
     name: Routes.RegisterMembers,
-    url: 'registreren',
+    ...getUrls(buildTranslatedUrl({ nl: 'inschrijven', fr: 's-inscrire', en: 'register' })),
     component: async () => (await import('../members/RegisterMembersView.vue')).default as any,
     present: 'popup',
 });
 
 defineRoute({
     name: Routes.CheckData,
-    url: 'gegevens',
+    ...getUrls(buildTranslatedUrl({ nl: 'gegevens', fr: 'donnees', en: 'check-data' })),
     component: async () => (await import('../members/CheckDataView.vue')).default as any,
     present: 'popup',
 });
 
 defineRoute({
     name: Routes.Payments,
-    url: 'betalingen',
+    ...getUrls(buildTranslatedUrl({ nl: 'betalingen', fr: 'paiements', en: 'payments' })),
     component: async () => (await import('./payments/MemberPayableBalanceView.vue')).default as any,
     present: 'popup',
 });
 
 defineRoute({
     name: Routes.ViewMember,
-    url: 'leden/@id',
+    ...getUrls(buildTranslatedUrl({ nl: 'leden/@id', fr: 'membres/@id', en: 'members/@id' })),
     component: async () => (await import('../members/MemberView.vue')).default as any,
     present: 'popup',
     params: {

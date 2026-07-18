@@ -22,12 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
-import { computed } from 'vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useMemberActions } from '../../classes/MemberActionBuilder';
+import { usePresent } from '@simonbackx/vue-app-navigation';
+import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import { computed } from 'vue';
+import { presentEditResponsibilities } from '../../classes/MemberActionBuilder';
 import ViewMemberResponsibilityRow from './ViewMemberResponsibilityRow.vue';
 
 defineOptions({
@@ -43,7 +44,6 @@ const organization = useOrganization();
 const auth = useAuth();
 const hasResponsibilities = computed(() => ((platform.value.config.responsibilities.length > 0 || (organization.value && organization.value.privateMeta?.responsibilities?.length)) && props.member.patchedMember.details.defaultAge >= 16) || responsibilities.value.length);
 const responsibilities = computed(() => props.member.getResponsibilities({ organization: organization.value ?? undefined }));
-const buildActions = useMemberActions();
 
 const nationalResponsibilities = computed(() => {
     return platform.value.config.responsibilities.filter(r => !r.organizationBased);
@@ -83,7 +83,9 @@ const sortedResponsibilities = computed(() => {
     });
 });
 
+const present = usePresent();
+
 async function editResponsibilities() {
-    buildActions().editResponsibilities(props.member);
+    await presentEditResponsibilities({ member: props.member, present });
 }
 </script>

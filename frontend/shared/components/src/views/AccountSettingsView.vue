@@ -321,13 +321,13 @@ async function save() {
                     token: result.verificationToken,
                     email: email.value,
                 },
+                adjustHistory: false,
             });
         } else {
             const toast = new Toast($t(`%HA`), 'success green');
             toast.show();
+            await dismiss({ force: true });
         }
-
-        await dismiss({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     } finally {

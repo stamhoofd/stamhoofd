@@ -2,6 +2,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CoverImageContainer from '#containers/CoverImageContainer.vue';
 import TabBarController from '#containers/TabBarController.vue';
 import { TabBarItem } from '#containers/TabBarItem.ts';
+import type { TranslatedUrl } from '#containers/TranslatedUrl.ts';
 import { useAppContext } from '#context/appContext';
 import { useContext } from '#hooks/useContext.ts';
 import { ComponentWithProperties, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
@@ -50,6 +51,7 @@ export function useLoginRoot() {
                         id: 'start',
                         icon: '',
                         name: '',
+                        url: { '': '' } as TranslatedUrl,
                         component: new ComponentWithProperties(NavigationController, {
                             root: AsyncComponent(() => import('./MembersHomeView.vue'), {}),
                         }),

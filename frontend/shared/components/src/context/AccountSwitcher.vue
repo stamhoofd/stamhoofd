@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts" name="AccountSwitcher">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, useInheritCheckRoutes } from '@simonbackx/vue-app-navigation';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
@@ -49,7 +49,8 @@ const isNative = AppManager.shared.isNative;
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const organization = useOrganization();
 
-// todo: this isn't working yet on start
+// Make sure we also are allowed to check  routes if the parent componentWithProperties is
+useInheritCheckRoutes();
 defineRoutes([
     {
         url: 'account',

@@ -10,13 +10,14 @@ import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedVie
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
+import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
+import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useEventsEnabled } from '@stamhoofd/components/hooks/useEventsEnabled.ts';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
-import { computed } from 'vue';
-import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { AppRoute } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
 const context = useContext();
 const memberManager = useMemberManager();
@@ -43,8 +44,7 @@ function getRoot() {
         console.warn('No members package found for org ' + context.value.organization?.name + ', navigating to dashboard');
         return new ComponentWithProperties(PromiseView, {
             promise: async () => {
-                await appNavigate(AppRoute.Dashboard, { properties: { organization: context.value.organization } });
-                throw new Error('Should have been navigated away');
+                await appNavigate(AppRoute.Dashboard, { properties: { organization: context.value.organization, adjustHistory: false } });
             },
         });
     }
@@ -60,6 +60,7 @@ function getRoot() {
         id: 'events',
         icon: 'calendar',
         name: $t(`%uB`),
+        url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/events/EventsOverview.vue'), {}),
         }),
@@ -69,6 +70,7 @@ function getRoot() {
         id: 'communication',
         icon: 'email-filled',
         name: $t(`%1DK`),
+        url: buildTranslatedUrl({ nl: 'berichten', fr: 'messages', en: 'messages' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/communication/MemberCommunicationView.vue'), {}),
         }),
@@ -87,6 +89,7 @@ function getRoot() {
                         icon: 'home',
                         name: $t(`%I`),
                         component: startView,
+                        url: buildTranslatedUrl({ nl: 'start', fr: 'debut', en: 'start' }),
                     }),
                     ...(eventsEnabled.value ? [calendarTab] : []),
                     communicationTab,
@@ -94,6 +97,7 @@ function getRoot() {
                         id: 'cart',
                         icon: 'basket',
                         name: $t(`%X5`),
+                        url: buildTranslatedUrl({ nl: 'mandje', fr: 'panier', en: 'basket' }),
                         component: cartRoot,
                         badge: computed(() => memberManager.family.checkout.cart.count === 0 ? '' : memberManager.family.checkout.cart.count.toFixed(0)),
                     }),

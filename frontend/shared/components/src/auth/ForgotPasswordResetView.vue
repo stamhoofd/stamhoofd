@@ -208,14 +208,13 @@ async function submit() {
                     email: email.value,
                     organization: org,
                 },
+                adjustHistory: false,
             });
         } else if (org) {
-            await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } });
+            await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org }, adjustHistory: false });
         } else {
-            await appNavigate(AppRoute.UnscopedAuto);
+            await appNavigate(AppRoute.UnscopedAuto, { adjustHistory: false });
         }
-
-        await dismiss({ force: true });
         loading.value = false;
     } catch (e) {
         loading.value = false;

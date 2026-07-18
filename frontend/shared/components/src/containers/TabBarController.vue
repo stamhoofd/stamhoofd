@@ -44,6 +44,7 @@ import { inject, shallowRef } from 'vue';
 import { GlobalEventBus } from '../EventBus';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
 import type TabBarController from './TabBarController.vue';
+import { getUrls } from './TranslatedUrl.ts';
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
     const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController> | Ref<InstanceType<typeof TabBarController>>;
@@ -79,7 +80,7 @@ export function useHideTabBar() {
 <script setup lang="ts">
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, ReactiveUrl, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import { computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, ref, toRaw, unref } from 'vue';
@@ -165,17 +166,20 @@ const mainElement = ref<HTMLElement | null>(null);
 const urlHelpers = useUrl();
 const present = usePresent();
 
+console.log('Created TabBarController');
+
 defineRoutes(flatTabs.value.map((tab) => {
     const name = unref(tab.name);
     return {
         name,
-        url: Formatter.slug(name),
+        ...(tab.url ? getUrls(tab.url) : { url: tab.id, alternativeUrls: [Formatter.slug(name)] }),
         isDefault: {},
         handler: async (options) => {
+            console.log('Select item handler TabBarController', options);
             if (options.checkRoutes) {
                 tab.component.setCheckRoutes();
             }
-            await selectItem(tab, options.adjustHistory);
+            await selectItem(tab, options.adjustHistory, { url: options.url });
         },
     };
 }));
@@ -213,24 +217,41 @@ const shouldNavigateAway = async () => {
     return true;
 };
 
-async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
+async function selectItem(item: TabBarItem, appendHistory: boolean = true, options?: { force?: boolean; url?: ReactiveUrl | Ref<ReactiveUrl | string | null> | string | null }) {
+    let save = true;
     if (toRaw(item) === toRaw(selectedItem.value)) {
+        save = false;
+        if (!options?.force) {
         // Try to scroll this item to the top
-        if (mainElement.value) {
-            const scrollElement = mainElement.value.querySelector('.st-view > main');
-            if (scrollElement) {
-                if (scrollElement.scrollTop !== 0) {
-                    // Scroll to top animated
-                    scrollElement.scrollTo({
-                        top: 0,
-                        behavior: 'smooth',
-                    });
-                } else {
-                    // todo: try to pop
+            if (mainElement.value) {
+                let didScroll = false;
+                const scrollElements = mainElement.value.querySelectorAll('.st-view > main');
+                if (scrollElements) {
+                    for (const scrollElement of scrollElements) {
+                        if (scrollElement.scrollTop !== 0) {
+                        // Scroll to top animated
+                            scrollElement.scrollTo({
+                                top: 0,
+                                behavior: 'smooth',
+                            });
+                            didScroll = true;
+                        }
+                    }
+                }
+
+                if (!didScroll) {
+                    if (selectedItem.value?.component) {
+                        const component = selectedItem.value?.component;
+
+                        // Reset state
+                        const clone = component.deepClone();
+                        selectedItem.value.component = clone;
+                        await selectItem(item, appendHistory, { force: true });
+                    }
                 }
             }
+            return;
         }
-        return;
     }
 
     if (!await shouldNavigateAway()) {
@@ -243,18 +264,24 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
         }
         return;
     }
-    saveCurrentItemState();
+    if (save) {
+        saveCurrentItemState();
+    }
     const old = selectedItem.value;
 
     // Set url namespace of the tab
-    const tabUrl = Formatter.slug(unref(item.name));
-    item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
+    const defaultTabUrl = (item.url ? getUrls(item.url) : { url: item.id, alternativeUrls: [Formatter.slug(item.name)] }).url;
+    item.component.provide.reactive_navigation_url = computed(() => {
+        // prefer the url that was passed, because this contains the 'matched' url (E.g. 'members' was matched, while the normal url is 'leden', which is required for further url matching)
+        const u = (options?.url ? unref(options?.url) : null) ?? defaultTabUrl;
+        return urlHelpers.extendUrl((typeof u === 'string') ? new ReactiveUrl({ url: u }) : u);
+    });
 
     if (item.component.hasHistoryIndex()) {
         item.component.returnToHistoryIndex();
     } else {
         item.component.deleteHistoryIndex();
-        HistoryManager.pushState(undefined, old
+        HistoryManager.pushState(null, old
             ? async () => {
                 await selectItem(old, false);
             }
@@ -366,7 +393,7 @@ const show = async (options: PushOptions) => {
     saveCurrentItemState();
 
     const old = selectedItem.value;
-    HistoryManager.pushState(undefined, old
+    HistoryManager.pushState(null, old
         ? async () => {
             await selectItem(old, false);
         }
@@ -386,6 +413,7 @@ const show = async (options: PushOptions) => {
 provide('reactive_navigation_show', show);
 
 onMounted(() => {
+    console.log('Mounted TabBarController');
     GlobalEventBus.addListener(this, 'selectTabById', selectTabById);
 });
 
