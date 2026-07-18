@@ -7187,10 +7187,6 @@
     "original": "Deze betaling werd intussen terugbetaald of teruggevorderd voor {price} in een andere betaling.",
     "translation": "This payment has since been refunded or reclaimed for {price} in another payment."
   },
-  "%1Uh": {
-    "original": "beheerders",
-    "translation": "administrators"
-  },
   "%1Ui": {
     "original": "Jongknapen",
     "translation": "Juniors"
@@ -7198,10 +7194,6 @@
   "%1Uk": {
     "original": "Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.",
     "translation": "You probably know many other associations (or you might even be active in them): sports clubs, schools, youth movements... If you refer other associations, and they spend at least 1 euro, you will receive free credit as well. For each association you refer, you will receive a bit more (see table below). So if you do it carefully and thoughtfully, you can really collect a lot of credit with minimal effort."
-  },
-  "%1Ul": {
-    "original": "berichten",
-    "translation": "messages"
   },
   "%1Un": {
     "original": "Waarmee wil je starten? Je kan dit later altijd uitbreiden.",
@@ -7618,10 +7610,6 @@
   "%1Wv": {
     "original": "{orgName} heeft deze tag al.",
     "translation": "{orgName} already has this tag."
-  },
-  "%1Wy": {
-    "original": "mandje",
-    "translation": "basket"
   },
   "%1X0": {
     "original": "Dit is het toekomstig werkjaar. Het is nog niet actief. Leden kunnen nog niet inschrijven. Overschakelen kan ten vroegste vanaf {switchDate}.",
@@ -8622,10 +8610,6 @@
   "%1c4": {
     "original": "Kleiner dan of gelijk aan...",
     "translation": "Less than or equal to..."
-  },
-  "%1c5": {
-    "original": "activiteiten",
-    "translation": "activities"
   },
   "%1c6": {
     "original": "Tot {x} jaar",
@@ -18034,6 +18018,14 @@
   "%ZeT": {
     "original": "Alle noodcontacten van het lid in één kolom, ook als het er meer dan twee zijn.",
     "translation": "All of the member's emergency contacts in a single column, even if there are more than two."
+  },
+  "%ZeU": {
+    "original": "De functies van {firstName} werden opgeslagen",
+    "translation": "The roles for {firstName} have been saved."
+  },
+  "%ZeV": {
+    "original": "De gegevens van {firstName} werden opgeslagen",
+    "translation": "The data for {firstName} have been saved."
   },
   "%Zf": {
     "original": "Korte naam",

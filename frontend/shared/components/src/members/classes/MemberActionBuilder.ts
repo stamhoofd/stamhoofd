@@ -1180,7 +1180,7 @@ export async function presentEditMember({ member, present, context }: { member: 
                 title: $t(`%15E`, { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
-                    Toast.success($t('De gegevens van {firstName} werden opgeslagen', { firstName: member.patchedMember.firstName })).show();
+                    Toast.success($t('%ZeV', { firstName: member.patchedMember.firstName })).show();
                     await dismiss({ force: true });
 
                     // Mark review moment
@@ -1200,7 +1200,7 @@ export async function presentEditResponsibilities({ member, present }: { member:
                 title: $t(`%et`) + ' ' + member.member.firstName,
                 component: markRaw(EditMemberResponsibilitiesBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
-                    Toast.success($t('De functies van {firstName} werden opgeslagen', { firstName: member.patchedMember.firstName })).show();
+                    Toast.success($t('%ZeU', { firstName: member.patchedMember.firstName })).show();
                     await dismiss({ force: true });
                     GlobalEventBus.sendEvent('members-responsibilities-changed', [member]).catch(console.error);
                 },
