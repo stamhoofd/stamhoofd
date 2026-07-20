@@ -296,7 +296,7 @@
                 <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
                     <hr>
 
-                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+                    <GroupOptionMenuBox :option-menu="optionMenu" :group="patchedGroup" :errors="errors" :level="2" @patch:group="addGroupPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
                 </div>
             </CategorizedBox>
 
@@ -829,7 +829,7 @@ const RegistrationRecordSettingsRoute = organization.value ? useOrganizationRegi
 
 function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
-    groups.addPatch(Group.patch({ id: props.groupId, ...newPatch }));
+    groups.addPatch(Group.patch({ ...newPatch, id: props.groupId }));
     addPatch({ groups });
 }
 
