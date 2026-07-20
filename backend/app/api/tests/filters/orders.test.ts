@@ -391,11 +391,17 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         // case-insensitive, exactly like the in-memory engine.
         it('$eq and $in match the codes in the array (case-insensitive)', async () => {
             const summer = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'SUMMER' })] }) });
+            const summerLower = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'summer' })] }) });
+            const summerCombination = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'suMMER' })] }) });
+
             const winter = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'WINTER' })] }) });
+
             const none = await createOrder({ data: orderData({ discountCodes: [] }) });
 
-            await expectFilter({ discountCodes: { code: { $eq: 'summer' } } }, [summer]);
-            await expectFilter({ discountCodes: { code: { $in: ['summer', 'winter'] } } }, [summer, winter]);
+            await expectFilter({ discountCodes: { code: { $eq: 'summer' } } }, [summer, summerLower, summerCombination]);
+            await expectFilter({ discountCodes: { code: { $in: ['summer', 'winter'] } } }, [summer, summerLower, summerCombination, winter]);
+            await expectFilter({ discountCodes: { code: { $in: ['SUMMER', 'WINTER'] } } }, [summer, summerLower, summerCombination, winter]);
+            await expectFilter({ discountCodes: { code: { $in: ['suMmer', 'winTEr'] } } }, [summer, summerLower, summerCombination, winter]);
             expect(none.id).toBeDefined();
         });
     });
