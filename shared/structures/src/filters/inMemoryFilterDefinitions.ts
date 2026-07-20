@@ -3,29 +3,23 @@ import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemo
 
 // This should match the backend logica. Some things that might be possible in the 'in memory' compilers, are not possible in the SQL compilers.
 // so that is why we don't support $elemMatch inside selectedChoices - this has been replaced with a wildcard selector instead.
-//
-// Every path the backend maps to a JSON value must set isMappedToJSONValueInBackend, so a missing value behaves
-// as null, exactly like JSON_VALUE in the backend. E.g. a record answer that has not been given (a missing record
-// id, or a missing/empty field on the answer): filtering '$lt some-date' or '$eq null' then also matches members
-// that never answered the question, exactly like the SQL query would.
-const jsonValueInBackend = { isMappedToJSONValueInBackend: true };
 export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
-    selected: createInMemoryFilterCompiler('selected', undefined, jsonValueInBackend),
+    selected: createInMemoryFilterCompiler('selected'),
     selectedChoice: createInMemoryFilterCompiler('selectedChoice', {
         ...baseInMemoryFilterCompilers,
-        id: createInMemoryFilterCompiler('id', undefined, jsonValueInBackend),
-    }, jsonValueInBackend),
+        id: createInMemoryFilterCompiler('id'),
+    }),
     selectedChoices: {
         ...baseInMemoryFilterCompilers,
-        id: createInMemoryFilterCompiler('selectedChoices.*.id', undefined, jsonValueInBackend),
+        id: createInMemoryFilterCompiler('selectedChoices.*.id'),
     },
-    value: createInMemoryFilterCompiler('value', undefined, jsonValueInBackend),
-    dateValue: createInMemoryFilterCompiler('dateValue', undefined, jsonValueInBackend),
+    value: createInMemoryFilterCompiler('value'),
+    dateValue: createInMemoryFilterCompiler('dateValue'),
 };
 
 export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
-    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers, jsonValueInBackend)),
+    recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
@@ -43,7 +37,7 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     gender: createInMemoryFilterCompiler('details.gender'),
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
     missingData: createInMemoryFilterCompiler('details.missingData'),
-    recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers, jsonValueInBackend)),
+    recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
     registrations: createInMemoryFilterCompiler('registrations', registrationInMemoryFilterCompilers),
 };
 
@@ -130,8 +124,8 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
 
     // Generic filtering
     id: createInMemoryFilterCompiler('id'),
-    timeSlotEndTime: createInMemoryFilterCompiler('data.timeSlot.endTime', undefined, jsonValueInBackend),
-    timeSlotStartTime: createInMemoryFilterCompiler('data.timeSlot.startTime', undefined, jsonValueInBackend),
+    timeSlotEndTime: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    timeSlotStartTime: createInMemoryFilterCompiler('data.timeSlot.startTime'),
     webshopId: createInMemoryFilterCompiler('webshopId'),
 
     // The following fields are required for sorting
@@ -139,13 +133,13 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     createdAt: createInMemoryFilterCompiler('createdAt'),
     number: createInMemoryFilterCompiler('number'),
     status: createInMemoryFilterCompiler('status'),
-    checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type', undefined, jsonValueInBackend),
-    checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id', undefined, jsonValueInBackend),
+    checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
+    checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id'),
     discountCodes: {
         ...baseInMemoryFilterCompilers,
-        code: createInMemoryFilterCompiler('data.discountCodes.*.code', undefined, jsonValueInBackend),
+        code: createInMemoryFilterCompiler('data.discountCodes.*.code'),
     },
-    timeSlotDate: createInMemoryFilterCompiler('data.timeSlot.date', undefined, jsonValueInBackend),
+    timeSlotDate: createInMemoryFilterCompiler('data.timeSlot.date'),
     validAt: createInMemoryFilterCompiler('validAt'),
     name: createInMemoryFilterCompiler('data.customer.name'),
     email: createInMemoryFilterCompiler('data.customer.email'),
@@ -174,7 +168,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
-    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers, jsonValueInBackend)),
+    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
     amountToPay: createInMemoryFilterCompiler('amountToPay'),
     payments: createInMemoryFilterCompiler('payments', paymentFilterCompilers),
 };
