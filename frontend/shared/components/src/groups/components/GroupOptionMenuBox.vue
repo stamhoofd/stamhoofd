@@ -91,8 +91,8 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { GroupOptionMenu } from '@stamhoofd/structures';
-import { Group, GroupOption, GroupSettings } from '@stamhoofd/structures';
+import type { Group, GroupOptionMenu } from '@stamhoofd/structures';
+import { GroupOption, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import type { useErrors } from '../../errors/useErrors';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
@@ -123,11 +123,11 @@ const { priceName: reducedPriceName } = useFinancialSupportSettings({
     group: computed(() => props.group),
 });
 const { up, canMoveUp, canMoveDown, down } = usePatchMoveUpDownSingle(props.optionMenu.id, computed(() => props.group.settings.optionMenus), (patch) => {
-    emit('patch:group', Group.patch({
+    emit('patch:group', {
         settings: GroupSettings.patch({
             optionMenus: patch,
         }),
-    }));
+    });
 });
 
 const patchOptionsArray = (options: PatchableArrayAutoEncoder<GroupOption>) => {
