@@ -331,7 +331,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 428;
+				CURRENT_PROJECT_VERSION = 431;
 				DEVELOPMENT_TEAM = FQ76GJ7XBM;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Stamhoofd;
@@ -341,7 +341,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.136.2;
+				MARKETING_VERSION = 2.136.3;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.stamhoofd.stamhoofd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -364,7 +364,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/AppRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 428;
+				CURRENT_PROJECT_VERSION = 431;
 				DEVELOPMENT_TEAM = FQ76GJ7XBM;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Stamhoofd;
@@ -374,7 +374,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.136.2;
+				MARKETING_VERSION = 2.136.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stamhoofd.stamhoofd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
