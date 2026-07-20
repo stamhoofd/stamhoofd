@@ -829,7 +829,7 @@ const RegistrationRecordSettingsRoute = organization.value ? useOrganizationRegi
 
 function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
-    groups.addPatch(Group.patch({ id: props.groupId, ...newPatch }));
+    groups.addPatch(Group.patch({ ...newPatch, id: props.groupId }));
     addPatch({ groups });
 }
 
