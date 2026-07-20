@@ -300,14 +300,19 @@ function normalizeValue(val: StamhoofdCompareValue): string | number | null {
 
 export type CreateInMemoryFilterCompilerOptions = {
     /**
-     * By default a filter on a property that does not exist on the object always evaluates to false.
+     * Set this to true if the backend maps this path to a value inside a JSON column, so the in-memory behavior
+     * matches the backend: extracting a missing path from a JSON column (JSON_VALUE) yields SQL NULL, exactly
+     * like a stored `null`. With this enabled, a missing property is treated as `null` and passed to the
+     * operators, so filters such as $lt/$lte/$eq(null) can match — just like the SQL query would.
+     * By default (false) a filter on a missing property always evaluates to false.
      *
-     * When this is enabled, a missing property is instead treated as `null` and passed to the operators. This
-     * mirrors how the SQL filters behave: extracting a missing path from a JSON column (JSON_VALUE) yields SQL
-     * NULL, exactly like a stored `null`, so operators such as $lt/$lte/$eq(null) can match. Only enable this on
-     * scalar/nullable value paths (not on array/relation paths that feed $elemMatch or $length, which throw on null).
+     * Keep it false for paths the backend maps to something else:
+     * - regular (non-JSON) columns: these always hold a value in the backend, so a missing property in memory is
+     *   a bug and should never match (e.g. $eq null would silently match everything)
+     * - relation/array paths that feed $elemMatch or $length (EXISTS queries in the backend) don't need it:
+     *   a missing or null array has no elements to match, with or without this option
      */
-    treatMissingAsNull?: boolean;
+    isMappedToJSONValueInBackend?: boolean;
 };
 
 export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector, options?: CreateInMemoryFilterCompilerOptions): InMemoryFilterCompiler {
@@ -319,9 +324,10 @@ export function createInMemoryFilterCompiler(path: string | string[], overrideFi
         return (object) => {
             const value = objectPathValue(object, splitted);
             if (value === undefined) {
-                if (options?.treatMissingAsNull) {
-                    // A missing property behaves like a stored null (see treatMissingAsNull docs), so the
-                    // operators get to decide the result instead of short-circuiting to false.
+                if (options?.isMappedToJSONValueInBackend) {
+                    // A missing property behaves like a stored null, exactly like JSON_VALUE in the backend
+                    // (see isMappedToJSONValueInBackend docs), so the operators get to decide the result
+                    // instead of short-circuiting to false.
                     return runner(null);
                 }
                 // Cannot filter on property that does not exists

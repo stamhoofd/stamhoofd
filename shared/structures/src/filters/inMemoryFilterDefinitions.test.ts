@@ -152,7 +152,7 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
     // These pin the in-memory engine to the same result the SQL query returns for a record answer that is
     // "empty": either the record id is missing entirely (the question was never answered), or the value on the
     // answer is null. In SQL both extract to NULL from the JSON column, so operators like $lt/$lte/$eq(null)
-    // match them, while $gt/$gte/$contains do not. The record-answer compilers mirror this via treatMissingAsNull.
+    // match them, while $gt/$gte/$contains do not. The record-answer compilers mirror this via isMappedToJSONValueInBackend.
     describe('record answers with missing or null values (SQL parity)', () => {
         const RID = 'record-id-1';
 
