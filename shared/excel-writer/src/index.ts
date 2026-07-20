@@ -1,3 +1,2 @@
-export * from './interfaces.js';
-export * from './exportToExcel.js';
+export * from './core.js';
 export * from './stream-writer/index.js';

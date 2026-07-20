@@ -39,51 +39,56 @@ export class ExcelHelper {
                 }
                 continue;
             }
-            if (column.toLowerCase().includes('totaal') || column.toLowerCase().includes('datum')) {
-                ws['!cols'].push({ width: 25 });
-            }
-            else if (column.toLowerCase().startsWith('naam')) {
-                ws['!cols'].push({ width: 20 });
-            }
-            else if (column.toLowerCase().includes('naam')) {
-                ws['!cols'].push({ width: 13 });
-            }
-            else if (column.toLowerCase().includes('e-mail')) {
-                ws['!cols'].push({ width: 25 });
-            }
-            else if (column.toLowerCase().includes('adres')) {
-                ws['!cols'].push({ width: 30 });
-            }
-            else if (column.toLowerCase().includes('gsm')) {
-                ws['!cols'].push({ width: 16 });
-            }
-            else if (column.toLowerCase().includes('product')) {
-                ws['!cols'].push({ width: 40 });
-            }
-            else if (column.toLowerCase() === 'id' || column.toLowerCase() === 'betaling id') {
-                ws['!cols'].push({ width: 25 });
-            }
-            else if (column.toLowerCase() === 'omschrijving') {
-                ws['!cols'].push({ width: 40 });
-            }
-            else if (column.toLowerCase() === 'context') {
-                ws['!cols'].push({ width: 40 });
-            }
-            else if (column.toLowerCase().includes('uitbetaling')) {
-                ws['!cols'].push({ width: 25 });
-            }
-            else if (column.toLowerCase().includes('plaatsen')) {
-                ws['!cols'].push({ width: 40 });
-            }
-            else if (column.toLowerCase().includes('betaalmethode')) {
-                ws['!cols'].push({ width: 40 });
-            }
-            else {
-                ws['!cols'].push({ width: options?.defaultColumnWidth ?? 13 });
-            }
+            ws['!cols'].push({ width: this.getAutoColumnWidth(column, options?.defaultColumnWidth ?? 13) });
         }
 
         return ws;
+    }
+
+    /**
+     * Guess a column width based on the column header
+     */
+    static getAutoColumnWidth(column: string, defaultColumnWidth = 13): number {
+        if (column.toLowerCase().includes('totaal') || column.toLowerCase().includes('datum')) {
+            return 25;
+        }
+        if (column.toLowerCase().startsWith('naam')) {
+            return 20;
+        }
+        if (column.toLowerCase().includes('naam')) {
+            return 13;
+        }
+        if (column.toLowerCase().includes('e-mail')) {
+            return 25;
+        }
+        if (column.toLowerCase().includes('adres')) {
+            return 30;
+        }
+        if (column.toLowerCase().includes('gsm')) {
+            return 16;
+        }
+        if (column.toLowerCase().includes('product')) {
+            return 40;
+        }
+        if (column.toLowerCase() === 'id' || column.toLowerCase() === 'betaling id') {
+            return 25;
+        }
+        if (column.toLowerCase() === 'omschrijving') {
+            return 40;
+        }
+        if (column.toLowerCase() === 'context') {
+            return 40;
+        }
+        if (column.toLowerCase().includes('uitbetaling')) {
+            return 25;
+        }
+        if (column.toLowerCase().includes('plaatsen')) {
+            return 40;
+        }
+        if (column.toLowerCase().includes('betaalmethode')) {
+            return 40;
+        }
+        return defaultColumnWidth;
     }
 
     static formatColumn(colNum: number, fmt: string, worksheet: any) {

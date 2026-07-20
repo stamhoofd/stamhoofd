@@ -16,6 +16,10 @@
             {{ visibleSheet.description }}
         </p>
 
+        <p v-if="visibleSheet.warning" class="warning-box">
+            {{ visibleSheet.warning }}
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-if="visibleSheet.withCategoryRow || visibleSheet.columns.find(c => c.category)">
@@ -62,14 +66,23 @@ import type { SelectableWorkbook } from './SelectableWorkbook';
 
 const props = withDefaults(
     defineProps<{
-        type: ExcelExportType;
+        type?: ExcelExportType | null;
         title?: string | null; // file name to use for the excel file, without extension
-        filter: LimitedFilteredRequest;
+        filter?: LimitedFilteredRequest | null;
         workbook: SelectableWorkbook;
         configurationId: string; // How to store the filters for easy reuse
+
+        /**
+         * Generate the Excel file locally (in the browser) instead of sending a request
+         * to the backend. When set, `type` and `filter` are not used.
+         */
+        localExporter?: ((workbookFilter: ExcelWorkbookFilter) => Promise<void>) | null;
     }>(),
     {
+        type: null,
         title: null,
+        filter: null,
+        localExporter: null,
     },
 );
 
@@ -131,13 +144,26 @@ async function startExport() {
 }
 
 async function doExport() {
+    if (props.localExporter) {
+        await props.localExporter(props.workbook.getFilter());
+        await pop();
+        return;
+    }
+
+    const type = props.type;
+    const filter = props.filter;
+
+    if (!type || !filter) {
+        throw new Error('Missing type or filter to export to Excel via the backend');
+    }
+
     try {
-        let title = Formatter.fileSlug(props.title ?? props.type);
+        let title = Formatter.fileSlug(props.title ?? type);
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
-            path: `/export/excel/${props.type}`,
+            path: `/export/excel/${type}`,
             body: ExcelExportRequest.create({
-                filter: props.filter,
+                filter,
                 workbookFilter: props.workbook.getFilter(),
                 title: title,
             }),

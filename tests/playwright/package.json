@@ -26,6 +26,7 @@
     "devDependencies": {
         "@playwright/test": "1.60.0",
         "@stamhoofd/test-utils": "*",
-        "eslint-plugin-stamhoofd": "*"
+        "eslint-plugin-stamhoofd": "*",
+        "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     }
 }

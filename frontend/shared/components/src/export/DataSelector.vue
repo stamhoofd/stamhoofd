@@ -1,6 +1,7 @@
 <template>
     <div v-for="({categoryName, selectableData: _selectableData}, index) in groupedColumns" :key="name + '-' + categoryName" class="container">
-        <hr v-if="index > 0"><h2>{{ categoryName }}</h2>
+        <hr v-if="index > 0 || categoryName.length > 0">
+        <h2>{{ categoryName }}</h2>
 
         <STList>
             <STListItem element-name="label" :selectable="true" class="full-border">

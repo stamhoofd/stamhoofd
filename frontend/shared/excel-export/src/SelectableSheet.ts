@@ -5,6 +5,12 @@ export class SelectableSheet {
 
     name: string;
     description: string;
+
+    /**
+     * Shown as a warning above the columns, for things the user has to know before exporting.
+     */
+    warning?: string;
+
     columns: SelectableColumn[];
     withCategoryRow: boolean = true;
 
@@ -12,6 +18,7 @@ export class SelectableSheet {
         id: string;
         name: string;
         description?: string;
+        warning?: string;
         columns: SelectableColumn[];
     }) {
         Object.assign(this, data);

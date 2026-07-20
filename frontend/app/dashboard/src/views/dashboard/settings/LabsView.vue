@@ -83,6 +83,18 @@
                 </h3>
             </STListItem>
 
+            <STListItem v-if="!!STAMHOOFD.domains.webshop" :selectable="true" element-name="label" data-testid="webshop-orders-excel-export-ui-checkbox">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('webshop-orders-excel-export-ui')" @update:model-value="setFeatureFlag('webshop-orders-excel-export-ui', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Kolommen kiezen bij de Excel-export van bestellingen') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Toont een scherm om de werkbladen en kolommen te kiezen bij het exporteren van bestellingen naar Excel, inclusief een nieuw werkblad met de tickets.') }}
+                </p>
+            </STListItem>
+
             <STListItem v-if="!$isPlatform" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="disableCalendar" />
