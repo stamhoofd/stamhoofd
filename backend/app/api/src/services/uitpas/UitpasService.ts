@@ -309,7 +309,7 @@ export class UitpasService {
 
     static async searchUitpasOrganizers(name: string): Promise<UitpasOrganizersResponse> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
-        const access_token = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(null); // always use platform credentials
         return await searchUitpasOrganizers(access_token, name);
     }
 
@@ -327,7 +327,7 @@ export class UitpasService {
      * @param organizationId
      * @returns clientId or empty string if not configured
      */
-    static async getClientIdFor(organizationId: string | null): Promise<string> {
+    static async getClientIdFor(organizationId: string): Promise<string> {
         // Get the uitpas client credentials for the organization
         return await UitpasTokenRepository.getClientIdFor(organizationId);
     }
@@ -338,9 +338,9 @@ export class UitpasService {
      * The field of the error will be the index of the uitpas number in the array.
      * @param uitpasNumbers The uitpas numbers to check
      */
-    static async checkUitpasNumbers(uitpasNumbers: string[]) {
+    static async checkUitpasNumbers(organizationId: string, uitpasNumbers: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
-        const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
+        const access_token = await UitpasTokenRepository.getAccessTokenForWithPlatformFallback(organizationId);
         return await checkUitpasNumbers(access_token, uitpasNumbers);
     }
 
@@ -350,7 +350,7 @@ export class UitpasService {
     static async getPassByUitpasNumber(uitpasNumber: string): Promise<GetPassResponse> {
         let access_token!: string;
         try {
-            access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
+            access_token = await UitpasTokenRepository.getAccessTokenFor(null); // always use platform credentials (for now)
         } catch (e) {
             if (isSimpleError(e) && e.hasCode('uitpas_api_not_configured_for_platform')) {
                 console.error('UiTPAS API has not been configured for this platform, so defaulting to an unknown status for number ', uitpasNumber);
@@ -387,8 +387,8 @@ export class UitpasService {
     }
 
     static async validateCart(organizationId: string, webshopId: string, cart: Cart, exisitingOrderId?: string): Promise<Cart> {
-        let access_token_org: string | null = null;
-        let access_token_platform: string | null = null;
+        let access_token: string | undefined;
+        const unofficialsToBeChecked: string[][] = [];
         for (const item of cart.items) {
             if (item.uitpasNumbers.length === 0) {
                 continue;
@@ -416,8 +416,8 @@ export class UitpasService {
                     });
                 }
 
-                access_token_org = access_token_org ?? await UitpasTokenRepository.getAccessTokenFor(organizationId);
-                const verified = await getSocialTariffForUitpasNumbers(access_token_org, item.uitpasNumbers.map(p => p.uitpasNumber), basePrice, item.product.uitpasEvent.url);
+                access_token = access_token ?? await UitpasTokenRepository.getAccessTokenFor(organizationId);
+                const verified = await getSocialTariffForUitpasNumbers(access_token, item.uitpasNumbers.map(p => p.uitpasNumber), basePrice, item.product.uitpasEvent.url);
                 if (verified.length < item.uitpasNumbers.length) {
                     throw new SimpleError({
                         code: 'uitpas_social_tariff_price_mismatch',
@@ -441,9 +441,14 @@ export class UitpasService {
                     }
                 }
             } else {
-                // non-official flow
-                access_token_platform = access_token_platform ?? await UitpasTokenRepository.getAccessTokenFor();
-                await checkUitpasNumbers(access_token_platform, item.uitpasNumbers.map(p => p.uitpasNumber));
+                // non-official flow: do all checks after official flows (for maximum token re-usage), but retaining index numbering for error reporting
+                unofficialsToBeChecked.push(item.uitpasNumbers.map(p => p.uitpasNumber));
+            }
+        }
+        if (unofficialsToBeChecked.length > 0) {
+            const token = access_token ?? await UitpasTokenRepository.getAccessTokenForWithPlatformFallback(organizationId);
+            for (const uitpasNumbers of unofficialsToBeChecked) {
+                await checkUitpasNumbers(token, uitpasNumbers);
             }
         }
         return cart;

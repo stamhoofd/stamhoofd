@@ -64,12 +64,15 @@ export class UitpasTokenRepository {
     }
 
     /**
-     * organizationId (null means platform) -> UitpasTokenRepository
+     * organizationId (null means platform) -> UitpasTokenRepository or null if no creds are configured for this org/platform
      */
-    static knownTokens: Map<string | null, UitpasTokenRepository> = new Map();
+    private static knownRepos: Map<string | null, UitpasTokenRepository | null> = new Map();
 
-    private static getRepoFromMemory(organizationId: string | null): UitpasTokenRepository | null {
-        return UitpasTokenRepository.knownTokens.get(organizationId) ?? null;
+    /**
+     * @returns null if no creds configured, undefined if not found in memory, UitpasTokenRepository if found in memory
+     */
+    private static getRepoFromMemory(organizationId: string | null): UitpasTokenRepository | undefined | null {
+        return UitpasTokenRepository.knownRepos.get(organizationId);
     }
 
     private static async getModelFromDb(organizationId: string | null) {
@@ -154,9 +157,8 @@ export class UitpasTokenRepository {
         return this.accessToken;
     }
 
-    private static setRepoInMemory(organizationId: string | null, repo: UitpasTokenRepository) {
-        UitpasTokenRepository.knownTokens.set(organizationId, repo);
-        return repo;
+    private static setRepoInMemory(organizationId: string | null, repo: UitpasTokenRepository | null) {
+        UitpasTokenRepository.knownRepos.set(organizationId, repo);
     }
 
     private static async setModelInDb(organizationId: string | null, model: UitpasClientCredential) {
@@ -173,6 +175,17 @@ export class UitpasTokenRepository {
         return model; // return new model
     }
 
+    static async getAccessTokenForWithPlatformFallback(orgId: string, forceRefresh: boolean = false): Promise<string> {
+        try {
+            return await UitpasTokenRepository.getAccessTokenFor(orgId, forceRefresh);
+        } catch (error) {
+            if (error instanceof SimpleError && error.code === 'uitpas_api_not_configured_for_this_organization') {
+                return await UitpasTokenRepository.getAccessTokenFor(null, forceRefresh); // fallback to platform
+            }
+            throw error;
+        }
+    }
+
     /**
      * Get the access token for the organization or platform.
      * @param organizationId the organization ID for which to get the access token. If null, it means the platform.
@@ -180,60 +193,101 @@ export class UitpasTokenRepository {
      * @returns Promise<string> the access token for the organization or platform
      * @throws SimpleError if the token cannot be obtained or the API is not configured
      */
-    static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<string> {
-        let repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
-        if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
-            return repo.accessToken;
+    static async getAccessTokenFor(organizationId: string | null, forceRefresh: boolean = false): Promise<string> {
+        const notConfiguredError = new SimpleError({
+            code: 'uitpas_api_not_configured_for_this_organization',
+            message: `UiTPAS api not configured for organization with id ${organizationId}`,
+            human: $t('%1BJ'),
+        });
+
+        const tryFromMemory = (): string | UitpasTokenRepository | undefined => {
+            const cached = UitpasTokenRepository.getRepoFromMemory(organizationId);
+            if (cached === null) {
+                throw notConfiguredError;
+            }
+            if (cached && cached.accessToken && !forceRefresh && cached.expiresOn > new Date()) {
+                return cached.accessToken;
+            }
+            return cached; // not found in memory or expired or no access token or forceRefresh
+        };
+
+        const memoryResult = tryFromMemory();
+        if (typeof memoryResult === 'string') {
+            return memoryResult; // access token found in memory
         }
 
         // Prevent multiple concurrent requests for the same organization, asking for an access token to the UiTPAS API.
         // The queue can only run one at a time for the same organizationId
         return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
             // we re-search for the repo, as another call to this funcion might have added while we we're waiting in the queue
-            repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
-            if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
-                return repo.accessToken;
+            let repo: UitpasTokenRepository;
+            const memoryResult = tryFromMemory();
+            if (typeof memoryResult === 'string') {
+                return memoryResult; // access token found in memory
             }
-            if (!repo) {
+            if (!memoryResult) {
                 const model = await UitpasTokenRepository.getModelFromDb(organizationId);
                 if (!model) {
-                    throw new SimpleError({
-                        code: 'uitpas_api_not_configured_for_this_organization',
-                        message: `UiTPAS api not configured for organization with id ${organizationId}`,
-                        human: $t('%1BJ'),
-                    });
+                    UitpasTokenRepository.setRepoInMemory(organizationId, null);
+                    throw notConfiguredError;
                 }
-                repo = UitpasTokenRepository.setRepoInMemory(organizationId, new UitpasTokenRepository(model)); // store in memory
+                repo = new UitpasTokenRepository(model);
+                UitpasTokenRepository.setRepoInMemory(organizationId, repo);
+            } else {
+                repo = memoryResult;
             }
             // ask for a new access token
-            return repo.getNewAccessToken();
+            return await repo.getNewAccessToken();
         });
     }
 
-    static async getClientIdFor(organizationId: string | null): Promise<string> {
-        const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
-        if (!repo) {
-            const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
-            if (!model) {
-                return ''; // no client ID and secret configured
+    static async getClientIdFor(organizationId: string): Promise<string> {
+        const tryFromMemory = (): string | undefined => {
+            const cached = UitpasTokenRepository.getRepoFromMemory(organizationId);
+            if (cached === null) {
+                return '';
             }
-            return model.clientId; // client ID configured, but not in memory
+            if (cached) {
+                return cached.uitpasClientCredential.clientId;
+            }
+        };
+
+        const memoryResult = tryFromMemory();
+        if (typeof memoryResult === 'string') {
+            return memoryResult; // client ID found in memory
         }
-        return repo.uitpasClientCredential.clientId; // client ID configured and in memory
+
+        return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
+            // re-search memory, as another call to this function might have populated it while we were waiting in the queue
+            const memoryResult = tryFromMemory();
+            if (typeof memoryResult === 'string') {
+                return memoryResult; // client ID found in memory
+            }
+            const model = await UitpasTokenRepository.getModelFromDb(organizationId);
+            if (!model) {
+                UitpasTokenRepository.setRepoInMemory(organizationId, null); // remember there are no creds configured
+                return '';
+            }
+            UitpasTokenRepository.setRepoInMemory(organizationId, new UitpasTokenRepository(model)); // store in memory
+            return model.clientId; // client ID configured, now also in memory
+        });
     }
 
     static async clearClientCredentialsFor(organizationId: string | null): Promise<boolean> {
         return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
-            const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
-            if (repo) {
+            const cached = UitpasTokenRepository.getRepoFromMemory(organizationId);
+            if (cached) {
                 // in memory, thus also in db
-                await repo.uitpasClientCredential.delete(); // remove from db
-                UitpasTokenRepository.knownTokens.delete(organizationId); // remove from memory
+                await cached.uitpasClientCredential.delete(); // remove from db
+                UitpasTokenRepository.setRepoInMemory(organizationId, null); // remove from memory
                 return true;
             }
             // not in memory, maybe in db
             const model = await UitpasTokenRepository.getModelFromDb(organizationId);
             if (model) {
+                if (cached === null) {
+                    console.warn(`Clearing UiTPAS client credentials for organization with id ${organizationId} although it was not in memory, but found in database. This is a bug, memory and database are out of sync.`);
+                }
                 await model.delete(); // remove from database
                 return true;
             }

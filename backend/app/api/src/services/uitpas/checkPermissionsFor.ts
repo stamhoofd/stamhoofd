@@ -74,21 +74,22 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         });
     });
     assertIsPermissionsResponse(json);
-    const neededPermissions = !organizationId
-        ? [{
-                permission: 'PASSES_READ',
-                human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
-            }]
-        : [{
-                permission: 'TARIFFS_READ',
-                human: 'Tarieven opvragen',
-            }, {
-                permission: 'TICKETSALES_REGISTER',
-                human: 'Ticketsales registreren',
-            }, {
-                permission: 'TICKETSALES_SEARCH',
-                human: 'Ticketsales zoeken',
-            }];
+    const neededPermissions = [{
+        permission: 'PASSES_READ',
+        human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
+    }];
+    if (organizationId) {
+        neededPermissions.push(...[{
+            permission: 'TARIFFS_READ',
+            human: 'Tarieven opvragen',
+        }, {
+            permission: 'TICKETSALES_REGISTER',
+            human: 'Ticketsales registreren',
+        }, {
+            permission: 'TICKETSALES_SEARCH',
+            human: 'Ticketsales zoeken',
+        }]);
+    }
     const item = json.find(item => item.organizer.id === uitpasOrganizerId);
     if (!item) {
         const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t('%1BM') + ' ');
