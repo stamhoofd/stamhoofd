@@ -15,7 +15,7 @@
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-networking": "1.23.0",
-        "@simonbackx/vue-app-navigation": "2.24.0",
+        "@simonbackx/vue-app-navigation": "2.24.1",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/document-helper": "*",

@@ -19,7 +19,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-errors": "*",
-        "@simonbackx/vue-app-navigation": "2.24.0",
+        "@simonbackx/vue-app-navigation": "2.24.1",
         "@stamhoofd/admin-frontend": "*",
         "@stamhoofd/assets": "*",
         "@stamhoofd/auto": "*",
