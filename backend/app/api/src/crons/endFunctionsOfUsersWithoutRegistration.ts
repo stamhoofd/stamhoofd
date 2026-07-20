@@ -1,49 +1,34 @@
 import { registerCron } from '@stamhoofd/crons';
 import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup.js';
-import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 
-// Only delete responsibilities when the server is running during a month change.
-// Chances are almost zero that we reboot during a month change
-// Running on every reboot also would have unintended consequences
-const now = new Date();
-let lastCleanupYear: number = now.getFullYear();
-let lastCleanupMonth: number = now.getMonth();
+// Only run the cleanup once per calendar day (crons tick every 5 minutes).
+let lastRunDate: number | null = null;
 
 registerCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);
 
-export async function endFunctionsOfUsersWithoutRegistration() {
-    if (STAMHOOFD.userMode === 'organization') {
-        return;
-    }
-
+function shouldRun() {
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
 
-    if (lastCleanupMonth === currentMonth && currentYear === lastCleanupYear) {
-        return;
+    if (now.getDate() === lastRunDate) {
+        return false;
     }
 
-    // Check if the current period is active for more than 2 months
-    const platform = await Platform.getShared();
-    const period = await RegistrationPeriod.getByID(platform.periodId);
-    if (!period) {
-        console.warn('No active registration period found, skipping cleanup.');
-        return;
+    const hour = now.getHours();
+
+    // between 5 and 7 AM
+    if (hour !== 5 && hour !== 6 && STAMHOOFD.environment !== 'development') {
+        return false;
     }
 
-    if (period.startDate > new Date(Date.now() - 1000 * 60 * 60 * 24 * 55)) {
-        console.warn('Current registration period is less than 2 months old, skipping cleanup.');
+    return true;
+}
+
+export async function endFunctionsOfUsersWithoutRegistration() {
+    if (!shouldRun()) {
         return;
     }
+    const now = new Date();
+    lastRunDate = now.getDate();
 
-    // If period is ending within 15 days, also skip cleanup
-    if (period.endDate && period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 15)) {
-        console.warn('Current registration period is ending within 15 days or has ended, skipping cleanup.');
-        return;
-    }
-
-    await FlagMomentCleanup.endFunctionsOfUsersWithoutRegistration();
-    lastCleanupYear = currentYear;
-    lastCleanupMonth = currentMonth;
+    await FlagMomentCleanup.endResponsibilitiesOfUnregisteredMembers();
 }
