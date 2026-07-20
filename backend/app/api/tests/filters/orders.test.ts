@@ -346,18 +346,20 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             await expectFilter({ timeSlotDate: { $neq: null } }, [withSlot]);
         });
 
-        // timeSlotStartTime / timeSlotEndTime are typed as JSONString in the backend (orderFilterCompilers)
-        // even though the stored value is a number. Numeric comparisons ($gt/$lt/$eq with a number) therefore
-        // throw in SQL ("Cannot compare a number with a non-number column") while working in memory, so those
-        // cannot be compared here. Their null / not-null behaviour is well defined in both engines.
-        it('timeSlotStartTime / timeSlotEndTime null parity', async () => {
-            const withSlot = await createOrder({ data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z'), startTime: 9 * 60, endTime: 11 * 60 }) }) });
+        // timeSlotStartTime / timeSlotEndTime hold numbers (minutes since midnight). Numeric comparisons
+        // must work in both engines, and a missing time slot must behave like SQL NULL: matched by $eq null
+        // and by $lt (NULL is the smallest), not matched by $gt or $neq null.
+        it('timeSlotStartTime / timeSlotEndTime comparisons and null parity', async () => {
+            const morning = await createOrder({ data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z'), startTime: 9 * 60, endTime: 11 * 60 }) }) });
+            const evening = await createOrder({ data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z'), startTime: 18 * 60, endTime: 20 * 60 }) }) });
             const without = await createOrder({ data: orderData({ timeSlot: null }) });
 
             await expectFilter({ timeSlotStartTime: { $eq: null } }, [without]);
-            await expectFilter({ timeSlotStartTime: { $neq: null } }, [withSlot]);
-            await expectFilter({ timeSlotEndTime: { $eq: null } }, [without]);
-            await expectFilter({ timeSlotEndTime: { $neq: null } }, [withSlot]);
+            await expectFilter({ timeSlotStartTime: { $neq: null } }, [morning, evening]);
+            await expectFilter({ timeSlotStartTime: { $gt: 12 * 60 } }, [evening]);
+            await expectFilter({ timeSlotStartTime: { $lt: 12 * 60 } }, [morning, without]);
+            await expectFilter({ timeSlotEndTime: { $gt: 12 * 60 } }, [evening]);
+            await expectFilter({ timeSlotEndTime: { $lt: 12 * 60 } }, [morning, without]);
         });
     });
 
@@ -385,16 +387,14 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     // --- discount codes --------------------------------------------------------------------------------
 
     describe('discountCodes.code', () => {
-        // NOTE: codes are stored lowercase here on purpose. $eq on a JSON array is case-insensitive in both
-        // engines, but $in on a JSON array is case-sensitive in SQL (JSON_OVERLAPS) while case-insensitive in
-        // memory. They therefore only agree on $in when the stored value already matches the filter's case.
-        it('$eq and $in match the codes in the array', async () => {
-            const summer = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'summer' })] }) });
-            const winter = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'winter' })] }) });
+        // Codes are stored with mixed case on purpose: both $eq and $in on a JSON array must be
+        // case-insensitive, exactly like the in-memory engine.
+        it('$eq and $in match the codes in the array (case-insensitive)', async () => {
+            const summer = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'SUMMER' })] }) });
+            const winter = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'WINTER' })] }) });
             const none = await createOrder({ data: orderData({ discountCodes: [] }) });
 
-            // $eq is case-insensitive in both engines
-            await expectFilter({ discountCodes: { code: { $eq: 'SUMMER' } } }, [summer]);
+            await expectFilter({ discountCodes: { code: { $eq: 'summer' } } }, [summer]);
             await expectFilter({ discountCodes: { code: { $in: ['summer', 'winter'] } } }, [summer, winter]);
             expect(none.id).toBeDefined();
         });
