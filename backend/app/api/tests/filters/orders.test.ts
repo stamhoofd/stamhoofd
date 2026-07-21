@@ -562,10 +562,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
 
         // Negated filters on an empty record answer (null value, or a question that was never answered).
         // The dashboard builds "not equal to x" and "does not contain x" as $not { ... }. A missing or null
-        // answer is not equal to and does not contain any concrete value, so it must match — and both
-        // engines must agree. NotEquals already behaves this way in both engines; NotContains currently
-        // DIVERGES because the backend excludes null/unanswered rows from a negated $contains, so that test
-        // fails on the backend until the divergence is fixed.
+        // answer is not equal to and does not contain any concrete value, so it must match — in both engines.
         describe('negated filters on missing or null values', () => {
             const nullText = () => new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value: null })]]);
 
