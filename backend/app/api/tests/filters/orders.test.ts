@@ -3,7 +3,7 @@ import type { Organization, Webshop } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { Address, BalanceItemType, Cart, CartItem, CartItemPrice, CheckoutMethodType, compileToInMemoryFilter, Customer, DiscountCode, OrderData, OrderStatus, PaymentMethod, PaymentStatus, privateOrderWithTicketsFilterCompilers, Product, ProductPrice, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Address, BalanceItemType, Cart, CartItem, CartItemPrice, CheckoutMethodType, compileToInMemoryFilter, Customer, DiscountCode, OrderData, OrderStatus, PaymentMethod, PaymentStatus, privateOrderWithTicketsFilterCompilers, Product, ProductPrice, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 
 import { orderFilterCompilers } from '../../src/sql-filters/orders.js';
@@ -71,7 +71,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         checkoutMethod?: WebshopTakeoutMethod | null;
         discountCodes?: DiscountCode[];
         items?: CartItem[];
-        recordAnswers?: Map<string, RecordCheckboxAnswer | RecordTextAnswer | RecordChooseOneAnswer | RecordMultipleChoiceAnswer | RecordDateAnswer>;
+        recordAnswers?: Map<string, RecordCheckboxAnswer | RecordTextAnswer | RecordChooseOneAnswer | RecordMultipleChoiceAnswer | RecordDateAnswer | RecordIntegerAnswer>;
     } = {}): OrderData {
         return OrderData.create({
             customer: Customer.create({
@@ -427,9 +427,10 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
 
         const checkbox = (selected: boolean) => new Map([[RID, RecordCheckboxAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Checkbox }), selected })]]);
         const text = (value: string) => new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value })]]);
-        const chooseOne = (choiceId: string) => new Map([[RID, RecordChooseOneAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.ChooseOne }), selectedChoice: RecordChoice.create({ id: choiceId }) })]]);
+        const chooseOne = (choiceId: string | null) => new Map([[RID, RecordChooseOneAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.ChooseOne }), selectedChoice: choiceId === null ? null : RecordChoice.create({ id: choiceId }) })]]);
         const multipleChoice = (choiceIds: string[]) => new Map([[RID, RecordMultipleChoiceAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.MultipleChoice }), selectedChoices: choiceIds.map(id => RecordChoice.create({ id })) })]]);
         const date = (dateValue: Date | null) => new Map([[RID, RecordDateAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Date }), dateValue })]]);
+        const integer = (value: number | null) => new Map([[RID, RecordIntegerAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Integer }), value })]]);
 
         it('checkbox: selected', async () => {
             const checked = await createOrder({ data: orderData({ recordAnswers: checkbox(true) }) });
@@ -473,8 +474,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             expect(stored.id).toBeDefined();
         });
 
-        // The whole reason isMappedToJSONValueInBackend exists: an unanswered record question (missing map key)
-        // or a null answer value must behave in memory exactly like the SQL NULL the JSON extraction yields.
+        //  An unanswered record question (missing map key) or a null answer value must behave in memory exactly like the SQL NULL the JSON extraction yields.
         describe('missing / null answer parity (the SQL NULL behaviour)', () => {
             it('$eq null matches both a null value and an unanswered question', async () => {
                 const nullValue = await createOrder({ data: orderData({ recordAnswers: text('') }) });
@@ -506,6 +506,57 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
                 await expectFilter({ recordAnswers: { [RID]: { value: { $contains: 'hello' } } } }, [match]);
                 expect(nullAnswer.id).toBeDefined();
                 expect(unanswered.id).toBeDefined();
+            });
+
+            it('number value $lt matches smaller values, null and unanswered', async () => {
+                const small = await createOrder({ data: orderData({ recordAnswers: integer(5) }) });
+                const big = await createOrder({ data: orderData({ recordAnswers: integer(15) }) });
+                const nullValue = await createOrder({ data: orderData({ recordAnswers: integer(null) }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { value: { $lt: 10 } } } }, [small, nullValue, unanswered]);
+                expect(big.id).toBeDefined();
+            });
+
+            it('date value $gt matches later values but not null or unanswered', async () => {
+                const later = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-10T00:00:00Z')) }) });
+                const earlier = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-01T00:00:00Z')) }) });
+                const nullValue = await createOrder({ data: orderData({ recordAnswers: date(null) }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { dateValue: { $gt: new Date('2023-06-05T00:00:00Z') } } } }, [later]);
+                expect(earlier.id).toBeDefined();
+                expect(nullValue.id).toBeDefined();
+                expect(unanswered.id).toBeDefined();
+            });
+
+            it('date value $eq null matches null and unanswered', async () => {
+                const stored = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-10T00:00:00Z')) }) });
+                const nullValue = await createOrder({ data: orderData({ recordAnswers: date(null) }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { dateValue: { $eq: null } } } }, [nullValue, unanswered]);
+                expect(stored.id).toBeDefined();
+            });
+
+            it('checkbox selected: $in [null, true] matches unanswered, $in [true] does not', async () => {
+                const checked = await createOrder({ data: orderData({ recordAnswers: checkbox(true) }) });
+                const unchecked = await createOrder({ data: orderData({ recordAnswers: checkbox(false) }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { selected: { $in: [null, true] } } } }, [checked, unanswered]);
+                await expectFilter({ recordAnswers: { [RID]: { selected: { $in: [true] } } } }, [checked]);
+                expect(unchecked.id).toBeDefined();
+            });
+
+            it('single choice: $in [null, choice] matches a null choice and unanswered', async () => {
+                const a = await createOrder({ data: orderData({ recordAnswers: chooseOne('choice-a') }) });
+                const b = await createOrder({ data: orderData({ recordAnswers: chooseOne('choice-b') }) });
+                const nullChoice = await createOrder({ data: orderData({ recordAnswers: chooseOne(null) }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { selectedChoice: { id: { $in: [null, 'choice-a'] } } } } }, [a, nullChoice, unanswered]);
+                expect(b.id).toBeDefined();
             });
         });
     });
