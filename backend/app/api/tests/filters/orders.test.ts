@@ -559,6 +559,36 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
                 expect(b.id).toBeDefined();
             });
         });
+
+        // Negated filters on an empty record answer (null value, or a question that was never answered).
+        // The dashboard builds "not equal to x" and "does not contain x" as $not { ... }. A missing or null
+        // answer is not equal to and does not contain any concrete value, so it must match — and both
+        // engines must agree. NotEquals already behaves this way in both engines; NotContains currently
+        // DIVERGES because the backend excludes null/unanswered rows from a negated $contains, so that test
+        // fails on the backend until the divergence is fixed.
+        describe('negated filters on missing or null values', () => {
+            const nullText = () => new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value: null })]]);
+
+            it('$not { $eq } (NotEquals) matches null and unanswered in both engines', async () => {
+                const x = await createOrder({ data: orderData({ recordAnswers: text('x') }) });
+                const y = await createOrder({ data: orderData({ recordAnswers: text('y') }) });
+                const nullValue = await createOrder({ data: orderData({ recordAnswers: nullText() }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { $not: { value: { $eq: 'x' } } } } }, [y, nullValue, unanswered]);
+                expect(x.id).toBeDefined();
+            });
+
+            it('$not { $contains } (NotContains) matches null and unanswered in both engines', async () => {
+                const withX = await createOrder({ data: orderData({ recordAnswers: text('fox') }) });
+                const withoutX = await createOrder({ data: orderData({ recordAnswers: text('dog') }) });
+                const nullValue = await createOrder({ data: orderData({ recordAnswers: nullText() }) });
+                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+
+                await expectFilter({ recordAnswers: { [RID]: { $not: { value: { $contains: 'x' } } } } }, [withoutX, nullValue, unanswered]);
+                expect(withX.id).toBeDefined();
+            });
+        });
     });
 
     // --- payments ($elemMatch) -------------------------------------------------------------------------

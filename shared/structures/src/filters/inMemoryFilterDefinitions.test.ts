@@ -148,28 +148,4 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
             );
         });
     });
-
-    // KNOWN LIMITATION, documented on purpose.
-    // SQL uses three-valued logic: NOT(value = X) does not match rows where value IS NULL, so an unanswered
-    // record answer does NOT match a "NotEquals"/"NotContains" filter (which the UI builds as $not { $eq }).
-    // The in-memory engine is two-valued: !(null === X) is true, so it DOES match. This cannot be reconciled
-    // without a tri-state runner, so the two engines differ for negated equality on empty record answers.
-    describe('record answers: negated equality differs from SQL for missing or null values', () => {
-        const RID = 'record-id-1';
-        const answered = (answer: Record<string, any>) => makeOrder({ data: { ...makeOrder().data, recordAnswers: { [RID]: answer } } });
-        const unanswered = makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } });
-
-        it('$not { $eq } matches null and unanswered in memory (SQL would not)', () => {
-            const filter = { recordAnswers: { [RID]: { $not: { value: { $eq: 'x' } } } } };
-            const compiled = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
-
-            // Differs from SQL, which excludes NULLs from a negated equality:
-            expect(compiled(unanswered)).toBe(true);
-            expect(compiled(answered({ value: null }))).toBe(true);
-
-            // Agrees with SQL for concrete values:
-            expect(compiled(answered({ value: 'x' }))).toBe(false);
-            expect(compiled(answered({ value: 'y' }))).toBe(true);
-        });
-    });
 });
