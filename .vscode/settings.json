@@ -26,7 +26,8 @@
         "./frontend/app/*",
         "./frontend/shared/*",
         "./devops",
-        "./shared/*"
+        "./shared/*",
+        "./docs"
     ],
     "github.copilot.enable": {
         "*": true,
