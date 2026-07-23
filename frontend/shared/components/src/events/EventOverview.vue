@@ -23,7 +23,7 @@
                             <template v-if="event.group && (!organization || auth.canAccessGroup(event.group, undefined, groupOrganization) || event.group.settings.implicitlyAllowViewRegistrations)">
                                 <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
                                     <template #left>
-                                        <span class="icon group" />
+                                        <span class="icon small group" />
                                     </template>
 
                                     <h2 class="style-title-list">
@@ -41,7 +41,7 @@
 
                                 <STListItem v-if="event.group.waitingList && (!organization || auth.canAccessGroup(event.group.waitingList, undefined, groupOrganization) || event.group.waitingList.settings.implicitlyAllowViewRegistrations)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
                                     <template #left>
-                                        <span class="icon clock" />
+                                        <span class="icon small clock" />
                                     </template>
 
                                     <h2 class="style-title-list">
@@ -59,7 +59,7 @@
 
                                 <STListItem v-if="invitationsCount > 0" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Invitations)">
                                     <template #left>
-                                        <span class="icon email" />
+                                        <span class="icon small email" />
                                     </template>
                                     <h2 class="style-title-list">
                                         {{ $t('%1TY') }}

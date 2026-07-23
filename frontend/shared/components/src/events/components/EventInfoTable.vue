@@ -2,7 +2,7 @@
     <STList>
         <STListItem>
             <template #left>
-                <span class="icon event" />
+                <span class="icon small event" />
             </template>
 
             <h2 class="style-title-list">
@@ -12,7 +12,7 @@
 
         <STListItem v-if="event.meta.location" :selectable="!!googleMapsUrl" :href="googleMapsUrl" :element-name="googleMapsUrl ? 'a' : undefined" target="_blank">
             <template #left>
-                <span class="icon location" />
+                <span class="icon small location" />
             </template>
 
             <h2 class="style-title-list">
@@ -29,7 +29,7 @@
 
         <STListItem v-if="ageGroups.length">
             <template #left>
-                <span class="icon group" />
+                <span class="icon small group" />
             </template>
 
             <h2 class="style-title-list">
@@ -39,7 +39,7 @@
 
         <STListItem v-if="event.group && (event.meta.minAge !== null || event.meta.maxAge !== null)">
             <template #left>
-                <span class="icon membership-filled" />
+                <span class="icon small membership-filled" />
             </template>
 
             <h2 v-if="event.meta.minAge !== null && event.meta.maxAge !== null && event.meta.minAge === event.meta.maxAge" class="style-title-list">
@@ -72,7 +72,7 @@
 
         <STListItem v-if="event.group && !hideGroupStatus" :selectable="!differentOrganization && !event.group.closed" class="right-stack" @click="!differentOrganization && !event.group.closed ? openGroup() : undefined">
             <template #left>
-                <span class="icon edit" />
+                <span class="icon small edit" />
             </template>
 
             <h2 class="style-title-list">
@@ -113,7 +113,7 @@ const props = withDefaults(
     }>(),
     {
         family: null,
-        hideGroupStatus: false
+        hideGroupStatus: false,
     },
 );
 
