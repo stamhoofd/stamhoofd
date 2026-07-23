@@ -117,7 +117,7 @@ const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput
 const hasFocus = ref(false);
 
 const selectedDay = computed(() => {
-    let d = DateTime.fromObject(defaultLocalTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone);
+    let d = DateTime.fromObject(defaultLocalTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone) as DateTime<boolean>;
     if (model.value) {
         d = setTime(Formatter.luxon(model.value));
     } else if (props.placeholderDate) {
