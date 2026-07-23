@@ -24,7 +24,7 @@ import RouterAppView from './RouterAppView.vue';
 
 const modalStack = useTemplateRef<InstanceType<typeof ModalStackComponent>>('modalStack');
 HistoryManager.activate();
-HistoryManager.debug = STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development';
+HistoryManager.debug = STAMHOOFD.environment === 'test';
 
 if (STAMHOOFD.environment === 'development') {
     Error.stackTraceLimit = Infinity; // unlimited stack trace to debug infinite loops
