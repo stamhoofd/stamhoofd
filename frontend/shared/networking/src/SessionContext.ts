@@ -437,11 +437,12 @@ export class SessionContext implements RequestMiddleware {
             url.searchParams.set('prompt', data.prompt);
         }
 
-        const redirectUri = new URL(window.location.href);
-        if (redirectUri.protocol === 'capacitor:') {
-            // On the iOS app, we'll need to rewrite the schema
-            redirectUri.protocol = 'https:';
+        let redirectUri = new URL(window.location.href);
+        if (redirectUri.protocol !== 'https:') {
+            // Settings protocol does not work in all situations sadly
+            redirectUri = new URL(redirectUri.toString().replace(redirectUri.protocol, 'https:'));
         }
+
         if (STAMHOOFD.REDIRECT_LOGIN_DOMAIN) {
             redirectUri.searchParams.set('skipRedirect', 'true');
         }
