@@ -7,7 +7,7 @@
                     <span>{{ Formatter.firstLetters(invitationGroupData.name, 2) }}</span>
                 </figure>
                 <template #aside>
-                    <span class="icon email-filled stroke small" />
+                    <span class="icon email-filled stroke tiny" />
                 </template>
             </IconContainer>
         </template>
@@ -72,7 +72,7 @@ const group = computed(() => {
     }
 
     return null;
-})
+});
 
 function editInvitation(event: any) {
     emit('edit', event);
