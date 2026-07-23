@@ -66,7 +66,7 @@ const props = withDefaults(
 const context = useContext();
 const platform = usePlatform();
 
-const isLoggedIn = computed(() => context.value.isComplete() ?? false);
+const isLoggedIn = computed(() => context.value?.isComplete() ?? false);
 const company = computed(() => props.organization.defaultCompanies[0] as Company);
 
 async function logout() {
