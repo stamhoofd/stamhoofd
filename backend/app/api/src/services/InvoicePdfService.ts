@@ -5,10 +5,9 @@ import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import type { Address } from '@stamhoofd/structures';
-import { CountryHelper, File, getVATExcemptInvoiceNote, getVATExcemptReasonName, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
+import { CountryHelper, File, getVATExcemptInvoiceNote, getVATExcemptReasonName, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import fs from 'fs/promises';
-import { VERSION } from 'luxon';
 import { v4 as uuidv4 } from 'uuid';
 
 export class InvoicePdfService {
@@ -260,7 +259,7 @@ export class InvoicePdfService {
 
         try {
             // Issue with system trusted CA in development
-            const result = await fetch((STAMHOOFD.environment === 'development' ? 'http://' : 'https://') + STAMHOOFD.domains.rendererApi + '/v' + VERSION + '/html-to-pdf', {
+            const result = await fetch((STAMHOOFD.environment === 'development' ? 'http://' : 'https://') + STAMHOOFD.domains.rendererApi + '/v' + Version + '/html-to-pdf', {
                 method: 'POST',
                 body: form,
                 signal: controller.signal,
