@@ -36,7 +36,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     // Private implementation
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' = 'GET';
     url = '';
-    requestHeaders = {};
+    requestHeaders: Record<string, string> = {};
 
     responseHeaders: Record<string, string> = {};
 
@@ -99,8 +99,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
             if (typeof response.data !== 'string') {
                 // Overwrite behaviour
                 this.response = JSON.stringify(response.data);
-            }
-            else {
+            } else {
                 this.response = response.data;
             }
             this.responseHeaders = response.headers;

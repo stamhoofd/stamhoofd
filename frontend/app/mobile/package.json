@@ -12,7 +12,8 @@
     "serve": "NODE_ENV=development ENV_FILE=../../.env.json vite",
     "sync": "cap sync",
     "sync:production": "yarn -s trapeze && cap sync",
-    "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y && trapeze run display-name.yaml -y"
+    "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y && trapeze run display-name.yaml -y",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@capacitor-community/in-app-review": "8.0.0",

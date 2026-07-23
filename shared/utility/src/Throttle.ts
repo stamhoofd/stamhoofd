@@ -1,13 +1,11 @@
 /**
  * Named incorrectly, is in fact debounce
  */
-export const throttle = (func: any, limit: any) => {
+export const throttle = <T extends any[]>(func: (...args: T) => void, limit: number) => {
     let lastFunc: ReturnType<typeof setTimeout>;
-    let lastRan: any;
-    return function (this: any) {
+    let lastRan: number;
+    return function (this: any, ...args: T) {
         const context = this;
-        // eslint-disable-next-line prefer-rest-params
-        const args = arguments;
         if (lastRan) {
             clearTimeout(lastFunc);
         }

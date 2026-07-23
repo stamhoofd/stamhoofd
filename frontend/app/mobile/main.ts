@@ -1,6 +1,7 @@
 // Load icon font
 import 'virtual:vite-svg-2-webfont.css';
 
+import { InAppReview } from '@capacitor-community/in-app-review';
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
@@ -11,42 +12,20 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
-import App from './src/App.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { InAppReview } from '@capacitor-community/in-app-review';
+import { throttle } from '@stamhoofd/utility';
+import Plausible from 'plausible-tracker';
 import { createApp } from 'vue';
-
+import App from './src/App.vue';
 import { CapacitorStorage } from './src/CapacitorStorage.js';
 import FileOpener from './src/FileOpenerPlugin.js';
 import QRScanner from './src/QRScannerPlugin.js';
 import { UpdateStatus } from './src/UpdateStatus.js';
 import { WrapperHTTPRequest } from './src/WrapperHTTPRequest.js';
-
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function (this: any, height: number) {
-        const context = this;
-        // eslint-disable-next-line prefer-rest-params
-        const args = arguments;
-        if (lastRan) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            clearTimeout(lastFunc);
-        }
-        lastRan = Date.now();
-
-        lastFunc = setTimeout(function () {
-            if (Date.now() - lastRan >= limit) {
-                func.apply(context, args);
-                lastRan = Date.now();
-            }
-        }, limit - (Date.now() - lastRan));
-    };
-};
 
 function setKeyboardHeight(height: number) {
     document.documentElement.style.setProperty('--keyboard-height', `${height}px`);
@@ -126,21 +105,14 @@ document.body.style.userSelect = 'none';
 (document.body.style as any).webkitUserSelect = 'none';
 
 if (STAMHOOFD.PLAUSIBLE_DOMAIN && STAMHOOFD.environment === 'production') {
-    const script = document.createElement('script');
-    script.onload = function () {
-        // do stuff with the script
-        console.log('Plausible loaded');
-    };
-    script.setAttribute('data-domain', STAMHOOFD.PLAUSIBLE_DOMAIN);
-    script.src = 'https://plausible.io/js/plausible.js';
-    document.head.appendChild(script); // or something of the likes
-    const w = window as any;
-    // eslint-disable-next-line prefer-rest-params
-    w.plausible = w.plausible || function () { (w.plausible.q = w.plausible.q || []).push(arguments); };
+    // Use the bundled tracker instead of loading plausible.js from an external origin (blocked by our CSP).
+    // Events are sent via fetch/sendBeacon (connect-src), not by loading an external script.
+    const plausibleInstance = Plausible({ domain: STAMHOOFD.PLAUSIBLE_DOMAIN });
+    plausibleInstance.trackPageview();
+    (window as any).plausible = (name: string, args?: Parameters<typeof plausibleInstance.trackEvent>[1]) => plausibleInstance.trackEvent(name, args);
 } else {
-    (window as any).plausible = function () {
-        // eslint-disable-next-line prefer-rest-params
-        console.log('Debug plausible with args ', arguments);
+    (window as any).plausible = function (...args: unknown[]) {
+        console.log('Debug plausible with args ', args);
     };
 }
 

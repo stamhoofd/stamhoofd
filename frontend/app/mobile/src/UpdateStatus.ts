@@ -97,13 +97,10 @@ export class UpdateStatus {
         if (!alreadyDownloaded) {
             // toast = new Toast(`Downloaden van de nieuwste update (${STAMHOOFD.VERSION} > ${release.version})...`, 'spinner').setProgress(0).setHide(null).show()
 
-            // check
-            const listener = (v) => {
-                this.progress = v.percent / 100;
-            };
-
             try {
-                await CapacitorUpdater.addListener('download', listener);
+                await CapacitorUpdater.addListener('download', (v) => {
+                    this.progress = v.percent / 100;
+                });
                 version = await CapacitorUpdater.download({
                     url: release.path,
                     version: release.version.toString(),
