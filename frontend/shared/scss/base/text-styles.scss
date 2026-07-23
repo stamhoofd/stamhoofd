@@ -381,7 +381,7 @@
     }
 
     &.smaller {
-        font-size: 15px;
+        font-size: 14px;
         line-height: 1.4;
 
         +p {
@@ -1869,6 +1869,7 @@
     list-style: none; 
     @extend %style-normal;
     padding-left: 30px;
+    margin-bottom: 20px;
 
     li {
         padding: 8px 0;

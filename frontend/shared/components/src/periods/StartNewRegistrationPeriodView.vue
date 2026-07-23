@@ -33,11 +33,20 @@
                 />
                 <p v-else class="pre-wrap style-description-block" v-text="$t('%17q')" />
 
+                <ul v-if="$isPlatform" class="style-list">
+                    <li>{{ $t('De structuur van jouw leeftijdsgroepen blijft behouden (er wordt een éénmalige kopie gemaakt), maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.') }}</li>
+                    <li>{{ $t('De inschrijvingen van elke inschrijvingsgroep wordt gesloten, je kan deze na controle open zetten.') }}</li>
+                    <li>{{ $t('Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in.') }}</li>
+                    <li>{{ $t('Je kan nog steeds aan de gegevens van vorig jaar.') }}</li>
+                    <li>{{ $t('Na controle van alle instellingen kan je overschakelen op het nieuwe werkjaar. Dit kan ten vroegste vanaf juli.') }}</li>
+                    <li>{{ $t('Alle wachtlijsten worden gedupliceerd in het nieuwe werkjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige werkjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.') }}</li>
+                </ul>
+
                 <p v-if="fromPeriod && fromPeriod.settings.bundleDiscounts.length > 0" class="warning-box">
                     {{ $t('%ZcM', { period: period.name }) }}
                 </p>
 
-                <hr v-if="rows.length > 0 && fromPeriod">
+                <hr v-if="rows.length > 0 && fromPeriod && !$isPlatform">
 
                 <STGrid v-if="rows.length > 0 && fromPeriod" class="split">
                     <STGridItem class="header">
@@ -52,12 +61,12 @@
                         </template>
                     </STGridItem>
                     <template v-for="row in rows" :key="row.key">
-                        <STGridItem v-if="row.type === 'category'" class="right-stack no-border">
+                        <STGridItem v-if="row.type === 'category'" class="no-border">
                             <template #default>
                                 <div :class="'group-cell ' + row.type" :style="{ '--depth': row.depth }">
                                     <span v-if="row.depth > 0" class="icon small folder-open gray" />
                                     <div>
-                                        <h2 class="style-title-list bolder">
+                                        <h2 class="style-title-list smaller bolder">
                                             {{ row.name }}
                                         </h2>
                                     </div>
@@ -68,14 +77,14 @@
                                 <div :class="'group-cell ' + row.type" :style="{ '--depth': row.depth }">
                                     <span v-if="row.depth > 0" class="icon small folder-open gray" />
                                     <div>
-                                        <h2 class="style-title-list bolder">
+                                        <h2 class="style-title-list smaller bolder">
                                             {{ row.name }}
                                         </h2>
                                     </div>
                                 </div>
                             </template>
                         </STGridItem>
-                        <STGridItem v-else class="right-stack no-border">
+                        <STGridItem v-else class="no-border">
                             <template #default>
                                 <div :class="'group-cell ' + row.type" :style="{ '--depth': row.depth }">
                                     <GroupAvatar :group="row.old" />
@@ -83,9 +92,11 @@
                                         <h2 class="style-title-list">
                                             {{ row.old.settings.name }}
                                         </h2>
-                                        <p v-if="row.old.getMemberCount() !== null" class="style-description-small">
-                                            {{ pluralText(row.old.getMemberCount()!, $t('%79'), $t('%It')) }}
-                                        </p>
+
+                                        <STListItemGrid>
+                                            <STListItemGridRow :value="pluralText(row.old.getMemberCount()!, $t('%79'), $t('%It'))" :label="$t(`Inschrijvingen`)" />
+                                            <STListItemGridRow :value="row.old.settings.pricesTextList" :label="$t(`%62`)" />
+                                        </STListItemGrid>
                                     </div>
                                 </div>
                             </template>
@@ -99,9 +110,11 @@
                                         <h2 class="style-title-list">
                                             {{ row.new.settings.name }}
                                         </h2>
-                                        <p class="style-description-small">
-                                            {{ pluralText(0, $t('%79'), $t('%It')) }}
-                                        </p>
+
+                                        <STListItemGrid>
+                                            <STListItemGridRow :value="pluralText(0, $t('%79'), $t('%It'))" :label="$t(`Inschrijvingen`)" />
+                                            <STListItemGridRow :value="row.new.settings.pricesTextList" :label="$t(`%62`)" />
+                                        </STListItemGrid>
                                     </div>
                                 </div>
                             </template>
@@ -148,6 +161,8 @@ import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatc
 import type { Group, GroupCategoryTree, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
 import { GroupStatus, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, onMounted, ref, shallowRef } from 'vue';
+import STListItemGrid from '#layout/STListItemGrid.vue';
+import STListItemGridRow from '#layout/STListItemGridRow.vue';
 
 const props = defineProps<{
     period: RegistrationPeriod;
@@ -220,8 +235,7 @@ const rows = computed(() => {
 
     const result = buildRows(period, period.adminCategoryTree, 0);
 
-    // Waiting lists are stored separately from the category tree, so append them at the bottom
-    for (const waitingList of period.waitingLists) {
+    if (period.waitingLists.length) {
         result.push({
             type: 'category',
             key: 'watitinglists',
@@ -229,14 +243,17 @@ const rows = computed(() => {
             name: $t('%eh'),
         });
 
-        result.push({
-            type: 'group',
-            key: 'group-' + waitingList.id,
-            depth: 1,
-            old: waitingList,
-            // Force the new (duplicated) waiting list to render as closed
-            new: waitingList.patch({ status: GroupStatus.Closed }),
-        });
+        // Waiting lists are stored separately from the category tree, so append them at the bottom
+        for (const waitingList of period.waitingLists) {
+            result.push({
+                type: 'group',
+                key: 'group-' + waitingList.id,
+                depth: 1,
+                old: waitingList,
+                // Force the new (duplicated) waiting list to render as closed
+                new: waitingList.patch({ status: GroupStatus.Closed }),
+            });
+        }
     }
 
     return result;
@@ -291,13 +308,16 @@ async function start() {
 .start-new-registration-period-view {
     --st-list-padding: 6px;
     --st-grid-horizontal-gap: 6px;
+
+    // Firefox fix
+    --block-aside-scale: 0.6;
 }
 
 .group-cell {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 12px;
     --block-width: 22px;
 
     &.category {

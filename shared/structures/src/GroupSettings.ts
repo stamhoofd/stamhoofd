@@ -469,6 +469,24 @@ export class GroupSettings extends AutoEncoder {
     })
     waitingListSize: number | null = null;
 
+    get pricesTextList() {
+        if (this.prices.length === 0) {
+            return $t('geen');
+        }
+
+        return Array.from(
+            new Set(this.prices
+                .flatMap((p) => {
+                    const standardPrice = p.price.price;
+                    const reducedPrice = p.price.reducedPrice;
+                    if (reducedPrice) return [standardPrice, reducedPrice];
+                    return [standardPrice];
+                })),
+        ).sort((a, b) => a - b)
+            .map(price => Formatter.price(price))
+            .join(' / ');
+    }
+
     /**
      * Return the pre registration date only if is is active right now
      */

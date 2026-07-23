@@ -27,7 +27,7 @@ import GroupIconWithWaitingList from '@stamhoofd/components/members/components/g
 import STListItemGrid from '@stamhoofd/components/layout/STListItemGrid.vue';
 import STListItemGridRow from '@stamhoofd/components/layout/STListItemGridRow.vue';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import type { Group} from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
 import { GroupGenderType, GroupStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -39,15 +39,15 @@ const groupIcon = computed(() => {
     const group = props.group;
 
     if (group.status !== GroupStatus.Open) {
-        return 'lock';
+        return 'stroke lock';
     }
 
     if (group.defaultAgeGroupId === null) {
-        return 'warning';
+        return 'stroke warning';
     }
 
     if (group.settings.prices.length === 1 && group.settings.prices[0].price.price === 0) {
-        return 'gift';
+        return 'stroke gift';
     }
 
     return '';
@@ -56,23 +56,7 @@ const groupIcon = computed(() => {
 const name = computed(() => props.group.settings.name);
 
 const prices = computed(() => {
-    const group = props.group;
-
-    if (group.settings.prices.length === 0) {
-        return 'geen';
-    }
-
-    return Array.from(
-        new Set(group.settings.prices
-            .flatMap((p) => {
-                const standardPrice = p.price.price;
-                const reducedPrice = p.price.reducedPrice;
-                if (reducedPrice) return [standardPrice, reducedPrice];
-                return [standardPrice];
-            })),
-    ).sort((a, b) => a - b)
-        .map(price => Formatter.price(price))
-        .join(' / ');
+    return props.group.settings.pricesTextList;
 });
 
 const ageRestriction = computed(() => {
