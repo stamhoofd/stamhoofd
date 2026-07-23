@@ -60,7 +60,7 @@ export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 250 })
     organizationId: string = '';
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 407 })
     eventId: string | null;
 
     @field({ decoder: StringDecoder, version: 265 })
