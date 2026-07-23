@@ -46,13 +46,13 @@
         "test:reset": "yarn -s build:full && yarn -s test"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "3.1068.0",
-        "@aws-sdk/client-ses": "3.1068.0",
-        "@aws-sdk/client-sesv2": "3.1068.0",
-        "@aws-sdk/client-sqs": "3.1068.0",
-        "@aws-sdk/s3-request-presigner": "3.1068.0",
+        "@aws-sdk/client-s3": "3.1090.0",
+        "@aws-sdk/client-ses": "3.1090.0",
+        "@aws-sdk/client-sesv2": "3.1090.0",
+        "@aws-sdk/client-sqs": "3.1090.0",
+        "@aws-sdk/s3-request-presigner": "3.1090.0",
         "@bwip-js/node": "4.11.1",
-        "@mollie/api-client": "4.5.0",
+        "@mollie/api-client": "4.6.0",
         "@simonbackx/simple-database": "1.37.1",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.21.1",
@@ -86,7 +86,7 @@
         "luxon": "3.7.2",
         "mailparser": "3.9.9",
         "mockdate": "3.0.5",
-        "mysql2": "3.22.5",
+        "mysql2": "3.23.1",
         "node-rsa": "2.0.0",
         "openid-client": "5.7.1",
         "stripe": "16.12.0"

@@ -38,8 +38,8 @@
         "formidable": "3.5.4",
         "luxon": "3.7.2",
         "mockdate": "3.0.5",
-        "mysql2": "3.22.5",
-        "puppeteer": "25.1.0"
+        "mysql2": "3.23.1",
+        "puppeteer": "25.3.0"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.136.3",
