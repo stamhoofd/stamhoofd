@@ -79,11 +79,11 @@ describe('EmailContent', () => {
 
             // The translations and language fields are added at the (unreleased) NextVersion =
             // current Version, so every older version should not receive them
-            const encoded = JSON.parse(JSON.stringify(template.encode({ version: Version - 1 }))) as Record<string, unknown>;
+            const encoded = JSON.parse(JSON.stringify(template.encode({ version: 405 }))) as Record<string, unknown>;
             expect(encoded.translations).toBeUndefined();
             expect(encoded.language).toBeUndefined();
 
-            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(EmailTemplate as Decoder<EmailTemplate>);
+            const decoded = new ObjectData(encoded, { version: 405 }).decode(EmailTemplate as Decoder<EmailTemplate>);
             expect(decoded.translations.size).toBe(0);
             expect(decoded.language).toBeNull();
         });
