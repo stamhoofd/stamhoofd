@@ -18,9 +18,13 @@ export default defineAppConfig({
                 },
             },
         },
+<<<<<<< HEAD
         colors: {
             primary: 'blue',
         },
     },
     github: false,
+=======
+    },
+>>>>>>> 4f8e5c0f6 (Add UI config to avoid upscaling images)
 });
