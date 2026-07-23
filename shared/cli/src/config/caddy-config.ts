@@ -131,6 +131,7 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
         route([domains.dashboard], ports.webApp, proxyHost),
         route([domains.registration, `*.${domains.registration}`], ports.webApp, proxyHost),
         route([domains.webshop], ports.webshop, proxyHost),
+        route([domains.docs], ports.docs, proxyHost),
     ];
 
     const tlsSubjects = [...new Set([
@@ -140,6 +141,7 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
         domains.renderer,
         domains.registration,
         `*.${domains.registration}`,
+        domains.docs,
     ])];
 
     return {

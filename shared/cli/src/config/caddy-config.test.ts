@@ -5,7 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { writeInstanceManifest, writeRouteManifest } from '../runtime/manifest-store.js';
 import { caddyAdminPort, localhostPort } from './shared-service-config.js';
-import { writeCaddyConfig } from './caddy-config.js';
+import { buildCaddyRouteOptions, writeCaddyConfig } from './caddy-config.js';
+import { buildPorts } from '../context/ports.js';
 
 describe('Caddy config', () => {
     let rootDir: string;
@@ -57,6 +58,17 @@ describe('Caddy config', () => {
         for (const proxy of reverseProxies) {
             expect(proxy.stream_close_delay).toBe('24h');
         }
+    });
+
+    it('routes the docs domain to the Nuxt docs server with TLS coverage', () => {
+        const ctx = context(rootDir);
+        const options = buildCaddyRouteOptions(ctx);
+        const hosts = options.routes.flatMap(route => route.match.flatMap((match: any) => match.host));
+        const docsRoute = options.routes.find(route => route.match.some((match: any) => match.host?.includes('docs.stamhoofd')));
+
+        expect(hosts).toContain('docs.stamhoofd');
+        expect(options.tlsSubjects).toContain('docs.stamhoofd');
+        expect((docsRoute?.handle[0] as any).upstreams[0].dial).toContain(`:${buildPorts(ctx).docs}`);
     });
 
     it('can bind the admin API to the container interface', async () => {
