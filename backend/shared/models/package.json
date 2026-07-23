@@ -40,7 +40,8 @@
         "base-x": "3.0.11",
         "handlebars": "4.7.9",
         "sharp": "0.35.1",
-        "uuid": "14.0.0"
+        "uuid": "14.0.0",
+        "luxon": "3.7.2"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
