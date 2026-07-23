@@ -3,7 +3,7 @@
   "strict": true,
   "source": [
     "package.json",
-    ".development/i18n-uuid/package.json",
+    ".development/*/package.json",
     "backend/app/*/package.json",
     "backend/shared/*/package.json",
     "frontend/app/*/package.json",
