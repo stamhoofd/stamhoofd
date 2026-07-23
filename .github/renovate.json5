@@ -41,6 +41,17 @@
 
   packageRules: [
     {
+      // The native android/ios projects (gradle deps like androidx.*, cordova)
+      // are managed by Capacitor, not hand-maintained — don't let Renovate bump
+      // them independently.
+      description: "Don't update native dependencies of the android/ios packages",
+      matchFileNames: [
+        "frontend/app/mobile/android/**",
+        "frontend/app/mobile/ios/**",
+      ],
+      enabled: false,
+    },
+    {
       description: "Preserve Node.js engine compatibility ranges",
       matchDepTypes: ["engines"],
       rangeStrategy: "widen",
