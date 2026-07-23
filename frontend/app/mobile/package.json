@@ -53,6 +53,6 @@
     "@stamhoofd/vite-config": "*",
     "@trapezedev/configure": "7.1.4",
     "eslint-plugin-stamhoofd": "*",
-    "vite": "8.0.16"
+    "vite": "8.1.5"
   }
 }

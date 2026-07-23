@@ -43,6 +43,6 @@
     "devDependencies": {
         "@stamhoofd/vite-config": "*",
         "eslint-plugin-stamhoofd": "*",
-        "vite": "8.0.16"
+        "vite": "8.1.5"
     }
 }

@@ -40,7 +40,7 @@
         "@types/formidable": "3.5.1",
         "@types/luxon": "3.7.1",
         "@types/mysql": "2.15.27",
-        "@types/node": "22.15.34"
+        "@types/node": "22.20.1"
     },
     "license": "UNLICENCED",
     "publishConfig": {
