@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/models",
-    "version": "2.136.3",
+    "version": "2.137.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -39,13 +39,13 @@
         "argon2": "0.44.0",
         "base-x": "3.0.11",
         "handlebars": "4.7.9",
+        "luxon": "3.7.2",
         "sharp": "0.35.1",
-        "uuid": "14.0.0",
-        "luxon": "3.7.2"
+        "uuid": "14.0.0"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
-        "@stamhoofd/test-utils": "2.136.3",
+        "@stamhoofd/test-utils": "2.137.0",
         "@types/luxon": "3.7.1",
         "@types/uuid": "8.3.4",
         "vitest": "4.1.8"
