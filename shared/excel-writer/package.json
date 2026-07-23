@@ -28,11 +28,11 @@
     },
     "dependencies": {
         "@simonbackx/simple-errors": "1.5.0",
-        "uuid": "14.0.0"
+        "uuid": "14.0.1"
     },
     "devDependencies": {
-        "@types/archiver": "6.0.3",
-        "@types/luxon": "3.7.1",
+        "@types/archiver": "6.0.4",
+        "@types/luxon": "3.7.2",
         "@types/uuid": "8.3.4"
     },
     "peerDependencies": {

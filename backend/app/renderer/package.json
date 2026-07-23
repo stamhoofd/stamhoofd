@@ -44,10 +44,10 @@
     "devDependencies": {
         "@stamhoofd/test-utils": "2.136.3",
         "@types/formidable": "3.5.1",
-        "@types/luxon": "3.7.1",
+        "@types/luxon": "3.7.2",
         "@types/node": "22.20.1",
-        "nock": "14.0.15",
-        "vitest": "4.1.8"
+        "nock": "14.0.16",
+        "vitest": "4.1.10"
     },
     "license": "UNLICENCED",
     "publishConfig": {

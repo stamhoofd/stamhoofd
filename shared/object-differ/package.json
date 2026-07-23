@@ -25,18 +25,18 @@
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "2.26.11",
-        "uuid": "14.0.0"
+        "uuid": "14.0.1"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.136.3",
         "@types/uuid": "8.3.4",
-        "uuid": "14.0.0",
-        "vitest": "4.1.8"
+        "uuid": "14.0.1",
+        "vitest": "4.1.10"
     },
     "peerDependencies": {
         "@stamhoofd/structures": "*",
         "@stamhoofd/utility": "*",
-        "uuid": "14.0.0"
+        "uuid": "14.0.1"
     },
     "license": "UNLICENCED",
     "publishConfig": {

@@ -35,7 +35,7 @@
         "@stamhoofd/utility": "2.136.3"
     },
     "devDependencies": {
-        "vitest": "4.1.8"
+        "vitest": "4.1.10"
     },
     "license": "UNLICENSED",
     "publishConfig": {

@@ -18,7 +18,7 @@
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
         "@stamhoofd/structures": "*",
-        "vue": "3.5.38"
+        "vue": "3.5.40"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"
