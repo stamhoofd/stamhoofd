@@ -38,6 +38,20 @@ export async function getContainerLogs(name: string, options: { tail?: number } 
     return [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
 }
 
+export async function imageExists(image: string): Promise<boolean> {
+    const result = await run(['image', 'inspect', image], { capture: true, quiet: true, allowFailure: true });
+    return result.status === 0;
+}
+
+export async function buildImage(tag: string, contextDir: string, options: { dockerfile?: string; verbose?: boolean } = {}): Promise<void> {
+    const args = ['build', '-t', tag];
+    if (options.dockerfile) {
+        args.push('-f', options.dockerfile);
+    }
+    args.push(contextDir);
+    await run(args, { quiet: !options.verbose, verbose: options.verbose });
+}
+
 export async function createVolume(name: string, verbose = false): Promise<void> {
     const existing = await run(['volume', 'exists', name], { capture: true, quiet: true, allowFailure: true, verbose });
     if (existing.status === 0) {

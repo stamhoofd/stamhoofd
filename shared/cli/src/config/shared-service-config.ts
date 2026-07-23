@@ -18,7 +18,18 @@ export const mysqlImage = 'docker.io/library/mysql:8.4';
 export const maildevImage = 'docker.io/maildev/maildev:2.2.1';
 export const rustfsImage = 'docker.io/rustfs/rustfs:latest';
 export const corednsImage = 'docker.io/coredns/coredns:1.11.3';
-export const caddyImage = 'docker.io/library/caddy:2';
+
+/**
+ * The Caddy config uses the `replace_response` handler (webshop strict-dynamic CSP nonce),
+ * which is not part of the stock Caddy image. We build a small custom image on demand that
+ * compiles those plugins in via xcaddy, starting from the official Caddy builder + runtime
+ * images. `caddyImage` is the locally built tag; the `localhost/` prefix keeps it resolving
+ * to the local image store under both Docker and Podman (never pulled from a registry).
+ */
+export const caddyBaseImage = 'docker.io/library/caddy:2';
+export const caddyBuilderImage = 'docker.io/library/caddy:2-builder';
+export const caddyImage = 'localhost/stamhoofd-caddy:2';
+export const caddyPlugins = ['github.com/caddyserver/replace-response'];
 
 export const mysqlRootUser = 'root';
 export const mysqlRootPassword = 'root';

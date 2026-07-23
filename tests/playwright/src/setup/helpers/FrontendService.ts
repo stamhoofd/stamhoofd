@@ -1,4 +1,4 @@
-import { getProjectPath } from '@stamhoofd/cli';
+import { CSP_NONCE_PLACEHOLDER, getProjectPath } from '@stamhoofd/cli';
 import { createReadStream } from 'node:fs';
 import { cp, readFile, stat, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -163,7 +163,13 @@ export class FrontendService implements ServiceHelper {
         // Define the script you want to inject
         const apiUrl = CaddyConfigHelper.getUrl('api', this.workerId);
         const scriptSrc = `${apiUrl}/frontend-environment`;
-        const scriptToInject = `<script src="${scriptSrc}"></script>`;
+
+        // Every playwright frontend (dashboard, registration, webshop) is served with a
+        // strict-dynamic CSP (Caddy sets the header + rewrites the nonce placeholder, see
+        // CaddyConfigHelper). A response-header CSP applies to the whole document regardless of
+        // order, so this injected external env script must carry the nonce to run. Caddy rewrites
+        // the placeholder to the real per-request nonce along with the rest of the document.
+        const scriptToInject = `<script nonce="${CSP_NONCE_PLACEHOLDER}" src="${scriptSrc}"></script>`;
 
         const placeholder = '<!--IMPORT_ENV-->';
 

@@ -34,6 +34,8 @@ export interface CreateWebshopOptions {
     genderEnabled?: boolean;
     /** Add a delivery checkout method covering the given countries (enables the delivery address step) */
     deliveryCountries?: Country[];
+    /** Raw HTML injected into the document head on custom domains (script/style tags) */
+    customCode?: string | null;
 }
 
 export class TestWebshops {
@@ -58,6 +60,7 @@ export class TestWebshops {
             addressEnabled = false,
             genderEnabled = false,
             deliveryCountries,
+            customCode,
         } = options;
 
         let meta = WebshopMetaData.patch({});
@@ -99,6 +102,7 @@ export class TestWebshops {
             birthDayEnabled,
             addressEnabled,
             genderEnabled,
+            customCode,
         });
 
         if (deliveryCountries) {

@@ -54,7 +54,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
             // Validate domains
 
-            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
+            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^(?:[a-z0-9-]+\.)?(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'registerDomain is invalid',

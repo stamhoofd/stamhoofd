@@ -109,6 +109,13 @@ function buildDevelopmentDomains(context: CliContext) {
         renderer: appDomain('renderer'),
         registration: appDomain('registration'),
         webshop: appDomain('shop'),
+        // Shared suffix for local custom domains. Any host ending in this suffix is treated as a
+        // custom domain and served by a frontend: registration when it starts with 'inschrijven.',
+        // otherwise a webshop. This mirrors how production custom domains CNAME onto the
+        // registration/webshop endpoints, and lets Caddy decide from the Host alone whether a
+        // request is a custom domain. CoreDNS already resolves every *.<domain> host to localhost,
+        // so a custom domain such as `myshop.custom.stamhoofd` resolves without extra DNS config.
+        customDomain: appDomain('custom'),
         mail: `mail.${domain}`,
         files: `files.${domain}`,
         filesConsole: `files-console.${domain}`,

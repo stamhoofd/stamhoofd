@@ -140,13 +140,16 @@
 
         <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
             <hr>
-            <h2>{{ $t('%HQ') }}</h2>
+            <h2>{{ $t('%15t') }}</h2>
             <p v-if="!hasCustomDomain" class="info-box">
                 {{ $t('%15s') }}
             </p>
-            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max" :title="$t('%15t')">
+            <STInputBox error-fields="meta.customCode" :error-box="errors.errorBox" class="max">
                 <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('%15u')" :disabled="!hasCustomDomain" />
             </STInputBox>
+            <p class="style-description-small">
+                {{ $t('Het inladen van externe bronnen op jouw webshop kan een veiligheidsrisico veroorzaken. Het gebruik van code injection is daarom op eigen risico. Voeg enkel code toe van vertrouwde bronnen.') }}
+            </p>
         </div>
     </SaveView>
 </template>
@@ -173,7 +176,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
-import type { DarkMode, Image, RichText, SponsorConfig} from '@stamhoofd/structures';
+import type { DarkMode, Image, RichText, SponsorConfig } from '@stamhoofd/structures';
 import { Cart, CartItem, CartReservedSeat, LanguageHelper, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 

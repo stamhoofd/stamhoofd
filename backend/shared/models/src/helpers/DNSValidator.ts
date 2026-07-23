@@ -1,5 +1,5 @@
 import { SimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { DNSRecord} from '@stamhoofd/structures';
+import type { DNSRecord } from '@stamhoofd/structures';
 import { DNSRecordStatus, DNSRecordType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { Resolver } from 'dns/promises';
@@ -15,6 +15,11 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
     let hasAllNonTXT = true;
 
     for (const record of dnsRecords) {
+        if (STAMHOOFD.environment === 'development' && record.name.endsWith('.stamhoofd.')) {
+            record.status = DNSRecordStatus.Valid;
+            record.errors = null;
+            continue;
+        }
         try {
             switch (record.type) {
                 case DNSRecordType.CNAME: {
@@ -34,8 +39,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 human: $t(`%GA`) + ' ' + record.name + ' ' + $t(`%GB`),
                             }));
                         }
-                    }
-                    else if (addresses.length > 1) {
+                    } else if (addresses.length > 1) {
                         record.status = DNSRecordStatus.Failed;
                         allValid = false;
                         hasAllNonTXT = false;
@@ -45,12 +49,10 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             message: '',
                             human: $t(`%GC`) + ' ' + record.name + $t(`%GD`),
                         }));
-                    }
-                    else {
+                    } else {
                         if (addresses[0] + '.' === record.value) {
                             record.status = DNSRecordStatus.Valid;
-                        }
-                        else {
+                        } else {
                             record.status = DNSRecordStatus.Failed;
 
                             if (!record.optional) {
@@ -86,8 +88,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 human: $t(`%GG`) + ' ' + record.name + ' ' + $t(`%GB`),
                             }));
                         }
-                    }
-                    else if (records.length > 1) {
+                    } else if (records.length > 1) {
                         record.status = DNSRecordStatus.Failed;
                         allValid = false;
                         record.errors = new SimpleErrors(new SimpleError({
@@ -95,13 +96,11 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             message: '',
                             human: $t(`%GH`) + ' ' + record.name + $t(`%GD`),
                         }));
-                    }
-                    else {
+                    } else {
                         const val = records[0].join('').trim();
                         if (val === record.value.trim()) {
                             record.status = DNSRecordStatus.Valid;
-                        }
-                        else {
+                        } else {
                             record.status = DNSRecordStatus.Failed;
 
                             if (!record.optional) {
@@ -118,8 +117,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                     break;
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             record.status = DNSRecordStatus.Pending;
 
             if (e.code && (e.code === 'ENOTFOUND' || e.code === 'ENODATA')) {
@@ -130,8 +128,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                         human: $t(`%GJ`) + ' ' + record.name + ' ' + $t(`%GB`),
                     }));
                 }
-            }
-            else {
+            } else {
                 console.error(e);
                 if (!record.optional) {
                     record.errors = new SimpleErrors(new SimpleError({

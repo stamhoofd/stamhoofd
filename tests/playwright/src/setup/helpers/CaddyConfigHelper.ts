@@ -1,6 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { FrontendProjectName } from './FrontendService.js';
 import type { CaddyRoute, CaddyRouteOptions } from '@stamhoofd/cli';
+import { cspFrontendSubroutes } from '@stamhoofd/cli';
 
 /**
  * Old domains and ports will get reused
@@ -91,6 +92,33 @@ export class CaddyConfigHelper {
     }
 
     /**
+     * A proxy route that enforces the same Content-Security-Policy as production (devops
+     * buildCaddyConfig.ts) on all playwright frontends — dashboard, registration and webshop.
+     * The CSP is applied by cspFrontendSubroutes based on the request path (file extension):
+     * documents get the strict-dynamic nonce policy (+ per-request nonce rewrite), resources get
+     * the sandboxed resource CSP and are never buffered by replace_response. The frontends are
+     * served from a static file server, so there is no Vite HMR websocket to keep unbuffered
+     * (unlike the CLI dev config, which proxies Vite and matches on the Accept header instead).
+     * `customDomain: true` omits the "no external scripts" hardening so webshop admin custom code
+     * can run on its own custom domain. The route is terminal, so a matched request never also
+     * falls through to a later, broader route (e.g. the webshop custom-domain catch-all).
+     */
+    private static frontendProxyRoutes(match: CaddyRoute['match'][number], proxyHost: string, port: number, options: { customDomain: boolean }): CaddyRoute[] {
+        const proxy = {
+            handler: 'reverse_proxy' as const,
+            upstreams: [{ dial: `${proxyHost}:${port}` }],
+        };
+
+        return [
+            {
+                match: [match],
+                handle: [...cspFrontendSubroutes(options), proxy],
+                terminal: true,
+            },
+        ];
+    }
+
+    /**
      * Create a frontend route for the caddy config
      */
     static createFrontendRoutes(service: FrontendProjectName, workerId: string, proxyHost: string): CaddyRoute[] {
@@ -102,78 +130,49 @@ export class CaddyConfigHelper {
         const port = this.getFrontendPort(service, workerId);
 
         const routes: CaddyRoute[] = [
-            {
-                match: [
-                    {
-                        host: service === 'registration' ? [domain, '*.' + domain] : [domain],
-                    },
-                ],
-                handle: [
-                    {
-                        handler: 'reverse_proxy',
-                        upstreams: [
-                            {
-                                dial: `${proxyHost}:${port}`,
-                            },
-                        ],
-                    },
-                ],
-                terminal: true,
-            },
+            ...this.frontendProxyRoutes(
+                { host: service === 'registration' ? [domain, '*.' + domain] : [domain] },
+                proxyHost,
+                port,
+                { customDomain: false },
+            ),
         ];
 
         if (service === 'registration') {
-            routes.push({
-                match: [
-                    {
-                        header_regexp: {
-                            Host: {
-                                pattern: '^inschrijven\\..+\\.' + Formatter.escapeRegex(this.getCustomDomainTld(workerId)) + '$',
-                            },
+            // Custom registration domains keep the "no external scripts" hardening (production
+            // parity): registration never allows admin-injected code, so customDomain stays false.
+            routes.push(...this.frontendProxyRoutes(
+                {
+                    header_regexp: {
+                        Host: {
+                            pattern: '^inschrijven\\..+\\.' + Formatter.escapeRegex(this.getCustomDomainTld(workerId)) + '$',
                         },
                     },
-                ],
-                handle: [
-                    {
-                        handler: 'reverse_proxy',
-                        upstreams: [
-                            {
-                                dial: `${proxyHost}:${port}`,
-                            },
-                        ],
-                    },
-                ],
-                terminal: true,
-            });
+                },
+                proxyHost,
+                port,
+                { customDomain: false },
+            ));
         }
 
         if (service === 'webshop') {
             // Every custom domain ending with the custom TLD that is NOT a registration domain
             // (which starts with 'inschrijven') is interpreted as a webshop. RE2 has no negative
             // lookahead, so we rely on the registration route being registered first and terminal
-            // in createRouteOptions.
-            routes.push({
-                match: [
-                    {
-                        header_regexp: {
-                            Host: {
-                                pattern: '^.+\\.' + Formatter.escapeRegex(this.getCustomDomainTld(workerId)) + '$',
-                            },
+            // in createRouteOptions. customDomain: true drops the "no external scripts" CSP so a
+            // webshop's admin custom code can run on its own custom domain (as in production).
+            routes.push(...this.frontendProxyRoutes(
+                {
+                    header_regexp: {
+                        Host: {
+                            pattern: '^.+\\.' + Formatter.escapeRegex(this.getCustomDomainTld(workerId)) + '$',
                         },
                     },
-                ],
-                handle: [
-                    {
-                        handler: 'reverse_proxy',
-                        upstreams: [
-                            {
-                                dial: `${proxyHost}:${port}`,
-                            },
-                        ],
-                    },
-                ],
-                terminal: true,
-            });
+                },
+                proxyHost,
+                port,
+                { customDomain: true },
+            ));
         }
 
         return routes;

@@ -5,14 +5,15 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-    
     <!--IMPORT_ENV-->
+    <!-- Extend CSP with EXTRA requirements on top of those defined by the backend (nonces, but strict dynamic) + extra defence in case something goes wrong on the backend side that prevents adding the headers -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-VIk1o3f2bapH5ABEJtUIWsy6JHXIa7RE7ZJjqpndrBg='" />
 </head>
 
 <body class="modern">
     <div id="app"></div>
     <!-- Browser detection script to redirect -->
-    <script lang="text/javascript">
+    <script lang="text/javascript" nonce="STAMHOOFD_CSP_NONCE">
         // The browsers that we support in the dashboard match the ones that support flatMap
         var testArray = []
         if (!(typeof testArray.flatMap === "function")) {
@@ -20,7 +21,7 @@
             throw new Error("Browser not supported");
         }
     </script>
-    <script type="module" src="/main.ts"></script>
+    <script type="module" nonce="STAMHOOFD_CSP_NONCE" src="/main.ts"></script>
 </body>
 
 </html>

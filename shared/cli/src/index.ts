@@ -9,5 +9,6 @@ export { pruneStaleRouteManifests, removeRouteManifest, removeRouteManifestsByKi
 export type { RouteManifest } from './runtime/manifest-store.js';
 export { CaddyService } from './services/definitions/caddy-service.js';
 export type { CaddyRoute } from './config/caddy-config.js';
+export { CSP_NONCE_PLACEHOLDER, cspFrontendSubroutes } from './config/caddy-config.js';
 export { getContainerRuntime } from './services/docker.js';
 export type { AppService, BackendAppService, DevelopmentConfig, DevelopmentDomains, FrontendAppService } from './config/development-config.js';

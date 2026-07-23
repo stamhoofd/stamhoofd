@@ -12,7 +12,7 @@
 <body class="modern">
     <div id="app"></div>
     <!-- Browser detection script to redirect -->
-    <script lang="text/javascript">
+    <script lang="text/javascript" nonce="STAMHOOFD_CSP_NONCE">
         // The browsers that we support in the dashboard match the ones that support flatMap
         var testArray = []
         if (!(typeof testArray.flatMap === "function")) {
@@ -20,7 +20,7 @@
             throw new Error("Browser not supported");
         }
     </script>
-    <script type="module" src="/src/index.ts"></script>
+    <script type="module" nonce="STAMHOOFD_CSP_NONCE" src="/src/index.ts"></script>
 </body>
 
 </html>

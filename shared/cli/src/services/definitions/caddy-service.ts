@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import { buildCaddyRouteOptions, writeCaddyConfig } from '../../config/caddy-config.js';
-import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import { caddyAdminPort, caddyBaseImage, caddyBuilderImage, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, caddyPlugins, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
 import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
 import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
 import type { CaddyRouteOptions } from '../../runtime/manifest-store.js';
+import { sharedDir } from '../../runtime/manifest-store.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import type { ServiceStatus } from '../service.js';
@@ -37,6 +39,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         const config = await CaddyService.writeRuntimeConfig(context);
         const dataDir = CaddyService.dataDir();
         await fs.mkdir(dataDir, { recursive: true });
+        await CaddyService.ensureImage(context);
         await CaddyService.validateConfig(config, context);
         return { config, dataDir };
     }
@@ -60,6 +63,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
 
     static async reload(context: CliContext): Promise<void> {
         const config = await CaddyService.writeRuntimeConfig(context);
+        await CaddyService.ensureImage(context);
         await CaddyService.validateConfig(config, context);
         if (await docker.containerIsRunning(CaddyService.container)) {
             await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { quiet: true, verbose: context.verbose });
@@ -98,6 +102,35 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     private static async validateConfig(config: string, context: CliContext): Promise<void> {
         const labelArgs = await docker.getContainerRuntime() === docker.ContainerRuntime.Podman ? ['--security-opt', 'label=disable'] : [];
         await docker.run(['run', '--rm', ...labelArgs, '-v', `${config}:${caddyConfigPath}:ro`, caddyImage, 'caddy', 'validate', '--config', caddyConfigPath], { quiet: true, verbose: context.verbose });
+    }
+
+    /**
+     * Build the custom Caddy image that bundles the plugins the config relies on (currently
+     * `replace_response`, used by the webshop strict-dynamic CSP nonce). The stock Caddy image
+     * does not ship these, so `caddy validate`/`caddy run` would reject the config without them.
+     * The build is layer-cached, so this is a no-op once the image exists.
+     */
+    static async ensureImage(context: CliContext): Promise<void> {
+        if (await docker.imageExists(caddyImage)) {
+            return;
+        }
+        const buildDir = path.join(sharedDir(context), 'caddy-build');
+        await fs.mkdir(buildDir, { recursive: true });
+        const dockerfile = path.join(buildDir, 'Dockerfile');
+        await fs.writeFile(dockerfile, CaddyService.dockerfile(), 'utf8');
+        await docker.buildImage(caddyImage, buildDir, { dockerfile, verbose: context.verbose });
+    }
+
+    static dockerfile(): string {
+        const withFlags = caddyPlugins.map(plugin => `--with ${plugin}`).join(' ');
+        return [
+            `FROM ${caddyBuilderImage} AS builder`,
+            `RUN xcaddy build ${withFlags}`,
+            '',
+            `FROM ${caddyBaseImage}`,
+            'COPY --from=builder /usr/bin/caddy /usr/bin/caddy',
+            '',
+        ].join('\n');
     }
 
     static dataDir(): string {

@@ -6,6 +6,7 @@ export const CORSMiddleware: ResponseMiddleware = {
         response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PATCH, PUT, DELETE';
         response.headers['Access-Control-Allow-Headers'] = request.headers['access-control-request-headers'] ?? '*';
         response.headers['Access-Control-Max-Age'] = '86400'; // Cache 24h
+        response.headers['Content-Security-Policy'] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
         if (request.method !== 'OPTIONS') {
             // Expose all headers

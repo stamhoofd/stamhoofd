@@ -124,18 +124,22 @@ const enableMemberModule = computed(() => organization.value.meta.modules.useMem
 const isAlreadySet = computed(() => !!(organization.value.privateMeta?.pendingMailDomain ?? organization.value.privateMeta?.mailDomain));
 
 function validateDomain() {
+    if (STAMHOOFD.environment === 'development') {
+        return true;
+    }
+
     if (allowSubdomain.value) {
         return /^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i.test(mailDomain.value);
     }
     return /^[a-z0-9-]+\.[a-z]+$/i.test(mailDomain.value);
 }
 
-const validateRegisterDomain = () => /^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i.test(registerDomain.value);
+const validateRegisterDomain = () => STAMHOOFD.environment === 'development' || /^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i.test(registerDomain.value);
 
 function domainChanged() {
     if (!validateDomain()) {
         const errors = new SimpleErrors();
-        errors.addError(new SimpleError({ code: 'invalid_field', message: 'De domeinnaam die je hebt ingevuld is niet geldig', field: 'mailDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'mailDomain' }));
         errorBox.value = new ErrorBox(errors);
     } else {
         errorBox.value = null;
@@ -145,7 +149,7 @@ function domainChanged() {
 function registerDomainChanged() {
     if (!validateRegisterDomain()) {
         const errors = new SimpleErrors();
-        errors.addError(new SimpleError({ code: 'invalid_field', message: 'De domeinnaam die je hebt ingevuld is niet geldig', field: 'registerDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'registerDomain' }));
         errorBox.value = new ErrorBox(errors);
     } else {
         errorBox.value = null;
@@ -159,10 +163,10 @@ async function save() {
 
     const errors = new SimpleErrors();
     if (!validateDomain()) {
-        errors.addError(new SimpleError({ code: 'invalid_field', message: 'De domeinnaam die je hebt ingevuld is niet geldig', field: 'mailDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'mailDomain' }));
     }
     if (customRegisterDomain.value && !validateRegisterDomain()) {
-        errors.addError(new SimpleError({ code: 'invalid_field', message: 'De domeinnaam die je hebt ingevuld is niet geldig', field: 'registerDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'registerDomain' }));
     }
 
     errorBox.value = errors.errors.length ? new ErrorBox(errors) : null;
@@ -198,8 +202,8 @@ async function deleteMe() {
     }
 
     if (!await CenteredMessage.confirm({
-        title: 'Ben je zeker dat je jouw domeinnaam wilt loskoppelen?',
-        confirmText: 'Ja',
+        title: $t('Ben je zeker dat je jouw domeinnaam wilt loskoppelen?'),
+        confirmText: $t('Ja, loskoppelen'),
     })) {
         return;
     }

@@ -17,4 +17,17 @@ export default defineConfig({
             './src/App.vue',
         ],
     }),
+    html: {
+        // Placeholder nonce for the web-app's strict-dynamic Content-Security-Policy.
+        // Vite injects this value into a <meta property="csp-nonce"> tag and onto every
+        // generated <script>/<style>/preload tag, and its runtime preload helper reuses
+        // it for lazily loaded chunks. Caddy replaces the placeholder with a real,
+        // per-request nonce and sets the matching CSP header (see devops buildCaddyConfig.ts).
+        // Keep this string in sync with `CSP_NONCE_PLACEHOLDER` in @stamhoofd/cli and the
+        // manual nonce="..." attributes in index.html and shared/public/out-of-date.html.
+        // NOTE: the mobile app also builds with buildConfig({ name: 'web-app' }) but has its own
+        // vite.config.ts without this option — it is served from the device (no Caddy to set the
+        // header / rewrite the nonce), so it keeps its meta-tag CSP instead.
+        cspNonce: 'STAMHOOFD_CSP_NONCE',
+    },
 } as any);
