@@ -2,8 +2,9 @@ export default defineNuxtConfig({
     extends: ['docus'],
     compatibilityDate: '2024-04-03',
     routeRules: {
+        // Browsers ask for /favicon.ico; we ship the logo as an SVG in public/.
         '/favicon.ico': {
-            redirect: 'https://www.stamhoofd.be/docs/content/images/2022/10/logo-small.svg',
+            redirect: '/favicon.svg',
         },
     },
     vite: {
