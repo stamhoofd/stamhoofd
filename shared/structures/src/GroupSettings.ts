@@ -321,6 +321,9 @@ export class GroupSettings extends AutoEncoder {
     @field(TranslatedString.field({ version: 370 }))
     description = new TranslatedString();
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: StringDecoder, version: 350, nullable: true })
     eventId: string | null = null;
 

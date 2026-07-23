@@ -4,9 +4,11 @@ import { Storage } from '@stamhoofd/networking/Storage';
 export function useCollapsed(globalIdentifier: string, defaultCollapsed = false) {
     const collapsedSections = reactive(new Set<string>());
 
+    const key = defaultCollapsed ? 'opened-' : 'collapsed-';
+
     const load = async () => {
         try {
-            const value = await Storage.keyValue.getItem('collapsed-' + globalIdentifier);
+            const value = await Storage.keyValue.getItem(key + globalIdentifier);
             if (value) {
                 const values = JSON.parse(value) as string[];
                 for (const value of values) {
@@ -21,7 +23,7 @@ export function useCollapsed(globalIdentifier: string, defaultCollapsed = false)
     const save = async () => {
         try {
             const values = [...collapsedSections.values()];
-            await Storage.keyValue.setItem('collapsed-' + globalIdentifier, JSON.stringify(values));
+            await Storage.keyValue.setItem(key + globalIdentifier, JSON.stringify(values));
         } catch (e) {
             console.error(e);
         }

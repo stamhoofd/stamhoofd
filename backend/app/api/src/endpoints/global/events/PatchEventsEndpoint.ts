@@ -527,7 +527,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        if (existingGroup.settings.eventId !== null && existingGroup.settings.eventId !== event.id) {
+        if (existingGroup.eventId !== null && existingGroup.eventId !== event.id) {
             throw new SimpleError({
                 code: 'invalid_group',
                 message: 'Group is already linked to another event',
@@ -544,7 +544,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             existingGroup.type = GroupType.EventRegistration;
         }
 
-        existingGroup.settings.eventId = event.id;
+        existingGroup.eventId = event.id;
 
         // update group categories
         const period = await RegistrationPeriod.getByID(existingGroup.periodId);
@@ -572,7 +572,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         } catch (e) {
             // reset the group
             existingGroup.type = originalGroupType;
-            existingGroup.settings.eventId = null;
+            existingGroup.eventId = null;
             await existingGroup.save();
 
             // delete the event again if failed to link the group

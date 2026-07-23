@@ -45,6 +45,10 @@ export const GroupLogger = new ModelLogger(Group, {
                     if (model.settings.eventId) {
                         result.objectId = model.settings.eventId;
                     }
+
+                    if (model.eventId) {
+                        result.objectId = model.eventId;
+                    }
                     break;
                 case AuditLogType.GroupDeleted:
                     // do not log
@@ -70,6 +74,15 @@ export const GroupLogger = new ModelLogger(Group, {
                 return new Map([
                     ['e', AuditLogReplacement.create({
                         id: model.settings.eventId,
+                        value: model.settings.name.toString(),
+                        type: AuditLogReplacementType.Event,
+                    })],
+                ]);
+            }
+            if (model.eventId) {
+                return new Map([
+                    ['e', AuditLogReplacement.create({
+                        id: model.eventId,
                         value: model.settings.name.toString(),
                         type: AuditLogReplacementType.Event,
                     })],

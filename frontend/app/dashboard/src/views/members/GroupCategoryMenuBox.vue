@@ -22,13 +22,14 @@
     </STMenuCategory>
 
     <STMenuCategory
-        v-if="period.waitingLists.length"
+        v-if="filteredWaitingLists.length"
         id="waiting-lists"
         :title="$t('%eh')"
         type="members"
+        :default-collapsed="filteredWaitingLists.length > 3"
     >
         <GroupMenuItem
-            v-for="group in period.waitingLists"
+            v-for="group in filteredWaitingLists"
             :key="group.id"
             :group="group"
             :period="period"
@@ -62,6 +63,7 @@ const tree = computed(() => {
     });
 });
 const getCategoryActions = useGroupCategoryActions();
+const filteredWaitingLists = computed(() => props.period.waitingLists.filter(w => w.eventId === null && w.deletedAt === null));
 
 enum Routes {
     Checklist = 'checklist',

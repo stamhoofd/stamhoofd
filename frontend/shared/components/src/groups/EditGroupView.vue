@@ -512,8 +512,11 @@
                     </p>
                 </template>
 
-                <p>{{ $t('%cg') }}</p>
-                <p class="style-description-block">
+                <p v-if="type === GroupType.Membership">
+                    {{ $t('%cg') }}
+                </p>
+
+                <p v-if="type === GroupType.Membership" class="style-description-block">
                     {{ $t('%ch') }}
                 </p>
 
@@ -543,8 +546,11 @@
                         </template>
                     </STListItem>
                 </STList>
-                <p v-else class="info-box">
+                <p v-else-if="type === GroupType.Membership" class="info-box">
                     {{ $t('%cj') }}
+                </p>
+                <p v-else>
+                    {{ $t('Er is momenteel geen wachtlijst ingesteld.') }}
                 </p>
 
                 <p class="style-button-bar">
@@ -769,10 +775,10 @@ import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEnc
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import type { DefaultAgeGroup, Image, MemberProperty, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
+import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import TInput from '../inputs/TInput.vue';
@@ -790,6 +796,8 @@ import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import { useOrganizationRegistrationRecordSettingsRoute } from '#records/useOrganizationRegistrationRecordSettingsRoute.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
+import { Request } from '@simonbackx/simple-networking';
 
 const props = withDefaults(
     defineProps<{
@@ -814,7 +822,7 @@ const platform = usePlatform();
 const organization = useOrganization();
 const blockCreatingNewMembers = computed(() => organization.value?.meta.blockCreatingNewMembers ?? false);
 
-const { patched: patchedPeriod, hasChanges, addPatch, addDependingPatch, patch } = usePatch(props.period);
+const { patched: patchedPeriod, hasChanges, addPatch, addDependingPatch, patch } = usePatch(computed(() => props.period));
 if (props.initialPatch) {
     addPatch(props.initialPatch);
 }
@@ -828,12 +836,42 @@ if (!groupBeforePatch.value) {
 }
 const $navigate = useNavigate();
 const RegistrationRecordSettingsRoute = organization.value ? useOrganizationRegistrationRecordSettingsRoute('persoonsgegevens') : null;
+const groupFetcher = useGroupsObjectFetcher();
 
 function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
     groups.addPatch(Group.patch({ ...newPatch, id: props.groupId }));
     addPatch({ groups });
 }
+
+async function loadWaitingLists() {
+    if (patchedGroup.value.type !== GroupType.EventRegistration || !patchedGroup.value.eventId) {
+        // Only event waiting lists need to be loaded async
+        return;
+    }
+
+    try {
+        const lists = await groupFetcher.fetch(new LimitedFilteredRequest({
+            filter: {
+                eventId: patchedGroup.value.eventId,
+                type: GroupType.WaitingList,
+                deletedAt: null,
+            },
+            limit: 25,
+        }));
+
+        props.period.groups.push(...lists.results);
+    } catch (e) {
+        if (Request.isAbortError(e)) {
+            return;
+        }
+        Toast.fromError(e).show();
+    }
+}
+
+onMounted(() => {
+    loadWaitingLists().catch(console.error);
+});
 
 const forceShowRequireGroupIds = ref(false);
 const forceShowPreventGroupIds = ref(false);
@@ -961,13 +999,12 @@ const present = usePresent();
 const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
-    let base = patchedPeriod.value.waitingLists;
+    let base = patchedGroup.value.type === GroupType.EventRegistration ? patchedPeriod.value.waitingLists.filter(w => w.eventId === patchedGroup.value.eventId) : patchedPeriod.value.waitingLists;
 
     // Add patched waiting list and the end, to maintain ordering
     if (patchedGroup.value.waitingList) {
         base.push(patchedGroup.value.waitingList);
     }
-
     base = base.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
     return base.map((list) => {
@@ -1334,7 +1371,7 @@ const waitingList = computed({
         if (patchedGroup.value.waitingList === null) {
             return null;
         }
-        return patchedPeriod.value.waitingLists.find(w => w.id === patchedGroup.value.waitingList!.id) ?? patchedGroup.value.waitingList;
+        return availableWaitingLists.value.map(l => l.list).find(w => w.id === patchedGroup.value.waitingList!.id) ?? patchedGroup.value.waitingList;
     },
     set: waitingList => addGroupPatch({
         waitingList,
@@ -1572,6 +1609,7 @@ async function addWaitingList() {
     const waitingList = Group.create({
         organizationId: patchedGroup.value.organizationId,
         periodId: patchedGroup.value.periodId,
+        eventId: patchedGroup.value.eventId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
             name: TranslatedString.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
@@ -1633,7 +1671,14 @@ async function editWaitingList(waitingList: Group) {
                 showToasts: false,
                 organizationHint: externalOrganization.value,
                 saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addDependingPatch(patch);
+                    if (patch.groups.getDeletes().includes(waitingList.id)) {
+                        addGroupPatch({
+                            waitingList: null,
+                        });
+                        addPatch(patch);
+                    } else {
+                        addDependingPatch(patch);
+                    }
                 },
             }),
         ],

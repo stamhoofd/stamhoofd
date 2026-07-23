@@ -14,6 +14,11 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    eventId: createColumnFilter({
+        expression: SQL.column('eventId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     periodId: createColumnFilter({
         expression: SQL.column('periodId'),
         type: SQLValueType.String,

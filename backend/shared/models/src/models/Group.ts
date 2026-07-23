@@ -27,6 +27,12 @@ export class Group extends QueryableModel {
     @column({ type: 'string' })
     type = GroupType.Membership;
 
+    /**
+     * For registrations, waiting lists and future other group types connected to an event.
+     */
+    @column({ type: 'string', nullable: true })
+    eventId: string | null = null;
+
     @column({ type: 'json', decoder: GroupSettings })
     settings: GroupSettings;
 

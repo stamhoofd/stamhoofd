@@ -389,6 +389,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             await event.save();
         }
 
+        const groups = await Group.select().where('waitingListId', id).fetch();
+        for (const group of groups) {
+            group.waitingListId = null;
+            await group.save();
+        }
+
         // delete invitations
         await RegistrationInvitation.delete().where('groupId', id);
     }
@@ -574,6 +580,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         };
 
         const patch = struct;
+        let syncGroupWithEvent = false;
         if (patch.waitingList !== undefined) {
             if (patch.waitingList === null) {
                 // delete
@@ -586,7 +593,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     field: 'waitingList',
                     message: 'Cannot patch waitingList',
                 });
-            } else {
+            } else if (model.waitingListId !== patch.waitingList.id) {
                 if (model.waitingListId) {
                     model.waitingListId = null;
                 }
@@ -612,6 +619,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     }
 
                     model.waitingListId = existing.id;
+                    existing.eventId = model.eventId;
+                    syncGroupWithEvent = true;
                 } else {
                     throw new SimpleError({
                         code: 'invalid_waiting_list',
@@ -647,6 +656,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.settings.throwIfInvalidPrices();
         await model.updateOccupancy();
         await model.save();
+
+        if (model.eventId && syncGroupWithEvent) {
+            const event = await Event.getByID(model.eventId);
+            if (event) {
+                await event.syncGroupRequirements(model);
+            }
+        }
 
         return model;
     }

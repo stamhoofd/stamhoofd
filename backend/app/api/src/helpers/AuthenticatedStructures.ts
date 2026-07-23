@@ -120,9 +120,13 @@ export class AuthenticatedStructures {
         const structs: GroupStruct[] = [];
         for (const group of groups) {
             const waitingList = waitingLists.find(g => g.id === group.waitingListId) ?? null;
-            const waitingListStruct = waitingList ? GroupStruct.create(waitingList) : null;
+            let waitingListStruct = waitingList ? GroupStruct.create(waitingList) : null;
             if (waitingList && waitingListStruct && !await Context.optionalAuth?.canAccessGroup(waitingList)) {
                 waitingListStruct.privateSettings = null;
+            }
+
+            if (waitingListStruct?.deletedAt) {
+                waitingListStruct = null;
             }
 
             const struct = GroupStruct.create({
@@ -163,6 +167,7 @@ export class AuthenticatedStructures {
         const whereWaitingList = SQL.where('organizationId', organizationIds)
             .and('periodId', periodIds)
             .and('type', GroupType.WaitingList)
+            .and('eventId', null)
             .and('deletedAt', null);
 
         if (groupIds.length) {

@@ -571,8 +571,20 @@ defineRoute({
                         props.event.group = null;
                     }
                 } else {
+                    // Possibly only the event waiting list has changed
                     console.warn('Group not found in updated period', group.id, updatedPeriod.groups);
-                    props.event.group = null;
+
+                    if (props.event.group?.waitingList) {
+                        const waitingList = props.event.group?.waitingList;
+                        const updatedWaitingList = updatedPeriod.groups.find(g => g.id === waitingList.id);
+                        if (updatedWaitingList) {
+                            waitingList.deepSet(updatedWaitingList);
+
+                            if (updatedWaitingList.deletedAt) {
+                                props.event.group.waitingList = null;
+                            }
+                        }
+                    }
                 }
             },
         };

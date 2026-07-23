@@ -37,17 +37,19 @@ const props = withDefaults(
          * Defines saved collapse state
          */
         type: 'members' | 'webshop';
+        defaultCollapsed?: boolean;
     }>(),
     {
         id: null,
         title: null,
         selected: false,
+        defaultCollapsed: false,
     },
 );
 defineEmits<{
     open: [value: MouseEvent];
 }>();
-const collapsed = useCollapsed(props.type);
+const collapsed = useCollapsed(props.type, props.defaultCollapsed);
 
 </script>
 
