@@ -34,7 +34,7 @@ const props = withDefaults(
     },
 );
 
-const listModel = defineModel<T[]>({ default: undefined });
+const listModel = defineModel<T[]>({ default: () => [] });
 
 const options = computed<SortableOptions>(() => {
     return {
