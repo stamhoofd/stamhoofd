@@ -1459,6 +1459,7 @@
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
         border-radius: $border-radius;
+        border-radius: calc($border-radius / 36px * var(--block-width, 40px));
         text-align: center;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
