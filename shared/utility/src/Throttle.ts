@@ -1,7 +1,7 @@
 /**
  * Named incorrectly, is in fact debounce
  */
-export const throttle = <T extends any[]>(func: (...args: T) => void | Promise<void>, limit: number) => {
+export const throttle = <T extends any[]>(func: (...args: T) => unknown | Promise<unknown>, limit: number) => {
     let lastFunc: ReturnType<typeof setTimeout>;
     let lastRan: number;
     return function (this: any, ...args: T) {
