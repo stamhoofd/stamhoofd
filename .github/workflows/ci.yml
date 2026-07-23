@@ -407,12 +407,19 @@ jobs:
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: /usr/local/bin/caddy
-        key: caddy-${{ runner.os }}-v2.10.2
+        key: caddy-${{ runner.os }}-v2.10.2-replace-response
     - name: Install Caddy if missing
       if: steps.caddy-cache.outputs.cache-hit != 'true'
+      # The Caddy config uses the replace_response handler (webshop strict-dynamic CSP nonce),
+      # which the stock Caddy release does not bundle, so `caddy run`/`validate` would reject it.
+      # Build a custom binary that compiles the plugin in via xcaddy, pinned to the same Caddy
+      # version. This mirrors the custom Caddy image built for local dev (see caddy-service.ts).
       run: |
-        curl -fsSL https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_linux_amd64.tar.gz \
-        | sudo tar -C /usr/local/bin -xz caddy
+        go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+        "$(go env GOPATH)/bin/xcaddy" build v2.10.2 \
+          --with github.com/caddyserver/replace-response \
+          --output ./caddy
+        sudo mv ./caddy /usr/local/bin/caddy
         sudo chmod +x /usr/local/bin/caddy
     - name: Verify Caddy
       run: caddy version
