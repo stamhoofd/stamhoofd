@@ -516,13 +516,18 @@ defineRoute({
 
 defineRoute({
     url: Routes.WaitingList,
-    component: async () => (await import('#members/MembersTableView.vue')).default,
+    component: async () => (await import('../registrations/RegistrationsTableView.vue')).default,
     defaultProperties: () => {
         if (!props.event.group || !props.event.group.waitingList) {
             throw new Error('No waiting list found');
         }
         return {
+            organization: eventOrganization.value,
             group: props.event.group.waitingList,
+            dateRange: {
+                start: props.event.startDate,
+                end: props.event.endDate,
+            },
         };
     },
 });

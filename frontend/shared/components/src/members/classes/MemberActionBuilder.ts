@@ -88,7 +88,6 @@ export class MemberActionBuilder {
     private resolvedPeriods: OrganizationRegistrationPeriod[] | null = null;
 
     private readonly isWaitingList: boolean;
-    private eventGroupsLinkedToWaitingList: Group[] | null = null;
     private _allGroupsLinkedToWaitingList: Group[] | null = null;
 
     get allGroupsLinkedToWaitingList() {
@@ -591,7 +590,7 @@ export class MemberActionBuilder {
                 enabled: () => this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
-            ...await this.getInviteMemberForGroupActionsWithGroups(),
+            ...this.getInviteMemberForGroupActionsWithGroups(),
         ];
 
         const includeOnlyRelevantForWaitingList = options.includeOnlyIfRelevantForWaitingList && this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
@@ -626,17 +625,7 @@ export class MemberActionBuilder {
         return allActions;
     }
 
-    private async fetchEventGroupsLinkedToWaitingList(): Promise<void> {
-        if (!this.isWaitingList || this.eventGroupsLinkedToWaitingList !== null) {
-            return;
-        }
-
-        const waitingListId = this.groups[0].id;
-
-        this.eventGroupsLinkedToWaitingList = await getEventGroupsLinkedToWaitingList(waitingListId);
-    }
-
-    private async getInviteMemberForGroupActionsWithGroups(): Promise<TableAction<PlatformMember>[]> {
+    private getInviteMemberForGroupActionsWithGroups(): TableAction<PlatformMember>[] {
         if (this.organizations.length === 0) {
             return [];
         }
@@ -645,7 +634,6 @@ export class MemberActionBuilder {
         const periodTrees: { period: OrganizationRegistrationPeriod | null; categoryTree: GroupCategoryTree }[] = [];
 
         if (this.isWaitingList) {
-            await this.fetchEventGroupsLinkedToWaitingList();
             const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
             if (tree) {
                 periodTrees.push({ period: null, categoryTree: tree });
@@ -660,14 +648,14 @@ export class MemberActionBuilder {
             return [];
         }
 
-        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.eventGroupsLinkedToWaitingList ?? []);
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.groups.flatMap(g => g.parentGroup ? [g.parentGroup] : []));
         this._allGroupsLinkedToWaitingList = allGroups;
 
         if (allGroups.length === 0) {
             return [];
         }
 
-        const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
+        const eventGroups = allGroups.filter(g => g.type === GroupType.EventRegistration);
 
         const enabled = () => this.hasWrite;
 
@@ -1360,7 +1348,9 @@ export async function inviteMembersForGroup({ members, group, context, owner, we
             }).catch(console.error);
         }
 
-        const successMessage = responseInvitations.length === 1 ? $t('%1Tr', { name: responseInvitations[0].member.name }) : $t('{count} leden zijn uitgenodigd', { count: responseInvitations.length });
+        const successMessage = responseInvitations.length === 1
+            ? $t('{name} is uitgenodigd. Er werd geen automatische e-mail verzonden, dat moet je zelf nog doen.', { name: responseInvitations[0].member.name })
+            : $t('{count} leden zijn uitgenodigd. Er werd geen automatische e-mail verzonden, dat moet je zelf nog doen.', { count: responseInvitations.length });
         new Toast(successMessage, 'success green').show();
     } catch (e) {
         console.error(e);
@@ -1380,7 +1370,9 @@ export async function deleteInvitationsForMembers({ members, group, context, own
 
     if (invitations.getDeletes().length === 0) {
         const groupName = group.settings.name.toString();
-        Toast.warning(members.length === 1 ? $t('%1Qh', { group: groupName }) : $t('Deze leden zijn nog niet uitgenodigd voor {group}', { group: groupName })).show();
+        Toast.warning(members.length === 1
+            ? $t('%1Qh', { group: groupName })
+            : $t('Deze leden zijn nog niet uitgenodigd voor {group}', { group: groupName })).show();
         return;
     }
 
@@ -1412,7 +1404,9 @@ export async function deleteInvitationsForMembers({ members, group, context, own
         return;
     }
 
-    const successMessage = members.length === 1 ? $t('%1RC', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
+    const successMessage = members.length === 1
+        ? $t('%1RC', { name: members[0].member.name })
+        : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
     new Toast(successMessage, 'success green').show();
 }
 
@@ -1431,32 +1425,4 @@ export function getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList, period
         admin: true,
         filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id,
     });
-}
-
-/**
- * Returns all event groups linked to the waiting list.
- * Does not throw if an error occurs.
- * @param waitingListId
- * @returns
- */
-export async function getEventGroupsLinkedToWaitingList(waitingListId: string): Promise<Group[]> {
-    const request = new LimitedFilteredRequest({
-        limit: 100,
-        filter: {
-            waitingListId,
-            // only get events
-            type: GroupType.EventRegistration,
-        },
-    });
-
-    const groupsObjectFetcher = useGroupsObjectFetcher();
-
-    let eventGroups: Group[] = [];
-    try {
-        eventGroups = await fetchAll(request, groupsObjectFetcher);
-    } catch (e) {
-        console.error(e);
-    }
-
-    return eventGroups;
 }

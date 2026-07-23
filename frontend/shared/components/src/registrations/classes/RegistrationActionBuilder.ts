@@ -7,7 +7,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import type { PlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
-import { deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, getEventGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
+import { deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
@@ -68,7 +68,6 @@ export class RegistrationActionBuilder {
     private present: ReturnType<typeof usePresent>;
     private owner: any;
     private readonly isWaitingList: boolean;
-    private eventGroupsLinkedToWaitingList: Group[] | null = null;
     private _allGroupsLinkedToWaitingList: Group[] | null = null;
     private categories: GroupCategoryTree[];
     private fetchOrganizationPeriods?: ReturnType<typeof useFetchOrganizationRegistrationPeriods>;
@@ -929,17 +928,7 @@ export class RegistrationActionBuilder {
         });
     }
 
-    private async fetchEventGroupsLinkedToWaitingList(): Promise<void> {
-        if (!this.isWaitingList || this.eventGroupsLinkedToWaitingList !== null) {
-            return;
-        }
-
-        const waitingListId = this.groups[0].id;
-
-        this.eventGroupsLinkedToWaitingList = await getEventGroupsLinkedToWaitingList(waitingListId);
-    }
-
-    private async getInviteMemberForGroupActionsWithGroups(): Promise<TableAction<PlatformRegistration>[]> {
+    private getInviteMemberForGroupActionsWithGroups(): TableAction<PlatformRegistration>[] {
         if (this.organizations.length === 0) {
             return [];
         }
@@ -948,7 +937,6 @@ export class RegistrationActionBuilder {
         const periodTrees: { period: OrganizationRegistrationPeriod | null; categoryTree: GroupCategoryTree }[] = [];
 
         if (this.isWaitingList) {
-            await this.fetchEventGroupsLinkedToWaitingList();
             const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
             if (tree) {
                 periodTrees.push({ period: null, categoryTree: tree });
@@ -963,14 +951,14 @@ export class RegistrationActionBuilder {
             return [];
         }
 
-        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.eventGroupsLinkedToWaitingList ?? []);
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.groups.flatMap(g => g.parentGroup ? [g.parentGroup] : []));
         this._allGroupsLinkedToWaitingList = allGroups;
 
         if (allGroups.length === 0) {
             return [];
         }
 
-        const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
+        const eventGroups = allGroups.filter(g => g.type === GroupType.EventRegistration);
 
         const enabled = () => this.hasWrite;
 

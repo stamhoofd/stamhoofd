@@ -51,83 +51,85 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             enabled: false,
         }),
 
-         isPlatform ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
-            id: 'member.membership',
-            name: $t(`%1Ny`),
-            getValue: (registration) => {
-                return {
-                    status: registration.member.membershipStatus,
-                    hasFutureMembership: registration.member.hasFutureMembership,
-                };
-            },
-            format: ({ status }) => {
-                switch (status) {
-                    case MembershipStatus.Trial:
-                        return $t(`%1IH`);
-                    case MembershipStatus.Active:
-                        return $t(`%1H0`);
-                    case MembershipStatus.Expiring:
-                        return $t(`%7F`);
-                    case MembershipStatus.Temporary:
-                        return $t(`%zU`);
-                    case MembershipStatus.Inactive:
-                        return $t(`%zV`);
-                }
-            },
-            getStyle: ({ status, hasFutureMembership }) => {
-                switch (status) {
-                    case MembershipStatus.Trial:
-                        return 'secundary';
-                    case MembershipStatus.Active:
-                        return 'success';
-                    case MembershipStatus.Expiring:
-                        return 'warn';
-                    case MembershipStatus.Temporary:
-                        return 'secundary';
-                    case MembershipStatus.Inactive: {
-                        if (hasFutureMembership) {
-                            return 'warn';
+        isPlatform
+            ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
+                    id: 'member.membership',
+                    name: $t(`%1Ny`),
+                    getValue: (registration) => {
+                        return {
+                            status: registration.member.membershipStatus,
+                            hasFutureMembership: registration.member.hasFutureMembership,
+                        };
+                    },
+                    format: ({ status }) => {
+                        switch (status) {
+                            case MembershipStatus.Trial:
+                                return $t(`%1IH`);
+                            case MembershipStatus.Active:
+                                return $t(`%1H0`);
+                            case MembershipStatus.Expiring:
+                                return $t(`%7F`);
+                            case MembershipStatus.Temporary:
+                                return $t(`%zU`);
+                            case MembershipStatus.Inactive:
+                                return $t(`%zV`);
                         }
+                    },
+                    getStyle: ({ status, hasFutureMembership }) => {
+                        switch (status) {
+                            case MembershipStatus.Trial:
+                                return 'secundary';
+                            case MembershipStatus.Active:
+                                return 'success';
+                            case MembershipStatus.Expiring:
+                                return 'warn';
+                            case MembershipStatus.Temporary:
+                                return 'secundary';
+                            case MembershipStatus.Inactive: {
+                                if (hasFutureMembership) {
+                                    return 'warn';
+                                }
 
-                        return 'error';
-                    }
-                }
-            },
-            minimumWidth: 120,
-            recommendedWidth: 140,
-            allowSorting: false,
-            enabled: true,
-        }) : null,
+                                return 'error';
+                            }
+                        }
+                    },
+                    minimumWidth: 120,
+                    recommendedWidth: 140,
+                    allowSorting: false,
+                    enabled: !group || group.type !== GroupType.WaitingList,
+                })
+            : null,
         isPlatform && dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
-                id: 'member.continuousMembership',
-                name: $t('%1IM'),
-                getValue: registration => registration.member.getContinuousMembershipStatus(dateRange!),
-                format: (status) => {
-                    switch (status) {
-                        case ContinuousMembershipStatus.Full:
-                            return 'Volledig';
-                        case ContinuousMembershipStatus.Partial:
-                            return 'Gedeeltelijk';
-                        case ContinuousMembershipStatus.None:
-                            return 'Geen aansluiting';
-                    }
-                },
-                getStyle: (status) => {
-                    switch (status) {
-                        case ContinuousMembershipStatus.Full:
-                            return 'success';
-                        case ContinuousMembershipStatus.Partial:
-                            return 'warn';
-                        case ContinuousMembershipStatus.None:
-                            return 'error';
-                    }
-                },
-                minimumWidth: 120,
-                recommendedWidth: 140,
-                allowSorting: false,
-                enabled: false,
-            })
+                    id: 'member.continuousMembership',
+                    name: $t('%1IM'),
+                    getValue: registration => registration.member.getContinuousMembershipStatus(dateRange!),
+                    format: (status) => {
+                        switch (status) {
+                            case ContinuousMembershipStatus.Full:
+                                return 'Volledig';
+                            case ContinuousMembershipStatus.Partial:
+                                return 'Gedeeltelijk';
+                            case ContinuousMembershipStatus.None:
+                                return 'Geen aansluiting';
+                        }
+                    },
+                    getStyle: (status) => {
+                        switch (status) {
+                            case ContinuousMembershipStatus.Full:
+                                return 'success';
+                            case ContinuousMembershipStatus.Partial:
+                                return 'warn';
+                            case ContinuousMembershipStatus.None:
+                                return 'error';
+                        }
+                    },
+                    minimumWidth: 120,
+                    recommendedWidth: 140,
+                    allowSorting: false,
+                    enabled: false,
+                })
             : null,
         new Column<ObjectType, string[]>({
             name: $t(`%7D`),
@@ -429,9 +431,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 },
                 getStyle: v => v.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
-                recommendedWidth: 200
-            })
-        )
+                recommendedWidth: 200,
+            }),
+        );
     }
 
     allColumns.push(
@@ -457,6 +459,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 220,
+            enabled: false,
         }),
     );
 
@@ -596,19 +599,19 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             }),
             groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
                 ? new Column<ObjectType, GroupType>({
-                    id: 'group.type',
-                    allowSorting: false,
-                    name: $t('%1LP'),
-                    getValue: (registration) => {
-                        return registration.group.type;
-                    },
-                    format: (type) => {
-                        return getGroupTypeName(type);
-                    },
-                    minimumWidth: 100,
-                    recommendedWidth: 200,
-                    enabled: false,
-                })
+                        id: 'group.type',
+                        allowSorting: false,
+                        name: $t('%1LP'),
+                        getValue: (registration) => {
+                            return registration.group.type;
+                        },
+                        format: (type) => {
+                            return getGroupTypeName(type);
+                        },
+                        minimumWidth: 100,
+                        recommendedWidth: 200,
+                        enabled: false,
+                    })
                 : null,
         ]);
     }
