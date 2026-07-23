@@ -293,6 +293,8 @@
                     </p>
                 </template>
 
+                <p v-if="patchedGroup.settings.optionMenus.length === 0" v-text="$t(`Maak een keuzemenu aan om extra vragen te stellen bij het inschrijven.`)" />
+
                 <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
                     <hr>
 
