@@ -7323,6 +7323,11 @@ jake@^10.8.5:
     chalk "^4.1.2"
     pretty-format "30.4.1"
 
+jiti@2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/jiti/-/jiti-2.7.0.tgz#974228f2f4ca2bc21885a1797b45fea68e950c64"
+  integrity sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==
+
 joi@^18.2.1:
   version "18.2.2"
   resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.2.tgz#164f61a5cf7fb7ae2992f5bffbcee6a6dcc91276"
