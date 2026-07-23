@@ -1,5 +1,5 @@
 <template>
-    <span v-if="icon" class="icon small" :class="icon" />
+    <span v-if="icon" class="icon tiny" :class="icon" />
     <span v-else-if="count" class="style-bubble primary">
         {{ count }}
     </span>
