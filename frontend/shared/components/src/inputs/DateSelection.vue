@@ -31,13 +31,12 @@
 </template>
 
 <script lang="ts" setup>
+import { useIsMobile } from '#hooks/useIsMobile.ts';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, nextTick, onActivated, onBeforeMount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
-import { useIsMobile } from '#hooks/useIsMobile.ts';
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
 type DateInputType = 'day' | 'month' | 'year';
