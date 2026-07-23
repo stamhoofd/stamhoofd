@@ -6999,10 +6999,6 @@
     "original": "Ongeldig BTW-nummer: {number}",
     "translation": "Invalid VAT number: {number}"
   },
-  "%1Tr": {
-    "original": "{name} is uitgenodigd",
-    "translation": "{name} has been invited"
-  },
   "%1Ts": {
     "original": "per lid",
     "translation": "per member"
@@ -18027,9 +18023,225 @@
     "original": "De gegevens van {firstName} werden opgeslagen",
     "translation": "The data for {firstName} have been saved."
   },
+  "%ZeW": {
+    "original": "Gescand op",
+    "translation": "Scanned on"
+  },
+  "%ZeX": {
+    "original": "Of het volledige bedrag van de bestelling al betaald is.",
+    "translation": "Whether the total amount of the order has already been paid."
+  },
+  "%ZeZ": {
+    "original": "Vragen",
+    "translation": "Questions"
+  },
+  "%Zec": {
+    "original": "Alle wachtlijsten worden gedupliceerd in het nieuwe werkjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige werkjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.",
+    "translation": "All waiting lists are duplicated for the new work year. If you want to continue the waiting list, you can go back to the previous work year and add all the members from there to the new waiting list."
+  },
+  "%Zed": {
+    "original": "Kolommen kiezen bij de Excel-export van bestellingen",
+    "translation": "Select columns when exporting orders to Excel"
+  },
+  "%Zee": {
+    "original": "Ticket",
+    "translation": "Ticket"
+  },
+  "%Zef": {
+    "original": "Deze leden zijn nog niet uitgenodigd voor {group}",
+    "translation": "These members have not yet been invited to {group}"
+  },
+  "%Zeg": {
+    "original": "Het gekozen afhaalpunt of het adres waarop geleverd wordt.",
+    "translation": "The chosen pickup point or the address where delivery will take place."
+  },
+  "%Zeh": {
+    "original": "{count} leden zijn uitgenodigd. Er werd geen automatische e-mail verzonden, dat moet je zelf nog doen.",
+    "translation": "{count} members have been invited. No automatic email was sent, you still need to do this yourself."
+  },
+  "%Zei": {
+    "original": "Het adres van de klant zelf, niet het adres waarop geleverd wordt.",
+    "translation": "The customer's own address, not the delivery address."
+  },
+  "%Zel": {
+    "original": "Link",
+    "translation": "Link"
+  },
+  "%Zem": {
+    "original": "De notities die de klant zelf toevoegde bij het bestellen.",
+    "translation": "The notes the customer added themselves when ordering."
+  },
+  "%Zen": {
+    "original": "Bevat het totaal besteld aantal per artikel, met een kolom per prijskeuze en optie.",
+    "translation": "Shows the total ordered amount per item, with a column for each price and option."
+  },
+  "%Zep": {
+    "original": "De unieke code van het ticket. Zet deze code niet in een QR-code: gebruik daarvoor de volledige link.",
+    "translation": "The unique code for the ticket. Do not use this code in a QR code: use the full link instead."
+  },
+  "%Zeq": {
+    "original": "Afhalen of leveren",
+    "translation": "Pickup or delivery"
+  },
+  "%Zer": {
+    "original": "Na controle van alle instellingen kan je overschakelen op het nieuwe werkjaar. Dit kan ten vroegste vanaf juli.",
+    "translation": "Once you've checked all settings, you can switch to the new work year. This is only possible from July at the earliest."
+  },
+  "%Zes": {
+    "original": "Het volgnummer of de naam die op het ticket staat.",
+    "translation": "The serial number or name printed on the ticket."
+  },
+  "%Zet": {
+    "original": "{name} is uitgenodigd. Er werd geen automatische e-mail verzonden, dat moet je zelf nog doen.",
+    "translation": "{name} has been invited. No automatic email was sent, you still need to do this yourself."
+  },
+  "%Zeu": {
+    "original": "Bevat een rij per ticket, inclusief de geheime code waarmee de QR-code op het ticket kan aangemaakt worden.",
+    "translation": "Contains a row for each ticket, including the secret code used to generate the QR code for the ticket."
+  },
+  "%Zew": {
+    "original": "Adres klant",
+    "translation": "Customer address"
+  },
+  "%Zex": {
+    "original": "Toelatingen voor {count} leden zijn ingetrokken",
+    "translation": "Permissions for {count} members have been revoked"
+  },
+  "%Zey": {
+    "original": "Het totaal van alle bestelde artikels, zonder leverings- en administratiekosten.",
+    "translation": "The total amount for all ordered items, excluding delivery and administration fees."
+  },
+  "%Zez": {
+    "original": "De meerprijs die maar voor een deel van de stuks geldt, bijvoorbeeld de meerprijs van een bepaalde zetel.",
+    "translation": "The extra charge that only applies to part of the items, for example, an extra fee for a certain seat."
+  },
   "%Zf": {
     "original": "Korte naam",
     "translation": "Short name"
+  },
+  "%Zf0": {
+    "original": "Bevat een rij per bestelling, met een kolom per artikelcombinatie.",
+    "translation": "Contains a row for each order, with a column for every item combination."
+  },
+  "%Zf1": {
+    "original": "Het aantal bestelde stuks van dit artikel.",
+    "translation": "The number of items of this article ordered."
+  },
+  "%Zf2": {
+    "original": "De kortingscodes die de klant gebruikte bij het bestellen.",
+    "translation": "The discount codes the customer used at checkout."
+  },
+  "%Zf3": {
+    "original": "Opties",
+    "translation": "Options"
+  },
+  "%Zf4": {
+    "original": "Geheime code",
+    "translation": "Secret code"
+  },
+  "%Zf5": {
+    "original": "De korting van de kortingscodes op de volledige bestelling. Dit bedrag wordt van het subtotaal afgetrokken.",
+    "translation": "The discount from the codes on the total order. This amount is deducted from the subtotal."
+  },
+  "%Zf6": {
+    "original": "De gekozen prijs en opties van het ticket.",
+    "translation": "The chosen price and options for the ticket."
+  },
+  "%Zf7": {
+    "original": "De inschrijvingen van elke inschrijvingsgroep wordt gesloten, je kan deze na controle open zetten.",
+    "translation": "Registrations for each registration group will be closed; after reviewing, you can reopen them."
+  },
+  "%Zf8": {
+    "original": "Bestelde artikels",
+    "translation": "Ordered items"
+  },
+  "%Zf9": {
+    "original": "QR-code",
+    "translation": "QR code"
+  },
+  "%ZfA": {
+    "original": "Het aantal keer dat deze prijskeuze gekozen werd.",
+    "translation": "The number of times this price option was chosen."
+  },
+  "%ZfB": {
+    "original": "Bevat een rij per besteld artikel. Een bestelling met meerdere artikels wordt over meerdere rijen verdeeld.",
+    "translation": "Contains a row for each ordered item. An order with multiple items will be spread across several rows."
+  },
+  "%ZfC": {
+    "original": "Het bedrag dat de klant moet betalen: het subtotaal, min de korting, plus de leverings- en administratiekosten.",
+    "translation": "The amount the customer needs to pay: the subtotal, minus the discount, plus delivery and administration fees."
+  },
+  "%ZfD": {
+    "original": "Er is momenteel geen wachtlijst ingesteld.",
+    "translation": "There is currently no waiting list configured."
+  },
+  "%ZfE": {
+    "original": "De status van de bestelling zelf, bijvoorbeeld of ze al verwerkt of geannuleerd is.",
+    "translation": "The status of the order itself, for example, whether it has been processed or canceled."
+  },
+  "%ZfF": {
+    "original": "Het totaal besteld aantal van dit artikel.",
+    "translation": "The total amount ordered of this item."
+  },
+  "%ZfG": {
+    "original": "De link waarop het ticket kan geopend worden. Maak je zelf tickets met een QR-code? Dan moet die QR-code exact deze link bevatten, anders kan hij niet gescand worden.",
+    "translation": "The link where the ticket can be opened. Are you creating your own tickets with a QR code? The QR code must contain exactly this link, otherwise it cannot be scanned."
+  },
+  "%ZfI": {
+    "original": "De dag waarop de bestelling wordt afgehaald of geleverd.",
+    "translation": "The day on which the order will be picked up or delivered."
+  },
+  "%ZfK": {
+    "original": "Bevat het totaal besteld aantal per combinatie van artikel, prijskeuze en opties.",
+    "translation": "Shows the total ordered amount for each combination of item, price, and options."
+  },
+  "%ZfL": {
+    "original": "Betaling en status",
+    "translation": "Payment and status"
+  },
+  "%ZfM": {
+    "original": "Toont een scherm om de werkbladen en kolommen te kiezen bij het exporteren van bestellingen naar Excel, inclusief een nieuw werkblad met de tickets.",
+    "translation": "Displays a screen to choose the worksheets and columns when exporting orders to Excel, including a new worksheet with the tickets."
+  },
+  "%ZfN": {
+    "original": "Het totaal voor dit artikel: de stukprijs maal het aantal, plus de meerprijs en na korting.",
+    "translation": "The total for this item: the unit price times the amount, plus extra charges and after discount."
+  },
+  "%ZfO": {
+    "original": "Het aantal keer dat deze optie gekozen werd.",
+    "translation": "The number of times this option was chosen."
+  },
+  "%ZfQ": {
+    "original": "De structuur van jouw leeftijdsgroepen blijft behouden (er wordt een éénmalige kopie gemaakt), maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.",
+    "translation": "The structure of your age groups will remain unchanged (a one-time copy is made), but you must set the prices and dates yourself. Don’t forget."
+  },
+  "%ZfS": {
+    "original": "Leeg als het ticket nog niet gescand is.",
+    "translation": "Empty if the ticket hasn't been scanned yet."
+  },
+  "%ZfT": {
+    "original": "De korting op dit artikel. Dit is een negatief bedrag.",
+    "translation": "The discount on this item. This is a negative amount."
+  },
+  "%ZfU": {
+    "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in.",
+    "translation": "All members must register again for the new work year, or you can register yourself again."
+  },
+  "%ZfV": {
+    "original": "Je kan nog steeds aan de gegevens van vorig jaar.",
+    "translation": "You still have access to last year’s data."
+  },
+  "%ZfX": {
+    "original": "De prijs voor één stuk, inclusief de gekozen opties, maar zonder kortingen.",
+    "translation": "The price for one item, including chosen options, but without discounts."
+  },
+  "%ZfZ": {
+    "original": "Maak een keuzemenu aan om extra vragen te stellen bij het inschrijven.",
+    "translation": "Add a selection menu to ask extra questions during registration."
+  },
+  "%Zfa": {
+    "original": "Maak je zelf QR-codes op basis van deze export? Zorg er dan voor dat elke QR-code exact de link uit de kolom Link bevat. Een QR-code met een andere inhoud, bijvoorbeeld enkel de geheime code, kan niet gescand worden.",
+    "translation": "Are you generating your own QR codes based on this export? Make sure that each QR code contains the exact link from the Link column. A QR code with different content, such as just the secret code, cannot be scanned."
   },
   "%Zg": {
     "original": "Login knop tekst",
@@ -23767,18 +23979,6 @@
     "original": "Totaal",
     "translation": "Total"
   },
-  "%xM": {
-    "original": "Totaal uitbetaald",
-    "translation": "Total paid out"
-  },
-  "%xN": {
-    "original": "Totaal van deze bestellingen",
-    "translation": "Total of these orders"
-  },
-  "%xO": {
-    "original": "Transactiekosten (incl. BTW)",
-    "translation": "Transaction costs (incl. VAT)"
-  },
   "%xP": {
     "original": "Artikel per lijn",
     "translation": "Item per line"
@@ -23790,10 +23990,6 @@
   "%xR": {
     "original": "Totalen",
     "translation": "Totals"
-  },
-  "%xS": {
-    "original": "Uitbetalingen",
-    "translation": "Payouts"
   },
   "%xU": {
     "original": "Instellingen",

@@ -293,7 +293,7 @@
                     </p>
                 </template>
 
-                <p v-if="patchedGroup.settings.optionMenus.length === 0" v-text="$t(`Maak een keuzemenu aan om extra vragen te stellen bij het inschrijven.`)" />
+                <p v-if="patchedGroup.settings.optionMenus.length === 0" v-text="$t(`%ZfZ`)" />
 
                 <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
                     <hr>
@@ -550,7 +550,7 @@
                     {{ $t('%cj') }}
                 </p>
                 <p v-else>
-                    {{ $t('Er is momenteel geen wachtlijst ingesteld.') }}
+                    {{ $t('%ZfD') }}
                 </p>
 
                 <p class="style-button-bar">

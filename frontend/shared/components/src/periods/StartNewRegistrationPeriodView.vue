@@ -34,12 +34,12 @@
                 <p v-else class="pre-wrap style-description-block" v-text="$t('%17q')" />
 
                 <ul v-if="$isPlatform" class="style-list">
-                    <li>{{ $t('De structuur van jouw leeftijdsgroepen blijft behouden (er wordt een éénmalige kopie gemaakt), maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.') }}</li>
-                    <li>{{ $t('De inschrijvingen van elke inschrijvingsgroep wordt gesloten, je kan deze na controle open zetten.') }}</li>
-                    <li>{{ $t('Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in.') }}</li>
-                    <li>{{ $t('Je kan nog steeds aan de gegevens van vorig jaar.') }}</li>
-                    <li>{{ $t('Na controle van alle instellingen kan je overschakelen op het nieuwe werkjaar. Dit kan ten vroegste vanaf juli.') }}</li>
-                    <li>{{ $t('Alle wachtlijsten worden gedupliceerd in het nieuwe werkjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige werkjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.') }}</li>
+                    <li>{{ $t('%ZfQ') }}</li>
+                    <li>{{ $t('%Zf7') }}</li>
+                    <li>{{ $t('%ZfU') }}</li>
+                    <li>{{ $t('%ZfV') }}</li>
+                    <li>{{ $t('%Zer') }}</li>
+                    <li>{{ $t('%Zec') }}</li>
                 </ul>
 
                 <p v-if="fromPeriod && fromPeriod.settings.bundleDiscounts.length > 0" class="warning-box">
@@ -94,7 +94,7 @@
                                         </h2>
 
                                         <STListItemGrid>
-                                            <STListItemGridRow :value="pluralText(row.old.getMemberCount()!, $t('%79'), $t('%It'))" :label="$t(`Inschrijvingen`)" />
+                                            <STListItemGridRow :value="pluralText(row.old.getMemberCount()!, $t('%79'), $t('%It'))" :label="$t(`%1EI`)" />
                                             <STListItemGridRow :value="row.old.settings.pricesTextList" :label="$t(`%62`)" />
                                         </STListItemGrid>
                                     </div>
@@ -112,7 +112,7 @@
                                         </h2>
 
                                         <STListItemGrid>
-                                            <STListItemGridRow :value="pluralText(0, $t('%79'), $t('%It'))" :label="$t(`Inschrijvingen`)" />
+                                            <STListItemGridRow :value="pluralText(0, $t('%79'), $t('%It'))" :label="$t(`%1EI`)" />
                                             <STListItemGridRow :value="row.new.settings.pricesTextList" :label="$t(`%62`)" />
                                         </STListItemGrid>
                                     </div>

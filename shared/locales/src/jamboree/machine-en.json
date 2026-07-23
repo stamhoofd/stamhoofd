@@ -1579,6 +1579,18 @@
     "original": "Dit lid heeft al een aansluiting in dit scoutsjaar die niet gecombineerd kan worden met deze aansluiting. Verwijder of pas de bestaande aansluiting aan.",
     "translation": "This member already has an affiliation for this scouting year that cannot be combined with this one. Remove or adjust the existing affiliation."
   },
+  "%Zec": {
+    "original": "Alle wachtlijsten worden gedupliceerd in het nieuwe scoutsjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige scoutsjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.",
+    "translation": "All waiting lists are duplicated for the new scout year. If you want to continue the waiting list, you can return to the previous scout year and add all members from there to the new waiting list."
+  },
+  "%Zer": {
+    "original": "Na controle van alle instellingen kan je overschakelen op het nieuwe scoutsjaar. Dit kan ten vroegste vanaf juli.",
+    "translation": "Once you've checked all settings, you can switch to the new scout year. This is only possible from July at the earliest."
+  },
+  "%ZfU": {
+    "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in.",
+    "translation": "All members need to register again for the new scout year, or you can register yourself again."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separately from Jamboree. For Microsoft you can"

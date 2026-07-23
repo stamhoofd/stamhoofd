@@ -88,10 +88,10 @@
                     <Checkbox :model-value="getFeatureFlag('webshop-orders-excel-export-ui')" @update:model-value="setFeatureFlag('webshop-orders-excel-export-ui', !!$event)" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Kolommen kiezen bij de Excel-export van bestellingen') }}
+                    {{ $t('%Zed') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Toont een scherm om de werkbladen en kolommen te kiezen bij het exporteren van bestellingen naar Excel, inclusief een nieuw werkblad met de tickets.') }}
+                    {{ $t('%ZfM') }}
                 </p>
             </STListItem>
 

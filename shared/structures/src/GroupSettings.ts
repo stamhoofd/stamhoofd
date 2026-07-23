@@ -474,7 +474,7 @@ export class GroupSettings extends AutoEncoder {
 
     get pricesTextList() {
         if (this.prices.length === 0) {
-            return $t('geen');
+            return $t('%1VV');
         }
 
         return Array.from(

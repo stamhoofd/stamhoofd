@@ -16,43 +16,43 @@ type OrderLineRow = {
  */
 const columnCategories = {
     get order() {
-        return $t(`Bestelling`);
+        return $t(`%W6`);
     },
     get customer() {
-        return $t(`Klant`);
+        return $t(`%1J1`);
     },
     get questions() {
-        return $t(`Vragen`);
+        return $t(`%ZeZ`);
     },
     get item() {
-        return $t(`Artikel`);
+        return $t(`%Sc`);
     },
     get checkout() {
-        return $t(`Afhalen of leveren`);
+        return $t(`%Zeq`);
     },
     get price() {
-        return $t(`Prijs`);
+        return $t(`%1IP`);
     },
     get payment() {
-        return $t(`Betaling en status`);
+        return $t(`%ZfL`);
     },
     get orderedItems() {
-        return $t(`Bestelde artikels`);
+        return $t(`%Zf8`);
     },
     get ticket() {
-        return $t(`Ticket`);
+        return $t(`%Zee`);
     },
     get scanning() {
-        return $t(`Scannen`);
+        return $t(`%lF`);
     },
     get qrCode() {
-        return $t(`QR-code`);
+        return $t(`%Zf9`);
     },
     get priceChoices() {
-        return $t(`Prijskeuzes`);
+        return $t(`%Sd`);
     },
     get options() {
-        return $t(`Opties`);
+        return $t(`%Zf3`);
     },
 };
 
@@ -207,7 +207,7 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'customer.birthDay',
-            name: $t(`Geboortedatum`),
+            name: $t(`%17w`),
             category: columnCategories.customer,
             getValue: (row) => {
                 const birthDay = getOrder(row).data.customer.birthDay;
@@ -226,7 +226,7 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'customer.gender',
-            name: $t(`Gender`),
+            name: $t(`%Zd4`),
             category: columnCategories.customer,
             getValue: (row) => {
                 const gender = getOrder(row).data.customer.gender;
@@ -235,8 +235,8 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'customer.address',
-            name: $t(`Adres klant`),
-            description: $t(`Het adres van de klant zelf, niet het adres waarop geleverd wordt.`),
+            name: $t(`%Zew`),
+            description: $t(`%Zei`),
             category: columnCategories.customer,
             getValue: row => ({ value: getOrder(row).data.customer.address?.toString() ?? '' }),
         }),
@@ -466,7 +466,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
     return {
         id: 'orderLines',
         name: $t(`%xP`),
-        description: $t(`Bevat een rij per besteld artikel. Een bestelling met meerdere artikels wordt over meerdere rijen verdeeld.`),
+        description: $t(`%ZfB`),
         transform: orders => orders.flatMap(order => order.data.cart.items.map(item => ({ order, item }))),
         expandableColumns: [
             ...getOrderDetailGroups<OrderLineRow>(row => row.order),
@@ -474,7 +474,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             singleColumnGroup<OrderLineRow>({
                 id: 'comments',
                 name: $t(`%Ve`),
-                description: $t(`De notities die de klant zelf toevoegde bij het bestellen.`),
+                description: $t(`%Zem`),
                 category: columnCategories.order,
                 getValue: row => ({ value: row.order.data.comments }),
             }),
@@ -487,7 +487,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             singleColumnGroup<OrderLineRow>({
                 id: 'amount',
                 name: $t(`%M4`),
-                description: $t(`Het aantal bestelde stuks van dit artikel.`),
+                description: $t(`%Zf1`),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: row.item.amount,
@@ -497,7 +497,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             singleColumnGroup<OrderLineRow>({
                 id: 'unitPrice',
                 name: $t(`%xC`),
-                description: $t(`De prijs voor één stuk, inclusief de gekozen opties, maar zonder kortingen.`),
+                description: $t(`%ZfX`),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getUnitPrice(row.order.data.cart) ?? 0) / 10000,
@@ -507,7 +507,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             singleColumnGroup<OrderLineRow>({
                 id: 'extraPrice',
                 name: $t(`%xD`),
-                description: $t(`De meerprijs die maar voor een deel van de stuks geldt, bijvoorbeeld de meerprijs van een bepaalde zetel.`),
+                description: $t(`%Zez`),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getPartialExtraPrice(row.order.data.cart) ?? 0) / 10000,
@@ -517,7 +517,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             singleColumnGroup<OrderLineRow>({
                 id: 'discount',
                 name: $t(`%176`),
-                description: $t(`De korting op dit artikel. Dit is een negatief bedrag.`),
+                description: $t(`%ZfT`),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getPriceWithDiscounts() - row.item.getPriceWithoutDiscounts()) / 10000,
@@ -527,7 +527,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             singleColumnGroup<OrderLineRow>({
                 id: 'price',
                 name: $t(`%1IP`),
-                description: $t(`Het totaal voor dit artikel: de stukprijs maal het aantal, plus de meerprijs en na korting.`),
+                description: $t(`%ZfN`),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getPriceWithDiscounts() ?? 0) / 10000,
@@ -560,14 +560,14 @@ function getCheckoutDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selecta
         singleColumnGroup<R>({
             id: 'checkoutAddress',
             name: $t(`%xF`),
-            description: $t(`Het gekozen afhaalpunt of het adres waarop geleverd wordt.`),
+            description: $t(`%Zeg`),
             category: columnCategories.checkout,
             getValue: row => ({ value: getCheckoutAddressString(getOrder(row)) }),
         }),
         singleColumnGroup<R>({
             id: 'timeSlotDate',
             name: $t(`%7R`),
-            description: $t(`De dag waarop de bestelling wordt afgehaald of geleverd.`),
+            description: $t(`%ZfI`),
             category: columnCategories.checkout,
             getValue: (row) => {
                 const timeSlot = getOrder(row).data.timeSlot;
@@ -597,21 +597,21 @@ function getOrderStatusGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         singleColumnGroup<R>({
             id: 'paid',
             name: $t(`%1OD`),
-            description: $t(`Of het volledige bedrag van de bestelling al betaald is.`),
+            description: $t(`%ZeX`),
             category: columnCategories.payment,
             getValue: row => ({ value: getOrder(row).openBalance <= 0 ? $t(`%1OD`) : $t(`%xI`) }),
         }),
         singleColumnGroup<R>({
             id: 'status',
             name: $t(`%1A`),
-            description: $t(`De status van de bestelling zelf, bijvoorbeeld of ze al verwerkt of geannuleerd is.`),
+            description: $t(`%ZfE`),
             category: columnCategories.payment,
             getValue: row => ({ value: OrderStatusHelper.getName(getOrder(row).status) }),
         }),
         singleColumnGroup<R>({
             id: 'discountCodes',
             name: $t(`%1MX`),
-            description: $t(`De kortingscodes die de klant gebruikte bij het bestellen.`),
+            description: $t(`%Zf2`),
             category: columnCategories.payment,
             getValue: row => ({ value: getOrder(row).data.discountCodes.map(d => d.code).join(', ') }),
         }),
@@ -625,7 +625,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
     return {
         id: 'orders',
         name: $t(`%xQ`),
-        description: $t(`Bevat een rij per bestelling, met een kolom per artikelcombinatie.`),
+        description: $t(`%Zf0`),
         transform: orders => orders,
         expandableColumns: [
             ...getOrderDetailGroups<PrivateOrder>(order => order),
@@ -633,7 +633,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             singleColumnGroup<PrivateOrder>({
                 id: 'comments',
                 name: $t(`%Ve`),
-                description: $t(`De notities die de klant zelf toevoegde bij het bestellen.`),
+                description: $t(`%Zem`),
                 category: columnCategories.order,
                 getValue: order => ({ value: order.data.comments }),
             }),
@@ -641,7 +641,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             singleColumnGroup<PrivateOrder>({
                 id: 'subtotal',
                 name: $t(`%xJ`),
-                description: $t(`Het totaal van alle bestelde artikels, zonder leverings- en administratiekosten.`),
+                description: $t(`%Zey`),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: order.data.cart.priceWithDiscounts / 10000,
@@ -651,7 +651,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             singleColumnGroup<PrivateOrder>({
                 id: 'discount',
                 name: $t(`%176`),
-                description: $t(`De korting van de kortingscodes op de volledige bestelling. Dit bedrag wordt van het subtotaal afgetrokken.`),
+                description: $t(`%Zf5`),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: (order.data.appliedPercentageDiscount + order.data.fixedDiscount) / 10000,
@@ -679,7 +679,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             singleColumnGroup<PrivateOrder>({
                 id: 'totalPrice',
                 name: $t(`%xL`),
-                description: $t(`Het bedrag dat de klant moet betalen: het subtotaal, min de korting, plus de leverings- en administratiekosten.`),
+                description: $t(`%ZfC`),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: order.data.totalPrice / 10000,
@@ -703,9 +703,9 @@ type TicketRow = {
 function getTicketsSheet(webshop: Webshop, organization: Organization): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, TicketRow> {
     return {
         id: 'tickets',
-        name: $t(`Tickets`),
-        description: $t(`Bevat een rij per ticket, inclusief de geheime code waarmee de QR-code op het ticket kan aangemaakt worden.`),
-        warning: $t(`Maak je zelf QR-codes op basis van deze export? Zorg er dan voor dat elke QR-code exact de link uit de kolom Link bevat. Een QR-code met een andere inhoud, bijvoorbeeld enkel de geheime code, kan niet gescand worden.`),
+        name: $t(`%1AU`),
+        description: $t(`%Zeu`),
+        warning: $t(`%Zfa`),
         transform: orders => orders.flatMap(order =>
             order.tickets
                 .filter(ticket => !ticket.deletedAt)
@@ -731,8 +731,8 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'description',
-                name: $t(`Beschrijving`),
-                description: $t(`De gekozen prijs en opties van het ticket.`),
+                name: $t(`%6o`),
+                description: $t(`%Zf6`),
                 category: columnCategories.ticket,
                 getValue: (row) => {
                     if (row.ticket.isSingle) {
@@ -744,8 +744,8 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'indexText',
-                name: $t(`Nummer`),
-                description: $t(`Het volgnummer of de naam die op het ticket staat.`),
+                name: $t(`%cH`),
+                description: $t(`%Zes`),
                 category: columnCategories.ticket,
                 getValue: row => ({ value: row.ticket.getIndexText() ?? '' }),
             }),
@@ -796,8 +796,8 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'scannedAt',
-                name: $t(`Gescand op`),
-                description: $t(`Leeg als het ticket nog niet gescand is.`),
+                name: $t(`%ZeW`),
+                description: $t(`%ZfS`),
                 category: columnCategories.scanning,
                 getValue: (row) => {
                     if (!row.ticket.scannedAt) {
@@ -815,21 +815,21 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'scannedBy',
-                name: $t(`Gescand door`),
+                name: $t(`%Vx`),
                 category: columnCategories.scanning,
                 getValue: row => ({ value: row.ticket.scannedBy ?? '' }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'secret',
-                name: $t(`Geheime code`),
-                description: $t(`De unieke code van het ticket. Zet deze code niet in een QR-code: gebruik daarvoor de volledige link.`),
+                name: $t(`%Zf4`),
+                description: $t(`%Zep`),
                 category: columnCategories.qrCode,
                 getValue: row => ({ value: row.ticket.secret }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'url',
-                name: $t(`Link`),
-                description: $t(`De link waarop het ticket kan geopend worden. Maak je zelf tickets met een QR-code? Dan moet die QR-code exact deze link bevatten, anders kan hij niet gescand worden.`),
+                name: $t(`%Zel`),
+                description: $t(`%ZfG`),
                 category: columnCategories.qrCode,
                 getValue: row => ({ value: 'https://' + webshop.getUrl(organization) + '/tickets/' + row.ticket.secret }),
             }),
@@ -872,7 +872,7 @@ function getProductsSheet(): SelectableXlsxTransformerSheet<PrivateOrderWithTick
     return {
         id: 'products',
         name: $t(`%15p`),
-        description: $t(`Bevat het totaal besteld aantal per combinatie van artikel, prijskeuze en opties.`),
+        description: $t(`%ZfK`),
         transform: orders => getProductTotalRows(orders),
         expandableColumns: [
             singleColumnGroup<ProductTotalRow>({
@@ -1001,7 +1001,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
     return {
         id: 'options',
         name: $t(`%xR`),
-        description: $t(`Bevat het totaal besteld aantal per artikel, met een kolom per prijskeuze en optie.`),
+        description: $t(`%Zen`),
         transform: orders => getOptionTotalRows(webshop, orders),
         expandableColumns: [
             singleColumnGroup<OptionTotalRow>({
@@ -1019,7 +1019,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
             singleColumnGroup<OptionTotalRow>({
                 id: 'total',
                 name: $t(`%xL`),
-                description: $t(`Het totaal besteld aantal van dit artikel.`),
+                description: $t(`%ZfF`),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: row.amount,
@@ -1029,7 +1029,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
             ...[...productPriceNames.entries()].map(([slug, name]) => singleColumnGroup<OptionTotalRow>({
                 id: `price.${slug}`,
                 name,
-                description: $t(`Het aantal keer dat deze prijskeuze gekozen werd.`),
+                description: $t(`%ZfA`),
                 category: columnCategories.priceChoices,
                 getValue: row => ({
                     value: row.productPriceCounts.get(slug) ?? 0,
@@ -1039,7 +1039,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
             ...[...optionNames.entries()].map(([slug, name]) => singleColumnGroup<OptionTotalRow>({
                 id: `option.${slug}`,
                 name,
-                description: $t(`Het aantal keer dat deze optie gekozen werd.`),
+                description: $t(`%ZfO`),
                 category: columnCategories.options,
                 getValue: row => ({
                     value: row.optionCounts.get(slug) ?? 0,

@@ -1349,8 +1349,8 @@ export async function inviteMembersForGroup({ members, group, context, owner, we
         }
 
         const successMessage = responseInvitations.length === 1
-            ? $t('{name} is uitgenodigd. Er werd geen automatische e-mail verzonden, dat moet je zelf nog doen.', { name: responseInvitations[0].member.name })
-            : $t('{count} leden zijn uitgenodigd. Er werd geen automatische e-mail verzonden, dat moet je zelf nog doen.', { count: responseInvitations.length });
+            ? $t('%Zet', { name: responseInvitations[0].member.name })
+            : $t('%Zeh', { count: responseInvitations.length });
         new Toast(successMessage, 'success green').show();
     } catch (e) {
         console.error(e);
@@ -1372,7 +1372,7 @@ export async function deleteInvitationsForMembers({ members, group, context, own
         const groupName = group.settings.name.toString();
         Toast.warning(members.length === 1
             ? $t('%1Qh', { group: groupName })
-            : $t('Deze leden zijn nog niet uitgenodigd voor {group}', { group: groupName })).show();
+            : $t('%Zef', { group: groupName })).show();
         return;
     }
 
@@ -1406,7 +1406,7 @@ export async function deleteInvitationsForMembers({ members, group, context, own
 
     const successMessage = members.length === 1
         ? $t('%1RC', { name: members[0].member.name })
-        : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
+        : $t('%Zex', { count: members.length });
     new Toast(successMessage, 'success green').show();
 }
 
