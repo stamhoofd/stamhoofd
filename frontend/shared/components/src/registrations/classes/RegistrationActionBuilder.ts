@@ -166,7 +166,7 @@ export class RegistrationActionBuilder {
             this.getExportAction(),
             ...this.getAuditLogAction(),
             ...this.getMessagesAction(),
-            ...await this.getInviteMemberForGroupActionsWithGroups(),
+            ...this.getInviteMemberForGroupActionsWithGroups(),
         ];
 
         if (options.includeMove) {
