@@ -1,0 +1,11 @@
+// Scoped subset of @stamhoofd/scss for the documentation site.
+//
+// This intentionally does NOT use main.scss: that includes the CSS reset and the
+// full app shell (st-view, st-menu, popups, sheets), which would collide with the
+// reset and layout Docus/Tailwind apply. Only include what the content components
+// need: the docs site is themed by Docus, and @stamhoofd/scss is here purely to
+// style the prose callouts in components/global/.
+@use '@stamhoofd/scss/base/variables';
+@use '@stamhoofd/scss/base/dark-modus';
+@use '@stamhoofd/scss/components/icons';
+@use '@stamhoofd/scss/components/errors';

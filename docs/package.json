@@ -1,5 +1,6 @@
 {
   "name": "docs",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,11 +10,15 @@
     "preview": "nuxt preview"
   },
   "dependencies": {
+    "@stamhoofd/assets": "*",
+    "@stamhoofd/scss": "*",
     "docus": "^5.12.3",
     "better-sqlite3": "^12.11.1",
     "nuxt": "^4.4.8"
   },
   "devDependencies": {
-    "eslint-plugin-stamhoofd": "2.135.0"
+    "eslint-plugin-stamhoofd": "2.135.0",
+    "sass": "1.101.0",
+    "vite-svg-2-webfont": "8.0.0"
   }
 }
