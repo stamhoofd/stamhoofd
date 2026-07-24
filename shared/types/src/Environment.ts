@@ -210,6 +210,18 @@ export type RendererEnvironment = {
     readonly INTERNAL_SECRET_KEY: string;
     readonly translationNamespace: string;
     readonly platformName: string;
+
+    /**
+     * Overrides the source URL for the trusted IP whitelist that guards the /prerender endpoint
+     * (see TrustedIPWhitelist). The list is a plain-text file with one entry per line, each being
+     * a single IP, a CIDR range or a "start-end" range (IPv4 and IPv6 supported); it's cached
+     * locally so a transient fetch outage doesn't drop the whitelist.
+     *
+     * In production and staging a built-in default URL is used when this is unset, so whitelisting
+     * is on by default there. In local development and tests it's off unless this is set.
+     */
+    readonly PRERENDER_IP_WHITELIST_URL?: string;
+
     readonly HEALTH_ACCESS_KEY?: string;
 };
 

@@ -21,7 +21,8 @@
         "@stamhoofd/backend-env": "2.137.2",
         "@stamhoofd/backend-middleware": "2.137.2",
         "@stamhoofd/structures": "2.137.2",
-        "@stamhoofd/types": "2.137.2"
+        "@stamhoofd/types": "2.137.2",
+        "@stamhoofd/utility": "2.137.2"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.137.2",

@@ -4,6 +4,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, URLDecoder } from '@simonbackx/simple-encoding';
+import { clientIPFromForwardedFor } from '@stamhoofd/utility/IPRange.js';
+import { TrustedIPWhitelist } from '../classes/TrustedIPWhitelist.js';
 import { TTLFileCache } from '../helpers/TTLFileCache.js';
 import { HtmlToPdfEndpoint } from './HtmlToPdfEndpoint.js';
 
@@ -43,6 +45,11 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        // Only trusted IPs (legitimate crawlers/bots) may trigger a (potentially expensive)
+        // prerender. Throws a 403 for non-whitelisted IPs when whitelisting is enabled. Caddy
+        // (with trusted_proxies) forwards the original client as the left-most X-Forwarded-For entry.
+        TrustedIPWhitelist.shared.assertAllowed(clientIPFromForwardedFor(request.request.getIP()));
+
         // Strip click/campaign tracking parameters (e.g. ?fbclid) so we don't render and cache
         // a separate copy of the same page for every unique tracking value.
         const url = PrerenderEndpoint.stripTrackingParams(request.query.url.href);

@@ -1,8 +1,9 @@
 import { Request, TestServer } from '@simonbackx/simple-endpoints';
 import { PrerenderEndpoint } from './PrerenderEndpoint.js';
 import nock from 'nock';
-import { STExpect } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import fs from 'fs/promises';
+import { TrustedIPWhitelist } from '../classes/TrustedIPWhitelist.js';
 
 async function fileExists(path: string): Promise<boolean> {
     try {
@@ -98,6 +99,31 @@ describe('Endpoint.Prerender', () => {
         expect(response.headers).toEqual(expect.objectContaining({
             location: 'https://shop.stamhoofd.be/test',
         }));
+    });
+
+    describe('IP whitelist', () => {
+        afterEach(() => {
+            TrustedIPWhitelist.shared.setFromText('');
+        });
+
+        test('Blocks requests from non-whitelisted IPs with a 403', async () => {
+            // Enable whitelisting with a list that does not contain the test request's IP.
+            // No network/render happens: the request is rejected before any browser work.
+            TestUtils.setEnvironment('PRERENDER_IP_WHITELIST_URL', 'https://example.com/list.txt');
+            TrustedIPWhitelist.shared.setFromText('1.2.3.4\n10.0.0.0/8');
+            nock.disableNetConnect();
+
+            const request = Request.post({
+                path: '/prerender',
+                query: {
+                    url: 'https://shop.stamhoofd.be/test/',
+                },
+            });
+
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({ code: 'ip_not_whitelisted', statusCode: 403 }),
+            );
+        });
     });
 
     describe('stripTrackingParams', () => {
