@@ -1175,10 +1175,6 @@
     "original": "Jouw wachtwoord moet uit minstens {count} karakters bestaan",
     "translation": "Your password must consist of at least {count} characters"
   },
-  "%14l": {
-    "original": "Deze wachtlijst wordt gebruikt door {groupNames}",
-    "translation": "This waiting list is used by {groupNames}"
-  },
   "%14m": {
     "original": "Alle talen",
     "translation": "All languages"
@@ -7426,10 +7422,6 @@
   "%1W1": {
     "original": "per lid, per jaar",
     "translation": "per member, per year"
-  },
-  "%1W2": {
-    "original": "Wachtlijst (volzet)",
-    "translation": "Waiting list (full)"
   },
   "%1W3": {
     "original": "éénmalig",
@@ -18243,6 +18235,82 @@
     "original": "Maak je zelf QR-codes op basis van deze export? Zorg er dan voor dat elke QR-code exact de link uit de kolom Link bevat. Een QR-code met een andere inhoud, bijvoorbeeld enkel de geheime code, kan niet gescand worden.",
     "translation": "Are you generating your own QR codes based on this export? Make sure that each QR code contains the exact link from the Link column. A QR code with different content, such as just the secret code, cannot be scanned."
   },
+  "%Zfb": {
+    "original": "De domeinnaam die je hebt ingevuld is niet geldig",
+    "translation": "The domain name you entered is not valid"
+  },
+  "%Zfc": {
+    "original": "Het inladen van externe bronnen op jouw webshop kan een veiligheidsrisico veroorzaken. Het gebruik van code injection is daarom op eigen risico. Voeg enkel code toe van vertrouwde bronnen.",
+    "translation": "Loading external sources on your webshop can create security risks. Using code injection is therefore at your own risk. Only add code from trusted sources."
+  },
+  "%Zfd": {
+    "original": "Ben je zeker dat je jouw domeinnaam wilt loskoppelen?",
+    "translation": "Are you sure you want to disconnect your domain name?"
+  },
+  "%Zfe": {
+    "original": "Iedereen die niet kan inschrijven voor {group-name} (maar wel voldoet aan de restricties) kan inschrijven op een wachtlijst (als die geopend is). Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen.",
+    "translation": "Anyone who cannot register for {group-name} (but meets the requirements) can sign up for a waiting list if it's available. You can share a waiting list across different age groups."
+  },
+  "%Zff": {
+    "original": "Wachtlijst van {start-date} tot {end-date}",
+    "translation": "Waiting list from {start-date} to {end-date}"
+  },
+  "%Zfg": {
+    "original": "Volzet, wachtlijst geopend tot {date}",
+    "translation": "Full, waiting list open until {date}"
+  },
+  "%Zfh": {
+    "original": "Wachtlijst vanaf {date}",
+    "translation": "Waiting list available from {date}"
+  },
+  "%Zfi": {
+    "original": "Geen voorrangsregels",
+    "translation": "No priority rules"
+  },
+  "%Zfj": {
+    "original": "Nog één plaats",
+    "translation": "Only one place left"
+  },
+  "%Zfk": {
+    "original": "Wachtlijst geopend tot {date}",
+    "translation": "Waiting list open until {date}"
+  },
+  "%Zfl": {
+    "original": "Volzet, wachtlijst vanaf {date}",
+    "translation": "Full, waiting list from {date}"
+  },
+  "%Zfm": {
+    "original": "Als inschrijvingen voor {group-name} gesloten zijn, kunnen leden alsnog inschrijven voor de wachtlijst. Stem de openingstijden op elkaar af.",
+    "translation": "If registrations for {group-name} are closed, members can still register for the waiting list. Make sure the opening times match up."
+  },
+  "%Zfn": {
+    "original": "Deze wachtlijst wordt (nog) niet gebruikt",
+    "translation": "This waiting list is not in use (yet)"
+  },
+  "%Zfo": {
+    "original": "Deze wachtlijst wordt gebruikt door {group-names}.",
+    "translation": "This waiting list is being used by {group-names}."
+  },
+  "%Zfq": {
+    "original": "Nieuwe leden kunnen enkel inschrijven op de wachtlijst",
+    "translation": "New members can only sign up for the waiting list"
+  },
+  "%Zfs": {
+    "original": "Volzet, wachtlijst van {start-date} tot {end-date}",
+    "translation": "Full, waiting list from {start-date} to {end-date}"
+  },
+  "%Zfu": {
+    "original": "Volzet, wachtlijst geopend",
+    "translation": "Full, waiting list open"
+  },
+  "%Zfv": {
+    "original": "Als er geen wachtlijst is, of als die gesloten is, kunnen nieuwe leden niet inschrijven.",
+    "translation": "If there is no waiting list, or if it is closed, new members cannot register."
+  },
+  "%Zfw": {
+    "original": "Tel gezinsleden mee als bestaande leden",
+    "translation": "Count family members as existing members"
+  },
   "%Zg": {
     "original": "Login knop tekst",
     "translation": "Login button text"
@@ -18959,14 +19027,6 @@
     "original": "Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.",
     "translation": "If a waiting list is set up, members on the waiting list can register if the group is full."
   },
-  "%cg": {
-    "original": "Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.",
-    "translation": "You can share a waiting list between different age groups. This allows you to easily maintain the waiting list for several years. Choose below which waiting list applies to this group."
-  },
-  "%ch": {
-    "original": "Je kan indien gewenst ook nog vragen stellen aan leden die op de wachtlijst willen inschrijven.",
-    "translation": "If desired, you can also ask questions to members who want to register on the waiting list."
-  },
   "%ci": {
     "original": "Geen wachtlijst",
     "translation": "No waiting list"
@@ -18987,21 +19047,9 @@
     "original": "Iedereen kan gelijk starten met inschrijven (tot het maximum)",
     "translation": "Everyone can start registering at the same time (up to the maximum)"
   },
-  "%co": {
-    "original": "Alle nieuwe leden op wachtlijst",
-    "translation": "All new members on waiting list"
-  },
-  "%cp": {
-    "original": "Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest en nieuwe leden kunnen inschrijven op de wachtlijst.",
-    "translation": "Existing members can register immediately (up to the maximum). The rest and new members can register on the waiting list."
-  },
   "%cq": {
     "original": "Maak eerst een wachtlijst aan om deze optie te gebruiken.",
     "translation": "First create a waiting list to use this option."
-  },
-  "%cr": {
-    "original": "Ook gezinsleden van bestaande leden rechtstreeks laten inschrijven",
-    "translation": "Also allow family members of existing members to register directly"
   },
   "%cs": {
     "original": "Iedereen op wachtlijst",
@@ -19022,10 +19070,6 @@
   "%cw": {
     "original": "Stel eerst een startdatum in voor de inschrijvingen om deze optie te kunnen gebruiken.",
     "translation": "First set a start date for registrations to use this option."
-  },
-  "%cx": {
-    "original": "Ook gezinsleden van bestaande leden vroeger laten inschrijven",
-    "translation": "Also allow family members of existing members to register earlier"
   },
   "%cz": {
     "original": "Wijk af van je algemene instellingen om extra gegevens te verzamelen voor inschrijvingen voor {name}. Let op: de antwoorden worden gedeeld tussen inschrijvingen van hetzelfde lid, dus ze zijn niet geschikt voor tijdelijke vragen.",
@@ -24286,10 +24330,6 @@
   "%yf": {
     "original": "Filter niet opslaan?",
     "translation": "Don't save filter?"
-  },
-  "%yg": {
-    "original": "Niet gebruikt",
-    "translation": "Not used"
   },
   "%yh": {
     "original": "Wachtlijst van",

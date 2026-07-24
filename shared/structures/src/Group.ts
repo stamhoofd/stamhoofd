@@ -604,20 +604,20 @@ export class Group extends AutoEncoder {
                     icon: 'user',
                     title: remainingStock !== 1
                         ? $t('%1d9', { count: remainingStock })
-                        : $t('Nog één plaats'),
+                        : $t('%Zfj'),
                     style: 'warn',
                 });
             } else if (this.waitingList !== null && !this.waitingList.closed) {
                 if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Volzet, wachtlijst geopend tot {date}', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
+                        title: $t('%Zfg', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
                         style: 'error',
                     });
                 } else {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Volzet, wachtlijst geopend'),
+                        title: $t('%Zfu'),
                         style: 'error',
                     });
                 }
@@ -625,7 +625,7 @@ export class Group extends AutoEncoder {
                 if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Volzet, wachtlijst van {start-date} tot {end-date}', {
+                        title: $t('%Zfs', {
                             'start-date': Formatter.startDate(this.waitingList.settings.registrationStartDate),
                             'end-date': Formatter.endDate(this.waitingList.settings.registrationStartDate),
                         }),
@@ -634,7 +634,7 @@ export class Group extends AutoEncoder {
                 } else {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Volzet, wachtlijst vanaf {date}', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
+                        title: $t('%Zfl', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
                         style: 'error',
                     });
                 }
@@ -650,13 +650,13 @@ export class Group extends AutoEncoder {
                 if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Wachtlijst geopend tot {date}', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
+                        title: $t('%Zfk', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
                         style: 'error',
                     });
                 } else {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Wachtlijst geopend'),
+                        title: $t('%1ZU'),
                         style: 'error',
                     });
                 }
@@ -664,7 +664,7 @@ export class Group extends AutoEncoder {
                 if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Wachtlijst van {start-date} tot {end-date}', {
+                        title: $t('%Zff', {
                             'start-date': Formatter.startDate(this.waitingList.settings.registrationStartDate),
                             'end-date': Formatter.endDate(this.waitingList.settings.registrationEndDate),
                         }),
@@ -673,7 +673,7 @@ export class Group extends AutoEncoder {
                 } else {
                     tags.push({
                         icon: 'clock',
-                        title: $t('Wachtlijst vanaf {date}', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
+                        title: $t('%Zfh', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
                         style: 'error',
                     });
                 }

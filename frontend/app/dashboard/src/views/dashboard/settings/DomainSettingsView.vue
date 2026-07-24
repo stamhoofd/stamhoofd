@@ -139,7 +139,7 @@ const validateRegisterDomain = () => STAMHOOFD.environment === 'development' || 
 function domainChanged() {
     if (!validateDomain()) {
         const errors = new SimpleErrors();
-        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'mailDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('%Zfb'), field: 'mailDomain' }));
         errorBox.value = new ErrorBox(errors);
     } else {
         errorBox.value = null;
@@ -149,7 +149,7 @@ function domainChanged() {
 function registerDomainChanged() {
     if (!validateRegisterDomain()) {
         const errors = new SimpleErrors();
-        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'registerDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('%Zfb'), field: 'registerDomain' }));
         errorBox.value = new ErrorBox(errors);
     } else {
         errorBox.value = null;
@@ -163,10 +163,10 @@ async function save() {
 
     const errors = new SimpleErrors();
     if (!validateDomain()) {
-        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'mailDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('%Zfb'), field: 'mailDomain' }));
     }
     if (customRegisterDomain.value && !validateRegisterDomain()) {
-        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('De domeinnaam die je hebt ingevuld is niet geldig'), field: 'registerDomain' }));
+        errors.addError(new SimpleError({ code: 'invalid_field', message: $t('%Zfb'), field: 'registerDomain' }));
     }
 
     errorBox.value = errors.errors.length ? new ErrorBox(errors) : null;
@@ -202,8 +202,8 @@ async function deleteMe() {
     }
 
     if (!await CenteredMessage.confirm({
-        title: $t('Ben je zeker dat je jouw domeinnaam wilt loskoppelen?'),
-        confirmText: $t('Ja, loskoppelen'),
+        title: $t('%Zfd'),
+        confirmText: $t('%1Ap'),
     })) {
         return;
     }

@@ -514,11 +514,11 @@
                 </template>
 
                 <p v-if="type === GroupType.Membership">
-                    {{ $t('Iedereen die niet kan inschrijven voor {group-name} (maar wel voldoet aan de restricties) kan inschrijven op een wachtlijst (als die geopend is). Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen.', {'group-name': patchedGroup.settings.name}) }}
+                    {{ $t('%Zfe', {'group-name': patchedGroup.settings.name}) }}
                 </p>
 
                 <p v-if="waitingList && patchedGroup.isMoreRestrictiveOpenThan(waitingList)" class="warning-box">
-                    {{ $t('Als inschrijvingen voor {group-name} gesloten zijn, kunnen leden alsnog inschrijven voor de wachtlijst. Stem de openingstijden op elkaar af.', {'group-name': patchedGroup.settings.name}) }}
+                    {{ $t('%Zfm', {'group-name': patchedGroup.settings.name}) }}
                 </p>
 
                 <STList v-if="availableWaitingLists.length">
@@ -598,7 +598,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Geen voorrangsregels') }}
+                            {{ $t('%Zfi') }}
                         </h3>
 
                         <h3 class="style-description-small">
@@ -612,16 +612,16 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Nieuwe leden kunnen enkel inschrijven op de wachtlijst') }}
+                            {{ $t('%Zfq') }}
                         </h3>
 
                         <p v-if="!waitingList || waitingList.closed" class="style-description-small">
-                            {{ $t('Als er geen wachtlijst is, of als die gesloten is, kunnen nieuwe leden niet inschrijven.') }}
+                            {{ $t('%Zfv') }}
                         </p>
 
                         <div v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="option">
                             <Checkbox v-model="priorityForFamily">
-                                {{ $t('Tel gezinsleden mee als bestaande leden') }}
+                                {{ $t('%Zfw') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -671,7 +671,7 @@
                             </div>
 
                             <Checkbox v-model="priorityForFamily">
-                                {{ $t('Tel gezinsleden mee als bestaande leden') }}
+                                {{ $t('%Zfw') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -1029,10 +1029,10 @@ const usedByGroupsDescription = computed(() => {
     const usedBy = patchedGroup.value.type === GroupType.WaitingList ? patchedPeriod.value.groups.filter(g => g.waitingList?.id === props.groupId) : [];
 
     return usedBy.length > 0
-        ? $t('Deze wachtlijst wordt gebruikt door {group-names}.', {
-                'group-names': Formatter.joinLast(usedBy.map(g => g.settings.name.toString()), ', ', ' ' + $t('en') + ' '),
+        ? $t('%Zfo', {
+                'group-names': Formatter.joinLast(usedBy.map(g => g.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
             })
-        : $t('Deze wachtlijst wordt (nog) niet gebruikt');
+        : $t('%Zfn');
 });
 
 const defaultAgeGroups = computed(() => {

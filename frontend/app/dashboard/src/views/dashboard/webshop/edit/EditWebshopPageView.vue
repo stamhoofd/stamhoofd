@@ -148,7 +148,7 @@
                 <textarea v-model="customCode" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t('%15u')" :disabled="!hasCustomDomain" />
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('Het inladen van externe bronnen op jouw webshop kan een veiligheidsrisico veroorzaken. Het gebruik van code injection is daarom op eigen risico. Voeg enkel code toe van vertrouwde bronnen.') }}
+                {{ $t('%Zfc') }}
             </p>
         </div>
     </SaveView>
