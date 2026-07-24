@@ -120,7 +120,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, Date | null>({
             id: 'expiredDate',
-            description: $t('Datum vóór de einddatum waarop de aansluitingstatus overschakelt op \'verlopen\''),
+            description: $t(`%Zg9`),
             name: $t('%1J7'),
             getValue: m => m.expireDate,
             format: formatDate('N.v.t.'),

@@ -79,7 +79,9 @@ const groupsByPeriod = computed(() => {
 
     return periodGroups.map(({ period, groups }) => {
         return {
-            category: period ? $t('%Zcc', { period: period.name }) : $t('In onbekend werkjaar'),
+            category: period
+                ? $t('%Zcc', { period: period.name })
+                : $t('%Zg8'),
             items: groups.map((group) => {
                 return {
                     title: group.settings.name.toString(),

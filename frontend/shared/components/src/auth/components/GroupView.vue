@@ -235,7 +235,9 @@ function getStockText<T extends { getRemainingStock: (group: Group) => number | 
         return $t('%Um');
     }
 
-    return remainingStock !== 1 ? $t('%1d9', { count: remainingStock }) : $t('Nog één plaats');
+    return remainingStock !== 1
+        ? $t('%1d9', { count: remainingStock })
+        : $t('%Zfj');
 }
 
 const priceList = computed(() => {

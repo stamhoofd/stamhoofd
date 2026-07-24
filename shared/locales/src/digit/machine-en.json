@@ -1319,6 +1319,14 @@
     "original": "Stel de betaling uit, bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, via “Betalingen en openstaande rekening” in ‘Mijn account’ (iets meer verstopt).",
     "translation": "Postpone the payment, for example for paying in installments or for a trial period. It will only appear as a quick action in ‘My account’ from one week before this date (along with any automatic email), and must be paid by the specified date. You can also choose to pay it earlier via 'Payments and open accounts' in ‘My account’ (which is a bit more hidden)."
   },
+  "%ZgE": {
+    "original": "Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw groep? Wij gebruiken daarvoor Ravot en we mogen 25 euro tegoed uitdelen aan alle groepen die zich op Ravot registreren via onze link.",
+    "translation": "Looking for easy member administration or want to collect money for your group through a webshop? We use Ravot for that, and we can give a €25 credit to all groups who register on Ravot via our link."
+  },
+  "%ZgG": {
+    "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Groep ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
+    "translation": "- Select the correct company type in Stripe\n- Do you not have a non-profit, but instead an informal association? Then choose ‘Group WITHOUT legal personality’. You will not be able to change this afterwards.\n- Fill out all the information carefully and completely as requested, and take your time.\n- Be sure to enter a website address.\n- You can find templates and more info in the documentation. Check there first if you’re unsure.\n- Only upload documents that are on the list of permitted documents."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators of {organization}. Go to 'My account' if you want to register as a member."

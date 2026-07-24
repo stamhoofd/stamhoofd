@@ -18311,9 +18311,81 @@
     "original": "Tel gezinsleden mee als bestaande leden",
     "translation": "Count family members as existing members"
   },
+  "%Zfx": {
+    "original": "Eén ontvanger heeft de email als spam gemarkeerd",
+    "translation": "One recipient marked the email as spam"
+  },
+  "%Zfy": {
+    "original": "Eén ontvanger kon de email niet ontvangen (soft bounce)",
+    "translation": "One recipient could not receive the email (soft bounce)"
+  },
+  "%Zfz": {
+    "original": "Er is nog maar 1 stuk beschikbaar van {name}",
+    "translation": "Only 1 piece of {name} is still available"
+  },
   "%Zg": {
     "original": "Login knop tekst",
     "translation": "Login button text"
+  },
+  "%Zg0": {
+    "original": "Terugbetaling voor {group}",
+    "translation": "Refund for {group}"
+  },
+  "%Zg1": {
+    "original": "Voor {date}",
+    "translation": "Before {date}"
+  },
+  "%Zg3": {
+    "original": "Hiermee bevestig je zelf een geldig Peppol-ID te hebben ingevuld en ga je akkoord dat we Peppol facturen niet langer via het ondernemingsnummer versturen.",
+    "translation": "By doing this, you confirm that you have entered a valid Peppol ID and agree that we will no longer send Peppol invoices via the company number."
+  },
+  "%Zg4": {
+    "original": "Volgende zaken zouden ontbreken:",
+    "translation": "The following items may be missing:"
+  },
+  "%Zg6": {
+    "original": "Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld",
+    "translation": "You do not have sufficient access rights to filter by this data field"
+  },
+  "%Zg7": {
+    "original": "Weet je zeker dat je {count} uitnodigingen wilt verwijderen?",
+    "translation": "Are you sure you want to delete {count} invitations?"
+  },
+  "%Zg8": {
+    "original": "In onbekend werkjaar",
+    "translation": "In unknown work year"
+  },
+  "%Zg9": {
+    "original": "Datum vóór de einddatum waarop de aansluitingstatus overschakelt op ‘verlopen’",
+    "translation": "Date before the end date on which the affiliation status changes to 'expired'"
+  },
+  "%ZgA": {
+    "original": "Configureer eerst minstens één soort activiteit. Ga naar 'Instellingen' → 'Soorten activiteiten' in het Administratieportaal.",
+    "translation": "First configure at least one type of activity. Go to 'Settings' → 'Types of activities' in the Administration portal."
+  },
+  "%ZgB": {
+    "original": "Aantal leden",
+    "translation": "Number of members"
+  },
+  "%ZgC": {
+    "original": "de bankkaart",
+    "translation": "the bank card"
+  },
+  "%ZgD": {
+    "original": "Eén ontvanger kon de email niet ontvangen (hard bounce)",
+    "translation": "One recipient could not receive the email (hard bounce)"
+  },
+  "%ZgE": {
+    "original": "Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw vereniging? Wij gebruiken daarvoor Stamhoofd en we mogen 25 euro tegoed uitdelen aan alle verenigingen die zich op Stamhoofd registreren via onze link.",
+    "translation": "Looking for easy member administration or do you want to collect money via a webshop for your association? We use Stamhoofd for that, and we can give a €25 credit to all associations who register on Stamhoofd through our link."
+  },
+  "%ZgF": {
+    "original": "Hallo!",
+    "translation": "Hello!"
+  },
+  "%ZgG": {
+    "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Vereniging ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
+    "translation": "- Select the correct company type in Stripe\n- If you are not a non-profit but an informal association, choose ‘Association WITHOUT legal personality’. You won’t be able to change this later.\n- Fill in all details accurately and completely as requested, take your time.\n- Make sure to enter a website address.\n- You can find templates and information in the documentation—check there first if you’re unsure.\n- Only upload documents that are listed as allowed."
   },
   "%Zh": {
     "original": "Toegestane domeinnamen",

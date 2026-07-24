@@ -1591,6 +1591,18 @@
     "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in.",
     "translation": "All members need to register again for the new scout year, or you can register yourself again."
   },
+  "%Zg8": {
+    "original": "In onbekend scoutsjaar",
+    "translation": "In unknown scouts year"
+  },
+  "%ZgE": {
+    "original": "Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw eenheid? Wij gebruiken daarvoor Jamboree en we mogen 25 euro tegoed uitdelen aan alle eenheden die zich op Jamboree registreren via onze link.",
+    "translation": "Looking for easy member administration or want to collect money through a webshop for your unit? We use Jamboree for this, and we can give a €25 credit to all units that register on Jamboree via our link."
+  },
+  "%ZgG": {
+    "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Eenheid ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
+    "translation": "- Select the correct company type in Stripe\n- If you are not a non-profit but an informal unit, select ‘Unit WITHOUT legal personality’. You won’t be able to change this later.\n- Fill in all details accurately and completely as requested, take your time.\n- Make sure to enter a website address.\n- You can find templates and information in the documentation—check there first if you’re unsure.\n- Only upload documents that are listed as allowed."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separately from Jamboree. For Microsoft you can"

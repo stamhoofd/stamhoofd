@@ -34,21 +34,27 @@
             </template>
 
             <button v-if="email.spamComplaintsCount" class="error-box selectable" type="button" @click="navigate(Routes.Complaints)">
-                <span>{{ email.spamComplaintsCount > 1 ? $t('%1EX', {count: email.spamComplaintsCount}) : $t('Eén ontvanger heeft de email als spam gemarkeerd') }}</span>
+                <span>{{ email.spamComplaintsCount > 1
+                    ? $t('%1EX', {count: email.spamComplaintsCount})
+                    : $t('%Zfx') }}</span>
                 <span class="button text">
                     {{ $t('%1EY') }}
                 </span>
             </button>
 
             <button v-if="email.hardBouncesCount" class="error-box selectable" type="button" @click="navigate(Routes.HardBounces)">
-                <span>{{ email.hardBouncesCount > 1 ? $t('%1EZ', {count: email.hardBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (hard bounce)') }}</span>
+                <span>{{ email.hardBouncesCount > 1
+                    ? $t('%1EZ', {count: email.hardBouncesCount})
+                    : $t('%ZgD') }}</span>
                 <span class="button text">
                     {{ $t('%1EY') }}
                 </span>
             </button>
 
             <button v-if="email.softBouncesCount" class="warning-box selectable" type="button" @click="navigate(Routes.SoftBounces)">
-                <span>{{ email.softBouncesCount > 1 ? $t('%1Ea', {count: email.softBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (soft bounce)') }}</span>
+                <span>{{ email.softBouncesCount > 1
+                    ? $t('%1Ea', {count: email.softBouncesCount})
+                    : $t('%Zfy') }}</span>
                 <span class="button text">
                     {{ $t('%1EY') }}
                 </span>

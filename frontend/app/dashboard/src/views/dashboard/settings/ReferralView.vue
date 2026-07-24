@@ -150,7 +150,7 @@ const organization = useRequiredOrganization();
 const isNative = AppManager.shared.isNative;
 const canShare = !!navigator.share;
 
-const referralText = $t('Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw vereniging? Wij gebruiken daarvoor Stamhoofd en we mogen 25 euro tegoed uitdelen aan alle verenigingen (sportclubs, jeugdbeweging, scholen, VZW\'s...) die zich op Stamhoofd registreren via onze link.');
+const referralText = $t('%ZgE');
 
 const href = computed(() => {
     return 'https://' + STAMHOOFD.domains.dashboard + '/aansluiten?code=' + encodeURIComponent(status.value?.code ?? '') + '&org=' + encodeURIComponent(organization.value.name);

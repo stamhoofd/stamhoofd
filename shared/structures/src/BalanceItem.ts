@@ -987,7 +987,12 @@ export class BalanceItem extends AutoEncoder {
             }
             case BalanceItemType.STPackage: {
                 const list: string[] = [];
-                const base = this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`%1c2`, { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) }) : $t(`Voor {date}`, { date: Formatter.date(this.startDate) })) : null;
+                const base = this.startDate && this.endDate
+                    ? (
+                            Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate)
+                                ? $t(`%1c2`, { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) })
+                                : $t(`%Zg1`, { date: Formatter.date(this.startDate) }))
+                    : null;
 
                 if (base) {
                     list.push(base);

@@ -76,10 +76,11 @@ async function deleteMandate(mandateId: string) {
         return;
     }
     const mandate = mandates.value?.find(m => m.id === mandateId);
+    const fallback = $t('%ZgC');
 
     if (!await CenteredMessage.confirm({
         title: $t('%1UA'),
-        requireCheckbox: $t('%1T7', { cardNumber: mandate?.name ?? $t('de bankkaart') }),
+        requireCheckbox: $t('%1T7', { cardNumber: mandate?.name ?? fallback }),
         confirmText: $t('%CJ'),
         destructive: true,
     })) {

@@ -404,7 +404,9 @@ export class RegisterItem implements ObjectWithRecords {
 
         for (const { registration } of this.replaceRegistrations) {
             all.push({
-                name: this.checkout.isAdminFromSameOrganization ? $t('%vZ', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
+                name: this.checkout.isAdminFromSameOrganization
+                    ? $t('%vZ', { group: registration.group.settings.name })
+                    : $t('%Zg0', { group: registration.group.settings.name }),
                 price: -registration.calculatedPrice,
             });
         }
@@ -1066,7 +1068,9 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? $t('%Bv', { group: group.settings.name, period: period.nameShort }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat werkjaar {period} is afgesloten.', { group: group.settings.name, period: period.nameShort }),
+                human: type === 'register'
+                    ? $t('%Bv', { group: group.settings.name, period: period.nameShort })
+                    : $t('%ql', { group: group.settings.name, period: period.nameShort }),
             });
         }
     }
@@ -1436,7 +1440,9 @@ export class RegisterItem implements ObjectWithRecords {
                             message: 'Stock empty',
                             human: remaining === 0
                                 ? $t(`%149`, { name: option.option.name })
-                                : remaining > 1 ? $t('%13n', { count: remaining.toString(), name: option.option.name }) : $t('Er is nog maar 1 stuk beschikbaar van {name}', { name: option.option.name }),
+                                : remaining > 1
+                                    ? $t('%13n', { count: remaining.toString(), name: option.option.name })
+                                    : $t('%Zfz', { name: option.option.name }),
                             meta: { recoverable: true },
                         });
                     }

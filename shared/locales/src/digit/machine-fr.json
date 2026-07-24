@@ -1487,6 +1487,14 @@
     "original": "Stel de betaling uit, bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, via “Betalingen en openstaande rekening” in ‘Mijn account’ (iets meer verstopt).",
     "translation": "Reporter le paiement, par exemple pour un paiement échelonné ou une période d'essai. L'option ne sera visible comme action rapide dans « Mon compte » qu'à partir d'une semaine avant cette date (en même temps qu'un éventuel e-mail automatique) et doit être réglée avant la date indiquée. Il est cependant possible de payer plus tôt via « Paiements et compte en attente » dans « Mon compte » (cette option est un peu plus cachée)."
   },
+  "%ZgE": {
+    "original": "Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw groep? Wij gebruiken daarvoor Ravot en we mogen 25 euro tegoed uitdelen aan alle groepen die zich op Ravot registreren via onze link.",
+    "translation": "Vous cherchez une gestion des membres simple ou souhaitez collecter des fonds avec une boutique en ligne pour votre groupe ? Nous utilisons Ravot pour cela et nous pouvons offrir un crédit de 25 euro à tous les groupes qui s’inscrivent sur Ravot via notre lien."
+  },
+  "%ZgG": {
+    "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Groep ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
+    "translation": "- Sélectionnez la bonne forme d'entreprise dans Stripe\n- Vous n'êtes pas une ASBL mais une association de fait ? Choisissez alors « Groupe SANS personnalité juridique ». Cette option ne pourra plus être modifiée par la suite.\n- Complétez soigneusement et entièrement toutes les informations demandées, prenez le temps nécessaire.\n- N'oubliez pas d'indiquer une adresse de site internet.\n- Des modèles et des informations utiles sont disponibles dans la documentation ; en cas de doute, consultez-la d'abord.\n- Téléchargez uniquement les documents figurant sur la liste des documents autorisés."
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

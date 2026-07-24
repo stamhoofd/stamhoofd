@@ -1607,6 +1607,18 @@
     "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in.",
     "translation": "Tous les membres doivent se réinscrire pour la nouvelle année scoute, ou inscris-toi à nouveau toi-même."
   },
+  "%Zg8": {
+    "original": "In onbekend scoutsjaar",
+    "translation": "Dans une année scoute inconnue."
+  },
+  "%ZgE": {
+    "original": "Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw eenheid? Wij gebruiken daarvoor Jamboree en we mogen 25 euro tegoed uitdelen aan alle eenheden die zich op Jamboree registreren via onze link.",
+    "translation": "Vous cherchez une gestion des membres simple ou souhaitez collecter des fonds avec une boutique en ligne pour votre unité ? Nous utilisons Jamboree pour cela et pouvons offrir un crédit de 25 euro à toutes les unités qui s’inscrivent sur Jamboree via notre lien."
+  },
+  "%ZgG": {
+    "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Eenheid ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
+    "translation": "- Sélectionnez la bonne forme d'entreprise dans Stripe.\n- Si vous n’êtes pas une ASBL mais une unité de fait, choisissez « Unité SANS personnalité juridique ». Vous ne pourrez plus modifier ce choix par la suite.\n- Complétez chaque champ correctement et complètement, prenez le temps nécessaire.\n- Assurez-vous de bien indiquer une adresse de site web.\n- Vous trouvez des modèles et informations dans la documentation, consultez-la d’abord en cas de doute.\n- Téléchargez uniquement les documents figurant sur la liste des documents autorisés."
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs peuvent se connecter via votre propre système de compte, séparément de Jamboree. Pour Microsoft, vous pouvez"

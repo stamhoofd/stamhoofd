@@ -18495,9 +18495,81 @@
     "original": "Tel gezinsleden mee als bestaande leden",
     "translation": "Compter les membres de la famille comme membres existants."
   },
+  "%Zfx": {
+    "original": "Eén ontvanger heeft de email als spam gemarkeerd",
+    "translation": "Un destinataire a marqué l'e-mail comme indésirable."
+  },
+  "%Zfy": {
+    "original": "Eén ontvanger kon de email niet ontvangen (soft bounce)",
+    "translation": "Un destinataire n'a pas pu recevoir l'e-mail (rejet temporaire)."
+  },
+  "%Zfz": {
+    "original": "Er is nog maar 1 stuk beschikbaar van {name}",
+    "translation": "Il ne reste plus qu’1 exemplaire de {name} disponible."
+  },
   "%Zg": {
     "original": "Login knop tekst",
     "translation": "Texte du bouton Connexion"
+  },
+  "%Zg0": {
+    "original": "Terugbetaling voor {group}",
+    "translation": "Remboursement pour {group}"
+  },
+  "%Zg1": {
+    "original": "Voor {date}",
+    "translation": "Avant le {date}"
+  },
+  "%Zg3": {
+    "original": "Hiermee bevestig je zelf een geldig Peppol-ID te hebben ingevuld en ga je akkoord dat we Peppol facturen niet langer via het ondernemingsnummer versturen.",
+    "translation": "Vous confirmez avoir saisi un identifiant Peppol valide et acceptez que nous n’envoyions plus les factures Peppol via le numéro d’entreprise."
+  },
+  "%Zg4": {
+    "original": "Volgende zaken zouden ontbreken:",
+    "translation": "Les éléments suivants semblent manquer :"
+  },
+  "%Zg6": {
+    "original": "Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld",
+    "translation": "Vous ne disposez pas des droits nécessaires pour filtrer ce champ de données."
+  },
+  "%Zg7": {
+    "original": "Weet je zeker dat je {count} uitnodigingen wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer {count} invitations ?"
+  },
+  "%Zg8": {
+    "original": "In onbekend werkjaar",
+    "translation": "Dans une année associative inconnue."
+  },
+  "%Zg9": {
+    "original": "Datum vóór de einddatum waarop de aansluitingstatus overschakelt op ‘verlopen’",
+    "translation": "Date avant la date de fin où le statut d'affiliation passe à 'expiré'."
+  },
+  "%ZgA": {
+    "original": "Configureer eerst minstens één soort activiteit. Ga naar 'Instellingen' → 'Soorten activiteiten' in het Administratieportaal.",
+    "translation": "Veuillez d'abord configurer au moins un type d'activité. Allez dans « Paramètres » → « Types d’activités » dans le Portail d’administration."
+  },
+  "%ZgB": {
+    "original": "Aantal leden",
+    "translation": "Nombre de membres"
+  },
+  "%ZgC": {
+    "original": "de bankkaart",
+    "translation": "la carte bancaire"
+  },
+  "%ZgD": {
+    "original": "Eén ontvanger kon de email niet ontvangen (hard bounce)",
+    "translation": "Un destinataire n'a pas pu recevoir l'e-mail (rejet définitif)."
+  },
+  "%ZgE": {
+    "original": "Op zoek naar gemakkelijke ledenadministratie of wil je geld inzamelen via een webshop voor jouw vereniging? Wij gebruiken daarvoor Stamhoofd en we mogen 25 euro tegoed uitdelen aan alle verenigingen die zich op Stamhoofd registreren via onze link.",
+    "translation": "Vous cherchez une gestion des membres simple ou souhaitez collecter des fonds avec une boutique en ligne pour votre association ? Nous utilisons Stamhoofd pour cela et pouvons offrir un crédit de 25 euro à toutes les associations qui s’inscrivent sur Stamhoofd via notre lien."
+  },
+  "%ZgF": {
+    "original": "Hallo!",
+    "translation": "Bonjour !"
+  },
+  "%ZgG": {
+    "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Vereniging ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
+    "translation": "- Sélectionnez la bonne forme d'entreprise dans Stripe.\n- Si vous n’êtes pas une ASBL mais une association de fait, choisissez « Association SANS personnalité juridique ». Vous ne pourrez plus modifier ce choix par la suite.\n- Complétez chaque champ correctement et complètement, prenez le temps nécessaire.\n- Assurez-vous de bien indiquer une adresse de site web.\n- Vous trouvez des modèles et informations dans la documentation, consultez-la d’abord en cas de doute.\n- Téléchargez uniquement les documents figurant sur la liste des documents autorisés."
   },
   "%Zh": {
     "original": "Toegestane domeinnamen",

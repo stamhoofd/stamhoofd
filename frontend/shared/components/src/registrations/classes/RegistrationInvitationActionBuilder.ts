@@ -16,13 +16,13 @@ export function useRegistrationInvitationActionBuilder() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    return (options: {group: Group, eventOrigin: RegistrationInvitationEvenOrigin}) => {
+    return (options: { group: Group; eventOrigin: RegistrationInvitationEvenOrigin }) => {
         return new RegistrationInvitationActionBuilder({
             ...options,
             context: context.value,
             owner,
         });
-    }
+    };
 }
 
 export class RegistrationInvitationActionBuilder {
@@ -32,14 +32,14 @@ export class RegistrationInvitationActionBuilder {
     private readonly eventOrigin: RegistrationInvitationEvenOrigin;
 
     get hasWrite() {
-        return this.context.auth.canAccessGroup(this.group, PermissionLevel.Write)
+        return this.context.auth.canAccessGroup(this.group, PermissionLevel.Write);
     }
 
     constructor(settings: {
         group: Group;
         context: SessionContext;
         owner: any;
-        eventOrigin: RegistrationInvitationEvenOrigin
+        eventOrigin: RegistrationInvitationEvenOrigin;
     }) {
         this.group = settings.group;
         this.context = settings.context;
@@ -67,64 +67,64 @@ export class RegistrationInvitationActionBuilder {
             organizationId: this.group.organizationId,
             context: this.context,
             owner: this.owner,
-            eventOrigin: this.eventOrigin
-        })
-        
+            eventOrigin: this.eventOrigin,
+        });
     }
 }
 
-export function getDeleteInvitationAction({organizationId, context, owner, eventOrigin, afterDelete}: {organizationId: string, context: SessionContext, owner: any, eventOrigin: RegistrationInvitationEvenOrigin | undefined, afterDelete?: () => void}): TableAction<RegistrationInvitation> | null {
-        
-        return new InMemoryTableAction({
-            name: $t('%Kk'),
-            destructive: true,
-            priority: 1,
-            groupIndex: 100,
-            needsSelection: true,
-            allowAutoSelectAll: false,
-            icon: 'trash',
-            handler: async (invitations: RegistrationInvitation[]) => {
-                const message = invitations.length === 1 ? $t('%1Tv', {name: invitations[0].member.name}) : $t('Weet je zeker dat je {count} uitnodigingen wilt verwijderen?', {count: invitations.length});
-                const isConfirm = await CenteredMessage.confirm(message, $t('%Kk'));
+export function getDeleteInvitationAction({ organizationId, context, owner, eventOrigin, afterDelete }: { organizationId: string; context: SessionContext; owner: any; eventOrigin: RegistrationInvitationEvenOrigin | undefined; afterDelete?: () => void }): TableAction<RegistrationInvitation> | null {
+    return new InMemoryTableAction({
+        name: $t('%Kk'),
+        destructive: true,
+        priority: 1,
+        groupIndex: 100,
+        needsSelection: true,
+        allowAutoSelectAll: false,
+        icon: 'trash',
+        handler: async (invitations: RegistrationInvitation[]) => {
+            const message = invitations.length === 1
+                ? $t('%1Tv', { name: invitations[0].member.name })
+                : $t('%Zg7', { count: invitations.length });
+            const isConfirm = await CenteredMessage.confirm(message, $t('%Kk'));
 
-                if (isConfirm) {
-                    deleteInvitations({
-                        invitations,
-                        organizationId,
-                        context,
-                        owner,
-                        eventOrigin,
-                        afterDelete
-                    })
+            if (isConfirm) {
+                deleteInvitations({
+                    invitations,
+                    organizationId,
+                    context,
+                    owner,
+                    eventOrigin,
+                    afterDelete,
+                })
                     .catch(console.error);
-                }
-            },
-        });
-    }
-
-async function deleteInvitations({invitations, organizationId, context, owner, eventOrigin, afterDelete}: {invitations: RegistrationInvitation[], organizationId: string, context: SessionContext, owner: any, eventOrigin: RegistrationInvitationEvenOrigin | undefined, afterDelete?: () => void}) {
-        const patchableArray: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
-        invitations.forEach(i => patchableArray.addDelete(i.id));
-    
-        try {
-            await context.getAuthenticatedServerForOrganization(organizationId).request({
-                method: 'PATCH',
-                path: '/registration-invitations',
-                body: patchableArray,
-                owner
-            });
-
-            RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set(invitations.map(i => i.group.id)), origin: eventOrigin}).catch(console.error);
-
-            if (afterDelete) {
-                afterDelete();
             }
-        } catch (e) {
-            console.error(e);
-            Toast.fromError(e).show();
-            return;
+        },
+    });
+}
+
+async function deleteInvitations({ invitations, organizationId, context, owner, eventOrigin, afterDelete }: { invitations: RegistrationInvitation[]; organizationId: string; context: SessionContext; owner: any; eventOrigin: RegistrationInvitationEvenOrigin | undefined; afterDelete?: () => void }) {
+    const patchableArray: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+    invitations.forEach(i => patchableArray.addDelete(i.id));
+
+    try {
+        await context.getAuthenticatedServerForOrganization(organizationId).request({
+            method: 'PATCH',
+            path: '/registration-invitations',
+            body: patchableArray,
+            owner,
+        });
+
+        RegistrationInvitationEventBus.sendEvent('updated', { groupIds: new Set(invitations.map(i => i.group.id)), origin: eventOrigin }).catch(console.error);
+
+        if (afterDelete) {
+            afterDelete();
         }
-    
-        const successMessage = invitations.length === 1 ? $t('%1Tu') : $t('%1U8', { count: invitations.length });
-        new Toast(successMessage, 'success green').show();
+    } catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
+        return;
     }
+
+    const successMessage = invitations.length === 1 ? $t('%1Tu') : $t('%1U8', { count: invitations.length });
+    new Toast(successMessage, 'success green').show();
+}

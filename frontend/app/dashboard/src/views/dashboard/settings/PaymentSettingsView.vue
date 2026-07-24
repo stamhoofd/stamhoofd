@@ -250,13 +250,13 @@
                             </p>
 
                             <template v-if="profile.status === 'verified'" #right>
-                                <span class="icon success green" v-tooltip="$t('%O1')" />
+                                <span v-tooltip="$t('%O1')" class="icon success green" />
                             </template>
                             <template v-else-if="profile.status === 'unverified'" #right>
-                                <span class="icon clock gray" v-tooltip="$t('%O2')" />
+                                <span v-tooltip="$t('%O2')" class="icon clock gray" />
                             </template>
                             <template v-else #right>
-                                <span class="icon canceled red" v-tooltip="$t('%O3')" />
+                                <span v-tooltip="$t('%O3')" class="icon canceled red" />
                             </template>
                         </STListItem>
                     </STList>
@@ -746,7 +746,11 @@ let didReadStripe = false;
 async function createStripeAccount() {
     if (isBelgium.value) {
         const time = new Date();
-        if ((!await CenteredMessage.confirm($t('%1Pe'), $t('%1Oj'), $t('- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.')))) {
+        if ((!await CenteredMessage.confirm(
+            $t('%1Pe'),
+            $t('%1Oj'),
+            $t('%ZgG'),
+        ))) {
             return;
         }
 

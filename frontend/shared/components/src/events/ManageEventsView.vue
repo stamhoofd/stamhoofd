@@ -256,7 +256,7 @@ function blurFocus() {
 async function addEvent(template?: Event) {
     if (eventTypes.value.length === 0) {
         if (auth.hasFullPlatformAccess()) {
-            Toast.error($t('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.')).show();
+            Toast.error($t(`%ZgA`)).show();
         } else {
             Toast.error($t(`%ye`)).show();
         }

@@ -522,7 +522,9 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'No permissions to filter on record ' + key,
-                            human: result.record ? $t(`%1Bc`, { recordName: result.record.name }) : $t(`Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld`),
+                            human: result.record
+                                ? $t(`%1Bc`, { recordName: result.record.name })
+                                : $t(`%Zg6`),
                             statusCode: 400,
                         });
                     }

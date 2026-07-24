@@ -249,15 +249,16 @@ export class StripeAccount extends AutoEncoder {
             const missing = [PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.iDEAL].filter(m => !this.meta.paymentMethods.includes(m));
             const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ', ', ' ' + $t(`%M1`) + ' ');
             const missingText = this.missingData;
+            const m = $t(`%Zg4`);
 
             if (missing.length === 1) {
                 return {
-                    text: $t(`%nh`, { method: text }) + ' ' + (missingText ? (' ' + $t(`Volgende zaken zouden ontbreken:`) + ' ' + missingText + '.') : ''),
+                    text: $t(`%nh`, { method: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
                     type: 'error',
                 };
             }
             return {
-                text: $t(`%ni`, { methods: text }) + ' ' + (missingText ? (' ' + $t(`Volgende zaken zouden ontbreken:`) + ' ' + missingText + '.') : ''),
+                text: $t(`%ni`, { methods: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
                 type: 'error',
             };
         }

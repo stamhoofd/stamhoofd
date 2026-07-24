@@ -2,9 +2,9 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasWrite" class="button icon edit" type="button" v-tooltip="$t(`%Go`)" @click="editOrganization" />
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" v-tooltip="$t('%Gk')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" v-tooltip="$t('%Gl')" @click="goForward" />
+                <button v-if="hasWrite" v-tooltip="$t(`%Go`)" class="button icon edit" type="button" @click="editOrganization" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('%Gk')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('%Gl')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -102,7 +102,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Aantal leden' ) }}
+                        {{ $t('%ZgB') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         <MemberCountSpan

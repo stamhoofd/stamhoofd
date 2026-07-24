@@ -31,7 +31,15 @@
     <template v-if="canEditPeppol">
         <STInputBox class="max">
             <STList>
-                <CheckboxListItem v-model="hasCustomPeppolEndpointId" :label="$t('%ZcR')" :description="!hasCustomPeppolEndpointId && hasVATNumber && company.peppolEndpointId ? $t('%Zch', {peppolId: company.peppolEndpointId.fullId }) : (hasVATNumber ? $t('Hiermee bevestig je zelf een geldig Peppol-ID te hebben ingevuld en ga je akkoord dat we Peppol facturen niet langer via het ondernemingsnummer versturen.') : '')">
+                <CheckboxListItem
+                    v-model="hasCustomPeppolEndpointId"
+                    :label="$t('%ZcR')"
+                    :description="!hasCustomPeppolEndpointId && hasVATNumber && company.peppolEndpointId
+                        ? $t('%Zch', {peppolId: company.peppolEndpointId.fullId })
+                        : (hasVATNumber
+                            ? $t('%Zg3')
+                            : '')"
+                >
                     <div class="option">
                         <div v-if="hasCustomPeppolEndpointId" class="split-inputs">
                             <STInputBox :title="$t('%1LP')">
