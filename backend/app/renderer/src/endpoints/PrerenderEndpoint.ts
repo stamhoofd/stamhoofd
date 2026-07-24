@@ -10,15 +10,15 @@ import { HtmlToPdfEndpoint } from './HtmlToPdfEndpoint.js';
 type Params = Record<string, never>;
 type Body = undefined;
 class Query extends AutoEncoder {
-    @field({decoder: new URLDecoder()})
-    url: URL
+    @field({ decoder: new URLDecoder() })
+    url: URL;
 }
 
 type Data = {
     html: string;
     headers: Record<string, string>;
-    statusCode: number
-}
+    statusCode: number;
+};
 
 type ResponseBody = string;
 
@@ -27,7 +27,7 @@ type ResponseBody = string;
  */
 
 export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = Query as Decoder<Query>
+    queryDecoder = Query as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
@@ -43,15 +43,14 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const url = request.query.url.href
+        const url = request.query.url.href;
 
-        console.log('Prerendering ' + url)
+        console.log('Prerendering ' + url);
 
         let data: Data | null = null;
         try {
             data = await PrerenderEndpoint.getUrlHtml(url, { retryCount: 2, startDate: new Date() });
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
         if (!data) {
@@ -62,25 +61,53 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
         const response = new Response(data.html);
-        data.headers['content-type'] = 'text/html'
-        response.headers = data.headers
-        response.status = data.statusCode
+        data.headers['content-type'] = 'text/html';
+        response.headers = data.headers;
+        response.status = data.statusCode;
         return response;
     }
-    
-    static readonly CACHE_TTL_MS = 60 * 1000 * 60 * 12; // 12 hours
-    static fileCache = new TTLFileCache('prerender', this.CACHE_TTL_MS)
 
-    static async getUrlHtml(url: string, options: { retryCount: number; startDate: Date }): Promise<Data | null> {        
+    static readonly CACHE_TTL_MS = 60 * 1000 * 60 * 12; // 12 hours
+    static fileCache = new TTLFileCache('prerender', this.CACHE_TTL_MS);
+
+    /**
+     * Response headers we never copy from the prerendered page onto our own response
+     */
+    static readonly SKIPPED_HEADERS = new Set([
+        'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization', 'te', 'trailer',
+        'transfer-encoding', 'upgrade', 'via', 'content-length', 'content-encoding', 'set-cookie', 'server',
+        'content-security-policy',
+    ]);
+
+    static cleanHeaders(headers: Record<string, string | undefined>): Record<string, string> {
+        const cleanedHeaders: Record<string, string> = {};
+        for (const key of Object.keys(headers)) {
+            const rawValue = headers[key];
+            if (!rawValue) {
+                continue;
+            }
+            const l = key.toLowerCase();
+            if (this.SKIPPED_HEADERS.has(l)) {
+                continue;
+            }
+            if (/[\r\n]/.test(rawValue)) {
+                continue;
+            }
+            cleanedHeaders[l] = rawValue;
+        }
+        return cleanedHeaders;
+    }
+
+    static async getUrlHtml(url: string, options: { retryCount: number; startDate: Date }): Promise<Data | null> {
         const existing = await this.fileCache.checkCache(url, this.CACHE_TTL_MS);
         if (existing) {
             try {
                 const d = JSON.parse(existing);
 
-                if (typeof d === 'object' && d !== null && 'html' in d && 'statusCode' in d && 'headers' in d)  {
+                if (typeof d === 'object' && d !== null && 'html' in d && 'statusCode' in d && 'headers' in d) {
                     return d;
                 } else {
-                    console.error('Invalid cached data point for ' + url)
+                    console.error('Invalid cached data point for ' + url);
                 }
             } catch (e) {
                 console.error(e);
@@ -92,7 +119,7 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 const page = await browser.newPage();
 
                 await page.setUserAgent({
-                    userAgent: 'prerender'
+                    userAgent: 'prerender',
                 });
 
                 await page.setJavaScriptEnabled(true);
@@ -144,10 +171,10 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                             return el ? el.getAttribute('content')?.replace(/^Location:\s*/i, '') : null;
                         });
                     if (dmetaLocation) {
-                        metaLocation = dmetaLocation
+                        metaLocation = dmetaLocation;
                     } else {
                         // something went wrong...
-                        console.error('Missing Location header')
+                        console.error('Missing Location header');
                         effectiveStatus = 500;
                     }
                 }
@@ -156,11 +183,11 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 // Strip <script> tags and <link rel="preload|modulepreload"> from the DOM
                 await page.evaluate(() => {
                     // Remove all script tags
-                    document.querySelectorAll('script').forEach((el) => el.remove());
+                    document.querySelectorAll('script').forEach(el => el.remove());
 
                     // Remove preload / modulepreload link tags (removePreloads plugin)
                     document.querySelectorAll('link[rel="preload"][as="script"], link[rel="prefetch"][as="script"], link[rel="prefetch"][as="style"], link[rel="modulepreload"][as="script"]')
-                        .forEach((el) => el.remove());
+                        .forEach(el => el.remove());
                 });
 
                 // Ibject <base href="url here" />
@@ -168,9 +195,8 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 if (STAMHOOFD.environment === 'test') {
                     await page.evaluate(() => {
                         const child = document.createElement('base');
-                        child.href = location.href; 
-                        document.head.prepend(child)
-
+                        child.href = location.href;
+                        document.head.prepend(child);
                     });
                 }
 
@@ -181,18 +207,8 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     return null;
                 }
 
-                // lowercase all headers
-                const cleanedHeaders: Record<string, string> = {};
-                for (const key of Object.keys(headers)) {
-                    if (!headers[key]) {
-                        continue;
-                    }
-                    const l = key.toLowerCase();
-                    if (['connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization', 'te', 'trailer', 'transfer-encoding', 'upgrade', 'via', 'content-length', 'content-encoding', 'set-cookie', 'server'].includes(l)) {
-                        continue;
-                    }
-                    cleanedHeaders[l] = headers[key]
-                }
+                // lowercase, filter and sanitize the upstream headers before forwarding them
+                const cleanedHeaders = PrerenderEndpoint.cleanHeaders(headers);
 
                 if (metaLocation) {
                     cleanedHeaders.location = metaLocation;
@@ -200,9 +216,9 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 delete cleanedHeaders.connection;
 
                 return {
-                    html: '<!doctype html>' + html, 
-                    statusCode: effectiveStatus, 
-                    headers: cleanedHeaders
+                    html: '<!doctype html>' + html,
+                    statusCode: effectiveStatus,
+                    headers: cleanedHeaders,
                 };
             } catch (e) {
                 console.error('Failed to render url', e);
@@ -217,11 +233,9 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         // Store in cache
         if (response !== null) {
-            await this.fileCache.cacheFile(url, JSON.stringify(response))
+            await this.fileCache.cacheFile(url, JSON.stringify(response));
             return response;
-
         }
         return null;
-
     }
 }
