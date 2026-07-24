@@ -250,11 +250,11 @@ export class MollieService {
 
             details: PaymentMandateDetails.create({
                 name: ('consumerName' in details ? details.consumerName : details.cardHolder) ?? undefined,
-                cardNumber: 'cardNumber' in details ? details.cardNumber : null,
-                iban: 'consumerAccount' in details ? Formatter.iban(details.consumerAccount) : null,
-                bic: ('consumerBic' in details ? details.consumerBic : undefined),
-                expiryDate: ('cardExpiryDate' in details ? DateTime.fromISO(details.cardExpiryDate, { zone: Formatter.timezone }).toJSDate() : null), // todo: parse date correctly in Brussels timezone!
-                brand: ('cardLabel' in details ? details.cardLabel : null),
+                cardNumber: 'cardNumber' in details && details.cardNumber ? details.cardNumber : null,
+                iban: 'consumerAccount' in details && details.consumerAccount ? Formatter.iban(details.consumerAccount) : null,
+                bic: ('consumerBic' in details && details.consumerBic ? details.consumerBic : undefined),
+                expiryDate: ('cardExpiryDate' in details && details.cardExpiryDate ? DateTime.fromISO(details.cardExpiryDate, { zone: Formatter.timezone }).toJSDate() : null), // todo: parse date correctly in Brussels timezone!
+                brand: ('cardLabel' in details && details.cardLabel ? details.cardLabel : null),
             }),
         });
     }
