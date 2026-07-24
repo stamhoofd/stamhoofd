@@ -39,7 +39,7 @@ exports[`$in > JSON > Can check if a string is in a JSON string array, case inse
   "params": [
     "["apple","banana","other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -48,7 +48,7 @@ exports[`$in > JSON > Can check if a string is in a JSON string array, case inse
   "params": [
     "["apple","banana","cherry","other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -57,7 +57,7 @@ exports[`$in > JSON > Can check if a string is in a JSON string array, case inse
   "params": [
     "["apple","banana","other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -66,7 +66,7 @@ exports[`$in > JSON > Can check if a string is in a JSON string array, case inse
   "params": [
     "["orange","kiwi"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -75,7 +75,7 @@ exports[`$in > JSON > Can check if a string is in a JSON string array, case inse
   "params": [
     "["pple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -84,7 +84,7 @@ exports[`$in > JSON > Can check if a string is in a JSON string array, case inse
   "params": [
     "["àpple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -93,7 +93,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["🍎","🍌","other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -102,7 +102,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["🍎","🍌","👩🏽‍🎤","other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -111,7 +111,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["👩🏽‍🎤","other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -120,7 +120,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["👩🏽‍🎤"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -129,7 +129,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["other"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -138,7 +138,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["👩🏻‍🎤"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -147,7 +147,7 @@ exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Quer
   "params": [
     "["👩🏽"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -157,7 +157,7 @@ exports[`$in > JSON > Can check if null is in a JSON array > SQL Query for filte
     "null",
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?))",
 }
 `;
 
@@ -166,7 +166,7 @@ exports[`$in > JSON > Can check if null is in a JSON array > SQL Query for not m
   "params": [
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -175,7 +175,7 @@ exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for filter
   "params": [
     "[false,true]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -184,7 +184,7 @@ exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for filter
   "params": [
     "[false]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -195,7 +195,7 @@ exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for not ma
   "params": [
     "[0]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -204,7 +204,7 @@ exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for not ma
   "params": [
     "[true]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -213,7 +213,7 @@ exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter:
   "params": [
     "[5,15]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -222,7 +222,7 @@ exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter:
   "params": [
     "[5]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -231,7 +231,7 @@ exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter:
   "params": [
     "[15]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -240,7 +240,7 @@ exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter:
   "params": [
     "[99,15]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -251,7 +251,7 @@ exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for not mat
   "params": [
     "[6,10]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -260,7 +260,7 @@ exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for not mat
   "params": [
     "[99,14]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -269,7 +269,7 @@ exports[`$in > JSON > If a json array exists and does not contain null, it is no
   "params": [
     "[false]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -279,7 +279,7 @@ exports[`$in > JSON > If a json array exists and does not contain null, it is no
     "null",
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?))",
 }
 `;
 
@@ -289,7 +289,7 @@ exports[`$in > JSON > Including null also matches when a JSON path does not exis
     "null",
     "["apple","banana","cherry"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?))",
 }
 `;
 
@@ -298,7 +298,7 @@ exports[`$in > JSON > Including null also matches when a JSON path does not exis
   "params": [
     "["apple","banana","cherry"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
@@ -308,7 +308,7 @@ exports[`$in > JSON > Including null will also check on key existence for json a
     "null",
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?))",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE (JSON_CONTAINS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)) OR JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues") IS NULL OR (JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?))",
 }
 `;
 
@@ -326,7 +326,7 @@ exports[`$in > JSON > Including null will also check on key existence for json a
   "params": [
     "["apple"]",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(LOWER(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues")),?)",
 }
 `;
 
