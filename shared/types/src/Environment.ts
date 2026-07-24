@@ -210,6 +210,7 @@ export type RendererEnvironment = {
     readonly INTERNAL_SECRET_KEY: string;
     readonly translationNamespace: string;
     readonly platformName: string;
+    readonly HEALTH_ACCESS_KEY?: string;
 };
 
 /**
