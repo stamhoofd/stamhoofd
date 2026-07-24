@@ -43,7 +43,9 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const url = request.query.url.href;
+        // Strip click/campaign tracking parameters (e.g. ?fbclid) so we don't render and cache
+        // a separate copy of the same page for every unique tracking value.
+        const url = PrerenderEndpoint.stripTrackingParams(request.query.url.href);
 
         console.log('Prerendering ' + url);
 
@@ -78,6 +80,75 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         'transfer-encoding', 'upgrade', 'via', 'content-length', 'content-encoding', 'set-cookie', 'server',
         'content-security-policy',
     ]);
+
+    /**
+     * Query parameters used purely for click/campaign tracking. They never influence the
+     * rendered page, so we drop them before requesting and caching the prerender. This keeps
+     * the cache from fragmenting into near-identical entries (one per ?fbclid, ?gclid, ...).
+     */
+    static readonly TRACKING_QUERY_PARAMS = new Set([
+        'fbclid', // Facebook
+        'gclid', // Google Ads
+        'gclsrc', // Google Ads
+        'dclid', // Google DoubleClick
+        'wbraid', // Google Ads
+        'gbraid', // Google Ads
+        'msclkid', // Microsoft / Bing Ads
+        'yclid', // Yandex
+        'twclid', // Twitter / X
+        'ttclid', // TikTok
+        'igshid', // Instagram
+        'mc_cid', // Mailchimp
+        'mc_eid', // Mailchimp
+        '_hsenc', // HubSpot
+        '_hsmi', // HubSpot
+        'vero_id', // Vero
+        'vero_conv', // Vero
+        'oly_anon_id', // Omeda
+        'oly_enc_id', // Omeda
+        '_openstat', // Openstat
+    ]);
+
+    /**
+     * Any query parameter whose name starts with one of these prefixes is treated as tracking
+     * (e.g. utm_source, utm_medium, pk_campaign, mtm_kwd).
+     */
+    static readonly TRACKING_QUERY_PREFIXES = ['utm_', 'pk_', 'piwik_', 'mtm_', 'matomo_'];
+
+    static isTrackingParam(key: string): boolean {
+        const l = key.toLowerCase();
+        if (this.TRACKING_QUERY_PARAMS.has(l)) {
+            return true;
+        }
+        return this.TRACKING_QUERY_PREFIXES.some(prefix => l.startsWith(prefix));
+    }
+
+    /**
+     * Remove tracking query parameters from a URL. Returns the original string untouched when it
+     * isn't a valid absolute URL or when there is nothing to strip (so the common case keeps its
+     * exact formatting).
+     */
+    static stripTrackingParams(rawUrl: string): string {
+        let parsed: URL;
+        try {
+            parsed = new URL(rawUrl);
+        } catch {
+            return rawUrl;
+        }
+
+        let changed = false;
+        for (const key of [...parsed.searchParams.keys()]) {
+            if (this.isTrackingParam(key)) {
+                parsed.searchParams.delete(key);
+                changed = true;
+            }
+        }
+
+        if (!changed) {
+            return rawUrl;
+        }
+        return parsed.href;
+    }
 
     static cleanHeaders(headers: Record<string, string | undefined>): Record<string, string> {
         const cleanedHeaders: Record<string, string> = {};

@@ -100,6 +100,43 @@ describe('Endpoint.Prerender', () => {
         }));
     });
 
+    describe('stripTrackingParams', () => {
+        test('Strips a single tracking parameter (fbclid)', () => {
+            expect(PrerenderEndpoint.stripTrackingParams('https://shop.stamhoofd.be/test/?fbclid=abc123'))
+                .toBe('https://shop.stamhoofd.be/test/');
+        });
+
+        test('Keeps non-tracking parameters and drops tracking ones', () => {
+            expect(PrerenderEndpoint.stripTrackingParams('https://shop.stamhoofd.be/test/?fbclid=abc&page=2&utm_source=news'))
+                .toBe('https://shop.stamhoofd.be/test/?page=2');
+        });
+
+        test('Strips utm_* prefixed parameters', () => {
+            expect(PrerenderEndpoint.stripTrackingParams('https://shop.stamhoofd.be/test/?utm_source=nl&utm_medium=email&utm_campaign=x'))
+                .toBe('https://shop.stamhoofd.be/test/');
+        });
+
+        test('Matches tracking parameter names case-insensitively', () => {
+            expect(PrerenderEndpoint.stripTrackingParams('https://shop.stamhoofd.be/test/?FBCLID=abc&UTM_Source=x'))
+                .toBe('https://shop.stamhoofd.be/test/');
+        });
+
+        test('Returns the original string unchanged when there is nothing to strip', () => {
+            const url = 'https://shop.stamhoofd.be/test/?page=2&sort=name';
+            expect(PrerenderEndpoint.stripTrackingParams(url)).toBe(url);
+        });
+
+        test('Leaves a URL without query parameters untouched', () => {
+            const url = 'https://shop.stamhoofd.be/test/';
+            expect(PrerenderEndpoint.stripTrackingParams(url)).toBe(url);
+        });
+
+        test('Does not treat a parameter merely containing a tracking name as tracking', () => {
+            const url = 'https://shop.stamhoofd.be/test/?myfbclid=x&customization=y';
+            expect(PrerenderEndpoint.stripTrackingParams(url)).toBe(url);
+        });
+    });
+
     describe('cleanHeaders', () => {
         test('Ignores the Content-Security-Policy header (the renderer sets its own via CORSMiddleware)', () => {
             // Caddy sets two CSP headers on documents; Puppeteer hands them back as one newline-joined
