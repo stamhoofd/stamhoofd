@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/email",
-    "version": "2.137.0",
+    "version": "2.137.1",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -21,7 +21,7 @@
         "uuid": "14.0.0"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.137.0",
+        "@stamhoofd/test-utils": "2.137.1",
         "@types/html-to-text": "9.0.4",
         "@types/nodemailer": "8.0.1",
         "@types/uuid": "8.3.4",
