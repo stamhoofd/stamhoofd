@@ -47,9 +47,10 @@
                 </template>
 
                 <template v-if="type === GroupType.WaitingList">
-                    <div class="split-inputs">
-                        <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
-                    </div>
+                    <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
+                    <p v-if="usedByGroupsDescription && !isNew" class="style-description-small">
+                        {{ usedByGroupsDescription }}
+                    </p>
                 </template>
 
                 <TTextarea v-model="description" :placeholder="$t(`%dA`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
@@ -513,11 +514,11 @@
                 </template>
 
                 <p v-if="type === GroupType.Membership">
-                    {{ $t('%cg') }}
+                    {{ $t('Iedereen die niet kan inschrijven voor {group-name} (maar wel voldoet aan de restricties) kan inschrijven op een wachtlijst (als die geopend is). Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen.', {'group-name': patchedGroup.settings.name}) }}
                 </p>
 
-                <p v-if="type === GroupType.Membership" class="style-description-block">
-                    {{ $t('%ch') }}
+                <p v-if="waitingList && patchedGroup.isMoreRestrictiveOpenThan(waitingList)" class="warning-box">
+                    {{ $t('Als inschrijvingen voor {group-name} gesloten zijn, kunnen leden alsnog inschrijven voor de wachtlijst. Stem de openingstijden op elkaar af.', {'group-name': patchedGroup.settings.name}) }}
                 </p>
 
                 <STList v-if="availableWaitingLists.length">
@@ -540,6 +541,10 @@
                             {{ list.settings.name }}
                         </h3>
                         <p class="style-description-small pre-wrap" v-text="waitingListDescription" />
+
+                        <p class="tags-without-background">
+                            <GroupTag :group="list" />
+                        </p>
 
                         <template #right>
                             <button class="button icon edit gray" type="button" @click="editWaitingList(list)" />
@@ -593,30 +598,30 @@
                         </template>
 
                         <h3 class="style-title-list">
+                            {{ $t('Geen voorrangsregels') }}
+                        </h3>
+
+                        <h3 class="style-description-small">
                             {{ $t('%cn') }}
                         </h3>
                     </STListItem>
 
-                    <STListItem :selectable="true" element-name="label" :disabled="!waitingList">
+                    <STListItem :selectable="true" element-name="label">
                         <template #left>
-                            <Radio v-model="waitingListType" :value="WaitingListType.ExistingMembersFirst" :disabled="!waitingList" />
+                            <Radio v-model="waitingListType" :value="WaitingListType.ExistingMembersFirst" />
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('%co') }}
+                            {{ $t('Nieuwe leden kunnen enkel inschrijven op de wachtlijst') }}
                         </h3>
 
-                        <p class="style-description-small">
-                            {{ $t('%cp') }}
-                        </p>
-
-                        <p v-if="!waitingList" class="style-description-small">
-                            {{ $t('%cq') }}
+                        <p v-if="!waitingList || waitingList.closed" class="style-description-small">
+                            {{ $t('Als er geen wachtlijst is, of als die gesloten is, kunnen nieuwe leden niet inschrijven.') }}
                         </p>
 
                         <div v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="option">
                             <Checkbox v-model="priorityForFamily">
-                                {{ $t('%cr') }}
+                                {{ $t('Tel gezinsleden mee als bestaande leden') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -666,7 +671,7 @@
                             </div>
 
                             <Checkbox v-model="priorityForFamily">
-                                {{ $t('%cx') }}
+                                {{ $t('Tel gezinsleden mee als bestaande leden') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -798,6 +803,7 @@ import { useOrganizationRegistrationRecordSettingsRoute } from '#records/useOrga
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { Request } from '@simonbackx/simple-networking';
+import GroupTag from '#auth/components/GroupTag.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -1008,16 +1014,25 @@ const availableWaitingLists = computed(() => {
     base = base.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
     return base.map((list) => {
-        const usedByGroups = patchedPeriod.value.groups.filter(g => g.waitingList?.id === list.id);
-        let d = usedByGroups?.length ? $t(`%14l`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`%M1`) + ' ') }) : $t(`%yg`);
+        let d = '';
         if (list.periodId !== patchedPeriod.value.period.id && list.settings.period) {
-            d = list.settings.period.nameShort + '\n' + d;
+            d = list.settings.period.nameShort;
         }
         return {
             list,
             description: d,
         };
     });
+});
+
+const usedByGroupsDescription = computed(() => {
+    const usedBy = patchedGroup.value.type === GroupType.WaitingList ? patchedPeriod.value.groups.filter(g => g.waitingList?.id === props.groupId) : [];
+
+    return usedBy.length > 0
+        ? $t('Deze wachtlijst wordt gebruikt door {group-names}.', {
+                'group-names': Formatter.joinLast(usedBy.map(g => g.settings.name.toString()), ', ', ' ' + $t('en') + ' '),
+            })
+        : $t('Deze wachtlijst wordt (nog) niet gebruikt');
 });
 
 const defaultAgeGroups = computed(() => {
@@ -1613,7 +1628,10 @@ async function addWaitingList() {
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
             name: TranslatedString.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
+            registrationStartDate: patchedGroup.value.settings.registrationStartDate ? new Date(patchedGroup.value.settings.registrationStartDate) : null,
+            registrationEndDate: patchedGroup.value.settings.registrationEndDate ? new Date(patchedGroup.value.settings.registrationEndDate) : null,
         }),
+        status: patchedGroup.value.status,
     });
 
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
@@ -1675,10 +1693,8 @@ async function editWaitingList(waitingList: Group) {
                         addGroupPatch({
                             waitingList: null,
                         });
-                        addPatch(patch);
-                    } else {
-                        addDependingPatch(patch);
                     }
+                    addPatch(patch);
                 },
             }),
         ],

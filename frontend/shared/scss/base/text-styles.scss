@@ -797,6 +797,10 @@
     &:empty {
         display: none;
     }
+
+    &+ .warning-box, &+ .info-box, &+ .error-box {
+        margin-top: 0px;
+    }
 }
 
 %style-description-block-large {

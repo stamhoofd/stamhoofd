@@ -602,11 +602,14 @@ export class GroupSettings extends AutoEncoder {
 
             let total: number = 0;
             let skip = false;
+            let hasOne = false;
 
             for (const option of menu.options) {
                 if (option.hidden) {
                     continue;
                 }
+
+                hasOne = true;
 
                 const remaining = option.getRemainingStock(item);
                 if (remaining === null) {
@@ -618,7 +621,7 @@ export class GroupSettings extends AutoEncoder {
                 total = total + remaining;
             }
 
-            if (!skip) {
+            if (!skip && hasOne) {
                 results.push(total);
             }
         }

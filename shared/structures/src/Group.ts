@@ -181,6 +181,45 @@ export class Group extends AutoEncoder {
         return false;
     }
 
+    /**
+     * Checks whether memebrs can register earlier for the passed group than for this group.
+     * Useful for checking whether a waiting list opens earlier than the normal group, which should be signaled to admins.
+     */
+    isMoreRestrictiveOpenThan(group: Group) {
+        if (this.status === GroupStatus.Closed) {
+            if (group.status !== GroupStatus.Closed) {
+                return true;
+            }
+            return false;
+        }
+
+        if (group.status === GroupStatus.Closed) {
+            return false;
+        }
+
+        if (this.settings.registrationStartDate) {
+            if (!group.settings.registrationStartDate) {
+                return true;
+            }
+            if (group.settings.registrationStartDate < this.settings.registrationStartDate) {
+                return true;
+            }
+            return false;
+        }
+
+        if (this.settings.registrationEndDate) {
+            if (!group.settings.registrationEndDate) {
+                return true;
+            }
+            if (group.settings.registrationEndDate > this.settings.registrationEndDate) {
+                return true;
+            }
+            return false;
+        }
+
+        return false;
+    }
+
     trimmedName(categoryName: string) {
         const name = this.settings.name.toString();
         if (name.toLocaleLowerCase().startsWith(categoryName.toLocaleLowerCase())) {
@@ -481,25 +520,27 @@ export class Group extends AutoEncoder {
         const preRegistrations = activePreRegistrationDate !== null;
         const allWaitingList = this.settings.waitingListType === WaitingListType.All;
 
-        if (activePreRegistrationDate !== null && (remainingStock === null || remainingStock > 0) && activePreRegistrationDate > now) {
-            tags.push({
-                icon: 'calendar',
-                title: $t('%1Y7', { date: Formatter.startDate(activePreRegistrationDate) }),
-                style: 'warn',
-            });
-        } else if (preRegistrations && (remainingStock === null || remainingStock > 0)) {
-            tags.push({
-                icon: 'calendar',
-                title: $t('%1bt', { date: Formatter.endDate(this.settings.registrationStartDate ?? new Date()) }),
-                style: 'warn',
-            });
-        }
-        if (this.notYetOpen) {
-            tags.push({
-                icon: 'calendar',
-                title: $t('%1Z9', { date: Formatter.startDate(this.settings.registrationStartDate ?? new Date()) }),
-                style: 'warn',
-            });
+        if (remainingStock !== 0 && !allWaitingList) {
+            if (activePreRegistrationDate !== null && (remainingStock === null || remainingStock > 0) && activePreRegistrationDate > now) {
+                tags.push({
+                    icon: 'calendar',
+                    title: $t('%1Y7', { date: Formatter.startDate(activePreRegistrationDate) }),
+                    style: 'warn',
+                });
+            } else if (preRegistrations && (remainingStock === null || remainingStock > 0)) {
+                tags.push({
+                    icon: 'calendar',
+                    title: $t('%1bt', { date: Formatter.endDate(this.settings.registrationStartDate ?? new Date()) }),
+                    style: 'warn',
+                });
+            }
+            if (this.notYetOpen) {
+                tags.push({
+                    icon: 'calendar',
+                    title: $t('%1Z9', { date: Formatter.startDate(this.settings.registrationStartDate ?? new Date()) }),
+                    style: 'warn',
+                });
+            }
         }
 
         if (options.app === 'dashboard') {
@@ -532,27 +573,29 @@ export class Group extends AutoEncoder {
             }
         }
 
-        if ((!this.closed || (this.status !== GroupStatus.Closed && options.app === 'dashboard')) && this.settings.registrationEndDate && (options.app === 'dashboard' || this.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
-            tags.push({
-                icon: 'lock',
-                title: $t('%1d3', { date: Formatter.endDate(this.settings.registrationEndDate) }),
-                style: 'warn',
-            });
-        }
+        if (remainingStock !== 0 && !allWaitingList) {
+            if ((!this.closed || (this.status !== GroupStatus.Closed && options.app === 'dashboard')) && this.settings.registrationEndDate && (options.app === 'dashboard' || this.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                tags.push({
+                    icon: 'lock',
+                    title: $t('%1d3', { date: Formatter.endDate(this.settings.registrationEndDate) }),
+                    style: 'warn',
+                });
+            }
 
-        if (tags.length === 0 && !this.closed && options.app === 'dashboard') {
-            tags.push({
-                icon: 'earth',
-                title: $t('%1EN'),
-                style: 'success',
-            });
-        }
-        if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockCreatingNewMembers) {
-            tags.push({
-                icon: 'disabled',
-                title: $t('%ZdL'),
-                style: 'warn',
-            });
+            if (tags.length === 0 && !this.closed && options.app === 'dashboard') {
+                tags.push({
+                    icon: 'earth',
+                    title: $t('%1EN'),
+                    style: 'success',
+                });
+            }
+            if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockCreatingNewMembers) {
+                tags.push({
+                    icon: 'disabled',
+                    title: $t('%ZdL'),
+                    style: 'warn',
+                });
+            }
         }
 
         if ((!this.closed || this.notYetOpen) && (remainingStock !== null && (remainingStock < 50 || options.app === 'dashboard'))) {
@@ -565,11 +608,36 @@ export class Group extends AutoEncoder {
                     style: 'warn',
                 });
             } else if (this.waitingList !== null && !this.waitingList.closed) {
-                tags.push({
-                    icon: 'clock',
-                    title: $t('%1W2'),
-                    style: 'error',
-                });
+                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Volzet, wachtlijst geopend tot {date}', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
+                        style: 'error',
+                    });
+                } else {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Volzet, wachtlijst geopend'),
+                        style: 'error',
+                    });
+                }
+            } else if (this.waitingList !== null && this.waitingList.notYetOpen && this.waitingList.settings.registrationStartDate) {
+                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Volzet, wachtlijst van {start-date} tot {end-date}', {
+                            'start-date': Formatter.startDate(this.waitingList.settings.registrationStartDate),
+                            'end-date': Formatter.endDate(this.waitingList.settings.registrationStartDate),
+                        }),
+                        style: 'error',
+                    });
+                } else {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Volzet, wachtlijst vanaf {date}', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
+                        style: 'error',
+                    });
+                }
             } else {
                 tags.push({
                     icon: 'disabled',
@@ -577,12 +645,39 @@ export class Group extends AutoEncoder {
                     style: 'error',
                 });
             }
-        } else if ((allWaitingList || this.closed) && this.waitingList !== null && !this.waitingList.closed) {
-            tags.push({
-                icon: 'clock',
-                title: $t('%1ZU'),
-                style: 'error',
-            });
+        } else if ((allWaitingList || this.closed) && this.waitingList !== null) {
+            if (!this.waitingList.closed) {
+                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Wachtlijst geopend tot {date}', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
+                        style: 'error',
+                    });
+                } else {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Wachtlijst geopend'),
+                        style: 'error',
+                    });
+                }
+            } else if ((!this.notYetOpen || allWaitingList || (options.app === 'dashboard' && this.isMoreRestrictiveOpenThan(this.waitingList))) && this.waitingList.notYetOpen && this.waitingList.settings.registrationStartDate) {
+                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Wachtlijst van {start-date} tot {end-date}', {
+                            'start-date': Formatter.startDate(this.waitingList.settings.registrationStartDate),
+                            'end-date': Formatter.endDate(this.waitingList.settings.registrationEndDate),
+                        }),
+                        style: 'error',
+                    });
+                } else {
+                    tags.push({
+                        icon: 'clock',
+                        title: $t('Wachtlijst vanaf {date}', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
+                        style: 'error',
+                    });
+                }
+            }
         }
 
         return tags;
