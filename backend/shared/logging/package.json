@@ -5,6 +5,18 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
+        },
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
     "files": [
         "src",
         "dist"

@@ -1,11 +1,16 @@
-import { SQLLogger } from '@stamhoofd/sql';
-
 class StaticCpuService {
     samples: number[];
     private maxSamples: number;
     private interval?: NodeJS.Timeout;
     // Current index = the last saved
     private currentIndex = 0;
+
+    /**
+     * Called after every saved sample with the current 5s average CPU usage. Kept generic so
+     * consumers (e.g. the api tuning SQL slow-query logging) can react to load without this
+     * package depending on them.
+     */
+    private sampleListeners: ((average5s: number) => void)[] = [];
 
     constructor() {
         this.maxSamples = 5 * 60; // 5 minutes of data
@@ -74,6 +79,14 @@ class StaticCpuService {
         }
     }
 
+    /**
+     * Register a listener that is called after every saved sample with the current 5s average CPU
+     * usage (in percent). Register before startMonitoring().
+     */
+    addSampleListener(listener: (average5s: number) => void) {
+        this.sampleListeners.push(listener);
+    }
+
     private async saveSample() {
         const sample = await this.takeSample(1000);
         this.samples[this.currentIndex] = sample;
@@ -85,15 +98,12 @@ class StaticCpuService {
             console.log(`[CPU] 5s: ${five.toFixed(2)}%\n[CPU] 1 min: ${min.toFixed(2)}%\n[CPU] 5 min: ${this.getAverage(60 * 5).toFixed(2)}%`);
         }
 
-        if (five > 80) {
-            // Danger zone, in this case we don't want to log all slow queries any longer because the information won't be trustworthy.
-            SQLLogger.slowQueryThresholdMs = null;
-        } else {
-            if (five < 20) {
-                // No load, safe to log all slow queries
-                SQLLogger.slowQueryThresholdMs = 300;
-            } else {
-                SQLLogger.slowQueryThresholdMs = 500;
+        for (const listener of this.sampleListeners) {
+            try {
+                listener(five);
+            }
+            catch (e) {
+                console.error('Error in CPU sample listener', e);
             }
         }
     }

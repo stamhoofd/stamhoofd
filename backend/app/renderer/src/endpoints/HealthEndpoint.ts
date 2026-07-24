@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/sim
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { CpuService } from '@stamhoofd/logging/CpuService';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -62,9 +63,13 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             });
         }
 
-        // The renderer has no async health signals yet; reaching this point means the process is up
-        // and serving requests. Renderer-specific checks can be pushed into `errors` in the future.
         const errors: string[] = [];
+
+        // The renderer is CPU-bound (Puppeteer). Sustained high load means it can no longer render
+        // pages in time, so report it as unhealthy so it can be taken out of rotation.
+        if (CpuService.getAverage(60) > 80) {
+            errors.push('CPU usage is too high');
+        }
 
         const health = ResponseBody.create({
             status: errors.length > 0 ? 'error' : 'ok',

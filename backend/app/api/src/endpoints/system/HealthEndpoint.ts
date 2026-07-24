@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/sim
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CpuService } from '../../services/CpuService.js';
+import { CpuService } from '@stamhoofd/logging/CpuService';
 import { StartupHealthService } from '../../services/StartupHealthService.js';
 
 type Params = Record<string, never>;

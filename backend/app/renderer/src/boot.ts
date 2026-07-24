@@ -2,6 +2,8 @@ import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';
+import { CpuService } from '@stamhoofd/logging/CpuService';
+import { TrustedIPWhitelist } from './classes/TrustedIPWhitelist.js';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -21,6 +23,11 @@ const start = async () => {
     console.log('Started Renderer.');
     loadLogger();
     await I18n.load();
+
+    // Load the trusted IP whitelist that guards the /prerender endpoint (no-op when not configured).
+    await TrustedIPWhitelist.shared.load();
+    TrustedIPWhitelist.shared.startAutoRefresh();
+
     const router = new Router();
     await router.loadEndpoints(import.meta.dirname + '/endpoints');
     router.endpoints.push(new CORSPreflightEndpoint());
@@ -36,6 +43,11 @@ const start = async () => {
     routerServer.addResponseMiddleware(CORSMiddleware);
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+
+    // Monitor CPU load so the /health endpoint can report an overloaded renderer as unhealthy.
+    if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
+        CpuService.startMonitoring();
+    }
 
     if (routerServer.server) {
         // Default timeout is a bit too short
