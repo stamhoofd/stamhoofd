@@ -302,6 +302,28 @@ export class InvoiceService {
         return model;
     }
 
+    static async retryInvoiceGenerationAndSending(model: Invoice) {
+        const hadPdf = !!model.pdf;
+        if (!model.pdf) {
+            // Create PDF
+            await InvoicePdfService.generatePdf(model);
+        }
+
+        if (!model.xml) {
+            await InvoiceXMlService.generateXml(model);
+        }
+
+        const organization = await Organization.getByID(model.organizationId);
+        if (!organization) {
+            console.error('Unexpected missing organization for ' + model.id);
+            return;
+        }
+
+        if (!await this.forwardInvoice(model, organization) && !model.didSendPeppol && !hadPdf) {
+            await this.sendCustomerEmail(model, organization);
+        }
+    }
+
     /**
      * Permanently delete an invoice.
      *

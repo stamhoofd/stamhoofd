@@ -57,6 +57,24 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
             invoices.push(model);
         }
 
+        for (const patch of request.body.getPatches()) {
+            const model = await Invoice.getByID(patch.id);
+            if (!model || model.organizationId !== organization.id) {
+                throw Context.auth.notFoundOrNoAccess($t('%ZcE'));
+            }
+
+            if (!model.number) {
+                // ignore
+                continue;
+            }
+
+            // Create PDF
+            if (patch.pdf === null) {
+                await InvoiceService.retryInvoiceGenerationAndSending(model);
+            }
+            invoices.push(model);
+        }
+
         for (const id of request.body.getDeletes()) {
             const model = await Invoice.getByID(id);
             if (!model || model.organizationId !== organization.id) {

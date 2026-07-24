@@ -187,16 +187,6 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
         }
 
-        for (const invoice of invoices) {
-            if (invoice.number && !invoice.pdf && STAMHOOFD.environment === 'development') {
-                await InvoicePdfService.generatePdf(invoice);
-            }
-
-            if (invoice.number && STAMHOOFD.environment === 'development') {
-                await InvoiceXMlService.generateXml(invoice);
-            }
-        }
-
         return new PaginatedResponse<InvoiceStruct[], LimitedFilteredRequest>({
             results: await AuthenticatedStructures.invoices(invoices, true),
             next,

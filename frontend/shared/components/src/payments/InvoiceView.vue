@@ -3,7 +3,7 @@
         <STNavigationBar :title="title">
             <template #right>
                 <button v-if="invoice.xml && invoice.pdf" v-tooltip="'Download PDF in plaats van XML (niet officieel)'" type="button" class="button icon color-pdf file-pdf" @click="downloadInvoicePdf(invoice)" />
-                <button type="button" class="button icon download gray" @click="downloadInvoice(invoice)" />
+                <button v-if="invoice.xml || invoice.pdf" type="button" class="button icon download gray" @click="downloadInvoice(invoice)" />
 
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hA')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hB')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
@@ -19,6 +19,14 @@
                 <span class="icon-spacer">{{ title }}</span>
             </h1>
             <STErrorsDefault :error-box="errors.errorBox" />
+
+            <p v-if="invoice.number && !invoice.pdf" class="error-box selectable with-button">
+                {{ $t('Aanmaak van factuur mislukt. Probeer het opnieuw') }}
+
+                <LoadingButton class="button text" type="button" :loading="isRetrying" @click="retrySending">
+                    {{ $t('Opnieuw proberen') }}
+                </LoadingButton>
+            </p>
 
             <STList class="info">
                 <STListItem v-if="invoice.invoicedAt">
@@ -157,14 +165,19 @@ import { useBackForward } from '#hooks/useBackForward.ts';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
-import type { Invoice } from '@stamhoofd/structures';
+import { Invoice } from '@stamhoofd/structures';
 import { InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import { Sorter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 import { useDownloadInvoice } from './hooks/useDownloadInvoice.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import { Toast } from '#overlays/Toast.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -181,5 +194,35 @@ const { hasNext, hasPrevious, goBack, goForward } = useBackForward('invoice', pr
 const errors = useErrors();
 const title = props.invoice.number ?? '/';
 const { downloadInvoice, downloadInvoicePdf } = useDownloadInvoice();
+
+const isRetrying = ref(false);
+const context = useContext();
+
+async function retrySending() {
+    if (isRetrying.value) {
+        return;
+    }
+    isRetrying.value = true;
+
+    try {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Invoice>;
+        arr.addPatch(Invoice.patch({
+            id: props.invoice.id,
+            pdf: null,
+        }));
+        const response = await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/invoices',
+            body: arr,
+            decoder: new ArrayDecoder(Invoice as Decoder<Invoice>),
+        });
+        deepSetArray([props.invoice], response.data);
+        Toast.success($t('Opnieuw verzonden')).show();
+    } catch (e) {
+        Toast.fromError(e).show();
+    } finally {
+        isRetrying.value = false;
+    }
+}
 
 </script>
