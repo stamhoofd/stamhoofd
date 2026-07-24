@@ -258,20 +258,46 @@ export class InvoicePdfService {
         const timeout = setTimeout(() => controller.abort(), 30_000);
 
         try {
-            // Issue with system trusted CA in development
-            const result = await fetch((STAMHOOFD.environment === 'development' ? 'http://' : 'https://') + STAMHOOFD.domains.rendererApi + '/v' + Version + '/html-to-pdf', {
-                method: 'POST',
-                body: form,
-                signal: controller.signal,
-            });
-            if (result.status === 200) {
-                // todo
-                const buffer = Buffer.from(await result.arrayBuffer());
-                const file = await this.uploadPdf(invoice, buffer);
+            if (STAMHOOFD.environment === 'test') {
+                const file = new File({
+                    id: uuidv4(),
+                    server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
+                    path: 'test.pdf',
+                    size: 0,
+                    name: (invoice.number ?? invoice.id),
+                    isPrivate: false,
+                    contentType: 'application/pdf',
+                });
                 invoice.pdf = file;
                 await invoice.save();
             } else {
+            // Issue with system trusted CA in development
+                const result = await fetch((STAMHOOFD.environment === 'development' ? 'http://' : 'https://') + STAMHOOFD.domains.rendererApi + '/v' + Version + '/html-to-pdf', {
+                    method: 'POST',
+                    body: form,
+                    signal: controller.signal,
+                });
+                if (result.status === 200) {
                 // todo
+                    const buffer = Buffer.from(await result.arrayBuffer());
+                    const file = await this.uploadPdf(invoice, buffer);
+                    invoice.pdf = file;
+                    await invoice.save();
+                } else {
+                    let txt = '';
+                    try {
+                        txt = await result.text();
+                    } catch (e) {
+                        txt = '<unreadable stream>';
+                        console.error('Could not read response', e);
+                    }
+                    console.error('Failed to generate invoice PDF. Non 200 statuscode: ', result.status, txt);
+                    throw new SimpleError({
+                        code: 'pdf_creation_timeout',
+                        message: 'Failed to generate invoice PDF',
+                        human: $t('Er ging iets mis bij het aanmaken van de factuur'),
+                    });
+                }
             }
         } catch (err) {
             console.error('Failed to generate invoice PDF', err);
