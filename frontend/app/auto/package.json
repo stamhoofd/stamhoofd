@@ -28,7 +28,7 @@
         "@stamhoofd/ticket-builder": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "vue": "3.5.38"
+        "vue": "3.5.40"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "*"

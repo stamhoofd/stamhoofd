@@ -38,7 +38,7 @@
     },
     "devDependencies": {
         "@types/formidable": "3.5.1",
-        "@types/luxon": "3.7.1",
+        "@types/luxon": "3.7.2",
         "@types/node": "22.20.1"
     },
     "license": "UNLICENCED",

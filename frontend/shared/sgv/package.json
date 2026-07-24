@@ -31,11 +31,11 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "vue": "3.5.38"
+        "vue": "3.5.40"
     },
     "devDependencies": {
-        "@vue/test-utils": "2.4.6",
+        "@vue/test-utils": "2.4.11",
         "eslint-plugin-stamhoofd": "*",
-        "vitest": "4.1.8"
+        "vitest": "4.1.10"
     }
 }

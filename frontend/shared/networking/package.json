@@ -28,7 +28,7 @@
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
-        "vue": "3.5.38",
+        "vue": "3.5.40",
         "file-saver": "2.0.5"
     },
     "devDependencies": {
