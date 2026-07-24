@@ -57,7 +57,7 @@
     "@zxcvbn-ts/language-common": "0.1.2",
     "@zxcvbn-ts/language-nl-be": "0.3.0",
     "@stamhoofd/cli": "*",
-    "argon2": "0.44.0",
+    "argon2": "0.45.0",
     "chart.js": "3.9.1",
     "core-js": "3.49.0",
     "ibantools": "4.5.4",
