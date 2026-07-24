@@ -274,10 +274,20 @@ export class InvoicePdfService {
                 // todo
             }
         } catch (err) {
+            console.error('Failed to generate invoice PDF', err);
+
             if (err instanceof DOMException && err.name === 'AbortError') {
-                throw new Error('Request timed out after 30s');
+                throw new SimpleError({
+                    code: 'pdf_creation_timeout',
+                    message: 'Failed to generate invoice PDF: timeout',
+                    human: $t('Er ging iets mis bij het aanmaken van de factuur'),
+                });
             }
-            console.error(err);
+            throw new SimpleError({
+                code: 'pdf_creation_failed',
+                message: 'Failed to generate invoice PDF',
+                human: $t('Er ging iets mis bij het aanmaken van de factuur'),
+            });
         } finally {
             clearTimeout(timeout);
         }
