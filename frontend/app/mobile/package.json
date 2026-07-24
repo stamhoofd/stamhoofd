@@ -46,7 +46,7 @@
     "@stamhoofd/structures": "*",
     "@stamhoofd/ticket-builder": "*",
     "@stamhoofd/utility": "*",
-    "plausible-tracker": "0.3.9",
+    "@plausible-analytics/tracker": "0.4.5",
     "vue": "3.5.40",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
