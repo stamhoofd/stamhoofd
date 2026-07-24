@@ -35,8 +35,8 @@
         "fast-xml-parser": "5.10.1",
         "openai": "4.104.0",
         "typescript": "5.9.3",
-        "uuid": "14.0.0",
-        "vitest": "4.1.8",
+        "uuid": "14.0.1",
+        "vitest": "4.1.10",
         "winston": "3.19.0"
     }
 }

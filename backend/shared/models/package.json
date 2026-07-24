@@ -31,7 +31,7 @@
     "dependencies": {
         "@aws-sdk/client-s3": "3.1090.0",
         "@aws-sdk/client-sesv2": "3.1090.0",
-        "@bwip-js/node": "4.11.1",
+        "@bwip-js/node": "4.11.2",
         "@mollie/api-client": "4.6.0",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.21.1",
@@ -41,14 +41,14 @@
         "handlebars": "4.7.9",
         "luxon": "3.7.2",
         "sharp": "0.35.1",
-        "uuid": "14.0.0"
+        "uuid": "14.0.1"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
         "@stamhoofd/test-utils": "2.137.1",
-        "@types/luxon": "3.7.1",
+        "@types/luxon": "3.7.2",
         "@types/uuid": "8.3.4",
-        "vitest": "4.1.8"
+        "vitest": "4.1.10"
     },
     "peerDependencies": {
         "@simonbackx/simple-database": "1.37.1",

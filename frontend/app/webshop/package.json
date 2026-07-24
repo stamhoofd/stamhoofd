@@ -29,7 +29,7 @@
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "blob-stream": "0.1.3",
-        "vue": "3.5.38"
+        "vue": "3.5.40"
     },
     "devDependencies": {
         "@stamhoofd/vite-config": "*",

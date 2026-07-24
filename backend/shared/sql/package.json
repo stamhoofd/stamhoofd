@@ -19,12 +19,12 @@
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1",
-        "lru-cache": "11.5.1"
+        "lru-cache": "11.5.2"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
         "@stamhoofd/test-utils": "2.137.1",
-        "vitest": "4.1.8"
+        "vitest": "4.1.10"
     },
     "peerDependencies": {
         "@simonbackx/simple-database": "1.37.1",
