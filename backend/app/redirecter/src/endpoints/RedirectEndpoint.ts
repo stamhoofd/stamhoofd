@@ -1,7 +1,6 @@
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Country } from '@stamhoofd/types/Country';
-import { clientIPFromForwardedFor } from '@stamhoofd/utility/IPRange.js';
 import { Geolocator } from '../classes/Geolocator.js';
 
 type Params = Record<string, never>;
@@ -15,8 +14,7 @@ export class RedirectEndpoint extends Endpoint<Params, Query, Body, ResponseBody
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        // Caddy (with trusted_proxies) forwards the original client as the left-most X-Forwarded-For entry.
-        const ip = clientIPFromForwardedFor(request.request.getIP());
+        const ip = request.request.getIP();
 
         const country = Geolocator.shared.getCountry(ip);
 

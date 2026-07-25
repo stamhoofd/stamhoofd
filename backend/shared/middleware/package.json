@@ -14,7 +14,7 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "1.21.1",
+        "@simonbackx/simple-endpoints": "1.22.0",
         "@simonbackx/simple-errors": "1.5.0",
         "@simonbackx/simple-logging": "1.0.1"
     },

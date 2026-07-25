@@ -60,16 +60,14 @@ function logRequestDetails(request: Request) {
                     json,
                 );
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (typeof body === 'string') {
                 logger.error(
                     ...requestPrefix(request, 'body'),
                     'Request body was invalid JSON ',
                     body,
                 );
-            }
-            else {
+            } else {
                 // Don't log
                 logger.error(
                     ...requestPrefix(request, 'body'),
@@ -87,7 +85,7 @@ function requestOneLiner(request: Request): (StyledText | string)[] {
         ' ',
         new StyledText(request.url).addClass('request', 'url'),
         ' (',
-        new StyledText(request.getIP()).addClass('request', 'ip'),
+        new StyledText(request.getIPs().join(', ')).addClass('request', 'ip'),
         '@',
         new StyledText(request.host).addClass('request', 'host'),
         ')',
@@ -164,8 +162,7 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
                         logRequestDetails(request);
                     }
                 }
-            }
-            else {
+            } else {
                 logger.error(
                     ...prefix,
                     'Request with internal error:',

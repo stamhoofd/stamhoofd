@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.37.1",
-        "@simonbackx/simple-endpoints": "1.21.1",
+        "@simonbackx/simple-endpoints": "1.22.0",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "2.137.2",
         "@stamhoofd/backend-middleware": "2.137.2",

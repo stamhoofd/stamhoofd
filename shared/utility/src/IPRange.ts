@@ -100,18 +100,6 @@ export function normalizeIP(ip: string): string {
     return mapped ? mapped[1] : trimmed;
 }
 
-/**
- * Extract the originating client IP from a value that may be an `X-Forwarded-For` chain
- * (`"client, proxy1, proxy2"`). A reverse proxy that trusts its upstreams (e.g. Caddy with
- * `trusted_proxies`) appends each hop, and sanitizes forged headers at the edge, so the left-most
- * entry is the original client. A plain single IP (or anything without a comma) passes through
- * unchanged.
- */
-export function clientIPFromForwardedFor(value: string): string {
-    const first = value.split(',')[0];
-    return (first ?? value).trim();
-}
-
 export function ipToBigInt(ip: string): { version: IPVersion; value: bigint } {
     const normalized = normalizeIP(ip);
     const version = getIPVersion(normalized);

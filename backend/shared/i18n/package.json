@@ -28,7 +28,7 @@
         "@simonbackx/simple-logging": "1.0.1"
     },
     "peerDependencies": {
-        "@simonbackx/simple-endpoints": "1.21.1",
+        "@simonbackx/simple-endpoints": "1.22.0",
         "@stamhoofd/locales": "*",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*"

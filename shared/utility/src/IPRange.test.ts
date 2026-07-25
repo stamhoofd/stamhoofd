@@ -1,4 +1,4 @@
-import { clientIPFromForwardedFor, getIPVersion, IPRange, IPRangeSet, ipToBigInt, normalizeIP } from './IPRange.js';
+import { getIPVersion, IPRange, IPRangeSet, ipToBigInt, normalizeIP } from './IPRange.js';
 
 describe('IPRange', () => {
     describe('getIPVersion', () => {
@@ -9,22 +9,6 @@ describe('IPRange', () => {
 
         test('throws on invalid input', () => {
             expect(() => getIPVersion('not-an-ip')).toThrow();
-        });
-    });
-
-    describe('clientIPFromForwardedFor', () => {
-        test('returns a single IP unchanged', () => {
-            expect(clientIPFromForwardedFor('1.2.3.4')).toBe('1.2.3.4');
-            expect(clientIPFromForwardedFor('2a02:578::1')).toBe('2a02:578::1');
-        });
-
-        test('takes the left-most entry of an X-Forwarded-For chain', () => {
-            expect(clientIPFromForwardedFor('1.2.3.4, 10.0.0.4')).toBe('1.2.3.4');
-            expect(clientIPFromForwardedFor('1.2.3.4, 10.0.0.4, 10.0.0.3')).toBe('1.2.3.4');
-        });
-
-        test('trims surrounding whitespace', () => {
-            expect(clientIPFromForwardedFor('  1.2.3.4 , 10.0.0.4')).toBe('1.2.3.4');
         });
     });
 
