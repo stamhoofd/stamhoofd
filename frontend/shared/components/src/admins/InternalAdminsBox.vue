@@ -38,7 +38,7 @@
                 {{ member.users.map(u => u.email).join(', ') }}
             </p>
             <p class="style-description-small">
-                {{ Formatter.joinLast(member.getResponsibilities(organization), ', ', ' en ') }}
+                {{ Formatter.joinLast(member.getResponsibilities(organization, platform), ', ', ' en ') }}
             </p>
 
             <template #right>
@@ -65,6 +65,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
 import type { MemberAdmin, PlatformMember } from '@stamhoofd/structures';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
@@ -74,6 +75,7 @@ import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
 const organization = useOrganization();
+const platform = usePlatform();
 const { memberHasFullAccess, memberHasNoRoles, sortedMembers } = useAdmins();
 const MAX_VISIBLE_DEFAULT = 5;
 const searchQuery = ref('');
