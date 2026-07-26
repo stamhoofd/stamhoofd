@@ -11,7 +11,7 @@ import type { GroupCategory } from '../../GroupCategory.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import type { Organization } from '../../Organization.js';
-import { Platform, PlatformMembershipTypeBehaviour } from '../../Platform.js';
+import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import type { RegistrationPeriod } from '../../RegistrationPeriod.js';
 import type { RegistrationPeriodBase } from '../../RegistrationPeriodBase.js';
@@ -697,7 +697,7 @@ export class RegisterItem implements ObjectWithRecords {
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
-                const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => Platform.shared.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
+                const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => this.member.platform.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
                 return $t('%1GO', {
                     firstName: this.member.patchedMember.details.firstName,
                     aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('%GT') + ' ') : $t('%1GN'),
