@@ -142,8 +142,8 @@ export class Event extends AutoEncoder {
         return queue;
     }
 
-    get eventNotificationTypes() {
-        return Platform.shared.config.eventNotificationTypes.filter(t => t.eventTypeIds.includes(this.typeId));
+    getEventNotificationTypes(platform: Platform) {
+        return platform.config.eventNotificationTypes.filter(t => t.eventTypeIds.includes(this.typeId));
     }
 
     static decodeField(...args: Parameters<typeof AutoEncoder.decode>) {
