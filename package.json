@@ -92,12 +92,12 @@
     "maildev": "2.2.1",
     "nodemon": "3.1.14",
     "postcss-discard-duplicates": "8.0.1",
-    "sass": "1.101.3",
+    "sass": "1.101.7",
     "terser": "5.49.0",
     "typescript": "6.0.3",
     "vitest": "4.1.10",
     "vitest-browser-vue": "2.1.0",
-    "vue-tsc": "3.3.7",
+    "vue-tsc": "3.3.8",
     "wait-on": "9.0.10"
   },
   "engines": {
@@ -112,11 +112,11 @@
     "fast-xml-parser": "5.8.0",
     "nodemailer": "9.0.3",
     "pacote": "21.5.1",
-    "postcss": "8.5.21",
+    "postcss": "8.5.22",
     "semver": "7.7.2",
     "sharp": "0.35.1",
     "sortablejs": "1.15.7",
-    "tar": "7.5.20",
+    "tar": "7.5.21",
     "vue": "3.5.40",
     "ws": "8.21.1",
     "yargs": "17.7.3"
