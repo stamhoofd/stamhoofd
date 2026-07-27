@@ -2,7 +2,6 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/sim
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { BalanceItem } from '../../BalanceItem.js';
 import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
-import { Platform } from '../../Platform.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import type { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem } from './RegisterItem.js';
@@ -381,7 +380,7 @@ export class RegisterCart {
                 continue;
             }
 
-            const platform = Platform.shared;
+            const platform = registration.member.platform;
 
             const periodId = registration.registration.group.periodId;
             const period = periodId === platform.period.id ? platform.period : (periodId === singleOrganization.period.period.id ? singleOrganization.period.period : registration.registration.group.settings.period);
