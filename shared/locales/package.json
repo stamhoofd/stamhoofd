@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/locales",
-    "version": "2.137.2",
+    "version": "2.137.3",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",

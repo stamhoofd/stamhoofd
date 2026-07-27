@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/structures",
-    "version": "2.137.2",
+    "version": "2.137.3",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -37,7 +37,7 @@
     },
     "devDependencies": {
         "@simonbackx/simple-errors": "1.5.0",
-        "@stamhoofd/test-utils": "2.137.2",
+        "@stamhoofd/test-utils": "2.137.3",
         "@types/uuid": "8.3.4",
         "uuid": "14.0.1",
         "vitest": "4.1.10"
