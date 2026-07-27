@@ -98,7 +98,7 @@
     "vitest": "4.1.10",
     "vitest-browser-vue": "2.1.0",
     "vue-tsc": "3.3.8",
-    "wait-on": "9.0.10"
+    "wait-on": "9.1.0"
   },
   "engines": {
     "node": "^22 || ^24"
