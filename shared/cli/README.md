@@ -168,6 +168,7 @@ Run Playwright tests with:
 
 ```bash
 yarn stam test e2e                                   # full build + suite
+yarn stam test e2e --ui                              # run with interactive UI to view and pause tests
 yarn stam test e2e --grep @tag                       # only tests matching a name/tag (playwright --grep)
 yarn stam test e2e --grep @tag --skip-build          # skip build:shared + API/frontend rebuild (only test files changed)
 ```
