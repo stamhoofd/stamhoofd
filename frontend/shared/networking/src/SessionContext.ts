@@ -39,7 +39,7 @@ export class SessionContext implements RequestMiddleware {
 
     /**
      * Never replace this reference: use updatePlatform to keep it stable
-     * (Platform.shared and usePlatform() keep a reference to this object)
+     * (usePlatform() and the audit log uuid resolver keep a reference to this object)
      */
     platform: Platform;
     user: UserWithMembers | null = null;

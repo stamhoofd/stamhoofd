@@ -549,8 +549,6 @@ export class PlatformConfig extends AutoEncoder {
 }
 
 export class Platform extends AutoEncoder {
-    static instance: Platform | null = null;
-
     @field({ decoder: PlatformConfig })
     config: PlatformConfig = PlatformConfig.create({});
 
@@ -577,24 +575,5 @@ export class Platform extends AutoEncoder {
      */
     getRoles() {
         return this.privateConfig?.roles ?? [];
-    }
-
-    static get shared(): Platform {
-        if (!Platform.instance) {
-            Platform.instance = Platform.create({});
-        }
-        return Platform.instance;
-    }
-
-    static get optionalShared(): Platform | null {
-        return Platform.instance;
-    }
-
-    static clearShared() {
-        Platform.instance = null;
-    }
-
-    setShared() {
-        Platform.instance = this;
     }
 }

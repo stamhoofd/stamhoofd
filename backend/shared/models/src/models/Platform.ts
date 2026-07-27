@@ -164,12 +164,11 @@ export class Platform extends QueryableModel {
 
         const clone = struct.clone();
         clone.privateConfig = null;
-        clone.setShared();
 
         // Audit logs render uuids from a bare id, so they cannot receive a platform through their
-        // call chain. Bind the resolver to the same struct that backs Platform.shared here, so it
-        // is refreshed together with the caches. Uses the public struct on purpose: resolving
-        // privateConfig roles would change the names that get persisted in audit logs.
+        // call chain. Bind the resolver to the struct we are about to cache, so it is refreshed
+        // together with the caches. Uses the public struct on purpose: resolving privateConfig
+        // roles would change the names that get persisted in audit logs.
         AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, clone);
 
         this.sharedStruct = clone;
