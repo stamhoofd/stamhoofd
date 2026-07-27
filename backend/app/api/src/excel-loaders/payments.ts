@@ -62,7 +62,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             }),
         });
     },
-    sheets: [
+    getSheets: () => [
         {
             id: 'payments',
             name: $t(`%1JH`),

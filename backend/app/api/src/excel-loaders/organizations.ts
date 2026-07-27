@@ -1,8 +1,8 @@
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
-import { Group, Member, MemberResponsibilityRecord } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, Premise } from '@stamhoofd/structures';
-import { ExcelExportType, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { Group, Member, MemberResponsibilityRecord, Platform } from '@stamhoofd/models';
+import type { LimitedFilteredRequest, Platform as PlatformStruct, Premise } from '@stamhoofd/structures';
+import { ExcelExportType, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint.js';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
@@ -27,7 +27,7 @@ class MemberResponsibilityRecordWithMemberAndOrganization extends MemberResponsi
 type Object = OrganizationWithResponsibilities;
 
 // Assign to a typed variable to assure we have correct type checking in place
-const sheet: XlsxTransformerSheet<Object, Object> = {
+const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, Object> => ({
     id: 'organizations',
     name: $t(`%wP`),
     columns: [
@@ -60,8 +60,6 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
             name: $t(`%13`),
             width: 50,
             getValue: (object: Object) => {
-                const platform = PlatformStruct.shared;
-
                 return {
                     value: object.meta.tags.map(tag => platform.config.tags.find(t => t.id === tag)?.name ?? $t(`%Gr`)).join(', '),
                 };
@@ -76,17 +74,15 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
             matchId: 'recordAnswers',
             getRecordAnswers: (object: Object) => object.getRecordAnswers(),
             getRecordCategories: () => {
-                const platform = PlatformStruct.shared;
-
                 return [
                     ...platform.config.organizationLevelRecordsConfiguration.recordCategories,
                 ];
             },
         }),
     ],
-};
+});
 
-const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordWithMemberAndOrganization> = {
+const getResponsibilitiesSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, MemberResponsibilityRecordWithMemberAndOrganization> => ({
     id: 'responsibilities',
     name: $t(`%7D`),
     transform(organization) {
@@ -125,7 +121,6 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
             name: $t(`%H2`),
             width: 50,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => {
-                const platform = PlatformStruct.shared;
                 const responsibility = platform.config.responsibilities.find(r => r.id === object.responsibilityId) ?? object.organization.privateMeta?.responsibilities.find(r => r.id === object.responsibilityId);
 
                 if (!responsibility) {
@@ -168,10 +163,10 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
             getAddress: object => object.member.details.address ?? object.member.details.parents[0]?.address ?? object.member.details.parents[1]?.address ?? null,
         }),
     ],
-};
+});
 
 type PremiseWithOrganization = { organization: Object; premise: Premise };
-const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
+const getPremisesSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, PremiseWithOrganization> => ({
     id: 'premises',
     name: $t(`%6c`),
     transform(organization) {
@@ -219,7 +214,6 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
             width: 20,
             getValue: (object: PremiseWithOrganization) => {
                 const ids = object.premise.premiseTypeIds;
-                const platform = PlatformStruct.shared;
                 return {
                     value: ids.map(id => platform.config.premiseTypes.find(t => t.id === id)?.name ?? $t(`%Gr`)).join(', '),
                 };
@@ -230,7 +224,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
             getAddress: object => object.premise.address,
         }),
     ],
-};
+});
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
     fetch: async (query: LimitedFilteredRequest) => {
@@ -253,7 +247,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
         const groups = await Group.getByIDs(...groupIds);
         const memberStructs = await AuthenticatedStructures.members(members);
         const groupStructs = await AuthenticatedStructures.groups(groups);
-        const platform = PlatformStruct.shared;
+        const platform = await Platform.getSharedStruct();
 
         const mappedOrganizations = organizations.results.map((o) => {
             const resp = responsibilities.filter(r => r.organizationId === o.id);
@@ -295,9 +289,9 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
             next: organizations.next,
         });
     },
-    sheets: [
-        sheet,
-        responsibilities,
-        premises,
+    getSheets: platform => [
+        getSheet(platform),
+        getResponsibilitiesSheet(platform),
+        getPremisesSheet(platform),
     ],
 });

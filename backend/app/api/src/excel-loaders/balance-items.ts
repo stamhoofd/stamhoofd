@@ -16,7 +16,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.BalanceItems, {
             results: await BalanceItem.getStructureWithPayments(data.results),
         });
     },
-    sheets: [
+    getSheets: () => [
         {
             id: 'balanceItems',
             name: $t(`%1LA`),

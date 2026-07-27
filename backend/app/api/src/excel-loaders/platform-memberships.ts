@@ -1,12 +1,12 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import type { LimitedFilteredRequest, PlatformMembership } from '@stamhoofd/structures';
-import { ExcelExportType, PaginatedResponse, Platform } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, PlatformMembership, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { ExcelExportType, PaginatedResponse } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPlatformMembershipsEndpoint } from '../endpoints/global/platform-memberships/GetPlatformMembershipsEndpoint.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
-const sheet: XlsxTransformerSheet<PlatformMembership> = {
+const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMembership> => ({
     id: 'platform-memberships',
     name: $t('%1EI'),
     columns: [
@@ -23,7 +23,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             name: $t('%1LP'),
             width: 40,
             getValue: (membership: PlatformMembership) => {
-                const membershipType = Platform.shared.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
+                const membershipType = platform.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
                 const value = membershipType ? membershipType.name : '';
                 return { value };
             },
@@ -244,7 +244,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             }),
         },
     ],
-};
+});
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.PlatformMemberships, {
     fetch: async (query: LimitedFilteredRequest) => {
@@ -255,7 +255,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.PlatformMemberships, {
             next: data.next,
         });
     },
-    sheets: [
-        sheet,
+    getSheets: platform => [
+        getSheet(platform),
     ],
 });

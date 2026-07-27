@@ -1,17 +1,17 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, PlatformMember } from '@stamhoofd/structures';
-import { ExcelExportType, getGroupTypeName, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { ExcelExportType, getGroupTypeName, PlatformRegistration, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { Context } from '../helpers/Context.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
-import { baseMemberColumns } from './members.js';
+import { getBaseMemberColumns } from './members.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
-const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
+const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformRegistration> => ({
     id: 'registrations',
     name: $t('%1EI'),
     columns: [
@@ -294,7 +294,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 ];
             },
         },
-        ...baseMemberColumns.map(column => XlsxTransformerColumnHelper.transformColumnForProperty({
+        ...getBaseMemberColumns(platform).map(column => XlsxTransformerColumnHelper.transformColumnForProperty({
             column,
             key: 'member',
             getPropertyValue: (registration: PlatformRegistration) => registration.member,
@@ -341,7 +341,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                     };
                 }
                 return {
-                    value: PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`%wJ`),
+                    value: platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`%wJ`),
                 };
             },
         },
@@ -356,7 +356,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             },
         },
     ],
-};
+});
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Registrations, {
     fetch: async (query: LimitedFilteredRequest) => {
@@ -370,7 +370,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Registrations, {
             next: result.next,
         });
     },
-    sheets: [
-        sheet,
+    getSheets: platform => [
+        getSheet(platform),
     ],
 });

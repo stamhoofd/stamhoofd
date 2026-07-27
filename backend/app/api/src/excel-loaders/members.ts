@@ -1,8 +1,8 @@
 import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, PlatformMember } from '@stamhoofd/structures';
-import { ExcelExportType, Gender, GroupType, MembershipStatus, PlatformFamily, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { ExcelExportType, Gender, GroupType, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
@@ -10,7 +10,7 @@ import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { Context } from '../helpers/Context.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
-export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
+export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerColumn<PlatformMember>[] => [
     {
         id: 'id',
         name: $t(`%d`),
@@ -244,7 +244,6 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
         matchId: 'recordAnswers',
         getRecordAnswers: ({ patchedMember: object }: PlatformMember) => object.details.recordAnswers,
         getRecordCategories: () => {
-            const platform = PlatformStruct.shared;
             const organization = Context.organization;
 
             return [
@@ -256,11 +255,11 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
 ];
 
 // Assign to a typed variable to assure we have correct type checking in place
-const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
+const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformMember> => ({
     id: 'members',
     name: $t(`%1EH`),
     columns: [
-        ...baseMemberColumns,
+        ...getBaseMemberColumns(platform),
         {
             id: 'group',
             name: $t(`%wH`),
@@ -281,7 +280,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
             getValue: (member: PlatformMember) => {
                 const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
                 const defaultAgeGroupIds = Formatter.uniqueArray(groups.filter(o => o.group.defaultAgeGroupId));
-                const defaultAgeGroups = defaultAgeGroupIds.map(o => PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t(`%wJ`));
+                const defaultAgeGroups = defaultAgeGroupIds.map(o => platform.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t(`%wJ`));
                 const str = Formatter.joinLast(Formatter.uniqueArray(defaultAgeGroups).sort(), ', ', ' ' + $t(`%M1`) + ' ') || Context.i18n.$t('%5D');
 
                 return {
@@ -472,7 +471,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
             },
         },
     ],
-};
+});
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
     fetch: async (query: LimitedFilteredRequest) => {
@@ -486,8 +485,8 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
             next: result.next,
         });
     },
-    sheets: [
-        sheet,
+    getSheets: platform => [
+        getSheet(platform),
     ],
 });
 

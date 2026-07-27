@@ -1,14 +1,14 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import type { EventNotification, LimitedFilteredRequest } from '@stamhoofd/structures';
-import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType, Platform as PlatformStruct } from '@stamhoofd/structures';
+import type { EventNotification, LimitedFilteredRequest, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetEventNotificationsEndpoint } from '../endpoints/global/events/GetEventNotificationsEndpoint.js';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
-const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
+const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotification, EventNotification> => ({
     id: 'event-notifications',
     name: $t(`%1FR`),
     columns: [
@@ -118,18 +118,17 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
             matchId: 'recordAnswers',
             getRecordAnswers: (notification: EventNotification) => notification.recordAnswers,
             getRecordCategories: () => {
-                const platform = PlatformStruct.shared;
                 return platform.config.eventNotificationTypes.flatMap(r => r.recordCategories);
             },
         }),
     ],
-};
+});
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.EventNotifications, {
     fetch: async (query: LimitedFilteredRequest) => {
         return await GetEventNotificationsEndpoint.buildData(query);
     },
-    sheets: [
-        sheet,
+    getSheets: platform => [
+        getSheet(platform),
     ],
 });
