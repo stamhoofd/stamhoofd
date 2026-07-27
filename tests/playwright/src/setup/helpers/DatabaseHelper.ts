@@ -1,13 +1,56 @@
 import type { DatabaseInstance } from '@simonbackx/simple-database';
+import { playwrightDatabaseCredentials, playwrightDatabaseName } from '@stamhoofd/cli';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 
 export class DatabaseHelper {
     private _database?: DatabaseInstance;
 
     constructor(private workerId: string) {}
 
+    /**
+     * The database of a worker is named after its slot, not after its worker index: a run reserves a
+     * block of slots no other run on this machine uses, so two runs never write to the same database
+     * — not even when they connect to the same MySQL server (`stam test e2e --local-db`). The name
+     * also carries the worktree of the run, so a checkout on another branch migrates its own
+     * databases. Only valid once the global setup reserved the block of this run.
+     */
     static getDatabaseName(workerId: string) {
-        return `stamhoofd-playwright-${workerId}`;
+        return playwrightDatabaseName(CaddyConfigHelper.getSlot(workerId));
+    }
+
+    /**
+     * Point the test environment at the MySQL of this run. Only needed for a MySQL that was already
+     * running on this machine (`stam test e2e --local-db`): it does not have to use the root/root of
+     * the containers the test environment defaults to. Has to run again after every
+     * `TestUtils.clearPermanentOverrides()`.
+     */
+    static applyCredentials() {
+        const { user, password } = playwrightDatabaseCredentials();
+
+        if (user !== undefined) {
+            TestUtils.setPermanentEnvironment('DB_USER', user);
+        }
+        if (password !== undefined) {
+            TestUtils.setPermanentEnvironment('DB_PASS', password);
+        }
+    }
+
+    /**
+     * Drop a worker database, so the next migration run starts from an empty one. Only used by the
+     * global setup: dropping a database a worker is connected to breaks that worker.
+     */
+    static async dropDatabase(name: string) {
+        const { DatabaseInstance } = await import('@simonbackx/simple-database');
+
+        // A pool without a selected database: the database we are about to drop cannot be the one we
+        // are connected to.
+        const globalDatabase = new DatabaseInstance({ database: null });
+        try {
+            await globalDatabase.statement(`DROP DATABASE IF EXISTS ${globalDatabase.escapeId(name)}`);
+        } finally {
+            await globalDatabase.end();
+        }
     }
 
     async clear() {

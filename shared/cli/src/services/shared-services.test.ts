@@ -9,7 +9,7 @@ import { MysqlService } from './definitions/mysql-service.js';
 import { RustfsService } from './definitions/rustfs-service.js';
 import { SsoService } from './definitions/sso-service.js';
 import { ContainerRuntime } from './docker.js';
-import { tailSharedLogs } from './shared-services.js';
+import { sharedServicesToStart, tailSharedLogs } from './shared-services.js';
 
 vi.mock('../runtime/command-runner.js', () => ({
     run: vi.fn(),
@@ -155,6 +155,14 @@ describe('shared service Docker args', () => {
         expect(detail).toContain(`HTTP ${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyUnprivilegedHttpPort)}`);
         expect(detail).toContain(`HTTPS ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyUnprivilegedHttpsPort)}`);
         expect(detail).toContain(`admin ${localhostPort(caddyAdminPort)}`);
+    });
+
+    it('starts every shared service by default', () => {
+        expect(sharedServicesToStart().map(service => service.key)).toEqual(['coredns', 'caddy', 'mysql', 'maildev', 'rustfs']);
+    });
+
+    it('leaves only MySQL out for a run that brings its own database', () => {
+        expect(sharedServicesToStart({ skipMysql: true }).map(service => service.key)).toEqual(['coredns', 'caddy', 'maildev', 'rustfs']);
     });
 
     it('tails all shared service logs through concurrently', async () => {

@@ -37,8 +37,21 @@ Consequences worth knowing:
 - The number of workers has to be known before the tests start. Set `PLAYWRIGHT_WORKER_COUNT`
   (`stam test e2e --workers N` does this) instead of passing `--workers` to Playwright directly.
 - At most `slotPoolSize` (30) workers can run at the same time across all runs on one machine.
-- The databases are still named per worker index, not per slot, and the e2e MySQL container is per
-  worktree: two runs from the *same* worktree still collide. Run them from different worktrees.
+- Nothing may derive a port, domain or database name before the global setup reserved the block, so
+  the reservation happens before the frontend build and the migrations start.
+
+## Databases
+
+Each worker gets its own database, named `stamhoofd-playwright[-<instance>]-<slot>` after its slot,
+with the instance name of the worktree in it for every worktree except the primary one. So two runs
+never share a database, not even when they connect to the same MySQL server, and a checkout on
+another branch migrates its own databases. The prefix is passed in by `stam test e2e`
+(`PLAYWRIGHT_DB_PREFIX`), the databases are created and migrated in the global setup, and they are
+kept between runs so the migrations don't have to run again.
+
+By default `stam test e2e` starts a MySQL container for the run. With `--local-db` (or
+`STAMHOOFD_E2E_MYSQL_PORT`) it connects to a MySQL that is already running on `127.0.0.1` instead;
+see the CLI README. Only the connection changes: the databases and their names stay the same.
 
 ## Test file naming
 

@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { ciFlag } from '../../command-flags.js';
+import { defaultLocalMysqlPort, e2eMysqlPortVariable } from '../../config/test-database-config.js';
 import { testE2e } from '../../runtime/monorepo-runner.js';
 
 export default class TestE2e extends BaseCommand {
@@ -14,6 +15,7 @@ export default class TestE2e extends BaseCommand {
         'stam test e2e --ci',
         'stam test e2e --extra',
         'stam test e2e --workers 2',
+        'stam test e2e --local-db',
         'stam test e2e --ui --verbose',
     ];
 
@@ -23,6 +25,7 @@ export default class TestE2e extends BaseCommand {
         'clear': Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
         'extra': Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
         'grep': Flags.string({ char: 'g', description: 'Only run tests matching this pattern/tag (passed to playwright --grep)' }),
+        'local-db': Flags.boolean({ allowNo: true, description: `Connect to the MySQL already running on 127.0.0.1 instead of starting an e2e MySQL container (port ${e2eMysqlPortVariable}, default ${defaultLocalMysqlPort})` }),
         'skip-build': Flags.boolean({ default: false, description: 'Skip build:shared, the API test pre-build, and the frontend build (only test files changed)' }),
         'ui': Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
         'workers': Flags.integer({ description: 'Number of Playwright workers' }),
@@ -33,6 +36,6 @@ export default class TestE2e extends BaseCommand {
         if (flags.workers !== undefined && flags.workers < 1) {
             throw new Error('--workers must be at least 1');
         }
-        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers });
+        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, localDb: flags['local-db'], skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers });
     }
 }
