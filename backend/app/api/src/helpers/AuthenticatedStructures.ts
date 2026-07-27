@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { BaseOrganization, getAppHost, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
@@ -1007,6 +1007,7 @@ export class AuthenticatedStructures {
             ...balances.filter(b => b.objectType === ReceivableBalanceType.user || b.objectType === ReceivableBalanceType.userWithoutMembers).map(b => b.objectId),
         ]);
         const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
+        const platform = await PlatformModel.getSharedStruct();
 
         const result: { balance: CachedBalance; object: ReceivableBalanceObject }[] = [];
 
@@ -1131,7 +1132,7 @@ export class AuthenticatedStructures {
             } else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
                 const user = users.find(m => m.id === balance.objectId) ?? null;
                 if (user) {
-                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, user.permissions?.forOrganization(Context.organization)?.isEmpty === false) : '';
+                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, user.permissions?.forOrganization(Context.organization, platform, { inheritTags: false })?.isEmpty === false) : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: user.name || user.email,
@@ -1193,6 +1194,7 @@ export class AuthenticatedStructures {
         const users = await User.getByIDs(...userIds);
         const organizationsIds = Formatter.uniqueArray(logs.map(l => l.organizationId).filter(id => id !== null));
         const organizations = await Organization.getByIDs(...organizationsIds);
+        const platform = await PlatformModel.getSharedStruct();
 
         for (const log of logs) {
             const user = log.userId ? (users.find(u => u.id === log.userId) ?? null) : null;
@@ -1200,7 +1202,7 @@ export class AuthenticatedStructures {
 
             if (user) {
                 if (!await Context.auth.canAccessUser(user)) {
-                    if (user.permissions?.platform !== null) {
+                    if (user.permissions?.forPlatform(platform) !== null) {
                         userStruct = NamedObject.create({
                             id: '',
                             name: $t(`%wi`) + ' ' + Platform.shared.config.name,

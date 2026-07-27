@@ -79,10 +79,12 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
 
             if (request.body.permissions) {
+                const platform = await Platform.getSharedStruct();
+
                 if (organization) {
                     editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
 
-                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
+                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, { inheritTags: false })?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: $t(`%DG`),
@@ -99,7 +101,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         editUser.permissions = null;
                     }
 
-                    if (editUser.id === user.id && !editUser.permissions?.platform?.hasFullAccess() && STAMHOOFD.environment !== 'development') {
+                    if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform)?.hasFullAccess() && STAMHOOFD.environment !== 'development') {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: $t(`%DG`),

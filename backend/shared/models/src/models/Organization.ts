@@ -18,6 +18,7 @@ import { OrganizationServerMetaData } from '../structures/OrganizationServerMeta
 import { Event } from './Event.js';
 import { Group } from './Group.js';
 import { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
+import { Platform } from './Platform.js';
 import { Registration } from './Registration.js';
 import { StripeAccount } from './StripeAccount.js';
 import { Token } from './Token.js';
@@ -866,9 +867,10 @@ export class Organization extends QueryableModel {
      */
     async getFullAdmins() {
         const admins = await this.getAdmins();
+        const platform = await Platform.getSharedStruct();
 
         // Only full access
-        return admins.filter(a => a.permissions && a.permissions.forOrganization(this)?.hasFullAccess());
+        return admins.filter(a => a.permissions && a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasFullAccess());
     }
 
     /**
@@ -876,7 +878,8 @@ export class Organization extends QueryableModel {
      */
     async getFinanceAdmins() {
         const admins = await this.getAdmins();
-        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+        const platform = await Platform.getSharedStruct();
+        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasFullAccess() || a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         // Only full access
         return filtered;
@@ -974,12 +977,13 @@ export class Organization extends QueryableModel {
             );
         });
 
-        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+        const platform = await Platform.getSharedStruct();
+        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasFullAccess() || a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         if (filtered.length > 0) {
             return filtered.map(f => f.email)[0];
         }
-        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasFullAccess() || a.permissions.forOrganization(this, platform, { inheritTags: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         if (filtered2.length > 0) {
             return filtered2.map(f => f.email)[0];

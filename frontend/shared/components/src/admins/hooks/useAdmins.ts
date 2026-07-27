@@ -29,7 +29,7 @@ export function usePermissionsCache() {
             const cacheEntry = cache.get(user);
             if (!cacheEntry) {
                 const c = {
-                    permissions: organization.value ? (user.permissions?.forOrganization(organization.value, null) ?? null) : (user.permissions?.forPlatform(platform.value) ?? null),
+                    permissions: organization.value ? (user.permissions?.forOrganization(organization.value, platform.value, { inheritTags: false }) ?? null) : (user.permissions?.forPlatform(platform.value) ?? null),
                     unloadedPermissions: organization.value ? (user.permissions?.organizationPermissions.get(organization.value.id) ?? null) : (user.permissions?.globalPermissions ?? null),
                 };
                 cache.set(user, c);
