@@ -3,18 +3,20 @@ import { ComponentWithProperties, defineRoute, NavigationController, onCheckRout
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import type { PaymentGeneral } from '@stamhoofd/structures';
-import { EmailAddressSettings, PaymentStatus, Platform } from '@stamhoofd/structures';
+import type { PaymentGeneral, Platform } from '@stamhoofd/structures';
+import { EmailAddressSettings, PaymentStatus } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;
 
 export function useGlobalRoutes() {
     const modalStackComponent = useModalStackComponent();
     const context = useContext();
+    const platform = usePlatform();
 
     defineRoute({
         url: 'reset-password',
@@ -111,7 +113,7 @@ export function useGlobalRoutes() {
             const type = initialQueryString.get('type') ?? 'all';
 
             if (id && token && ['all', 'marketing'].includes(type)) {
-                await unsubscribe(id, token, type as 'all' | 'marketing');
+                await unsubscribe(id, token, type as 'all' | 'marketing', platform.value);
             }
         }
 
@@ -119,7 +121,7 @@ export function useGlobalRoutes() {
     });
 }
 
-async function unsubscribe(id: string, token: string, type: 'all' | 'marketing') {
+async function unsubscribe(id: string, token: string, type: 'all' | 'marketing', platform: Platform) {
     const toast = new Toast($t(`%Ib`), 'spinner').setHide(null).show();
 
     try {
@@ -140,13 +142,13 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
         const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing';
 
         if (details[fieldName]) {
-            if (!await CenteredMessage.confirm($t(`%Ic`), $t(`%Id`), $t(`%Ie`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email, complaintEmail: $t('%W') }))) {
+            if (!await CenteredMessage.confirm($t(`%Ic`), $t(`%Id`), $t(`%Ie`, { name: details.organization?.name ?? platform.config.name, email: details.email, complaintEmail: $t('%W') }))) {
                 return;
             }
 
             doUnsubscribe = false;
         } else {
-            if (!await CenteredMessage.confirm($t(`%If`), $t(`%Ig`), $t(`%Ih`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email }))) {
+            if (!await CenteredMessage.confirm($t(`%If`), $t(`%Ig`), $t(`%Ih`, { name: details.organization?.name ?? platform.config.name, email: details.email }))) {
                 return;
             }
             toast.show();
