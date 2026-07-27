@@ -12,6 +12,16 @@ import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsC
 import { OrganizationEmail } from './OrganizationEmail.js';
 import { OrganizationLevelRecordsConfiguration } from './OrganizationLevelRecordsConfiguration.js';
 import { PermissionRoleDetailed } from './PermissionRole.js';
+import { PlatformMembershipTypeBehaviour } from './PlatformMembershipTypeBehaviour.js';
+
+/**
+ * Re-exported so `export * from './Platform.js'` in index.ts keeps exposing it to consumers of
+ * @stamhoofd/structures. Import it from './PlatformMembershipTypeBehaviour.js' directly inside this
+ * package when the importing module must not depend on Platform.ts -- Platform.ts sits in a value
+ * import cycle with RegistrationPeriod, BundleDiscount and RegisterItem, so pulling it in from one
+ * of those modules reintroduces the cycle.
+ */
+export { PlatformMembershipTypeBehaviour } from './PlatformMembershipTypeBehaviour.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
@@ -240,18 +250,6 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
     get name() {
         return Formatter.dateRange(this.startDate, this.endDate);
     }
-}
-
-export enum PlatformMembershipTypeBehaviour {
-    /**
-     * A membership that is valid for a certain period
-     */
-    Period = 'Period',
-
-    /**
-     * A membership that is valid for a certain number of days
-     */
-    Days = 'Days',
 }
 
 export class PlatformMembershipType extends AutoEncoder {

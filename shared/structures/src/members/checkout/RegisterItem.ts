@@ -11,7 +11,7 @@ import type { GroupCategory } from '../../GroupCategory.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import type { Organization } from '../../Organization.js';
-import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
+import { PlatformMembershipTypeBehaviour } from '../../PlatformMembershipTypeBehaviour.js';
 import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import type { RegistrationPeriod } from '../../RegistrationPeriod.js';
 import type { RegistrationPeriodBase } from '../../RegistrationPeriodBase.js';
