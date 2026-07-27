@@ -1,5 +1,5 @@
-import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
-import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType, Platform } from '@stamhoofd/structures';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 
@@ -83,11 +83,11 @@ export class ContextPermissions {
         if (!this.organization) {
             return this.platformPermissions;
         }
-        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null;
+        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions ? this.platform : null) ?? null;
     }
 
     getPermissionsForOrganization(organization: OrganizationForPermissionCalculation) {
-        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null;
+        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions ? this.platform : null) ?? null;
     }
 
     get unloadedPermissions(): Permissions | null {
