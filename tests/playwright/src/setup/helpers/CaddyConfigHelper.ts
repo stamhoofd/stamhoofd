@@ -4,11 +4,20 @@ import type { CaddyRoute, CaddyRouteOptions } from '@stamhoofd/cli';
 import { cspFrontendSubroutes, ssoRealm } from '@stamhoofd/cli';
 
 /**
- * Old domains and ports will get reused
- *
- * E.g. worker 32 will use same domains and ports as worker 2
+ * Every port and domain of a worker is derived from its slot, not from its worker id: an e2e run
+ * reserves a block of `workerCount` consecutive slots (see CaddyHelper) so runs started from other
+ * worktrees never end up on the same ports or domains. This is the number of slots that exist on
+ * one machine, so at most this many Playwright workers can run at the same time across all runs.
  */
-const maximumRunners = 30;
+export const slotPoolSize = 30;
+
+const portBases = {
+    api: 6000,
+    dashboard: 6100,
+    registration: 6200,
+    webshop: 6300,
+    sso: 6400,
+} as const;
 
 /**
  * Helper to create caddy configuration for playwright
@@ -17,10 +26,45 @@ export class CaddyConfigHelper {
     static readonly GROUP_PREFIX = 'playwright';
 
     /**
+     * The first slot of the block this run reserved. Set once by the global setup and read back in
+     * every worker process, which Playwright forks after the global setup ran.
+     */
+    static getSlotOffset(): number {
+        const offset = Number.parseInt(process.env.PLAYWRIGHT_SLOT_OFFSET ?? '0', 10);
+        return Number.isFinite(offset) && offset >= 0 ? offset : 0;
+    }
+
+    /**
+     * Record the block this run reserved: `count` slots starting at `offset`.
+     */
+    static setSlotBlock(offset: number, count: number) {
+        process.env.PLAYWRIGHT_SLOT_OFFSET = offset.toString();
+        process.env.PLAYWRIGHT_SLOT_COUNT = count.toString();
+    }
+
+    /**
+     * The slot a worker runs on: its ports and domains are all derived from this number.
+     */
+    static getSlot(workerId: string) {
+        const worker = parseInt(workerId);
+        const reserved = Number.parseInt(process.env.PLAYWRIGHT_SLOT_COUNT ?? '', 10);
+
+        if (Number.isFinite(reserved) && worker >= reserved) {
+            throw new Error(`Worker ${workerId} has no reserved slot: this run reserved ${reserved} slots. Set PLAYWRIGHT_WORKER_COUNT instead of overriding --workers.`);
+        }
+
+        const slot = this.getSlotOffset() + worker;
+        if (!Number.isFinite(slot) || slot < 0 || slot >= slotPoolSize) {
+            throw new Error(`Worker ${workerId} maps to slot ${slot}, which is outside the pool of ${slotPoolSize} slots`);
+        }
+        return slot;
+    }
+
+    /**
      * Get the group name for the caddy routes
      */
     static getGroup(service: string, workerId: string) {
-        return `${this.GROUP_PREFIX}-${service}-${workerId}`;
+        return `${this.GROUP_PREFIX}-${service}-${this.getSlot(workerId)}`;
     }
 
     /**
@@ -30,7 +74,7 @@ export class CaddyConfigHelper {
         service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
         workerId: string,
     ) {
-        return `playwright-${service}-${this.cycledWorkerId(workerId)}.stamhoofd`;
+        return `playwright-${service}-${this.getSlot(workerId)}.stamhoofd`;
     }
 
     static getCustomDomainTld(
@@ -38,7 +82,7 @@ export class CaddyConfigHelper {
     ) {
         // IMPORTANT: custom registration domains may never end with getDomain('registration', workerId)
         // otherwise, the backend will try to resolve by URI, not by domain
-        return `playwright-custom-${this.cycledWorkerId(workerId)}.stamhoofd`;
+        return `playwright-custom-${this.getSlot(workerId)}.stamhoofd`;
     }
 
     static getRegistrationCustomDomain(
@@ -64,22 +108,27 @@ export class CaddyConfigHelper {
         return `${prefix}.${this.getCustomDomainTld(workerId)}`;
     }
 
-    static cycledWorkerId(workerId: string) {
-        const asNumber = parseInt(workerId);
-        return asNumber % maximumRunners;
-    }
-
     /**
-     * Host of the SSO (Keycloak) server used by the e2e tests. One server is shared by all
-     * workers, and it deliberately does not reuse the `sso.<domain>` host of `stam sso start`: a
-     * test run must never restart the SSO server a developer started for manual testing.
+     * Host of the SSO (Keycloak) server used by the e2e tests. One server is shared by all workers
+     * of a run, but not between runs: the host and port carry the slot offset of the run, so an
+     * e2e run in another worktree gets its own server. It deliberately does not reuse the
+     * `sso.<domain>` host of `stam sso start` either: a test run must never restart the SSO server
+     * a developer started for manual testing.
      */
     static getSsoDomain() {
-        return 'playwright-sso.stamhoofd';
+        return `playwright-sso-${this.getSlotOffset()}.stamhoofd`;
     }
 
     static getSsoPort() {
-        return 6400;
+        return portBases.sso + this.getSlotOffset();
+    }
+
+    /**
+     * Suffix that keeps the container and realm files of this run apart from those of a run in
+     * another worktree.
+     */
+    static getSsoVariantName() {
+        return `playwright-${this.getSlotOffset()}`;
     }
 
     /**
@@ -92,12 +141,12 @@ export class CaddyConfigHelper {
 
     /**
      * The redirect URI the backend of a worker hands to the SSO server. Keycloak only redirects
-     * back to URIs listed in the realm, and one SSO server serves every worker, so the realm
-     * allows the callback of every worker.
+     * back to URIs listed in the realm, and one SSO server serves every worker of this run, so the
+     * realm allows the callback of every worker.
      */
-    static getSsoRedirectUris() {
+    static getSsoRedirectUris(workerCount: number) {
         const uris: string[] = [];
-        for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
             uris.push(`${this.getUrl('api', workerId.toString())}/openid/callback`);
         }
         return uris;
@@ -117,12 +166,31 @@ export class CaddyConfigHelper {
     static getPort(
         service: 'api',
         workerId: string) {
-        return 6000 + this.cycledWorkerId(workerId);
+        return portBases[service] + this.getSlot(workerId);
     }
 
     static getFrontendPort(service: FrontendProjectName, workerId: string) {
-        const offset = service === 'dashboard' ? 6100 : service === 'registration' ? 6200 : 6300;
-        return offset + this.cycledWorkerId(workerId);
+        return portBases[service] + this.getSlot(workerId);
+    }
+
+    /**
+     * Every host port this run needs: the ports of all its workers plus the shared SSO server.
+     * Reserved in the route manifest so a run in another worktree picks a different block.
+     */
+    static getReservedPorts(workerCount: number) {
+        const ports: number[] = [this.getSsoPort()];
+
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
+            const id = workerId.toString();
+            ports.push(
+                this.getPort('api', id),
+                this.getFrontendPort('dashboard', id),
+                this.getFrontendPort('registration', id),
+                this.getFrontendPort('webshop', id),
+            );
+        }
+
+        return ports;
     }
 
     /**
@@ -282,12 +350,14 @@ export class CaddyConfigHelper {
     }
 
     /**
-     * Create the default playwright caddy config
+     * Create the caddy routes of this run: only the workers it actually starts, on the slots it
+     * reserved. Routes of runs in other worktrees live in their own manifest and are merged in by
+     * the CLI when it renders the shared Caddy config.
      */
-    static createRouteOptions(options: { proxyHost: string }): CaddyRouteOptions {
+    static createRouteOptions(options: { proxyHost: string; workerCount: number }): CaddyRouteOptions {
         const routes: CaddyRoute[] = [this.createSsoRoute(options.proxyHost)];
 
-        for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
+        for (let workerId = 0; workerId < options.workerCount; workerId += 1) {
             routes.push(
                 ...this.createFrontendRoutes('dashboard', workerId.toString(), options.proxyHost),
                 // registration must come before webshop: its terminal 'inschrijven.*' custom-domain
@@ -312,7 +382,7 @@ export class CaddyConfigHelper {
     /**
      * Create the default playwright caddy config
      */
-    static createDefault(options: { adminListen: string; adminOrigin: string; httpListen: string; httpsListen: string; proxyHost: string }) {
+    static createDefault(options: { adminListen: string; adminOrigin: string; httpListen: string; httpsListen: string; proxyHost: string; workerCount: number }) {
         const { routes, tlsSubjects } = this.createRouteOptions(options);
 
         const config = {

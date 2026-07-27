@@ -1,12 +1,20 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
-import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, writeRouteManifest, buildCaddyServiceProfile } from '@stamhoofd/cli';
-import type { RouteManifest } from '@stamhoofd/cli';
-import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, removeOwnRouteManifests, buildCaddyServiceProfile } from '@stamhoofd/cli';
+import type { RouteManifestInput } from '@stamhoofd/cli';
+import { CaddyConfigHelper, slotPoolSize } from './CaddyConfigHelper.js';
 import { ProcessInfo } from './ProcessInfo.js';
 import { STChildProcess } from './STChildProcess.js';
 
 const exec = promisify(execCallback);
+
+/**
+ * A reservation outlives the run that made it only if that run crashed hard: the manifest is
+ * removed on teardown and ignored as soon as the process is gone. The expiry is the last resort
+ * for a machine that was put to sleep mid-run and woke up with the pid recycled.
+ */
+const reservationLifetimeMs = 2 * 60 * 60 * 1000;
+const routesActiveTimeoutMs = 60_000;
 
 type CaddyRuntime = {
     adminUrl: string;
@@ -40,6 +48,9 @@ export class CaddyHelper {
             return;
         }
 
+        // This Caddy was started by this run and serves nothing else, so the first slots are free.
+        CaddyConfigHelper.setSlotBlock(0, workerCount);
+
         // post the initial config
         console.log('Start posting caddy config...');
         await this.postConfig(
@@ -49,6 +60,7 @@ export class CaddyHelper {
                 httpListen: this.caddyRuntime.httpListen,
                 httpsListen: this.caddyRuntime.httpsListen,
                 proxyHost: this.caddyRuntime.proxyHost,
+                workerCount,
             }),
         );
         console.log('Done posting caddy config.');
@@ -61,7 +73,9 @@ export class CaddyHelper {
         }
 
         const context = await createContext({ env: 'stamhoofd', verbose: false });
-        await removeRouteManifestsByKind(context, 'playwright-worker');
+
+        // Only the reservation of this run: a run in another worktree is still using its own slots.
+        await removeOwnRouteManifests(context, 'playwright-worker');
         await CaddyService.reload(context);
     }
 
@@ -94,37 +108,86 @@ export class CaddyHelper {
         }
     }
 
+    /**
+     * Claim a block of slots for this run and add its routes to the shared Caddy.
+     *
+     * The block is picked by the CLI: it tries consecutive blocks until it finds one that no other
+     * manifest reserves and whose ports can all be bound, then writes the manifest for it. Only
+     * after that are the ports and domains of this run fixed, so nothing may derive a port or
+     * domain before this ran (which is why the slot offset is set from inside the candidate).
+     */
     private async configureSharedCaddy(workerCount: number) {
         const context = await createContext({ env: 'stamhoofd', verbose: false });
-        await pruneStaleRouteManifests(context);
-        await removeRouteManifestsByKind(context, 'playwright-worker');
 
-        for (let workerId = 0; workerId < workerCount; workerId += 1) {
-            await writeRouteManifest(context, this.createWorkerManifest(workerId));
-        }
+        // Leftovers of an earlier setup attempt in this same process.
+        await removeOwnRouteManifests(context, 'playwright-worker');
 
-        await CaddyService.reload(context);
-    }
-
-    private createWorkerManifest(workerId: number): RouteManifest {
-        const id = workerId.toString();
-        const profile = buildCaddyServiceProfile();
-
-        const caddy = CaddyConfigHelper.createRouteOptions({
-            proxyHost: profile.caddyProxyHost,
+        const manifest = await CaddyService.reserveRouteManifest(context, {
+            buildManifest: attempt => this.createRunManifest(context.instance.name, attempt, workerCount),
         });
 
+        const offset = CaddyConfigHelper.getSlotOffset();
+        console.log(`Reserved playwright slots ${offset}-${offset + workerCount - 1} (${manifest.name}).`);
+
+        await CaddyService.reload(context);
+        await this.waitUntilRoutesActive(workerCount);
+    }
+
+    /**
+     * The manifest of this run for attempt `attempt`: the same manifest every time, but starting
+     * at the next slot. Returns undefined once the remaining slots no longer fit this run.
+     */
+    private createRunManifest(instanceName: string, attempt: number, workerCount: number): RouteManifestInput | undefined {
+        if (attempt + workerCount > slotPoolSize) {
+            return undefined;
+        }
+
+        CaddyConfigHelper.setSlotBlock(attempt, workerCount);
+        const profile = buildCaddyServiceProfile();
+
         return {
-            version: '2',
-            name: `playwright-worker-${id}`,
+            // One manifest per run (not per worker): all workers share the same reserved block.
+            name: `playwright-${instanceName}-${process.pid}`,
             kind: 'playwright-worker',
             pid: process.pid,
             startedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+            expiresAt: new Date(Date.now() + reservationLifetimeMs).toISOString(),
             rootPath: process.cwd(),
             workspace: 'playwright',
-            caddy,
+            reservedPorts: CaddyConfigHelper.getReservedPorts(workerCount),
+            caddy: CaddyConfigHelper.createRouteOptions({
+                proxyHost: profile.caddyProxyHost,
+                workerCount,
+            }),
         };
+    }
+
+    /**
+     * Wait until the shared Caddy serves the hosts of this run. A reload is applied asynchronously
+     * and another process may be reloading at the same time, so the services must not start (and
+     * report an unreachable URL) before the routes are really in place.
+     */
+    private async waitUntilRoutesActive(workerCount: number) {
+        const expectedHosts = [CaddyConfigHelper.getSsoDomain()];
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
+            expectedHosts.push(CaddyConfigHelper.getDomain('api', workerId.toString()));
+        }
+
+        const start = Date.now();
+        let missing: string[] = expectedHosts;
+
+        while (Date.now() - start < routesActiveTimeoutMs) {
+            const configured = JSON.stringify(await this.getRoutes());
+            // The hosts sit in matchers of nested subroutes, so a lookup in the serialized routes
+            // is both simpler and stricter than walking every handler type.
+            missing = expectedHosts.filter(host => !configured.includes(`"${host}"`));
+            if (missing.length === 0) {
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 250));
+        }
+
+        throw new Error(`Timed out waiting for Caddy to serve the routes of this run. Missing: ${missing.join(', ')}`);
     }
 
     private async postConfig(caddyConfig: any) {

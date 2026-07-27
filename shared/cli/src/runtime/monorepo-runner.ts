@@ -64,6 +64,7 @@ export type UnitTestPackage = {
 // runs vitest, then add it here with the correct `needsDatabase` (true if its vitest setup/tests
 // query `Database` from @simonbackx/simple-database).
 export const unitTestPackages: UnitTestPackage[] = [
+    { name: 'cli', path: 'shared/cli', needsDatabase: false },
     { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },

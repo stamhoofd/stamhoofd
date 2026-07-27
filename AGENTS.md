@@ -46,7 +46,7 @@ From repo root: `yarn lint` · `yarn typecheck`. **`yarn stam test` is the one g
 
 ```bash
 yarn stam test unit                 # every unit package (excludes Playwright)
-yarn stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint
+yarn stam test api                  # one package: api models sql structures renderer redirecter queues utility sgv object-differ eslint cli
 yarn stam test unit SomeFile        # filename filter across all packages
 yarn stam test structures bundle-discounts          # package + filename filter
 yarn stam test structures -t 'partial test name'    # package + test-name filter (-t → vitest -t)

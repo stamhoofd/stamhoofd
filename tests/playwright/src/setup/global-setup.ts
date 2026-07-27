@@ -1,10 +1,10 @@
-import os from 'node:os';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { CaddyHelper } from './helpers/CaddyHelper.js';
 import { DatabaseHelper } from './helpers/DatabaseHelper.js';
 import { FrontendBuilder } from './helpers/FrontendBuilder.js';
 import { PlaywrightHooks } from './helpers/PlaywrightHooks.js';
 import { SsoHelper } from './helpers/SsoHelper.js';
+import { getWorkerCount } from './helpers/WorkerCount.js';
 
 // Make sure initial env is loaded
 
@@ -23,7 +23,7 @@ export default async function globalSetup() {
     // The SSO server is only reachable once its Caddy route is in place, so it starts after the
     // routes are configured. Runs next to the frontend build, which takes far longer.
     const configureCaddyAndStartSso = async () => {
-        const workerCount = getExpectedWorkerCount();
+        const workerCount = getWorkerCount();
         if (!await caddyHelper.isRunning()) {
             console.log('Starting CI Caddy...');
             await caddyHelper.start();
@@ -32,7 +32,7 @@ export default async function globalSetup() {
         await caddyHelper.configure(workerCount);
 
         console.log('Starting SSO server...');
-        await SsoHelper.start();
+        await SsoHelper.start(workerCount);
         console.log('SSO server started.');
     };
 
@@ -45,7 +45,7 @@ export default async function globalSetup() {
     };
 
     const migrateDatabases = async () => {
-        const workerCount = getExpectedWorkerCount();
+        const workerCount = getWorkerCount();
         const { run: runMigrations } = await import('@stamhoofd/backend/migrate');
 
         for (let workerId = 0; workerId < workerCount; workerId += 1) {
@@ -59,17 +59,4 @@ export default async function globalSetup() {
     for (const promise of [configureCaddyAndStartSso(), buildFrontend(), migrateDatabases()]) {
         await promise;
     }
-}
-
-function getExpectedWorkerCount() {
-    const explicitWorkerCount = process.env.PLAYWRIGHT_WORKER_COUNT ? parseInt(process.env.PLAYWRIGHT_WORKER_COUNT) : undefined;
-    if (explicitWorkerCount !== undefined && Number.isFinite(explicitWorkerCount) && explicitWorkerCount > 0) {
-        return explicitWorkerCount;
-    }
-
-    if (process.env.CI) {
-        return 2;
-    }
-
-    return Math.max(1, Math.floor(os.availableParallelism() / 2));
 }

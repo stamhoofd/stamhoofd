@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { writeInstanceManifest, writeRouteManifest } from '../runtime/manifest-store.js';
 import { caddyAdminPort, localhostPort } from './shared-service-config.js';
+import { buildDomains } from './build-config.js';
 import { buildCaddyRouteOptions, cspFrontendSubroutes, writeCaddyConfig } from './caddy-config.js';
 
 describe('Caddy config', () => {
@@ -153,19 +154,21 @@ describe('Caddy config', () => {
         expect(caddyConfig.admin.origins).toEqual([`http://${localhostPort(caddyAdminPort)}`]);
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('keeps normal routes when adding Playwright routes', async () => {
+    it('keeps normal routes when adding Playwright routes', async () => {
         const ctx = context(rootDir);
         await writeRouteManifest(ctx, {
-            name: 'playwright-worker-0',
+            name: 'playwright-test-1234',
             kind: 'playwright-worker',
             pid: process.pid,
             startedAt: new Date().toISOString(),
             expiresAt: new Date(Date.now() + 60_000).toISOString(),
             rootPath: rootDir,
             workspace: 'playwright',
-            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
-            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
+            reservedPorts: [6100],
+            caddy: {
+                routes: [{ match: [{ host: ['playwright-dashboard-0.stamhoofd'] }], handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:6100' }] }] }],
+                tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
+            },
         });
 
         const config = await writeCaddyConfig(ctx);
@@ -173,34 +176,32 @@ describe('Caddy config', () => {
         const hosts = routeHosts(caddyConfig);
         const subjects = caddyConfig.apps.tls.automation.policies[0].subjects;
 
-        expect(hosts).toContain('dashboard.stamhoofd');
+        expect(hosts).toContain('mail.stamhoofd');
         expect(hosts).toContain('playwright-dashboard-0.stamhoofd');
-        expect(subjects).toContain('dashboard.stamhoofd');
+        expect(subjects).toContain('mail.stamhoofd');
         expect(subjects).toContain('playwright-dashboard-0.stamhoofd');
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('includes all frontend app routes from active instance manifests', async () => {
+    it('includes all frontend app routes from active instance manifests', async () => {
         const ctx = context(rootDir);
-        await writeInstanceManifest(ctx, {
-            dashboard: 'feature.dashboard.stamhoofd',
-            api: 'feature.api.stamhoofd',
-            renderer: 'feature.renderer.stamhoofd',
-            registration: 'feature.registration.stamhoofd',
-            webshop: 'feature.shop.stamhoofd',
+        const otherInstance = { ...ctx, instance: { name: 'feature', prefix: 'feature', primary: false, portOffset: 100 } };
+        await writeInstanceManifest(otherInstance, {
+            domains: buildDomains(otherInstance),
+            caddy: buildCaddyRouteOptions(otherInstance),
         });
 
         const config = await writeCaddyConfig(ctx);
         const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
         const hosts = routeHosts(caddyConfig);
+        const domains = buildDomains(otherInstance);
 
-        expect(hosts).toContain('feature.dashboard.stamhoofd');
-        expect(hosts).toContain('feature.api.stamhoofd');
-        expect(hosts).toContain('*.feature.api.stamhoofd');
-        expect(hosts).toContain('feature.renderer.stamhoofd');
-        expect(hosts).toContain('feature.registration.stamhoofd');
-        expect(hosts).toContain('*.feature.registration.stamhoofd');
-        expect(hosts).toContain('feature.shop.stamhoofd');
+        expect(hosts).toContain(domains.dashboard);
+        expect(hosts).toContain(domains.api);
+        expect(hosts).toContain(`*.${domains.api}`);
+        expect(hosts).toContain(domains.renderer);
+        expect(hosts).toContain(domains.registration);
+        expect(hosts).toContain(`*.${domains.registration}`);
+        expect(hosts).toContain(domains.webshop);
     });
 });
 

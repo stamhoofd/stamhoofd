@@ -3,6 +3,7 @@ import { buildPorts } from '../../context/ports.js';
 import { keycloakImage, localIpv4Host, ssoInternalPort } from '../../config/shared-service-config.js';
 import type { CliContext } from '../../context/create-context.js';
 import { DockerService } from '../docker-service.js';
+import * as docker from '../docker.js';
 import { ssoAdminPassword, ssoAdminUser, ssoRealm, writeKeycloakRealm } from '../sso-config.js';
 
 type SsoStartOptions = {
@@ -130,6 +131,24 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
 
     static container(context: { instance: { name: string } }, variant?: string): string {
         return `${context.instance.name}-keycloak${variant ? `-${variant}` : ''}`;
+    }
+
+    /**
+     * Remove the containers of sibling variants, e.g. the server of an e2e run that crashed before
+     * its teardown. Variant names carry the slots a run reserved, so a leaked container is not
+     * replaced by the next run (which reserves other slots) and would keep both its memory and its
+     * port for as long as the machine is up. Only variants starting with `variantPrefix` are
+     * removed, so this never touches the SSO server of `stam sso start`.
+     */
+    async removeOtherVariants(context: CliContext, variantPrefix: string): Promise<void> {
+        const own = this.getContainer(context);
+        const containers = await docker.listContainerNames(SsoService.container(context, variantPrefix));
+
+        for (const container of containers) {
+            if (container !== own) {
+                await docker.removeContainer(container, context.verbose);
+            }
+        }
     }
 }
 

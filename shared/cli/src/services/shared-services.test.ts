@@ -112,6 +112,25 @@ describe('shared service Docker args', () => {
         expect(service.getIssuer(context)).toBe('https://playwright-sso.stamhoofd/dex/realms/stamhoofd');
     });
 
+    it('removes the containers of other variants of the same family, but not of other families', async () => {
+        const context = {
+            rootDir: '/tmp/stamhoofd',
+            env: 'stamhoofd',
+            verbose: false,
+            instance: { name: 'stamhoofd', prefix: 'stamhoofd', portOffset: 0, primary: true },
+        } as any;
+        vi.mocked(run).mockResolvedValue({ status: 0, stdout: 'stamhoofd-keycloak-playwright-0\nstamhoofd-keycloak-playwright-5\n', stderr: '' } as any);
+
+        const service = new SsoService({ name: 'playwright-5', port: 6405, hostname: 'playwright-sso-5.stamhoofd' });
+        await service.removeOtherVariants(context, 'playwright');
+
+        const commands = vi.mocked(run).mock.calls.map(call => (call[1] as string[]).join(' '));
+        expect(commands).toContainEqual(expect.stringContaining('name=^stamhoofd-keycloak-playwright'));
+        expect(commands).toContainEqual('rm -f stamhoofd-keycloak-playwright-0');
+        expect(commands).not.toContainEqual('rm -f stamhoofd-keycloak-playwright-5');
+        expect(commands).not.toContainEqual('rm -f stamhoofd-keycloak');
+    });
+
     it('builds macOS Docker bridge args for Caddy', () => {
         const args = CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'darwin'));
 

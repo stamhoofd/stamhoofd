@@ -1,5 +1,5 @@
-import net from 'node:net';
 import type { CliContext } from './create-context.js';
+import { isPortAvailable } from '../runtime/port-probe.js';
 import { buildPorts } from './ports.js';
 
 const portResolutionStep = 100;
@@ -72,24 +72,4 @@ async function occupiedAppPorts(context: CliContext): Promise<Array<{ name: AppP
     return results
         .filter(result => !result.available)
         .map(({ name, port }) => ({ name, port }));
-}
-
-async function isPortAvailable(port: number): Promise<boolean> {
-    return await new Promise((resolve) => {
-        const server = net.createServer();
-
-        server.once('error', (error: NodeJS.ErrnoException) => {
-            if (error.code === 'EADDRINUSE' || error.code === 'EACCES') {
-                resolve(false);
-                return;
-            }
-            resolve(false);
-        });
-
-        server.once('listening', () => {
-            server.close(() => resolve(true));
-        });
-
-        server.listen(port, '127.0.0.1');
-    });
 }
