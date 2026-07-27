@@ -24,6 +24,7 @@ import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/orders.ts';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -60,6 +61,7 @@ const show = useShow();
 const present = usePresent();
 const isMobile = useIsMobile();
 const requestOwner = useRequestOwner();
+const platform = usePlatform();
 
 const preview = computed(() => props.webshopManager.preview);
 const hasSingleTickets = computed(() => preview.value.hasSingleTickets);
@@ -79,6 +81,7 @@ const actions = computed(() => {
         present,
         organizationManager: organizationManager.value,
         webshopManager: props.webshopManager,
+        platform: platform.value,
     });
 
     const results = [

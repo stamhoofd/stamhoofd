@@ -373,6 +373,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
@@ -410,6 +411,7 @@ const pop = usePop();
 const canPop = useCanPop();
 const context = useContext();
 const organizationManager = useOrganizationManager();
+const platform = usePlatform();
 
 const webshop = computed(() => props.webshopManager.webshop);
 props.webshopManager.loadWebshopIfNeeded(false, true).catch(console.error);
@@ -446,6 +448,7 @@ const actionBuilder = computed(() => new OrderActionBuilder({
     present: usePresent(),
     organizationManager: organizationManager.value,
     webshopManager: props.webshopManager,
+    platform: platform.value,
 }));
 
 const statusName = computed(() => OrderStatusHelper.getName(props.order.status));

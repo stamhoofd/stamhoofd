@@ -4,6 +4,7 @@ import { useContext } from './useContext';
 import { useEventTypes } from './useEventTypes';
 import { manualFeatureFlag } from './useFeatureFlag';
 import { useOrganization } from './useOrganization';
+import { usePlatform } from './usePlatform';
 
 /**
  * Whether the events/calendar feature should be shown for the current context.
@@ -17,13 +18,14 @@ export function useEventsEnabled(): ComputedRef<boolean> {
     const eventTypes = useEventTypes();
     const context = useContext();
     const organization = useOrganization();
+    const platform = usePlatform();
 
     return computed(() => {
         if (eventTypes.value.length === 0) {
             return false;
         }
 
-        if (manualFeatureFlag('disable-events', context.value)) {
+        if (manualFeatureFlag('disable-events', context.value, platform.value)) {
             return false;
         }
 

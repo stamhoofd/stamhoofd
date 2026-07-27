@@ -241,7 +241,7 @@ function getRoot() {
             if (organization?.meta.packages.useMembers) {
                 tabs.push(membersTab);
 
-                if (!manualFeatureFlag('disable-events', context.value) && organization.meta.enableCalendar !== false) {
+                if (!manualFeatureFlag('disable-events', context.value, platformManager.value.$platform) && organization.meta.enableCalendar !== false) {
                     const eventTypes = getEventTypes({ platform: platformManager.value.$platform, organization });
                     if (eventTypes.length > 0) {
                         tabs.push(calendarTab);

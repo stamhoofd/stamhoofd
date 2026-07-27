@@ -11,7 +11,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { ExcelWorkbookFilter, PrivateOrderWithTickets } from '@stamhoofd/structures';
+import type { ExcelWorkbookFilter, Platform, PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { WebshopManager } from '../WebshopManager';
@@ -20,6 +20,7 @@ import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 export class OrderActionBuilder {
     webshopManager: WebshopManager;
     organizationManager: OrganizationManager;
+    platform: Platform;
 
     present: ReturnType<typeof usePresent>;
 
@@ -27,10 +28,12 @@ export class OrderActionBuilder {
         present: ReturnType<typeof usePresent>;
         webshopManager: WebshopManager;
         organizationManager: OrganizationManager;
+        platform: Platform;
     }) {
         this.present = settings.present;
         this.webshopManager = settings.webshopManager;
         this.organizationManager = settings.organizationManager;
+        this.platform = settings.platform;
     }
 
     getStatusActions(): TableAction<PrivateOrder>[] {
@@ -335,7 +338,7 @@ export class OrderActionBuilder {
 
         const { getSelectableWorkbook } = await import('./excel/getSelectableWorkbook');
 
-        if (!manualFeatureFlag('webshop-orders-excel-export-ui', this.organizationManager.$context)) {
+        if (!manualFeatureFlag('webshop-orders-excel-export-ui', this.organizationManager.$context, this.platform)) {
             // Export immediately with all columns and sheets, without the settings UI
             // (same behaviour as before the settings UI existed, so without the tickets sheet)
             const { exportOrdersToExcel } = await import('./excel/exportOrdersToExcel');

@@ -177,7 +177,7 @@ function getRoot() {
             }
 
             if (isPlatform) {
-                if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value)) {
+                if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value, platformManager.value.$platform)) {
                     tabs.push(calendarTab);
                 }
             }
@@ -200,7 +200,7 @@ function getRoot() {
                 }
             }
 
-            if (manualFeatureFlag('event-notifications', context.value) && context.value.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
+            if (manualFeatureFlag('event-notifications', context.value, platformManager.value.$platform) && context.value.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
                 // Feature is still in development so not visible for everyone
                 moreTab.items.push(eventNotificationsTab);
             }
