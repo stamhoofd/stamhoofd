@@ -1,7 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { FrontendProjectName } from './FrontendService.js';
 import type { CaddyRoute, CaddyRouteOptions } from '@stamhoofd/cli';
-import { cspFrontendSubroutes } from '@stamhoofd/cli';
+import { cspFrontendSubroutes, ssoRealm } from '@stamhoofd/cli';
 
 /**
  * Old domains and ports will get reused
@@ -67,6 +67,40 @@ export class CaddyConfigHelper {
     static cycledWorkerId(workerId: string) {
         const asNumber = parseInt(workerId);
         return asNumber % maximumRunners;
+    }
+
+    /**
+     * Host of the SSO (Keycloak) server used by the e2e tests. One server is shared by all
+     * workers, and it deliberately does not reuse the `sso.<domain>` host of `stam sso start`: a
+     * test run must never restart the SSO server a developer started for manual testing.
+     */
+    static getSsoDomain() {
+        return 'playwright-sso.stamhoofd';
+    }
+
+    static getSsoPort() {
+        return 6400;
+    }
+
+    /**
+     * OpenID Connect issuer of the realm imported by the SSO server, to configure as the issuer in
+     * the Stamhoofd SSO settings.
+     */
+    static getSsoIssuer() {
+        return `https://${this.getSsoDomain()}/dex/realms/${ssoRealm}`;
+    }
+
+    /**
+     * The redirect URI the backend of a worker hands to the SSO server. Keycloak only redirects
+     * back to URIs listed in the realm, and one SSO server serves every worker, so the realm
+     * allows the callback of every worker.
+     */
+    static getSsoRedirectUris() {
+        const uris: string[] = [];
+        for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
+            uris.push(`${this.getUrl('api', workerId.toString())}/openid/callback`);
+        }
+        return uris;
     }
 
     /**
@@ -222,10 +256,36 @@ export class CaddyConfigHelper {
     }
 
     /**
+     * Route to the SSO (Keycloak) server. Not per worker: one server serves every worker, and both
+     * the browser and the backends reach it over HTTPS through Caddy (Keycloak is started with
+     * `--proxy-headers=xforwarded`, so it builds its URLs from the headers Caddy sets).
+     */
+    static createSsoRoute(proxyHost: string): CaddyRoute {
+        return {
+            group: `${this.GROUP_PREFIX}-sso`,
+            match: [
+                {
+                    host: [this.getSsoDomain()],
+                },
+            ],
+            handle: [
+                {
+                    handler: 'reverse_proxy',
+                    upstreams: [
+                        {
+                            dial: `${proxyHost}:${this.getSsoPort()}`,
+                        },
+                    ],
+                },
+            ],
+        };
+    }
+
+    /**
      * Create the default playwright caddy config
      */
     static createRouteOptions(options: { proxyHost: string }): CaddyRouteOptions {
-        const routes: CaddyRoute[] = [];
+        const routes: CaddyRoute[] = [this.createSsoRoute(options.proxyHost)];
 
         for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
             routes.push(

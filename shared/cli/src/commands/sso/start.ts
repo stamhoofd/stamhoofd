@@ -29,6 +29,6 @@ export default class SsoStart extends BaseCommand {
             await startServices(context, sharedServiceDefinitions);
         }
         await CaddyService.reload(context);
-        await ssoService.start(context, { redirectUri: args.redirectUri, background: flags.background });
+        await ssoService.start(context, { redirectUris: [args.redirectUri], background: flags.background });
     }
 }

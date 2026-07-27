@@ -41,7 +41,7 @@ Commands:
   stam sso start "${resolvedRedirectUri}"`;
 }
 
-export function buildKeycloakRealm(redirectUri: string): Record<string, unknown> {
+export function buildKeycloakRealm(redirectUris: string | string[]): Record<string, unknown> {
     const [firstName, lastName] = splitName(ssoUserName);
 
     return {
@@ -69,7 +69,7 @@ export function buildKeycloakRealm(redirectUri: string): Record<string, unknown>
                 implicitFlowEnabled: false,
                 directAccessGrantsEnabled: false,
                 serviceAccountsEnabled: false,
-                redirectUris: [redirectUri],
+                redirectUris: Array.isArray(redirectUris) ? redirectUris : [redirectUris],
                 webOrigins: ['+'],
                 defaultClientScopes: ['web-origins', 'acr', 'profile', 'roles', 'email'],
                 optionalClientScopes: ['address', 'phone', 'offline_access', 'microprofile-jwt'],
@@ -100,11 +100,16 @@ export function buildKeycloakRealm(redirectUri: string): Record<string, unknown>
     };
 }
 
-export async function writeKeycloakRealm(context: CliContext, redirectUri: string): Promise<string> {
-    const importDir = path.join(context.generatedDir, 'instances', context.instance.name, 'keycloak');
+/**
+ * Write the realm Keycloak imports on boot. `dirName` keeps realms of different SSO servers
+ * apart: the Playwright server allows other redirect URIs than the one `stam sso start`
+ * configures, and both may exist for the same instance.
+ */
+export async function writeKeycloakRealm(context: CliContext, redirectUris: string | string[], options: { dirName?: string } = {}): Promise<string> {
+    const importDir = path.join(context.generatedDir, 'instances', context.instance.name, options.dirName ?? 'keycloak');
     const file = path.join(importDir, 'stamhoofd-realm.json');
     await fs.mkdir(importDir, { recursive: true });
-    await fs.writeFile(file, JSON.stringify(buildKeycloakRealm(redirectUri), null, 4));
+    await fs.writeFile(file, JSON.stringify(buildKeycloakRealm(redirectUris), null, 4));
     return importDir;
 }
 

@@ -4,6 +4,7 @@ import { CaddyHelper } from './helpers/CaddyHelper.js';
 import { DatabaseHelper } from './helpers/DatabaseHelper.js';
 import { FrontendBuilder } from './helpers/FrontendBuilder.js';
 import { PlaywrightHooks } from './helpers/PlaywrightHooks.js';
+import { SsoHelper } from './helpers/SsoHelper.js';
 
 // Make sure initial env is loaded
 
@@ -19,7 +20,9 @@ export default async function globalSetup() {
     const frontendBuilder = new FrontendBuilder();
     const caddyHelper = new CaddyHelper();
 
-    const configureCaddy = async () => {
+    // The SSO server is only reachable once its Caddy route is in place, so it starts after the
+    // routes are configured. Runs next to the frontend build, which takes far longer.
+    const configureCaddyAndStartSso = async () => {
         const workerCount = getExpectedWorkerCount();
         if (!await caddyHelper.isRunning()) {
             console.log('Starting CI Caddy...');
@@ -27,6 +30,10 @@ export default async function globalSetup() {
             console.log('CI Caddy started.');
         }
         await caddyHelper.configure(workerCount);
+
+        console.log('Starting SSO server...');
+        await SsoHelper.start();
+        console.log('SSO server started.');
     };
 
     const buildFrontend = async () => {
@@ -49,7 +56,7 @@ export default async function globalSetup() {
         }
     };
 
-    for (const promise of [configureCaddy(), buildFrontend(), migrateDatabases()]) {
+    for (const promise of [configureCaddyAndStartSso(), buildFrontend(), migrateDatabases()]) {
         await promise;
     }
 }

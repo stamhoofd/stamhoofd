@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { run as runCommand } from '../runtime/command-runner.js';
 import * as docker from './docker.js';
 
@@ -10,6 +10,27 @@ describe('container runtime selection', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         docker.resetContainerRuntimeCacheForTests();
+        delete process.env.STAMHOOFD_CONTAINER_RUNTIME;
+    });
+
+    afterEach(() => {
+        delete process.env.STAMHOOFD_CONTAINER_RUNTIME;
+    });
+
+    it('uses the runtime pinned through STAMHOOFD_CONTAINER_RUNTIME', async () => {
+        process.env.STAMHOOFD_CONTAINER_RUNTIME = 'Docker';
+
+        await expect(docker.getContainerRuntime()).resolves.toBe(docker.ContainerRuntime.Docker);
+
+        expect(runCommand).toHaveBeenCalledExactlyOnceWith('docker', ['info'], { quiet: true });
+    });
+
+    it('rejects an unknown pinned runtime', async () => {
+        process.env.STAMHOOFD_CONTAINER_RUNTIME = 'containerd';
+
+        await expect(docker.getContainerRuntime()).rejects.toThrow('Unknown STAMHOOFD_CONTAINER_RUNTIME');
+
+        expect(runCommand).not.toHaveBeenCalled();
     });
 
     it('prefers podman and caches the selected runtime', async () => {

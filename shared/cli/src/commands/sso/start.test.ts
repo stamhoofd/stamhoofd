@@ -36,7 +36,7 @@ describe('SsoStart command', () => {
         expect(log).toHaveBeenCalledWith(expect.stringContaining(`Redirect URI:  ${redirectUri}`));
         expect(log).toHaveBeenCalledWith(expect.stringContaining('Client secret: stamhoofd-local-secret'));
         expect(CaddyService.reload).toHaveBeenCalledWith(createContext());
-        expect(ssoService.start).toHaveBeenCalledWith(createContext(), { redirectUri, background: false });
+        expect(ssoService.start).toHaveBeenCalledWith(createContext(), { redirectUris: [redirectUri], background: false });
     });
 
     it('starts shared services first when they are not running', async () => {
@@ -48,7 +48,7 @@ describe('SsoStart command', () => {
         await command.run();
 
         expect(startServices).toHaveBeenCalledWith(createContext(), sharedServiceDefinitions);
-        expect(ssoService.start).toHaveBeenCalledWith(createContext(), { redirectUri, background: true });
+        expect(ssoService.start).toHaveBeenCalledWith(createContext(), { redirectUris: [redirectUri], background: true });
     });
 });
 

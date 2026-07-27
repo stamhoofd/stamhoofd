@@ -320,6 +320,9 @@ jobs:
     env:
       SPACES_CI_BUCKET: stamhoofd-ci-traces
       SPACES_CI_REGION: ams3
+      # The SSO tests start a Keycloak container from the CLI. Runners ship both docker and
+      # podman, and the auto-detection prefers podman, so pin the runtime we actually verified.
+      STAMHOOFD_CONTAINER_RUNTIME: docker
     services:
       mysql:
         image: mysql:8.4@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
@@ -437,6 +440,11 @@ jobs:
         certutil -N -d sql:$HOME/.pki/nssdb --empty-password
     - name: Add trusted CA certificate to NSS
       run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
+    # The Playwright global setup starts a local SSO server (Keycloak) that the SSO login tests
+    # sign in on. Pull it up front so a cold registry pull cannot eat into the setup timeout.
+    # Keep the tag in sync with keycloakImage in shared/cli/src/config/shared-service-config.ts.
+    - name: Pull SSO server image
+      run: docker pull quay.io/keycloak/keycloak:26.0.7
     - name: Download shared build output
       uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
       with:

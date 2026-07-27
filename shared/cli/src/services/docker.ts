@@ -100,6 +100,18 @@ export function resetContainerRuntimeCacheForTests(): void {
 }
 
 async function resolveContainerRuntime(): Promise<ContainerRuntime> {
+    // Both runtimes are often installed side by side (GitHub Actions runners ship podman as well
+    // as docker), so allow pinning one instead of relying on the auto-detection order.
+    const configured = process.env.STAMHOOFD_CONTAINER_RUNTIME?.trim().toLowerCase();
+    if (configured) {
+        const supported: string[] = [ContainerRuntime.Docker, ContainerRuntime.Podman];
+        if (!supported.includes(configured)) {
+            throw new Error(`Unknown STAMHOOFD_CONTAINER_RUNTIME "${configured}": expected ${supported.map(runtime => `"${runtime}"`).join(' or ')}`);
+        }
+        await commandRunner.run(configured, ['info'], { quiet: true });
+        return configured as ContainerRuntime;
+    }
+
     const podmanVersion = await commandRunner.run('podman', ['--version'], { capture: true, allowFailure: true });
     if (podmanVersion.status === 0) {
         await commandRunner.run('podman', ['info'], { quiet: true });
