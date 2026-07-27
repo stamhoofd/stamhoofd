@@ -1,12 +1,12 @@
 import { Column } from '#tables/classes/Column.ts';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { AppType, Group, GroupCategoryTree, Organization, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
-import { ContinuousMembershipStatus, getGroupTypeName, GroupType, MembershipStatus, PermissionLevel, Platform } from '@stamhoofd/structures';
+import type { AppType, Group, GroupCategoryTree, Organization, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { ContinuousMembershipStatus, getGroupTypeName, GroupType, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
 
-export function getRegistrationColumns({ organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
+export function getRegistrationColumns({ platform, organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { platform: Platform; organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
     const isPlatform = STAMHOOFD.userMode === 'platform';
 
     const allColumns: (Column<ObjectType, any> | null)[] = [
@@ -576,7 +576,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                     if (!g) {
                         return $t('%1FW');
                     }
-                    return Platform.shared.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('%Gr');
+                    return platform.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('%Gr');
                 },
                 getStyle: g => !g ? 'gray' : '',
                 minimumWidth: 100,
