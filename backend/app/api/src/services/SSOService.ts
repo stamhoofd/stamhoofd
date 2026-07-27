@@ -287,7 +287,6 @@ export class SSOService {
             httpOnly: true,
             secure: STAMHOOFD.environment !== 'development',
             expires: data.expires,
-            sameSite: 'lax',
         });
     }
 
