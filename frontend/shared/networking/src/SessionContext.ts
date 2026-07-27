@@ -15,7 +15,7 @@ import { QueueHandler } from './QueueHandler';
 import { Storage } from './Storage';
 import { UrlHelper } from './UrlHelper';
 
-type AuthenticationStateListener = (changed: 'user' | 'organization' | 'token' | 'preventComplete') => void;
+type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;
 
 // dec2hex :: Integer -> String
 // i.e. 0-255 -> '00'-'ff'
@@ -35,6 +35,12 @@ export class SessionContext implements RequestMiddleware {
      * This will become optional in the future
      */
     organization: Organization | null = null;
+
+    /**
+     * Never replace this reference: use updatePlatform to keep it stable
+     * (Platform.shared and usePlatform() keep a reference to this object)
+     */
+    platform: Platform;
     user: UserWithMembers | null = null;
     loadingError: Error | null = null;
 
@@ -60,6 +66,7 @@ export class SessionContext implements RequestMiddleware {
 
     constructor(organization: Organization | null) {
         this.organization = organization;
+        this.platform = Platform.create({});
         this.usedPlatformStorage = this.organization === null;
 
         // Reactive hack: always force creating reactive SessionContext
@@ -90,7 +97,7 @@ export class SessionContext implements RequestMiddleware {
         if (!this.organization) {
             return null;
         }
-        return this.user?.permissions?.forOrganization(this.organization, Platform.shared) ?? null;
+        return this.user?.permissions?.forOrganization(this.organization, this.platform) ?? null;
     }
 
     /**
@@ -104,7 +111,7 @@ export class SessionContext implements RequestMiddleware {
     _auth: ContextPermissions | null = null;
     get auth() {
         if (!this._auth) {
-            this._auth = new ContextPermissions(this.user, this.organization, Platform.shared);
+            this._auth = new ContextPermissions(this.user, this.organization, this.platform);
         }
         return this._auth;
     }
@@ -470,7 +477,7 @@ export class SessionContext implements RequestMiddleware {
         this.listeners.delete(owner);
     }
 
-    callListeners(changed: 'user' | 'organization' | 'token' | 'preventComplete') {
+    callListeners(changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') {
         for (const listener of this.listeners.values()) {
             listener(changed);
         }
@@ -630,6 +637,7 @@ export class SessionContext implements RequestMiddleware {
 
     _lastFetchedUser: Date | null = null;
     _lastFetchedOrganization: Date | null = null;
+    _lastFetchedPlatform: Date | null = null;
 
     async fetchUser(shouldRetry = true): Promise<UserWithMembers> {
         console.log('Fetching session user...');
@@ -733,6 +741,85 @@ export class SessionContext implements RequestMiddleware {
         return this.organization!;
     }
 
+    /**
+     * Set the platform, but keep the same reference and update
+     * other references correctly to keep the app reactive
+     */
+    updatePlatform(platform: Platform) {
+        this.platform.deepSet(platform);
+        this._lastFetchedPlatform = new Date();
+        this.clearAuthCache();
+        this.callListeners('platform');
+    }
+
+    /**
+     * Whether we need the private config of the platform to reliably calculate the permissions of this session.
+     * This is the platform equivalent of auth.requiresPrivateMeta.
+     *
+     * Users with global permissions need the private data to reliably calculate permissions, even for specific
+     * organizations when not using the admin panel.
+     */
+    requiresPlatformPrivateConfig() {
+        if (this.user?.organizationId) {
+            return false;
+        }
+        return this.auth.unloadedPlatformPermissions?.isEmpty === false;
+    }
+
+    /**
+     * Set the platform from storage without doing any network request.
+     * Returns whether a usable platform was found.
+     */
+    async loadPlatformFromCache(): Promise<boolean> {
+        const fromStorage = await SessionContext.loadPlatformFromStorage();
+
+        if (fromStorage && (fromStorage.privateConfig || !this.requiresPlatformPrivateConfig())) {
+            this.updatePlatform(fromStorage);
+            return true;
+        }
+
+        return false;
+    }
+
+    async fetchPlatform(): Promise<Platform> {
+        // Run in a queue to prevent race conditions, so concurrent callers of this context share one request
+        await QueueHandler.schedule('fetch-platform-' + (this.organization?.id ?? 'platform'), async () => {
+            const pResponse = await this.optionalAuthenticatedServer.request({
+                method: 'GET',
+                path: '/platform',
+                decoder: Platform as Decoder<Platform>,
+            });
+            this.updatePlatform(pResponse.data);
+            await this.savePlatform();
+        });
+
+        return this.platform;
+    }
+
+    /**
+     * Save the platform in localstorage
+     */
+    async savePlatform() {
+        await Storage.keyValue.setItem('platform', JSON.stringify(new VersionBox(this.platform).encode({ version: Version })));
+    }
+
+    static async loadPlatformFromStorage(): Promise<Platform | null> {
+        try {
+            const value = await Storage.keyValue.getItem('platform');
+
+            if (!value) {
+                return null;
+            }
+            const decoder = new VersionBoxDecoder(Platform as Decoder<Platform>);
+            const result = decoder.decode(new ObjectData(JSON.parse(value), { version: 0 }));
+
+            return result.data;
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    }
+
     isOutdated(date: Date | null) {
         return date === null || date < new Date(new Date().getTime() - 10 * 1000);
     }
@@ -776,6 +863,15 @@ export class SessionContext implements RequestMiddleware {
             if (this.organization && ((force && !fetchedOrganization) || (this.auth.requiresPrivateMeta && !this.organization.privateMeta))) {
                 fetchedOrganization = true;
                 await this.fetchOrganization(shouldRetry);
+            }
+
+            // The platform is required to calculate the permissions of this session, but only read
+            // it from the cache here. Fetching it over the network is the app level platform
+            // manager's job: short lived sessions (the password reset flow builds one from a
+            // password token) are not necessarily allowed to request the platform, and a failure
+            // there would take down the whole flow.
+            if (this._lastFetchedPlatform === null) {
+                await this.loadPlatformFromCache();
             }
 
             if (((!fetchedOrganization && this.organization) || (!fetchedUser && this.canGetCompleted())) && background) {

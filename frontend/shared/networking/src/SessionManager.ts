@@ -207,7 +207,13 @@ export class SessionManagerStatic {
 
         this.callListeners('session');
 
-        session.addListener(this, (changed: 'user' | 'organization' | 'token' | 'preventComplete') => {
+        session.addListener(this, (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => {
+            if (changed === 'platform') {
+                // Not a session change: the platform manager handles this one. Relaying it here
+                // would rewrite the organization storage on every platform refresh.
+                return;
+            }
+
             if (session.organization) {
                 if (session.loadingError && (isSimpleErrors(session.loadingError) || isSimpleError(session.loadingError)) && (session.loadingError.hasCode('invalid_organization') || session.loadingError.hasCode('archived'))) {
                     this.removeOrganizationFromStorage(session.organization.id).catch(console.error);

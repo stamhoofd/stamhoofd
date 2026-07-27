@@ -21,7 +21,6 @@ import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Ref } from 'vue';
 import { markRaw, onMounted, ref } from 'vue';
-import { Platform } from '@stamhoofd/structures';
 import ToastBox from '#overlays/ToastBox.vue';
 
 const props = withDefaults(defineProps<{
@@ -31,7 +30,7 @@ const props = withDefaults(defineProps<{
     keepAlive: true,
 });
 const context = new SessionContext(null);
-const platformManager = new PlatformManager(context, Platform.create({}), 'auto');
+const platformManager = new PlatformManager(context, 'auto');
 
 const wrappedRoot = new ComponentWithProperties(ContextProvider, {
     context: markRaw({

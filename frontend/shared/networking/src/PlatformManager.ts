@@ -1,14 +1,12 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import type { AppType } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, Version } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { inject, reactive, toRef } from 'vue';
-import { QueueHandler } from './QueueHandler';
-import type { SessionContext } from './SessionContext';
-import { Storage } from './Storage';
+import { inject, toRef } from 'vue';
+import { SessionContext } from './SessionContext';
 
 export function usePlatformManager(): Ref<PlatformManager> {
     return toRef(inject<PlatformManager>('$platformManager', null as unknown as PlatformManager)) as any as Ref<PlatformManager>;
@@ -19,16 +17,34 @@ export function usePlatformManager(): Ref<PlatformManager> {
  */
 export class PlatformManager {
     $context: SessionContext;
-    $platform: Platform;
     $app: AppType | 'auto';
 
-    constructor($context: SessionContext, $platform: Platform, app: AppType | 'auto') {
+    /**
+     * The platform is owned by the session context: this is only a convenient shortcut
+     */
+    get $platform(): Platform {
+        return this.$context.platform;
+    }
+
+    constructor($context: SessionContext, app: AppType | 'auto') {
         this.$context = $context;
-        this.$platform = $platform;
         this.$app = app;
 
-        $platform.setShared();
+        // Only the app level platform manager may stamp the global Platform.shared.
+        // The context never replaces the platform reference (updatePlatform uses deepSet),
+        // so doing this once here keeps Platform.shared up to date forever.
+        this.$platform.setShared();
         $context.clearAuthCache();
+
+        // The context owns the platform, so it is the one that knows when it changed. React to that
+        // instead of updating the styles at every call site that happens to change the platform.
+        $context.addListener(this, (changed) => {
+            if (changed !== 'platform') {
+                return;
+            }
+            this.updateStyles();
+            GlobalEventBus.sendEvent('platform-updated', this.$platform).catch(console.error);
+        });
 
         this.updateStyles();
     }
@@ -41,36 +57,23 @@ export class PlatformManager {
         this.setFavicon();
     }
 
-    static _lastFetch: Date | null = null;
-    static _lastFetchedPlatform: Platform | null = null;
-
     /**
      * Create one from cache, otherwise load it using the network
      */
-    static async createFromCache($context: SessionContext, app: AppType | 'auto', backgroundFetch = true, requirePrivateConfig = false): Promise<PlatformManager> {
-        const fromStorage = this._lastFetchedPlatform ?? (await PlatformManager.loadPlatform());
+    static async createFromCache($context: SessionContext, app: AppType | 'auto', backgroundFetch = true): Promise<PlatformManager> {
+        if (await $context.loadPlatformFromCache()) {
+            const manager = new PlatformManager($context, app);
 
-        // Users with global permissions need the private data to reliably calculate permissions, even for specific organizations when not using the admin panel
-        requirePrivateConfig = requirePrivateConfig || $context.user?.permissions?.globalPermissions?.isEmpty === false;
-        if ($context.user?.organizationId) {
-            requirePrivateConfig = false;
-        }
-
-        if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
-            const manager = new PlatformManager($context, reactive(fromStorage as any) as Platform, app);
-
-            if (backgroundFetch && (this._lastFetch === null || (Date.now() - this._lastFetch.getTime()) > 1000 * 5 * 60)) {
-                manager.forceUpdate(requirePrivateConfig).catch(console.error);
+            if (backgroundFetch) {
+                // We served a platform that came from storage, so refresh it in the background.
+                manager.forceUpdate().catch(console.error);
             }
 
             return manager;
         }
 
-        const platform = reactive(await PlatformManager.fetchPlatform($context, requirePrivateConfig)) as any as Platform;
-        const platformManager = new PlatformManager($context, platform, app);
-        await platformManager.savePlatform();
-        await GlobalEventBus.sendEvent('platform-updated', platformManager.$platform);
-        return platformManager;
+        await $context.fetchPlatform();
+        return new PlatformManager($context, app);
     }
 
     setFavicon() {
@@ -95,34 +98,12 @@ export class PlatformManager {
         document.head.appendChild(link);
     }
 
-    static async fetchPlatform($context: SessionContext, requirePrivateConfig = false) {
-        // Run in a queue to prevent race conditions. So we always return the last fetched platform when creating new platform managers
-        const started = this._lastFetch;
-        return await QueueHandler.schedule('fetch-platform', async () => {
-            if (started !== this._lastFetch && this._lastFetchedPlatform) {
-                if (!requirePrivateConfig || this._lastFetchedPlatform.privateConfig) {
-                    // Has been resolved when we started this request in the queue
-                    console.log('Returning cached platform');
-                    return this._lastFetchedPlatform;
-                }
-            }
-
-            const pResponse = await $context.optionalAuthenticatedServer.request({
-                method: 'GET',
-                path: '/platform',
-                decoder: Platform as Decoder<Platform>,
-            });
-            this._lastFetch = new Date();
-            this._lastFetchedPlatform = pResponse.data;
-            return pResponse.data;
-        });
+    static async fetchPlatform($context: SessionContext) {
+        return await $context.fetchPlatform();
     }
 
-    async forceUpdate(requirePrivateConfig = false) {
-        this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context, requirePrivateConfig));
-        this.updateStyles();
-        await this.savePlatform();
-        await GlobalEventBus.sendEvent('platform-updated', this.$platform);
+    async forceUpdate() {
+        await this.$context.fetchPlatform();
     }
 
     async patch(patch: AutoEncoderPatchType<Platform>, shouldRetry = false) {
@@ -133,12 +114,10 @@ export class PlatformManager {
             decoder: Platform as Decoder<Platform>,
             shouldRetry,
         });
-        this.$platform.deepSet(response.data);
+        this.$context.updatePlatform(response.data);
 
         // Save platform in localstorage
         this.savePlatform().catch(console.error);
-        this.updateStyles();
-        await GlobalEventBus.sendEvent('platform-updated', this.$platform);
     }
 
     _pendingLoadPeriods: Promise<RegistrationPeriod[]> | null = null;
@@ -190,23 +169,10 @@ export class PlatformManager {
      * Save organization in localstorage
      */
     async savePlatform() {
-        await Storage.keyValue.setItem('platform', JSON.stringify(new VersionBox(this.$platform).encode({ version: Version })));
+        await this.$context.savePlatform();
     }
 
     static async loadPlatform() {
-        try {
-            const value = await Storage.keyValue.getItem('platform');
-
-            if (!value) {
-                return null;
-            }
-            const decoder = new VersionBoxDecoder(Platform as Decoder<Platform>);
-            const result = decoder.decode(new ObjectData(JSON.parse(value), { version: 0 }));
-
-            return result.data;
-        } catch (e) {
-            console.error(e);
-            return null;
-        }
+        return await SessionContext.loadPlatformFromStorage();
     }
 }
