@@ -1,6 +1,6 @@
 import type { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import type { Organization } from './Organization.js';
-import { Platform } from './Platform.js';
+import type { Platform } from './Platform.js';
 import type { User } from './User.js';
 
 export class MemberAdmin {
@@ -19,7 +19,7 @@ export class MemberAdmin {
         return withName ? withName.name : this.users[0].email;
     }
 
-    getResponsibilities(organization: Organization | null) {
+    getResponsibilities(organization: Organization | null, platform: Platform) {
         const responsibilities = new Map<string, MemberResponsibilityRecordBase>();
 
         for (const user of this.users) {
@@ -40,7 +40,7 @@ export class MemberAdmin {
                 }
             }
 
-            const name = Platform.shared.config.responsibilities.find(res => res.id === r.responsibilityId)?.name;
+            const name = platform.config.responsibilities.find(res => res.id === r.responsibilityId)?.name;
             if (name) {
                 return [name];
             }
