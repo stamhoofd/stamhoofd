@@ -9,7 +9,6 @@ import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
 import { EventNotificationStatus, EventNotificationStatusHelper } from '../EventNotificationStatus.js';
 import { GroupStatus, getGroupStatusName } from '../Group.js';
-import { uuidToName } from '../helpers/uuidToName.js';
 import { Gender, getGenderName } from '../members/Gender.js';
 import { ParentType, ParentTypeHelper } from '../members/ParentType.js';
 import { OrganizationType, OrganizationTypeHelper } from '../OrganizationType.js';
@@ -38,4 +37,6 @@ registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTy
 registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
 registerAuditLogEnum('Language', Language, LanguageHelper.getName);
 
-AuditLogReplacementDependencies.uuidToName = uuidToName;
+// AuditLogReplacementDependencies.uuidToName is deliberately not registered here: resolving a uuid
+// to a name needs a platform, and this module runs on import of @stamhoofd/structures, where there
+// is none. The api and the frontend each register a resolver bound to their own platform instead.

@@ -2,7 +2,8 @@ import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import { PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { AuditLogReplacementDependencies, PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
 import { deepFreeze } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
@@ -164,6 +165,13 @@ export class Platform extends QueryableModel {
         const clone = struct.clone();
         clone.privateConfig = null;
         clone.setShared();
+
+        // Audit logs render uuids from a bare id, so they cannot receive a platform through their
+        // call chain. Bind the resolver to the same struct that backs Platform.shared here, so it
+        // is refreshed together with the caches. Uses the public struct on purpose: resolving
+        // privateConfig roles would change the names that get persisted in audit logs.
+        AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, clone);
+
         this.sharedStruct = clone;
     }
 
