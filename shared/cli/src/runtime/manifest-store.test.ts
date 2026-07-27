@@ -3,9 +3,10 @@ import path from 'node:path';
 import os from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { listActiveRouteManifests, listInstanceManifests, writeRouteManifest } from './manifest-store.js';
+import type { RouteManifestInput } from './manifest-store.js';
+import { listActiveRouteManifests, listInstanceManifests, removeOwnRouteManifests, writeRouteManifest } from './manifest-store.js';
 
-describe.skip('manifest store', () => {
+describe('manifest store', () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
@@ -51,35 +52,16 @@ describe.skip('manifest store', () => {
 
     it('returns active route manifests', async () => {
         const context = await testContext();
-        await writeRouteManifest(context, {
-            name: 'playwright-worker-0',
-            kind: 'playwright-worker',
-            pid: process.pid,
-            startedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 60_000).toISOString(),
-            rootPath: '/repo',
-            workspace: 'playwright',
-            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
-            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
-        });
+        await writeRouteManifest(context, routeManifest({ pid: process.pid }));
 
         await expect(listActiveRouteManifests(context)).resolves.toMatchObject([
-            { name: 'playwright-worker-0', kind: 'playwright-worker' },
+            { name: 'playwright-worker-0', kind: 'playwright-worker', reservedPorts: [6000, 6100] },
         ]);
     });
 
     it('ignores and removes expired route manifests', async () => {
         const context = await testContext();
-        await writeRouteManifest(context, {
-            name: 'playwright-worker-0',
-            kind: 'playwright-worker',
-            startedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() - 60_000).toISOString(),
-            rootPath: '/repo',
-            workspace: 'playwright',
-            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
-            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
-        });
+        await writeRouteManifest(context, routeManifest({ expiresAt: new Date(Date.now() - 60_000) }));
 
         await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
         await expect(fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json'))).rejects.toMatchObject({ code: 'ENOENT' });
@@ -93,22 +75,39 @@ describe.skip('manifest store', () => {
             }
             return true;
         }) as typeof process.kill);
-        await writeRouteManifest(context, {
-            name: 'playwright-worker-0',
-            kind: 'playwright-worker',
-            pid: 123456,
-            startedAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 60_000).toISOString(),
-            rootPath: '/repo',
-            workspace: 'playwright',
-            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
-            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
-        });
+        await writeRouteManifest(context, routeManifest({ pid: 123456 }));
 
         await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
         await expect(fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json'))).rejects.toMatchObject({ code: 'ENOENT' });
     });
+
+    it('removes only the route manifests of this process', async () => {
+        const context = await testContext();
+        await writeRouteManifest(context, { ...routeManifest({ pid: process.pid }), name: 'own-run' });
+        await writeRouteManifest(context, { ...routeManifest({ pid: 1 }), name: 'other-run' });
+
+        await removeOwnRouteManifests(context, 'playwright-worker');
+
+        await expect(listActiveRouteManifests(context)).resolves.toMatchObject([{ name: 'other-run' }]);
+    });
 });
+
+function routeManifest(options: { pid?: number; expiresAt?: Date } = {}): RouteManifestInput {
+    return {
+        name: 'playwright-worker-0',
+        kind: 'playwright-worker',
+        pid: options.pid,
+        startedAt: new Date().toISOString(),
+        expiresAt: (options.expiresAt ?? new Date(Date.now() + 60_000)).toISOString(),
+        rootPath: '/repo',
+        workspace: 'playwright',
+        reservedPorts: [6000, 6100],
+        caddy: {
+            routes: [{ match: [{ host: ['playwright-dashboard-0.stamhoofd'] }], handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:6100' }] }] }],
+            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
+        },
+    };
+}
 
 async function testContext(): Promise<CliContext> {
     const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-cli-manifest-'));

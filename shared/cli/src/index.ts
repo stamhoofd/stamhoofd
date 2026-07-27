@@ -5,8 +5,9 @@ export { caddyAdminPort, localIpv4Host } from './config/shared-service-config.js
 export { buildCaddyServiceProfile, buildSharedServiceProfile } from './config/shared-service-profile.js';
 export { createContext } from './context/create-context.js';
 export { getProjectPath } from './context/project-path.js';
-export { pruneStaleRouteManifests, removeRouteManifest, removeRouteManifestsByKind, writeRouteManifest, type CaddyRouteOptions } from './runtime/manifest-store.js';
-export type { RouteManifest } from './runtime/manifest-store.js';
+export { pruneStaleRouteManifests, removeOwnRouteManifests, removeRouteManifest, writeRouteManifest, type CaddyRouteOptions } from './runtime/manifest-store.js';
+export type { RouteManifest, RouteManifestInput } from './runtime/manifest-store.js';
+export type { ReserveRouteManifestOptions, RouteManifestConflict } from './runtime/route-reservation.js';
 export { CaddyService } from './services/definitions/caddy-service.js';
 export { SsoService, type SsoServiceVariant } from './services/definitions/sso-service.js';
 export { ssoClientId, ssoClientSecret, ssoRealm, ssoUserEmail, ssoUserName, ssoUserPassword } from './services/sso-config.js';

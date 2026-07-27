@@ -5,8 +5,11 @@ import { caddyAdminPort, caddyBaseImage, caddyBuilderImage, caddyConfigPath, cad
 import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
 import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
-import type { CaddyRouteOptions } from '../../runtime/manifest-store.js';
+import { withFileLock } from '../../runtime/file-lock.js';
+import type { CaddyRouteOptions, RouteManifest, RouteManifestInput } from '../../runtime/manifest-store.js';
 import { sharedDir } from '../../runtime/manifest-store.js';
+import type { ReserveRouteManifestOptions, RouteManifestConflict } from '../../runtime/route-reservation.js';
+import { findRouteManifestConflicts, reserveRouteManifest } from '../../runtime/route-reservation.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import type { ServiceStatus } from '../service.js';
@@ -15,6 +18,36 @@ type CaddyPrepared = {
     config: string;
     dataDir: string;
 };
+
+/**
+ * Whether this process is already inside the config lock, so a reload that has to start the
+ * container (which renders the config again in `prepare`) does not wait on the lock it holds
+ * itself. The CLI renders the config from one place at a time, so this never hides a genuinely
+ * concurrent render within the same process.
+ */
+let configLockDepth = 0;
+
+/**
+ * Serialize everything that renders the shared Caddy config.
+ *
+ * The config is a full rewrite of the routing table of every active manifest, and the container
+ * watches the file, so writing it is what applies it. Without this lock two processes (a dev
+ * session starting while an e2e run in another worktree configures its routes) can each render a
+ * config from the manifests they saw and the last write silently drops the routes of the other.
+ */
+async function withConfigLock<T>(context: CliContext, handler: () => Promise<T>): Promise<T> {
+    if (configLockDepth > 0) {
+        return await handler();
+    }
+
+    configLockDepth += 1;
+    try {
+        return await withFileLock(path.join(sharedDir(context), 'caddy-config.lock'), handler);
+    }
+    finally {
+        configLockDepth -= 1;
+    }
+}
 
 export class CaddyService extends SharedDockerService<CaddyPrepared> {
     static readonly container = caddyContainer;
@@ -36,7 +69,9 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     }
 
     async prepare(context: CliContext): Promise<CaddyPrepared> {
-        const config = await CaddyService.writeRuntimeConfig(context);
+        // Rendering the config already applies it: the container watches the file. So this write
+        // takes the same lock as a reload, see withConfigLock.
+        const config = await withConfigLock(context, async () => await CaddyService.writeRuntimeConfig(context));
         const dataDir = CaddyService.dataDir();
         await fs.mkdir(dataDir, { recursive: true });
         await CaddyService.ensureImage(context);
@@ -61,15 +96,38 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         return CaddyService.dockerArgs(prepared.config, prepared.dataDir, profile, { disableLabel: runtime === docker.ContainerRuntime.Podman });
     }
 
+    /**
+     * Render the config of every active manifest and apply it to the running container.
+     */
     static async reload(context: CliContext): Promise<void> {
-        const config = await CaddyService.writeRuntimeConfig(context);
-        await CaddyService.ensureImage(context);
-        await CaddyService.validateConfig(config, context);
-        if (await docker.containerIsRunning(CaddyService.container)) {
-            await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { quiet: true, verbose: context.verbose });
-            return;
-        }
-        await caddyService.start(context, undefined);
+        await withConfigLock(context, async () => {
+            const config = await CaddyService.writeRuntimeConfig(context);
+            await CaddyService.ensureImage(context);
+            await CaddyService.validateConfig(config, context);
+            if (await docker.containerIsRunning(CaddyService.container)) {
+                await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { quiet: true, verbose: context.verbose });
+                return;
+            }
+            await caddyService.start(context, undefined);
+        });
+    }
+
+    /**
+     * The active manifests that already claim one of the ports of `manifest`. Ask this before
+     * adding a manifest of your own: overlapping ports mean the two would fight over the same
+     * servers (and, for Playwright workers, over the same domains).
+     */
+    static async findRouteManifestConflicts(context: CliContext, manifest: RouteManifestInput): Promise<RouteManifestConflict[]> {
+        return await findRouteManifestConflicts(context, manifest);
+    }
+
+    /**
+     * Claim a free port range for this process, retrying other ranges while they conflict with an
+     * active manifest or with a port that is already bound. Give the range back with
+     * `removeOwnRouteManifests` followed by a reload.
+     */
+    static async reserveRouteManifest(context: CliContext, options: ReserveRouteManifestOptions): Promise<RouteManifest> {
+        return await reserveRouteManifest(context, options);
     }
 
     static buildRouteOptions(context: CliContext): CaddyRouteOptions {

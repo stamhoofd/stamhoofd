@@ -85,9 +85,20 @@ export class FrontendService implements ServiceHelper {
         });
 
         await new Promise<void>((resolveListen, rejectListen) => {
-            server.once('error', rejectListen);
+            const onError = (error: NodeJS.ErrnoException) => {
+                if (error.code === 'EADDRINUSE') {
+                    // The port was reserved for this run (see CaddyHelper), so something outside
+                    // the reservation took it: another process bound it after the reservation, or
+                    // a previous run of this worker did not shut its server down.
+                    rejectListen(new Error(`Port ${port} of worker ${this.workerId} (${this.name}) was reserved for this run but is already in use`));
+                    return;
+                }
+                rejectListen(error);
+            };
+
+            server.once('error', onError);
             server.listen(port, '127.0.0.1', () => {
-                server.off('error', rejectListen);
+                server.off('error', onError);
                 resolveListen();
             });
         });

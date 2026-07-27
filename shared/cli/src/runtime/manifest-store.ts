@@ -34,6 +34,7 @@ export type InstanceManifest = {
     rootPath: string;
     domains: Domains;
     ports: ReturnType<typeof buildPorts>;
+    reservedPorts?: number[];
     caddy?: CaddyRouteOptions;
 };
 
@@ -48,10 +49,17 @@ export type RouteManifest = {
     expiresAt?: string;
     rootPath: string;
     workspace: string;
+    /**
+     * Every host port this manifest claims for as long as it is active. Other processes read these
+     * to pick a port range of their own without scanning the route configs, see
+     * `CaddyService.findRouteManifestConflicts`.
+     */
+    reservedPorts?: number[];
     caddy: CaddyRouteOptions;
 };
 
 export async function writeInstanceManifest(context: CliContext, options: { domains: Domains; caddy?: CaddyRouteOptions }): Promise<void> {
+    const ports = buildPorts(context);
     const manifest: InstanceManifest = {
         version: CurrentManifestVersion,
         name: context.instance.name,
@@ -65,7 +73,10 @@ export async function writeInstanceManifest(context: CliContext, options: { doma
         startedAt: new Date().toISOString(),
         rootPath: context.rootDir,
         domains: options?.domains,
-        ports: buildPorts(context),
+        ports,
+        // Only the ports this instance owns: the shared services (MySQL, MailDev, ...) are used by
+        // every instance at once, so claiming them would block anyone else from starting.
+        reservedPorts: [ports.webApp, ports.webshop, ports.api, ports.renderer, ports.sso],
         caddy: options?.caddy,
     };
     await fs.mkdir(instanceDir(context), { recursive: true });
@@ -76,19 +87,32 @@ export async function removeInstanceManifest(context: CliContext): Promise<void>
     await fs.rm(instancePath(context, context.instance.name), { force: true });
 }
 
-export async function writeRouteManifest(context: CliContext, manifest: RouteManifest): Promise<void> {
+/**
+ * The fields a caller provides: the manifest version is stamped here, so writers never have to
+ * know which version the store is on.
+ */
+export type RouteManifestInput = Omit<RouteManifest, 'version'>;
+
+export async function writeRouteManifest(context: CliContext, manifest: RouteManifestInput): Promise<RouteManifest> {
+    const stored: RouteManifest = { ...manifest, version: CurrentManifestVersion };
     await fs.mkdir(instanceDir(context), { recursive: true });
-    await fs.writeFile(instancePath(context, manifest.name), JSON.stringify(manifest, null, 4));
+    await fs.writeFile(instancePath(context, stored.name), JSON.stringify(stored, null, 4));
+    return stored;
 }
 
 export async function removeRouteManifest(context: CliContext, name: string): Promise<void> {
     await fs.rm(instancePath(context, name), { force: true });
 }
 
-export async function removeRouteManifestsByKind(context: CliContext, kind: RouteManifestKind): Promise<void> {
+/**
+ * Remove every manifest of a kind that was written by this same process. Manifests of other
+ * processes are never touched: they may belong to an e2e run or dev session that is still using
+ * those routes and ports.
+ */
+export async function removeOwnRouteManifests(context: CliContext, kind: RouteManifestKind): Promise<void> {
     const manifests = await listRouteManifestEntries(context);
     await Promise.all(manifests
-        .filter(entry => entry.manifest?.kind === kind)
+        .filter(entry => entry.manifest?.kind === kind && entry.manifest.pid === process.pid)
         .map(entry => fs.rm(entry.path, { force: true })));
 }
 
@@ -162,6 +186,7 @@ export function instanceManifestToRouteManifest(manifest: InstanceManifest): Rou
         startedAt: manifest.startedAt,
         rootPath: manifest.rootPath,
         workspace: manifest.workspace,
+        reservedPorts: manifest.reservedPorts,
         caddy: manifest.caddy ?? {
             routes: [],
             tlsSubjects: [],
@@ -245,7 +270,8 @@ function processIsAlive(pid: number): boolean {
     try {
         process.kill(pid, 0);
         return true;
-    } catch {
-        return false;
+    } catch (error) {
+        // EPERM means the process exists but belongs to someone else.
+        return (error as NodeJS.ErrnoException).code === 'EPERM';
     }
 }

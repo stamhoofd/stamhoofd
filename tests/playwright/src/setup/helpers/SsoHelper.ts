@@ -10,23 +10,35 @@ import { CaddyConfigHelper } from './CaddyConfigHelper.js';
  * exported by `@stamhoofd/cli` (ssoClientId, ssoClientSecret).
  */
 export class SsoHelper {
-    private static service = new SsoService({
-        name: 'playwright',
-        port: CaddyConfigHelper.getSsoPort(),
-        hostname: CaddyConfigHelper.getSsoDomain(),
-    });
+    /**
+     * Built on demand, never cached: the hostname and port follow the slots this run reserved,
+     * which are only known once the Caddy routes are configured.
+     */
+    private static get service() {
+        return new SsoService({
+            name: CaddyConfigHelper.getSsoVariantName(),
+            port: CaddyConfigHelper.getSsoPort(),
+            hostname: CaddyConfigHelper.getSsoDomain(),
+        });
+    }
 
     /**
      * Requires the Caddy route for the SSO host to be configured already: readiness is checked
      * through Caddy, the same way the backends reach the server.
      */
-    static async start(): Promise<void> {
+    static async start(workerCount: number): Promise<void> {
         const context = await createContext({ env: 'stamhoofd', verbose: false });
-        await this.service.start(context, {
-            redirectUris: CaddyConfigHelper.getSsoRedirectUris(),
+        const service = this.service;
+
+        // Servers of earlier runs of this worktree that crashed before their teardown: their name
+        // carries the slots they reserved, so nothing else would ever replace them.
+        await service.removeOtherVariants(context, CaddyConfigHelper.GROUP_PREFIX);
+
+        await service.start(context, {
+            redirectUris: CaddyConfigHelper.getSsoRedirectUris(workerCount),
             background: true,
         });
-        await this.service.waitUntilReady(context);
+        await service.waitUntilReady(context);
     }
 
     static async stop(): Promise<void> {

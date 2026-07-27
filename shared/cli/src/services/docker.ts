@@ -33,6 +33,14 @@ export async function removeContainer(name: string, verbose = false): Promise<vo
     await run(['rm', '-f', name], { quiet: true, allowFailure: true, verbose });
 }
 
+/**
+ * Every container (running or not) whose name starts with `prefix`.
+ */
+export async function listContainerNames(prefix: string): Promise<string[]> {
+    const result = await run(['ps', '-a', '--filter', `name=^${prefix}`, '--format', '{{.Names}}'], { capture: true, quiet: true, allowFailure: true });
+    return result.stdout.split('\n').map(name => name.trim()).filter(name => name.startsWith(prefix));
+}
+
 export async function getContainerLogs(name: string, options: { tail?: number } = {}): Promise<string> {
     const result = await run(['logs', '--tail', String(options.tail ?? 50), name], { capture: true, allowFailure: true });
     return [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
