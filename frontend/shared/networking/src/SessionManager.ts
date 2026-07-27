@@ -2,6 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
+import type { Platform } from '@stamhoofd/structures';
 import { Organization, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -33,11 +34,11 @@ export class SessionManagerStatic {
     protected cachedStorage?: SessionStorage;
     protected listeners: Map<any, AuthenticationStateListener> = new Map();
 
-    async getLastSession() {
+    async getLastSession(platform: Platform) {
         const storage = await this.getSessionStorage(false);
         const id = storage.lastOrganizationId;
         if (id) {
-            const session = await this.getContextForOrganization(id);
+            const session = await this.getContextForOrganization(id, platform);
             if (session && session.canGetCompleted()) {
                 return session;
             } else {
@@ -46,11 +47,11 @@ export class SessionManagerStatic {
             }
         }
 
-        return this.getLastGlobalSession();
+        return this.getLastGlobalSession(platform);
     }
 
-    async getLastGlobalSession() {
-        const session = new SessionContext(null);
+    async getLastGlobalSession(platform: Platform) {
+        const session = new SessionContext(null, platform);
         await session.loadFromStorage();
         return session;
     }
@@ -207,7 +208,13 @@ export class SessionManagerStatic {
 
         this.callListeners('session');
 
-        session.addListener(this, (changed: 'user' | 'organization' | 'token' | 'preventComplete') => {
+        session.addListener(this, (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => {
+            if (changed === 'platform') {
+                // Not a session change: the theme manager handles this one. Relaying it here
+                // would rewrite the organization storage on every platform refresh.
+                return;
+            }
+
             if (session.organization) {
                 if (session.loadingError && (isSimpleErrors(session.loadingError) || isSimpleError(session.loadingError)) && (session.loadingError.hasCode('invalid_organization') || session.loadingError.hasCode('archived'))) {
                     this.removeOrganizationFromStorage(session.organization.id).catch(console.error);
@@ -231,17 +238,17 @@ export class SessionManagerStatic {
     /**
      * Try to create a session, and support offline mode so we don't need to fetch if network is offline
      */
-    async getContextForOrganization(id: string) {
+    async getContextForOrganization(id: string, platform: Platform) {
         const sessionStorage = await this.getSessionStorage(false);
         const organization = sessionStorage.organizations.find(o => o.id === id);
 
         if (organization) {
-            const session = new SessionContext(organization);
+            const session = new SessionContext(organization, platform);
             await session.loadFromStorage();
             return session;
         }
 
-        const session = await SessionContext.createFrom({ organizationId: id });
+        const session = await SessionContext.createFrom({ organizationId: id }, platform);
         await session.loadFromStorage();
         return session;
     }
@@ -288,12 +295,12 @@ export class SessionManagerStatic {
         return cache;
     }
 
-    async availableSessions(): Promise<SessionContext[]> {
+    async availableSessions(platform: Platform): Promise<SessionContext[]> {
         const sessionStorage = await this.getSessionStorage(false);
         const sessions: SessionContext[] = [];
 
         for (const o of sessionStorage.organizations) {
-            const session = new SessionContext(o);
+            const session = new SessionContext(o, platform);
             await session.loadFromStorage();
             sessions.push(session);
         }
@@ -301,14 +308,14 @@ export class SessionManagerStatic {
         return sessions;
     }
 
-    async getPreparedContextForOrganization(organization: Organization) {
+    async getPreparedContextForOrganization(organization: Organization, platform: Platform) {
         if (document.activeElement) {
             // Blur currently focused element, to prevent from opening the login view multiple times
             (document.activeElement as HTMLElement).blur();
         }
 
         try {
-            const session = await this.getContextForOrganization(organization.id);
+            const session = await this.getContextForOrganization(organization.id, platform);
             session.updateOrganization(organization);
             await this.prepareSessionForUsage(session, false);
             return session;

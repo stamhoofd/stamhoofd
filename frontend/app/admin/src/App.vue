@@ -14,7 +14,7 @@ import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/Ta
 
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -23,7 +23,7 @@ import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedU
 
 const getLoginRoot = useLoginRoot();
 const context = useContext();
-const platformManager = usePlatformManager();
+const platform = usePlatform();
 const auditLogRenderers = useAdminAuditLogRenderers();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
@@ -177,7 +177,7 @@ function getRoot() {
             }
 
             if (isPlatform) {
-                if (platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value, platformManager.value.$platform)) {
+                if (platform.value.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value, platform.value)) {
                     tabs.push(calendarTab);
                 }
             }
@@ -200,7 +200,7 @@ function getRoot() {
                 }
             }
 
-            if (manualFeatureFlag('event-notifications', context.value, platformManager.value.$platform) && context.value.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
+            if (manualFeatureFlag('event-notifications', context.value, platform.value) && context.value.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {
                 // Feature is still in development so not visible for everyone
                 moreTab.items.push(eventNotificationsTab);
             }

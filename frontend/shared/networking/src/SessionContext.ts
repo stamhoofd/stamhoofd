@@ -9,13 +9,14 @@ import type { LoginProviderType } from '@stamhoofd/structures';
 import { OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
 import { ContextPermissions } from './ContextPermissions';
+import { loadPlatform, savePlatformToStorage } from './loadPlatform';
 import { ManagedToken } from './ManagedToken';
 import { NetworkManager } from './NetworkManager';
 import { QueueHandler } from './QueueHandler';
 import { Storage } from './Storage';
 import { UrlHelper } from './UrlHelper';
 
-type AuthenticationStateListener = (changed: 'user' | 'organization' | 'token' | 'preventComplete') => void;
+type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;
 
 // dec2hex :: Integer -> String
 // i.e. 0-255 -> '00'-'ff'
@@ -35,6 +36,12 @@ export class SessionContext implements RequestMiddleware {
      * This will become optional in the future
      */
     organization: Organization | null = null;
+
+    /**
+     * Never replace this reference: use updatePlatform to keep it stable
+     * (Platform.shared and usePlatform() keep a reference to this object)
+     */
+    platform: Platform;
     user: UserWithMembers | null = null;
     loadingError: Error | null = null;
 
@@ -58,8 +65,13 @@ export class SessionContext implements RequestMiddleware {
 
     isStorageDisabled = false;
 
-    constructor(organization: Organization | null) {
+    /**
+     * A session always needs a platform: it is required to calculate permissions. Pass the app level
+     * platform (see loadPlatform), which is either read from cache or fetched over the network.
+     */
+    constructor(organization: Organization | null, platform: Platform) {
         this.organization = organization;
+        this.platform = platform;
         this.usedPlatformStorage = this.organization === null;
 
         // Reactive hack: always force creating reactive SessionContext
@@ -90,7 +102,7 @@ export class SessionContext implements RequestMiddleware {
         if (!this.organization) {
             return null;
         }
-        return this.user?.permissions?.forOrganization(this.organization, Platform.shared) ?? null;
+        return this.user?.permissions?.forOrganization(this.organization, this.platform) ?? null;
     }
 
     /**
@@ -104,7 +116,7 @@ export class SessionContext implements RequestMiddleware {
     _auth: ContextPermissions | null = null;
     get auth() {
         if (!this._auth) {
-            this._auth = new ContextPermissions(this.user, this.organization, Platform.shared);
+            this._auth = new ContextPermissions(this.user, this.organization, this.platform);
         }
         return this._auth;
     }
@@ -113,7 +125,13 @@ export class SessionContext implements RequestMiddleware {
         this._auth = null;
     }
 
-    static async createFrom(data: ({ organization: Organization } | { organizationId: string })) {
+    /**
+     * @param platform The app level platform. Only omit it when this session is the app level one:
+     * sub-contexts (see useWrapOrganization and SessionManager.getContextForOrganization) have to
+     * pass the platform they already have, or they'd end up with a second platform object that
+     * silently diverges from the one usePlatform() returns.
+     */
+    static async createFrom(data: ({ organization: Organization } | { organizationId: string }), platform?: Platform) {
         let organization: Organization;
         if ('organizationId' in data) {
             // If we have the token, we better do an authenticated request
@@ -128,7 +146,7 @@ export class SessionContext implements RequestMiddleware {
             organization = data.organization;
         }
 
-        return new SessionContext(organization);
+        return new SessionContext(organization, platform ?? (await loadPlatform()).platform);
     }
 
     get preventComplete() {
@@ -470,7 +488,7 @@ export class SessionContext implements RequestMiddleware {
         this.listeners.delete(owner);
     }
 
-    callListeners(changed: 'user' | 'organization' | 'token' | 'preventComplete') {
+    callListeners(changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') {
         for (const listener of this.listeners.values()) {
             listener(changed);
         }
@@ -733,6 +751,50 @@ export class SessionContext implements RequestMiddleware {
         return this.organization!;
     }
 
+    /**
+     * Set the platform, but keep the same reference and update
+     * other references correctly to keep the app reactive
+     */
+    updatePlatform(platform: Platform) {
+        this.platform.deepSet(platform);
+        this.clearAuthCache();
+        this.callListeners('platform');
+    }
+
+    /**
+     * Whether we need the private config of the platform to reliably calculate the permissions of this session.
+     * This is the platform equivalent of auth.requiresPrivateMeta.
+     *
+     * Users with global permissions need the private data to reliably calculate permissions, even for specific
+     * organizations when not using the admin panel.
+     */
+    requiresPlatformPrivateConfig() {
+        if (this.user?.organizationId) {
+            return false;
+        }
+        return this.auth.unloadedPlatformPermissions?.isEmpty === false;
+    }
+
+    /**
+     * Fetch the platform for this session. Unlike the unauthenticated bootstrap fetch in
+     * loadPlatform, this uses the session's token when it has one, so it also loads the
+     * privateConfig for users with global permissions.
+     */
+    async fetchPlatform(): Promise<Platform> {
+        // Run in a queue to prevent race conditions, so concurrent callers of this context share one request
+        await QueueHandler.schedule('fetch-platform-' + (this.organization?.id ?? 'platform'), async () => {
+            const pResponse = await this.optionalAuthenticatedServer.request({
+                method: 'GET',
+                path: '/platform',
+                decoder: Platform as Decoder<Platform>,
+            });
+            this.updatePlatform(pResponse.data);
+            await savePlatformToStorage(this.platform);
+        });
+
+        return this.platform;
+    }
+
     isOutdated(date: Date | null) {
         return date === null || date < new Date(new Date().getTime() - 10 * 1000);
     }
@@ -777,6 +839,11 @@ export class SessionContext implements RequestMiddleware {
                 fetchedOrganization = true;
                 await this.fetchOrganization(shouldRetry);
             }
+
+            // The platform is not touched here. It is passed into the constructor, and loading it
+            // again would be actively wrong: sessions that are not the app level one are handed the
+            // app level platform object, so writing a cached platform into it would overwrite the
+            // live one (and could drop a privateConfig that was already loaded).
 
             if (((!fetchedOrganization && this.organization) || (!fetchedUser && this.canGetCompleted())) && background) {
                 // Initiate a slow background update without retry

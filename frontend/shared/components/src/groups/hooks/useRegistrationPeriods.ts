@@ -1,26 +1,25 @@
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import type { Ref} from 'vue';
 import { computed, onMounted, unref } from 'vue';
 import { Toast } from '../../overlays/Toast';
 
 export function useRegistrationPeriods() {
-    const platformManager = usePlatformManager()
-    const owner = useRequestOwner()
+    const fetchPeriods = useFetchAllRegistrationPeriods()
+    const periods = useAllRegistrationPeriods()
 
     onMounted(async () => {
         try {
-            await platformManager.value.loadPeriods(true, true, owner)
+            await fetchPeriods({ shouldRetry: true, force: true })
         } catch (e) {
             Toast.fromError(e).show()
         }
     });
 
     return {
-        loading: computed(() => !platformManager.value.$platform.periods),
-        periods: computed(() => platformManager.value.$platform.periods),
+        loading: computed(() => !periods.value),
+        periods: computed(() => periods.value),
     }
-}   
+}
 
 export function useRegistrationPeriod(id: Ref<string>|string) {
     const periods = useRegistrationPeriods()

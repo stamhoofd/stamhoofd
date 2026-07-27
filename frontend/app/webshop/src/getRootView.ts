@@ -3,8 +3,8 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import type { Webshop } from '@stamhoofd/structures';
 import { WebshopAuthType } from '@stamhoofd/structures';
 import { markRaw, reactive } from 'vue';
@@ -17,15 +17,15 @@ export async function wrapContext(
     root: ComponentWithProperties,
     options: { ownDomain?: boolean; webshop: Webshop },
 ) {
-    const platformManager = await PlatformManager.createFromCache(context, app, true);
+    const themeManager = new ThemeManager(context, app);
 
-    const $webshopManager = reactive(new WebshopManager(context, platformManager.$platform, options.webshop) as any) as WebshopManager;
+    const $webshopManager = reactive(new WebshopManager(context, context.platform, options.webshop) as any) as WebshopManager;
     const $checkoutManager = reactive(new CheckoutManager($webshopManager));
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: context,
-            $platformManager: platformManager,
+            $themeManager: themeManager,
             $organizationManager: new OrganizationManager(context),
             $webshopManager,
             $checkoutManager,

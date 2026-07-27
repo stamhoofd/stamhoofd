@@ -3,9 +3,9 @@ import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encodin
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatchPlatform } from '#hooks/usePatchPlatform.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { Group, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility} from '@stamhoofd/structures';
 import { Organization, OrganizationPrivateMetaData, Platform, PlatformConfig, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
 import type { Ref} from 'vue';
@@ -13,7 +13,7 @@ import { computed, ref } from 'vue';
 
 export function useRoles() {
     const organization = useOrganization();
-    const platformManager = usePlatformManager();
+    const platform = usePlatform();
 
     return computed(() => {
         if (organization.value) {
@@ -21,7 +21,7 @@ export function useRoles() {
         }
 
         // Platform scope
-        return platformManager.value.$platform.privateConfig?.roles ?? [];
+        return platform.value.privateConfig?.roles ?? [];
     });
 }
 
@@ -34,7 +34,7 @@ export function usePatchRoles() {
     const patchedOrganization = computed(() => organization.value?.patch(organizationPatch.value));
     const patchedPlatform = computed(() => platform.value.patch(platformPatch.value));
     const organizationManager = useOrganizationManager();
-    const platformManager = usePlatformManager();
+    const patchPlatform = usePatchPlatform();
     const saving = ref(false);
     const errors = useErrors();
 
@@ -155,7 +155,7 @@ export function usePatchRoles() {
         }
         else {
             try {
-                await platformManager.value.patch(platformPatch.value);
+                await patchPlatform(platformPatch.value);
                 await succeededHandler();
             }
             catch (e) {

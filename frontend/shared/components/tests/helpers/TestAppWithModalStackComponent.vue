@@ -17,11 +17,11 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import CenteredMessageView from '#overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '#overlays/ModalStackEventBus.ts';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
+import { Platform } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { markRaw, onMounted, ref } from 'vue';
-import { Platform } from '@stamhoofd/structures';
 import ToastBox from '#overlays/ToastBox.vue';
 
 const props = withDefaults(defineProps<{
@@ -30,13 +30,14 @@ const props = withDefaults(defineProps<{
 }>(), {
     keepAlive: true,
 });
-const context = new SessionContext(null);
-const platformManager = new PlatformManager(context, Platform.create({}), 'auto');
+const platform = Platform.create({});
+const context = new SessionContext(null, platform);
+const themeManager = new ThemeManager(context, 'auto');
 
 const wrappedRoot = new ComponentWithProperties(ContextProvider, {
     context: markRaw({
-        $context: new SessionContext(null),
-        $platformManager: platformManager,
+        $context: new SessionContext(null, platform),
+        $themeManager: themeManager,
         // $memberManager,
         $organizationManager: new OrganizationManager(context),
         // $webshopManager,

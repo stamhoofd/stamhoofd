@@ -107,8 +107,7 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import type { PlatformMember, RegistrationPeriod } from '@stamhoofd/structures';
 import { GroupType, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -136,11 +135,10 @@ const platform = usePlatform();
 const now = new Date();
 const auth = useAuth();
 const hasFull = auth.hasFullAccess();
-const platformManager = usePlatformManager();
-const owner = useRequestOwner();
 const errors = useErrors();
-platformManager.value.loadPeriods(false, true, owner).catch(e => errors.errorBox = new ErrorBox(e));
-const periods = computed(() => platformManager.value.$platform.periods);
+const fetchPeriods = useFetchAllRegistrationPeriods();
+fetchPeriods({ shouldRetry: true }).catch(e => errors.errorBox = new ErrorBox(e));
+const periods = useAllRegistrationPeriods();
 const organization = useOrganization();
 
 function isRegisteredAt(periodId: string, organizationId: string) {

@@ -27,18 +27,18 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { OrganizationTag, Platform, PlatformConfig, TagHelper } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 
 
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
@@ -95,7 +95,7 @@ async function save() {
     saving.value = true;
 
     try {
-        await platformManager.value.patch(Platform.patch({
+        await patchPlatform(Platform.patch({
             config: PlatformConfig.patch({
                 tags: patch.value,
             }),

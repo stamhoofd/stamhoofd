@@ -12,12 +12,12 @@
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PremiseTypesList from './PremiseTypesList.vue';
@@ -26,7 +26,7 @@ const errors = useErrors();
 const pop = usePop();
 
 const platform = usePlatform();
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 
 const originalTypes = computed(() => platform.value.config.premiseTypes);
 const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(originalTypes);
@@ -44,7 +44,7 @@ async function save() {
     saving.value = true;
 
     try {
-        await platformManager.value.patch(Platform.patch({
+        await patchPlatform(Platform.patch({
             config: PlatformConfig.patch({
                 premiseTypes: patch.value,
             }),

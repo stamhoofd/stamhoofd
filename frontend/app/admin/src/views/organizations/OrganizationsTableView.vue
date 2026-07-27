@@ -48,14 +48,12 @@ import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = Organization;
 
 const owner = useRequestOwner();
-const platformManager = usePlatformManager();
 
 const props = withDefaults(
     defineProps<{
@@ -338,7 +336,7 @@ async function applyTagsPatchToOrganizations(organizations: Organization[], tags
         org.meta.deepSet(result.data.meta);
     }
 
-    await platformManager.value.forceUpdate();
+    await context.value.fetchPlatform();
 }
 
 async function addTagToOrganizations(organizations: Organization[], tag: OrganizationTag, _allTags: OrganizationTag[]) {

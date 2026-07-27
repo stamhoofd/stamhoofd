@@ -1,9 +1,9 @@
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import type { Organization } from '@stamhoofd/structures';
+import type { Organization, Platform } from '@stamhoofd/structures';
 
-export async function sessionFromOrganization(organization: Organization) {
-    const session = await SessionContext.createFrom({ organization });
+export async function sessionFromOrganization(organization: Organization, platform: Platform) {
+    const session = await SessionContext.createFrom({ organization }, platform);
     await session.loadFromStorage();
     await session.checkSSO();
     session.updateOrganization(organization);
@@ -12,8 +12,8 @@ export async function sessionFromOrganization(organization: Organization) {
     return session;
 }
 
-export async function sessionGlobal() {
-    const session = await SessionManager.getLastGlobalSession();
+export async function sessionGlobal(platform: Platform) {
+    const session = await SessionManager.getLastGlobalSession(platform);
     await session.checkSSO();
     await SessionManager.prepareSessionForUsage(session, false);
     return session;

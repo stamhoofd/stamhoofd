@@ -6,7 +6,8 @@ import CustomHooksContainer from '@stamhoofd/components/containers/CustomHooksCo
 import OrganizationSwitcher from '@stamhoofd/components/context/OrganizationSwitcher.vue';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { loadPlatform } from '@stamhoofd/networking/loadPlatform';
+import { ThemeManager } from '@stamhoofd/networking/ThemeManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { AppType, Organization } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
@@ -32,10 +33,22 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
         // TODO
     }
 
-    const context = organization ? await sessionFromOrganization(organization) : await sessionGlobal();
+    // The platform has to exist before the session does, so resolve it first (from cache, or over
+    // the network). This is the seam that becomes a tenant/domain lookup later.
+    const { platform, fromCache } = await loadPlatform();
+    const context = organization ? await sessionFromOrganization(organization, platform) : await sessionGlobal(platform);
 
-    const platformManager = await PlatformManager.createFromCache(context, app, true);
-    const $memberManager = new MemberManager(context, platformManager.$platform);
+    if (context.requiresPlatformPrivateConfig() && !context.platform.privateConfig) {
+        // The bootstrapped platform is the public one, but this user needs the private config to
+        // reliably calculate its permissions: upgrade it with an authenticated request.
+        await context.fetchPlatform();
+    } else if (fromCache) {
+        // We served a platform that came from storage, so refresh it in the background.
+        context.fetchPlatform().catch(console.error);
+    }
+
+    const themeManager = new ThemeManager(context, app);
+    const $memberManager = new MemberManager(context, platform);
 
     if (app === 'webshop') {
         throw new Error('Webshop should not be loaded through the web-app');
@@ -44,7 +57,7 @@ export async function wrap(organization: Organization | null = null, app: AppTyp
     const root = new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: context,
-            $platformManager: platformManager,
+            $themeManager: themeManager,
             $memberManager,
             $organizationManager: new OrganizationManager(context),
             reactive_components: {

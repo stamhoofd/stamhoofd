@@ -17,7 +17,7 @@ import { WorkerData } from '../helpers/index.js';
  *
  * When a Platform is already cached in localStorage and the app boots, it loads that cached
  * Platform and then merges the fresh Platform received from the backend on top of it using
- * `deepSet` (see PlatformManager.forceUpdate -> `this.$platform.deepSet(...)`), saving the
+ * `deepSet` (see SessionContext.updatePlatform -> `this.platform.deepSet(...)`), saving the
  * merged result back to localStorage.
  *
  * A StamhoofdFilter is a plain-object dictionary (e.g. `{ $and: [...] }`) whose key set is data.
@@ -44,7 +44,7 @@ test.describe('[Regression] Platform cache filter merge @platform-filter-merge',
      * - Configure the backend platform so `/platform` serves `backendFilter`.
      * - Seed localStorage with a cached platform that is identical to the backend one, except that
      *   its record-category filter is `cachedFilter` (the stale state).
-     * - Boot the dashboard so PlatformManager loads the cached platform, fetches the fresh one and
+     * - Boot the dashboard so loadPlatform reads the cached platform, the session fetches the fresh one and
      *   merges it with `deepSet`, then persists the merged platform back to localStorage.
      * - Return the merged record-category `enabledWhen` filter that ended up in localStorage.
      */

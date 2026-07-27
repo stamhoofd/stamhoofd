@@ -90,6 +90,7 @@
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
@@ -102,12 +103,11 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { Image } from '@stamhoofd/structures';
 import { DarkMode, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
@@ -187,7 +187,7 @@ async function save() {
             return;
         }
 
-        await platformManager.value.patch(patch.value);
+        await patchPlatform(patch.value);
         new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }

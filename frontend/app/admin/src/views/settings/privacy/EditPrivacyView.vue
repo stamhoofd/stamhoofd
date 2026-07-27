@@ -28,17 +28,17 @@ import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Platform, PlatformConfig, PlatformPolicy, PrivacySettings } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import PolicyRow from './components/PolicyRow.vue';
 
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
@@ -126,7 +126,7 @@ async function save() {
             saving.value = false;
             return;
         }
-        await platformManager.value.patch(patch.value);
+        await patchPlatform(patch.value);
         new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     } catch (e) {

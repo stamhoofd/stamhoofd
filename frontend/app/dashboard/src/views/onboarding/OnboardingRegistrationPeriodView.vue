@@ -108,6 +108,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import type { OnboardingStepProps } from './useMemberAdministrationOnboarding';
 import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { clearRegistrationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 
 type ConfigType = 'year' | 'semester' | 'custom';
 
@@ -265,6 +266,7 @@ async function goNext() {
             shouldRetry: false,
         });
         clearOrganizationPeriodsCache();
+        clearRegistrationPeriodsCache();
 
         // Keep the in-memory organization in sync so the user resumes with the saved values.
         const updated = response.data.find(p => p.id === period.id);

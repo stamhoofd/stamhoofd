@@ -93,6 +93,7 @@ import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
 import { useAppData } from '@stamhoofd/components/context/appContext.ts';
 import type { Option } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
@@ -118,6 +119,7 @@ const resultElements = reactive<HTMLElement[]>([]);
 const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.value : results.value);
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const { getAppTitle, getAppDescription } = useAppData();
+const platform = usePlatform();
 
 const { getAllOptions, getDefaultOptions, selectOption, getOptionForOrganization } = useContextOptions();
 
@@ -178,7 +180,7 @@ const showContextMenu = async (event: MouseEvent, option: Option) => {
 
     if (!isSearching) {
         // Load the session from local storage only (no network) to check login state.
-        const session = new SessionContext(option.organization);
+        const session = new SessionContext(option.organization, platform.value);
         await session.loadFromStorage();
 
         if (session.canGetCompleted()) {

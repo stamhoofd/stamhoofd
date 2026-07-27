@@ -50,6 +50,7 @@
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { usePatchPlatform } from '#hooks/usePatchPlatform.ts';
 import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
@@ -61,9 +62,8 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
-import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { clearRegistrationPeriodsCache, useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
@@ -80,8 +80,8 @@ const app = useAppContext();
 const isPlatform = app === 'admin';
 
 const context = useContext();
+const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
-const platformManager = usePlatformManager();
 const organization = isPlatform ? ref(Organization.create({})) as unknown as Ref<Organization> : useRequiredOrganization();
 
 const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
@@ -198,13 +198,14 @@ async function save() {
             });
             changedPeriods = response.data;
             clearOrganizationPeriodsCache();
+            clearRegistrationPeriodsCache();
         }
 
         if (isPlatform) {
             const changedPeriod = hasChangesPlatform.value;
 
             if (changedPeriod) {
-                await platformManager.value.patch(platformPatch.value, false);
+                await patchPlatform(platformPatch.value, { shouldRetry: false });
             }
 
             new Toast($t(`%HA`), 'success green').show();

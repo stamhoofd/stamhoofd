@@ -25,7 +25,7 @@ export function useContextOptions() {
     const platform = usePlatform();
 
     const getRegistrationOption = (organization: Organization | null, user: UserWithMembers | null): Option => {
-        const context = new SessionContext(organization);
+        const context = new SessionContext(organization, platform.value);
         context.user = user;
 
         return {
@@ -54,7 +54,7 @@ export function useContextOptions() {
 
         // Platform level users (present on all platforms)
         if (isPlatformAdmin(user)) {
-            const context = new SessionContext(null);
+            const context = new SessionContext(null, platform.value);
             context.user = user;
             opts.push({
                 id: 'admin',
@@ -120,7 +120,7 @@ export function useContextOptions() {
                 }
             }
 
-            const context = new SessionContext(organization);
+            const context = new SessionContext(organization, platform.value);
             context.user = user;
 
             opts.push({
@@ -150,7 +150,7 @@ export function useContextOptions() {
         const options: Option[] = [];
 
         // Load platform account explicitly (if available)
-        const global = new SessionContext(null);
+        const global = new SessionContext(null, platform.value);
         await global.loadFromStorage();
         if (global.user && global.canGetCompleted()) {
             const d = getDefaultOptionsFor(global.user);
@@ -172,7 +172,7 @@ export function useContextOptions() {
 
                 if ($user.value && $user.value?.permissions && $user.value.permissions.forOrganization($organization.value, platform.value)?.isEmpty === false) {
                 // Hide organizations you don't have permissions for that don't have members package
-                    const context = new SessionContext($organization.value);
+                    const context = new SessionContext($organization.value, platform.value);
                     context.user = $user.value;
                     const app = 'dashboard';
 
@@ -197,7 +197,7 @@ export function useContextOptions() {
             if (options.find(o => o.organization?.id === organization.id)) {
                 continue; // Already added this organization
             }
-            const context = new SessionContext(organization);
+            const context = new SessionContext(organization, platform.value);
             await context.loadFromStorage();
             if (context.canGetCompleted()) {
                 options.push(
@@ -221,7 +221,7 @@ export function useContextOptions() {
             if (options.find(o => o.organization?.id === organization.id)) {
                 continue; // Already added this organization
             }
-            const context = new SessionContext(organization);
+            const context = new SessionContext(organization, platform.value);
             await context.loadFromStorage();
             if (!context.canGetCompleted()) {
                 options.push(
@@ -239,7 +239,7 @@ export function useContextOptions() {
     };
 
     const getOptionForOrganization = async (organization: Organization): Promise<Option> => {
-        const context = new SessionContext(organization);
+        const context = new SessionContext(organization, platform.value);
 
         return {
             id: 'org-' + organization.id,
