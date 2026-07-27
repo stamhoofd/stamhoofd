@@ -69,6 +69,7 @@ import { AppRoute, NewUser, Token } from '@stamhoofd/structures';
 import { computed, onMounted, ref, shallowRef } from 'vue';
 import { useContext } from '../hooks/useContext';
 import { useOrganization } from '../hooks/useOrganization';
+import { usePlatform } from '../hooks/usePlatform';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 
 const props = defineProps<{
@@ -77,6 +78,7 @@ const props = defineProps<{
 
 const context = useContext();
 const organization = useOrganization();
+const platform = usePlatform();
 const dismiss = useDismiss();
 const appNavigate = useAppNavigate();
 const loading = ref(false);
@@ -120,7 +122,7 @@ onMounted(() => {
         },
         decoder: Token,
     }).then(async (response) => {
-        const newSession = new SessionContext(context.value.organization);
+        const newSession = new SessionContext(context.value.organization, platform.value);
         newSession.disableStorage();
         await newSession.setToken(response.data);
         await newSession.updateData(false, false);

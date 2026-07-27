@@ -299,12 +299,12 @@ import listIllustration from '@stamhoofd/assets/images/illustrations/list.svg';
 import membershipIllustration from '@stamhoofd/assets/images/illustrations/membership.svg';
 import tentIllustration from '@stamhoofd/assets/images/illustrations/tent.svg';
 
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
 
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type {
     OrganizationLevelRecordsConfiguration,
     OrganizationRecordsConfiguration,
@@ -339,7 +339,7 @@ enum Routes {
 }
 
 const platform = usePlatform();
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 const $feature = useFeatureFlag();
 
 const settingItems = computed(() => [
@@ -417,7 +417,7 @@ defineRoutes([
                 saveHandler: async (
                     patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>,
                 ) => {
-                    await platformManager.value.patch(
+                    await patchPlatform(
                         Platform.patch({
                             config: PlatformConfig.patch({
                                 recordsConfiguration: patch,
@@ -442,7 +442,7 @@ defineRoutes([
                     patch: AutoEncoderPatchType<FinancialSupportSettings>,
                 ) => {
                     const isNew = !platform.value.config.financialSupport;
-                    await platformManager.value.patch(
+                    await patchPlatform(
                         Platform.patch({
                             config: PlatformConfig.patch({
                                 financialSupport: isNew
@@ -472,7 +472,7 @@ defineRoutes([
                     patch: AutoEncoderPatchType<DataPermissionsSettings>,
                 ) => {
                     const isNew = !platform.value.config.dataPermission;
-                    await platformManager.value.patch(
+                    await patchPlatform(
                         Platform.patch({
                             config: PlatformConfig.patch({
                                 dataPermission: isNew
@@ -560,7 +560,7 @@ defineRoutes([
                 saveHandler: async (
                     patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>,
                 ) => {
-                    await platformManager.value.patch(
+                    await patchPlatform(
                         Platform.patch({
                             config: PlatformConfig.patch({
                                 organizationLevelRecordsConfiguration: patch,

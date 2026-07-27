@@ -67,13 +67,13 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { Organization, OrganizationTag, PatchAnswers} from '@stamhoofd/structures';
 import { OrganizationMetaData, OrganizationPrivateMetaData, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -94,7 +94,7 @@ const props = defineProps<{
 
 const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
 
-const platformManager = usePlatformManager();
+const context = useContext();
 
 const saving = ref(false);
 
@@ -189,7 +189,7 @@ async function save() {
         await props.saveHandler(patch.value);
 
         // Reload platform in the background
-        await platformManager.value.forceUpdate();
+        await context.value.fetchPlatform();
 
         await pop({ force: true });
     }

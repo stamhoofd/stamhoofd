@@ -12,14 +12,14 @@ import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/Ta
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { AccessRight, getEventTypes, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { buildTranslatedUrl } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 
 const context = useContext();
-const platformManager = usePlatformManager();
+const platform = usePlatform();
 const getLoginRoot = useLoginRoot();
 
 function wrapWithModalStack(component: ComponentWithProperties) {
@@ -241,8 +241,8 @@ function getRoot() {
             if (organization?.meta.packages.useMembers) {
                 tabs.push(membersTab);
 
-                if (!manualFeatureFlag('disable-events', context.value, platformManager.value.$platform) && organization.meta.enableCalendar !== false) {
-                    const eventTypes = getEventTypes({ platform: platformManager.value.$platform, organization });
+                if (!manualFeatureFlag('disable-events', context.value, platform.value) && organization.meta.enableCalendar !== false) {
+                    const eventTypes = getEventTypes({ platform: platform.value, organization });
                     if (eventTypes.length > 0) {
                         tabs.push(calendarTab);
                     }

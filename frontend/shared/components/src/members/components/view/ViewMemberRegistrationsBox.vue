@@ -49,7 +49,6 @@ import type { TableActionSelection } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { MemberRegistrationInvitation, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { InvitationMemberData, LimitedFilteredRequest, PermissionLevel, RegistrationInvitation } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -64,7 +63,7 @@ import { Toast } from '../../../overlays/Toast';
 import { getDeleteInvitationAction } from '../../../registrations/classes/RegistrationInvitationActionBuilder';
 
 import { useChooseGroupForMember } from '#members/checkout/useCheckoutRegisterItem.ts';
-import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
+import { useFetchAllRegistrationPeriods, useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 import { useRegistrationsActionBuilder } from '../../classes/RegistrationsActionBuilder';
 import ViewMemberInvitationRow from './ViewMemberInvitationRow.vue';
@@ -95,7 +94,6 @@ const context = useContext();
 const defaultPeriod = organization.value?.period?.period ?? props.member.filterOrganizations({ currentPeriod: true })[0]?.period?.period ?? props.member.filterOrganizations({})[0]?.period?.period ?? platform.value.period;
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 
-const platformManager = usePlatformManager();
 const owner = useRequestOwner();
 const showDeleted = ref(false);
 const app = useAppContext();
@@ -104,7 +102,8 @@ const hasDeleted = computed(() => {
 });
 const dismiss = useDismiss();
 
-platformManager.value.loadPeriods(false, true, owner).catch(console.error);
+const fetchAllPeriods = useFetchAllRegistrationPeriods();
+fetchAllPeriods({ shouldRetry: true }).catch(console.error);
 
 const hasWrite = computed(() => {
     return !period.value.locked && auth.canAccessPlatformMember(props.member, PermissionLevel.Write);

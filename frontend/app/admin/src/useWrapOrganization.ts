@@ -3,18 +3,18 @@ import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vu
 import { useAppContext } from '@stamhoofd/components/context/appContext';
 import { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { PlatformManager, usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import type { Organization } from '@stamhoofd/structures';
+import type { Organization, Platform } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 
 /**
  * Build an authenticated session scoped to a specific organization, reusing the
  * tokens that are already stored for the current (platform) user.
  */
-async function sessionForOrganization(organization: Organization) {
-    const session = await SessionContext.createFrom({ organization });
+async function sessionForOrganization(organization: Organization, platform: Platform) {
+    const session = await SessionContext.createFrom({ organization }, platform);
     await session.loadFromStorage();
     session.updateOrganization(organization);
     session._lastFetchedOrganization = new Date();
@@ -26,7 +26,7 @@ async function sessionForOrganization(organization: Organization) {
  * Returns a helper that wraps a component in a context scoped to a specific organization.
  *
  * Views like AdminsView rely on an organization scope being present in the injected
- * context (`$context`, `$organizationManager`, `$platformManager`, `$memberManager`).
+ * context (`$context`, `$organizationManager`, `$memberManager`).
  * In the admin dashboard the active context is the global/platform one, so we cannot
  * render those views directly. This helper provides a fresh, organization-scoped set of
  * managers around the given component, while leaving the rest of the injected context
@@ -45,11 +45,11 @@ async function sessionForOrganization(organization: Organization) {
  * ```
  */
 export function useWrapOrganization() {
-    const platformManager = usePlatformManager();
+    const platform = usePlatform();
 
     return async (organization: Organization, component: ComponentWithProperties): Promise<ComponentWithProperties> => {
-        const context = await sessionForOrganization(organization);
-        const memberManager = new MemberManager(context, platformManager.value.$platform);
+        const context = await sessionForOrganization(organization, platform.value);
+        const memberManager = new MemberManager(context, platform.value);
 
         return new ComponentWithProperties(ContextProvider, {
             context: markRaw({

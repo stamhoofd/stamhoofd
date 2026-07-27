@@ -277,12 +277,12 @@ import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewT
 import OrganizationAvatar from '@stamhoofd/components/context/OrganizationAvatar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useExternalOrganization } from '@stamhoofd/components/groups/hooks/useExternalOrganization.ts';
 import { useInterval } from '@stamhoofd/components/hooks/useInterval.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { PlatformMembershipType } from '@stamhoofd/structures';
 import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
@@ -292,10 +292,10 @@ import { computed, onActivated, ref } from 'vue';
 const errors = useErrors();
 const summary = ref(null) as Ref<null | ChargeMembershipsSummary>;
 const context = useContext();
+const patchPlatform = usePatchPlatform();
 const owner = useRequestOwner();
 const platform = usePlatform();
 const { patch, patched, addPatch, hasChanges, reset } = usePatch(platform);
-const platformManager = usePlatformManager();
 const saving = ref(false);
 const charging = ref(false);
 let loading = false;
@@ -325,7 +325,7 @@ async function save() {
     }
     saving.value = true;
     try {
-        await platformManager.value.patch(patch.value, false);
+        await patchPlatform(patch.value, { shouldRetry: false });
         reset();
         Toast.success($t('%9J')).show();
     }

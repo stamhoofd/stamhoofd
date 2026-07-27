@@ -23,6 +23,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { loadPlatform } from '@stamhoofd/networking/loadPlatform';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
@@ -94,8 +95,12 @@ const root = new ComponentWithProperties(PromiseView, {
 
             I18nController.skipUrlPrefixForLocale = webshopLanguage + '-' + response.data.organization.address.country;
 
+            // The platform has to exist before the session does, so resolve it first (from cache,
+            // or over the network). This is the seam that becomes a tenant/domain lookup later.
+            const { platform, fromCache } = await loadPlatform();
+
             // Set session
-            const session = new SessionContext(response.data.organization);
+            const session = new SessionContext(response.data.organization, platform);
             await session.loadFromStorage();
 
             await I18nController.loadDefault({
@@ -112,6 +117,17 @@ const root = new ComponentWithProperties(PromiseView, {
 
             await session.checkSSO();
             await SessionManager.prepareSessionForUsage(session);
+
+            if (session.requiresPlatformPrivateConfig() && !session.platform.privateConfig) {
+                // The bootstrapped platform is the public one, but this user needs the private
+                // config to reliably calculate its permissions: upgrade it with an authenticated
+                // request.
+                await session.fetchPlatform();
+            }
+            else if (fromCache) {
+                // We served a platform that came from storage, so refresh it in the background.
+                session.fetchPlatform().catch(console.error);
+            }
 
             if (!response.data.webshop) {
                 return new ComponentWithProperties(NavigationController, {

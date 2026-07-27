@@ -110,8 +110,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useFetchAllRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import type { PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -124,9 +123,8 @@ const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 
-const platformManager = usePlatformManager();
 const platform = usePlatform();
-const owner = useRequestOwner();
+const fetchPeriods = useFetchAllRegistrationPeriods();
 const loading = ref(false);
 const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
 const present = usePresent();
@@ -157,7 +155,7 @@ async function loadData() {
     loading.value = true;
 
     try {
-        originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner);
+        originalPeriods.value = await fetchPeriods({ shouldRetry: true, force: true });
         loading.value = false;
     } catch (e) {
         Toast.fromError(e).show();
@@ -294,7 +292,7 @@ async function addConfig(event: MouseEvent) {
         availablePeriods.map((period) => {
             return new ContextMenuItem({
                 name: period.name,
-                icon: period.id === platformManager.value.$platform.period.id ? 'dot' : undefined,
+                icon: period.id === platform.value.period.id ? 'dot' : undefined,
                 action: () => addConfigForPeriod(period),
             });
         }),

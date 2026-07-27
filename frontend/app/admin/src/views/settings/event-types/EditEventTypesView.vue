@@ -28,12 +28,12 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Platform, PlatformConfig, PlatformEventType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -44,7 +44,7 @@ const pop = usePop();
 const present = usePresent();
 
 const platform = usePlatform();
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 
 const originalTypes = computed(() => platform.value.config.eventTypes);
 const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(originalTypes);
@@ -110,7 +110,7 @@ async function save() {
             return;
         }
 
-        await platformManager.value.patch(Platform.patch({
+        await patchPlatform(Platform.patch({
             config: PlatformConfig.patch({
                 eventTypes: patch.value,
             }),

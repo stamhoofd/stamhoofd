@@ -64,16 +64,16 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { LoginMethod, LoginMethodConfig, LoginProviderType, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
-const platformManager = usePlatformManager();
+const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
@@ -183,7 +183,7 @@ async function save() {
             return;
         }
 
-        await platformManager.value.patch(patch.value);
+        await patchPlatform(patch.value);
         new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     } catch (e) {

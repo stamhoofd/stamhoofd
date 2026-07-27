@@ -23,8 +23,7 @@ function renderButton(props: { modelValue?: Language | null; languages?: Languag
         global: {
             provide: {
                 // useFeatureFlag reads the feature flags from the organization of the session context and the platform config
-                $context: { organization: { privateMeta: { featureFlags: options.featureFlags ?? [] } } },
-                $platformManager: { $platform: Platform.create({}) },
+                $context: { organization: { privateMeta: { featureFlags: options.featureFlags ?? [] } }, platform: Platform.create({}) },
             },
         },
     });

@@ -137,12 +137,12 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { useErrors } from '#errors/useErrors.ts';
+import { usePatchPlatform } from '#hooks/usePatchPlatform.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, PermissionsResourceType, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
@@ -159,6 +159,7 @@ const groups = ref([]) as Ref<SelectableGroup[]>;
 const webshops = ref([]) as Ref<SelectableWebshop[]>;
 const organization = useOrganization();
 const platform = usePlatform();
+const patchPlatform = usePatchPlatform();
 const originalArray = computed(() => (organization.value ? organization.value.privateMeta?.emails : platform.value.privateConfig?.emails) ?? []);
 const { patched: patchedArray, patch, hasChanges, addPatch: addAPatch, addPut, addArrayPatch } = usePatchArray(originalArray);
 const patched = computed(() => patchedArray.value.find(e => e.id === props.email.id) ?? props.email);
@@ -166,7 +167,6 @@ const addPatch = (patch: PartialWithoutMethods<AutoEncoderPatchType<Organization
 const organizationManager = useOrganizationManager();
 const owner = useRequestOwner();
 const pop = usePop();
-const platformManager = usePlatformManager();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const present = usePresent();
 
@@ -288,7 +288,7 @@ async function deleteMe() {
 
             await organizationManager.value.patch(organizationPatch, { owner, shouldRetry: false });
         } else {
-            await platformManager.value.patch(Platform.patch({
+            await patchPlatform(Platform.patch({
                 privateConfig: PlatformPrivateConfig.patch({
                     emails: arr,
                 }),
@@ -363,7 +363,7 @@ async function save() {
                 await patchOrganizationPeriod(organization.value.period, organizationPeriodPatch);
             }
         } else {
-            await platformManager.value.patch(Platform.patch({
+            await patchPlatform(Platform.patch({
                 privateConfig: PlatformPrivateConfig.patch({
                     emails: patch.value,
                 }),

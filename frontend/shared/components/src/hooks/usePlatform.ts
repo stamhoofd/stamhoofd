@@ -1,9 +1,9 @@
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { Platform } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed } from 'vue';
+import { useContext } from './useContext';
 
 export function usePlatform(): Ref<Platform> {
-    const platformManager = usePlatformManager();
-    return computed(() => platformManager.value.$platform)
+    const context = useContext();
+    return computed(() => context.value.platform);
 }
