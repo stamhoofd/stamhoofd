@@ -1,6 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { Platform, Version } from '@stamhoofd/structures';
+import { AuditLogReplacementDependencies, Platform, Version } from '@stamhoofd/structures';
+import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
 import { NetworkManager } from './NetworkManager';
 import { Storage } from './Storage';
 
@@ -59,8 +60,11 @@ async function fetchPublicPlatform(): Promise<Platform> {
  *
  * The returned platform is the app level platform: it is handed to the SessionContext, which never
  * replaces the reference (updatePlatform uses deepSet). Because of that stability, this is also
- * where Platform.shared is stamped, exactly once per app level platform. That global is still read
- * by UserPermissions, which has no platform passed to it yet.
+ * where the two things that cannot be passed a platform get bound, exactly once per app level
+ * platform:
+ * - Platform.shared, still read by UserPermissions.
+ * - The audit log uuid resolver, which renders a uuid from a bare id deep inside
+ *   AuditLogReplacement and cannot receive a platform through its call chain.
  *
  * Throwaway sessions (e.g. the account switcher) reuse the app level platform instead of calling
  * this, so they never stamp anything.
@@ -70,6 +74,7 @@ export async function loadPlatform(): Promise<{ platform: Platform; fromCache: b
     const platform = cached ?? (await fetchPublicPlatform());
 
     platform.setShared();
+    AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, platform);
 
     // The caller needs to know whether this is a possibly stale cached platform, so it can decide
     // whether a refresh is still needed: a platform we just fetched does not need one.
