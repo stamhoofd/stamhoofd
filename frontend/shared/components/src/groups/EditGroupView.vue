@@ -780,7 +780,7 @@ import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEnc
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import type { DefaultAgeGroup, Image, MemberProperty, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
+import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
@@ -1763,7 +1763,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
 const getRegisterItemFilterBuilders = useRegisterItemFilterBuilders();
 
 const family = new PlatformFamily({
-    platform: Platform.shared,
+    platform: platform.value,
     contextOrganization: organization.value,
 });
 

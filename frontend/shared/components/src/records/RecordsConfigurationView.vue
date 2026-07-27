@@ -64,8 +64,9 @@ import { useAppContext } from '#context/appContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { PropertyFilter, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePlatformMemberFilterBuilders } from '../filters/filter-builders/members';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
@@ -91,12 +92,13 @@ const pop = usePop();
 const { patch, patched, addPatch, hasChanges } = usePatch(props.recordsConfiguration);
 
 const organization = useOrganization();
+const platform = usePlatform();
 const app = useAppContext();
 const getPlatformMemberFilterBuilders = usePlatformMemberFilterBuilders();
 
 const settings = computed(() => {
     const family = new PlatformFamily({
-        platform: Platform.shared,
+        platform: platform.value,
         contextOrganization: organization.value,
     });
     const ss = new RecordEditorSettings({

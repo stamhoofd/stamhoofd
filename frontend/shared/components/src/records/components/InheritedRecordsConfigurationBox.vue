@@ -84,8 +84,9 @@ import { propertyFilterToString } from '#filters/UIFilter.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Platform, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 
@@ -110,13 +111,14 @@ const { patched, addPatch } = useEmitPatch<OrganizationRecordsConfiguration>(pro
 
 const baseOrg = useOrganization();
 const organization = computed(() => props.overrideOrganization ?? baseOrg.value);
+const platform = usePlatform();
 const present = usePresent();
 const filterBuilders = getMemberFilterBuildersForInheritedRecords();
 const filterBuilder = filterBuilders[0];
 const { financialSupportSettings } = useFinancialSupportSettings();
 
 const family = new PlatformFamily({
-    platform: Platform.shared,
+    platform: platform.value,
     contextOrganization: organization.value,
 });
 
