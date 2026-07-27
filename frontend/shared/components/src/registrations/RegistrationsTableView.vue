@@ -312,6 +312,7 @@ const { sgvSyncOpen, sgvSyncWarning } = useSGVSync(
 );
 
 const allColumns: Column<ObjectType, any>[] = getRegistrationColumns({
+    platform: platform.value,
     dateRange: props.dateRange,
     group: props.group,
     periodId: props.periodId,

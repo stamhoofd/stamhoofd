@@ -1,7 +1,7 @@
 import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { EmergencyContact, Group, Organization, Parent, PlatformMember, RecordSettings } from '@stamhoofd/structures';
-import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, Platform, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
+import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordSettings } from '@stamhoofd/structures';
+import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -191,7 +191,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                                     );
                                     const defaultAgeGroups = defaultAgeGroupIds.map(
                                         o =>
-                                            Platform.shared.config.defaultAgeGroups.find(
+                                            platform.config.defaultAgeGroups.find(
                                                 g => g.id === o.group.defaultAgeGroupId,
                                             )?.name ?? $t(`%wJ`),
                                     );
