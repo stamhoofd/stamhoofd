@@ -8,6 +8,8 @@ export { getProjectPath } from './context/project-path.js';
 export { pruneStaleRouteManifests, removeRouteManifest, removeRouteManifestsByKind, writeRouteManifest, type CaddyRouteOptions } from './runtime/manifest-store.js';
 export type { RouteManifest } from './runtime/manifest-store.js';
 export { CaddyService } from './services/definitions/caddy-service.js';
+export { SsoService, type SsoServiceVariant } from './services/definitions/sso-service.js';
+export { ssoClientId, ssoClientSecret, ssoRealm, ssoUserEmail, ssoUserName, ssoUserPassword } from './services/sso-config.js';
 export type { CaddyRoute } from './config/caddy-config.js';
 export { CSP_NONCE_PLACEHOLDER, cspFrontendSubroutes } from './config/caddy-config.js';
 export { getContainerRuntime } from './services/docker.js';

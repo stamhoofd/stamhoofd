@@ -12,4 +12,16 @@ describe('buildKeycloakRealm', () => {
         expect(realm.users[0].email).toBe(ssoUserEmail);
         expect(realm.users[0].credentials[0].temporary).toBe(false);
     });
+
+    it('allows every given redirect uri', () => {
+        const realm = buildKeycloakRealm([
+            'https://playwright-api-0.stamhoofd/openid/callback',
+            'https://playwright-api-1.stamhoofd/openid/callback',
+        ]) as any;
+
+        expect(realm.clients[0].redirectUris).toEqual([
+            'https://playwright-api-0.stamhoofd/openid/callback',
+            'https://playwright-api-1.stamhoofd/openid/callback',
+        ]);
+    });
 });

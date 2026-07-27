@@ -20,6 +20,12 @@ export const rustfsImage = 'docker.io/rustfs/rustfs:latest';
 export const corednsImage = 'docker.io/coredns/coredns:1.11.3';
 
 /**
+ * The local SSO server. Kept in sync with the image the Playwright CI job pre-pulls
+ * (.github/workflows/ci.yml).
+ */
+export const keycloakImage = 'quay.io/keycloak/keycloak:26.0.7';
+
+/**
  * The Caddy config uses the `replace_response` handler (webshop strict-dynamic CSP nonce),
  * which is not part of the stock Caddy image. We build a small custom image on demand that
  * compiles those plugins in via xcaddy, starting from the official Caddy builder + runtime

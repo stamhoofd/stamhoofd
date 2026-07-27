@@ -150,6 +150,8 @@ yarn stam sso start "https://<organization-id>.api.stamhoofd/openid/callback"
 
 The command imports a local realm with the printed client and test user.
 
+`yarn stam test e2e` starts a second Keycloak from the same `SsoService`, on its own container, port (6400) and host (`playwright-sso.stamhoofd`), with a realm that allows the `/openid/callback` of every Playwright worker. It is started and stopped by the Playwright global setup, so it never restarts the server you started for manual testing. Like the other e2e services it binds a fixed port, so only one e2e run can be up at a time.
+
 ### Tests
 
 `yarn stam test` runs `build:shared` first and only starts a MySQL container when a selected package needs one. That container runs off a data volume that persists between runs (so the data dir + migrations are reused, mapped `DB_PORT`), and it is shut down after the run. Both the container and volume are namespaced per worktree so runs don't collide:

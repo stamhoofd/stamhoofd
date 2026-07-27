@@ -1,5 +1,5 @@
 <template>
-    <button class="button full" :class="primary ? 'primary' : 'secundary'" type="button" :disabled="disabled">
+    <button class="button full" :class="primary ? 'primary' : 'secundary'" type="button" :disabled="disabled" :data-testid="'login-method-button-' + provider">
         <span v-if="provider === LoginProviderType.Google" class="icon">
             <img src="@stamhoofd/assets/images/partners/icons/google.svg">
         </span>

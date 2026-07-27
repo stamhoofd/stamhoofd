@@ -85,9 +85,31 @@ describe('shared service Docker args', () => {
                 primary: true,
             },
         } as any;
-        const args = new SsoService().getDockerArgs(context, { redirectUri: 'https://example.com/openid/callback' }, { importDir: '/tmp/keycloak' });
+        const args = new SsoService().getDockerArgs(context, { redirectUris: ['https://example.com/openid/callback'] }, { importDir: '/tmp/keycloak' });
 
         expect(args).toContain('/tmp/keycloak:/opt/keycloak/data/import:ro,Z');
+        expect(args).toContain('stamhoofd-keycloak');
+        expect(args).toContain('127.0.0.1:5556:8080');
+    });
+
+    it('builds SSO args for a variant on its own container, port and hostname', () => {
+        const context = {
+            rootDir: '/tmp/stamhoofd',
+            env: 'stamhoofd',
+            instance: {
+                name: 'stamhoofd',
+                prefix: 'stamhoofd',
+                portOffset: 0,
+                primary: true,
+            },
+        } as any;
+        const service = new SsoService({ name: 'playwright', port: 6400, hostname: 'playwright-sso.stamhoofd' });
+        const args = service.getDockerArgs(context, { redirectUris: ['https://example.com/openid/callback'] }, { importDir: '/tmp/keycloak' });
+
+        expect(args).toContain('stamhoofd-keycloak-playwright');
+        expect(args).toContain('127.0.0.1:6400:8080');
+        expect(args).toContain('https://playwright-sso.stamhoofd/dex');
+        expect(service.getIssuer(context)).toBe('https://playwright-sso.stamhoofd/dex/realms/stamhoofd');
     });
 
     it('builds macOS Docker bridge args for Caddy', () => {
