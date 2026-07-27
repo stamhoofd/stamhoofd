@@ -14,6 +14,7 @@ import { Group } from './Group.js';
 import type { RegistrationWithMember } from './Member.js';
 import { Member } from './Member.js';
 import type { Organization } from './Organization.js';
+import { Platform } from './Platform.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
 
@@ -731,10 +732,12 @@ export class DocumentTemplate extends QueryableModel {
             lastNumber = document.number;
         }
 
+        const platform = await Platform.getSharedStruct();
+
         const data = {
             id: this.id,
             created_at: this.createdAt,
-            documents: documents.map(d => d.buildContext(organization)),
+            documents: documents.map(d => d.buildContext(organization, platform)),
             organization: {
                 name: organization.name,
                 companyName: organization.meta.companies[0]?.name || organization.name,

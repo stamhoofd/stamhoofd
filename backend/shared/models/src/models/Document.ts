@@ -1,5 +1,6 @@
 import { column } from '@simonbackx/simple-database';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, Version } from '@stamhoofd/structures';
+import type { Platform as PlatformStruct } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,6 +9,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars.js';
 import type { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
 import type { Organization } from './Organization.js';
+import { Platform } from './Platform.js';
 import { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {
@@ -83,7 +85,7 @@ export class Document extends QueryableModel {
         return DocumentStruct.create(this);
     }
 
-    buildContext(organization: Organization) {
+    buildContext(organization: Organization, platform: PlatformStruct) {
         // Convert the field answers in a simplified javascript object
         const data: Record<string, any> = {
             id: this.id,
@@ -98,7 +100,7 @@ export class Document extends QueryableModel {
                 companyAddress: organization.meta.companies[0]?.address ?? organization.address,
             },
         };
-        const platformLogo = Platform.shared.config.logoDocuments ?? Platform.shared.config.horizontalLogo ?? Platform.shared.config.squareLogo;
+        const platformLogo = platform.config.logoDocuments ?? platform.config.horizontalLogo ?? platform.config.squareLogo;
         const organizationLogo = organization.meta.horizontalLogo ?? organization.meta.squareLogo;
         const logo = organizationLogo || platformLogo;
 
@@ -282,7 +284,8 @@ export class Document extends QueryableModel {
     // Rander handlebars template
     private async getRenderedHtmlForTemplate(organization: Organization, htmlTemplate: string): Promise<string | null> {
         try {
-            const context = this.buildContext(organization);
+            const platform = await Platform.getSharedStruct();
+            const context = this.buildContext(organization, platform);
             const renderedHtml = await render(htmlTemplate, context);
             return renderedHtml;
         } catch (e) {
