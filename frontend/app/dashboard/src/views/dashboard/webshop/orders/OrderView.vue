@@ -329,6 +329,7 @@ import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
@@ -362,6 +363,7 @@ const props = withDefaults(defineProps<{
 const present = usePresent();
 const pop = usePop();
 const organizationManager = useOrganizationManager();
+const platform = usePlatform();
 
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('initialOrder', props);
 
@@ -480,6 +482,7 @@ const actionBuilder = new OrderActionBuilder({
     present: usePresent(),
     organizationManager: organizationManager.value,
     webshopManager: props.webshopManager,
+    platform: platform.value,
 });
 
 const statusName = computed(() => {
