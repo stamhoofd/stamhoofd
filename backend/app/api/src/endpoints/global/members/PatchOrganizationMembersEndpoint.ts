@@ -585,7 +585,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 membership.locked = false;
 
                 // Correct price and dates
-                await membership.calculatePrice(member);
+                await PlatformMembershipService.calculatePrice(membership, member);
 
                 const incompatible = await MemberPlatformMembership.select()
                     .where('memberId', member.id)

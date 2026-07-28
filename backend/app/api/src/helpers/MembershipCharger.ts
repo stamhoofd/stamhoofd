@@ -3,6 +3,7 @@ import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPe
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
+import { PlatformMembershipService } from '../services/PlatformMembershipService.js';
 
 export const MembershipCharger = {
     async charge() {
@@ -86,7 +87,7 @@ export const MembershipCharger = {
 
                 // Force price update (required because could have changed - especially for free memberships in combination with deletes)
                 try {
-                    await membership.calculatePrice(member);
+                    await PlatformMembershipService.calculatePrice(membership, member);
                 } catch (e) {
                     console.error('Failed to update price for membership. Not charged.', membership.id, e);
                     continue;
@@ -194,7 +195,7 @@ export const MembershipCharger = {
 
                 // Force price update (required because could have changed - especially for free memberships in combination with deletes)
                 try {
-                    await membership.calculatePrice(member);
+                    await PlatformMembershipService.calculatePrice(membership, member);
                     await membership.save();
                 } catch (e) {
                     console.error('Failed to update price for membership', membership.id, e);
