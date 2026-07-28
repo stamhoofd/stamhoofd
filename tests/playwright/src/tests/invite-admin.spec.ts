@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, PasswordToken, Platform, Token, User, UserFactory } from '@stamhoofd/models';
+import { PasswordForgotService } from '@stamhoofd/backend/services/PasswordForgotService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { PermissionLevel, PermissionRoleDetailed, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -184,7 +185,7 @@ async function openInviteAndChoosePassword(browser: Browser, { userId, organizat
 
     // Find the stored PasswordToken and build the url from the invite email
     const passwordToken = await PasswordToken.select().where('userId', userId).first(true);
-    const url = await passwordToken.getPasswordRecoveryUrl(organization, i18n);
+    const url = await PasswordForgotService.getPasswordRecoveryUrlForToken(passwordToken, organization, i18n);
 
     // A new browser session with a clean local storage
     const context = await browser.newContext();

@@ -6,6 +6,8 @@ import { EmailVerificationCode, PasswordToken, Platform, sendEmailTemplate, User
 import { EmailTemplateType, LoginMethod, NewUser, Recipient, Replacement, SignupResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { PasswordForgotService } from '../../services/PasswordForgotService.js';
+import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -77,7 +79,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // We don't await this block to avoid user enumeration attack using request response time
                 (async () => {
                     // Send an e-mail to say you already have an account + follow password forgot flow
-                    const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n);
+                    const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(user, organization, request.i18n);
 
                     // Create e-mail builder
                     await sendEmailTemplate(organization, {
@@ -118,7 +120,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         const code = await EmailVerificationCode.createFor(user, user.email);
 
         if (sendCode) {
-            code.send(user, organization, request.i18n).catch(console.error);
+            VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
         }
 
         return new Response(SignupResponse.create({

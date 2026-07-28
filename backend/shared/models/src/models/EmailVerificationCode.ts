@@ -1,15 +1,10 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { I18n } from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
-import { appToUri, EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { Platform } from './Platform.js';
 import type { User } from './User.js';
-import type { Organization } from './Organization.js';
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
@@ -120,11 +115,6 @@ export class EmailVerificationCode extends QueryableModel {
         this.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 12);
     }
 
-    getEmailVerificationUrl(user: User, organization: Organization | null, i18n: I18n) {
-        const host = getAppHost('verify-email', organization, !!user.permissions, i18n);
-        return 'https://' + host + '?code=' + encodeURIComponent(this.code) + '&token=' + encodeURIComponent(this.token) + '&email=' + encodeURIComponent(this.email);
-    }
-
     /**
      * Return true if this token is still valid (used for automatic polling in code view)
      */
@@ -232,92 +222,6 @@ export class EmailVerificationCode extends QueryableModel {
                 statusCode: 429,
             });
         }
-    }
-
-    async send(user: User, organization: Organization | null, i18n: I18n, withCode = true) {
-        const url = this.getEmailVerificationUrl(user, organization, i18n);
-
-        const name = organization?.name ?? (await Platform.getSharedPrivateStruct()).config.name;
-
-        const replacements: Replacement[] = [
-            Replacement.create({
-                token: 'organizationName',
-                value: name,
-            }),
-            Replacement.create({
-                token: 'confirmEmailUrl',
-                value: url,
-            }),
-        ];
-
-        if (withCode) {
-            const formattedCode = this.code.substr(0, 3) + ' ' + this.code.substr(3);
-
-            await sendEmailTemplate(organization, {
-                recipients: [
-                    Recipient.create({
-                        email: this.email,
-                        replacements: [
-                            ...replacements,
-                            Replacement.create({
-                                token: 'confirmEmailCode',
-                                value: formattedCode,
-                            }),
-                        ],
-                    }),
-                ],
-                template: {
-                    type: EmailTemplateType.VerifyEmail,
-                },
-                type: 'transactional',
-            });
-        } else {
-            await sendEmailTemplate(organization, {
-                recipients: [
-                    Recipient.create({
-                        email: this.email,
-                        replacements,
-                    }),
-                ],
-                template: {
-                    type: EmailTemplateType.VerifyEmailWithoutCode,
-                },
-                type: 'transactional',
-            });
-        }
-    }
-
-    static async resend(organization: Organization | null, token: string, i18n: I18n) {
-        const verificationCodes = await this.where({
-            token,
-            organizationId: organization
-                ? {
-                        sign: 'IN',
-                        value: [organization.id, null],
-                    }
-                : null,
-        }, { limit: 1 });
-
-        if (verificationCodes.length == 0) {
-            console.log("Can't resend code, no coded found for token", token);
-            // TODO: maybe send a note via email
-            return;
-        }
-
-        const verificationCode = verificationCodes[0];
-
-        if (verificationCode.expiresAt < new Date()) {
-            // Don't report error, could be brute forced
-            console.log("Can't resend code, token is expired", token);
-            return;
-        }
-
-        const { User } = await import('./User.js');
-        const user = await User.getByID(verificationCode.userId);
-        if (!user) {
-            return;
-        }
-        await verificationCode.send(user, organization, i18n);
     }
 
     /**

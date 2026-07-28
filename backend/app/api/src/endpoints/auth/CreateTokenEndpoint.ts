@@ -6,6 +6,7 @@ import type { ChallengeGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruc
 import { CreateTokenStruct, LoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -127,7 +128,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // if not: throw a validation error (e-mail validation is required)
                 if (!user.verified) {
                     const code = await EmailVerificationCode.createFor(user, user.email);
-                    code.send(user, organization, request.i18n).catch(console.error);
+                    VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
 
                     throw new SimpleError({
                         code: 'verify_email',

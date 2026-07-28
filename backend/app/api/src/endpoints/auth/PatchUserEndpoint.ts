@@ -10,6 +10,7 @@ import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions 
 import { Context } from '../../helpers/Context.js';
 import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
+import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -189,7 +190,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 // Create an validation code
                 // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
                 const code = await EmailVerificationCode.createFor(editUser, request.body.email);
-                code.send(editUser, organization, request.i18n, editUser.id === user.id).catch(console.error);
+                VerificationCodeService.send(code, editUser, organization, request.i18n, editUser.id === user.id).catch(console.error);
 
                 throw new SimpleError({
                     code: 'verify_email',

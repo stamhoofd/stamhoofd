@@ -2,13 +2,14 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { Platform, sendEmailTemplate, User } from '@stamhoofd/models';
 import type { UserWithMembers } from '@stamhoofd/structures';
 import { EmailTemplateType, Recipient, Replacement, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../helpers/Context.js';
+import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UserStruct;
@@ -117,7 +118,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         validUntil.setTime(validUntil.getTime() + 7 * 24 * 3600 * 1000);
 
         const dateTime = Formatter.dateTime(validUntil);
-        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(admin, organization, request.i18n, validUntil);
+        const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(admin, organization, request.i18n, validUntil);
         const platformName = ((await Platform.getSharedStruct()).config.name);
 
         const name = organization?.name ?? platformName;

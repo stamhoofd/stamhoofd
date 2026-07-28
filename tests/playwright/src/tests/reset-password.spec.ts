@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, PasswordToken, User, UserFactory } from '@stamhoofd/models';
+import { PasswordForgotService } from '@stamhoofd/backend/services/PasswordForgotService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { PermissionLevel, Permissions, STPackageBundle } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -132,7 +133,7 @@ function defineResetScenarios(getOrganization: () => Organization) {
             const passwordToken = await PasswordToken.select().where('userId', user.id).first(true);
 
             // Navigate to the recovery url (the one that would be e-mailed to the user)
-            const url = await passwordToken.getPasswordRecoveryUrl(scope, i18n);
+            const url = await PasswordForgotService.getPasswordRecoveryUrlForToken(passwordToken, scope, i18n);
 
             await test.step('Navigate to ' + url + ' and reset password', async () => {
                 await page.goto(url);
