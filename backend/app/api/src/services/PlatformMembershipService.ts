@@ -1,6 +1,7 @@
 import { Model } from '@simonbackx/simple-database';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { logger } from '@simonbackx/simple-logging';
-import { Group, Member, MemberPlatformMembership, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { BalanceItem, Group, Member, MemberPlatformMembership, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { AuditLogSource, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
@@ -331,7 +332,7 @@ export class PlatformMembershipService {
                         membership.endDate = periodConfig.endDate;
                         membership.expireDate = periodConfig.expireDate;
                         membership.generated = true;
-                        await membership.calculatePrice(me, cheapestMembership.registration);
+                        await PlatformMembershipService.calculatePrice(membership, me, cheapestMembership.registration);
 
                         // Check if we have a not-locked but non-generated one that is cheaper
                         // if so, we stop and don't create a new one (but still delete others if required)
@@ -353,7 +354,7 @@ export class PlatformMembershipService {
                             if (!m.locked && m.generated) {
                                 // Update the price and dates of this active membership (could have changed)
                                 try {
-                                    await m.calculatePrice(me, cheapestMembership.registration);
+                                    await PlatformMembershipService.calculatePrice(m, me, cheapestMembership.registration);
                                 } catch (e) {
                                     // Ignore error: membership might not be available anymore
                                     if (!silent) {
@@ -381,7 +382,7 @@ export class PlatformMembershipService {
                                 // Update price
                                 if (!m.locked) {
                                     try {
-                                        await m.calculatePrice(me);
+                                        await PlatformMembershipService.calculatePrice(m, me);
                                     } catch (e) {
                                     // Ignore error: membership might not be available anymore
                                         if (!silent) {
@@ -418,5 +419,281 @@ export class PlatformMembershipService {
                 }
             });
         });
+    }
+
+    /**
+     * Returns the last trial until date for this member. Null if this member does not have any trials
+     */
+    private static async isElegibleForTrial(membership: MemberPlatformMembership, member: Member) {
+        const period = await RegistrationPeriod.getByID(membership.periodId);
+        if (!period) {
+            return null;
+        }
+
+        if (!period.previousPeriodId) {
+            // We have no previous period = no data = no trials
+            return null;
+        }
+
+        const platform = await Platform.getSharedStruct();
+        const typeIds = platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
+
+        const previousMembership = await MemberPlatformMembership.select()
+            .where('memberId', member.id)
+            .where('deletedAt', null)
+            .where('periodId', period.previousPeriodId)
+            .where('membershipTypeId', typeIds)
+            .first(false);
+
+        const hasBlockingMemberships = !!previousMembership;
+
+        if (hasBlockingMemberships) {
+            return null;
+        }
+
+        // The member needs to be registered for at least one registration that had a trial
+        const registrations = await Registration.select()
+            .where('memberId', member.id)
+            .where('periodId', period.id)
+            .where('organizationId', membership.organizationId)
+            .where('deactivatedAt', null)
+            .where('registeredAt', '!=', null)
+            .where('trialUntil', '!=', null)
+            .fetch();
+
+        if (registrations.length === 0) {
+            return null;
+        }
+
+        const latestTrialUntil = new Date(Math.max(...registrations.map(r => r.trialUntil!.getTime())));
+        return latestTrialUntil;
+    }
+
+    private static async correctDates(membership: MemberPlatformMembership, member: Member, registration?: Registration) {
+        if (membership.locked) {
+            // price of locked membership cannot be changed
+            return;
+        }
+
+        const platform = await Platform.getSharedPrivateStruct();
+        const membershipType = platform.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
+
+        if (!membershipType) {
+            throw new SimpleError({
+                code: 'invalid_membership_type',
+                message: 'Unknown membership type',
+                human: $t(`%GM`),
+            });
+        }
+
+        const periodConfig = membershipType.periods.get(membership.periodId);
+
+        if (!periodConfig) {
+            throw new SimpleError({
+                code: 'period_unavailable',
+                message: 'Membership not available for this period',
+                human: $t(`%GN`),
+            });
+        }
+
+        if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
+            // Make sure time is equal between start and end date
+            let startBrussels = Formatter.luxon(membership.startDate);
+            let endBrussels = Formatter.luxon(membership.endDate);
+            startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            endBrussels = endBrussels.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+            membership.startDate = startBrussels.toJSDate();
+            membership.endDate = endBrussels.toJSDate();
+            membership.expireDate = null;
+        } else {
+            membership.endDate = Formatter.luxon(periodConfig.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
+            membership.expireDate = periodConfig.expireDate ? Formatter.luxon(periodConfig.expireDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate() : null;
+
+            // Alter start date
+            if (registration) {
+                const preferredStartDate = registration.startDate ?? registration.registeredAt ?? membership.createdAt;
+                membership.startDate = periodConfig.startDate;
+
+                if (preferredStartDate > periodConfig.startDate && preferredStartDate < periodConfig.endDate) {
+                    let startBrussels = Formatter.luxon(preferredStartDate);
+                    startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                    membership.startDate = startBrussels.toJSDate();
+                }
+            } else {
+                // Keep the set date, but make sure it is at 0:00 in CET
+                let startBrussels = Formatter.luxon(membership.startDate);
+                startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                membership.startDate = startBrussels.toJSDate();
+            }
+        }
+
+        let minimumStartDate = Formatter.luxon(periodConfig.startDate).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+
+        if (!membership.existsInDatabase) {
+            if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
+                // Cannot create a membership in the past
+                minimumStartDate = Formatter.luxon(new Date()).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+            }
+        }
+
+        if (membership.startDate < minimumStartDate) {
+            membership.startDate = minimumStartDate;
+        }
+
+        if (membership.endDate < membership.startDate) {
+            membership.endDate = Formatter.luxon(membership.startDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
+        }
+
+        const maximumEndDate = periodConfig.getMaximumEndDate(membership.startDate, membershipType.behaviour);
+        if (membership.endDate > maximumEndDate) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'endDate',
+                message: 'End date is after the maximum allowed end date',
+                human: $t('%15C', { date: Formatter.date(maximumEndDate) }),
+            });
+        }
+
+        if (periodConfig.trialDays) {
+            // Check whether you are elegible for a trial
+            const latestTrialDate = await PlatformMembershipService.isElegibleForTrial(membership, member);
+            if (latestTrialDate !== null) {
+                // Allowed to set trial until, maximum periodConfig.trialDays after startDate
+                let trialUntil = Formatter.luxon(membership.startDate).plus({ days: periodConfig.trialDays });
+                trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+
+                if (trialUntil.toJSDate() > latestTrialDate) {
+                    // Use the latest trial date instead
+                    trialUntil = Formatter.luxon(latestTrialDate);
+                }
+
+                // Max end date
+                if (trialUntil.toJSDate() > membership.endDate) {
+                    trialUntil = Formatter.luxon(membership.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+                }
+
+                membership.trialUntil = trialUntil.toJSDate();
+            } else {
+                membership.trialUntil = null;
+            }
+        } else {
+            // No trial
+            membership.trialUntil = null;
+        }
+    }
+
+    static async calculatePrice(membership: MemberPlatformMembership, member: Member, registration?: Registration) {
+        if (membership.locked) {
+            // price of locked membership cannot be changed
+            return;
+        }
+
+        const platform = await Platform.getSharedPrivateStruct();
+        const membershipType = platform.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
+
+        if (!membershipType) {
+            throw new SimpleError({
+                code: 'invalid_membership_type',
+                message: 'Unknown membership type',
+                human: $t(`%GM`),
+            });
+        }
+
+        const periodConfig = membershipType.periods.get(membership.periodId);
+
+        if (!periodConfig) {
+            throw new SimpleError({
+                code: 'period_unavailable',
+                message: 'Membership not available for this period',
+                human: $t(`%GN`),
+            });
+        }
+
+        const organization = await Organization.getByID(membership.organizationId);
+        if (!organization) {
+            throw new SimpleError({
+                // todo
+                code: 'not_found',
+                message: 'Organization not found',
+                human: $t(`%GO`),
+            });
+        }
+
+        const tagIds = organization.meta.tags;
+        const shouldApplyReducedPrice = member.details.shouldApplyReducedPrice;
+
+        // Correct dates so we get the correct price config
+        await PlatformMembershipService.correctDates(membership, member, registration);
+        const priceConfig = periodConfig.getPriceConfigForDate(membership.trialUntil ?? membership.startDate);
+        const earliestPriceConfig = periodConfig.getPriceConfigForDate(new Date(1950, 0, 1));
+
+        let freeDays = 0;
+
+        const d = membership.createdAt ?? new Date();
+
+        if (periodConfig.amountFree) {
+            // Check if this organization has rights to free memberships
+            const alreadyUsed = await MemberPlatformMembership.select()
+                .where('organizationId', membership.organizationId)
+                .where('membershipTypeId', membership.membershipTypeId)
+                .where('periodId', membership.periodId)
+                .where('deletedAt', null)
+                .whereNot('id', membership.id)
+                .where(
+                    SQL.where('createdAt', SQLWhereSign.Less, d)
+                        .or(
+                            SQL.where('createdAt', SQLWhereSign.Equal, d)
+                                .and('id', SQLWhereSign.Less, membership.id),
+                        ),
+                )
+                .sum(SQL.column('maximumFreeAmount'));
+
+            if (alreadyUsed < periodConfig.amountFree) {
+                freeDays = periodConfig.amountFree - alreadyUsed;
+                console.log('Free membership created for ', membership.id, periodConfig.amountFree, alreadyUsed);
+            } else {
+                console.log('No free membership created for', membership.id, periodConfig.amountFree, alreadyUsed);
+            }
+        }
+
+        if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
+            const days = Math.round((membership.endDate.getTime() - membership.startDate.getTime()) / (1000 * 60 * 60 * 24));
+            membership.maximumFreeAmount = days;
+            membership.priceWithoutDiscount = earliestPriceConfig.calculatePrice(tagIds, false, days);
+            membership.price = priceConfig.calculatePrice(tagIds, shouldApplyReducedPrice, Math.max(0, days - freeDays));
+            membership.freeAmount = Math.min(days, freeDays);
+        } else {
+            membership.priceWithoutDiscount = earliestPriceConfig.getBasePrice(tagIds, false);
+            membership.price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
+            membership.maximumFreeAmount = membership.price > 0 ? 1 : 0;
+            membership.freeAmount = 0;
+
+            if (freeDays > 0) {
+                membership.price = 0;
+                membership.freeAmount = 1;
+            }
+        }
+
+        // Never charge itself
+        const chargeVia = platform.membershipOrganizationId;
+        if (membership.organizationId === chargeVia) {
+            membership.price = 0;
+            membership.priceWithoutDiscount = 0;
+            membership.freeAmount = 0;
+            membership.maximumFreeAmount = 0;
+        }
+
+        if (membership.balanceItemId) {
+            membership.maximumFreeAmount = membership.freeAmount;
+
+            // Also update the balance item
+            const balanceItem = await BalanceItem.getByID(membership.balanceItemId);
+            if (balanceItem) {
+                balanceItem.unitPrice = membership.price;
+                await balanceItem.save();
+
+                // await BalanceItem.updateOutstanding([balanceItem]);
+            }
+        }
     }
 }
