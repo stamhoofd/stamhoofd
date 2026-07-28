@@ -5,6 +5,7 @@ import { signInternal } from '@stamhoofd/backend-env';
 import { Document, Organization } from '@stamhoofd/models';
 
 import { Context } from '../../../helpers/Context.js';
+import { DocumentRenderService } from '../../../services/DocumentRenderService.js';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined;
@@ -45,7 +46,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
             });
         }
 
-        const html = await document.getRenderedHtml(organization);
+        const html = await DocumentRenderService.getRenderedHtml(document, organization);
         if (!html) {
             throw new SimpleError({
                 code: 'failed_generating',

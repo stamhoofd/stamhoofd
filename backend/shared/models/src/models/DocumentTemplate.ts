@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Parent, RecordAnswer } from '@stamhoofd/structures';
 import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, RecordAddressAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
@@ -7,14 +7,11 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { render } from '../helpers/Handlebars.js';
 import { BalanceItem } from './BalanceItem.js';
 import { Document } from './Document.js';
 import { Group } from './Group.js';
 import type { RegistrationWithMember } from './Member.js';
 import { Member } from './Member.js';
-import type { Organization } from './Organization.js';
-import { Platform } from './Platform.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
 
@@ -716,76 +713,6 @@ export class DocumentTemplate extends QueryableModel {
         }
 
         return lastNumber + 1;
-    }
-
-    private async buildContext(organization: Organization) {
-        // Convert the field answers in a simplified javascript object
-        const documents = (await this.buildAll({ generateNumbers: true })).filter(d => d.status === DocumentStatus.Published && !!d.number).sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0));
-
-        // Check numbers are strictly increasing
-        let lastNumber = 0;
-        for (const document of documents) {
-            if (document.number !== lastNumber + 1) {
-                document.number = lastNumber + 1;
-                await document.save();
-            }
-            lastNumber = document.number;
-        }
-
-        const platform = await Platform.getSharedStruct();
-
-        const data = {
-            id: this.id,
-            created_at: this.createdAt,
-            documents: documents.map(d => d.buildContext(organization, platform)),
-            organization: {
-                name: organization.name,
-                companyName: organization.meta.companies[0]?.name || organization.name,
-                companyNumber: organization.meta.companies[0]?.companyNumber || null,
-                address: organization.address,
-                companyAddress: organization.meta.companies[0]?.address ?? organization.address,
-            },
-        };
-
-        for (const field of this.settings.fieldAnswers.values()) {
-            const keys = field.settings.id.split('.');
-            let current = data;
-            const lastKey = keys.pop()!;
-            if (!lastKey) {
-                throw new Error('Invalid field id');
-            }
-            for (const key of keys) {
-                if (!current[key]) {
-                    current[key] = {};
-                }
-                current = current[key];
-
-                if (typeof current !== 'object') {
-                    throw new Error('Invalid field type');
-                }
-            }
-            current[lastKey] = field.objectValue;
-        }
-
-        return data;
-    }
-
-    async getRenderedXml(organization: Organization) {
-        if (!this.privateSettings.templateDefinition.xmlExport) {
-            return null;
-        }
-
-        try {
-            const context = await this.buildContext(organization);
-            const renderedHtml = await render(this.privateSettings.templateDefinition.xmlExport, context);
-            return renderedHtml;
-        } catch (e) {
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                throw e;
-            }
-            console.error('Failed to render document html', e);
-            return null;
-        }
     }
 
     areAnswersComplete(answers: Map<string, RecordAnswer>) {
