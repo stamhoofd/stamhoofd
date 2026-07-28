@@ -3,7 +3,7 @@ import type { AuditLog, Document, EventNotification, MemberWithUsersRegistration
 import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { BaseOrganization, getAppHost, OrganizationPrivateMetaData } from '@stamhoofd/structures';
-import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -465,11 +465,12 @@ export class AuthenticatedStructures {
             return MembersBlob.create({ members: [], organizations: [] });
         }
 
+        const platform = await PlatformModel.getSharedStruct();
         const organizations = new Map<string, Organization>();
         const relevantPeriodIds = Formatter.uniqueArray([
-            Platform.shared.period.previousPeriodId,
-            Platform.shared.period.id,
-            Platform.shared.period.nextPeriodId,
+            platform.period.previousPeriodId,
+            platform.period.id,
+            platform.period.nextPeriodId,
             Context.organization?.periodId ?? null,
         ].filter(id => id !== null)) as string[];
 
@@ -520,7 +521,7 @@ export class AuthenticatedStructures {
             organizationIds.push(STAMHOOFD.singleOrganization);
         }
 
-        const membershipOrganizationId = Platform.shared.membershipOrganizationId;
+        const membershipOrganizationId = platform.membershipOrganizationId;
         if (membershipOrganizationId && Context.auth.hasSomePlatformAccess()) {
             if (await Context.auth.hasSomeAccess(membershipOrganizationId)) {
                 organizationIds.push(membershipOrganizationId);
@@ -1205,7 +1206,7 @@ export class AuthenticatedStructures {
                     if (user.permissions?.forPlatform(platform) !== null) {
                         userStruct = NamedObject.create({
                             id: '',
-                            name: $t(`%wi`) + ' ' + Platform.shared.config.name,
+                            name: $t(`%wi`) + ' ' + platform.config.name,
                         });
                     } else {
                         userStruct = NamedObject.create({
