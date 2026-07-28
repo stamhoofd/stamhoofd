@@ -91,8 +91,6 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         limiter.track(user.id, 1);
         let sendEmail = false;
 
-        await Platform.getSharedStruct();
-
         const result = await Promise.race([
             this.job(loader, request.body, request.params.type, user.id).then(async (url: string) => {
                 if (sendEmail) {

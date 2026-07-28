@@ -60,11 +60,9 @@ async function fetchPublicPlatform(): Promise<Platform> {
  *
  * The returned platform is the app level platform: it is handed to the SessionContext, which never
  * replaces the reference (updatePlatform uses deepSet). Because of that stability, this is also
- * where the two things that cannot be passed a platform get bound, exactly once per app level
- * platform:
- * - Platform.shared, still read by UserPermissions.
- * - The audit log uuid resolver, which renders a uuid from a bare id deep inside
- *   AuditLogReplacement and cannot receive a platform through its call chain.
+ * where the audit log uuid resolver gets bound, exactly once per app level platform: it renders a
+ * uuid from a bare id deep inside AuditLogReplacement and cannot receive a platform through its
+ * call chain.
  *
  * Throwaway sessions (e.g. the account switcher) reuse the app level platform instead of calling
  * this, so they never stamp anything.
@@ -73,7 +71,6 @@ export async function loadPlatform(): Promise<{ platform: Platform; fromCache: b
     const cached = await loadPlatformFromStorage();
     const platform = cached ?? (await fetchPublicPlatform());
 
-    platform.setShared();
     AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, platform);
 
     // The caller needs to know whether this is a possibly stale cached platform, so it can decide
