@@ -1,17 +1,14 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Language } from '@stamhoofd/types/Language';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { TransferSettings, WebshopTimeSlot } from '@stamhoofd/structures';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { WebshopCounter } from '../helpers/WebshopCounter.js';
 import { BalanceItem } from './BalanceItem.js';
 import { BalanceItemPayment } from './BalanceItemPayment.js';
 import type { Organization } from './Organization.js';
@@ -736,66 +733,6 @@ export class Order extends QueryableModel {
         await this.setRelation(Order.webshop, webshop).updateTickets();
     }
 
-    /**
-     * Only call this once! Make sure you use the queues correctly
-     */
-    async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
-        if (!this.id) {
-            await this.save();
-        }
-        console.log('Marking order ' + this.id + ' as paid');
-
-        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
-        if (!webshop) {
-            console.error('Missing webshop for order ' + this.id);
-            return;
-        }
-
-        if (this.status === OrderStatus.Deleted) {
-            await this.undoPaymentFailed(payment, organization);
-        }
-
-        const { tickets, didCreateTickets } = await this.setRelation(Order.webshop, webshop).updateTickets({ hasPaidPayment: true });
-
-        // Needs to happen before validation, because we can include the tickets in the validation that way
-        if (this.validAt === null) {
-            await this.setRelation(Order.webshop, webshop).markValid(payment, tickets);
-        } else {
-            this.markUpdated();
-            await this.save();
-
-            if (!this.data.shouldSendPaymentUpdates) {
-                console.log('Skip sending paid email for order ' + this.id);
-                return;
-            }
-            if (this.data.customer.email.length > 0) {
-                if (didCreateTickets) {
-                    await this.setRelation(Order.webshop, webshop).sendTickets();
-                } else {
-                    if (payment && payment.method === PaymentMethod.Transfer) {
-                        await this.setRelation(Order.webshop, webshop).sendPaidMail();
-                    }
-                }
-            }
-        }
-    }
-
-    async sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        // For a tickets webshop, where the order was marked as paid / non-paid, we should still send the tickets email
-        // - because the normal email is not editable
-        const hasTickets = this.webshop.meta.hasTickets;
-
-        await this.sendEmailTemplate({
-            type: hasTickets ? EmailTemplateType.TicketsReceivedTransfer : EmailTemplateType.OrderReceivedTransfer,
-        });
-    }
-
-    async sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        await this.sendEmailTemplate({
-            type: EmailTemplateType.TicketsReceivedTransfer,
-        });
-    }
-
     getStructureWithoutPayment() {
         return OrderStruct.create({
             id: this.id,
@@ -901,47 +838,6 @@ export class Order extends QueryableModel {
         return (await Order.getStructures([this]))[0];
     }
 
-    async sendEmailTemplate(this: Order & { webshop: Webshop & { organization: Organization } }, data: {
-        type: EmailTemplateType;
-        to?: Recipient;
-    }) {
-        // Never send an email for archived webshops
-        if (this.webshop.meta.status === WebshopStatus.Archived) {
-            return;
-        }
-
-        // Render all $t's (recipient replacements, order tables, template...) in the language
-        // the customer used while placing the order, instead of the current request language.
-        const i18n = new I18n(this.consumerLanguage, this.webshop.organization.address.country);
-
-        await I18n.runWithLocale(i18n, async () => {
-            let recipient = (await this.getStructure()).getRecipient(
-                this.webshop.organization.getBaseStructure(),
-                WebshopPreview.create(this.webshop),
-            );
-
-            if (data.to) {
-                // Clear first and last name
-                recipient.firstName = null;
-                recipient.lastName = null;
-                recipient.language = this.webshop.meta.defaultLanguage;
-                recipient.replacements = recipient.replacements.filter(r => !['firstName', 'lastName'].includes(r.token));
-                data.to.merge(recipient);
-                recipient = data.to;
-            }
-
-            // Create e-mail builder
-            await sendEmailTemplate(this.webshop.organization, {
-                recipients: [recipient],
-                template: {
-                    type: data.type,
-                    webshop: this.webshop,
-                },
-                type: 'transactional',
-            });
-        });
-    }
-
     /**
      * Get the transfer settings for this order
      * @param this
@@ -960,104 +856,5 @@ export class Order extends QueryableModel {
         }
 
         return transferSettings;
-    }
-
-    /**
-     * WARNING: this should always run inside a queue so it only runs once for the same orde
-     * Include any tickets that are generated and should be included in the e-mail
-     */
-    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null, tickets: Ticket[]) {
-        const webshop = this.webshop;
-        const organization = webshop.organization;
-
-        console.log('Marking as valid: order ' + this.id);
-        const wasValid = this.validAt !== null;
-
-        if (wasValid) {
-            console.warn('Warning: already validated an order');
-            return;
-        }
-        this.validAt = new Date(); // will get flattened AFTER calculations
-        this.validAt.setMilliseconds(0);
-        this.number = await WebshopCounter.getNextNumber(this.webshop);
-
-        if (payment && !Order.payment.isLoaded(this)) {
-            this.setRelation(Order.payment, payment);
-        }
-
-        // Now we have a number, update the payment
-        if (payment && payment.method === PaymentMethod.Transfer) {
-            // Only now we can update the transfer description, since we need the order number as a reference
-            payment.transferSettings = this.getTransferSettings({ shouldThrowIfNoIban: true });
-            payment.generateDescription(organization, this.number.toString(), this.getTransferReplacements());
-            await payment.save();
-        }
-
-        await this.save();
-
-        if (this.data.customer.email.length > 0) {
-            if (tickets.length > 0) {
-                // Also send a copy
-                if (payment && payment.method === PaymentMethod.PointOfSale) {
-                    await this.sendEmailTemplate({
-                        type: EmailTemplateType.TicketsConfirmationPOS,
-                    });
-                } else {
-                    await this.sendEmailTemplate({
-                        type: EmailTemplateType.TicketsConfirmation,
-                    });
-                }
-            } else {
-                if (this.webshop.meta.ticketType === WebshopTicketType.None) {
-                    if (payment && payment.method === PaymentMethod.Transfer) {
-                        // Also send a copy
-                        await this.sendEmailTemplate({
-                            type: EmailTemplateType.OrderConfirmationTransfer,
-                        });
-                    } else if (payment && payment.method === PaymentMethod.PointOfSale) {
-                        await this.sendEmailTemplate({
-                            type: EmailTemplateType.OrderConfirmationPOS,
-                        });
-                    } else {
-                        // Also send a copy
-                        await this.sendEmailTemplate({
-                            type: EmailTemplateType.OrderConfirmationOnline,
-                        });
-                    }
-                } else {
-                    if (payment && payment.method === PaymentMethod.Transfer) {
-                        await this.sendEmailTemplate({
-                            type: EmailTemplateType.TicketsConfirmationTransfer,
-                        });
-                    } else {
-                        console.error('Unexpected missing tickets for order where tickets are expected');
-                    }
-                }
-            }
-        }
-
-        if (this.webshop.privateMeta.notificationEmails) {
-            const webshop = this.webshop;
-            const organization = webshop.organization;
-            const i18n = organization.i18n;
-
-            const webshopDashboardUrl = 'https://' + (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') + '/' + i18n.locale + '/webshops/' + Formatter.slug(webshop.meta.name) + '/orders';
-
-            // Send an email to all these notification emails
-            for (const email of this.webshop.privateMeta.notificationEmails) {
-                await this.sendEmailTemplate({
-                    type: EmailTemplateType.OrderNotification,
-                    to: Recipient.create({
-                        email,
-                        replacements: [
-                            Replacement.create({
-                                token: 'orderUrl',
-                                value: webshopDashboardUrl,
-                            }),
-                        ],
-                    }),
-                });
-            }
-        }
     }
 }
