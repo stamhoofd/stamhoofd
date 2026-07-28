@@ -307,7 +307,7 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
             if (!organization) {
                 continue;
             }
-            const users = admins.filter(a => a.permissions?.forOrganization(organization, platform, { inheritTags: false })?.hasFullAccess());
+            const users = admins.filter(a => a.permissions?.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess());
 
             if (users.length === 0) {
                 console.warn('No admins found for organization with id ', organizationId, ' while fetching email recipients for payment with id ', payment.id);

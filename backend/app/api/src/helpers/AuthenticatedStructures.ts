@@ -1133,7 +1133,7 @@ export class AuthenticatedStructures {
             } else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
                 const user = users.find(m => m.id === balance.objectId) ?? null;
                 if (user) {
-                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, user.permissions?.forOrganization(Context.organization, platform, { inheritTags: false })?.isEmpty === false) : '';
+                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, user.permissions?.forOrganization(Context.organization, platform, { inheritFromPlatform: false })?.isEmpty === false) : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: user.name || user.email,

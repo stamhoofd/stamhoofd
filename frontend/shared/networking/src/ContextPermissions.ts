@@ -83,11 +83,11 @@ export class ContextPermissions {
         if (!this.organization) {
             return this.platformPermissions;
         }
-        return unref(this.userPermissions)?.forOrganization(this.organization, this.platform, { inheritTags: this.allowInheritingPermissions }) ?? null;
+        return unref(this.userPermissions)?.forOrganization(this.organization, this.platform, { inheritFromPlatform: this.allowInheritingPermissions }) ?? null;
     }
 
     getPermissionsForOrganization(organization: OrganizationForPermissionCalculation) {
-        return unref(this.userPermissions)?.forOrganization(organization, this.platform, { inheritTags: this.allowInheritingPermissions }) ?? null;
+        return unref(this.userPermissions)?.forOrganization(organization, this.platform, { inheritFromPlatform: this.allowInheritingPermissions }) ?? null;
     }
 
     get unloadedPermissions(): Permissions | null {

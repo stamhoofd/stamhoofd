@@ -168,7 +168,7 @@ export const RegistrationService = {
                 }),
                 Replacement.create({
                     token: 'registerUrl',
-                    value: 'https://' + getAppHost('registration', organization, user.permissions?.forOrganization(organization, platform, { inheritTags: false })?.isEmpty === false),
+                    value: 'https://' + getAppHost('registration', organization, user.permissions?.forOrganization(organization, platform, { inheritFromPlatform: false })?.isEmpty === false),
                 }),
                 Replacement.create({
                     token: 'groupName',
