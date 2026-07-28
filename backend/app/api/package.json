@@ -19,6 +19,12 @@
             "import": "./dist/src/boot.js",
             "require": "./dist/src/boot.js"
         },
+        "./services/*": {
+            "types": "./dist/src/services/*.d.ts",
+            "import": "./dist/src/services/*.js",
+            "require": "./dist/src/services/*.js",
+            "@stamhoofd/source": "./src/services/*.ts"
+        },
         "./tests/helpers": {
             "types": "./dist/tests/helpers/index.d.ts",
             "import": "./dist/tests/helpers/index.js",

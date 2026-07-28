@@ -5,6 +5,7 @@ import { EmailVerificationCode } from '@stamhoofd/models';
 import { PollEmailVerificationRequest, PollEmailVerificationResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -32,7 +33,7 @@ export class PollEmailVerificationEndpoint extends Endpoint<Params, Query, Body,
         const valid = await EmailVerificationCode.poll(organization?.id ?? null, request.body.token);
 
         if (valid) {
-            EmailVerificationCode.resend(organization, request.body.token, request.i18n).catch(console.error);
+            VerificationCodeService.resend(organization, request.body.token, request.i18n).catch(console.error);
         }
 
         return new Response(PollEmailVerificationResponse.create({

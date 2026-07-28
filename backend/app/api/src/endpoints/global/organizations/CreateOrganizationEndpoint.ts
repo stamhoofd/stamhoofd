@@ -12,6 +12,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AuditLogService } from '../../../services/AuditLogService.js';
 import { ReferralService } from '../../../services/ReferralService.js';
+import { VerificationCodeService } from '../../../services/VerificationCodeService.js';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 
@@ -160,7 +161,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         await AuditLog.update().where('type', AuditLogType.OrganizationAdded).where('objectId', organization.id).set('userId', user.id).set('source', AuditLogSource.User).update();
 
         const code = await EmailVerificationCode.createFor(user, user.email);
-        code.send(user, organization, request.i18n).catch(console.error);
+        VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
 
         for (const email of delayEmails) {
             Email.send({

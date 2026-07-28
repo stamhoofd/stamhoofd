@@ -1,11 +1,12 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { Platform, sendEmailTemplate, User } from '@stamhoofd/models';
 import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient, Replacement } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../helpers/Context.js';
+import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -72,7 +73,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
             return new Response(undefined);
         }
 
-        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n);
+        const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(user, organization, request.i18n);
 
         // Create e-mail builder
         await sendEmailTemplate(organization, {
