@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { DocumentTemplate } from '@stamhoofd/models';
 
 import { Context } from '../../../../helpers/Context.js';
+import { DocumentRenderService } from '../../../../services/DocumentRenderService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -42,7 +43,7 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
         }
 
         // Update documents
-        const xml = await template.getRenderedXml(organization);
+        const xml = await DocumentRenderService.getRenderedXml(template, organization);
         if (!xml) {
             throw new SimpleError({
                 code: 'failed_generating',

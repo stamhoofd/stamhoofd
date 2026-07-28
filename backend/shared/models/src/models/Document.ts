@@ -1,15 +1,11 @@
 import { column } from '@simonbackx/simple-database';
-import type { Platform as PlatformStruct } from '@stamhoofd/structures';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, Version } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import { render } from '../helpers/Handlebars.js';
 import type { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
-import type { Organization } from './Organization.js';
-import { Platform } from './Platform.js';
 import { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {
@@ -83,64 +79,6 @@ export class Document extends QueryableModel {
 
     getStructure() {
         return DocumentStruct.create(this);
-    }
-
-    buildContext(organization: Organization, platform: PlatformStruct) {
-        // Convert the field answers in a simplified javascript object
-        const data: Record<string, any> = {
-            id: this.id,
-            name: this.data.name,
-            number: this.number,
-            created_at: this.createdAt,
-            organization: {
-                name: organization.name,
-                companyName: organization.meta.companies[0]?.name || organization.name,
-                companyNumber: organization.meta.companies[0]?.companyNumber || null,
-                address: organization.address,
-                companyAddress: organization.meta.companies[0]?.address ?? organization.address,
-            },
-        };
-        const platformLogo = platform.config.logoDocuments ?? platform.config.horizontalLogo ?? platform.config.squareLogo;
-        const organizationLogo = organization.meta.horizontalLogo ?? organization.meta.squareLogo;
-        const logo = organizationLogo || platformLogo;
-
-        if (organizationLogo) {
-            data['organization'] = {
-                ...data['organization'],
-                logo: organizationLogo.encode({ version: Version }) ?? null,
-            };
-        }
-
-        if (platformLogo) {
-            data['platform'] = {
-                logo: platformLogo.encode({ version: Version }) ?? null,
-            };
-        }
-
-        if (logo) {
-            data['logo'] = logo.encode({ version: Version }) ?? null;
-        }
-
-        for (const field of this.data.fieldAnswers.values()) {
-            const keys = field.settings.id.split('.');
-            let current = data;
-            const lastKey = keys.pop()!;
-            if (!lastKey) {
-                throw new Error('Invalid field id');
-            }
-            for (const key of keys) {
-                if (!current[key]) {
-                    current[key] = {};
-                }
-                current = current[key];
-
-                if (typeof current !== 'object') {
-                    throw new Error('Invalid field type');
-                }
-            }
-            current[lastKey] = field.objectValue;
-        }
-        return data;
     }
 
     async updateData(): Promise<void> {
@@ -267,30 +205,6 @@ export class Document extends QueryableModel {
             }
         } catch (e) {
             console.error(e);
-        }
-    }
-
-    // Rander handlebars template
-    async getRenderedHtml(organization: Organization): Promise<string | null> {
-        const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-        const template = await DocumentTemplate.getByID(this.templateId);
-        if (!template) {
-            return null;
-        }
-
-        return await this.getRenderedHtmlForTemplate(organization, template.html);
-    }
-
-    // Rander handlebars template
-    private async getRenderedHtmlForTemplate(organization: Organization, htmlTemplate: string): Promise<string | null> {
-        try {
-            const platform = await Platform.getSharedStruct();
-            const context = this.buildContext(organization, platform);
-            const renderedHtml = await render(htmlTemplate, context);
-            return renderedHtml;
-        } catch (e) {
-            console.error('Failed to render document html', e);
-            return null;
         }
     }
 }

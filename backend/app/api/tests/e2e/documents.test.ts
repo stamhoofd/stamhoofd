@@ -12,6 +12,7 @@ import { testServer } from '../helpers/TestServer.js';
 import { initAdmin } from '../init/initAdmin.js';
 import { initStripe } from '../init/initStripe.js';
 import { registrationUpdateQueue } from '../../src/services/BalanceItemService.js';
+import { DocumentRenderService } from '../../src/services/DocumentRenderService.js';
 import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 
 const baseUrl = `/members/register`;
@@ -119,7 +120,7 @@ describe('E2E.Documents', () => {
         const document = await Document.select().where('registrationId', registration.id).first(false);
         expect(document).not.toBeNull();
 
-        const html = await document!.getRenderedHtml(organization);
+        const html = await DocumentRenderService.getRenderedHtml(document!, organization);
 
         const registrationModel = (await Registration.getByID(registration.id))!;
 
