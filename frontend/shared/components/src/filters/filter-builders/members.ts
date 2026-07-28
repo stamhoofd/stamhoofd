@@ -77,7 +77,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         recordsConfiguration,
     );
 
-    if (user?.permissions?.platform !== null) {
+    if (user?.permissions?.forPlatform(platform) !== null) {
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: $t('%7D'),
@@ -652,7 +652,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         }
     }
 
-    if (user?.permissions?.platform !== null) {
+    if (user?.permissions?.forPlatform(platform) !== null) {
         const responsibilitiesFilters: typeof all = [];
 
         responsibilitiesFilters.push(
@@ -890,7 +890,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders(): { loading: Ref<
         filterBuilders: computed(() => {
             const platform = $platform.value;
             const user = $user.value;
-            const hasPlatformPermissions = (user?.permissions?.platform !== null);
+            const hasPlatformPermissions = (user?.permissions?.forPlatform(platform) !== null);
 
             const all: UIFilterBuilder[] = [];
             all.push(

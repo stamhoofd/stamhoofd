@@ -1,5 +1,5 @@
 import type { RecipientLoader } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Organization, Payment, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Organization, Payment, Platform, User } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { LimitedFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, EmailRecipient, PaginatedResponse, PaymentMethod } from '@stamhoofd/structures';
@@ -301,12 +301,13 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
     if (subFilter === null) {
         // Use full admins instead
         const admins = await User.getAdmins(allOrganizationIds, { verified: true });
+        const platform = await Platform.getSharedStruct();
         for (const { organizationId, payment } of ids) {
             const organization = organizationMap.get(organizationId);
             if (!organization) {
                 continue;
             }
-            const users = admins.filter(a => a.permissions?.forOrganization(organization)?.hasFullAccess());
+            const users = admins.filter(a => a.permissions?.forOrganization(organization, platform, { inheritTags: false })?.hasFullAccess());
 
             if (users.length === 0) {
                 console.warn('No admins found for organization with id ', organizationId, ' while fetching email recipients for payment with id ', payment.id);

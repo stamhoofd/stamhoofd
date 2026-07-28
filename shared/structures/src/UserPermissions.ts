@@ -8,7 +8,7 @@ import { PermissionLevel } from './PermissionLevel.js';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
-import { Platform } from './Platform.js';
+import type { Platform } from './Platform.js';
 
 export type OrganizationForPermissionCalculation = {
     id: string;
@@ -30,10 +30,6 @@ export class UserPermissions extends AutoEncoder {
     organizationPermissions: Map<string, Permissions> = new Map();
 
     // Current list of groups
-
-    get platform(): LoadedPermissions | null {
-        return this.forPlatform(Platform.shared);
-    }
 
     forPlatform(platform: Platform): LoadedPermissions | null {
         if (!this.globalPermissions) {
@@ -62,10 +58,10 @@ export class UserPermissions extends AutoEncoder {
         return base;
     }
 
-    forOrganization(organization: OrganizationForPermissionCalculation, platform?: Platform | null): LoadedPermissions | null {
+    forOrganization(organization: OrganizationForPermissionCalculation, platform: Platform, options?: { inheritTags?: boolean }): LoadedPermissions | null {
         const base: LoadedPermissions = LoadedPermissions.create({});
 
-        if (platform) {
+        if (options?.inheritTags ?? true) {
             const platformPermissions = this.forPlatform(platform);
 
             if (platformPermissions) {
@@ -80,7 +76,7 @@ export class UserPermissions extends AutoEncoder {
             }
         }
 
-        const specific = this.forWithoutInherit(organization);
+        const specific = this.forWithoutInherit(organization, platform);
 
         if (!specific) {
             if (base.isEmpty) {
@@ -92,14 +88,14 @@ export class UserPermissions extends AutoEncoder {
         return specific;
     }
 
-    forWithoutInherit(organization: OrganizationForPermissionCalculation): LoadedPermissions | null {
+    forWithoutInherit(organization: OrganizationForPermissionCalculation, platform: Platform): LoadedPermissions | null {
         const permissions = this.organizationPermissions.get(organization.id) ?? null;
         if (!permissions) {
             return null;
         }
         const organizationRoles = organization?.privateMeta?.roles ?? [];
         const inheritedResponsibilityRoles = organization?.privateMeta?.inheritedResponsibilityRoles ?? [];
-        const allResponsibilities = [...Platform.shared.config.responsibilities, ...(organization?.privateMeta?.responsibilities ?? [])];
+        const allResponsibilities = [...platform.config.responsibilities, ...(organization?.privateMeta?.responsibilities ?? [])];
 
         // Clone all external data to avoid mutating them because of the removeAccessRights call
         const result = LoadedPermissions.from(permissions.clone(), organizationRoles.map(r => r.clone()), inheritedResponsibilityRoles.map(r => r.clone()), allResponsibilities.map(r => r.clone()));

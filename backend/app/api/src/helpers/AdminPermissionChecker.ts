@@ -794,7 +794,7 @@ export class AdminPermissionChecker {
 
             // Check if this user has permissions for the current scoped organization
             if (this.organization && await this.hasFullAccess(this.organization.id)) {
-                if (user.permissions?.forOrganization(this.organization)) {
+                if (user.permissions?.forOrganization(this.organization, this.platform, { inheritTags: false })) {
                     return true;
                 }
             }

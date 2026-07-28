@@ -1,6 +1,6 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { encodeObject } from '@simonbackx/simple-encoding';
-import { BalanceItem, Document, Group, Member, Organization, Registration, RegistrationInvitation, sendEmailTemplate } from '@stamhoofd/models';
+import { BalanceItem, Document, Group, Member, Organization, Platform, Registration, RegistrationInvitation, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getAppHost, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -150,6 +150,7 @@ export const RegistrationService = {
         }
 
         const allowedEmails = member.details.getNotificationEmails();
+        const platform = await Platform.getSharedStruct();
 
         return member.users.map(user => Recipient.create({
             firstName: user.firstName,
@@ -167,7 +168,7 @@ export const RegistrationService = {
                 }),
                 Replacement.create({
                     token: 'registerUrl',
-                    value: 'https://' + getAppHost('registration', organization, user.permissions?.forOrganization(organization)?.isEmpty === false),
+                    value: 'https://' + getAppHost('registration', organization, user.permissions?.forOrganization(organization, platform, { inheritTags: false })?.isEmpty === false),
                 }),
                 Replacement.create({
                     token: 'groupName',

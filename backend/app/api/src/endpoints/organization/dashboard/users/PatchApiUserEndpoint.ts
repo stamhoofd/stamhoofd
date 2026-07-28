@@ -3,7 +3,7 @@ import { isPatch } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Token, User } from '@stamhoofd/models';
+import { Platform, Token, User } from '@stamhoofd/models';
 import { ApiUser, PermissionLevel, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
@@ -58,10 +58,12 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             if (request.body.permissions) {
+                const platform = await Platform.getSharedStruct();
+
                 if (organization) {
                     editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
 
-                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess())) {
+                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, { inheritTags: false })?.hasFullAccess())) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
@@ -74,7 +76,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                         editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
                     }
 
-                    if (editUser.id === user.id && !editUser.permissions?.platform?.hasFullAccess()) {
+                    if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform)?.hasFullAccess()) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
