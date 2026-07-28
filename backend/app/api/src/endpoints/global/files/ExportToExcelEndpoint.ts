@@ -6,7 +6,7 @@ import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { ArchiverWriterAdapter, exportToExcel, XlsxWriter } from '@stamhoofd/excel-writer';
 import { Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { ExcelExportType, IPaginatedResponse, LimitedFilteredRequest } from '@stamhoofd/structures';
+import type { ExcelExportType, IPaginatedResponse, LimitedFilteredRequest, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, Replacement, Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context.js';
@@ -20,7 +20,12 @@ type ResponseBody = ExcelExportResponse;
 
 type ExcelExporter<T> = {
     fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>;
-    sheets: XlsxTransformerSheet<T, unknown>[];
+
+    /**
+     * The sheet definitions depend on the platform: they are built per export request instead of
+     * once at module load, so the callbacks never have to read a process wide platform singleton.
+     */
+    getSheets(platform: PlatformStruct): XlsxTransformerSheet<T, unknown>[];
 };
 
 export const limiter = new RateLimiter({
@@ -146,6 +151,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 // Estimate how long it will take.
                 // If too long, we'll schedule it and write it to Digitalocean Spaces
                 // Otherwise we'll just return the file directly
+                const platform = await Platform.getSharedStruct();
                 const { file, stream } = await FileCache.getWriteStream('.xlsx');
 
                 const zipWriterAdapter = new ArchiverWriterAdapter(stream);
@@ -155,7 +161,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 request.filter.limit = STAMHOOFD.environment === 'development' ? 1000 : 100; // in development, we need to check if total count matches and pagination is working correctly
 
                 await exportToExcel({
-                    definitions: loader.sheets,
+                    definitions: loader.getSheets(platform),
                     writer,
                     dataGenerator: fetchToAsyncIterator(request.filter, loader, { signFiles: true }),
                     filter: request.workbookFilter,

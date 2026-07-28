@@ -1,7 +1,7 @@
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { EmergencyContact, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily } from '@stamhoofd/structures';
-import { baseMemberColumns } from './members.js';
+import { getBaseMemberColumns } from './members.js';
 
 describe('Member excel export', () => {
     describe('emergencyContacts column', () => {
@@ -21,7 +21,7 @@ describe('Member excel export', () => {
         }
 
         function getColumn() {
-            const column = baseMemberColumns.find(c => 'id' in c && c.id === 'emergencyContacts') as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
+            const column = getBaseMemberColumns(Platform.create({})).find(c => 'id' in c && c.id === 'emergencyContacts') as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
 
             if (!column) {
                 throw new Error('Column emergencyContacts not found');

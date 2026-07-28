@@ -19,7 +19,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.ReceivableBalances, {
             ...data,
         });
     },
-    sheets: [
+    getSheets: () => [
         {
             id: 'receivableBalances',
             name: $t(`%99`),
