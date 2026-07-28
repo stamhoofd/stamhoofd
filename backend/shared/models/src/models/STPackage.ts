@@ -1,12 +1,9 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageStatusServiceFee, STPackageType, STPricingType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { STPackageMeta, STPackageStatus, STPackageStatusServiceFee, STPackageType, STPricingType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { Organization } from './Organization.js';
 
 export class STPackage extends QueryableModel {
     static table = 'stamhoofd_packages';
@@ -194,112 +191,6 @@ export class STPackage extends QueryableModel {
                         : (this.validUntil ?? this.removeAt),
                 },
                 )],
-        });
-    }
-
-    async sendExpiryEmail() {
-        if (this.validAt === null) {
-            // never activated
-            return;
-        }
-
-        if (this.removeAt && this.removeAt <= new Date()) {
-            this.emailCount += 1;
-            await this.save();
-            return;
-        }
-
-        let allowDays = 0;
-        let type: EmailTemplateType | null = null;
-
-        if (this.meta.type === STPackageType.Members) {
-            type = EmailTemplateType.MembersExpirationReminder;
-            allowDays = 32;
-        } else if (this.meta.type === STPackageType.Webshops) {
-            type = EmailTemplateType.WebshopsExpirationReminder;
-            allowDays = 32;
-        } else if (this.meta.type === STPackageType.SingleWebshop) {
-            type = EmailTemplateType.SingleWebshopExpirationReminder;
-            allowDays = 7;
-        } else if (this.meta.type === STPackageType.TrialMembers) {
-            type = EmailTemplateType.TrialMembersExpirationReminder;
-            allowDays = 3;
-        } else if (this.meta.type === STPackageType.TrialWebshops) {
-            type = EmailTemplateType.TrialWebshopsExpirationReminder;
-            allowDays = 3;
-        }
-
-        const allowFrom = new Date(Date.now() + 1000 * 60 * 60 * 24 * allowDays);
-        if (type && (this.validUntil === null || this.validUntil < new Date() || this.validUntil > allowFrom)) {
-            console.log('Skip sending expiration email for ' + this.id);
-            return;
-        }
-
-        if (type) {
-            console.log('Sending expiration email for ' + this.id, type);
-            if (STAMHOOFD.environment === 'production') {
-                await this.sendEmailTemplate({
-                    type,
-                });
-            }
-            this.lastEmailAt = new Date();
-        } else {
-            console.log('Skip sending expiration email for ' + this.id + ' (no type)');
-        }
-
-        this.emailCount += 1;
-        await this.save();
-    }
-
-    async sendEmailTemplate(data: {
-        type: EmailTemplateType;
-        replyTo?: string;
-    }) {
-        const organization = await Organization.getByID(this.organizationId);
-
-        if (!organization) {
-            console.error('Could not find package organization ' + this.id);
-            return;
-        }
-
-        const admins = await organization.getFullAdmins();
-
-        const recipients = admins.map(admin =>
-            Recipient.create({
-                firstName: admin.firstName,
-                lastName: admin.lastName,
-                email: admin.email,
-                replacements: [
-                    Replacement.create({
-                        token: 'organizationName',
-                        value: organization.name,
-                    }),
-                    Replacement.create({
-                        token: 'packageName',
-                        value: this.meta.name ?? '',
-                    }),
-                    Replacement.create({
-                        token: 'validUntil',
-                        value: this.validUntil ? Formatter.dateTime(this.validUntil) : 'nooit',
-                    }),
-                    Replacement.create({
-                        token: 'validUntilDate',
-                        value: this.validUntil ? Formatter.date(this.validUntil) : 'nooit',
-                    }),
-                    Replacement.create({
-                        token: 'renewUrl',
-                        value: `https://${(STAMHOOFD.domains.dashboard ?? 'stamhoofd.app')}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`,
-                    }),
-                ],
-            }),
-        );
-
-        // Create e-mail builder
-        await sendEmailTemplate(null, {
-            template: {
-                type: data.type,
-            },
-            recipients,
         });
     }
 }

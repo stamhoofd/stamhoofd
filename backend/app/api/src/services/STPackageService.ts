@@ -1,7 +1,7 @@
-import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
+import { BalanceItem, Organization, Platform, sendEmailTemplate, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPricingTypeName, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
 
@@ -261,6 +261,122 @@ export class STPackageService {
             await pack.save();
         }
         await this.updateOrganizationPackages(organizationId);
+    }
+
+    /**
+     * Send the expiration reminder of a package if one is due, and record on the package that it was
+     * sent (also when nothing was sent, so a package is only ever considered once).
+     *
+     * Composing the reminder needs the administrators of the organization, and those are filtered
+     * with the platform. Models have no request context to resolve the platform they belong to, so
+     * this lives here instead of on STPackage.
+     */
+    static async sendExpiryEmail(pack: STPackage) {
+        if (pack.validAt === null) {
+            // never activated
+            return;
+        }
+
+        if (pack.removeAt && pack.removeAt <= new Date()) {
+            pack.emailCount += 1;
+            await pack.save();
+            return;
+        }
+
+        let allowDays = 0;
+        let type: EmailTemplateType | null = null;
+
+        if (pack.meta.type === STPackageType.Members) {
+            type = EmailTemplateType.MembersExpirationReminder;
+            allowDays = 32;
+        } else if (pack.meta.type === STPackageType.Webshops) {
+            type = EmailTemplateType.WebshopsExpirationReminder;
+            allowDays = 32;
+        } else if (pack.meta.type === STPackageType.SingleWebshop) {
+            type = EmailTemplateType.SingleWebshopExpirationReminder;
+            allowDays = 7;
+        } else if (pack.meta.type === STPackageType.TrialMembers) {
+            type = EmailTemplateType.TrialMembersExpirationReminder;
+            allowDays = 3;
+        } else if (pack.meta.type === STPackageType.TrialWebshops) {
+            type = EmailTemplateType.TrialWebshopsExpirationReminder;
+            allowDays = 3;
+        }
+
+        const allowFrom = new Date(Date.now() + 1000 * 60 * 60 * 24 * allowDays);
+        if (type && (pack.validUntil === null || pack.validUntil < new Date() || pack.validUntil > allowFrom)) {
+            console.log('Skip sending expiration email for ' + pack.id);
+            return;
+        }
+
+        if (type) {
+            console.log('Sending expiration email for ' + pack.id, type);
+            if (STAMHOOFD.environment === 'production') {
+                await this.sendEmailTemplate(pack, {
+                    type,
+                });
+            }
+            pack.lastEmailAt = new Date();
+        } else {
+            console.log('Skip sending expiration email for ' + pack.id + ' (no type)');
+        }
+
+        pack.emailCount += 1;
+        await pack.save();
+    }
+
+    /**
+     * Send an email template about a package to the full administrators of its organization.
+     */
+    static async sendEmailTemplate(pack: STPackage, data: {
+        type: EmailTemplateType;
+    }) {
+        const organization = await Organization.getByID(pack.organizationId);
+
+        if (!organization) {
+            console.error('Could not find package organization ' + pack.id);
+            return;
+        }
+
+        const admins = await organization.getFullAdmins();
+
+        const recipients = admins.map(admin =>
+            Recipient.create({
+                firstName: admin.firstName,
+                lastName: admin.lastName,
+                email: admin.email,
+                replacements: [
+                    Replacement.create({
+                        token: 'organizationName',
+                        value: organization.name,
+                    }),
+                    Replacement.create({
+                        token: 'packageName',
+                        value: pack.meta.name ?? '',
+                    }),
+                    Replacement.create({
+                        token: 'validUntil',
+                        value: pack.validUntil ? Formatter.dateTime(pack.validUntil) : 'nooit',
+                    }),
+                    Replacement.create({
+                        token: 'validUntilDate',
+                        value: pack.validUntil ? Formatter.date(pack.validUntil) : 'nooit',
+                    }),
+                    Replacement.create({
+                        token: 'renewUrl',
+                        value: `https://${(STAMHOOFD.domains.dashboard ?? 'stamhoofd.app')}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`,
+                    }),
+                ],
+            }),
+        );
+
+        // Create e-mail builder
+        await sendEmailTemplate(null, {
+            template: {
+                type: data.type,
+            },
+            recipients,
+        });
     }
 
     static async markBalanceRestored(organizationId: string) {
