@@ -58,10 +58,13 @@ export class UserPermissions extends AutoEncoder {
         return base;
     }
 
-    forOrganization(organization: OrganizationForPermissionCalculation, platform: Platform, options?: { inheritTags?: boolean }): LoadedPermissions | null {
+    /**
+     * @param options.inheritFromPlatform Whether the permissions this user was granted at the platform level, and that apply to this organization, are included in the result. Defaults to true. Set to false to only take the permissions that were granted for this organization itself into account.
+     */
+    forOrganization(organization: OrganizationForPermissionCalculation, platform: Platform, options?: { inheritFromPlatform?: boolean }): LoadedPermissions | null {
         const base: LoadedPermissions = LoadedPermissions.create({});
 
-        if (options?.inheritTags ?? true) {
+        if (options?.inheritFromPlatform ?? true) {
             const platformPermissions = this.forPlatform(platform);
 
             if (platformPermissions) {
