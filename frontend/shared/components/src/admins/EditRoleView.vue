@@ -197,7 +197,7 @@
             </button>
         </div>
 
-        <template v-if="!isNew && !responsibility">
+        <template v-if="!isNew && !isForResponsibility">
             <hr><h2>{{ $t('%ZD') }}</h2>
 
             <Spinner v-if="loading" />
@@ -250,10 +250,10 @@ const deleting = ref(false);
 const props = withDefaults(
     defineProps<{
         role: PermissionRoleDetailed | PermissionRoleForResponsibility;
-        inheritedRoles: (PermissionRoleDetailed | PermissionRoleForResponsibility)[];
+        inheritedRoles?: (PermissionRoleDetailed | PermissionRoleForResponsibility)[];
         isNew: boolean;
         saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) => Promise<void>;
-        deleteHandler: (() => Promise<void>) | null;
+        deleteHandler?: (() => Promise<void>) | null;
         scope?: 'organization' | 'admin' | null;
     }>(), {
         scope: null,
