@@ -5,6 +5,7 @@ import type { EmailPreview } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context.js';
+import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -51,6 +52,6 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             throw Context.auth.error();
         }
 
-        return new Response(await model.getPreviewStructure({ allLanguages: true }));
+        return new Response(await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }));
     }
 }

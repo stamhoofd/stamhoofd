@@ -8,6 +8,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context.js';
+import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -211,6 +212,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             await model.queueForSending();
         }
 
-        return new Response(await model.getPreviewStructure({ allLanguages: true }));
+        return new Response(await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }));
     }
 }
