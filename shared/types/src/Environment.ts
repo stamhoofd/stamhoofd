@@ -228,6 +228,15 @@ export type RendererEnvironment = {
 /**
  * The environment that is available everywhere: frontend, backend and shared
  */
+export type ObjectStorageConfig = {
+    readonly endpoint: string;
+    readonly bucket: string;
+    readonly key: string;
+    readonly secret: string;
+    readonly region?: string;
+    readonly prefix?: string;
+};
+
 export type BackupEnvironment = {
     /**
      * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
@@ -252,6 +261,14 @@ export type BackupEnvironment = {
     readonly SPACES_SECRET: string;
     readonly AWS_REGION: 'eu-west-1' | string; // TODO: add others
     readonly MINIMUM_BACKUP_SIZE?: number; // Expected size (in bytes) of database backup, to detect broken backups
+
+    readonly fileSync?: {
+        readonly source: ObjectStorageConfig;
+        readonly replica: ObjectStorageConfig;
+        readonly fullReverifyDays?: number;
+        readonly startDate?: string;
+        readonly maxNewMissingFilesPerRun?: number;
+    };
 
     readonly IS_REPLICA?: boolean; // Whether this is a replica server and health checks should also check replica health
 

@@ -58,7 +58,10 @@ export function publicBucketPolicy(bucket: string): string {
                 Effect: 'Allow',
                 Principal: '*',
                 Action: 's3:GetObject',
-                Resource: `arn:aws:s3:::${bucket}/development/p/*`,
+                Resource: [
+                    `arn:aws:s3:::${bucket}/development/p/*`,
+                    `arn:aws:s3:::${bucket}/development/d/*/p/*`,
+                ],
             },
         ],
     });

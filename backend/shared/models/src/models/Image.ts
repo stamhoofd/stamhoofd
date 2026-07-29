@@ -5,6 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { ResolutionRequest } from '@stamhoofd/structures';
 import { File, Resolution } from '@stamhoofd/structures';
+import { buildObjectKey, buildStoragePrefix } from '@stamhoofd/object-storage';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -101,22 +102,11 @@ export class Image extends QueryableModel {
 
         const client = this.getS3Client();
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
-        if (prefix.length > 0) {
-            prefix += '/';
-        }
-
-        prefix += (STAMHOOFD.environment ?? 'development') === 'development' ? ('development/') : ('');
-
-        // Prepend user id to the file path
-        if (isPrivateFile && user) {
-            // Private files
-            prefix += 'users/' + user.id + '/';
-        }
-        else {
-            // Public files
-            prefix += 'p/';
-        }
+        const root = buildStoragePrefix({
+            spacesPrefix: STAMHOOFD.SPACES_PREFIX,
+            environment: STAMHOOFD.environment ?? 'development',
+        });
+        const uploadedAt = new Date();
 
         const uploadPromises: Promise<any>[] = [];
         const image = new Image();
@@ -125,7 +115,14 @@ export class Image extends QueryableModel {
         for (const f of files) {
             const fileId = uuidv4();
 
-            const key = prefix + image.id + '/' + fileId + (!supportsTransparency ? '.jpg' : '.png');
+            const key = buildObjectKey({
+                root,
+                date: uploadedAt,
+                isPrivate: isPrivateFile,
+                userId: user?.id,
+                fileId: image.id,
+                filename: fileId + (!supportsTransparency ? '.jpg' : '.png'),
+            });
             const cmd = new PutObjectCommand({
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,
@@ -168,7 +165,14 @@ export class Image extends QueryableModel {
         // Also include the source, in private mode
         const fileId = uuidv4();
         const uploadExt = fileType;
-        const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + image.id + '/' + fileId + '.' + uploadExt;
+        const key = buildObjectKey({
+            root,
+            date: uploadedAt,
+            isPrivate: isPrivateFile,
+            userId: user?.id,
+            fileId: image.id,
+            filename: fileId + '.' + uploadExt,
+        });
         image.source = new File({
             id: fileId,
             server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,

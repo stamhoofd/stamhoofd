@@ -4,6 +4,7 @@ import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
 import { File, getPeppolCategoryCode, getVATExcemptInvoiceNote, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
+import { buildObjectKey, buildStoragePrefix } from '@stamhoofd/object-storage';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { InvoicePdfService } from './InvoicePdfService.js';
@@ -347,18 +348,17 @@ export class InvoiceXMlService {
     static async uploadXml(invoice: Invoice, fileContent: Buffer) {
         const fileId = uuidv4();
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
-        if (prefix.length > 0) {
-            prefix += '/';
-        }
-
-        const envPrefix = STAMHOOFD.environment !== 'production' ? STAMHOOFD.environment : null;
-
-        if (envPrefix && envPrefix !== (STAMHOOFD.SPACES_PREFIX ?? '')) {
-            prefix += envPrefix + '/';
-        }
-
-        const key = prefix + 'invoices/' + fileId + '.xml';
+        const key = buildObjectKey({
+            root: buildStoragePrefix({
+                spacesPrefix: STAMHOOFD.SPACES_PREFIX,
+                environment: STAMHOOFD.environment,
+            }),
+            date: new Date(),
+            isPrivate: true,
+            userId: invoice.organizationId,
+            fileId,
+            filename: `${fileId}.xml`,
+        });
 
         const fileStruct = new File({
             id: fileId,

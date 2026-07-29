@@ -1,6 +1,7 @@
 import { registerCron } from '@stamhoofd/crons';
 import { backup, backupBinlogs, cleanBackups, cleanBinaryLogBackups } from './helpers/backup.js';
 import { Formatter } from '@stamhoofd/utility';
+import { scheduleFileSync } from './helpers/file-sync.js';
 
 let lastFullBackup: Date | null = null;
 const backupStartTime = '02:00';
@@ -44,7 +45,20 @@ async function clean() {
     }
 }
 
+let lastFileSync = new Date(0);
+const fileSyncInterval = 1000 * 60 * 60;
+
+async function syncFiles() {
+    const now = new Date();
+    if (now.getTime() - lastFileSync.getTime() < fileSyncInterval) {
+        return;
+    }
+    await scheduleFileSync();
+    lastFileSync = now;
+}
+
 registerCron('createBackups', createBackups);
 registerCron('backupBinLogs', backupBinLogs);
 
 registerCron('clean', clean);
+registerCron('fileSync', syncFiles);

@@ -6,6 +6,7 @@ import { Image, InvoicedBalanceItem, Organization, Payment, Platform } from '@st
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import type { Address } from '@stamhoofd/structures';
 import { CountryHelper, File, getVATExcemptInvoiceNote, getVATExcemptReasonName, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from '@stamhoofd/structures';
+import { buildObjectKey, buildStoragePrefix } from '@stamhoofd/object-storage';
 import { Formatter } from '@stamhoofd/utility';
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
@@ -160,18 +161,17 @@ export class InvoicePdfService {
     static async uploadPdf(invoice: Invoice, fileContent: Buffer) {
         const fileId = uuidv4();
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
-        if (prefix.length > 0) {
-            prefix += '/';
-        }
-
-        const envPrefix = STAMHOOFD.environment !== 'production' ? STAMHOOFD.environment : null;
-
-        if (envPrefix && envPrefix !== (STAMHOOFD.SPACES_PREFIX ?? '')) {
-            prefix += envPrefix + '/';
-        }
-
-        const key = prefix + 'invoices/' + fileId + '.pdf';
+        const key = buildObjectKey({
+            root: buildStoragePrefix({
+                spacesPrefix: STAMHOOFD.SPACES_PREFIX,
+                environment: STAMHOOFD.environment,
+            }),
+            date: new Date(),
+            isPrivate: true,
+            userId: invoice.organizationId,
+            fileId,
+            filename: `${fileId}.pdf`,
+        });
 
         const fileStruct = new File({
             id: fileId,

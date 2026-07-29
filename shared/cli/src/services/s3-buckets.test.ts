@@ -70,7 +70,10 @@ describe('setupDevelopmentS3Buckets', () => {
                 Effect: 'Allow',
                 Principal: '*',
                 Action: 's3:GetObject',
-                Resource: 'arn:aws:s3:::example/development/p/*',
+                Resource: [
+                    'arn:aws:s3:::example/development/p/*',
+                    'arn:aws:s3:::example/development/d/*/p/*',
+                ],
             },
         ]);
     });
