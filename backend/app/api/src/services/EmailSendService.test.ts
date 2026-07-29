@@ -1,13 +1,9 @@
 import type { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { BalanceItemType, EmailRecipientFilter, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
-import { Email } from './Email.js';
-import { EmailRecipient } from './EmailRecipient.js';
 import { EmailMocker } from '@stamhoofd/email';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { OrganizationFactory } from '../factories/OrganizationFactory.js';
-import { Platform } from './Platform.js';
-import { BalanceItemFactory, MemberFactory, UserFactory } from '../factories/index.js';
-import { CachedBalance } from './CachedBalance.js';
+import { BalanceItemFactory, CachedBalance, Email, EmailRecipient, MemberFactory, OrganizationFactory, Platform, UserFactory } from '@stamhoofd/models';
+import { EmailSendService } from './EmailSendService.js';
 import { Formatter } from '@stamhoofd/utility';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
@@ -99,7 +95,7 @@ async function buildFailEmail(data: {
     return model;
 }
 
-describe('Model.Email', () => {
+describe('EmailSendService', () => {
     it('Correctly whitelists email recipients', async () => {
         TestUtils.setEnvironment('WHITELISTED_EMAIL_DESTINATIONS', ['*@stamhoofd-allowed-domain-tests.be']);
         const model = await buildEmail({
@@ -116,7 +112,7 @@ describe('Model.Email', () => {
                 }),
             ],
         });
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -172,7 +168,7 @@ describe('Model.Email', () => {
         // It should automatically retry to send the email
         EmailMocker.broadcast.failNext(new Error('This is a simulated network error'));
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -219,7 +215,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await expect(model.queueForSending(true)).rejects.toThrow();
+        await expect(EmailSendService.queueForSending(model, true)).rejects.toThrow();
         await model.refresh();
 
         // Check if it was sent correctly
@@ -263,7 +259,7 @@ describe('Model.Email', () => {
         EmailMocker.broadcast.failNext(new Error('This is a simulated network error 5'));
         EmailMocker.broadcast.failNext(new Error('This is a simulated network error 6'));
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -313,7 +309,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -353,7 +349,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -395,7 +391,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -444,7 +440,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -491,7 +487,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -535,7 +531,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -584,7 +580,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -635,7 +631,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.queueForSending(true);
+        await EmailSendService.queueForSending(model, true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -687,7 +683,7 @@ describe('Model.Email', () => {
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
-            await model.queueForSending(true);
+            await EmailSendService.queueForSending(model, true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -744,7 +740,7 @@ describe('Model.Email', () => {
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
-            await model.queueForSending(true);
+            await EmailSendService.queueForSending(model, true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -803,7 +799,7 @@ describe('Model.Email', () => {
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
-            await model.queueForSending(true);
+            await EmailSendService.queueForSending(model, true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -854,7 +850,7 @@ describe('Model.Email', () => {
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
-            await model.queueForSending(true);
+            await EmailSendService.queueForSending(model, true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -916,7 +912,7 @@ describe('Model.Email', () => {
                     emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
                 });
 
-                await model.queueForSending(true);
+                await EmailSendService.queueForSending(model, true);
                 await model.refresh();
 
                 // Check if it was sent correctly
@@ -977,7 +973,7 @@ describe('Model.Email', () => {
                     emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
                 });
 
-                await model.queueForSending(true);
+                await EmailSendService.queueForSending(model, true);
                 await model.refresh();
 
                 // Check if it was sent correctly
@@ -1038,7 +1034,7 @@ describe('Model.Email', () => {
                     emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
                 });
 
-                await model.queueForSending(true);
+                await EmailSendService.queueForSending(model, true);
                 await model.refresh();
 
                 // Check if it was sent correctly
@@ -1051,7 +1047,7 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch(
-                    $t('%1EB', { email: existingUser.email }),
+                    $t('%1EB', { email: `<strong>${Formatter.escapeHtml(existingUser.email)}</strong>` }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EB', { email: existingUser.email }),
@@ -1083,7 +1079,7 @@ describe('Model.Email', () => {
                     emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
                 });
 
-                await model.queueForSending(true);
+                await EmailSendService.queueForSending(model, true);
                 await model.refresh();
 
                 // Check if it was sent correctly
@@ -1096,7 +1092,7 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch(
-                    $t('%1EB', { email: 'unknown@example.com' }),
+                    $t('%1EB', { email: '<strong>unknown@example.com</strong>' }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EB', { email: 'unknown@example.com' }),
@@ -1133,7 +1129,7 @@ describe('Model.Email', () => {
                     emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
                 });
 
-                await model.queueForSending(true);
+                await EmailSendService.queueForSending(model, true);
                 await model.refresh();
 
                 // Check if it was sent correctly
@@ -1146,7 +1142,7 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch(
-                    $t('%1EA', { email: existingUser.email }),
+                    $t('%1EA', { email: `<strong>${Formatter.escapeHtml(existingUser.email)}</strong>` }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EA', { email: existingUser.email }),
@@ -1192,7 +1188,7 @@ describe('Model.Email', () => {
                     emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
                 });
 
-                await model.queueForSending(true);
+                await EmailSendService.queueForSending(model, true);
                 await model.refresh();
 
                 // Check if it was sent correctly

@@ -6,6 +6,7 @@ import type { OrganizationEmail, StamhoofdFilter } from '@stamhoofd/structures';
 import { EmailRecipientFilter, EmailRecipientSubfilter, EmailTemplateType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
+import { EmailSendService } from '../services/EmailSendService.js';
 
 registerCron('balanceEmails', balanceEmails);
 
@@ -201,7 +202,7 @@ async function sendTemplate({
 
     try {
         const upToDate = await ContextInstance.startForUser(systemUser, organization, async () => {
-            return await model.queueForSending(true);
+            return await EmailSendService.queueForSending(model, true);
         });
 
         if (!upToDate) {

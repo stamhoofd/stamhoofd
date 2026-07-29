@@ -6,6 +6,7 @@ import { EmailStatus, PermissionLevel } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context.js';
+import { EmailSendService } from '../../../services/EmailSendService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -76,7 +77,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         // Retry
-        await model.resumeSending(emailRecipient.id);
+        await EmailSendService.resumeSending(model, emailRecipient.id);
 
         await emailRecipient.refresh();
 
