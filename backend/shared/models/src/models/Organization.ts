@@ -927,7 +927,7 @@ export class Organization extends QueryableModel {
      * These email addresess are private
      */
     async getFinanceAdminRecipients(): Promise<Recipient[]> {
-        const filtered = await this.getFullAdmins();
+        const filtered = await this.getFinanceAdmins();
         return this.adminsToRecipients(filtered);
     }
 
