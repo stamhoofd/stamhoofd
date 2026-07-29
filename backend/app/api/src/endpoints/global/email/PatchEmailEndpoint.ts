@@ -197,7 +197,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         await model.save();
 
         if (rebuild) {
-            await model.buildExampleRecipient();
+            await EmailSendService.buildExampleRecipient(model);
             await model.updateCount();
         }
 
