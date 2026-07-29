@@ -190,6 +190,121 @@ The keys of the translations are uuids. A new translation can be added by writin
 
 - `I18NUUID_DEFAULT_LOCALE`: default locale (e.g. nl)
 
+# Self hosting
+
+When self hosting the software, we recommend setting correct Content-Security-Policy header(s) to avoid XSS and other type of attacks when untrusted users are allowed to edit WYSIWYG content. By default Stamhoofd already adds CSP meta tags in HTML, but these might not cover all attacks.
+
+For frontend app content (index.html), you'll need to set a nonce. Example for Caddy (JSON) config. 
+
+```
+const cspNoncePlaceholder = 'STAMHOOFD_CSP_NONCE';
+const cspNonceSubRoute = {
+    handler: 'subroute',
+    routes: [
+        // Allow javascript only with nonces on resources
+        {
+            match: [
+                {
+                    not: [
+                        {
+                            path: [
+                                ...resourcesPathMatchers,
+                            ],
+                        },
+                    ],
+                },
+            ],
+            handle: [
+                {
+                    handler: 'headers',
+                    response: {
+                        set: {
+                            'Content-Security-Policy': [
+                                `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; object-src 'none'; base-uri 'none'; form-action 'self'`,
+                            ],
+                        },
+                    },
+                },
+                {
+                    // Replace the build-time placeholder with the same per-request nonce used
+                    // in the header above. Placeholders are supported in replace_response's
+                    // literal `replace` field (but not in regexes).
+                    handler: 'replace_response',
+                    replacements: [
+                        {
+                            search: cspNoncePlaceholder,
+                            replace: '{http.request.uuid}',
+                        },
+                    ],
+                },
+            ],
+            terminal: false,
+        },
+
+        // Disallow javascript on resources, just in case something is wrong with the matching or when a .html, xml or svg file was uploaded as a resource
+            {
+            match: [
+                {
+                    path: [
+                        ...resourcesPathMatchers,
+                    ],
+                },
+            ],
+            handle: [
+                {
+                    handler: 'headers',
+                    response: {
+                        set: {
+                            'Content-Security-Policy': [
+                                `sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,
+                            ],
+                        },
+                    },
+                },
+            ],
+            terminal: false,
+        },
+    ],
+};
+```
+As an extra protection you can add 2 Content-Security-Policy headers if you are not using the (trusted) code injection feature on webshops. 
+
+```
+const cspNoExternalScripts = {
+    handler: 'subroute',
+    routes: [
+        {
+            match: [
+                {
+                    not: [
+                        {
+                            path: [
+                                // these already have been sandboxed
+                                ...resourcesPathMatchers,
+                            ],
+                        },
+                    ],
+                },
+            ],
+            handle: [
+                {
+                    handler: 'headers',
+                    response: {
+                        add: {
+                            'Content-Security-Policy': [
+                                // Still allow the nonce, but only top-level (all other scripts without nonce should be 'self')
+                                `script-src 'self' 'nonce-{http.request.uuid}'`,
+                            ],
+                        },
+                    },
+                },
+            ],
+            terminal: false,
+        },
+    ],
+};
+```
+
 # License
 
 Stamhoofd may be used freely by non-profits, as outlined in the license in [LICENSE.md](LICENSE.md).

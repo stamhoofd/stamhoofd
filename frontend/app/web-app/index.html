@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
     <!--IMPORT_ENV-->
     <!-- Extend CSP with EXTRA requirements on top of those defined by the backend (nonces, but strict dynamic) + extra defence in case something goes wrong on the backend side that prevents adding the headers -->
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-VIk1o3f2bapH5ABEJtUIWsy6JHXIa7RE7ZJjqpndrBg='" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-VIk1o3f2bapH5ABEJtUIWsy6JHXIa7RE7ZJjqpndrBg='; object-src 'none'; base-uri 'none'; form-action 'self'" />
 </head>
 
 <body class="modern">
