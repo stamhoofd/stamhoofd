@@ -157,7 +157,7 @@ describe('Endpoint.getAdminEmails', () => {
         expect(unsubscribeUrlReplacement!.value).toMatch(/^https:\/\//); // Should still be a valid URL
         expect(unsubscribeUrlReplacement!.value).not.toContain('secret-token-12345'); // Original sensitive token should be gone
 
-        // This tests that Email.getStructureForUser properly handles sensitive data by:
+        // This tests that EmailPreviewService.getStructureForUser properly handles sensitive data by:
         // 1. Removing original sensitive replacements from other users' data
         // 2. Creating fresh, appropriate replacements for the current viewer
         // 3. Ensuring web safety of all replacement values

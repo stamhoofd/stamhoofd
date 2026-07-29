@@ -9,6 +9,7 @@ import { Email, Platform } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';
+import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 import { emailFilterCompilers } from '../../../sql-filters/emails.js';
 import { emailSorters } from '../../../sql-sorters/emails.js';
 
@@ -158,7 +159,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
         }
 
         return new PaginatedResponse<EmailPreview[], LimitedFilteredRequest>({
-            results: await Promise.all(emails.map(email => email.getPreviewStructure({ allLanguages: true }))),
+            results: await Promise.all(emails.map(email => EmailPreviewService.getPreviewStructure(email, { allLanguages: true }))),
             next,
         });
     }

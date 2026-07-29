@@ -7,6 +7,7 @@ import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct
 
 import { Context } from '../../../helpers/Context.js';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -162,6 +163,6 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await duplicate.save();
         }
 
-        return new Response(await model.getPreviewStructure({ allLanguages: true }));
+        return new Response(await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }));
     }
 }
