@@ -17,10 +17,10 @@
             <p v-else-if="recordFileAnswer" class="style-definition-text">
                 <span v-if="!recordFileAnswer.file">{{ $t('%Rs') }}</span>
                 <template v-else>
-                    <a :href="recordFileAnswer.file?.getPublicPath()" target="_blank" class="button text">
+                    <button type="button" class="button text" @click="download(recordFileAnswer.file)">
                         <span class="icon download" />
                         <span>{{ recordFileAnswer.file.name }}</span>
-                    </a>
+                    </button>
                 </template>
             </p>
             <p v-else v-copyable class="style-definition-text pre-wrap style-copyable" v-text="answer.stringValue" />
@@ -67,10 +67,12 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import type { ObjectWithRecords, RecordCategory} from '@stamhoofd/structures';
+import type { File, ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
 import { PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '#context/appContext.ts';
+import { downloadFile } from '../../helpers/downloadFile.ts';
+import { Toast } from '../../overlays/Toast';
 
 const props = withDefaults(
     defineProps<{
@@ -118,5 +120,12 @@ const childCategories = computed(() => {
 const isAllCheckboxAnswers = computed(() => {
     return recordsWithAnswers.value.every(({ recordCheckboxAnswer }) => recordCheckboxAnswer);
 });
+
+// A file of an answer is uploaded by a member, so we download it instead of sending anyone to its url
+function download(file: File) {
+    downloadFile(file.getPublicPath(), file.name ?? $t('Bestand')).catch((e) => {
+        Toast.fromError(e).show();
+    });
+}
 
 </script>

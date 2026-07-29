@@ -4,7 +4,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { ResolutionRequest } from '@stamhoofd/structures';
-import { File, Resolution } from '@stamhoofd/structures';
+import { File, Resolution, supportedImageTypes } from '@stamhoofd/structures';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -51,20 +51,14 @@ export class Image extends QueryableModel {
             });
         }
 
-        let fileType = 'png';
-        if (type == 'image/jpeg' || type == 'image/jpg') {
-            fileType = 'jpg';
-        }
-        if (type == 'image/webp') {
-            fileType = 'webp';
-        }
-        if (type === 'image/svg+xml' || type === 'image/svg') {
-            fileType = 'svg';
-        }
+        // Fall back to png for content types we don't recognize: sharp detects the real format itself, so
+        // this only decides how we store the file
+        const imageType = (type ? supportedImageTypes.resolveUpload({ contentType: type }) : null) ?? { contentType: 'image/png', extension: 'png' };
+        const fileType = imageType.extension;
 
         console.log('creating image', fileType, type, resolutions);
 
-        const supportsTransparency = fileType == 'png' || fileType == 'svg' || fileType == 'webp';
+        const supportsTransparency = fileType !== 'jpg';
         const promises: Promise<{ data: Buffer;info: sharp.OutputInfo }>[] = [];
 
         if (resolutions.length) {
@@ -78,7 +72,7 @@ export class Image extends QueryableModel {
                     width: r.width ?? undefined,
                     height: r.height ?? undefined,
                     fit: r.fit,
-                    withoutEnlargement: type !== 'image/svg+xml',
+                    withoutEnlargement: fileType !== 'svg',
                 };
 
                 let t = sharpStream.resize(size);
@@ -181,7 +175,10 @@ export class Image extends QueryableModel {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
             Body: fileContent,
-            ContentType: type ?? 'image/jpeg',
+            // Never store the content type reported by the uploader: this is the only file we store
+            // unaltered, so it should never be rendered by a browser
+            ContentType: imageType.contentType,
+            ContentDisposition: 'attachment',
             ACL: 'private',
         });
         uploadPromises.push(client.send(cmd));

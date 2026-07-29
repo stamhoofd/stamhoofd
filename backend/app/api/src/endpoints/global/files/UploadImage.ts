@@ -4,7 +4,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Image, RateLimiter } from '@stamhoofd/models';
-import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';
+import { Image as ImageStruct, ResolutionRequest, supportedImageTypes } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
 
@@ -131,8 +131,27 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             });
         });
 
-        const fileContent = await fs.readFile(file.filepath);
-        const image = await Image.create(fileContent, file.mimetype ?? undefined, resolutions, request.query.isPrivate, user);
-        return new Response(ImageStruct.create(image));
+        try {
+            // Never trust the content type of the uploader: it decides how we store the image, so only accept
+            // the image types we know we can generate our resolutions from.
+            const imageType = supportedImageTypes.resolveUpload({ contentType: file.mimetype, filename: file.originalFilename });
+
+            if (!imageType) {
+                throw new SimpleError({
+                    code: 'invalid_file_type',
+                    message: 'Unsupported image type ' + (file.mimetype ?? 'unknown') + ' for file ' + (file.originalFilename ?? 'unknown'),
+                    human: $t('Dit soort afbeelding kan je niet opladen.'),
+                    field: 'file',
+                    statusCode: 400,
+                });
+            }
+
+            const fileContent = await fs.readFile(file.filepath);
+            const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user);
+            return new Response(ImageStruct.create(image));
+        } finally {
+            // Formidable wrote the upload to a temporary file
+            await fs.rm(file.filepath, { force: true }).catch(() => { /* we can't do anything about this */ });
+        }
     }
 }

@@ -26,7 +26,9 @@ import { ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
+import { downloadFile } from '../helpers/downloadFile.ts';
 import { useContext } from '../hooks/useContext.ts';
+import { Toast } from '../overlays/Toast';
 import Spinner from '../Spinner.vue';
 import STInputBox from './STInputBox.vue';
 
@@ -57,9 +59,14 @@ function deleteMe() {
 }
 
 function openFile(event: MouseEvent) {
+    event.preventDefault();
+
     if (model.value) {
-        window.open(model.value.getPublicPath(), '_blank');
-        event.preventDefault();
+        // Never open the url of a file: it doesn't have to be a file server of ours
+        downloadFile(model.value.getPublicPath(), model.value.name ?? $t('Bestand'))
+            .catch((e) => {
+                Toast.fromError(e).show();
+            });
     }
 }
 

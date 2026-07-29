@@ -108,11 +108,34 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             });
         });
 
+        try {
+            return await this.upload(request, file, user);
+        } finally {
+            // Formidable wrote the upload to a temporary file
+            await fs.rm(file.filepath, { force: true }).catch(() => { /* we can't do anything about this */ });
+        }
+    }
+
+    private async upload(request: DecodedRequest<Params, Query, Body>, file: FormidableFile, user: { id: string }) {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'Uploading is not available',
                 statusCode: 503,
+            });
+        }
+
+        // Never trust the content type of the uploader: it is served back to browsers when the file is
+        // downloaded, so we only allow content types we know are safe to serve.
+        const uploadType = File.resolveUploadType({ contentType: file.mimetype, filename: file.originalFilename });
+
+        if (!uploadType) {
+            throw new SimpleError({
+                code: 'invalid_file_type',
+                message: 'Unsupported file type ' + (file.mimetype ?? 'unknown') + ' for file ' + (file.originalFilename ?? 'unknown'),
+                human: $t('Dit type bestand kan je niet uploaden.'),
+                field: 'file',
+                statusCode: 400,
             });
         }
 
@@ -140,19 +163,19 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Also include the source, in private mode
         const fileId = uuidv4();
-        const uploadExt = File.contentTypeToExtension(file.mimetype ?? '') ?? '';
 
-        const filenameWithoutExt = file.originalFilename ? File.removeExtension(file.originalFilename) : fileId;
-        const key = prefix + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
+        const filenameWithoutExt = file.originalFilename ? File.removeExtension(file.originalFilename) : '';
+        const key = prefix + fileId + '/' + ((Formatter.slug(filenameWithoutExt) || fileId) + '.' + uploadType.extension);
 
         const fileStruct = new File({
             id: fileId,
             server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
             path: key,
+            // Always keep the extension in sync with the content type we store the file with
+            name: filenameWithoutExt ? filenameWithoutExt + '.' + uploadType.extension : null,
             size: fileContent.length,
-            name: file.originalFilename,
             isPrivate: request.query.isPrivate,
-            contentType: file.mimetype ?? null,
+            contentType: uploadType.contentType,
         });
 
         // Generate an upload signature for this file if it is private
@@ -171,7 +194,9 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
             Body: fileContent,
-            ContentType: file.mimetype ?? 'application/octet-stream',
+            ContentType: uploadType.contentType,
+            // Only let the browser render file types it can't execute
+            ContentDisposition: uploadType.canRenderInline ? 'inline' : 'attachment',
             ACL: request.query.isPrivate ? 'private' : 'public-read',
         });
         await Image.getS3Client().send(cmd);

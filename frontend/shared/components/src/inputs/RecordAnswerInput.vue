@@ -68,7 +68,7 @@
 
 <script lang="ts" setup>
 import type { Address, Image, PatchAnswers, RecordChoice, RecordSettings } from '@stamhoofd/structures';
-import { FileType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { FileType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType, supportedFileTypes } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
@@ -293,7 +293,8 @@ const accept = computed(() => {
             case FileType.Word:
                 return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword';
             default:
-                return '';
+                // Without a file type, everything the server accepts is allowed
+                return supportedFileTypes.acceptAttribute;
         }
     }
     return '';

@@ -4,7 +4,7 @@
 
         <hr v-if="email.attachments.length > 0" class="email-attachments-spacer">
         <STList v-if="email.attachments.length > 0" class="attachments-container">
-            <STListItem v-for="attachment in email.attachments" :key="attachment.id" class="file-list-item" :selectable="!!attachment.file" target="_blank" :href="attachment.file?.getPublicPath()" :download="attachment.file ? 1 : 0" :element-name="attachment.file ? 'a' : 'div'">
+            <STListItem v-for="attachment in email.attachments" :key="attachment.id" class="file-list-item" :selectable="!!attachment.file" :element-name="attachment.file ? 'button' : 'div'" @click="attachment.file ? download(attachment) : undefined">
                 <template #left>
                     <span :class="'icon '+attachment.icon" />
                 </template>
@@ -23,9 +23,11 @@
 
 <script lang="ts" setup>
 import SafeHtmlBox from '#editor/SafeHtmlBox.vue';
-import type { EmailPreview, EmailRecipient, EmailWithRecipients } from '@stamhoofd/structures';
+import type { EmailAttachment, EmailPreview, EmailRecipient, EmailWithRecipients } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { downloadFile } from '../../helpers/downloadFile.ts';
+import { Toast } from '../../overlays/Toast';
 
 const props = withDefaults(defineProps<{
     email: EmailPreview | EmailWithRecipients;
@@ -46,6 +48,17 @@ const replacedHtml = computed(() => {
     const recipient = props.recipient ?? props.email.exampleRecipient;
     return props.email.getHtmlFor(recipient);
 });
+
+// An attachment is uploaded by a user, so we download it instead of sending anyone to its url
+function download(attachment: EmailAttachment) {
+    if (!attachment.file) {
+        return;
+    }
+
+    downloadFile(attachment.file.getPublicPath(), attachment.filename).catch((e) => {
+        Toast.fromError(e).show();
+    });
+}
 
 </script>
 

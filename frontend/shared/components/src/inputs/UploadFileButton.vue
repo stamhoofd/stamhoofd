@@ -17,7 +17,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { File } from '@stamhoofd/structures';
+import { File, supportedFileTypes } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
 import { useContext } from '../hooks/useContext.ts';
@@ -33,7 +33,8 @@ const props = withDefaults(defineProps<{
 }>(), {
     elementName: 'label',
     text: '',
-    accept: '',
+    // Default to everything the server accepts, so the file picker never offers a file we'll refuse
+    accept: supportedFileTypes.acceptAttribute,
     isPrivate: false,
     maxSize: 20 * 1024 * 1024,
 });

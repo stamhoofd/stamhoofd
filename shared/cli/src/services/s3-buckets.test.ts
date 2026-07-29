@@ -1,8 +1,8 @@
-import { CreateBucketCommand, HeadBucketCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, HeadBucketCommand, PutBucketCorsCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { localPrimaryBucket } from '../config/shared-service-config.js';
-import { publicBucketPolicy, setupDevelopmentS3Buckets } from './s3-buckets.js';
+import { bucketCorsConfiguration, publicBucketPolicy, setupDevelopmentS3Buckets } from './s3-buckets.js';
 
 const send = vi.fn();
 
@@ -60,6 +60,30 @@ describe('setupDevelopmentS3Buckets', () => {
 
         expect(send.mock.calls[0][0].input.Bucket).toBe(`${localPrimaryBucket}-stamhoofd-feature-keeo`);
         expect(send.mock.calls[1][0].input.Policy).toBe(publicBucketPolicy(`${localPrimaryBucket}-stamhoofd-feature-keeo`));
+    });
+
+    it('allows our apps to read the files of the bucket', async () => {
+        await setupDevelopmentS3Buckets(context());
+
+        // Without this, downloading a file fails in development but not in production
+        const corsCommand = send.mock.calls.map(call => call[0]).find(command => command instanceof PutBucketCorsCommand);
+
+        expect(corsCommand).toBeDefined();
+        expect(corsCommand.input.Bucket).toBe(localPrimaryBucket);
+        expect(corsCommand.input.CORSConfiguration).toEqual(bucketCorsConfiguration());
+    });
+
+    it('only allows reading files from any origin', () => {
+        // Webshops and registration pages run on domains of our customers, so there is no list of origins
+        expect(bucketCorsConfiguration().CORSRules).toEqual([
+            {
+                AllowedOrigins: ['*'],
+                AllowedMethods: ['GET', 'HEAD'],
+                AllowedHeaders: ['*'],
+                ExposeHeaders: ['Content-Length', 'Content-Type', 'Content-Disposition'],
+                MaxAgeSeconds: 3600,
+            },
+        ]);
     });
 
     it('only grants public access to the public development prefix', () => {

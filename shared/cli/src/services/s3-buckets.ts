@@ -1,4 +1,5 @@
-import { CreateBucketCommand, HeadBucketCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
+import type { CORSConfiguration } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, HeadBucketCommand, PutBucketCorsCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
 import fs from 'node:fs/promises';
 import { buildDevelopmentConfig } from '../config/development-config.js';
 import { createS3Client } from '../config/s3-client.js';
@@ -28,6 +29,11 @@ export async function setupDevelopmentS3Buckets(context: CliContext): Promise<vo
         Bucket: bucket,
         Policy: publicBucketPolicy(bucket),
     }));
+
+    await client.send(new PutBucketCorsCommand({
+        Bucket: bucket,
+        CORSConfiguration: bucketCorsConfiguration(),
+    }));
 }
 
 async function readCaddyRootCertificate(): Promise<Buffer | undefined> {
@@ -48,6 +54,28 @@ async function bucketExists(client: ReturnType<typeof createS3Client>, bucket: s
         }
         throw error;
     }
+}
+
+/**
+ * The frontend downloads a file by reading its bytes instead of opening its url (see downloadFile in
+ * @stamhoofd/components), so the file server has to allow our apps to read from it. Production does the same,
+ * and without it every download in development fails.
+ *
+ * Any origin is allowed: webshops and registration pages run on domains of our customers, so there is no list
+ * of origins to allow. Nothing here is private - reading a file still needs a signed url or a public object.
+ */
+export function bucketCorsConfiguration(): CORSConfiguration {
+    return {
+        CORSRules: [
+            {
+                AllowedOrigins: ['*'],
+                AllowedMethods: ['GET', 'HEAD'],
+                AllowedHeaders: ['*'],
+                ExposeHeaders: ['Content-Length', 'Content-Type', 'Content-Disposition'],
+                MaxAgeSeconds: 3600,
+            },
+        ],
+    };
 }
 
 export function publicBucketPolicy(bucket: string): string {

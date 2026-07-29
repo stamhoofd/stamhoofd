@@ -1,7 +1,7 @@
 import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { encodeObject, EncodeMedium, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Member, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
@@ -62,7 +62,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const privateFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: true,
@@ -105,7 +105,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const privateFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: true,
@@ -149,7 +149,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const privateFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: true,
@@ -188,6 +188,69 @@ describe('E2E.PrivateFiles', () => {
         expect(answer.file!.signedUrl).toBeTruthy();
     });
 
+    test('Cannot set a public file with a url a browser would run as code', async () => {
+        const organization = await createOrganization();
+
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+        }).create();
+        const token = await Token.createToken(user);
+
+        // Public files are not signed, so a malicious user can put anything in them. The url of a file ends up
+        // in a link (and in the source of an image), so a javascript: url would run on our own domain.
+        const buildBody = (server: string) => {
+            const member = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                }),
+            });
+
+            member.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
+                file: new File({
+                    id: 'test',
+                    server: 'https://replace-me.example.com',
+                    path: 'test.pdf',
+                    size: 100,
+                    isPrivate: false,
+                }),
+                settings: recordSettings,
+            }));
+
+            const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+            arr.addPut(member);
+
+            // An attacker doesn't use our client, so build the request body they would send instead
+            const encoded = encodeObject(arr, { version: Version, medium: EncodeMedium.Network });
+            return JSON.parse(JSON.stringify(encoded).replaceAll('https://replace-me.example.com', server));
+        };
+
+        const attacks = [
+            { server: 'javascript:alert(document.domain)', error: /can only be http or https/i },
+            { server: 'data:text/html,<script>alert(1)</script>', error: /can only be http or https/i },
+            { server: 'not-a-url', error: /invalid url for a file/i },
+            { server: '', error: /invalid url for a file/i },
+        ];
+
+        for (const attack of attacks) {
+            const r = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), buildBody(attack.server));
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            await expect(testServer.test(endpoint, r), attack.server).rejects.toThrow(attack.error);
+        }
+
+        // ... and our own code can never store one either
+        expect(() => Request.buildJson('PATCH', baseUrl, organization.getApiHost(), new File({
+            id: 'test',
+            server: 'javascript:alert(document.domain)',
+            path: 'test.pdf',
+            size: 100,
+        }))).toThrow(/can only be http or https/i);
+    });
+
     test('Can set public files', async () => {
         const organization = await createOrganization();
 
@@ -211,7 +274,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const publicFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: false,
@@ -275,7 +338,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const maliciousFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: true,
@@ -355,7 +418,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const maliciousFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: true,
@@ -418,7 +481,7 @@ describe('E2E.PrivateFiles', () => {
             // access to the signed URL. This should not be possible without a valid signature
             const privateFile = new File({
                 id: 'test',
-                server: 'test.com',
+                server: 'https://test.com',
                 path: 'test.txt',
                 size: 100,
                 isPrivate: true,
@@ -447,7 +510,7 @@ describe('E2E.PrivateFiles', () => {
             // access to the signed URL. This should not be possible without a valid signature
             const privateFile = new File({
                 id: 'test',
-                server: 'test.com',
+                server: 'https://test.com',
                 path: 'test.txt',
                 size: 100,
                 isPrivate: true,
@@ -481,7 +544,7 @@ describe('E2E.PrivateFiles', () => {
             // access to the signed URL. This should not be possible without a valid signature
             const privateFile = new File({
                 id: 'test',
-                server: 'test.com',
+                server: 'https://test.com',
                 path: 'test.txt',
                 size: 100,
                 isPrivate: true,
@@ -509,7 +572,7 @@ describe('E2E.PrivateFiles', () => {
             // access to the signed URL. This should not be possible without a valid signature
             const privateFile = new File({
                 id: 'test',
-                server: 'test.com',
+                server: 'https://test.com',
                 path: 'test.txt',
                 size: 100,
                 isPrivate: true,
@@ -537,7 +600,7 @@ describe('E2E.PrivateFiles', () => {
             // access to the signed URL. This should not be possible without a valid signature
             const privateFile = new File({
                 id: 'test',
-                server: 'test.com',
+                server: 'https://test.com',
                 path: 'test.txt',
                 size: 100,
                 isPrivate: true,
@@ -564,7 +627,7 @@ describe('E2E.PrivateFiles', () => {
             // access to the signed URL. This should not be possible without a valid signature
             const privateFile = new File({
                 id: 'test',
-                server: 'test.com',
+                server: 'https://test.com',
                 path: 'test.txt',
                 size: 100,
                 isPrivate: true,
@@ -613,7 +676,7 @@ describe('E2E.PrivateFiles', () => {
         // access to the signed URL. This should not be possible without a valid signature
         const maliciousFile = new File({
             id: 'test',
-            server: 'test.com',
+            server: 'https://test.com',
             path: 'test.txt',
             size: 100,
             isPrivate: true,

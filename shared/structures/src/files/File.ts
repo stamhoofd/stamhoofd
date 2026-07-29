@@ -3,6 +3,227 @@ import { EncodeMedium } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement.js';
 
+export type FileTypeDefinition = {
+    /**
+     * The content type we store and serve files of this type with.
+     */
+    contentType: string;
+
+    /**
+     * Extensions that belong to this content type. The first one is the extension we use when storing a file.
+     */
+    extensions: [string, ...string[]];
+
+    /**
+     * Other content types browsers and operating systems use for this file type. These are all replaced with
+     * the canonical content type above.
+     */
+    alternativeContentTypes?: string[];
+
+    /**
+     * Whether a browser may render this file type instead of downloading it.
+     *
+     * Only enable this for file types a browser can't execute: an uploaded file is served from one of our own
+     * domains, so anything a browser runs (html, svg, ...) would run there too.
+     */
+    canRenderInline?: boolean;
+};
+
+export type ResolvedFileType = {
+    contentType: string;
+    extension: string;
+    canRenderInline: boolean;
+};
+
+/**
+ * Drops parameters (e.g. `; charset=utf-8`) and normalizes casing and whitespace
+ */
+function normalizeContentType(contentType: string): string {
+    return contentType.split(';')[0].trim().toLowerCase();
+}
+
+/**
+ * Parses a url we'll hand to a browser, and throws when it is not a plain http(s) url.
+ *
+ * Schemes like `javascript:`, `data:` and `vbscript:` are code as soon as a browser opens them, so they may
+ * never end up in a link or an image we render.
+ */
+function validateHttpUrl(value: string, field: string): URL {
+    let url: URL;
+
+    try {
+        url = new URL(value);
+    } catch {
+        throw new SimpleError({
+            code: 'invalid_field',
+            message: 'Invalid url for a file: ' + value,
+            human: $t('Dit bestand heeft een ongeldige URL.'),
+            field,
+        });
+    }
+
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+        throw new SimpleError({
+            code: 'invalid_field',
+            message: 'A file url can only be http or https, received: ' + url.protocol,
+            human: $t('Dit bestand heeft een ongeldige URL.'),
+            field,
+        });
+    }
+
+    return url;
+}
+
+/**
+ * Returns the lowercased extension of a filename or path, without the dot, or null if it doesn't have one.
+ */
+function getFilenameExtension(filename: string): string | null {
+    // Only look at the filename itself: a directory in the path can contain dots too
+    const basename = filename.split('/').pop() ?? '';
+    const parts = basename.split('.');
+
+    if (parts.length < 2) {
+        return null;
+    }
+
+    const extension = parts[parts.length - 1].trim().toLowerCase();
+    return extension.length > 0 ? extension : null;
+}
+
+/**
+ * An allowlist of file types, used to decide what an upload may be stored and served as.
+ */
+export class FileTypes {
+    private readonly byContentType = new Map<string, FileTypeDefinition>();
+    private readonly byExtension = new Map<string, FileTypeDefinition>();
+
+    constructor(readonly definitions: FileTypeDefinition[]) {
+        for (const definition of definitions) {
+            for (const contentType of [definition.contentType, ...(definition.alternativeContentTypes ?? [])]) {
+                const key = normalizeContentType(contentType);
+
+                if (this.byContentType.has(key)) {
+                    throw new Error('Duplicate content type ' + key + ' in file types');
+                }
+                this.byContentType.set(key, definition);
+            }
+
+            for (const extension of definition.extensions) {
+                const key = extension.trim().toLowerCase();
+
+                if (this.byExtension.has(key)) {
+                    throw new Error('Duplicate extension ' + key + ' in file types');
+                }
+                this.byExtension.set(key, definition);
+            }
+        }
+    }
+
+    /**
+     * The value for the accept attribute of a file input, so the file picker only offers files we accept.
+     */
+    get acceptAttribute(): string {
+        return [
+            ...this.definitions.flatMap(definition => definition.extensions.map(extension => '.' + extension)),
+            ...this.definitions.map(definition => definition.contentType),
+        ].join(',');
+    }
+
+    private resolveDefinition(definition: FileTypeDefinition, extension: string): ResolvedFileType {
+        return {
+            contentType: definition.contentType,
+            extension,
+            canRenderInline: definition.canRenderInline ?? false,
+        };
+    }
+
+    /**
+     * Determines the content type and extension we'll store an uploaded file with, or null if we don't
+     * support the file type.
+     *
+     * The reported content type decides, because it describes the file better than its name does: users do
+     * rename a jpg to .png, and we store the file with the extension of the content type we picked, so the
+     * two can never contradict each other. A content type that is not in this list is never used - we only
+     * fall back to the extension of the filename, which has to be in this list as well.
+     */
+    resolveUpload(upload: { contentType?: string | null; filename?: string | null }): ResolvedFileType | null {
+        const extension = upload.filename ? getFilenameExtension(upload.filename) : null;
+        const definitionFromContentType = upload.contentType ? this.byContentType.get(normalizeContentType(upload.contentType)) : undefined;
+        const definitionFromExtension = extension ? this.byExtension.get(extension) : undefined;
+
+        if (definitionFromContentType) {
+            // Keep the uploaded extension when it is one of this content type, so we don't rename .jpeg to .jpg
+            return this.resolveDefinition(
+                definitionFromContentType,
+                extension && definitionFromExtension === definitionFromContentType ? extension : definitionFromContentType.extensions[0],
+            );
+        }
+
+        if (definitionFromExtension && extension) {
+            return this.resolveDefinition(definitionFromExtension, extension);
+        }
+
+        return null;
+    }
+}
+
+/**
+ * The only file types that can be uploaded as a file.
+ *
+ * The content type of an upload is chosen by the uploading client, so it can never be trusted: it is stored
+ * as-is and returned by our file server when the file is downloaded again. Without an allowlist, a user could
+ * upload e.g. an HTML or SVG file that browsers would happily execute on one of our own domains.
+ */
+export const supportedFileTypes = new FileTypes([
+    // A pdf is rendered by the pdf viewer of the browser, which doesn't give it access to the page it is on
+    { contentType: 'application/pdf', extensions: ['pdf'], canRenderInline: true },
+
+    // Images. Browsers only sniff images as other image types, so they can never turn into html
+    { contentType: 'image/jpeg', extensions: ['jpg', 'jpeg'], alternativeContentTypes: ['image/jpg'], canRenderInline: true },
+    { contentType: 'image/png', extensions: ['png'], canRenderInline: true },
+    { contentType: 'image/gif', extensions: ['gif'], canRenderInline: true },
+    { contentType: 'image/webp', extensions: ['webp'], canRenderInline: true },
+    { contentType: 'image/heic', extensions: ['heic'], canRenderInline: true },
+    { contentType: 'image/heif', extensions: ['heif'], canRenderInline: true },
+
+    // Word
+    { contentType: 'application/msword', extensions: ['doc'] },
+    { contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', extensions: ['docx'] },
+
+    // Excel
+    { contentType: 'application/vnd.ms-excel', extensions: ['xls'] },
+    { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', extensions: ['xlsx'] },
+
+    // PowerPoint
+    { contentType: 'application/vnd.ms-powerpoint', extensions: ['ppt'] },
+    { contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', extensions: ['pptx'] },
+
+    // OpenDocument
+    { contentType: 'application/vnd.oasis.opendocument.text', extensions: ['odt'] },
+    { contentType: 'application/vnd.oasis.opendocument.spreadsheet', extensions: ['ods'] },
+    { contentType: 'application/vnd.oasis.opendocument.presentation', extensions: ['odp'] },
+
+    // Plain text
+    { contentType: 'text/csv', extensions: ['csv'] },
+    { contentType: 'text/plain', extensions: ['txt'] },
+]);
+
+/**
+ * The only file types that can be uploaded as an image.
+ *
+ * SVG is only allowed here, and not as a normal file, because we never serve the uploaded image itself: all
+ * the images we serve are generated with sharp (see the Image model), so they are always a png or jpeg.
+ */
+export const supportedImageTypes = new FileTypes([
+    { contentType: 'image/png', extensions: ['png'], canRenderInline: true },
+    { contentType: 'image/jpeg', extensions: ['jpg', 'jpeg'], alternativeContentTypes: ['image/jpg'], canRenderInline: true },
+    { contentType: 'image/webp', extensions: ['webp'], canRenderInline: true },
+    { contentType: 'image/gif', extensions: ['gif'], canRenderInline: true },
+
+    // An svg is never rendered: we only store the uploaded svg itself, and it can contain scripts
+    { contentType: 'image/svg+xml', extensions: ['svg'], alternativeContentTypes: ['image/svg'] },
+]);
+
 export class File implements Encodeable {
     id: string;
 
@@ -154,10 +375,41 @@ export class File implements Encodeable {
             }
         }
 
+        file.validateUrls();
+
         return file;
     }
 
+    /**
+     * Throws when this file would build a url we can't safely use.
+     *
+     * A file is turned into a url (see {@link getPublicPath}) that we render as a link and as the source of an
+     * image, so a url a browser treats as code - `javascript:alert(1)` - would run on the domain of whoever
+     * opens it. Files also arrive from clients, which is why this runs on both decoding and encoding: a file we
+     * can't build a url for is refused before it reaches the database, and can never leave it either.
+     */
+    validateUrls() {
+        const server = validateHttpUrl(this.server, 'server');
+
+        // The path is appended to the server, so it may never end up pointing at something else
+        const publicUrl = validateHttpUrl(this.server + '/' + this.path, 'path');
+
+        if (publicUrl.origin !== server.origin) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'The path of a file cannot change its server: ' + this.path,
+                field: 'path',
+            });
+        }
+
+        if (this.signedUrl) {
+            validateHttpUrl(this.signedUrl, 'signedUrl');
+        }
+    }
+
     encode(context: EncodeContext) {
+        this.validateUrls();
+
         return {
             id: this.id,
             server: this.server,
@@ -178,34 +430,18 @@ export class File implements Encodeable {
         return this.server + '/' + this.path;
     }
 
-    static contentTypeToExtension(contentType: string): string | null {
-        switch (contentType.toLocaleLowerCase()) {
-            case 'image/jpeg':
-            case 'image/jpg':
-                return 'jpg';
-            case 'image/png':
-                return 'png';
-            case 'image/gif':
-                return 'gif';
-            case 'image/webp':
-                return 'webp';
-            case 'image/svg+xml':
-                return 'svg';
-            case 'application/pdf':
-                return 'pdf';
-            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-            case 'application/vnd.ms-excel':
-                return 'xlsx';
-
-            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            case 'application/msword':
-                return 'docx';
-        }
-
-        return null;
+    /**
+     * See {@link FileTypes.resolveUpload}: determines the content type and extension we'll store an uploaded
+     * file with, or null if we don't support the file type.
+     */
+    static resolveUploadType(upload: { contentType?: string | null; filename?: string | null }): ResolvedFileType | null {
+        return supportedFileTypes.resolveUpload(upload);
     }
 
     static removeExtension(filename: string): string {
+        if (getFilenameExtension(filename) === null) {
+            return filename;
+        }
         return filename.split('.').slice(0, -1).join('.');
     }
 
