@@ -32,6 +32,8 @@ Backend uses a custom router (`@simonbackx/simple-endpoints`), **not Express**: 
 - For bugfixes: write a test that reproduces the bug, verify it fails before the fix and passes after.
 - Always run all linting, typechecking and tests before considering your work done.
 
+- Comments must make code faster to understand, so keep them short and only document what a reader cannot infer from the code: a non-obvious invariant, an external constraint, a gotcha. **Never comment your own reasoning** — why you chose a design, what the code used to be, what a refactor moved. That belongs in the PR description. Strip such comments when you encounter them.
+
 ## Build ordering (the #1 source of confusing errors)
 
 Packages consume each other's **built `dist/` output**, not source. After changing a shared package, consumers see stale code until you run `yarn build:shared`. Almost every "type error after editing a shared package", "test fails on module load", or "cached code keeps running" is fixed by running it first. Full reset when badly out of sync:
