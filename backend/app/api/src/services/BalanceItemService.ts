@@ -7,6 +7,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue.js';
 import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
 import { AuditLogService } from './AuditLogService.js';
+import { OrderService } from './OrderService.js';
 import { PaymentReallocationService } from './PaymentReallocationService.js';
 import { RegistrationService } from './RegistrationService.js';
 import { STPackageService } from './STPackageService.js';
@@ -235,7 +236,7 @@ export class BalanceItemService {
             const order = await Order.getByID(balanceItem.orderId);
             if (order) {
                 shouldMarkUpdated = false;
-                await order.markPaid(payment, organization);
+                await OrderService.markPaid(order, payment, organization);
 
                 // Save number in balance description
                 if (order.number !== null) {

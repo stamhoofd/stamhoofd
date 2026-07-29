@@ -16,6 +16,7 @@ import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
 import { AuditLogService } from '../../../services/AuditLogService.js';
 import { MollieService } from '../../../services/MollieService.js';
+import { OrderService } from '../../../services/OrderService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { UitpasService } from '../../../services/uitpas/UitpasService.js';
 import { WebshopAuthHelper } from './WebshopAuthHelper.js';
@@ -171,7 +172,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 order.data.paymentMethod = PaymentMethod.Unknown;
 
                 // Mark this order as paid
-                await order.markPaid(null, organization, webshop);
+                await OrderService.markPaid(order, null, organization, webshop);
                 await order.save();
             } else {
                 const payment = new Payment();
@@ -242,7 +243,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 const description = webshop.meta.name + ' - ' + organization.name;
 
                 if (payment.method === PaymentMethod.Transfer) {
-                    await order.markValid(payment, []);
+                    await OrderService.markValid(order, payment, []);
 
                     if (order.number) {
                         balanceItem.description = order.generateBalanceDescription(webshop);
@@ -253,7 +254,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await payment.save();
                 } else if (payment.method === PaymentMethod.PointOfSale) {
                     // Not really paid, but needed to create the tickets if needed
-                    await order.markPaid(payment, organization, webshop);
+                    await OrderService.markPaid(order, payment, organization, webshop);
 
                     if (order.number) {
                         balanceItem.description = order.generateBalanceDescription(webshop);

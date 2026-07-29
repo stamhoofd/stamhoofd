@@ -10,6 +10,7 @@ import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceIt
 import { Context } from '../../../../helpers/Context.js';
 import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
+import { OrderService } from '../../../../services/OrderService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
@@ -151,7 +152,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         order.data.paymentMethod = PaymentMethod.Unknown;
 
                         // Mark this order as paid
-                        await order.markPaid(null, organization, webshop);
+                        await OrderService.markPaid(order, null, organization, webshop);
                         await order.save();
                     } else {
                         const payment = new Payment();
@@ -217,12 +218,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         await balanceItemPayment.save();
 
                         if (payment.method === PaymentMethod.Transfer) {
-                            await order.markValid(payment, []);
+                            await OrderService.markValid(order, payment, []);
                             await payment.save();
                             await order.save();
                         } else if (payment.method === PaymentMethod.PointOfSale) {
                             // Not really paid, but needed to create the tickets if needed
-                            await order.markPaid(payment, organization, webshop);
+                            await OrderService.markPaid(order, payment, organization, webshop);
                             await payment.save();
                             await order.save();
                         } else {
