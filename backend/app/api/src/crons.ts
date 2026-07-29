@@ -6,6 +6,7 @@ import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/struct
 import { checkSettlements } from './helpers/CheckSettlements.js';
 import { PaymentService } from './services/PaymentService.js';
 import { RegistrationService } from './services/RegistrationService.js';
+import { STPackageService } from './services/STPackageService.js';
 
 let lastDNSCheck: Date | null = null;
 let lastDNSId = '';
@@ -76,7 +77,7 @@ async function checkExpirationEmails() {
     console.log('[EXPIRATION EMAILS] Sending expiration emails...');
 
     for (const pack of packages) {
-        await pack.sendExpiryEmail();
+        await STPackageService.sendExpiryEmail(pack);
     }
     lastExpirationCheck = new Date();
 }
