@@ -1,12 +1,12 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
-import { Email, EmailRecipient, Organization } from '@stamhoofd/models';
-import { canSendFromEmail, getEmailBuilder } from '@stamhoofd/models/helpers/EmailBuilder.js';
+import { Email, EmailRecipient, Organization, Platform } from '@stamhoofd/models';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements } from '@stamhoofd/models/helpers/EmailBuilder.js';
 import { errorToSimpleErrors } from '@stamhoofd/models/helpers/errorToSimpleErrors.js';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { EmailRecipientsStatus, EmailStatus, isSoftEmailRecipientError } from '@stamhoofd/structures';
+import { EmailRecipientsStatus, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 
 type Attachment = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string };
 
@@ -247,7 +247,7 @@ export class EmailSendService {
                     await upToDate.save();
 
                     // Create recipients if not yet created
-                    await upToDate.buildRecipients();
+                    await EmailSendService.buildRecipients(upToDate);
                     abort.throwIfAborted();
 
                     // Refresh model
@@ -450,6 +450,177 @@ export class EmailSendService {
                 await upToDate.save();
                 return upToDate;
             });
+        });
+    }
+
+    static async buildRecipients(email: Email) {
+        const id = email.id;
+        await QueueHandler.schedule('email-build-recipients-' + email.id, async function ({ abort }) {
+            const upToDate = await Email.getByID(id);
+
+            if (!upToDate || !upToDate.id) {
+                return;
+            }
+
+            if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
+                return;
+            }
+
+            if (upToDate.status === EmailStatus.Sent) {
+                return;
+            }
+
+            abort.throwIfAborted();
+            const organization = upToDate.organizationId ? (await Organization.getByID(upToDate.organizationId) ?? null) : null;
+            if (upToDate.organizationId && !organization) {
+                throw new SimpleError({
+                    code: 'organization_not_found',
+                    message: 'Organization not found',
+                    human: $t(`%1NV`),
+                });
+            }
+            const platform = await Platform.getSharedPrivateStruct();
+
+            console.log('Building recipients for email', id);
+
+            // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
+
+            upToDate.recipientsStatus = EmailRecipientsStatus.Creating;
+            await upToDate.save();
+
+            const membersSet = new Set<string>();
+            const emailsSet = new Set<string>();
+            const combinedHtml = upToDate.getCombinedHtml();
+
+            let count = 0;
+            let countWithoutEmail = 0;
+
+            try {
+                // Delete all recipients
+                await SQL
+                    .delete()
+                    .from(
+                        SQL.table('email_recipients'),
+                    )
+                    .where(SQL.column('emailId'), upToDate.id);
+
+                abort.throwIfAborted();
+
+                for (const subfilter of upToDate.recipientFilter.filters) {
+                    // Create recipients
+                    const loader = Email.recipientLoaders.get(subfilter.type);
+
+                    if (!loader) {
+                        throw new Error('Loader for type ' + subfilter.type + ' has not been initialised on the Email model');
+                    }
+
+                    let request: LimitedFilteredRequest | null = new LimitedFilteredRequest({
+                        filter: subfilter.filter,
+                        sort: [{ key: 'id', order: SortItemDirection.ASC }],
+                        limit: 100,
+                        search: subfilter.search,
+                    });
+
+                    const beforeFetchAllResult = loader.beforeFetchAll ? await loader.beforeFetchAll(request, subfilter.subfilter) : undefined;
+
+                    while (request) {
+                        abort.throwIfAborted();
+                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult, { allowedLanguages: upToDate.getLanguages() });
+
+                        for (const item of response.results) {
+                            if (!item.email && !item.memberId && !item.userId) {
+                                continue;
+                            }
+
+                            const recipient = new EmailRecipient();
+                            recipient.emailType = upToDate.emailType;
+                            recipient.objectId = item.objectId;
+                            recipient.emailId = upToDate.id;
+                            recipient.email = item.email;
+                            recipient.firstName = item.firstName;
+                            recipient.lastName = item.lastName;
+                            recipient.language = item.language ?? null;
+                            recipient.replacements = item.replacements;
+                            recipient.memberId = item.memberId ?? null;
+                            recipient.userId = item.userId ?? null;
+                            recipient.organizationId = upToDate.organizationId ?? null;
+
+                            await fillRecipientReplacements(recipient, {
+                                platform,
+                                organization,
+                                from: upToDate.getFromAddress(),
+                                replyTo: null,
+                                forPreview: false,
+                                allowedLanguages: upToDate.getLanguages(),
+                            });
+                            recipient.replacements = removeUnusedReplacements(combinedHtml, recipient.replacements);
+
+                            let duplicateOfRecipientId: string | null = null;
+                            if (item.email && emailsSet.has(item.email)) {
+                                console.log('Found duplicate email recipient', item.email);
+
+                                // Try to merge
+                                const existing = await EmailRecipient.select()
+                                    .where('emailId', upToDate.id)
+                                    .where('email', item.email)
+                                    .where('duplicateOfRecipientId', null)
+                                    .fetch();
+
+                                for (const other of existing) {
+                                    const merged = mergeReplacementsIfEqual(other.replacements, recipient.replacements);
+                                    if (merged !== false) {
+                                        console.log('Found mergeable duplicate email recipient', item.email, other.id);
+                                        duplicateOfRecipientId = other.id;
+
+                                        other.replacements = merged;
+                                        other.firstName = other.firstName || item.firstName;
+                                        other.lastName = other.lastName || item.lastName;
+                                        await other.save();
+
+                                        recipient.replacements = merged;
+
+                                        break;
+                                    } else {
+                                        console.log('Could not merge duplicate email recipient', item.email, other.id, 'keeping both', other.replacements, item.replacements);
+                                    }
+                                }
+                            }
+                            recipient.duplicateOfRecipientId = duplicateOfRecipientId;
+
+                            await recipient.save();
+
+                            if (recipient.memberId) {
+                                membersSet.add(recipient.memberId);
+                            }
+
+                            if (recipient.email) {
+                                emailsSet.add(recipient.email);
+                            }
+
+                            if (!recipient.email || duplicateOfRecipientId) {
+                                countWithoutEmail += 1;
+                            } else {
+                                count += 1;
+                            }
+                        }
+
+                        request = response.next ?? null;
+                    }
+                }
+
+                upToDate.recipientsStatus = EmailRecipientsStatus.Created;
+                upToDate.emailRecipientsCount = count;
+                upToDate.otherRecipientsCount = countWithoutEmail;
+                upToDate.recipientsErrors = null;
+                upToDate.membersCount = membersSet.size;
+                await upToDate.save();
+            } catch (e: unknown) {
+                console.error('Failed to build recipients for email', id);
+                console.error(e);
+                upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
+                upToDate.recipientsErrors = errorToSimpleErrors(e);
+                await upToDate.save();
+            }
         });
     }
 }
