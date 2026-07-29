@@ -1,5 +1,6 @@
 import { registerCron } from '@stamhoofd/crons';
 import { Organization } from '@stamhoofd/models';
+import { OrganizationEmailService } from '../services/OrganizationEmailService.js';
 import { isOutside } from './helpers/isOutside.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 
@@ -30,7 +31,7 @@ async function checkDrips() {
     // Get the next x organization to send e-mails for
     for await (const organization of iterate()) {
         try {
-            await organization.checkDrips();
+            await OrganizationEmailService.checkDrips(organization);
         } catch (e) {
             console.error(e);
         }

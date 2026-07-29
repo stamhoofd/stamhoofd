@@ -4,6 +4,7 @@ import { Group, Organization, Payment, Registration, STPackage, Webshop } from '
 import { SQL } from '@stamhoofd/sql';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { checkSettlements } from './helpers/CheckSettlements.js';
+import { OrganizationEmailService } from './services/OrganizationEmailService.js';
 import { PaymentService } from './services/PaymentService.js';
 import { RegistrationService } from './services/RegistrationService.js';
 import { STPackageService } from './services/STPackageService.js';
@@ -40,7 +41,7 @@ async function checkDNS() {
             console.log('[DNS] ' + organization.name);
         }
         try {
-            await organization.updateDNSRecords();
+            await OrganizationEmailService.updateDNSRecords(organization);
         } catch (e) {
             console.error(e);
         }
