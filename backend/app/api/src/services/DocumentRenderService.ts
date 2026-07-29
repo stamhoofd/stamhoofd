@@ -7,15 +7,7 @@ import { DocumentStatus, Version } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 /**
- * Owns rendering documents and document templates into HTML/XML.
- *
- * Turning a row into a handlebars context and rendering that context is not data access: the context
- * mixes in the platform (for the fallback logo and, for an XML export, the document numbering), and
- * models have no request context to resolve the platform they belong to. So both context building and
- * the render calls live here instead of on Document/DocumentTemplate.
- *
- * Document and DocumentTemplate keep the rows themselves, including DocumentTemplate.buildAll which
- * is a document lifecycle operation and has its own callers.
+ * Renders documents and document templates into HTML/XML.
  */
 export class DocumentRenderService {
     /**

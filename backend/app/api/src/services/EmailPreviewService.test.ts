@@ -253,8 +253,6 @@ describe('EmailPreviewService', () => {
         });
 
         test('the allLanguages option is not read: the example recipients only depend on the languages of the email', async () => {
-            // Documents the current behaviour. Moving this code has to be a strict no-op, so the
-            // option is kept as it is even though it is not used.
             TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
 
             const email = await createSentEmail({

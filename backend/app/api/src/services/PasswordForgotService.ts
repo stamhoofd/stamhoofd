@@ -4,11 +4,8 @@ import { PasswordToken, Platform, User } from '@stamhoofd/models';
 import { getAppHost } from '@stamhoofd/structures';
 
 /**
- * Owns the password recovery links.
- *
- * Which app the link points to depends on whether the user is an administrator of the organization,
- * and that requires the platform. Models have no request context to resolve the platform they
- * belong to, so both the permission check and the url building live here instead of on PasswordToken.
+ * Builds the password recovery links. Which app the link points to depends on whether the user is an
+ * administrator of the organization.
  */
 export class PasswordForgotService {
     /**
