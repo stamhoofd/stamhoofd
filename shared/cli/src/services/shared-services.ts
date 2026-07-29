@@ -7,11 +7,12 @@ import { run } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
 import { CorednsService } from './definitions/coredns-service.js';
 import { MaildevService } from './definitions/maildev-service.js';
-import { MysqlService } from './definitions/mysql-service.js';
+import { MysqlService, mysqlService } from './definitions/mysql-service.js';
 import { RustfsService } from './definitions/rustfs-service.js';
 import * as docker from './docker.js';
 import { allRunning, printServicesStatus, removeSharedServicesManifest, restartServicesInteractive, startServices, startServicesInteractive, stopServices, stopServicesInteractive, writeSharedServicesManifest } from './manager.js';
 import { sharedServiceDefinitions } from './registry.js';
+import type { SharedServiceDefinition } from './service.js';
 
 export { CaddyService, CorednsService, MaildevService, MysqlService, RustfsService };
 
@@ -19,10 +20,26 @@ export async function sharedServicesRunning(context: CliContext): Promise<boolea
     return await allRunning(context, sharedServiceDefinitions);
 }
 
-export async function startSharedServices(context: CliContext): Promise<void> {
+export type StartSharedServicesOptions = {
+    /**
+     * Leave the shared MySQL container alone. Used by e2e runs that connect to a MySQL that is
+     * already running on this machine: they never touch the development database, so starting a
+     * server for it would only cost time and memory.
+     */
+    skipMysql?: boolean;
+};
+
+export function sharedServicesToStart(options: StartSharedServicesOptions = {}): SharedServiceDefinition[] {
+    if (!options.skipMysql) {
+        return sharedServiceDefinitions;
+    }
+    return sharedServiceDefinitions.filter(service => service.key !== mysqlService.key);
+}
+
+export async function startSharedServices(context: CliContext, options: StartSharedServicesOptions = {}): Promise<void> {
     await fs.mkdir(sharedDir(context), { recursive: true });
     await fs.mkdir(path.join(logsDir(context), 'shared'), { recursive: true });
-    await startServices(context, sharedServiceDefinitions);
+    await startServices(context, sharedServicesToStart(options));
     await writeSharedServicesManifest(context);
 }
 

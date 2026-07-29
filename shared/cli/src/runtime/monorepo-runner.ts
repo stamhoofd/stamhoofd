@@ -1,12 +1,16 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { buildBackendEnv } from '../config/build-config.js';
-import { caddyRootCaPath, localIpv4Host, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
+import { caddyRootCaPath, localIpv4Host, localhostPort, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
+import type { E2eMysqlTarget } from '../config/test-database-config.js';
+import { buildPlaywrightDatabasePrefix, e2eMysqlPortVariable, playwrightClearDatabasesVariable, playwrightDatabasePasswordVariable, playwrightDatabasePrefixVariable, playwrightDatabaseUserVariable, resolveE2eMysqlTarget } from '../config/test-database-config.js';
 import type { CliContext } from '../context/create-context.js';
+import { buildPorts } from '../context/ports.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import * as docker from '../services/docker.js';
 import { startSharedServices } from '../services/shared-services.js';
 import { run } from './command-runner.js';
+import { isPortListening } from './port-probe.js';
 
 const globalSharedPackages = [
     'shared/types',
@@ -31,22 +35,27 @@ const backendSharedPackages = [
     'backend/shared/middleware',
 ];
 
+/**
+ * The MySQL servers the tests use: the unit tests (`test`) and the e2e tests each get their own, so
+ * a unit run and an e2e run never wait for or wipe each other's data.
+ */
+const testMysqlKinds = {
+    test: 'test MySQL',
+    e2e: 'e2e MySQL',
+} as const;
+
+type TestMysqlKind = keyof typeof testMysqlKinds;
+
 // Namespace the test MySQL containers + data volumes by instance so each git worktree gets its own
 // and tests can run in parallel across worktrees. The primary worktree keeps the historical
 // `stamhoofd-*` names (its instance name is `stamhoofd`). The data volume persists between runs (so
 // initialized data + applied migrations are reused); the container itself is shut down after the run
 // and `--clear` wipes the volume for a fresh start.
-function testMysqlNames(context: CliContext): { container: string; volume: string } {
+function testMysqlNames(context: CliContext, kind: TestMysqlKind): { container: string; volume: string } {
+    const container = `${context.instance.name}-${kind}-mysql`;
     return {
-        container: `${context.instance.name}-test-mysql`,
-        volume: `${context.instance.name}-test-mysql-data`,
-    };
-}
-
-function e2eMysqlNames(context: CliContext): { container: string; volume: string } {
-    return {
-        container: `${context.instance.name}-e2e-mysql`,
-        volume: `${context.instance.name}-e2e-mysql-data`,
+        container,
+        volume: `${container}-data`,
     };
 }
 
@@ -134,7 +143,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     }
 
     const needsDatabase = packages.some(pkg => pkg.needsDatabase);
-    const dbPort = needsDatabase ? await startTestMysql(context, options.clear ?? false) : undefined;
+    const dbPort = needsDatabase ? await startTestMysql(context, 'test', options.clear ?? false) : undefined;
 
     // With multiple packages a filename/test-name filter will legitimately match nothing in some of
     // them, so don't let an empty package fail the whole run.
@@ -159,7 +168,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
         if (needsDatabase) {
-            await docker.removeContainer(testMysqlNames(context).container, context.verbose);
+            await docker.removeContainer(testMysqlNames(context, 'test').container, context.verbose);
         }
     }
 }
@@ -168,23 +177,26 @@ export async function testUnit(context: CliContext, ci: boolean): Promise<void> 
     await runUnitTests(context, { ci });
 }
 
-export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; grep?: string; skipBuild?: boolean }): Promise<void> {
-    const dbPort = await startE2eMysql(context, options.clear);
-    const { container: e2eContainer } = e2eMysqlNames(context);
+export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; grep?: string; skipBuild?: boolean; localDb?: boolean }): Promise<void> {
+    const mysql = resolveE2eMysqlTarget({ localDb: options.localDb });
+    const databaseEnv = await prepareE2eDatabase(context, mysql, options.clear);
     let shouldRestoreCaddy = false;
     if (!options.skipBuild) {
         await buildShared(context);
     }
     try {
-        await startSharedServices(context);
+        await startSharedServices(context, { skipMysql: mysql.kind === 'local' });
         shouldRestoreCaddy = true;
         if (!options.skipBuild) {
-            await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
+            await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbose: context.verbose });
         }
-        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
+        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { ...databaseEnv, NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, NODE_EXTRA_CA_CERTS: caddyRootCaPath(), PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers), STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined }, verbose: context.verbose });
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
-        await docker.removeContainer(e2eContainer, context.verbose);
+        // A MySQL that was already running is left alone: it is not ours to stop.
+        if (mysql.kind === 'container') {
+            await docker.removeContainer(testMysqlNames(context, 'e2e').container, context.verbose);
+        }
         if (shouldRestoreCaddy) {
             try {
                 await CaddyService.reload(context);
@@ -280,18 +292,47 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
     return dbPort;
 }
 
-async function startTestMysql(context: CliContext, clear: boolean): Promise<string> {
-    const names = testMysqlNames(context);
-    console.log(clear ? `Starting fresh test MySQL (${names.container})...` : `Starting test MySQL (${names.container})...`);
+/**
+ * Start the MySQL container of a test kind and return the host port it is mapped to.
+ */
+async function startTestMysql(context: CliContext, kind: TestMysqlKind, clear: boolean): Promise<string> {
+    const names = testMysqlNames(context, kind);
+    const label = testMysqlKinds[kind];
+    console.log(clear ? `Starting fresh ${label} (${names.container})...` : `Starting ${label} (${names.container})...`);
     const dbPort = await ensureTestMysql(context, names, clear);
-    console.log(`Test MySQL is mapped to ${localIpv4Host}:${dbPort}.`);
+    console.log(`Mapped ${label} to ${localIpv4Host}:${dbPort}.`);
     return dbPort;
 }
 
-async function startE2eMysql(context: CliContext, clear: boolean): Promise<string> {
-    const names = e2eMysqlNames(context);
-    console.log(clear ? `Starting fresh e2e MySQL (${names.container})...` : `Starting e2e MySQL (${names.container})...`);
-    const dbPort = await ensureTestMysql(context, names, clear);
-    console.log(`E2E MySQL is mapped to ${localIpv4Host}:${dbPort}.`);
-    return dbPort;
+/**
+ * Get the MySQL of this e2e run ready and return the environment the Playwright process needs to
+ * reach it: where to connect, which databases belong to this worktree, and whether they have to be
+ * dropped first.
+ */
+async function prepareE2eDatabase(context: CliContext, mysql: E2eMysqlTarget, clear: boolean): Promise<NodeJS.ProcessEnv> {
+    const databasePrefix = { [playwrightDatabasePrefixVariable]: buildPlaywrightDatabasePrefix(context.instance) };
+
+    if (mysql.kind === 'container') {
+        return { ...databasePrefix, DB_PORT: await startTestMysql(context, 'e2e', clear) };
+    }
+
+    if (!await isPortListening(mysql.port)) {
+        // The shared MySQL container is not started for a local run, so point at it by name when
+        // that is the server this run was configured to use.
+        const sharedHint = mysql.port === buildPorts(context).mysql ? ' That is the port of the shared MySQL container: `stam services up` starts it.' : '';
+        throw new Error(`No MySQL is listening on ${localhostPort(mysql.port)}.${sharedHint} Start it, point ${e2eMysqlPortVariable} at the port it listens on, or pass --no-local-db to run against an e2e MySQL container instead.`);
+    }
+
+    console.log(`Using the MySQL already running on ${localhostPort(mysql.port)}.`);
+
+    return {
+        ...databasePrefix,
+        DB_PORT: String(mysql.port),
+        [playwrightDatabaseUserVariable]: mysql.user,
+        [playwrightDatabasePasswordVariable]: mysql.password,
+        // There is no data volume to drop here, so `--clear` drops the worker databases themselves.
+        // The Playwright global setup does that: it knows which slots this run reserved, and a
+        // database of a run in another worktree must survive.
+        [playwrightClearDatabasesVariable]: clear ? 'true' : undefined,
+    };
 }

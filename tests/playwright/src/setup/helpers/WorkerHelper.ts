@@ -154,6 +154,10 @@ class WorkerHelperInstance {
             TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment]);
         }
 
+        // After the permanent overrides above: clearPermanentOverrides() dropped the ones of the
+        // previous load.
+        DatabaseHelper.applyCredentials();
+
         if (STAMHOOFD.singleOrganization) {
             throw new Error('Something went wrong while setting the environment: singleOrganization');
         }

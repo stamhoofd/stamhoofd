@@ -90,6 +90,8 @@ Useful environment variables:
 - `STAMHOOFD_PORT_OFFSET` overrides the deterministic port offset.
 - `STAMHOOFD_DOMAIN` overrides the shared local domain, defaulting to `stamhoofd`.
 - `MYSQL_PORT` overrides the local MySQL host port, defaulting to `3307`.
+- `STAMHOOFD_E2E_MYSQL_PORT` runs the e2e tests against a MySQL that is already running on `127.0.0.1` instead of starting a container for them (see Tests).
+- `STAMHOOFD_E2E_MYSQL_USER` and `STAMHOOFD_E2E_MYSQL_PASSWORD` override the credentials of that MySQL, defaulting to `root` / `root`.
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE` tunes the MySQL container InnoDB buffer pool size (e.g. `512M`, `1G`), defaulting to `4G`.
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container InnoDB buffer pool instances defaulting to `4`.
 - `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
@@ -183,6 +185,20 @@ yarn stam test e2e --clear
 
 Use `--workers <number>` to override Playwright's default worker count for a run.
 Use `--extra` to include tests tagged `@extra`.
+
+#### Running e2e tests without a MySQL container
+
+A MySQL that is already running on this machine can serve the e2e tests instead, which skips both the e2e MySQL container and the shared `stamhoofd-mysql` container (the e2e tests never use the development database):
+
+```bash
+yarn stam test e2e --local-db                          # MySQL on 127.0.0.1:3306
+STAMHOOFD_E2E_MYSQL_PORT=3307 yarn stam test e2e       # the shared stamhoofd-mysql container
+STAMHOOFD_E2E_MYSQL_PORT=3306 STAMHOOFD_E2E_MYSQL_USER=tests STAMHOOFD_E2E_MYSQL_PASSWORD=secret yarn stam test e2e
+```
+
+Set `STAMHOOFD_E2E_MYSQL_PORT` in your shell profile to make this the default, and pass `--no-local-db` for a single run that should use a container after all. The server has to be reachable already: the CLI never starts or stops it, and `--clear` drops the worker databases of the run instead of a data volume.
+
+The worker databases are named `stamhoofd-playwright[-<instance>]-<slot>`, after the slot a worker runs on. Since a run reserves a block of slots no other run on this machine uses, several runs can share one MySQL server without sharing a database. Unit tests still always use a container: they all use the same `stamhoofd-tests` database.
 
 Run the full validation flow with:
 

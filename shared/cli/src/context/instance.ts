@@ -1,6 +1,6 @@
 import { slug } from './workspace.js';
 
-function checksum(value: string): number {
+export function checksum(value: string): number {
     let hash = 0;
     for (const char of value) {
         hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;

@@ -1,3 +1,4 @@
+import { shouldClearPlaywrightDatabases } from '@stamhoofd/cli';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { CaddyHelper } from './helpers/CaddyHelper.js';
 import { DatabaseHelper } from './helpers/DatabaseHelper.js';
@@ -17,20 +18,25 @@ export default async function globalSetup() {
         );
     }
 
+    DatabaseHelper.applyCredentials();
+
     const frontendBuilder = new FrontendBuilder();
     const caddyHelper = new CaddyHelper();
+    const workerCount = getWorkerCount();
 
-    // The SSO server is only reachable once its Caddy route is in place, so it starts after the
-    // routes are configured. Runs next to the frontend build, which takes far longer.
-    const configureCaddyAndStartSso = async () => {
-        const workerCount = getWorkerCount();
-        if (!await caddyHelper.isRunning()) {
-            console.log('Starting CI Caddy...');
-            await caddyHelper.start();
-            console.log('CI Caddy started.');
-        }
-        await caddyHelper.configure(workerCount);
+    if (!await caddyHelper.isRunning()) {
+        console.log('Starting CI Caddy...');
+        await caddyHelper.start();
+        console.log('CI Caddy started.');
+    }
 
+    // Reserves the block of slots of this run: every port, domain and worker database is derived
+    // from it, so nothing may run before this completed.
+    await caddyHelper.configure(workerCount);
+
+    // The SSO server is only reachable once its Caddy route is in place. Runs next to the frontend
+    // build and the migrations, which take far longer.
+    const startSso = async () => {
         console.log('Starting SSO server...');
         await SsoHelper.start(workerCount);
         console.log('SSO server started.');
@@ -45,18 +51,22 @@ export default async function globalSetup() {
     };
 
     const migrateDatabases = async () => {
-        const workerCount = getWorkerCount();
         const { run: runMigrations } = await import('@stamhoofd/backend/migrate');
+        const clear = shouldClearPlaywrightDatabases();
 
         for (let workerId = 0; workerId < workerCount; workerId += 1) {
             const database = DatabaseHelper.getDatabaseName(workerId.toString());
+            if (clear) {
+                console.log(`Dropping ${database}...`);
+                await DatabaseHelper.dropDatabase(database);
+            }
             console.log(`Migrating ${database}...`);
             TestUtils.setEnvironment('DB_DATABASE', database);
             await runMigrations();
         }
     };
 
-    for (const promise of [configureCaddyAndStartSso(), buildFrontend(), migrateDatabases()]) {
+    for (const promise of [startSso(), buildFrontend(), migrateDatabases()]) {
         await promise;
     }
 }

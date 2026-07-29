@@ -3,6 +3,7 @@ export { buildDevelopmentEnvironment } from './config/development-config.js';
 export { createS3Client, type S3ClientEnvironment } from './config/s3-client.js';
 export { caddyAdminPort, localIpv4Host } from './config/shared-service-config.js';
 export { buildCaddyServiceProfile, buildSharedServiceProfile } from './config/shared-service-profile.js';
+export { playwrightDatabaseCredentials, playwrightDatabaseName, shouldClearPlaywrightDatabases } from './config/test-database-config.js';
 export { createContext } from './context/create-context.js';
 export { getProjectPath } from './context/project-path.js';
 export { pruneStaleRouteManifests, removeOwnRouteManifests, removeRouteManifest, writeRouteManifest, type CaddyRouteOptions } from './runtime/manifest-store.js';
