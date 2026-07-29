@@ -1,137 +1,11 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
 import { sendEmailTemplate } from '@stamhoofd/models';
-import { validateDNSRecords } from '@stamhoofd/models/helpers/DNSValidator.js';
-import { DNSRecordStatus, EmailTemplateType, Replacement, STPackageType } from '@stamhoofd/structures';
+import { EmailTemplateType, Replacement, STPackageType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 
-/**
- * Owns the notification emails Stamhoofd sends to the administrators of an organization: the mail
- * domain (DNS) state changes and the drip emails.
- *
- * Composing these emails needs the platform (via the shared email builder) and they are all sent
- * without an organization as sender (`sendEmailTemplate(null, ...)`), so they are sent from Stamhoofd
- * itself. Models have no request context to resolve the platform they belong to, so both the decision
- * of which template to send and the sending itself live here instead of on Organization.
- *
- * updateDNSRecords moved along with them: every state transition it makes exists to decide whether the
- * organization may send email and which notification its admins receive, so splitting the state machine
- * from the emails would only spread one decision over two layers.
- */
 export class OrganizationEmailService {
-    static async updateDNSRecords(organization: Organization) {
-        // Check initial status
-        let isValidRecords = true;
-        for (const record of organization.privateMeta.dnsRecords) {
-            if (record.status !== DNSRecordStatus.Valid) {
-                isValidRecords = false;
-            }
-        }
-
-        const { allValid } = await validateDNSRecords(organization.privateMeta.dnsRecords);
-
-        if (organization.registerDomain ?? organization.privateMeta.pendingRegisterDomain) {
-            const registerDomainRecord = (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain) + '.';
-            const records = organization.privateMeta.dnsRecords.filter(r => r.name === registerDomainRecord);
-            const areRegisterDomainRecordsValid = records.length === 0 || records.every(r => r.status === DNSRecordStatus.Valid);
-
-            if (areRegisterDomainRecordsValid) {
-                // We can setup the register domain if needed
-                if (organization.privateMeta.pendingRegisterDomain !== null) {
-                    organization.registerDomain = organization.privateMeta.pendingRegisterDomain;
-                    organization.privateMeta.pendingRegisterDomain = null;
-
-                    console.log('Did set register domain for ' + organization.id + ' to ' + organization.registerDomain);
-                }
-            } else {
-                // Clear register domain
-                if (organization.registerDomain) {
-                    // We need to clear it, to prevent sending e-mails with invalid links
-                    organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain;
-                    organization.registerDomain = null;
-
-                    console.log('Cleared register domain for ' + organization.id + ' because of invalid non txt records');
-                }
-            }
-        }
-
-        if (allValid) {
-            if (organization.privateMeta.pendingMailDomain !== null) {
-                organization.privateMeta.mailDomain = organization.privateMeta.pendingMailDomain;
-                organization.privateMeta.pendingMailDomain = null;
-            }
-
-            const wasUnstable = organization.serverMeta.isDNSUnstable;
-            organization.serverMeta.markDNSValid();
-
-            const didSendDomainSetupMail = organization.serverMeta.didSendDomainSetupMail;
-            const didSendWarning = organization.serverMeta.DNSRecordWarningCount > 0;
-            organization.serverMeta.DNSRecordWarningCount = 0;
-
-            const wasActive = organization.privateMeta.mailDomainActive;
-            await organization.updateAWSMailIdenitity();
-
-            // yay! Do not Save until after doing AWS changes
-            await organization.save();
-
-            if (wasUnstable && !organization.serverMeta.isDNSUnstable) {
-                console.warn('DNS settings became stable for ' + organization.name + ' ' + organization.id);
-
-                await this.sendEmailTemplate(organization, {
-                    type: EmailTemplateType.OrganizationStableDNS,
-                    bcc: true,
-                });
-            } else if (!wasActive && organization.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning) && !organization.serverMeta.isDNSUnstable) {
-                organization.serverMeta.didSendDomainSetupMail = true;
-                await organization.save();
-
-                if (!didSendDomainSetupMail) {
-                    await this.sendEmailTemplate(organization, {
-                        type: EmailTemplateType.OrganizationDNSSetupComplete,
-                    });
-                } else {
-                    await this.sendEmailTemplate(organization, {
-                        type: EmailTemplateType.OrganizationValidDNS,
-                    });
-                }
-            }
-        } else {
-            // DNS settings gone broken
-            if (organization.privateMeta.mailDomain) {
-                organization.privateMeta.pendingMailDomain = organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain;
-                organization.privateMeta.mailDomain = null;
-            }
-
-            const wasDNSUnstable = organization.serverMeta.isDNSUnstable;
-
-            organization.serverMeta.markDNSFailure();
-
-            // disable AWS emails
-            organization.privateMeta.mailDomainActive = false;
-
-            // save
-            await organization.save();
-
-            if (!wasDNSUnstable && organization.serverMeta.isDNSUnstable) {
-                // DNS became instable
-                console.warn('DNS settings became instable for ' + organization.name + ' ' + organization.id);
-
-                await this.sendEmailTemplate(organization, {
-                    type: EmailTemplateType.OrganizationUnstableDNS,
-                    bcc: true,
-                });
-            } else if (!organization.serverMeta.isDNSUnstable && organization.serverMeta.didSendDomainSetupMail && organization.serverMeta.DNSRecordWarningCount == 0) {
-                organization.serverMeta.DNSRecordWarningCount += 1;
-                await organization.save();
-
-                await this.sendEmailTemplate(organization, {
-                    type: EmailTemplateType.OrganizationInvalidDNS,
-                });
-            }
-        }
-    }
-
     static async sendEmailTemplate(organization: Organization, data: {
         type: EmailTemplateType;
         personal?: boolean;
@@ -156,7 +30,6 @@ export class OrganizationEmailService {
             },
         ];
 
-        // Create e-mail builder
         await sendEmailTemplate(null, {
             replaceAll,
             recipients,
