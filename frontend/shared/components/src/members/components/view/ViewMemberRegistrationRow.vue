@@ -22,10 +22,10 @@
             <p v-if="description.type === 'text'" class="style-description-small pre-wrap" v-text="description.text" />
             <p v-else class="style-description-small pre-wrap">
                 <span>{{ description.label }}: </span>
-                <a :href="description.url" target="_blank" class="inline-link" @click.stop>
+                <button type="button" class="inline-link" @click.stop="download(description)">
                     <span :class="'icon text-size ' + description.icon" />
                     <span>{{ description.name }}</span>
-                </a>
+                </button>
             </p>
         </template>
 
@@ -71,6 +71,8 @@ import { GroupType, RecordFileAnswer, RecordImageAnswer } from '@stamhoofd/struc
 import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
+import { downloadFile } from '../../../helpers/downloadFile.ts';
+import { Toast } from '../../../overlays/Toast';
 import { useNow } from '#hooks/useNow.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
@@ -105,7 +107,7 @@ const defaultAgeGroup = computed(() => {
     if (group.value.type !== GroupType.Membership) {
         return null;
     }
-    
+
     if (!group.value.defaultAgeGroupId) {
         return $t(`%10I`);
     }
@@ -158,7 +160,7 @@ const descriptions = computed<Description[]>(() => {
                 label: answer.settings.name.toString(),
                 url: answer.file.getPublicPath(),
                 icon: answer.file.icon,
-                name: answer.file.name ?? answer.file.getPublicPath(),
+                name: answer.file.name ?? answer.settings.name?.toString() ?? answer.file.getPublicPath(),
             });
             continue;
         }
@@ -170,7 +172,7 @@ const descriptions = computed<Description[]>(() => {
                 label: answer.settings.name.toString(),
                 url: answer.image.getPublicPath(),
                 icon: answer.image.source.icon,
-                name: answer.image.source.name ?? answer.image.getPublicPath(),
+                name: answer.image.source.name ?? answer.settings.name?.toString() ?? answer.image.getPublicPath(),
             });
             continue;
         }
@@ -187,6 +189,16 @@ const descriptions = computed<Description[]>(() => {
 
     return descriptions;
 });
+
+// These files are uploaded by a member, so we download them instead of sending anyone to their url
+function download(description: Description & { type: 'link' }) {
+    // A file without a name is shown with its url, which we don't want to use as a filename
+    const filename = description.name === description.url ? $t('Bestand') : description.name;
+
+    downloadFile(description.url, filename).catch((e) => {
+        Toast.fromError(e).show();
+    });
+}
 
 function editRegistration(event: any) {
     if (isDeactivated.value) {
