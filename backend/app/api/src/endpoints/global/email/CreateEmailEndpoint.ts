@@ -8,6 +8,7 @@ import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct
 import { Context } from '../../../helpers/Context.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
+import { EmailSendService } from '../../../services/EmailSendService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -142,7 +143,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     human: $t('%1Cw'),
                 });
             }
-            await model.queueForSending();
+            await EmailSendService.queueForSending(model);
         }
 
         // Delete open drafts with the same content, from the same user

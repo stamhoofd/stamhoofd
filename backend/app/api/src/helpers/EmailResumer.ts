@@ -2,6 +2,7 @@ import { Email, Organization, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { EmailStatus } from '@stamhoofd/structures';
 import { ContextInstance } from './Context.js';
+import { EmailSendService } from '../services/EmailSendService.js';
 
 export async function resumeEmails() {
     const query = SQL.select()
@@ -28,7 +29,7 @@ export async function resumeEmails() {
 
         try {
             await ContextInstance.startForUser(user, organization, async () => {
-                await email.resumeSending();
+                await EmailSendService.resumeSending(email);
             });
         } catch (e) {
             console.error('Error resuming email', email.id, e);
