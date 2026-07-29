@@ -73,6 +73,7 @@
         "@stamhoofd/logging": "2.137.4",
         "@stamhoofd/models": "2.137.4",
         "@stamhoofd/object-differ": "2.137.4",
+        "@stamhoofd/object-storage": "2.137.4",
         "@stamhoofd/queues": "2.137.4",
         "@stamhoofd/sql": "2.137.4",
         "@stamhoofd/structures": "2.137.4",

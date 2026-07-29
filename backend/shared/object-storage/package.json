@@ -1,0 +1,32 @@
+{
+    "name": "@stamhoofd/object-storage",
+    "version": "2.137.4",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage",
+        "typecheck": "tsc --build tsconfig.test.json"
+    },
+    "devDependencies": {
+        "vitest": "4.1.10"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}

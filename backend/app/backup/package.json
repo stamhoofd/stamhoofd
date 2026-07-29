@@ -14,10 +14,12 @@
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "lint": "eslint",
-        "start": "yarn -s build && node --enable-source-maps ./dist/index.js"
+        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "test": "vitest"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "3.1090.0",
+        "@aws-sdk/lib-storage": "3.1090.0",
         "@simonbackx/simple-database": "1.37.1",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.22.0",
@@ -27,6 +29,7 @@
         "@stamhoofd/backend-middleware": "2.137.4",
         "@stamhoofd/crons": "2.137.4",
         "@stamhoofd/logging": "2.137.4",
+        "@stamhoofd/object-storage": "2.137.4",
         "@stamhoofd/queues": "2.137.4",
         "@stamhoofd/types": "2.137.4",
         "@stamhoofd/utility": "2.137.4",
@@ -37,9 +40,13 @@
         "mysql2": "3.23.1"
     },
     "devDependencies": {
+        "@stamhoofd/test-utils": "2.137.4",
+        "@stamhoofd/structures": "2.137.4",
         "@types/formidable": "3.5.1",
         "@types/luxon": "3.7.2",
-        "@types/node": "22.20.1"
+        "@types/node": "22.20.1",
+        "nock": "14.0.16",
+        "vitest": "4.1.10"
     },
     "license": "UNLICENCED",
     "publishConfig": {

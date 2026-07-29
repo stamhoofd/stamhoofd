@@ -3,6 +3,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { File } from '@stamhoofd/structures';
+import { buildObjectKey, buildStoragePrefix } from '@stamhoofd/object-storage';
 import { Formatter } from '@stamhoofd/utility';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
@@ -118,32 +119,22 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const fileContent = await fs.readFile(file.filepath);
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
-        if (prefix.length > 0) {
-            prefix += '/';
-        }
-
-        const envPrefix = STAMHOOFD.environment !== 'production' ? STAMHOOFD.environment : null;
-
-        if (envPrefix && envPrefix !== (STAMHOOFD.SPACES_PREFIX ?? '')) {
-            prefix += envPrefix + '/';
-        }
-
-        // Prepend user id to the file path
-        if (request.query.isPrivate && user) {
-            // Private files
-            prefix += 'users/' + user.id + '/';
-        } else {
-            // Public files
-            prefix += 'p/';
-        }
-
         // Also include the source, in private mode
         const fileId = uuidv4();
         const uploadExt = File.contentTypeToExtension(file.mimetype ?? '') ?? '';
 
         const filenameWithoutExt = file.originalFilename ? File.removeExtension(file.originalFilename) : fileId;
-        const key = prefix + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
+        const key = buildObjectKey({
+            root: buildStoragePrefix({
+                spacesPrefix: STAMHOOFD.SPACES_PREFIX,
+                environment: STAMHOOFD.environment,
+            }),
+            date: new Date(),
+            isPrivate: request.query.isPrivate,
+            userId: user?.id,
+            fileId,
+            filename: Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''),
+        });
 
         const fileStruct = new File({
             id: fileId,

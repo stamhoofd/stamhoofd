@@ -1,7 +1,8 @@
 import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { Database } from '@simonbackx/simple-database';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
+import type { ObjectStorageConfig } from '@stamhoofd/types/Environment';
 import { Formatter } from '@stamhoofd/utility';
 import chalk from 'chalk';
 import { exec } from 'child_process';
@@ -11,6 +12,7 @@ import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import path from 'path';
 import util from 'util';
+import { getFileSyncHealth } from './file-sync.js';
 const execPromise = util.promisify(exec);
 
 // Normally we'll have ±24 binary logs per day (if max size is set to 50MB)
@@ -52,6 +54,23 @@ async function hashFile(path: string, algo = 'md5') {
     return hashFunc.digest('base64'); // will return hash, formatted to HEX
 }
 
+export class BackupFileSyncHealth extends AutoEncoder {
+    @field({ decoder: StringDecoder, nullable: true })
+    lastRunAt: string | null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    lastFullReverifyAt: string | null;
+
+    @field({ decoder: IntegerDecoder })
+    pendingCopies: number;
+
+    @field({ decoder: IntegerDecoder })
+    missingFileCount: number;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    error: string | null;
+}
+
 export class BackupHealth extends AutoEncoder {
     @field({ decoder: BackupDateSize, nullable: true })
     lastBackup: BackupDateSize | null;
@@ -61,6 +80,9 @@ export class BackupHealth extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     status: 'ok' | 'error';
+
+    @field({ decoder: BackupFileSyncHealth, nullable: true })
+    fileSync: BackupFileSyncHealth | null;
 }
 
 export function getHealth(): BackupHealth {
@@ -83,6 +105,15 @@ export function getHealth(): BackupHealth {
         }
     }
 
+    const syncHealth = STAMHOOFD.fileSync ? getFileSyncHealth() : null;
+    if (syncHealth && (
+        !syncHealth.lastRunAt
+        || now.getTime() - syncHealth.lastRunAt.getTime() > 3 * 60 * 60 * 1000
+        || syncHealth.error
+    )) {
+        status = 'error';
+    }
+
     return BackupHealth.create({
         lastBinaryBackup: LAST_BINARY_BACKUP
             ? BackupDateSize.create({
@@ -93,6 +124,15 @@ export function getHealth(): BackupHealth {
             ? BackupDateSize.create({
                     date: Formatter.dateTimeIso(LAST_BACKUP.date),
                     size: Formatter.fileSize(LAST_BACKUP.size),
+                })
+            : null,
+        fileSync: syncHealth
+            ? BackupFileSyncHealth.create({
+                    lastRunAt: syncHealth.lastRunAt ? Formatter.dateTimeIso(syncHealth.lastRunAt) : null,
+                    lastFullReverifyAt: syncHealth.lastFullReverifyAt ? Formatter.dateTimeIso(syncHealth.lastFullReverifyAt) : null,
+                    pendingCopies: syncHealth.pendingCopies,
+                    missingFileCount: syncHealth.missingFileCount,
+                    error: syncHealth.error,
                 })
             : null,
         status,
@@ -241,15 +281,32 @@ export async function diskSpace(): Promise<number> {
     return size;
 }
 
-export function getS3Client() {
-    return new S3Client({
-        endpoint: 'https://' + STAMHOOFD.SPACES_ENDPOINT,
+const s3Clients = new Map<string, S3Client>();
+
+export function getS3Client(config?: ObjectStorageConfig) {
+    const resolvedConfig: ObjectStorageConfig = config ?? {
+        endpoint: STAMHOOFD.SPACES_ENDPOINT,
+        bucket: STAMHOOFD.SPACES_BUCKET,
+        key: STAMHOOFD.SPACES_KEY,
+        secret: STAMHOOFD.SPACES_SECRET,
         region: STAMHOOFD.AWS_REGION,
+    };
+    const cacheKey = JSON.stringify(resolvedConfig);
+    const existing = s3Clients.get(cacheKey);
+    if (existing) {
+        return existing;
+    }
+
+    const client = new S3Client({
+        endpoint: 'https://' + resolvedConfig.endpoint,
+        region: resolvedConfig.region ?? 'us-east-1',
         credentials: {
-            accessKeyId: STAMHOOFD.SPACES_KEY,
-            secretAccessKey: STAMHOOFD.SPACES_SECRET,
+            accessKeyId: resolvedConfig.key,
+            secretAccessKey: resolvedConfig.secret,
         },
     });
+    s3Clients.set(cacheKey, client);
+    return client;
 }
 
 export function getBackupBaseFileName(date: Date) {

@@ -26,6 +26,7 @@ const globalSharedPackages = [
 const backendSharedPackages = [
     'backend/shared/queues',
     'backend/shared/env',
+    'backend/shared/object-storage',
     'backend/shared/i18n',
     'backend/shared/sql',
     'backend/shared/email',
@@ -80,10 +81,12 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'eslint', path: 'shared/eslint', needsDatabase: false },
     { name: 'utility', path: 'shared/utility', needsDatabase: false },
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
+    { name: 'object-storage', path: 'backend/shared/object-storage', needsDatabase: false, typecheck: true },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
     { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
+    { name: 'backup', path: 'backend/app/backup', needsDatabase: false },
     { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;

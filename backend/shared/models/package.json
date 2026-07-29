@@ -54,6 +54,7 @@
         "@simonbackx/simple-database": "1.37.1",
         "@stamhoofd/backend-i18n": "*",
         "@stamhoofd/email": "*",
+        "@stamhoofd/object-storage": "*",
         "@stamhoofd/queues": "*",
         "@stamhoofd/sql": "*",
         "@stamhoofd/structures": "*",
