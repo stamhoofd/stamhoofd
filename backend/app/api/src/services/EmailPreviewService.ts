@@ -8,15 +8,8 @@ import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacem
 import type { Language } from '@stamhoofd/types/Language';
 
 /**
- * Owns building the read-only structures of an email: the preview an administrator sees while
- * composing or browsing emails, and the version of a sent email a user sees in the member portal.
- *
- * Both fill (and strip) the recipient replacements for display instead of for sending, and filling
- * replacements needs the platform. Models have no request context to resolve the platform they
- * belong to, so this display logic lives here instead of on the Email model.
- *
- * The Email model keeps the send pipeline (queueForSending, resumeSending, buildRecipients) and the
- * data it needs (getLanguages, getFromAddress, getCombinedHtml), which is used from here as well.
+ * Builds the read-only structures of an email: the preview an administrator sees while composing or
+ * browsing emails, and the version of a sent email a user sees in the member portal.
  */
 export class EmailPreviewService {
     /**

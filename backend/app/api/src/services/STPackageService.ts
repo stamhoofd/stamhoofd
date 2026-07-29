@@ -266,10 +266,6 @@ export class STPackageService {
     /**
      * Send the expiration reminder of a package if one is due, and record on the package that it was
      * sent (also when nothing was sent, so a package is only ever considered once).
-     *
-     * Composing the reminder needs the administrators of the organization, and those are filtered
-     * with the platform. Models have no request context to resolve the platform they belong to, so
-     * this lives here instead of on STPackage.
      */
     static async sendExpiryEmail(pack: STPackage) {
         if (pack.validAt === null) {

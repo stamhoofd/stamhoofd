@@ -6,18 +6,11 @@ import { Formatter } from '@stamhoofd/utility';
 
 /**
  * An order with its webshop, and the organization of that webshop, loaded.
- *
- * The order emails need both, so they are required by the signature instead of being fetched (or
- * assumed) here: the caller already has them in almost every case.
  */
 export type OrderWithWebshop = Order & { webshop: Webshop & { organization: Organization } };
 
 /**
- * Owns the lifecycle transitions of an order (valid / paid) and the customer emails they send.
- *
- * Sibling models already have their transitions in a service (BalanceItemService, RegistrationService,
- * STPackageService); orders were the exception. Composing an email also needs the email templates and
- * the platform behind them, which the lowest model layer must not resolve, so it lives here.
+ * The lifecycle transitions of an order (valid / paid) and the customer emails they send.
  */
 export class OrderService {
     /**

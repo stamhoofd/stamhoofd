@@ -4,12 +4,8 @@ import { EmailVerificationCode, Platform, sendEmailTemplate, User } from '@stamh
 import { EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
 
 /**
- * Owns sending the verification emails for an EmailVerificationCode.
- *
- * The code itself (generating, storing, verifying and rate limiting it) stays on the model: that is
- * data access. Building the verification url and composing the email is not, and it needs the
- * platform name as a fallback when the code is not scoped to an organization. Models cannot resolve
- * the platform they belong to, so that logic lives here.
+ * Sends the verification emails for an EmailVerificationCode. The code itself is generated, stored
+ * and verified on the model.
  */
 export class VerificationCodeService {
     static getEmailVerificationUrl(code: EmailVerificationCode, user: User, organization: Organization | null, i18n: I18n) {
