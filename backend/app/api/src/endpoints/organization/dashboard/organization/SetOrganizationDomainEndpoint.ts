@@ -9,6 +9,7 @@ import NodeRSA from 'node-rsa';
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
+import { OrganizationDNSService } from '../../../../services/OrganizationDNSService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -169,7 +170,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 }));
             } else {
                 if (oldMailDomain) {
-                    organization.deleteAWSMailIdenitity(oldMailDomain).catch(console.error);
+                    OrganizationDNSService.deleteAWSMailIdenitity(organization, oldMailDomain).catch(console.error);
                 }
 
                 if (organization.serverMeta.privateDKIMKey && organization.serverMeta.publicDKIMKey) {
@@ -188,7 +189,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         } else {
             // Validate DNS-records if not empty
             console.log('Validating domains');
-            await organization.updateDNSRecords();
+            await OrganizationDNSService.updateDNSRecords(organization);
         }
 
         console.log('Done.');
