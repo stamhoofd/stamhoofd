@@ -1,6 +1,7 @@
 import type { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
-import { EmailVerificationCode, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Platform, User } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
 
 /**

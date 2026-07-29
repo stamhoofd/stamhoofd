@@ -7,14 +7,8 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
-import { EmailRecipient } from '../models/EmailRecipient.js';
-import { CachedBalance } from '../models/CachedBalance.js';
-import { EmailTemplate } from '../models/EmailTemplate.js';
-import type { Group } from '../models/Group.js';
-import type { Organization } from '../models/Organization.js';
-import { Platform } from '../models/Platform.js';
-import { User } from '../models/User.js';
-import type { Webshop } from '../models/Webshop.js';
+import type { Group, Organization, Webshop } from '@stamhoofd/models';
+import { CachedBalance, EmailRecipient, EmailTemplate, Member, Platform, User } from '@stamhoofd/models';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;
@@ -691,7 +685,6 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
             if (recipientUser) {
                 const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
                 const suffixes: string[] = [];
-                const { Member } = await import('../models/Member.js');
                 const memberIds = await Member.getMemberIdsForUser(recipientUser);
                 const members = await Member.getByIDs(...memberIds);
                 if (members.length > 0) {

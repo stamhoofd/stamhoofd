@@ -1,7 +1,7 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 
-import { getDefaultEmailFrom, sendEmailTemplate } from '@stamhoofd/models';
+import { getDefaultEmailFrom, sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import { EmailTemplateType, Recipient } from '@stamhoofd/structures';
 import { Context } from '../../helpers/Context.js';
 

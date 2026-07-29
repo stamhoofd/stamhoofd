@@ -2,7 +2,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
 import { Email, EmailRecipient, Organization, Platform } from '@stamhoofd/models';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements } from '@stamhoofd/models/helpers/EmailBuilder.js';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements } from '../helpers/EmailBuilder.js';
 import { errorToSimpleErrors } from '@stamhoofd/models/helpers/errorToSimpleErrors.js';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';

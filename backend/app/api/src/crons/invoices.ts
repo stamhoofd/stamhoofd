@@ -1,7 +1,8 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { registerCron } from '@stamhoofd/crons';
 import type { Invoice } from '@stamhoofd/models';
-import { Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
+import { Organization, Payment } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { EmailTemplateType, InvoiceStruct, PaymentStatus, Replacement } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';

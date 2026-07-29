@@ -1,6 +1,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Member, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Group, MolliePayment, Organization, PayconiqPayment, Payment, Platform, sendEmailTemplate, UsedRegisterCode } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Group, MolliePayment, Organization, PayconiqPayment, Payment, Platform, UsedRegisterCode } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Replacement, VATExcemptReason, Version } from '@stamhoofd/structures';

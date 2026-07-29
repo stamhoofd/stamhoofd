@@ -1,6 +1,7 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization, Payment, Ticket } from '@stamhoofd/models';
-import { Order, sendEmailTemplate, Webshop, WebshopCounter } from '@stamhoofd/models';
+import { Order, Webshop, WebshopCounter } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { EmailTemplateType, OrderStatus, PaymentMethod, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

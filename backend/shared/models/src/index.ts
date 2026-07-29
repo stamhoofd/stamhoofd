@@ -1,5 +1,4 @@
 // Helpers
-export * from './helpers/EmailBuilder.js';
 export * from './helpers/RateLimiter.js';
 export * from './helpers/WebshopCounter.js';
 

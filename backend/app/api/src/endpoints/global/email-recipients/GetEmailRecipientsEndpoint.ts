@@ -5,7 +5,8 @@ import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, P
 
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailRecipient, fillRecipientReplacements } from '@stamhoofd/models';
+import { EmailRecipient } from '@stamhoofd/models';
+import { fillRecipientReplacements } from '../../../helpers/EmailBuilder.js';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';

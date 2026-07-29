@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, User } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import type { EmailTemplateType } from '@stamhoofd/structures';
 import { PermissionLevel, Recipient, RecordCategory, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
