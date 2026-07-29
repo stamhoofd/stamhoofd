@@ -13,6 +13,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { QueueHandler } from '@stamhoofd/queues';
+import { OrganizationAdminService } from '../../../../services/OrganizationAdminService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -121,11 +122,11 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     continue;
                 }
 
-                customerUser = customerUser ?? (payingOrganization ? (await payingOrganization.getFullAdmins())[0] : null);
+                customerUser = customerUser ?? (payingOrganization ? (await OrganizationAdminService.getFullAdmins(payingOrganization))[0] : null);
                 const customer = PaymentCustomer.create({
                     firstName: customerUser?.firstName,
                     lastName: customerUser?.lastName,
-                    email: customerUser?.email ?? (payingOrganization ? (await payingOrganization.getReplyEmails())[0].email : null),
+                    email: customerUser?.email ?? (payingOrganization ? (await OrganizationAdminService.getReplyEmails(payingOrganization))[0].email : null),
                     company: payingOrganization?.defaultCompanies[0],
                 });
 

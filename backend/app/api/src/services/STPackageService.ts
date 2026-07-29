@@ -5,6 +5,7 @@ import type { Company } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
+import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class STPackageService {
     static async getActivePackages(organizationId: string) {
@@ -335,7 +336,7 @@ export class STPackageService {
             return;
         }
 
-        const admins = await organization.getFullAdmins();
+        const admins = await OrganizationAdminService.getFullAdmins(organization);
 
         const recipients = admins.map(admin =>
             Recipient.create({

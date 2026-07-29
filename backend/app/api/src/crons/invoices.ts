@@ -9,6 +9,7 @@ import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { isOutside } from './helpers/isOutside.js';
+import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 registerCron('invoices', invoices);
 
@@ -148,7 +149,7 @@ async function createInvoicesFor(organization: Organization) {
             template: {
                 type: EmailTemplateType.InvoiceGenerationErrors,
             },
-            recipients: await organization.getAdminRecipients(),
+            recipients: await OrganizationAdminService.getAdminRecipients(organization),
             type: 'transactional',
             fromStamhoofd: true,
             defaultReplacements: [

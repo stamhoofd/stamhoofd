@@ -23,6 +23,7 @@ import { PaymentMandateService } from './PaymentMandateService.js';
 import { ReferralService } from './ReferralService.js';
 import { VATService } from './VATService.js';
 import { STPackageService } from './STPackageService.js';
+import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class PaymentService {
     static async updateReversedPaymentsFor(payment: Payment) {
@@ -238,7 +239,7 @@ export class PaymentService {
         const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
 
         await sendEmailTemplate(organization, {
-            recipients: await payingOrganization.getFinanceAdminRecipients(),
+            recipients: await OrganizationAdminService.getFinanceAdminRecipients(payingOrganization),
             defaultReplacements: [
                 Replacement.create({
                     token: 'payingOrganizationName',
@@ -275,7 +276,7 @@ export class PaymentService {
         const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
 
         await sendEmailTemplate(organization, {
-            recipients: await payingOrganization.getFinanceAdminRecipients(),
+            recipients: await OrganizationAdminService.getFinanceAdminRecipients(payingOrganization),
             defaultReplacements: [
                 Replacement.create({
                     token: 'payingOrganizationName',

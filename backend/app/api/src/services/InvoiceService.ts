@@ -10,6 +10,7 @@ import { ViesHelper } from '../helpers/ViesHelper.js';
 import { BalanceItemService } from './BalanceItemService.js';
 import { InvoicePdfService } from './InvoicePdfService.js';
 import { InvoiceXMlService } from './InvoiceXMLService.js';
+import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class InvoiceService {
     static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
@@ -436,7 +437,7 @@ export class InvoiceService {
         if (!email && invoice.payingOrganizationId) {
             const payingOrganization = await Organization.getByID(invoice.payingOrganizationId);
             if (payingOrganization) {
-                email = (await payingOrganization.getInvoicingToEmail()) ?? undefined;
+                email = (await OrganizationAdminService.getInvoicingToEmail(payingOrganization)) ?? undefined;
             }
         }
 
