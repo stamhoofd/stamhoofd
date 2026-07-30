@@ -1,11 +1,11 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerFeesTenantCron } from './helpers/registerTenantCron.js';
 import { Organization, Platform } from '@stamhoofd/models';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { STPackageService } from '../services/STPackageService.js';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 
 // Charge manual service fees every night
-registerCron('members-fees', chargeMembers);
+registerFeesTenantCron('members-fees', chargeMembers);
 
 const { iterate, isHoursAgo } = useSavedIterator(() => {
     return Organization.select();

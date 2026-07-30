@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
@@ -12,7 +12,7 @@ import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { isOutside } from './helpers/isOutside.js';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
-registerCron('invoices', invoices);
+registerTenantCron('invoices', invoices);
 
 const { iterate, isHoursAgo } = useSavedIterator(() => {
     return Organization.select();

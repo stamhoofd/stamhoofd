@@ -4,12 +4,12 @@
  * another member), its cached balance is left behind. This cron cleans up those orphaned rows.
  */
 
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { CachedBalance } from '@stamhoofd/models';
 
 let lastRunDate: number | null = null;
 
-registerCron('cleanupOrphanedCachedBalances', cleanupOrphanedCachedBalances);
+registerTenantCron('cleanupOrphanedCachedBalances', cleanupOrphanedCachedBalances);
 
 function shouldRun() {
     const now = new Date();

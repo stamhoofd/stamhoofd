@@ -1,10 +1,10 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 
 let lastRunDate: number | null = null;
 
-registerCron('disableAutoUpdateDocuments', disableAutoUpdateDocuments);
+registerTenantCron('disableAutoUpdateDocuments', disableAutoUpdateDocuments);
 
 function shouldRun() {
     const now = new Date();
