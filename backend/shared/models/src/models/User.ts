@@ -22,6 +22,12 @@ export class User extends QueryableModel {
     })
     id!: string;
 
+    /**
+     * The tenant this row belongs to. Nullable until every row is backfilled.
+     */
+    @column({ type: 'string', nullable: true })
+    tenantId: string | null = null;
+
     @column({ type: 'string', nullable: true })
     organizationId: string | null;
 
