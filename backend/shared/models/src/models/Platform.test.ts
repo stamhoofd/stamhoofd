@@ -2,6 +2,7 @@ import { PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
 import { Platform } from './Platform.js';
 import { Database } from '@simonbackx/simple-database';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { QueueHandler } from '@stamhoofd/queues';
 
 describe('Model.Platform', () => {
     describe('Shared caches', () => {
@@ -239,6 +240,27 @@ describe('Model.Platform', () => {
             expect(await Platform.getStructForTenant('1')).toBe(rootBefore);
             expect(await Platform.getStructForTenant('second-tenant')).not.toBe(otherBefore);
         });
+
+        test('one tenant loading its cache does not queue behind another', async () => {
+            await createSecondTenant();
+            await Platform.clearCacheForTenantWithoutRefresh('second-tenant');
+
+            let release!: () => void;
+            const held = new Promise<void>((resolve) => {
+                release = resolve;
+            });
+
+            // Occupy the key a process-wide cache would have used. If the per-tenant load shares it,
+            // this never resolves and the test times out.
+            const blocker = QueueHandler.schedule('Platform.loadCaches', async () => {
+                await held;
+            });
+
+            await Platform.getStructForTenant('second-tenant');
+
+            release();
+            await blocker;
+        }, 5000);
 
         test('an unknown tenant is not created on the fly', async () => {
             await expect(Platform.getForEditing('does-not-exist')).rejects.toThrow(
