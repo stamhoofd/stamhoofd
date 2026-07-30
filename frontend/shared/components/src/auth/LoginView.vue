@@ -72,7 +72,7 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { defineRoutes, onCheckRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, onCheckRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { computed, ref } from 'vue';
@@ -90,6 +90,8 @@ import EmailInput from '../inputs/EmailInput.vue';
 
 import LoginMethodButton from './LoginMethodButton.vue';
 import PlatformFooter from './PlatformFooter.vue';
+import { useForgotPassword } from './useForgotPassword.ts';
+import { useSSOTwoFactor } from './useSSOTwoFactor.ts';
 
 const props = withDefaults(
     defineProps<{
@@ -106,17 +108,7 @@ enum Routes {
     Signup = 'signup',
 }
 
-defineRoutes([
-    {
-        name: Routes.ForgotPassword,
-        url: 'wachtwoord-vergeten',
-        component: async () => (await import('./ForgotPasswordView.vue')).default,
-        defaultProperties() {
-            return {
-                initialEmail: email.value,
-            };
-        },
-    },
+defineRoute(
     {
         name: Routes.Signup,
         url: 'account-aanmaken',
@@ -127,7 +119,7 @@ defineRoutes([
             };
         },
     },
-]);
+);
 
 const errors = useErrors();
 const $context = useContext();
@@ -137,7 +129,6 @@ const appNavigate = useAppNavigate();
 const loading = ref(false);
 const email = ref(props.initialEmail);
 const password = ref('');
-const emailInput = ref<InstanceType<typeof EmailInput> | null>(null);
 const showVersionFooter = computed(() => {
     return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev';
 });
@@ -146,8 +137,17 @@ const context = useContext();
 const passwordConfig = useLoginMethod(LoginMethod.Password);
 const ssoConfig = useLoginMethod(LoginMethod.SSO);
 const googleConfig = useLoginMethod(LoginMethod.Google);
+const { gotoPasswordForgot } = useForgotPassword({ email });
+const { hasPendingSSOTwoFactor, continuePendingSSOTwoFactor, presentMfaChallenge, presentMfaSetup } = useSSOTwoFactor();
 
 onCheckRoutes(() => {
+    // An SSO login that still needs a second factor comes back here without a session:
+    // continue where the redirect left off instead of asking to sign in again.
+    if (hasPendingSSOTwoFactor()) {
+        continueSSOTwoFactor().catch(console.error);
+        return;
+    }
+
     // Try to log in on first load
     try {
         if (!ssoConfig.value || passwordConfig.value || googleConfig.value) {
@@ -165,6 +165,20 @@ onCheckRoutes(() => {
         console.error(e);
     }
 });
+
+/**
+ * Finish an SSO login that the backend held back for two-factor authentication.
+ */
+async function continueSSOTwoFactor() {
+    loading.value = true;
+    try {
+        await continuePendingSSOTwoFactor();
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    } finally {
+        loading.value = false;
+    }
+}
 
 async function startSSO(provider: LoginProviderType, automatic = false) {
     if (loading.value) {
@@ -246,15 +260,15 @@ async function submit() {
                 },
                 adjustHistory: false,
             });
+        } else if (result.mfaChallenge) {
+            await presentMfaChallenge(result.mfaChallenge);
+        } else if (result.mfaSetup) {
+            await presentMfaSetup(result.mfaSetup);
         }
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
-}
-
-async function gotoPasswordForgot() {
-    await $navigate(Routes.ForgotPassword);
 }
 
 async function openSignup() {

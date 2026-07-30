@@ -30,11 +30,11 @@
     <STList v-else-if="filteredAdmins.length > 0">
         <STListItem v-for="admin of filteredLimitedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
             <template #left>
-                <span v-if="hasFullAccess(admin)" class="icon layered" v-tooltip="$t('%Yb')">
+                <span v-if="hasFullAccess(admin)" v-tooltip="$t('%Yb')" class="icon layered">
                     <span class="icon user-admin-layer-1" />
                     <span class="icon user-admin-layer-2 yellow" />
                 </span>
-                <span v-else-if="hasEmptyAccess(admin)" class="icon layered" v-tooltip="$t('%Yc')">
+                <span v-else-if="hasEmptyAccess(admin)" v-tooltip="$t('%Yc')" class="icon layered">
                     <span class="icon user-blocked-layer-1" />
                     <span class="icon user-blocked-layer-2 red" />
                 </span>
@@ -53,12 +53,17 @@
             <p class="style-description-small">
                 {{ permissionList(admin) }}
             </p>
+            <p v-if="lastActiveDescription(admin)" class="style-description-small">
+                {{ lastActiveDescription(admin) }}
+            </p>
 
             <template #right>
+                <span v-if="hasTwoFactor([admin])" v-tooltip="$t('Deze beheerder heeft tweestapsverificatie ingeschakeld.')" class="icon privacy small gray" />
+                <span v-if="isInactive(admin)" v-tooltip="$t('Deze beheerder heeft zich al meer dan {months} maanden niet meer aangemeld.', {months: INACTIVE_ADMIN_MONTHS})" class="icon warning yellow small" />
                 <span v-if="admin.id === me?.id" class="style-tag">
                     {{ $t('%Yd') }}
                 </span>
-                <span v-else-if="!admin.hasAccount" class="icon email gray" v-tooltip="$t('%Ye')" />
+                <span v-else-if="!admin.hasAccount" v-tooltip="$t('%Ye')" class="icon email gray" />
                 <span><span class="icon gray edit" /></span>
             </template>
         </STListItem>
@@ -79,6 +84,8 @@ import type { User } from '@stamhoofd/structures';
 import { PermissionLevel, Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
+import { getLastActiveDescription, INACTIVE_ADMIN_MONTHS, isInactiveAdmin } from '#auth/userActivity.ts';
+import { hasTwoFactor } from '#auth/twoFactor.ts';
 import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins } from './hooks/useAdmins';
 import { useShowInternalAdmins } from './hooks/useShowInternalAdmins';
@@ -197,6 +204,8 @@ const editAdmin = async (user: User) => {
 
 const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
 const hasEmptyAccess = (user: User) => getPermissions(user)?.isEmpty ?? true;
+const isInactive = (user: User) => isInactiveAdmin([user]);
+const lastActiveDescription = (user: User) => getLastActiveDescription([user]);
 
 const permissionList = (user: User) => {
     const list: string[] = [];

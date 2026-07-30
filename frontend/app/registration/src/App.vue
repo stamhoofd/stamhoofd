@@ -31,7 +31,9 @@ function wrapWithModalStack(component: ComponentWithProperties) {
 }
 
 const root = new ComponentWithProperties(AuthenticatedView, {
-    loginRoot: getLoginRoot(),
+    // The login stack needs a modal stack of its own: the two-factor views are presented
+    // as modals on top of the login view, and without it they have nowhere to go.
+    loginRoot: wrapWithModalStack(getLoginRoot()),
     root: wrapWithModalStack(getRoot()),
 });
 const component = useCurrentComponent();

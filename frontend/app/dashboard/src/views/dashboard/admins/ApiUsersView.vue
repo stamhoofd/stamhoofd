@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <div v-if="!loading" class="st-view background">
+        <div v-if="!loading" class="st-view background" data-testid="api-users-view">
             <STNavigationBar :title="$t(`%K5`)">
                 <template #right>
                     <button class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
@@ -12,7 +12,7 @@
                 <p>{{ $t('%5P') }}</p>
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center" @click="createUser">
+                    <STListItem :selectable="true" class="left-center" data-testid="create-api-user" @click="createUser">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
                         </template>

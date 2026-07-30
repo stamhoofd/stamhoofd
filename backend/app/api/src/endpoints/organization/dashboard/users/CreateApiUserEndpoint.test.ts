@@ -15,6 +15,35 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
+    test('A session that did not recently authenticate cannot create a key', async () => {
+        // An API key is not covered by two-factor authentication and does not expire, so a
+        // stolen session must not be enough to mint one: the user has to prove who they
+        // are again first.
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            permissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+            organization,
+        }).create();
+
+        // A token as produced by a refresh_token rotation (never authenticatedAt).
+        const token = await Token.createToken(user);
+
+        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
+            permissions: UserPermissions.create({
+                organizationPermissions: new Map([
+                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                ]),
+            }),
+        }));
+        createRequest.headers.authorization = 'Bearer ' + token.accessToken;
+
+        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(STExpect.simpleError({
+            code: 'require_fresh_auth',
+        }));
+    });
+
     test('Only a platform admin can set the rate limits of a key', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
@@ -22,7 +51,7 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -49,7 +78,7 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -76,7 +105,7 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({

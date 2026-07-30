@@ -33,6 +33,13 @@ export class PlatformPrivateConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(OrganizationEmail), version: 272 })
     emails: OrganizationEmail[] = [];
+
+    /**
+     * When enabled, users with platform permissions are required to have two-factor
+     * authentication and are forced to enroll on their next password login.
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    requireTwoFactor = false;
 }
 
 export enum OrganizationTagType {

@@ -91,6 +91,19 @@ export class User extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 360 })
     hasPassword = false;
 
+    /**
+     * Readonly. The last time this user signed in or refreshed their session.
+     */
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    lastActiveAt: Date | null = null;
+
+    /**
+     * Readonly. Whether this user has at least one second factor (an authenticator app or
+     * a passkey) enrolled. The factors themselves are only visible to the user itself.
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    hasTwoFactor = false;
+
     get name() {
         if (!this.lastName) {
             if (!this.firstName) {

@@ -177,6 +177,7 @@ export default {
                             'TableActionsContextMenu',
                             'GeneralContextMenuView',
                             'ImportErrorView',
+                            'BoxedController',
                         ],
                     }],
                     'stamhoofd/async-route-components': 'error',

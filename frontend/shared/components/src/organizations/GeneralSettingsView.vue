@@ -79,9 +79,10 @@ import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useTwoFactorEnabled } from '#hooks/useTwoFactorEnabled.ts';
 import { useReview } from '#useReview.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { PatchAnswers} from '@stamhoofd/structures';
+import type { PatchAnswers } from '@stamhoofd/structures';
 import { Company, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
@@ -118,7 +119,7 @@ const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.c
 
 watch(draggableCompanies, (companies) => {
     overrideIsDone.value = companies.length > 0;
-}, {immediate: true});
+}, { immediate: true });
 
 const name = computed({
     get: () => patched.value.name,
@@ -237,11 +238,9 @@ async function save() {
         }
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }

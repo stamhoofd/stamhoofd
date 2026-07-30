@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container" data-op-ignore data-lpignore="true" data-bwignore="true" data-form-type="other">
         <Title v-bind="$attrs" :title="title" />
 
         <STErrorsDefault :error-box="parentErrorBox" />

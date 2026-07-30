@@ -24,6 +24,12 @@
         <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
             {{ $t('%1B3') }}
         </p>
+        <p v-if="lastActiveDescription" class="style-description-small">
+            {{ lastActiveDescription }}
+        </p>
+        <p v-if="hasTwoFactor" class="style-description-small">
+            {{ $t('Tweestapsverificatie ingeschakeld') }}
+        </p>
 
         <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
             <LoadingButton :loading="isDeleting" class="hover-show">
@@ -34,18 +40,24 @@
 </template>
 
 <script setup lang="ts">
+import { getLastActiveDescription } from '#auth/userActivity.ts';
+import { hasTwoFactor as usersHaveTwoFactor } from '#auth/twoFactor.ts';
 import type { PlatformMember, User } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import STGridItem from '../../../layout/STGridItem.vue';
 import EmailAddress from '../../../email/EmailAddress.vue';
 
-defineProps<{
+const props = defineProps<{
     member: PlatformMember;
     user: User;
     isDeleting: boolean;
     hasEmptyAccess: (user: User) => boolean;
     hasWrite: boolean;
 }>();
+
+const lastActiveDescription = computed(() => getLastActiveDescription([props.user]));
+const hasTwoFactor = computed(() => usersHaveTwoFactor([props.user]) === true);
 
 const emits = defineEmits<{
     (e: 'deleteUser', user: User): void;

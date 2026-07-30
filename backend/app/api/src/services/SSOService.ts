@@ -10,6 +10,7 @@ import { Context } from '../helpers/Context.js';
 
 import type { ObjectWithHeaders } from '../helpers/CookieHelper.js';
 import { CookieHelper } from '../helpers/CookieHelper.js';
+import { TwoFactorHelper } from '../helpers/TwoFactorHelper.js';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -37,12 +38,24 @@ type SSOSessionContext = {
      * Link this method to this existing user and don't create a new token
      */
     userId?: string | null;
+
+    /**
+     * The session (access token) that has to count as freshly authenticated again once the
+     * provider confirms the identity of `userId`. Only set for a reauthentication flow.
+     */
+    reauthenticateAccessToken?: string | null;
 };
 
 export class SSOAuthToken {
     validUntil: Date;
     token: string;
     userId: string;
+
+    /**
+     * The session this token was requested with, so a reauthentication can mark it fresh
+     * again. Null for API users and other sessionless callers.
+     */
+    accessToken: string | null = null;
 }
 
 export class SSOService {
@@ -76,7 +89,7 @@ export class SSOService {
         }
     }
 
-    static async createToken() {
+    static async createToken(sessionToken: Token | null = null) {
         if (!Context.user) {
             throw new SimpleError({
                 code: 'invalid_user',
@@ -89,6 +102,7 @@ export class SSOService {
         token.validUntil = new Date(Date.now() + 1000 * 60 * 5);
         token.token = (await randomBytes(192)).toString('base64').toUpperCase();
         token.userId = Context.user.id;
+        token.accessToken = sessionToken?.accessToken ?? null;
 
         await this.clearExpiredTokensOrFromUser(token.userId);
         this.authTokens.set(token.token, token);
@@ -369,6 +383,7 @@ export class SSOService {
         }
 
         let user: User | undefined = undefined;
+        let reauthenticateAccessToken: string | null = null;
 
         if (data.authToken) {
             const token = await SSOService.validateToken(data.authToken);
@@ -384,10 +399,27 @@ export class SSOService {
                 }
 
                 this.validateEmail(user.email);
+
+                // Force reentry of login credentials (no automatic login)
+                // Sadly select_account is not reliable and sometimes works automatically
+                // since this would automatically link a possibly wrong user, we don't allow that
+                // we check this with the auth_time, so a user cannot really get around this
+                data.prompt = 'login';
+
+                if (data.reauthenticate) {
+                    if (!token.accessToken) {
+                        throw new SimpleError({
+                            code: 'invalid_token',
+                            message: 'Cannot reauthenticate without a session',
+                            statusCode: 400,
+                        });
+                    }
+                    reauthenticateAccessToken = token.accessToken;
+                }
             }
         }
 
-        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user);
+        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user, reauthenticateAccessToken);
     }
 
     validateRedirectUri(uri: string) {
@@ -422,7 +454,7 @@ export class SSOService {
         }
     }
 
-    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User): Promise<Response<undefined>> {
+    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User, reauthenticateAccessToken: string | null = null): Promise<Response<undefined>> {
         const code_verifier = generators.codeVerifier();
         const state = generators.state(); // this is the internal state backend <-> SSO provider
         const nonce = generators.nonce();
@@ -439,6 +471,7 @@ export class SSOService {
             providerType: this.provider,
             organizationId: this.organization?.id ?? null,
             userId: user?.id ?? null,
+            reauthenticateAccessToken,
         };
 
         try {
@@ -465,7 +498,8 @@ export class SSOService {
                 prompt: prompt ?? undefined,
                 login_hint: user?.email ?? undefined,
                 redirect_uri: this.externalRedirectUri,
-
+                max_age: prompt === 'login' ? 0 : undefined, // required to get auth_time in the response
+                claims: prompt === 'login' ? { id_token: { auth_time: { essential: true } } } : undefined,
                 // Google has this instead of the offline_access scope
                 access_type: this.provider === LoginProviderType.Google ? 'offline' : undefined,
             });
@@ -585,6 +619,21 @@ export class SSOServiceWithSession {
 
             this.service.validateEmail(claims.email);
 
+            if (this.session.userId) {
+                if (!claims.auth_time || claims.auth_time * 1000 < Date.now() - 1000 * 60 * 5) {
+                    if (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test') {
+                        // Dex does not support this (yet)
+                    } else {
+                        throw new SimpleError({
+                            code: 'invalid_user',
+                            message: 'No recent authentication',
+                            human: $t('De provider stuurde je te snel terug. Je moet verplicht opnieuw inloggen bij de externe provider voor deze operatie.'),
+                            statusCode: 400,
+                        });
+                    }
+                }
+            }
+
             // Get user from database
             let user = await User.getForRegister(this.service.organization?.id ?? null, claims.email);
             if (!user) {
@@ -639,23 +688,66 @@ export class SSOServiceWithSession {
             const redirectUri = new URL(session.redirectUri);
 
             if (!this.session.userId) {
-                const token = await Token.createExpiredToken(user);
+                // The identity provider authenticated the user, but that is only the first
+                // factor. A user who enrolled a second factor still has to pass it, and an
+                // account that also has a password must still enroll one when it is
+                // required — the password would otherwise stay a way in that skips
+                // whatever the provider enforces.
+                //
+                // This is a redirect, not a request/response pair, so the client gets the
+                // token of the pending step in the URL and picks the flow up from there.
+                const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, this.service.organization, { loginMethod: 'sso' });
 
-                if (!token) {
+                if (requirement.type === 'challenge') {
+                    redirectUri.searchParams.set('oid_mfa', requirement.challenge.token);
+                    redirectUri.searchParams.set('s', session.spaState);
+                } else if (requirement.type === 'setup') {
+                    redirectUri.searchParams.set('oid_mfa_setup', requirement.setupToken.token);
+                    // Which methods to offer. Only a hint for the enrollment screen: the
+                    // enrollment endpoints check this themselves.
+                    redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
+                    redirectUri.searchParams.set('s', session.spaState);
+                } else {
+                    const token = await Token.createExpiredToken(user);
+
+                    if (!token) {
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Could not generate token',
+                            human: $t(`%D6`),
+                            statusCode: 500,
+                        });
+                    }
+
+                    const st = new TokenStruct(token);
+                    redirectUri.searchParams.set('oid_rt', st.refreshToken);
+                    redirectUri.searchParams.set('s', session.spaState);
+                }
+            } else if (this.session.reauthenticateAccessToken) {
+                // The provider confirmed the identity of the user that is already signed in,
+                // so their session counts as freshly authenticated again and the sensitive
+                // actions behind Context.authenticateFresh() unlock. This is the only way an
+                // SSO-only account can reach them: it has no password to confirm with.
+                const token = await Token.getByAccessToken(this.session.reauthenticateAccessToken);
+
+                if (!token || token.userId !== user.id) {
                     throw new SimpleError({
-                        code: 'error',
-                        message: 'Could not generate token',
-                        human: $t(`%D6`),
-                        statusCode: 500,
+                        code: 'invalid_token',
+                        message: 'The session to reauthenticate no longer exists',
+                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        statusCode: 401,
                     });
                 }
 
-                const st = new TokenStruct(token);
-                redirectUri.searchParams.set('oid_rt', st.refreshToken);
+                token.authenticatedAt = new Date();
+                await token.save();
+                await user.markActive();
+
                 redirectUri.searchParams.set('s', session.spaState);
+                redirectUri.searchParams.set('msg', $t('Je identiteit werd bevestigd'));
             } else {
                 redirectUri.searchParams.set('s', session.spaState);
-                redirectUri.searchParams.set('msg', 'Je account is succesvol gekoppeld');
+                redirectUri.searchParams.set('msg', $t('Je account is succesvol gekoppeld'));
             }
 
             response.headers['location'] = redirectUri.toString();

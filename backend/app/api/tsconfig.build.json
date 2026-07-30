@@ -8,7 +8,8 @@
         "./index.ts",
         "./migrations.ts",
         "./src",
-        "../../stamhoofd.d.ts"
+        "../../stamhoofd.d.ts",
+        "./src/**/*.json",
     ],
     "exclude": [
         "./src/**/*.spec.ts", 

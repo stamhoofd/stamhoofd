@@ -24,7 +24,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -60,7 +60,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -95,7 +95,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -143,7 +143,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -190,7 +190,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user);
+        const token = await Token.createToken(user, new Date());
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({

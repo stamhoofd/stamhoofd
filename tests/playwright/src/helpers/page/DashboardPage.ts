@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import type { Page, Response } from '@playwright/test';
 import { appToUri } from '@stamhoofd/structures';
 import { WorkerData } from '../worker/WorkerData.js';
 
@@ -12,6 +12,15 @@ const dashboardTabLabels: Record<DashboardTab, string> = {
     [DashboardTab.Events]: 'Activiteiten',
     [DashboardTab.Webshops]: 'Webshops',
 };
+
+/**
+ * Whether the login was refused because the user still has to set up two-factor
+ * authentication.
+ */
+async function isRequireMFASetup(response: Response): Promise<boolean> {
+    const body = await response.json().catch(() => null) as { errors?: { code?: string }[] } | null;
+    return body?.errors?.some(error => error.code === 'require_mfa_setup') ?? false;
+}
 
 export class DashboardPage {
     constructor(public readonly page: Page) {}
@@ -63,7 +72,18 @@ export class DashboardPage {
 
         const tokenResponse = await tokenResponsePromise;
         if (!tokenResponse.ok()) {
-            throw new Error(`Login failed with status ${tokenResponse.status()}`);
+            // A user that is required to have two-factor authentication (e.g. a platform
+            // admin) has to enroll a second factor before the login is finished. Tests that
+            // are not about 2FA shouldn't have to care, so we complete the enrollment here.
+            if (await isRequireMFASetup(tokenResponse)) {
+                // Imported here and not at the top: this file is loaded (via helpers/index)
+                // before the test environment is loaded, and the backend test helpers read
+                // STAMHOOFD while they are being evaluated.
+                const { TwoFactorFlow } = await import('../../flows/TwoFactorFlow.js');
+                await new TwoFactorFlow({ page: this.page }).completeForcedSetup();
+            } else {
+                throw new Error(`Login failed with status ${tokenResponse.status()}`);
+            }
         }
 
         const deadline = Date.now() + 30000;

@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts" name="AccountSwitcher">
-import { defineRoutes, useNavigate, useInheritCheckRoutes } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, useInheritCheckRoutes, defineRoute } from '@simonbackx/vue-app-navigation';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
@@ -51,13 +51,17 @@ const organization = useOrganization();
 
 // Make sure we also are allowed to check  routes if the parent componentWithProperties is
 useInheritCheckRoutes();
-defineRoutes([
-    {
-        url: 'account',
-        component: async () => (await import('../views/AccountSettingsView.vue')).default as any,
-        present: 'popup',
-    },
-]);
+
+if ($user.value) {
+    // Only enable the route when logged in
+    defineRoute(
+        {
+            url: 'account',
+            component: async () => (await import('../views/AccountSettingsView.vue')).default as any,
+            present: 'popup',
+        },
+    );
+}
 
 const letters = computed(() => {
     return $user.value ? Formatter.firstLetters($user.value.name, 3) : '';

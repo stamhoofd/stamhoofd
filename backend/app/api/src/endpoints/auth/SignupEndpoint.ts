@@ -34,7 +34,17 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope({ willAuthenticate: false });
 
-        if (STAMHOOFD.userMode === 'platform') {
+        if (!organization) {
+            if (STAMHOOFD.userMode === 'organization') {
+                // Not supported for now
+                throw new SimpleError({
+                    code: 'not_supported',
+                    message: 'This platform does not support password login',
+                    human: $t(`%D7`),
+                    statusCode: 400,
+                });
+            }
+
             const platform = await Platform.getShared();
             if (!platform.config.loginMethods.has(LoginMethod.Password)) {
                 throw new SimpleError({

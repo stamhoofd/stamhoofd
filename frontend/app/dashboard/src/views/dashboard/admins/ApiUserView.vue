@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
-            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`%1Os`)">
+            <input v-model="name" enterkeyhint="next" class="input" type="text" data-testid="api-user-name" :placeholder="$t(`%1Os`)">
         </STInputBox>
 
         <div class="container">
@@ -89,6 +89,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { useFreshAction } from '@stamhoofd/components/auth/useFreshAction.ts';
 import { ApiUser, ApiUserRateLimits, ApiUserWithToken, UserMeta } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -101,6 +102,7 @@ const pop = usePop();
 const show = useShow();
 const auth = useAuth();
 const canAlterRateLimits = auth.hasPlatformFullAccess();
+const runFresh = useFreshAction();
 
 const props = defineProps<{
     user: ApiUser;
@@ -166,12 +168,15 @@ async function save() {
     try {
         let user: ApiUser | ApiUserWithToken;
         if (props.isNew) {
-            const response = await $context.value.authenticatedServer.request({
+            // An API key is not covered by two-factor authentication, so the backend only
+            // hands one out to a recently authenticated session: runFresh re-authenticates
+            // the user when needed and retries.
+            const response = await runFresh(() => $context.value.authenticatedServer.request({
                 method: 'POST',
                 path: '/api-keys',
                 body: patched.value,
                 decoder: ApiUserWithToken as Decoder<ApiUserWithToken>,
-            });
+            }));
             user = response.data;
         } else {
             const response = await $context.value.authenticatedServer.request({

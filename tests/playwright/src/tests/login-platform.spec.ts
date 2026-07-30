@@ -11,9 +11,13 @@ import {
     Token,
     UserFactory,
 } from '@stamhoofd/models';
+import { expect } from '@playwright/test';
+import { MFARecoveryCode, MFATOTP } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { WorkerData } from '../helpers/index.js';
+import { setPlatformRequiresTwoFactor } from '../init/setPlatformRequiresTwoFactor.js';
 
 test.describe('Login', () => {
     let organization: Organization;
@@ -25,6 +29,10 @@ test.describe('Login', () => {
 
     test.beforeAll(async () => {
         TestUtils.setPermanentEnvironment('userMode', 'platform');
+
+        // Platform admins are only forced to enroll when the platform requires 2FA
+        await setPlatformRequiresTwoFactor(true);
+
         organization = await new OrganizationFactory({
             name: organizationName,
         }).create();
@@ -44,6 +52,7 @@ test.describe('Login', () => {
     });
 
     test.afterAll(async () => {
+        await setPlatformRequiresTwoFactor(false);
         await WorkerData.resetDatabase();
     });
 
@@ -67,7 +76,15 @@ test.describe('Login', () => {
         // login
         await page.getByTestId('login-button').click();
 
+        // Platform admins are required to have two-factor authentication: the password is
+        // correct, but the login is only finished after enrolling a second factor. The
+        // recovery codes are shown once, right before the user is signed in.
+        await new TwoFactorFlow({ page }).completeForcedSetup();
+
         // wait for the organization search input
         await page.getByTestId('organization-search-input').waitFor();
+
+        expect(await MFATOTP.getConfirmedForUser(user.id)).toHaveLength(1);
+        expect(await MFARecoveryCode.getUnusedForUser(user.id)).toHaveLength(10);
     });
 });

@@ -40,8 +40,13 @@
             <p class="style-description-small">
                 {{ Formatter.joinLast(member.getResponsibilities(organization, platform), ', ', ' en ') }}
             </p>
+            <p v-if="getLastActiveDescription(member.users)" class="style-description-small">
+                {{ getLastActiveDescription(member.users) }}
+            </p>
 
             <template #right>
+                <span v-if="hasTwoFactor(member.users)" class="icon privacy small gray" v-tooltip="$t('Deze beheerder heeft tweestapsverificatie ingeschakeld.')" />
+                <span v-if="isInactiveAdmin(member.users)" class="icon warning yellow" v-tooltip="$t('Deze beheerder heeft zich al meer dan {months} maanden niet meer aangemeld.', {months: INACTIVE_ADMIN_MONTHS})" />
                 <span v-if="member.id === me?.memberId" class="style-tag">
                     {{ $t('%Yd') }}
                 </span>
@@ -71,6 +76,8 @@ import type { MemberAdmin, PlatformMember } from '@stamhoofd/structures';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import { getLastActiveDescription, INACTIVE_ADMIN_MONTHS, isInactiveAdmin } from '#auth/userActivity.ts';
+import { hasTwoFactor } from '#auth/twoFactor.ts';
 import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();

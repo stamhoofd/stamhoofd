@@ -10,6 +10,7 @@ import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
 import { EventNotificationStatus, EventNotificationStatusHelper } from '../EventNotificationStatus.js';
 import { GroupStatus, getGroupStatusName } from '../Group.js';
 import { Gender, getGenderName } from '../members/Gender.js';
+import { MFAMethodType, getMFAMethodTypeName } from '../MFA.js';
 import { ParentType, ParentTypeHelper } from '../members/ParentType.js';
 import { OrganizationType, OrganizationTypeHelper } from '../OrganizationType.js';
 import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
@@ -36,6 +37,7 @@ registerAuditLogEnum('SetupStepType', SetupStepType, getSetupStepName, { legacy:
 registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTypeTitle, { legacy: true });
 registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
 registerAuditLogEnum('Language', Language, LanguageHelper.getName);
+registerAuditLogEnum('MFAMethodType', MFAMethodType, getMFAMethodTypeName);
 
 // AuditLogReplacementDependencies.uuidToName is deliberately not registered here: resolving a uuid
 // to a name needs a platform, and this module runs on import of @stamhoofd/structures, where there

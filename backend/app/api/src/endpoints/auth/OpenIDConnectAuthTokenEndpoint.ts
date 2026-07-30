@@ -32,10 +32,10 @@ export class OpenIDConnectAuthTokenEndpoint extends Endpoint<Params, Query, Body
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Check webshop and/or organization
         await Context.setUserOrganizationScope();
-        await Context.authenticate({ allowWithoutAccount: false });
+        const { token: sessionToken } = await Context.authenticate({ allowWithoutAccount: false });
 
         // Create a SSO auth token that can only be used once
-        const token = await SSOService.createToken();
+        const token = await SSOService.createToken(sessionToken);
 
         return new Response(OpenIDAuthTokenResponse.create({
             ssoAuthToken: token,
