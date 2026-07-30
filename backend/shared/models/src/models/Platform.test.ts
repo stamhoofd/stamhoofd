@@ -1,4 +1,4 @@
-import { PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
+import { PermissionRoleDetailed, PlatformConfig, PlatformMembershipType, PlatformPrivateConfig } from '@stamhoofd/structures';
 import { Platform } from './Platform.js';
 import { Database } from '@simonbackx/simple-database';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -126,6 +126,68 @@ describe('Model.Platform', () => {
             const editable = await Platform.getSharedStruct();
             expect(editable).toBeDefined();
             expect(await Platform.getByID('1')).toBeDefined();
+        });
+    });
+
+    describe('Parent tenant', () => {
+        afterEach(async () => {
+            await Database.delete('DELETE FROM platform WHERE id != ?', ['1']);
+            await Platform.clearCache();
+        });
+
+        async function createChildOfRoot() {
+            const root = await Platform.getForEditing();
+            root.privateConfig = PlatformPrivateConfig.create({
+                roles: [PermissionRoleDetailed.create({ name: 'root role' })],
+            });
+            root.config = PlatformConfig.create({
+                membershipTypes: [PlatformMembershipType.create({ id: 'r', name: 'Root type' })],
+            });
+            await root.save();
+
+            const child = new Platform();
+            child.id = 'child-tenant';
+            child.periodId = root.periodId;
+            child.parentTenantId = root.id;
+            await child.save();
+
+            return { root, child };
+        }
+
+        test('a child tenant struct carries its parent', async () => {
+            const { root } = await createChildOfRoot();
+
+            const struct = await Platform.getStructForTenant('child-tenant');
+
+            expect(struct.parentTenant?.id).toBe(root.id);
+            expect(struct.parentTenant?.config.membershipTypes.map(m => m.name)).toEqual(['Root type']);
+        });
+
+        test('the parent never carries its private config', async () => {
+            await createChildOfRoot();
+
+            // Both variants: a child tenant administrator has no rights on the parent either way
+            expect((await Platform.getStructForTenant('child-tenant')).parentTenant?.privateConfig).toBeNull();
+            expect((await Platform.getPrivateStructForTenant('child-tenant')).parentTenant?.privateConfig).toBeNull();
+        });
+
+        test('the parent is only one level deep', async () => {
+            const { root } = await createChildOfRoot();
+
+            const grandchild = new Platform();
+            grandchild.id = 'grandchild-tenant';
+            grandchild.periodId = root.periodId;
+            grandchild.parentTenantId = 'child-tenant';
+            await grandchild.save();
+
+            const struct = await Platform.getStructForTenant('grandchild-tenant');
+
+            expect(struct.parentTenant?.id).toBe('child-tenant');
+            expect(struct.parentTenant?.parentTenant).toBeNull();
+        });
+
+        test('the root tenant has no parent', async () => {
+            expect((await Platform.getStructForTenant('1')).parentTenant).toBeNull();
         });
     });
 
