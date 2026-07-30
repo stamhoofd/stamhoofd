@@ -7,6 +7,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { InvoicePdfService } from './InvoicePdfService.js';
+import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class InvoiceXMlService {
     static async buildXml(invoice: Invoice) {
@@ -68,7 +69,7 @@ export class InvoiceXMlService {
         if (!customerEmail && invoice.payingOrganizationId) {
             const payingOrganization = await Organization.getByID(invoice.payingOrganizationId);
             if (payingOrganization) {
-                customerEmail = (await payingOrganization.getInvoicingToEmail()) ?? null;
+                customerEmail = (await OrganizationAdminService.getInvoicingToEmail(payingOrganization)) ?? null;
             }
         }
 

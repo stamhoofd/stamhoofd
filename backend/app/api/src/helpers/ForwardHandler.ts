@@ -5,6 +5,7 @@ import { Email, EmailAddress } from '@stamhoofd/email';
 import { Organization, Platform } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { simpleParser } from 'mailparser';
+import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 export class ForwardHandler {
     static async handle(content: any, receipt: {
@@ -93,7 +94,7 @@ export class ForwardHandler {
         }
 
         if (organization) {
-            organizationEmails = await organization.getReplyEmails();
+            organizationEmails = await OrganizationAdminService.getReplyEmails(organization);
             if (!organizationEmails) {
                 if (STAMHOOFD.environment === 'test') {
                     // ignore

@@ -6,6 +6,7 @@ import { BalanceItem, Organization, Platform, RegisterCode, UsedRegisterCode } f
 import { BalanceItemStatus, BalanceItemType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
+import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class ReferralService {
     /**
@@ -76,7 +77,7 @@ export class ReferralService {
         }
 
         if (otherOrganization) {
-            const admins = await otherOrganization.getAdminToEmails();
+            const admins = await OrganizationAdminService.getAdminToEmails(otherOrganization);
             if (admins) {
                 if (code.invoiceValue) {
                     // Delay email until everything is validated and saved
@@ -196,7 +197,7 @@ export class ReferralService {
             await item.save();
         }
 
-        const admins = await receivingOrganization.getAdminRecipients();
+        const admins = await OrganizationAdminService.getAdminRecipients(receivingOrganization);
         if (admins) {
             if (code.invoiceValue) {
                 Email.send({

@@ -4,6 +4,7 @@ import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { EmailTemplateType, Replacement, STPackageType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
+import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class OrganizationEmailService {
     static async sendEmailTemplate(organization: Organization, data: {
@@ -11,7 +12,7 @@ export class OrganizationEmailService {
         personal?: boolean;
         bcc?: boolean;
     }) {
-        const recipients = await organization.getAdminRecipients();
+        const recipients = await OrganizationAdminService.getAdminRecipients(organization);
         const defaultI18n = new I18n(Language.Dutch, Country.Belgium);
         const i18n = organization.i18n;
 

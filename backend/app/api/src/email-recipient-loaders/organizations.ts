@@ -6,6 +6,7 @@ import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFil
 import { PaginatedResponse } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint.js';
+import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 function userToFilterableAdmin(user: User, platform: PlatformStruct, organization: Organization) {
     return {
@@ -49,14 +50,14 @@ async function fetchRecipients(query: LimitedFilteredRequest, subfilter: Stamhoo
     const recipients: EmailRecipient[] = [];
     for (const organization of result.results) {
         // todo: filter admins
-        const users = await organization.getAdmins();
+        const users = await OrganizationAdminService.getAdmins(organization);
         const filteredUsers = users.filter((user) => {
             const filterable = userToFilterableAdmin(user, platform, organization);
             return compiledFilter(filterable);
         });
 
         recipients.push(
-            ...organization.adminsToRecipients(filteredUsers).map((r) => {
+            ...OrganizationAdminService.adminsToRecipients(filteredUsers).map((r) => {
                 return EmailRecipient.create({
                     ...r,
                     replacements: [
