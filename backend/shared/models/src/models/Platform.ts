@@ -8,6 +8,14 @@ import { deepFreeze } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 
+export const ROOT_TENANT_ID = '1';
+
+type TenantCache = {
+    model: Readonly<Platform>;
+    struct: PlatformStruct;
+    privateStruct: PlatformStruct & { privateConfig: PlatformPrivateConfig };
+};
+
 export class Platform extends QueryableModel {
     static table = 'platform';
 
@@ -81,20 +89,20 @@ export class Platform extends QueryableModel {
         });
     }
 
-    private static shared: Platform | null = null;
-    private static sharedPrivateStruct: PlatformStruct & { privateConfig: PlatformPrivateConfig } | null = null;
-    private static sharedStruct: PlatformStruct | null = null;
+    private static caches: Map<string, TenantCache> = new Map();
 
-    static async getSharedStruct(): Promise<PlatformStruct> {
-        if (!this.sharedStruct) {
-            await this.loadCaches();
-        }
+    static async getStructForTenant(tenantId: string): Promise<PlatformStruct> {
+        const struct = (await this.getCache(tenantId)).struct;
 
-        if (!this.sharedStruct || !!this.sharedStruct.privateConfig) {
+        if (struct.privateConfig) {
             throw new Error('[Platform] Failed to load platform shared struct');
         }
 
-        return this.sharedStruct;
+        return struct;
+    }
+
+    static async getSharedStruct(): Promise<PlatformStruct> {
+        return await this.getStructForTenant(ROOT_TENANT_ID);
     }
 
     async setPreviousPeriodId() {
@@ -103,29 +111,40 @@ export class Platform extends QueryableModel {
         this.nextPeriodId = period?.nextPeriodId ?? null;
     }
 
-    static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
-        if (!this.sharedPrivateStruct) {
-            await this.loadCaches();
-        }
+    static async getPrivateStructForTenant(tenantId: string): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
+        const privateStruct = (await this.getCache(tenantId)).privateStruct;
 
-        if (!this.sharedPrivateStruct || !this.sharedPrivateStruct.privateConfig) {
+        if (!privateStruct.privateConfig) {
             throw new Error('[Platform] Failed to load platform shared private struct');
         }
 
-        return this.sharedPrivateStruct;
+        return privateStruct;
     }
 
-    static async getForEditing(): Promise<Platform> {
-        return QueueHandler.schedule('Platform.getModel', async () => {
+    static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
+        return await this.getPrivateStructForTenant(ROOT_TENANT_ID);
+    }
+
+    static async getForEditing(tenantId: string = ROOT_TENANT_ID): Promise<Platform> {
+        return QueueHandler.schedule('Platform.getModel-' + tenantId, async () => {
             // Build a new one
-            let model = await this.getByID('1');
+            let model = await this.getByID(tenantId);
 
             if (!model) {
+                if (tenantId !== ROOT_TENANT_ID) {
+                    // Only the root tenant bootstraps itself. Any other tenant is created explicitly.
+                    throw new SimpleError({
+                        code: 'tenant_not_found',
+                        message: 'Tenant ' + tenantId + ' not found',
+                        statusCode: 404,
+                    });
+                }
+
                 console.info('[Platform] Creating new platform');
 
                 // Create a new platform
                 model = new Platform();
-                model.id = '1';
+                model.id = tenantId;
                 model.feesTenantId = model.id;
                 model.uri = STAMHOOFD.platformName;
                 model.domain = STAMHOOFD.domains.dashboard ?? null;
@@ -145,35 +164,44 @@ export class Platform extends QueryableModel {
         });
     }
 
+    static async getForTenant(tenantId: string): Promise<Readonly<Platform> & { save: never }> {
+        return (await this.getCache(tenantId)).model as any;
+    }
+
     static async getShared(): Promise<Readonly<Platform> & { save: never }> {
-        if (this.shared) {
+        return await this.getForTenant(ROOT_TENANT_ID);
+    }
+
+    private static async getCache(tenantId: string): Promise<TenantCache> {
+        const cached = this.caches.get(tenantId);
+        if (cached) {
             // Skip queue if possible (performance optimization)
-            return this.shared as any;
+            return cached;
         }
 
-        return QueueHandler.schedule('Platform.getShared', async () => {
-            if (this.shared) {
-                return this.shared;
-            }
+        await this.loadCachesForTenant(tenantId);
 
-            // Build a new one
-            const model = await this.getForEditing();
-            deepFreeze(model);
-            this.shared = model;
-            return model as any;
+        const loaded = this.caches.get(tenantId);
+        if (!loaded) {
+            throw new Error('[Platform] Failed to load caches for tenant ' + tenantId);
+        }
+        return loaded;
+    }
+
+    static async loadCachesForTenant(tenantId: string): Promise<void> {
+        // Keyed per tenant: a global key would stall every tenant behind one tenant's reload.
+        await QueueHandler.schedule('Platform.loadCaches-' + tenantId, async () => {
+            if (this.caches.has(tenantId)) {
+                // Already loaded (possible if multiple calls were made)
+                return;
+            }
+            const model = await this.getForEditing(tenantId);
+            await this.setCachesFromModel(model);
         });
     }
 
     static async loadCaches(): Promise<void> {
-        await QueueHandler.schedule('Platform.loadCaches', async () => {
-            if (this.sharedPrivateStruct && this.sharedStruct) {
-                // Already loaded (possible if multiple calls to loadCaches were made)
-                return;
-            }
-            // Build a new one
-            const model = await this.getForEditing();
-            await this.setCachesFromModel(model);
-        });
+        await this.loadCachesForTenant(ROOT_TENANT_ID);
     }
 
     private static async setCachesFromModel(model: Platform) {
@@ -185,31 +213,46 @@ export class Platform extends QueryableModel {
         });
 
         // We clone to avoid the chance of updating the platform model
-        this.sharedPrivateStruct = struct.clone() as PlatformStruct & { privateConfig: PlatformPrivateConfig };
+        const privateStruct = struct.clone() as PlatformStruct & { privateConfig: PlatformPrivateConfig };
 
         const clone = struct.clone();
         clone.privateConfig = null;
 
-        // Audit logs render uuids from a bare id, so they cannot receive a platform through their
-        // call chain. Bind the resolver to the struct we are about to cache, so it is refreshed
-        // together with the caches. Uses the public struct on purpose: resolving privateConfig
-        // roles would change the names that get persisted in audit logs.
-        AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, clone);
+        if (model.id === ROOT_TENANT_ID) {
+            // Audit logs render uuids from a bare id, so they cannot receive a platform through their
+            // call chain. Bind the resolver to the struct we are about to cache, so it is refreshed
+            // together with the caches. Uses the public struct on purpose: resolving privateConfig
+            // roles would change the names that get persisted in audit logs.
+            // Still process-wide: it becomes tenant-aware once a request carries its tenant.
+            AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, clone);
+        }
 
-        this.sharedStruct = clone;
+        deepFreeze(model);
+
+        this.caches.set(model.id, {
+            model,
+            struct: clone,
+            privateStruct,
+        });
+    }
+
+    static async clearCacheForTenant(tenantId: string) {
+        await this.clearCacheForTenantWithoutRefresh(tenantId);
+        await this.loadCachesForTenant(tenantId);
+    }
+
+    static async clearCacheForTenantWithoutRefresh(tenantId: string) {
+        await QueueHandler.schedule('Platform.loadCaches-' + tenantId, async () => {
+            this.caches.delete(tenantId);
+        });
     }
 
     static async clearCache() {
-        await this.clearCacheWithoutRefresh();
-        await this.loadCaches();
+        await this.clearCacheForTenant(ROOT_TENANT_ID);
     }
 
     static async clearCacheWithoutRefresh() {
-        await QueueHandler.schedule('Platform.loadCaches', async () => {
-            this.sharedStruct = null;
-            this.sharedPrivateStruct = null;
-        });
-        this.shared = null;
+        await this.clearCacheForTenantWithoutRefresh(ROOT_TENANT_ID);
     }
 
     async save() {
@@ -220,8 +263,8 @@ export class Platform extends QueryableModel {
         const s = await super.save();
 
         if (update) {
-            // Force update cache immediately
-            await Platform.clearCache();
+            // Only this tenant's cache: another tenant's is unaffected by this save.
+            await Platform.clearCacheForTenant(this.id);
         }
 
         return s;
