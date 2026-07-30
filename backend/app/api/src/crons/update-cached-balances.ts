@@ -1,8 +1,8 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { CachedBalance } from '@stamhoofd/models';
 import { ReceivableBalanceType } from '@stamhoofd/structures';
 
-registerCron('updateCachedBalances', updateCachedBalances);
+registerTenantCron('updateCachedBalances', updateCachedBalances);
 
 async function updateCachedBalances() {
     // Check if between 3 - 6 AM
