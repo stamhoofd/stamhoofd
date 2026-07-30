@@ -1,7 +1,8 @@
 import { PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
 import { Platform } from './Platform.js';
 import { Database } from '@simonbackx/simple-database';
-import { TestUtils } from '@stamhoofd/test-utils';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { QueueHandler } from '@stamhoofd/queues';
 
 describe('Model.Platform', () => {
     describe('Shared caches', () => {
@@ -178,6 +179,93 @@ describe('Model.Platform', () => {
             const reloaded = await Platform.getByID('clash-c');
             expect(reloaded!.parentTenantId).toBe(existing.id);
             expect(reloaded!.feesTenantId).toBe(existing.id);
+        });
+    });
+
+    describe('Per-tenant caches', () => {
+        async function createSecondTenant() {
+            const root = await Platform.getForEditing();
+
+            const other = new Platform();
+            other.id = 'second-tenant';
+            other.periodId = root.periodId;
+            other.config = PlatformConfig.create({
+                membershipTypes: [PlatformMembershipType.create({ id: 't2', name: 'Second tenant type' })],
+            });
+            await other.save();
+
+            return { root, other };
+        }
+
+        afterEach(async () => {
+            await Platform.clearCacheForTenantWithoutRefresh('second-tenant');
+            await Database.delete('DELETE FROM platform WHERE id != ?', ['1']);
+            await Platform.clearCache();
+        });
+
+        test('each tenant caches its own struct', async () => {
+            const { root } = await createSecondTenant();
+
+            root.config.membershipTypes = [PlatformMembershipType.create({ id: 't1', name: 'Root type' })];
+            await root.save();
+
+            const rootStruct = await Platform.getStructForTenant('1');
+            const otherStruct = await Platform.getStructForTenant('second-tenant');
+
+            expect(rootStruct.config.membershipTypes.map(m => m.name)).toEqual(['Root type']);
+            expect(otherStruct.config.membershipTypes.map(m => m.name)).toEqual(['Second tenant type']);
+        });
+
+        test('saving one tenant does not discard another tenant cache', async () => {
+            const { root } = await createSecondTenant();
+
+            const otherBefore = await Platform.getStructForTenant('second-tenant');
+
+            root.config.membershipTypes = [PlatformMembershipType.create({ id: 't1', name: 'Changed' })];
+            await root.save();
+
+            // Same object identity: the second tenant's cache was never rebuilt
+            expect(await Platform.getStructForTenant('second-tenant')).toBe(otherBefore);
+            expect((await Platform.getStructForTenant('1')).config.membershipTypes[0].name).toBe('Changed');
+        });
+
+        test('clearing one tenant cache leaves the other in place', async () => {
+            await createSecondTenant();
+
+            const rootBefore = await Platform.getStructForTenant('1');
+            const otherBefore = await Platform.getStructForTenant('second-tenant');
+
+            await Platform.clearCacheForTenant('second-tenant');
+
+            expect(await Platform.getStructForTenant('1')).toBe(rootBefore);
+            expect(await Platform.getStructForTenant('second-tenant')).not.toBe(otherBefore);
+        });
+
+        test('one tenant loading its cache does not queue behind another', async () => {
+            await createSecondTenant();
+            await Platform.clearCacheForTenantWithoutRefresh('second-tenant');
+
+            let release!: () => void;
+            const held = new Promise<void>((resolve) => {
+                release = resolve;
+            });
+
+            // Occupy the key a process-wide cache would have used. If the per-tenant load shares it,
+            // this never resolves and the test times out.
+            const blocker = QueueHandler.schedule('Platform.loadCaches', async () => {
+                await held;
+            });
+
+            await Platform.getStructForTenant('second-tenant');
+
+            release();
+            await blocker;
+        }, 5000);
+
+        test('an unknown tenant is not created on the fly', async () => {
+            await expect(Platform.getForEditing('does-not-exist')).rejects.toThrow(
+                STExpect.simpleError({ code: 'tenant_not_found' }),
+            );
         });
     });
 });
