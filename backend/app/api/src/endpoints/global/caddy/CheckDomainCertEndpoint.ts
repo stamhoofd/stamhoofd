@@ -3,7 +3,7 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, Webshop } from '@stamhoofd/models';
+import { Organization, Platform, Webshop } from '@stamhoofd/models';
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -48,14 +48,20 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
                 // Search for the URI
                 const organization = await Organization.getByURI(strippped);
 
-                if (!organization) {
-                    throw new SimpleError({
-                        code: 'unknown_domain',
-                        message: 'Not known',
-                        statusCode: 404,
-                    });
+                if (organization) {
+                    return new Response(undefined);
                 }
-                return new Response(undefined);
+
+                // A tenant serves its organizations from <tenant-uri>.<registrationDomain> too
+                if (await Platform.getByURI(strippped)) {
+                    return new Response(undefined);
+                }
+
+                throw new SimpleError({
+                    code: 'unknown_domain',
+                    message: 'Not known',
+                    statusCode: 404,
+                });
             }
         }
 
@@ -91,6 +97,11 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const webshops = await Webshop.getByDomainOnly(request.query.domain);
         if (webshops.length > 0) {
+            return new Response(undefined);
+        }
+
+        // A tenant with its own domain
+        if (await Platform.getByDomain(request.query.domain)) {
             return new Response(undefined);
         }
 
