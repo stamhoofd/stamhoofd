@@ -18,6 +18,7 @@ import { resumeEmails } from './helpers/EmailResumer.js';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
 import { ContextMiddleware } from './middleware/ContextMiddleware.js';
+import { TenantScopeMiddleware } from './middleware/TenantScopeMiddleware.js';
 import { AuditLogService } from './services/AuditLogService.js';
 import { BalanceItemService } from './services/BalanceItemService.js';
 import { BootChecksService } from './services/BootChecksService.js';
@@ -136,6 +137,10 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     // Contexts
     routerServer.addRequestMiddleware(ContextMiddleware);
+
+    // After ContextMiddleware on purpose: the last registered wrapRun is the outermost, and the
+    // tenant has to be in scope before the context that reads it.
+    routerServer.addRequestMiddleware(TenantScopeMiddleware);
 
     // Add version headers and minimum version
     const versionMiddleware = new VersionMiddleware({
