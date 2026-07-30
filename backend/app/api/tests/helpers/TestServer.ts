@@ -3,12 +3,16 @@ import { VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { Version } from '@stamhoofd/structures';
 
 import { ContextMiddleware } from '../../src/middleware/ContextMiddleware.js';
+import { TenantScopeMiddleware } from '../../src/middleware/TenantScopeMiddleware.js';
 import { FileSignService } from '../../src/services/FileSignService.js';
 
 export const testServer = new TestServer();
 
 // Contexts
 testServer.addRequestMiddleware(ContextMiddleware);
+
+// Registration order mirrors boot.ts
+testServer.addRequestMiddleware(TenantScopeMiddleware);
 testServer.addResponseMiddleware(FileSignService);
 testServer.addRequestMiddleware(FileSignService);
 
