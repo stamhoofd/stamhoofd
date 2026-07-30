@@ -1,7 +1,7 @@
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Email } from '@stamhoofd/models';
 import { EmailRecipient, Organization, User } from '@stamhoofd/models';
-import { fillRecipientReplacements, mergeReplacementsIfEqual, removeUnusedReplacements, runWithRecipientLocale, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '@stamhoofd/models/helpers/EmailBuilder.js';
+import { fillRecipientReplacements, mergeReplacementsIfEqual, removeUnusedReplacements, runWithRecipientLocale, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
 import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, Replacement, User as UserStruct } from '@stamhoofd/structures';
 import { EmailPreview, EmailRecipientFilter, EmailWithRecipients, getExampleRecipient } from '@stamhoofd/structures';
 import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';

@@ -1,4 +1,5 @@
-import { BalanceItem, Organization, Platform, sendEmailTemplate, STPackage } from '@stamhoofd/models';
+import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';

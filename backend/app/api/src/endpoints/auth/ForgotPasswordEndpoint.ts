@@ -1,7 +1,8 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { Platform, User } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient, Replacement } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';

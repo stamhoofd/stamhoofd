@@ -1,4 +1,5 @@
-import { Email, runWithRecipientLocale, Webshop } from '@stamhoofd/models';
+import { Email, Webshop } from '@stamhoofd/models';
+import { runWithRecipientLocale } from '../helpers/EmailBuilder.js';
 import type { EmailRecipient, LimitedFilteredRequest, WebshopPreview } from '@stamhoofd/structures';
 import { mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
 import { GetWebshopOrdersEndpoint } from '../endpoints/organization/dashboard/webshops/GetWebshopOrdersEndpoint.js';

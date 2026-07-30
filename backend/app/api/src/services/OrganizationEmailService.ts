@@ -1,6 +1,6 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
-import { sendEmailTemplate } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { EmailTemplateType, Replacement, STPackageType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';

@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, Invoice, InvoicedBalanceItem, Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
+import { BalanceItem, Invoice, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';

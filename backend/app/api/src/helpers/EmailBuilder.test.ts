@@ -3,12 +3,8 @@ import { EmailContent, EmailTemplateType, Recipient, Replacement } from '@stamho
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { EmailTemplateFactory } from '../factories/EmailTemplateFactory.js';
-import { OrganizationFactory } from '../factories/OrganizationFactory.js';
-import { RegistrationPeriodFactory } from '../factories/RegistrationPeriodFactory.js';
-import { Email } from '../models/Email.js';
-import type { Organization } from '../models/Organization.js';
-import type { RegistrationPeriod } from '../models/RegistrationPeriod.js';
+import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
+import { Email, EmailTemplateFactory, OrganizationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { removeUnusedReplacements, sendEmailTemplate } from './EmailBuilder.js';
 
 describe('sendEmailTemplate with translations', () => {
