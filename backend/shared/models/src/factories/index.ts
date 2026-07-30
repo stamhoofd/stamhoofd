@@ -13,6 +13,7 @@ export * from './UserFactory.js';
 export * from './WebshopFactory.js';
 export * from './BalanceItemFactory.js';
 export * from './RegistrationPeriodFactory.js';
+export * from './TenantFactory.js';
 export * from './OrganizationTagFactory.js';
 export * from './OrganizationRegistrationPeriodFactory.js';
 export * from './MemberResponsibilityRecordFactory.js';
