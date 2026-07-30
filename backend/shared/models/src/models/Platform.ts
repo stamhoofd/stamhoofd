@@ -18,6 +18,28 @@ export class Platform extends QueryableModel {
     })
     id!: string;
 
+    /**
+     * The tenant this tenant belongs to. Null for a root tenant.
+     */
+    @column({ type: 'string', nullable: true })
+    parentTenantId: string | null = null;
+
+    /**
+     * The tenant that charges this tenant for packages, transfer fees, service fees and invoices.
+     * Only this may point outside the tenant's own subtree, and only at an ancestor.
+     */
+    @column({ type: 'string', nullable: true })
+    feesTenantId: string | null = null;
+
+    /**
+     * Globally unique, shares its namespace with organizations.uri.
+     */
+    @column({ type: 'string', nullable: true })
+    uri: string | null = null;
+
+    @column({ type: 'string', nullable: true })
+    domain: string | null = null;
+
     @column({ type: 'json', decoder: PlatformConfig })
     config: PlatformConfig = PlatformConfig.create({});
 
@@ -104,6 +126,9 @@ export class Platform extends QueryableModel {
                 // Create a new platform
                 model = new Platform();
                 model.id = '1';
+                model.feesTenantId = model.id;
+                model.uri = STAMHOOFD.platformName;
+                model.domain = STAMHOOFD.domains.dashboard ?? null;
 
                 if (STAMHOOFD.userMode === 'platform') {
                     model.periodId = (await RegistrationPeriod.all())[0].id;
