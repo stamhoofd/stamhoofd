@@ -1,9 +1,9 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { MFAToken, WebauthnChallenge } from '@stamhoofd/models';
 
 let lastRunDate: number | null = null;
 
-registerCron('deleteExpiredMFATokens', deleteExpiredMFATokens);
+registerTenantCron('deleteExpiredMFATokens', deleteExpiredMFATokens);
 
 /**
  * Sweep the short-lived tokens of the two-factor flows.
