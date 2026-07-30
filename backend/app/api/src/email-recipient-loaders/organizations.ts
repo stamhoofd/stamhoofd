@@ -50,7 +50,7 @@ async function fetchRecipients(query: LimitedFilteredRequest, subfilter: Stamhoo
     const recipients: EmailRecipient[] = [];
     for (const organization of result.results) {
         // todo: filter admins
-        const users = await organization.getAdmins();
+        const users = await OrganizationAdminService.getAdmins(organization);
         const filteredUsers = users.filter((user) => {
             const filterable = userToFilterableAdmin(user, platform, organization);
             return compiledFilter(filterable);

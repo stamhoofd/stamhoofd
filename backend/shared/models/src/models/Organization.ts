@@ -352,12 +352,6 @@ export class Organization extends QueryableModel {
         });
     }
 
-    async getAdmins() {
-        // Circular reference fix
-        const User = (await import('./User.js')).User;
-        return await User.getAdmins(this.id, { verified: true });
-    }
-
     /**
      * Return default e-mail address if no email addresses are set.
      */

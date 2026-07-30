@@ -1,5 +1,5 @@
-import type { Organization, User } from '@stamhoofd/models';
-import { Platform, Token } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
+import { Platform, Token, User } from '@stamhoofd/models';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import type { OrganizationEmail } from '@stamhoofd/structures';
 import { AccessRight, Recipient } from '@stamhoofd/structures';
@@ -28,11 +28,15 @@ export class OrganizationAdminService {
         return await this.getAdminToEmails(organization);
     }
 
+    static async getAdmins(organization: Organization) {
+        return await User.getAdmins(organization.id, { verified: true });
+    }
+
     /**
      * These email addresess are private
      */
     static async getFullAdmins(organization: Organization) {
-        const admins = await organization.getAdmins();
+        const admins = await this.getAdmins(organization);
         const platform = await Platform.getSharedStruct();
 
         // Only full access
@@ -43,7 +47,7 @@ export class OrganizationAdminService {
      * These email addresess are private
      */
     static async getFinanceAdmins(organization: Organization) {
-        const admins = await organization.getAdmins();
+        const admins = await this.getAdmins(organization);
         const platform = await Platform.getSharedStruct();
         const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasFullAccess() || a.permissions.forOrganization(organization, platform, { inheritFromPlatform: false })?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
@@ -102,7 +106,7 @@ export class OrganizationAdminService {
      * We choose the oldest user that was active in the last 3 months (otherwise the oldest user if noone was active)
      */
     static async getInvoicingToEmail(organization: Organization): Promise<string | undefined> {
-        const admins = await organization.getAdmins();
+        const admins = await this.getAdmins(organization);
 
         const tokens = await Token.select().where('userId', admins.map(a => a.id)).fetch();
 
