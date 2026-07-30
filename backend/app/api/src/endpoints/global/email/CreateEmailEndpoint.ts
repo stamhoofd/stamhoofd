@@ -133,7 +133,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         await model.save();
-        await model.buildExampleRecipient(true);
+        await EmailSendService.buildExampleRecipient(model, true);
         await model.updateCount();
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {
