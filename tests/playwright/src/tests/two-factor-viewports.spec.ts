@@ -214,6 +214,74 @@ for (const viewport of viewports) {
 }
 
 /**
+ * A phone cannot scan its own screen, so the setup view drops the QR code there and leans
+ * on the otpauth link that hands the secret to the default verification code provider.
+ *
+ * The phone is recognised from the user agent, not from the viewport: a narrow window on a
+ * desktop still gets the QR code, because there a second device does the scanning.
+ */
+test.describe('Two-factor setup on a phone @two-factor-phone', () => {
+    test.use({
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    });
+
+    let organization: Organization;
+
+    test.beforeAll(async () => {
+        TestUtils.setPermanentEnvironment('userMode', 'platform');
+        TestUtils.setPermanentEnvironment('singleOrganization', undefined);
+
+        organization = await new OrganizationFactory({}).create();
+    });
+
+    test.afterAll(async () => {
+        await WorkerData.resetDatabase();
+    });
+
+    test('the otpauth link replaces the QR code', async ({ page }) => {
+        await withTwoFactorRequired(organization, async () => {
+            const user = await new UserFactory({
+                organization,
+                email: randomEmail('mfa-phone-setup'),
+                password: PASSWORD,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            await submitLogin(page, { organization, email: user.email, password: PASSWORD });
+
+            const setupView = page.getByTestId('setup-mfa-view');
+            await expect(setupView).toBeVisible({ timeout: 30_000 });
+            await setupView.getByTestId('mfa-setup-totp').click();
+
+            const totpView = page.getByTestId('setup-totp-view');
+            await expect(totpView).toBeVisible({ timeout: 20_000 });
+
+            // The secret stays available for authenticators that are set up by hand.
+            const secret = (await totpView.locator('.totp-secret .secret').innerText()).trim();
+            expect(secret).not.toBe('');
+
+            // ... and the link carries that same secret to whatever app handles otpauth.
+            const link = totpView.getByTestId('open-authenticator-app');
+            await expect(link).toBeVisible();
+
+            // Only now, with the view fully rendered, is the missing QR code meaningful.
+            await expect(totpView.locator('.qr-code')).toHaveCount(0);
+
+            const href = await link.getAttribute('href');
+            expect(href).toMatch(/^otpauth:\/\/totp\//);
+            expect(new URL(href!).searchParams.get('secret')).toBe(secret);
+
+            // The enrollment itself still works from here.
+            await new TwoFactorFlow({ page }).confirmTOTPSetup();
+            expect(await MFATOTP.getConfirmedForUser(user.id)).toHaveLength(1);
+        });
+    });
+});
+
+/**
  * Open the invite link of a user in a clean browser session, choose a password and enroll
  * the required second factor.
  */

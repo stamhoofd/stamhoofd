@@ -4,14 +4,27 @@
 
         <main class="center">
             <h1>{{ $t('%ZhV') }}</h1>
-            <p>{{ $t('%Zga') }}</p>
+            <p v-if="showQRCode">
+                {{ $t('%Zga') }}
+            </p>
+            <p v-else>
+                {{ $t('Open je authenticator-app via de knop hieronder, of voeg de sleutel handmatig toe. Voer daarna de code in.') }}
+            </p>
 
-            <div class="totp-setup">
-                <img v-if="qrCodeUrl" :src="qrCodeUrl" class="qr-code" :alt="$t('%Zf9')">
+            <div class="totp-setup" :class="{ 'no-qr': !showQRCode }">
+                <img v-if="showQRCode && qrCodeUrl" :src="qrCodeUrl" class="qr-code" :alt="$t('%Zf9')">
                 <p class="totp-secret">
                     <span v-copyable="totpSetup.secret" class="secret style-copyable">{{ totpSetup.secret }}</span>
                 </p>
             </div>
+
+            <p class="style-button-bar">
+                <a :href="totpSetup.otpauthUri" class="button text" data-testid="open-authenticator-app">
+                    <span class="icon external" />
+                    <span>{{ $t('Open in authenticator-app') }}</span>
+                </a>
+            </p>
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STInputBox :title="$t('%ZgZ')" class="max" error-fields="name" :error-box="errors.errorBox">
@@ -45,6 +58,8 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { useIsAndroid } from '#hooks/useIsAndroid.ts';
+import { useIsIOS } from '#hooks/useIsIOS.ts';
 import CodeInput from '#inputs/CodeInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import LoadingButton from '#navigation/LoadingButton.vue';
@@ -74,7 +89,13 @@ const name = ref('');
 const loading = ref(false);
 const qrCodeUrl = ref<string | null>(null);
 
+// A phone or tablet cannot scan its own screen: there the otpauth link is the only one-tap way in.
+const showQRCode = !useIsIOS() && !useIsAndroid();
+
 onMounted(() => {
+    if (!showQRCode) {
+        return;
+    }
     generateQRCode().catch(console.error);
 });
 
@@ -145,7 +166,8 @@ async function submit() {
         text-align: center;
         border-radius: 8px;
         position: relative;
-        margin-bottom: 15px;
+        // The secret hangs half outside the box, so it needs room of its own below it
+        margin-bottom: 30px;
 
         .qr-code {
             width: 100%;
@@ -162,6 +184,18 @@ async function submit() {
             left: 50%;
             bottom: 0;
             transform: translate(-50%, 50%);
+        }
+
+        // Without the QR code the box only holds the secret, so it no longer floats on the border
+        &.no-qr {
+            padding: 15px;
+            margin-bottom: 15px;
+
+            .totp-secret .secret {
+                position: static;
+                transform: none;
+                display: inline-block;
+            }
         }
     }
 
