@@ -295,7 +295,7 @@ export class InvoicePdfService {
                     throw new SimpleError({
                         code: 'pdf_creation_timeout',
                         message: 'Failed to generate invoice PDF',
-                        human: $t('Er ging iets mis bij het aanmaken van de factuur'),
+                        human: $t('%ZgV'),
                     });
                 }
             }
@@ -306,13 +306,13 @@ export class InvoicePdfService {
                 throw new SimpleError({
                     code: 'pdf_creation_timeout',
                     message: 'Failed to generate invoice PDF: timeout',
-                    human: $t('Er ging iets mis bij het aanmaken van de factuur'),
+                    human: $t('%ZgV'),
                 });
             }
             throw new SimpleError({
                 code: 'pdf_creation_failed',
                 message: 'Failed to generate invoice PDF',
-                human: $t('Er ging iets mis bij het aanmaken van de factuur'),
+                human: $t('%ZgV'),
             });
         } finally {
             clearTimeout(timeout);

@@ -77,7 +77,7 @@ const priceString = computed(() => {
     }
     const minimum = Math.min(...priceRanges);
     const maximum = Math.max(...priceRanges);
-    return Formatter.price(minimum, true) + ' - ' + Formatter.price(maximum, true);
+    return Formatter.price(minimum) + ' - ' + Formatter.price(maximum);
 });
 
 const count = computed(() => {

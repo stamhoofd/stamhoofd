@@ -462,14 +462,14 @@ export class Formatter {
         return v + '%';
     }
 
-    static price(value: number, removeZeroDecimals = true): string {
+    static price(value: number, { removeZeroDecimals = true, maximumFractionDigits = 2 }: { removeZeroDecimals?: boolean; maximumFractionDigits?: number } = {}): string {
         // We store prices with up to 4 digits after the decimal point for correct VAT calculations,
         // but we never display more than 2 digits: users confuse 5,012 euro with 5.012 euro.
         // The extra digits are rounded away here.
         const formatted = new Intl.NumberFormat('nl-BE', {
             style: 'currency',
             currency: 'EUR',
-            maximumFractionDigits: 2,
+            maximumFractionDigits: maximumFractionDigits,
             minimumFractionDigits: 2,
         }).format(Math.abs(value) / 100_00);
 
