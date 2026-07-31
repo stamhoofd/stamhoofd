@@ -4,5 +4,7 @@
     <string name="package_name">com.stamhoofd.stamhoofd</string>
     <string name="custom_url_scheme">com.stamhoofd.stamhoofd</string>
     <string name="intent_host">stamhoofd.app</string>
-    <string name="asset_statements" translatable="false">[]</string>
+    <string name="asset_statements" translatable="false">
+        [{\"include\": \"https://stamhoofd.app/.well-known/assetlinks.json\"}]
+    </string>
 </resources>
