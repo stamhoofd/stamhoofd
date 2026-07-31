@@ -33,23 +33,11 @@ onMounted(async () => {
     // First check updates, and only after that, check for global routes
     // reason: otherwise the checkUpdates will dismiss the modal stack, and that can hide the reset password view instead of the update view
     try {
-        if (STAMHOOFD.userMode === 'organization' && STAMHOOFD.platformName.toLocaleLowerCase() === 'stamhoofd' && STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL && new Date() < new Date('2026-06-22T23:59:00+02:00')) {
-            // Since the backend is not compatible with the new app, before launch date we need a different app bundle.
-            await AppManager.shared.checkUpdates({
-                visibleCheck: 'spinner',
-                visibleDownload: true,
-                installAutomatically: true,
-                force: STAMHOOFD.environment !== 'staging',
-                channel: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
-                checkTimeout: 15 * 1000,
-            });
-        } else {
-            await AppManager.shared.checkUpdates({
-                visibleCheck: 'spinner',
-                visibleDownload: true,
-                installAutomatically: true,
-            });
-        }
+        await AppManager.shared.checkUpdates({
+            visibleCheck: 'spinner',
+            visibleDownload: true,
+            installAutomatically: true,
+        });
     } catch (e) {
         console.error(e);
     }
