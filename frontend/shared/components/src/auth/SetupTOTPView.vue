@@ -1,23 +1,23 @@
 <template>
     <form class="st-view setup-totp-view" data-testid="setup-totp-view" data-submit-last-field novalidate @submit.prevent="submit">
-        <STNavigationBar :title="$t('Authenticator-app instellen')" />
+        <STNavigationBar :title="$t('%ZhV')" />
 
         <main class="center">
-            <h1>{{ $t('Authenticator-app instellen') }}</h1>
-            <p>{{ $t('Scan de QR-code met je authenticator-app en voer daarna de code in.') }}</p>
+            <h1>{{ $t('%ZhV') }}</h1>
+            <p>{{ $t('%Zga') }}</p>
 
             <div class="totp-setup">
-                <img v-if="qrCodeUrl" :src="qrCodeUrl" class="qr-code" :alt="$t('QR-code')">
+                <img v-if="qrCodeUrl" :src="qrCodeUrl" class="qr-code" :alt="$t('%Zf9')">
                 <p class="totp-secret">
                     <span v-copyable="totpSetup.secret" class="secret style-copyable">{{ totpSetup.secret }}</span>
                 </p>
             </div>
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox :title="$t('Naam toestel of app')" class="max" error-fields="name" :error-box="errors.errorBox">
-                <input v-model="name" data-op-ignore data-lpignore="true" data-bwignore="true" data-form-type="other" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$isIOS || $isMac ? $t('Optioneel. Bv. iPhone van Jan') : $t('Optioneel. Bv. Pixel van Jan')">
+            <STInputBox :title="$t('%ZgZ')" class="max" error-fields="name" :error-box="errors.errorBox">
+                <input v-model="name" data-op-ignore data-lpignore="true" data-bwignore="true" data-form-type="other" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$isIOS || $isMac ? $t('%Zhm') : $t('%Zgr')">
             </STInputBox>
-            <STInputBox :title="$t('Bevestig de code uit je app')" class="max" error-fields="code" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%ZgP')" class="max" error-fields="code" :error-box="errors.errorBox">
                 <CodeInput v-model="code" data-testid="mfa-setup-totp-code" :code-length="6" :space-length="6" @complete="submit" />
             </STInputBox>
         </main>
@@ -26,7 +26,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="submit" data-testid="mfa-setup-totp-submit">
-                        <span>{{ $t('Bevestigen') }}</span>
+                        <span>{{ $t('%X9') }}</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -101,7 +101,7 @@ async function submit() {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'code',
-                message: $t('Vul de code van 6 cijfers in, die de app aan je toont. Deze wijzigt elke minuut.'),
+                message: $t('%Zhn'),
             });
         }
         const result = await runFresh(() => MFAManager.confirmTotp($context.value, props.totpSetup.totpId, code.value, name.value, props.setupToken ?? undefined));

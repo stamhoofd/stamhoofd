@@ -1,10 +1,10 @@
 <template>
     <div class="st-view show-recovery-codes-view" data-testid="show-recovery-codes-view">
-        <STNavigationBar :title="$t('Herstelcodes')" />
+        <STNavigationBar :title="$t('%ZhY')" />
 
         <main class="center">
-            <h1>{{ $t('Herstelcodes') }}</h1>
-            <p>{{ $t('Bewaar deze herstelcodes op een veilige plaats: bv. door ze af te drukken en in een kluis te bewaren. Je kan ze gebruiken om aan te melden als je de toegang tot je tweestapsverificatie-methode verliest (bv. bij een verloren smartphone). Ze worden maar één keer getoond.') }}</p>
+            <h1>{{ $t('%ZhY') }}</h1>
+            <p>{{ $t('%Zgw') }}</p>
 
             <div class="recovery-codes" data-testid="recovery-codes">
                 <code v-for="c of codes" :key="c">{{ c }}</code>
@@ -13,12 +13,12 @@
             <p class="style-button-bar">
                 <button v-if="canPrint" class="button text" type="button" data-testid="print-recovery-codes" @click.prevent="print">
                     <span class="icon printer" />
-                    <span>{{ $t('Afdrukken') }}</span>
+                    <span>{{ $t('%Zhi') }}</span>
                 </button>
 
                 <button class="button text" type="button" data-testid="copy-recovery-codes" @click.prevent="copy">
                     <span class="icon copy" />
-                    <span>{{ $t('Kopieer codes') }}</span>
+                    <span>{{ $t('%Zhe') }}</span>
                 </button>
             </p>
         </main>
@@ -26,7 +26,7 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" data-testid="recovery-codes-done" @click.prevent="done">
-                    <span>{{ $t('Ik heb ze bewaard') }}</span>
+                    <span>{{ $t('%Zhj') }}</span>
                 </button>
             </template>
         </STToolbar>
@@ -58,15 +58,15 @@ const props = withDefaults(
 
 const navigationActions = useNavigationActions();
 
-usePreventLeave(() => $t('Ben je zeker dat je de herstelcodes hebt opgeslagen?'));
+usePreventLeave(() => $t('%ZiE'));
 
 let didComplete = false;
 
 async function done() {
     if (!await CenteredMessage.confirm({
-        title: $t('Heb je de codes zeker goed opgeslagen?'),
-        description: $t('We raden je aan om de codes af te drukken en op een veilige plaats te bewaren'),
-        confirmText: $t('Ja, ik heb ze bewaard'),
+        title: $t('%Zhs'),
+        description: $t('%ZiC'),
+        confirmText: $t('%Zgj'),
     })) {
         return;
     }
@@ -91,7 +91,7 @@ onUnmounted(() => {
 async function copy() {
     try {
         await navigator.clipboard.writeText(props.codes.join('\n'));
-        Toast.success($t('Gekopieerd')).show();
+        Toast.success($t('%Zh2')).show();
     } catch (e) {
         console.error(e);
     }
@@ -105,12 +105,12 @@ function print() {
         printRecoveryCodes(props.codes);
     } catch (e) {
         console.error(e);
-        Toast.error($t('Afdrukken is niet gelukt. Kopieer de codes en bewaar ze op een veilige plaats.')).show();
+        Toast.error($t('%Zi3')).show();
     }
 }
 
 const shouldNavigateAway = async () => {
-    return await CenteredMessage.confirm($t('Ben je zeker dat je de herstelcodes hebt opgeslagen?'), $t('Ja, ik heb ze opgeslagen'), $t('We tonen deze codes maar één keer.'));
+    return await CenteredMessage.confirm($t('%ZiE'), $t('%Zgy'), $t('%Zhu'));
 };
 
 defineExpose({

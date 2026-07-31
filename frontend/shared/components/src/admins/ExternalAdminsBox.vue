@@ -58,8 +58,8 @@
             </p>
 
             <template #right>
-                <span v-if="hasTwoFactor([admin])" v-tooltip="$t('Deze beheerder heeft tweestapsverificatie ingeschakeld.')" class="icon privacy small gray" />
-                <span v-if="isInactive(admin)" v-tooltip="$t('Deze beheerder heeft zich al meer dan {months} maanden niet meer aangemeld.', {months: INACTIVE_ADMIN_MONTHS})" class="icon warning yellow small" />
+                <span v-if="hasTwoFactor([admin])" v-tooltip="$t('%ZhK')" class="icon privacy small gray" />
+                <span v-if="isInactive(admin)" v-tooltip="$t('%Zh1', {months: INACTIVE_ADMIN_MONTHS})" class="icon warning yellow small" />
                 <span v-if="admin.id === me?.id" class="style-tag">
                     {{ $t('%Yd') }}
                 </span>

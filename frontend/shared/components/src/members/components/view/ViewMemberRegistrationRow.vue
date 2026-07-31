@@ -193,7 +193,7 @@ const descriptions = computed<Description[]>(() => {
 // These files are uploaded by a member, so we download them instead of sending anyone to their url
 function download(description: Description & { type: 'link' }) {
     // A file without a name is shown with its url, which we don't want to use as a filename
-    const filename = description.name === description.url ? $t('Bestand') : description.name;
+    const filename = description.name === description.url ? $t('%yU') : description.name;
 
     downloadFile(description.url, filename).catch((e) => {
         Toast.fromError(e).show();

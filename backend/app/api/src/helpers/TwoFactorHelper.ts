@@ -139,7 +139,7 @@ export class TwoFactorHelper {
             throw new SimpleError({
                 code: 'require_mfa',
                 message: 'Two-factor authentication required',
-                human: $t('Tweestapsverificatie is vereist om aan te melden.'),
+                human: $t('%ZhQ'),
                 meta: requirement.challenge.encode({ version }),
                 statusCode: 403,
             });
@@ -151,7 +151,7 @@ export class TwoFactorHelper {
             throw new SimpleError({
                 code: 'require_mfa_setup',
                 message: 'Two-factor authentication setup required',
-                human: $t('Tweestapsverificatie is verplicht door jouw organisatie. Je moet tweestapsverificatie instellen voor je verder kan.'),
+                human: $t('%Zh8'),
                 meta: MFASetupResponse.create({
                     setupToken: requirement.setupToken.token,
                     token: temporaryToken,

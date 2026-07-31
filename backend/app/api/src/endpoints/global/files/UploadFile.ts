@@ -133,7 +133,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new SimpleError({
                 code: 'invalid_file_type',
                 message: 'Unsupported file type ' + (file.mimetype ?? 'unknown') + ' for file ' + (file.originalFilename ?? 'unknown'),
-                human: $t('Dit type bestand kan je niet uploaden.'),
+                human: $t('%ZiD'),
                 field: 'file',
                 statusCode: 400,
             });

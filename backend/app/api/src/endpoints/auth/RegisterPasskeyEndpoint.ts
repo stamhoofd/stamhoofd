@@ -42,7 +42,7 @@ export class RegisterPasskeyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: 'passkeys_not_available',
                 message: 'Passkeys are not available for this account',
-                human: $t('Passkeys zijn niet beschikbaar voor dit account. Gebruik een authenticator-app.'),
+                human: $t('%ZhE'),
                 statusCode: 400,
             });
         }
@@ -52,7 +52,7 @@ export class RegisterPasskeyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: 'invalid_challenge',
                 message: 'No valid registration challenge found',
-                human: $t('De registratie is verlopen. Probeer opnieuw.'),
+                human: $t('%Zi9'),
                 statusCode: 400,
             });
         }
@@ -62,7 +62,7 @@ export class RegisterPasskeyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: 'invalid_passkey',
                 message: 'Could not verify the passkey',
-                human: $t('De passkey kon niet geverifieerd worden.'),
+                human: $t('%Zhr'),
                 statusCode: 400,
             });
         }
@@ -71,7 +71,7 @@ export class RegisterPasskeyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: 'passkey_already_registered',
                 message: 'This passkey is already registered',
-                human: $t('Deze passkey is al geregistreerd.'),
+                human: $t('%Zhf'),
                 statusCode: 400,
             });
         }

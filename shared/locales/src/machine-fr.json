@@ -18571,13 +18571,497 @@
     "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Vereniging ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
     "translation": "- Sélectionnez la bonne forme d'entreprise dans Stripe.\n- Si vous n’êtes pas une ASBL mais une association de fait, choisissez « Association SANS personnalité juridique ». Vous ne pourrez plus modifier ce choix par la suite.\n- Complétez chaque champ correctement et complètement, prenez le temps nécessaire.\n- Assurez-vous de bien indiquer une adresse de site web.\n- Vous trouvez des modèles et informations dans la documentation, consultez-la d’abord en cas de doute.\n- Téléchargez uniquement les documents figurant sur la liste des documents autorisés."
   },
+  "%ZgH": {
+    "original": "Enkel gebruikers met rechten op het platform kunnen tweestapsverificatie instellen.",
+    "translation": "Seuls les utilisateurs disposant de droits sur la plateforme peuvent activer la vérification en deux étapes."
+  },
+  "%ZgI": {
+    "original": "Passkeys en beveiligingssleutels",
+    "translation": "Passkeys et clés de sécurité"
+  },
+  "%ZgJ": {
+    "original": "Deze authenticator werd niet gevonden.",
+    "translation": "Cet authentificateur n'a pas été trouvé."
+  },
+  "%ZgK": {
+    "original": "Ze moeten zich daarna opnieuw aanmelden. Jouw wijzigingen hierboven worden nog niet opgeslagen.",
+    "translation": "Ils devront ensuite se reconnecter. Vos modifications ci-dessus ne sont pas encore enregistrées."
+  },
+  "%ZgL": {
+    "original": "Passkeys werken enkel op {domain}. Meld je daar aan om een passkey toe te voegen of te gebruiken.",
+    "translation": "Les passkeys ne fonctionnent que sur {domain}. Connectez-vous là-bas pour ajouter ou utiliser une passkey."
+  },
+  "%ZgM": {
+    "original": "Deze authenticator is al bevestigd.",
+    "translation": "Cet authentificateur a déjà été confirmé."
+  },
+  "%ZgN": {
+    "original": "Voer één van je herstelcodes in.",
+    "translation": "Entrez un de vos codes de récupération."
+  },
+  "%ZgO": {
+    "original": "Deze browser ondersteunt geen passkeys.",
+    "translation": "Ce navigateur ne prend pas en charge les passkeys."
+  },
+  "%ZgP": {
+    "original": "Bevestig de code uit je app",
+    "translation": "Confirmez le code depuis votre application"
+  },
+  "%ZgQ": {
+    "original": "Nieuwe herstelcodes genereren?",
+    "translation": "Générer de nouveaux codes de récupération ?"
+  },
+  "%ZgR": {
+    "original": "Je moet de tweestapsverificatie voltooien om verder te gaan. Herlaad deze pagina om het opnieuw te proberen.",
+    "translation": "Vous devez terminer la vérification en deux étapes pour continuer. Rechargez cette page pour réessayer."
+  },
+  "%ZgS": {
+    "original": "Gebruikers met rechten op het platform moeten tweestapsverificatie instellen om aan te melden.",
+    "translation": "Les utilisateurs disposant de droits sur la plateforme doivent activer la vérification en deux étapes pour se connecter."
+  },
+  "%ZgT": {
+    "original": "Passkey of beveiligingssleutel toevoegen",
+    "translation": "Ajouter une passkey ou une clé de sécurité"
+  },
+  "%ZgU": {
+    "original": "De herstelcodes van {{u}} werden opnieuw gegenereerd",
+    "translation": "Les codes de récupération de {{u}} ont été régénérés"
+  },
+  "%ZgV": {
+    "original": "Er ging iets mis bij het aanmaken van de factuur",
+    "translation": "Une erreur s'est produite lors de la création de la facture"
+  },
+  "%ZgW": {
+    "original": "Opnieuw gegenereerde herstelcodes",
+    "translation": "Codes de récupération régénérés"
+  },
+  "%ZgX": {
+    "original": "Afmelden",
+    "translation": "Se déconnecter"
+  },
+  "%ZgY": {
+    "original": "Authenticator-app",
+    "translation": "Application d'authentification"
+  },
+  "%ZgZ": {
+    "original": "Naam toestel of app",
+    "translation": "Nom de l'appareil ou de l'application"
+  },
+  "%Zga": {
+    "original": "Scan de QR-code met je authenticator-app en voer daarna de code in.",
+    "translation": "Scannez le QR-code avec votre application d’authentification puis entrez le code."
+  },
+  "%Zgc": {
+    "original": "Bevestig je aanmelding met je ingestelde tweedestapsverificatie-methode.",
+    "translation": "Confirmez votre connexion avec la méthode de vérification en deux étapes que vous avez choisie."
+  },
+  "%Zgd": {
+    "original": "Laatst gebruikt op {date}",
+    "translation": "Dernière utilisation le {date}"
+  },
+  "%Zge": {
+    "original": "Niet afmelden",
+    "translation": "Ne pas se déconnecter"
+  },
+  "%Zgf": {
+    "original": "Dit bestand kon niet gedownload worden.",
+    "translation": "Ce fichier n'a pas pu être téléchargé."
+  },
+  "%Zgg": {
+    "original": "Aanmaak van factuur mislukt. Probeer het opnieuw",
+    "translation": "La création de la facture a échoué. Essayez à nouveau"
+  },
+  "%Zgi": {
+    "original": "Ze moeten zich daarna opnieuw aanmelden.",
+    "translation": "Ils devront ensuite se reconnecter."
+  },
+  "%Zgj": {
+    "original": "Ja, ik heb ze bewaard",
+    "translation": "Oui, je les ai conservés"
+  },
+  "%Zgk": {
+    "original": "Tweestapsverificatie (2FA)",
+    "translation": "Vérification en deux étapes (2FA)"
+  },
+  "%Zgl": {
+    "original": "Bepaal wie tweestapsverificatie kan instellen, en of het verplicht is voor beheerders van het platform.",
+    "translation": "Déterminez qui peut activer la vérification en deux étapes et si elle est obligatoire pour les administrateurs de la plateforme."
+  },
+  "%Zgo": {
+    "original": "Tweestapsverificatie inschakelen voor iedereen",
+    "translation": "Activer la vérification en deux étapes pour tout le monde"
+  },
+  "%Zgp": {
+    "original": "De ingevoerde code is ongeldig.",
+    "translation": "Le code saisi est invalide."
+  },
+  "%Zgq": {
+    "original": "Als dit uit staat, kan niemand tweestapsverificatie instellen (tenzij hieronder ingeschakeld voor beheerders).",
+    "translation": "Si ceci est désactivé, personne ne peut activer la vérification en deux étapes (sauf si cela est activé ci-dessous pour les administrateurs)."
+  },
+  "%Zgr": {
+    "original": "Optioneel. Bv. Pixel van Jan",
+    "translation": "Optionnel. Par exemple : Pixel de Jean"
+  },
+  "%Zgs": {
+    "original": "Bevestig je identiteit opnieuw om deze actie uit te voeren.",
+    "translation": "Veuillez reconfirmer votre identité pour effectuer cette action."
+  },
+  "%Zgt": {
+    "original": "Tweestapsverificatie verplichten voor beheerders van het platform",
+    "translation": "Rendre la vérification en deux étapes obligatoire pour les administrateurs de la plateforme"
+  },
+  "%Zgu": {
+    "original": "Tweestapsverificatie verplichten voor beheerders",
+    "translation": "Rendre la vérification en deux étapes obligatoire pour les administrateurs"
+  },
+  "%Zgv": {
+    "original": "Authenticator-app toevoegen",
+    "translation": "Ajouter une application d’authentification"
+  },
+  "%Zgw": {
+    "original": "Bewaar deze herstelcodes op een veilige plaats: bv. door ze af te drukken en in een kluis te bewaren. Je kan ze gebruiken om aan te melden als je de toegang tot je tweestapsverificatie-methode verliest (bv. bij een verloren smartphone). Ze worden maar één keer getoond.",
+    "translation": "Conservez ces codes de récupération dans un endroit sûr, par exemple en les imprimant et en les Rangeant dans un coffre-fort. Ils vous permettront de vous connecter si vous perdez l’accès à votre méthode de vérification en deux étapes (par exemple en cas de perte de votre smartphone). Ils ne s’affichent qu’une seule fois."
+  },
+  "%Zgx": {
+    "original": "Tweestapsverificatie instellen",
+    "translation": "Configurer la vérification en deux étapes"
+  },
+  "%Zgy": {
+    "original": "Ja, ik heb ze opgeslagen",
+    "translation": "Oui, je les ai enregistrés"
+  },
+  "%Zgz": {
+    "original": "Je moet eerst tweestapsverificatie instellen.",
+    "translation": "Vous devez d'abord configurer la vérification en deux étapes."
+  },
   "%Zh": {
     "original": "Toegestane domeinnamen",
     "translation": "Noms de domaine autorisés"
   },
+  "%Zh0": {
+    "original": "Deze passkey verwijderen?",
+    "translation": "Supprimer cette passkey ?"
+  },
+  "%Zh1": {
+    "original": "Deze beheerder heeft zich al meer dan {months} maanden niet meer aangemeld.",
+    "translation": "Cet administrateur ne s'est pas connecté depuis plus de {months} mois."
+  },
+  "%Zh2": {
+    "original": "Gekopieerd",
+    "translation": "Copié"
+  },
+  "%Zh3": {
+    "original": "Je account is succesvol gekoppeld",
+    "translation": "Votre compte a été lié avec succès"
+  },
+  "%Zh4": {
+    "original": "Je kan je laatste tweestapsverificatie niet verwijderen omdat die verplicht is.",
+    "translation": "Vous ne pouvez pas supprimer votre dernière vérification en deux étapes car elle est obligatoire."
+  },
+  "%Zh5": {
+    "original": "Tweestapsverificatie ingeschakeld",
+    "translation": "Vérification en deux étapes activée"
+  },
+  "%Zh6": {
+    "original": "Voor deze actie moet je je identiteit herbevestigen",
+    "translation": "Cette action nécessite de reconfirmer votre identité"
+  },
+  "%Zh7": {
+    "original": "Bevestig je identiteit",
+    "translation": "Confirmez votre identité"
+  },
+  "%Zh8": {
+    "original": "Tweestapsverificatie is verplicht door jouw organisatie. Je moet tweestapsverificatie instellen voor je verder kan.",
+    "translation": "La vérification en deux étapes est requise par votre organisation. Vous devez la configurer avant de continuer."
+  },
+  "%Zh9": {
+    "original": "Bevestig met je huidige tweestapsverificatie",
+    "translation": "Confirmez avec votre vérification en deux étapes actuelle"
+  },
+  "%ZhA": {
+    "original": "Genereren",
+    "translation": "Générer"
+  },
+  "%ZhB": {
+    "original": "Met herstelcodes kan je inloggen als je de toegang tot je andere 2FA-methodes verliest, bv. als je jouw smartphone verliest. Je bewaart ze best op een veilige plaats, zoals in een kluis thuis.",
+    "translation": "Les codes de récupération vous permettent de vous connecter si vous perdez l'accès à vos autres méthodes 2FA, par exemple si vous perdez votre smartphone. Il est préférable de les stocker dans un endroit sûr, comme un coffre-fort à la maison."
+  },
+  "%ZhC": {
+    "original": "Nog nooit gebruikt",
+    "translation": "Jamais utilisé"
+  },
+  "%ZhD": {
+    "original": "Tweestapsverificatie inschakelen voor beheerders van het platform",
+    "translation": "Activer la vérification en deux étapes pour les administrateurs de la plateforme"
+  },
+  "%ZhE": {
+    "original": "Passkeys zijn niet beschikbaar voor dit account. Gebruik een authenticator-app.",
+    "translation": "Les passkeys ne sont pas disponibles pour ce compte. Utilisez une application d’authentification."
+  },
+  "%ZhF": {
+    "original": "Deze authenticator-app verwijderen?",
+    "translation": "Supprimer cette application d’authentification ?"
+  },
+  "%ZhG": {
+    "original": "Voer de code uit je authenticator-app in.",
+    "translation": "Entrez le code de votre application d’authentification."
+  },
+  "%ZhH": {
+    "original": "De provider stuurde je te snel terug. Je moet verplicht opnieuw inloggen bij de externe provider voor deze operatie.",
+    "translation": "Le fournisseur vous a renvoyé trop vite. Vous devez obligatoirement vous reconnecter auprès du fournisseur externe pour cette opération."
+  },
+  "%ZhI": {
+    "original": "Herstelcode",
+    "translation": "Code de récupération"
+  },
+  "%ZhJ": {
+    "original": "Je sessie is verlopen. Meld je opnieuw aan.",
+    "translation": "Votre session a expiré. Veuillez vous reconnecter."
+  },
+  "%ZhK": {
+    "original": "Deze beheerder heeft tweestapsverificatie ingeschakeld.",
+    "translation": "Cet administrateur a activé la vérification en deux étapes."
+  },
+  "%ZhL": {
+    "original": "Voer de zescijferige code uit je authenticator-app in.",
+    "translation": "Entrez le code à six chiffres de votre application d’authentification."
+  },
+  "%ZhM": {
+    "original": "Laatst actief op {date}",
+    "translation": "Dernière activité le {date}"
+  },
+  "%ZhN": {
+    "original": "Nieuwe tweestapsverificatie",
+    "translation": "Nouvelle vérification en deux étapes"
+  },
+  "%ZhO": {
+    "original": "Bijvoorbeeld Google Authenticator, 1Password of Bitwarden.",
+    "translation": "Par exemple Google Authenticator, 1Password ou Bitwarden."
+  },
+  "%ZhP": {
+    "original": "Dit soort afbeelding kan je niet opladen.",
+    "translation": "Ce type d’image ne peut pas être téléchargé."
+  },
+  "%ZhQ": {
+    "original": "Tweestapsverificatie is vereist om aan te melden.",
+    "translation": "La vérification en deux étapes est nécessaire pour se connecter."
+  },
+  "%ZhR": {
+    "original": "Alle beheerders van het platform afmelden",
+    "translation": "Déconnecter tous les administrateurs de la plateforme"
+  },
+  "%ZhS": {
+    "original": "Meld je opnieuw aan om deze gevoelige actie te bevestigen.",
+    "translation": "Reconnectez-vous pour confirmer cette action sensible."
+  },
+  "%ZhT": {
+    "original": "Te veel pogingen. Meld je opnieuw aan.",
+    "translation": "Trop de tentatives. Veuillez vous reconnecter."
+  },
+  "%ZhU": {
+    "original": "Dit bestand heeft een ongeldige URL.",
+    "translation": "Ce fichier possède une URL non valide."
+  },
+  "%ZhV": {
+    "original": "Authenticator-app instellen",
+    "translation": "Configurer l’application d’authentification"
+  },
+  "%ZhW": {
+    "original": "Beveilig je account met een extra verificatiestap naast je wachtwoord.",
+    "translation": "Protégez votre compte avec une étape de vérification supplémentaire en plus de votre mot de passe."
+  },
+  "%ZhX": {
+    "original": "Nog nooit aangemeld",
+    "translation": "Jamais connecté"
+  },
+  "%ZhY": {
+    "original": "Herstelcodes",
+    "translation": "Codes de récupération"
+  },
+  "%ZhZ": {
+    "original": "Alle beheerders van het platform afmelden?",
+    "translation": "Déconnecter tous les administrateurs de la plateforme ?"
+  },
+  "%Zha": {
+    "original": "{passkey-name} toegevoegd",
+    "translation": "{passkey-name} ajouté"
+  },
+  "%Zhb": {
+    "original": "{{method}}{{if name ' ‘' name '’'}} werd verwijderd als tweestapsverificatie van {{u}}",
+    "translation": "{{method}}{{if name ' ‘' name '’'}} a été supprimé comme vérification en deux étapes de {{u}}"
+  },
+  "%Zhc": {
+    "original": "Bewaar dit blad op een veilige plaats, bv. in een kluis. Elke code kan één keer gebruikt worden om aan te melden als je de toegang tot je tweestapsverificatie-methode verliest.",
+    "translation": "Gardez cette feuille en lieu sûr, par exemple dans un coffre. Chaque code ne peut être utilisé qu’une seule fois si vous perdez l’accès à votre méthode de vérification en deux étapes."
+  },
+  "%Zhd": {
+    "original": "Je hebt enkel een passkey ingesteld, en die werkt enkel op {domain}. Meld je daar aan om verder te gaan.",
+    "translation": "Vous n’avez configuré qu’une passkey, qui ne fonctionne que sur {domain}. Connectez-vous là-bas pour continuer."
+  },
+  "%Zhe": {
+    "original": "Kopieer codes",
+    "translation": "Copier les codes"
+  },
+  "%Zhf": {
+    "original": "Deze passkey is al geregistreerd.",
+    "translation": "Cette passkey est déjà enregistrée."
+  },
+  "%Zhg": {
+    "original": "Beveiliging",
+    "translation": "Sécurité"
+  },
+  "%Zhh": {
+    "original": "Je identiteit werd bevestigd",
+    "translation": "Votre identité a été confirmée"
+  },
+  "%Zhi": {
+    "original": "Afdrukken",
+    "translation": "Imprimer"
+  },
+  "%Zhj": {
+    "original": "Ik heb ze bewaard",
+    "translation": "Je les ai sauvegardés"
+  },
+  "%Zhk": {
+    "original": "Herstelcode gebruiken",
+    "translation": "Utiliser un code de récupération"
+  },
+  "%Zhl": {
+    "original": "Verwijderde tweestapsverificatie",
+    "translation": "Vérification en deux étapes supprimée"
+  },
+  "%Zhm": {
+    "original": "Optioneel. Bv. iPhone van Jan",
+    "translation": "Optionnel. Par ex. iPhone de Jean"
+  },
+  "%Zhn": {
+    "original": "Vul de code van 6 cijfers in, die de app aan je toont. Deze wijzigt elke minuut.",
+    "translation": "Saisissez le code à 6 chiffres affiché dans votre app. Celui-ci change chaque minute."
+  },
+  "%Zho": {
+    "original": "Deze passkey werd niet gevonden.",
+    "translation": "Cette passkey n’a pas été trouvée."
+  },
+  "%Zhp": {
+    "original": "Passkey",
+    "translation": "Passkey"
+  },
+  "%Zhq": {
+    "original": "Opnieuw verzonden",
+    "translation": "Renvoi effectué"
+  },
+  "%Zhr": {
+    "original": "De passkey kon niet geverifieerd worden.",
+    "translation": "Impossible de vérifier la passkey."
+  },
+  "%Zhs": {
+    "original": "Heb je de codes zeker goed opgeslagen?",
+    "translation": "Avez-vous bien sauvegardé les codes ?"
+  },
+  "%Zht": {
+    "original": "Gebruik je toestel, vingerafdruk of gezichtsherkenning.",
+    "translation": "Utilisez votre appareil, votre empreinte digitale ou la reconnaissance faciale."
+  },
+  "%Zhu": {
+    "original": "We tonen deze codes maar één keer.",
+    "translation": "Ces codes ne sont affichés qu’une seule fois."
+  },
+  "%Zhv": {
+    "original": "Alle beheerders afmelden?",
+    "translation": "Déconnecter tous les administrateurs ?"
+  },
+  "%Zhw": {
+    "original": "Gebruik een van de herstelcodes die je had afgedrukt of veilig bewaard.",
+    "translation": "Utilisez un des codes de récupération que vous avez imprimés ou mis en sécurité."
+  },
+  "%Zhy": {
+    "original": "{{method}}{{if name ' ‘' name '’'}} werd toegevoegd als tweestapsverificatie van {{u}}",
+    "translation": "{{method}}{{if name ' ‘' name '’'}} a été ajouté comme vérification en deux étapes de {{u}}"
+  },
+  "%Zhz": {
+    "original": "Authenticator-apps",
+    "translation": "Applications d’authentification"
+  },
   "%Zi": {
     "original": "Uitgesloten domeinnamen",
     "translation": "Noms de domaine exclus"
+  },
+  "%Zi0": {
+    "original": "Passkey of beveiligingssleutel",
+    "translation": "Passkey ou clé de sécurité"
+  },
+  "%Zi1": {
+    "original": "Je oude herstelcodes worden hierbij ongeldig.",
+    "translation": "Vos anciens codes de récupération deviendront invalides."
+  },
+  "%Zi2": {
+    "original": "Beheerders die nu aangemeld zijn, blijven aangemeld zonder tweestapsverificatie. We raden aan om ze af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.",
+    "translation": "Les administrateurs déjà connectés pourront rester sans vérification en deux étapes. Nous vous conseillons de les déconnecter pour qu’ils l’activent immédiatement. Votre propre session restera active."
+  },
+  "%Zi3": {
+    "original": "Afdrukken is niet gelukt. Kopieer de codes en bewaar ze op een veilige plaats.",
+    "translation": "Impression échouée. Copiez les codes et gardez-les en lieu sûr."
+  },
+  "%Zi4": {
+    "original": "Alle beheerders afmelden",
+    "translation": "Déconnecter tous les administrateurs"
+  },
+  "%Zi5": {
+    "original": "Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan.",
+    "translation": "Votre compte requiert la vérification en deux étapes, mais elle n’est pas encore configurée. Veuillez ajouter une étape de vérification supplémentaire pour continuer."
+  },
+  "%Zi6": {
+    "original": "Voer je wachtwoord opnieuw in om deze gevoelige actie te bevestigen.",
+    "translation": "Saisissez à nouveau votre mot de passe pour confirmer cette action sensible."
+  },
+  "%Zi7": {
+    "original": "Alle beheerders zijn afgemeld",
+    "translation": "Tous les administrateurs sont déconnectés"
+  },
+  "%Zi8": {
+    "original": "Nieuwe herstelcodes genereren",
+    "translation": "Générer de nouveaux codes de récupération"
+  },
+  "%Zi9": {
+    "original": "De registratie is verlopen. Probeer opnieuw.",
+    "translation": "L’enregistrement a expiré. Veuillez réessayer."
+  },
+  "%ZiA": {
+    "original": "Tweestapsverificatie",
+    "translation": "Vérification en deux étapes"
+  },
+  "%ZiC": {
+    "original": "We raden je aan om de codes af te drukken en op een veilige plaats te bewaren",
+    "translation": "Nous vous conseillons d’imprimer les codes et de les conserver en lieu sûr"
+  },
+  "%ZiD": {
+    "original": "Dit type bestand kan je niet uploaden.",
+    "translation": "Ce type de fichier ne peut pas être importé."
+  },
+  "%ZiE": {
+    "original": "Ben je zeker dat je de herstelcodes hebt opgeslagen?",
+    "translation": "Êtes-vous certain d’avoir sauvegardé les codes de récupération ?"
+  },
+  "%ZiF": {
+    "original": "Je hebt nog {count} herstelcodes over.",
+    "translation": "Il vous reste {count} codes de récupération."
+  },
+  "%ZiG": {
+    "original": "Authenticator",
+    "translation": "Authenticator"
+  },
+  "%ZiH": {
+    "original": "Afgedrukt op {date}",
+    "translation": "Imprimé le {date}"
+  },
+  "%ZiI": {
+    "original": "Je passkey werkt enkel op {domain}. Kies hieronder een andere methode, of meld je aan via {domain}.",
+    "translation": "Votre passkey ne fonctionne que sur {domain}. Choisissez une autre méthode ci-dessous, ou connectez-vous via {domain}."
+  },
+  "%ZiJ": {
+    "original": "Beheerders moeten tweestapsverificatie pas verplicht instellen bij hun volgende aanmelding. Daarom raden we aan om alle beheerders af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.",
+    "translation": "Les administrateurs devront uniquement activer la vérification en deux étapes lors de leur prochaine connexion. C’est pourquoi nous recommandons de les déconnecter, afin qu’ils l’activent directement. Votre propre session restera active."
   },
   "%Zj": {
     "original": "Vergeten",

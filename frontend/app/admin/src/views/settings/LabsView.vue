@@ -9,9 +9,9 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
-        <h2>{{ $t('Beveiliging') }}</h2>
+        <h2>{{ $t('%Zhg') }}</h2>
 
-        <p>{{ $t('Bepaal wie tweestapsverificatie kan instellen, en of het verplicht is voor beheerders van het platform.') }}</p>
+        <p>{{ $t('%Zgl') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label" data-testid="mfa-enabled">
@@ -19,10 +19,10 @@
                     <Checkbox :model-value="getFeatureFlag('mfa')" @update:model-value="setFeatureFlag('mfa', !!$event)" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Tweestapsverificatie inschakelen voor iedereen') }}
+                    {{ $t('%Zgo') }}
                 </h3>
                 <p v-if="!getFeatureFlag('mfa')" class="style-description-small">
-                    {{ $t('Als dit uit staat, kan niemand tweestapsverificatie instellen (tenzij hieronder ingeschakeld voor beheerders).') }}
+                    {{ $t('%Zgq') }}
                 </p>
             </STListItem>
 
@@ -31,10 +31,10 @@
                     <Checkbox :model-value="getFeatureFlag('mfa-admins')" @update:model-value="setFeatureFlag('mfa-admins', !!$event)" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Tweestapsverificatie inschakelen voor beheerders van het platform') }}
+                    {{ $t('%ZhD') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Enkel gebruikers met rechten op het platform kunnen tweestapsverificatie instellen.') }}
+                    {{ $t('%ZgH') }}
                 </p>
             </STListItem>
 
@@ -43,10 +43,10 @@
                     <Checkbox v-model="requireTwoFactor" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Tweestapsverificatie verplichten voor beheerders van het platform') }}
+                    {{ $t('%Zgt') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Gebruikers met rechten op het platform moeten tweestapsverificatie instellen om aan te melden.') }}
+                    {{ $t('%ZgS') }}
                 </p>
             </STListItem>
 
@@ -55,7 +55,7 @@
                     <IconContainer icon="logout" aside-icon="power" class="error" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Alle beheerders van het platform afmelden') }}
+                    {{ $t('%ZhR') }}
                 </h3>
             </STListItem>
         </STList>
@@ -175,11 +175,11 @@ const requireTwoFactor = computed({
  */
 async function signOutAdmins() {
     if (!await CenteredMessage.confirm({
-        title: $t('Alle beheerders van het platform afmelden?'),
-        confirmText: $t('Afmelden'),
+        title: $t('%ZhZ'),
+        confirmText: $t('%ZgX'),
         description: hasChanges.value
-            ? $t('Ze moeten zich daarna opnieuw aanmelden. Jouw wijzigingen hierboven worden nog niet opgeslagen.')
-            : $t('Ze moeten zich daarna opnieuw aanmelden.'),
+            ? $t('%ZgK')
+            : $t('%Zgi'),
     })) {
         return;
     }
@@ -193,10 +193,10 @@ async function signOutAdmins() {
  */
 async function askToSignOutAdmins() {
     if (!await CenteredMessage.confirm({
-        title: $t('Alle beheerders van het platform afmelden?'),
-        confirmText: $t('Afmelden'),
-        description: $t('Beheerders die nu aangemeld zijn, blijven aangemeld zonder tweestapsverificatie. We raden aan om ze af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.'),
-        cancelText: $t('Niet afmelden'),
+        title: $t('%ZhZ'),
+        confirmText: $t('%ZgX'),
+        description: $t('%Zi2'),
+        cancelText: $t('%Zge'),
         destructive: false,
     })) {
         return;
@@ -212,7 +212,7 @@ async function doSignOutAdmins() {
             path: '/platform/admins/sign-out',
             owner: requestOwner,
         });
-        new Toast($t('Alle beheerders zijn afgemeld'), 'success green').show();
+        new Toast($t('%Zi7'), 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
     }

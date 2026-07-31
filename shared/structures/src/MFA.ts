@@ -14,11 +14,11 @@ export enum MFAMethodType {
 export function getMFAMethodTypeName(method: MFAMethodType): string {
     switch (method) {
         case MFAMethodType.TOTP:
-            return $t(`Authenticator-app`);
+            return $t(`%ZgY`);
         case MFAMethodType.Passkey:
-            return $t(`Passkey`);
+            return $t(`%Zhp`);
         case MFAMethodType.RecoveryCode:
-            return $t(`Herstelcode`);
+            return $t(`%ZhI`);
     }
 }
 
@@ -190,7 +190,7 @@ export class PasskeyCredential extends AutoEncoder {
     lastUsedAt: Date | null = null;
 
     get derivedName() {
-        return this.name || this.providerName || $t('Passkey');
+        return this.name || this.providerName || $t('%Zhp');
     }
 
     get icon() {

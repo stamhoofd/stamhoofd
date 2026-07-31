@@ -123,7 +123,7 @@ const isAllCheckboxAnswers = computed(() => {
 
 // A file of an answer is uploaded by a member, so we download it instead of sending anyone to its url
 function download(file: File) {
-    downloadFile(file.getPublicPath(), file.name ?? $t('Bestand')).catch((e) => {
+    downloadFile(file.getPublicPath(), file.name ?? $t('%yU')).catch((e) => {
         Toast.fromError(e).show();
     });
 }

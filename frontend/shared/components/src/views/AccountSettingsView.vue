@@ -76,7 +76,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Tweestapsverificatie') }}
+                        {{ $t('%ZiA') }}
                     </h3>
 
                     <template #right>

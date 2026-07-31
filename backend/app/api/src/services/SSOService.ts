@@ -627,7 +627,7 @@ export class SSOServiceWithSession {
                         throw new SimpleError({
                             code: 'invalid_user',
                             message: 'No recent authentication',
-                            human: $t('De provider stuurde je te snel terug. Je moet verplicht opnieuw inloggen bij de externe provider voor deze operatie.'),
+                            human: $t('%ZhH'),
                             statusCode: 400,
                         });
                     }
@@ -734,7 +734,7 @@ export class SSOServiceWithSession {
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'The session to reauthenticate no longer exists',
-                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        human: $t('%ZhJ'),
                         statusCode: 401,
                     });
                 }
@@ -744,10 +744,10 @@ export class SSOServiceWithSession {
                 await user.markActive();
 
                 redirectUri.searchParams.set('s', session.spaState);
-                redirectUri.searchParams.set('msg', $t('Je identiteit werd bevestigd'));
+                redirectUri.searchParams.set('msg', $t('%Zhh'));
             } else {
                 redirectUri.searchParams.set('s', session.spaState);
-                redirectUri.searchParams.set('msg', $t('Je account is succesvol gekoppeld'));
+                redirectUri.searchParams.set('msg', $t('%Zh3'));
             }
 
             response.headers['location'] = redirectUri.toString();

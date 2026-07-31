@@ -55,7 +55,7 @@ const printStyles = `
  * Turns an empty document into a printable sheet with the recovery codes.
  */
 export function renderRecoveryCodesDocument(doc: Document, codes: string[]) {
-    const title = $t('Herstelcodes');
+    const title = $t('%ZhY');
     doc.title = title;
 
     const style = doc.createElement('style');
@@ -66,11 +66,11 @@ export function renderRecoveryCodesDocument(doc: Document, codes: string[]) {
     heading.textContent = title;
 
     const description = doc.createElement('p');
-    description.textContent = $t('Bewaar dit blad op een veilige plaats, bv. in een kluis. Elke code kan één keer gebruikt worden om aan te melden als je de toegang tot je tweestapsverificatie-methode verliest.');
+    description.textContent = $t('%Zhc');
 
     const date = doc.createElement('p');
     date.className = 'date';
-    date.textContent = $t('Afgedrukt op {date}', { date: Formatter.date(new Date(), true) });
+    date.textContent = $t('%ZiH', { date: Formatter.date(new Date(), true) });
 
     const list = doc.createElement('div');
     list.className = 'codes';
@@ -100,7 +100,7 @@ export function printRecoveryCodes(codes: string[]) {
     printFrame?.remove();
 
     const frame = document.createElement('iframe');
-    frame.title = $t('Herstelcodes');
+    frame.title = $t('%ZhY');
     frame.setAttribute('aria-hidden', 'true');
     frame.setAttribute('data-testid', 'recovery-codes-print-frame');
     frame.style.position = 'fixed';

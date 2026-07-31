@@ -23,7 +23,7 @@ export async function downloadFile(url: string, filename: string): Promise<void>
         throw new SimpleError({
             code: 'failed_to_download',
             message: 'Failed to download file',
-            human: $t('Dit bestand kon niet gedownload worden.'),
+            human: $t('%Zgf'),
         });
     }
 
@@ -31,7 +31,7 @@ export async function downloadFile(url: string, filename: string): Promise<void>
         throw new SimpleError({
             code: 'failed_to_download',
             message: 'Failed to download file: status ' + response.status,
-            human: $t('Dit bestand kon niet gedownload worden.'),
+            human: $t('%Zgf'),
         });
     }
 

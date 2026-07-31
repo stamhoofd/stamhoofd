@@ -1,15 +1,15 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="status" class="st-view mfa-settings-view" data-testid="mfa-settings-view">
-            <STNavigationBar :title="$t('Tweestapsverificatie')" />
+            <STNavigationBar :title="$t('%ZiA')" />
 
             <main class="center">
-                <h1>{{ $t('Tweestapsverificatie (2FA)') }}</h1>
-                <p>{{ $t('Beveilig je account met een extra verificatiestap naast je wachtwoord.') }}</p>
+                <h1>{{ $t('%Zgk') }}</h1>
+                <p>{{ $t('%ZhW') }}</p>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
 
-                <hr><h2>{{ $t('Authenticator-apps') }}</h2>
+                <hr><h2>{{ $t('%Zhz') }}</h2>
 
                 <STList>
                     <STListItem v-for="totp of status.totp" :key="totp.id" data-testid="totp-item">
@@ -17,16 +17,16 @@
                             <IconContainer icon="smartphone" class="success" aside-icon="success" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ totp.name || $t('Authenticator-app') }}
+                            {{ totp.name || $t('%ZgY') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Toegevoegd op {date}', { date: Formatter.dateTime(totp.createdAt) }) }}
+                            {{ $t('%g7', { date: Formatter.dateTime(totp.createdAt) }) }}
                         </p>
                         <p v-if="totp.lastUsedAt" class="style-description-small">
-                            {{ $t('Laatst gebruikt op {date}', { date: Formatter.dateTime(totp.lastUsedAt) }) }}
+                            {{ $t('%Zgd', { date: Formatter.dateTime(totp.lastUsedAt) }) }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('Nog nooit gebruikt') }}
+                            {{ $t('%ZhC') }}
                         </p>
                         <template #right>
                             <LoadingButton>
@@ -40,19 +40,19 @@
                             <IconContainer icon="smartphone" aside-icon="add" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Authenticator-app toevoegen') }}
+                            {{ $t('%Zgv') }}
                         </h3>
                     </STListItem>
                 </STList>
 
                 <template v-if="showPasskeySection">
-                    <hr><h2>{{ $t('Passkeys en beveiligingssleutels') }}</h2>
+                    <hr><h2>{{ $t('%ZgI') }}</h2>
 
                     <p v-if="passkeyBlockedReason === 'domain'" class="info-box" data-testid="passkey-domain-warning">
-                        {{ $t('Passkeys werken enkel op {domain}. Meld je daar aan om een passkey toe te voegen of te gebruiken.', { domain: passkeyDomain }) }}
+                        {{ $t('%ZgL', { domain: passkeyDomain }) }}
                     </p>
                     <p v-else-if="passkeyBlockedReason === 'unsupported'" class="info-box">
-                        {{ $t('Deze browser ondersteunt geen passkeys.') }}
+                        {{ $t('%ZgO') }}
                     </p>
 
                     <STList>
@@ -64,13 +64,13 @@
                                 {{ passkey.derivedName }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Toegevoegd op {date}', { date: Formatter.dateTime(passkey.createdAt) }) }}
+                                {{ $t('%g7', { date: Formatter.dateTime(passkey.createdAt) }) }}
                             </p>
                             <p v-if="passkey.lastUsedAt" class="style-description-small">
-                                {{ $t('Laatst gebruikt op {date}', { date: Formatter.dateTime(passkey.lastUsedAt) }) }}
+                                {{ $t('%Zgd', { date: Formatter.dateTime(passkey.lastUsedAt) }) }}
                             </p>
                             <p v-else class="style-description-small">
-                                {{ $t('Nog nooit gebruikt') }}
+                                {{ $t('%ZhC') }}
                             </p>
                             <template #right>
                                 <LoadingButton>
@@ -84,7 +84,7 @@
                                 <IconContainer icon="key" aside-icon="add" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('Passkey of beveiligingssleutel toevoegen') }}
+                                {{ $t('%ZgT') }}
                             </h3>
                         </STListItem>
                     </STList>
@@ -92,14 +92,14 @@
 
                 <template v-if="hasRecoveryCodes || status.totp.length || status.passkeys.length">
                     <hr>
-                    <h2>{{ $t('Herstelcodes') }}</h2>
+                    <h2>{{ $t('%ZhY') }}</h2>
 
                     <p class="style-description-small">
-                        {{ $t('Met herstelcodes kan je inloggen als je de toegang tot je andere 2FA-methodes verliest, bv. als je jouw smartphone verliest. Je bewaart ze best op een veilige plaats, zoals in een kluis thuis.') }}
+                        {{ $t('%ZhB') }}
                     </p>
 
                     <p class="info-box small">
-                        {{ hasRecoveryCodes ? $t('Je hebt nog {count} herstelcodes over.', { count: status.recoveryCodesRemaining }) : $t('Je hebt nog geen herstelcodes.') }}
+                        {{ hasRecoveryCodes ? $t('%ZiF', { count: status.recoveryCodesRemaining }) : $t('Je hebt nog geen herstelcodes.') }}
                     </p>
 
                     <STList>
@@ -108,10 +108,10 @@
                                 <IconContainer icon="recovery-keys" aside-icon="trash stroke" class="error" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('Nieuwe herstelcodes genereren') }}
+                                {{ $t('%Zi8') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Je oude herstelcodes worden hierbij ongeldig.') }}
+                                {{ $t('%Zi1') }}
                             </p>
                         </STListItem>
                     </STList>
@@ -222,7 +222,7 @@ async function addPasskey() {
         if (result.recoveryCodes && result.recoveryCodes.codes.length > 0) {
             await showRecoveryCodes(result.recoveryCodes.codes);
         } else {
-            Toast.success($t('{passkey-name} toegevoegd', { 'passkey-name': added?.derivedName ?? $t('Passkey') })).show();
+            Toast.success($t('%Zha', { 'passkey-name': added?.derivedName ?? $t('%Zhp') })).show();
         }
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -230,7 +230,7 @@ async function addPasskey() {
 }
 
 async function deleteTotp(id: string) {
-    if (!await CenteredMessage.confirm($t('Deze authenticator-app verwijderen?'), $t('Verwijderen'))) {
+    if (!await CenteredMessage.confirm($t('%ZhF'), $t('%CJ'))) {
         return;
     }
     errors.errorBox = null;
@@ -242,7 +242,7 @@ async function deleteTotp(id: string) {
 }
 
 async function deletePasskey(id: string) {
-    if (!await CenteredMessage.confirm($t('Deze passkey verwijderen?'), $t('Verwijderen'))) {
+    if (!await CenteredMessage.confirm($t('%Zh0'), $t('%CJ'))) {
         return;
     }
     errors.errorBox = null;
@@ -254,7 +254,7 @@ async function deletePasskey(id: string) {
 }
 
 async function regenerateRecoveryCodes() {
-    if (!await CenteredMessage.confirm($t('Nieuwe herstelcodes genereren?'), $t('Genereren'), $t('Je oude herstelcodes worden hierbij ongeldig.'))) {
+    if (!await CenteredMessage.confirm($t('%ZgQ'), $t('%ZhA'), $t('%Zi1'))) {
         return;
     }
     errors.errorBox = null;

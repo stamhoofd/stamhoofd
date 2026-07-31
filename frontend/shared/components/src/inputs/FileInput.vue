@@ -63,7 +63,7 @@ function openFile(event: MouseEvent) {
 
     if (model.value) {
         // Never open the url of a file: it doesn't have to be a file server of ours
-        downloadFile(model.value.getPublicPath(), model.value.name ?? $t('Bestand'))
+        downloadFile(model.value.getPublicPath(), model.value.name ?? $t('%yU'))
             .catch((e) => {
                 Toast.fromError(e).show();
             });

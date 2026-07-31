@@ -4,17 +4,17 @@
 
         <main class="center">
             <h1>{{ title }}</h1>
-            <p>{{ $t('Bevestig je aanmelding met je ingestelde tweedestapsverificatie-methode.') }}</p>
+            <p>{{ $t('%Zgc') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="passkeyBlockedReason === 'domain'" class="warning-box" data-testid="passkey-domain-warning">
                 {{ hasOtherMethods
-                    ? $t('Je passkey werkt enkel op {domain}. Kies hieronder een andere methode, of meld je aan via {domain}.', { domain: passkeyDomain })
-                    : $t('Je hebt enkel een passkey ingesteld, en die werkt enkel op {domain}. Meld je daar aan om verder te gaan.', { domain: passkeyDomain }) }}
+                    ? $t('%ZiI', { domain: passkeyDomain })
+                    : $t('%Zhd', { domain: passkeyDomain }) }}
             </p>
             <p v-else-if="passkeyBlockedReason === 'unsupported'" class="warning-box">
-                {{ $t('Deze browser ondersteunt geen passkeys.') }}
+                {{ $t('%ZgO') }}
             </p>
 
             <STList>
@@ -23,10 +23,10 @@
                         <IconContainer icon="key" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Passkey of beveiligingssleutel') }}
+                        {{ $t('%Zi0') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Gebruik je toestel, vingerafdruk of gezichtsherkenning.') }}
+                        {{ $t('%Zht') }}
                     </p>
                     <template #right>
                         <LoadingButton :loading="loading">
@@ -40,10 +40,10 @@
                         <IconContainer icon="smartphone" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Authenticator-app') }}
+                        {{ $t('%ZgY') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Voer de code uit je authenticator-app in.') }}
+                        {{ $t('%ZhG') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small" />
@@ -55,10 +55,10 @@
                         <IconContainer icon="recovery-keys" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Herstelcode gebruiken') }}
+                        {{ $t('%Zhk') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Gebruik een van de herstelcodes die je had afgedrukt of veilig bewaard.') }}
+                        {{ $t('%Zhw') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small" />
@@ -105,7 +105,7 @@ const errors = useErrors();
 const navigationActions = useNavigationActions();
 const show = useShow();
 const title = computed(() => {
-    return props.isRefreshing ? $t('Bevestig met je huidige tweestapsverificatie') : $t('Tweestapsverificatie');
+    return props.isRefreshing ? $t('%Zh9') : $t('%ZiA');
 });
 
 const loading = ref(false);

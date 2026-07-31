@@ -140,7 +140,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                 throw new SimpleError({
                     code: 'invalid_file_type',
                     message: 'Unsupported image type ' + (file.mimetype ?? 'unknown') + ' for file ' + (file.originalFilename ?? 'unknown'),
-                    human: $t('Dit soort afbeelding kan je niet opladen.'),
+                    human: $t('%ZhP'),
                     field: 'file',
                     statusCode: 400,
                 });

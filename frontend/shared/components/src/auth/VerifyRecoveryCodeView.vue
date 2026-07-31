@@ -1,15 +1,15 @@
 <template>
     <form class="st-view verify-recovery-code-view" data-testid="verify-recovery-code-view" novalidate @submit.prevent="submit">
-        <STNavigationBar :title="$t('Herstelcode')" />
+        <STNavigationBar :title="$t('%ZhI')" />
 
         <main class="center">
-            <h1>{{ $t('Herstelcode') }}</h1>
-            <p>{{ $t('Voer één van je herstelcodes in.') }}</p>
+            <h1>{{ $t('%ZhI') }}</h1>
+            <p>{{ $t('%ZgN') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox :title="$t('Herstelcode')">
-                <input v-model="recoveryCode" class="input" type="text" autocomplete="off" data-testid="mfa-recovery-code" :placeholder="$t('Herstelcode')">
+            <STInputBox :title="$t('%ZhI')">
+                <input v-model="recoveryCode" class="input" type="text" autocomplete="off" data-testid="mfa-recovery-code" :placeholder="$t('%ZhI')">
             </STInputBox>
         </main>
 
@@ -17,7 +17,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="submit" data-testid="mfa-recovery-submit">
-                        <span>{{ $t('Bevestigen') }}</span>
+                        <span>{{ $t('%X9') }}</span>
                     </button>
                 </LoadingButton>
             </template>

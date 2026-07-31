@@ -53,8 +53,8 @@ export function getLastActiveDescription(users: User[]): string | null {
 
     const lastActiveAt = getLastActiveAt(withAccount);
     if (!lastActiveAt) {
-        return $t('Nog nooit aangemeld');
+        return $t('%ZhX');
     }
 
-    return $t('Laatst actief op {date}', { date: Formatter.date(lastActiveAt, true) });
+    return $t('%ZhM', { date: Formatter.date(lastActiveAt, true) });
 }

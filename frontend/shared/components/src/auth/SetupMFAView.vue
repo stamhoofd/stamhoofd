@@ -1,10 +1,10 @@
 <template>
     <div class="st-view setup-mfa-view" data-testid="setup-mfa-view">
-        <STNavigationBar :title="$t('Tweestapsverificatie instellen')" />
+        <STNavigationBar :title="$t('%Zgx')" />
 
         <main class="center">
-            <h1>{{ $t('Tweestapsverificatie instellen') }}</h1>
-            <p>{{ $t('Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan.') }}</p>
+            <h1>{{ $t('%Zgx') }}</h1>
+            <p>{{ $t('%Zi5') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -14,10 +14,10 @@
                         <IconContainer icon="key" aside-icon="add" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Passkey of beveiligingssleutel toevoegen') }}
+                        {{ $t('%ZgT') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Gebruik je toestel, vingerafdruk of gezichtsherkenning.') }}
+                        {{ $t('%Zht') }}
                     </p>
                     <template #right>
                         <LoadingButton :loading="loading">
@@ -31,10 +31,10 @@
                         <IconContainer icon="smartphone" aside-icon="add" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Authenticator-app instellen') }}
+                        {{ $t('%ZhV') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Bijvoorbeeld Google Authenticator, 1Password of Bitwarden.') }}
+                        {{ $t('%ZhO') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small" />

@@ -175,7 +175,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_mfa_token',
                         message: 'The MFA session is invalid or expired',
-                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        human: $t('%ZhJ'),
                         statusCode: 400,
                     });
                 }
@@ -186,7 +186,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_mfa_token',
                         message: 'The MFA session is invalid or expired',
-                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        human: $t('%ZhJ'),
                         statusCode: 400,
                     });
                 }
@@ -196,7 +196,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_mfa_token',
                         message: 'The MFA session is invalid or expired',
-                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        human: $t('%ZhJ'),
                         statusCode: 400,
                     });
                 }
@@ -248,7 +248,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: locked ? 'too_many_attempts' : 'invalid_mfa_code',
                         message: locked ? 'Too many attempts' : 'Invalid code',
-                        human: locked ? $t('Te veel pogingen. Meld je opnieuw aan.') : $t('De ingevoerde code is ongeldig.'),
+                        human: locked ? $t('%ZhT') : $t('%Zgp'),
                         statusCode: locked ? 429 : 400,
                         field: 'code',
                     });
@@ -259,7 +259,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_mfa_token',
                         message: 'The MFA session is invalid or expired',
-                        human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                        human: $t('%ZhJ'),
                         statusCode: 400,
                     });
                 }

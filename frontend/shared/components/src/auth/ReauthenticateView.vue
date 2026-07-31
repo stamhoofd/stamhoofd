@@ -1,19 +1,19 @@
 <template>
     <form class="st-view reauthenticate-view" data-testid="reauthenticate-view" data-submit-last-field novalidate @submit.prevent="submit">
-        <STNavigationBar :title="$t('Bevestig je identiteit')" />
+        <STNavigationBar :title="$t('%Zh7')" />
 
         <main class="center">
-            <h1>{{ $t('Bevestig je identiteit') }}</h1>
+            <h1>{{ $t('%Zh7') }}</h1>
             <p v-if="showPassword">
-                {{ $t('Voer je wachtwoord opnieuw in om deze gevoelige actie te bevestigen.') }}
+                {{ $t('%Zi6') }}
             </p>
             <p v-else>
-                {{ $t('Meld je opnieuw aan om deze gevoelige actie te bevestigen.') }}
+                {{ $t('%ZhS') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput v-model="email" class="max" :disabled="true" name="username" autocomplete="username" enterkeyhint="next" :title="$t('E-mailadres')" :placeholder="$t(`%WT`)" />
+            <EmailInput v-model="email" class="max" :disabled="true" name="username" autocomplete="username" enterkeyhint="next" :title="$t('%1FK')" :placeholder="$t(`%WT`)" />
 
             <STInputBox v-if="showPassword" class="max" :title="$t(`%HK`)">
                 <template #right>
@@ -29,7 +29,7 @@
                 <LoadingButton v-if="showPassword" :loading="loading" class="block">
                     <button id="submit" class="button primary full" type="submit" data-testid="reauth-submit">
                         <span class="lock icon" />
-                        <span>{{ $t('Bevestigen') }}</span>
+                        <span>{{ $t('%X9') }}</span>
                     </button>
                 </LoadingButton>
                 <LoginMethodButton v-if="usesSSO" :config="ssoConfig!" :provider="LoginProviderType.SSO" :primary="!showPassword" :fallback-text="!showPassword ? $t('%Qg') : $t('%Zk')" data-testid="reauth-sso" @click="reauthenticateThroughSSO" />

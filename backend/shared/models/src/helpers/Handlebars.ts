@@ -54,7 +54,7 @@ Handlebars.registerHelper('formatPrice', (a, options) => {
     if (typeof a !== 'number') return a;
     // round=true rounds to nearest cent (100 units = 1 cent, where 10000 units = €1)
     const value = options?.hash?.round ? Math.round(a / 100) * 100 : a;
-    return Formatter.price(value);
+    return Formatter.price(value, { maximumFractionDigits: 4 });
 });
 Handlebars.registerHelper('formatDate', (a, options) => {
     if (!(a instanceof Date)) {
@@ -202,8 +202,7 @@ AsyncResolver.registerAsyncHelper(Handlebars, 'src', async (a, options) => {
         }
 
         return resolution.file.getPublicPath();
-    }
-    catch (e) {
+    } catch (e) {
         console.error('src helper:', e);
         return '';
     }
@@ -226,8 +225,7 @@ Handlebars.registerHelper('src-width', (a, options) => {
         const image = Image.decode(new ObjectData(a, { version: 0 }));
         const resolution = image.getResolutionForSize(width as number | undefined, height as number | undefined);
         return resolution.width;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('src-width helper:', e);
         return 0;
     }
@@ -250,8 +248,7 @@ Handlebars.registerHelper('src-height', (a, options) => {
         const image = Image.decode(new ObjectData(a, { version: 0 }));
         const resolution = image.getResolutionForSize(width as number | undefined, height as number | undefined);
         return resolution.height;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('src-height helper:', e);
         return 0;
     }
@@ -280,8 +277,7 @@ export async function render(htmlTemplate: string, context: any): Promise<string
         const renderedHtml = template({ ...context, asyncResolver: resolver });
         const html = await resolver.replace(renderedHtml);
         return html;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to render document html', e);
         return null;
     }

@@ -1,10 +1,10 @@
 <template>
     <form class="st-view verify-totp-view" data-testid="verify-totp-view" @submit.prevent="submit">
-        <STNavigationBar :title="$t('Authenticator-app')" />
+        <STNavigationBar :title="$t('%ZgY')" />
 
         <main class="center">
-            <h1>{{ $t('Authenticator-app') }}</h1>
-            <p>{{ $t('Voer de zescijferige code uit je authenticator-app in.') }}</p>
+            <h1>{{ $t('%ZgY') }}</h1>
+            <p>{{ $t('%ZhL') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -17,7 +17,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="submit" data-testid="mfa-totp-submit">
-                        <span>{{ $t('Bevestigen') }}</span>
+                        <span>{{ $t('%X9') }}</span>
                     </button>
                 </LoadingButton>
             </template>

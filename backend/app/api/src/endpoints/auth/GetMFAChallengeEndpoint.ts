@@ -46,7 +46,7 @@ export class GetMFAChallengeEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: 'invalid_mfa_token',
                 message: 'The MFA session is invalid or expired',
-                human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                human: $t('%ZhJ'),
                 statusCode: 400,
             });
         }

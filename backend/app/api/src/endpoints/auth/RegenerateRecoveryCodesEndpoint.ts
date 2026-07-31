@@ -37,7 +37,7 @@ export class RegenerateRecoveryCodesEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'no_factors',
                 message: 'You need at least one two-factor method before generating recovery codes',
-                human: $t('Je moet eerst tweestapsverificatie instellen.'),
+                human: $t('%Zgz'),
                 statusCode: 400,
             });
         }

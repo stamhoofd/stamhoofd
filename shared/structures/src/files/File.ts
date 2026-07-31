@@ -57,7 +57,7 @@ function validateHttpUrl(value: string, field: string): URL {
         throw new SimpleError({
             code: 'invalid_field',
             message: 'Invalid url for a file: ' + value,
-            human: $t('Dit bestand heeft een ongeldige URL.'),
+            human: $t('%ZhU'),
             field,
         });
     }
@@ -66,7 +66,7 @@ function validateHttpUrl(value: string, field: string): URL {
         throw new SimpleError({
             code: 'invalid_field',
             message: 'A file url can only be http or https, received: ' + url.protocol,
-            human: $t('Dit bestand heeft een ongeldige URL.'),
+            human: $t('%ZhU'),
             field,
         });
     }

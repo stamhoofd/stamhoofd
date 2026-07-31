@@ -44,7 +44,7 @@ export class ConfirmTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'not_found',
                 message: 'TOTP authenticator not found',
-                human: $t('Deze authenticator werd niet gevonden.'),
+                human: $t('%ZgJ'),
                 statusCode: 404,
             });
         }
@@ -53,7 +53,7 @@ export class ConfirmTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'already_confirmed',
                 message: 'This authenticator is already confirmed',
-                human: $t('Deze authenticator is al bevestigd.'),
+                human: $t('%ZgM'),
                 statusCode: 400,
             });
         }
@@ -63,7 +63,7 @@ export class ConfirmTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_mfa_code',
                 message: 'Invalid code',
-                human: $t('De ingevoerde code is ongeldig.'),
+                human: $t('%Zgp'),
                 field: 'code',
                 statusCode: 400,
             });
@@ -72,7 +72,7 @@ export class ConfirmTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const wasFirstFactor = !(await TwoFactorHelper.userHasFactors(user.id));
 
         totp.confirmedAt = new Date();
-        totp.name = request.body.name.trim() || $t('Authenticator');
+        totp.name = request.body.name.trim() || $t('%ZiG');
         // Record the counter so the confirmation code can't be replayed as a login code.
         totp.lastUsedCounter = counter;
         await totp.save();

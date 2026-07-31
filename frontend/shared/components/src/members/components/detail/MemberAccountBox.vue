@@ -28,7 +28,7 @@
             {{ lastActiveDescription }}
         </p>
         <p v-if="hasTwoFactor" class="style-description-small">
-            {{ $t('Tweestapsverificatie ingeschakeld') }}
+            {{ $t('%Zh5') }}
         </p>
 
         <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>

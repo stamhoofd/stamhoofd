@@ -9,7 +9,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="twoFactorEnabled || requireTwoFactor">
-            <hr><h2>{{ $t('Beveiliging') }}</h2>
+            <hr><h2>{{ $t('%Zhg') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -17,7 +17,7 @@
                         <Checkbox v-model="requireTwoFactor" data-testid="require-two-factor" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Tweestapsverificatie verplichten voor beheerders') }}
+                        {{ $t('%Zgu') }}
                     </h3>
                 </STListItem>
 
@@ -26,7 +26,7 @@
                         <IconContainer icon="logout" aside-icon="power" class="error" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Alle beheerders afmelden') }}
+                        {{ $t('%Zi4') }}
                     </h3>
                 </STListItem>
             </STList>
@@ -367,11 +367,11 @@ const requireTwoFactor = computed({
  */
 async function signOutAdmins() {
     if (!await CenteredMessage.confirm({
-        title: $t('Alle beheerders afmelden?'),
-        confirmText: $t('Afmelden'),
+        title: $t('%Zhv'),
+        confirmText: $t('%ZgX'),
         description: hasChanges.value
-            ? $t('Ze moeten zich daarna opnieuw aanmelden. Jouw wijzigingen hierboven worden nog niet opgeslagen.')
-            : $t('Ze moeten zich daarna opnieuw aanmelden.'),
+            ? $t('%ZgK')
+            : $t('%Zgi'),
     })) {
         return;
     }
@@ -385,10 +385,10 @@ async function signOutAdmins() {
  */
 async function askToSignOutAdmins() {
     if (!await CenteredMessage.confirm({
-        title: $t('Alle beheerders afmelden?'),
-        confirmText: $t('Afmelden'),
-        description: $t('Beheerders moeten tweestapsverificatie pas verplicht instellen bij hun volgende aanmelding. Daarom raden we aan om alle beheerders af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.'),
-        cancelText: $t('Niet afmelden'),
+        title: $t('%Zhv'),
+        confirmText: $t('%ZgX'),
+        description: $t('%ZiJ'),
+        cancelText: $t('%Zge'),
         destructive: false,
     })) {
         return;
@@ -404,7 +404,7 @@ async function doSignOutAdmins() {
             path: '/organization/admins/sign-out',
             owner: requestOwner,
         });
-        new Toast($t('Alle beheerders zijn afgemeld'), 'success green').show();
+        new Toast($t('%Zi7'), 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
     }

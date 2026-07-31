@@ -41,7 +41,7 @@ export function useFreshAction() {
                 if (!c) {
                     throw new SimpleError({
                         code: 'authentication_required',
-                        message: $t('Voor deze actie moet je je identiteit herbevestigen'),
+                        message: $t('%Zh6'),
                     });
                 }
                 return await action();

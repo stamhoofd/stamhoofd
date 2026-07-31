@@ -35,7 +35,7 @@ export class RegisterPasskeyOptionsEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'passkeys_not_available',
                 message: 'Passkeys are not available for this account',
-                human: $t('Passkeys zijn niet beschikbaar voor dit account. Gebruik een authenticator-app.'),
+                human: $t('%ZhE'),
                 statusCode: 400,
             });
         }

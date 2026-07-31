@@ -354,7 +354,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'require_fresh_auth',
                 message: 'A recent authentication is required for this action',
-                human: $t('Bevestig je identiteit opnieuw om deze actie uit te voeren.'),
+                human: $t('%Zgs'),
                 statusCode: 403,
             });
         }
@@ -375,7 +375,7 @@ export class ContextInstance {
                 throw new SimpleError({
                     code: 'mfa_setup_expired',
                     message: 'The MFA setup session is invalid or expired',
-                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    human: $t('%ZhJ'),
                     statusCode: 401,
                 });
             }
@@ -384,7 +384,7 @@ export class ContextInstance {
                 throw new SimpleError({
                     code: 'mfa_setup_expired',
                     message: 'The MFA setup session is invalid or expired',
-                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    human: $t('%ZhJ'),
                     statusCode: 401,
                 });
             }
@@ -399,7 +399,7 @@ export class ContextInstance {
                 throw new SimpleError({
                     code: 'mfa_setup_expired',
                     message: 'The MFA setup session is no longer valid: the user already has a second factor',
-                    human: $t('Je sessie is verlopen. Meld je opnieuw aan.'),
+                    human: $t('%ZhJ'),
                     statusCode: 401,
                 });
             }

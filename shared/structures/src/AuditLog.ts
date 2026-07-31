@@ -219,11 +219,11 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Verwijderde accounts`;
 
         case AuditLogType.UserTwoFactorMethodAdded:
-            return $t(`Nieuwe tweestapsverificatie`);
+            return $t(`%ZhN`);
         case AuditLogType.UserTwoFactorMethodDeleted:
-            return $t(`Verwijderde tweestapsverificatie`);
+            return $t(`%Zhl`);
         case AuditLogType.UserRecoveryCodesRegenerated:
-            return $t(`Opnieuw gegenereerde herstelcodes`);
+            return $t(`%ZgW`);
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Nieuwe toegekende functies`;
@@ -556,11 +556,11 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Account {{u}} werd verwijderd`;
 
         case AuditLogType.UserTwoFactorMethodAdded:
-            return $t(`{{method}}{{if name ' ‘' name '’'}} werd toegevoegd als tweestapsverificatie van {{u}}`);
+            return $t(`%Zhy`);
         case AuditLogType.UserTwoFactorMethodDeleted:
-            return $t(`{{method}}{{if name ' ‘' name '’'}} werd verwijderd als tweestapsverificatie van {{u}}`);
+            return $t(`%Zhb`);
         case AuditLogType.UserRecoveryCodesRegenerated:
-            return $t(`De herstelcodes van {{u}} werden opnieuw gegenereerd`);
+            return $t(`%ZgU`);
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}`;

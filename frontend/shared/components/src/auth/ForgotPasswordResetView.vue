@@ -152,7 +152,7 @@ async function trade() {
             if (!verified) {
                 errorBox.value = new ErrorBox(new SimpleError({
                     code: 'mfa_required',
-                    message: $t('Je moet de tweestapsverificatie voltooien om verder te gaan. Herlaad deze pagina om het opnieuw te proberen.'),
+                    message: $t('%ZgR'),
                 }));
                 return;
             }

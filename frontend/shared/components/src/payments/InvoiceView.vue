@@ -21,10 +21,10 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="invoice.number && !invoice.pdf" class="error-box selectable with-button">
-                {{ $t('Aanmaak van factuur mislukt. Probeer het opnieuw') }}
+                {{ $t('%Zgg') }}
 
                 <LoadingButton class="button text" type="button" :loading="isRetrying" @click="retrySending">
-                    {{ $t('Opnieuw proberen') }}
+                    {{ $t('%1EU') }}
                 </LoadingButton>
             </p>
 
@@ -217,7 +217,7 @@ async function retrySending() {
             decoder: new ArrayDecoder(Invoice as Decoder<Invoice>),
         });
         deepSetArray([props.invoice], response.data);
-        Toast.success($t('Opnieuw verzonden')).show();
+        Toast.success($t('%Zhq')).show();
     } catch (e) {
         Toast.fromError(e).show();
     } finally {

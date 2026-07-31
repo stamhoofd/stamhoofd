@@ -35,7 +35,7 @@ export class DeleteTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'TOTP authenticator not found',
-                human: $t('Deze authenticator werd niet gevonden.'),
+                human: $t('%ZgJ'),
                 statusCode: 404,
             });
         }
@@ -48,7 +48,7 @@ export class DeleteTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'cannot_remove_last_factor',
                 message: 'Cannot remove the last two-factor method',
-                human: $t('Je kan je laatste tweestapsverificatie niet verwijderen omdat die verplicht is.'),
+                human: $t('%Zh4'),
                 statusCode: 400,
             });
         }

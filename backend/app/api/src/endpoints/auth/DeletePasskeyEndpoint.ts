@@ -35,7 +35,7 @@ export class DeletePasskeyEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Passkey not found',
-                human: $t('Deze passkey werd niet gevonden.'),
+                human: $t('%Zho'),
                 statusCode: 404,
             });
         }
@@ -47,7 +47,7 @@ export class DeletePasskeyEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'cannot_remove_last_factor',
                 message: 'Cannot remove the last two-factor method',
-                human: $t('Je kan je laatste tweestapsverificatie niet verwijderen omdat die verplicht is.'),
+                human: $t('%Zh4'),
                 statusCode: 400,
             });
         }

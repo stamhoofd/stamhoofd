@@ -52,7 +52,7 @@ async function createInvoicesFor(organization: Organization) {
 
     // Belgian rules: allowed to invoice up to the 15th day of the next month. We extend it with one month to fix mistakes.
     const today = Formatter.luxon();
-    const startDate = today.day <= 15 ? today.minus({ month: 2 }).startOf('month') : today.minus({ month: 1 }).startOf('month');
+    const startDate = today.day <= 15 ? today.minus({ month: 3 }).startOf('month') : today.minus({ month: 2 }).startOf('month');
 
     // Don't invoice below 4 euro - unless we reached the timeout date for invoices (end of month + 15 days - 5 days margin) OR + 15 day offset
     const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 4_0000;
