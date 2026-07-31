@@ -5,7 +5,15 @@
 
             <main class="center">
                 <h1>{{ $t('%Zgk') }}</h1>
-                <p>{{ $t('%ZhW') }}</p>
+                <p>
+                    <I18nComponent :t="$t('Beveilig je account met een extra verificatiestap naast je wachtwoord. <button>Meer info</button>')">
+                        <template #button="{content}">
+                            <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
+                                {{ content }}
+                            </a>
+                        </template>
+                    </I18nComponent>
+                </p>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -145,6 +153,7 @@ import IconContainer from '#icons/IconContainer.vue';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { getPasskeyDomain, getPasskeyUnavailableReason } from './passkeyAvailability.ts';
 import { useFreshAction } from './useFreshAction';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const $context = useContext();
 const errors = useErrors();
