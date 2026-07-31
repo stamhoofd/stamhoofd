@@ -95,6 +95,18 @@ export type BackendSpecificEnvironment = {
     readonly LATEST_IOS_VERSION: number;
     readonly LATEST_ANDROID_VERSION: number;
 
+    /**
+     * SHA-256 fingerprints of the signing certificates of the Android apps that may use the
+     * passkeys of this platform, in the colon separated hexadecimal notation of
+     * assetlinks.json ("A0:7B:...:75").
+     *
+     * Android reports the calling app as the WebAuthn origin
+     * (`android:apk-key-hash:<base64url>`) instead of the address of the web view, so a
+     * passkey used inside the app can only be verified when its certificate is listed here.
+     * Keep in sync with the assetlinks.json of the dashboard domain.
+     */
+    readonly ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS?: string[];
+
     // Nolt
     readonly NOLT_SSO_SECRET_KEY?: string;
 

@@ -49,19 +49,45 @@ function getCredentialRpID(credential: WebauthnCredential): string {
 }
 
 /**
+ * Convert a SHA-256 certificate fingerprint to the base64url encoding Android uses in its
+ * origin. Accepts the colon separated hexadecimal notation of assetlinks.json, with or
+ * without separators.
+ */
+function fingerprintToBase64URL(fingerprint: string): string {
+    const hex = fingerprint.replace(/[\s:-]/g, '');
+    if (!/^[0-9a-f]{64}$/i.test(hex)) {
+        throw new Error('Invalid SHA-256 certificate fingerprint in ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS: ' + fingerprint);
+    }
+    return Buffer.from(hex, 'hex').toString('base64url');
+}
+
+/**
+ * The origins the Android app presents a passkey from.
+ *
+ * Android reports the app that made the call instead of the address of the web view:
+ * `android:apk-key-hash:<base64url sha-256 of the signing certificate>`. The certificates
+ * are configured through ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS and are the same ones as
+ * in the assetlinks.json of the RP ID, which is what makes Android hand our passkeys to
+ * the app in the first place.
+ */
+function getAndroidOrigins(): string[] {
+    return (STAMHOOFD.ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS ?? []).map(fingerprint => 'android:apk-key-hash:' + fingerprintToBase64URL(fingerprint));
+}
+
+/**
  * The origins a passkey for `rpId` may be presented from.
  *
  * The web apps run on https. The Capacitor app serves its web view from the same host but
- * a custom scheme (see frontend/app/mobile/capacitor.config.json): iOS reports
- * `capacitor://<host>`, while Android is configured with the https scheme and so already
- * matches the first entry.
+ * a custom scheme (see frontend/app/mobile/capacitor.config.json), which iOS reports as
+ * `capacitor://<host>`; Android reports its own signature instead, see getAndroidOrigins.
  *
  * Widening the origin does not widen who can use these passkeys: the app only gets to see
- * them because it is listed in the associated domains (webcredentials) of the RP ID, which
- * the operating system verifies before it releases a credential to any app.
+ * them because it is listed in the associated domains (webcredentials / assetlinks.json)
+ * of the RP ID, which the operating system verifies before it releases a credential to any
+ * app.
  */
 function getExpectedOrigins(rpId: string): string[] {
-    return ['https://' + rpId, 'capacitor://' + rpId];
+    return ['https://' + rpId, 'capacitor://' + rpId, ...getAndroidOrigins()];
 }
 
 export const WebauthnHelper = {
@@ -107,13 +133,14 @@ export const WebauthnHelper = {
         };
 
         const rpId = getRpID();
+        const expectedOrigin = getExpectedOrigins(rpId);
 
         let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
         try {
             verification = await verifyRegistrationResponse({
                 response,
                 expectedChallenge,
-                expectedOrigin: getExpectedOrigins(rpId),
+                expectedOrigin,
                 expectedRPID: rpId,
                 requireUserVerification: false,
             });
@@ -181,13 +208,14 @@ export const WebauthnHelper = {
 
         // Verify against the RP ID this credential was created for, not the current one.
         const rpId = getCredentialRpID(storedCredential);
+        const expectedOrigin = getExpectedOrigins(rpId);
 
         let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
         try {
             verification = await verifyAuthenticationResponse({
                 response,
                 expectedChallenge,
-                expectedOrigin: getExpectedOrigins(rpId),
+                expectedOrigin,
                 expectedRPID: rpId,
                 credential: {
                     id: storedCredential.credentialId,
