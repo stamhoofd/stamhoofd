@@ -1,4 +1,4 @@
-package com.stamhoofd.stamhoofd;
+package be.ksa.ravot;
 
 import com.getcapacitor.BridgeActivity;
 import android.content.res.Configuration;
@@ -8,6 +8,8 @@ import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 import stamhoofd.FileOpenerPlugin;
@@ -28,6 +30,10 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(FileOpenerPlugin.class);
         super.onCreate(savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(
+                this.bridge.getWebView(),
+                (view, insets) -> WindowInsetsCompat.CONSUMED
+        );
         enableWebAuthentication();
     }
 

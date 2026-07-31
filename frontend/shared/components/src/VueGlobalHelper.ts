@@ -198,9 +198,7 @@ export class VueGlobalHelper {
                     }, 250);
                 }
             }, { passive: true });
-        }
 
-        if (app.config.globalProperties.$OS === 'iOS') {
             document.addEventListener('focusin', (event) => {
                 const el = document.activeElement as HTMLElement;
                 if (el && el.tagName !== 'BUTTON') {

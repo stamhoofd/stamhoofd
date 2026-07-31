@@ -1,11 +1,15 @@
 {
-	"appId": "com.stamhoofd.stamhoofd",
-	"appName": "Stamhoofd",
+	"appId": "be.ksa.ravot",
+	"appName": "Ravot",
 	"webDir": "dist",
 	"loggingBehavior": "none",
 	"plugins": {
 		"Keyboard": {
-			"resize": "none"
+			"resize": "none",
+			"resizeOnFullScreen": false
+		},
+		"SystemBars": {
+			"insetsHandling": "disable"
 		},
 		"PushNotifications": {
 			"presentationOptions": [
@@ -19,7 +23,7 @@
 		}
 	},
 	"server": {
-		"hostname": "stamhoofd.app",
+		"hostname": "ravot.ksa.be",
 		"androidScheme": "https"
 	}
 }

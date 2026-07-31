@@ -31,12 +31,11 @@ function setKeyboardHeight(height: number) {
     document.documentElement.style.setProperty('--keyboard-height', `${height}px`);
     document.documentElement.style.setProperty('--keyboard-open', `${height > 0 ? '1' : '0'}`);
     document.documentElement.style.setProperty('--keyboard-closed', `${height > 0 ? '0' : '1'}`);
+}
 
-    if (height > 0 && Capacitor.getPlatform() === 'android') {
-        requestAnimationFrame(() => {
-            document.activeElement?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        });
-    }
+if ('virtualKeyboard' in navigator) {
+    // The VirtualKeyboard API is supported!
+    (navigator as any).virtualKeyboard.overlaysContent = true;
 }
 
 const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 100);
@@ -48,7 +47,7 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
     // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
     document.documentElement.style.setProperty('--navigation-bar-margin', `0px`);
 
-    // note: for this to work on android, android:windowSoftInputMode="adjustPan" is needed in the activity (manifest)
+    // note: for this to work on android, android:windowSoftInputMode="adjustNothing" is needed in the activity (manifest)
     // kick off the polyfill!
     //
 
