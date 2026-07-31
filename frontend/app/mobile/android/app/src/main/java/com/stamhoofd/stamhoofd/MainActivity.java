@@ -8,6 +8,8 @@ import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import androidx.core.content.ContextCompat;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 import stamhoofd.FileOpenerPlugin;
 
 public class MainActivity extends BridgeActivity {
@@ -26,6 +28,16 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(FileOpenerPlugin.class);
         super.onCreate(savedInstanceState);
+        enableWebAuthentication();
+    }
+
+    private void enableWebAuthentication() {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
+            WebSettingsCompat.setWebAuthenticationSupport(
+                    this.bridge.getWebView().getSettings(),
+                    WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP
+            );
+        }
     }
 
     @Override
