@@ -4,7 +4,16 @@
 
         <main class="center">
             <h1>{{ $t('%Zgx') }}</h1>
-            <p>{{ $t('%Zi5') }}</p>
+
+            <p>
+                <I18nComponent :t="$t('Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan. <button>Meer info</button>')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
+            </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -65,6 +74,7 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import IconContainer from '#icons/IconContainer.vue';
 import BoxedController from '#containers/BoxedController.vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(defineProps<{
     setupToken: string;

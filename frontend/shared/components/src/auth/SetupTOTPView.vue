@@ -4,11 +4,24 @@
 
         <main class="center">
             <h1>{{ $t('%ZhV') }}</h1>
+
             <p v-if="showQRCode">
-                {{ $t('%Zga') }}
+                <I18nComponent :t="$t('Scan de QR-code met je authenticator-app en voer daarna de code in. <button>Meer info</button>')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
             </p>
             <p v-else>
-                {{ $t('Open je authenticator-app via de knop hieronder, of voeg de sleutel handmatig toe. Voer daarna de code in.') }}
+                <I18nComponent :t="$t('Open je authenticator-app via de knop hieronder, of voeg de sleutel handmatig toe. Voer daarna de code in. <button>Meer info</button>')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
             </p>
 
             <div class="totp-setup" :class="{ 'no-qr': !showQRCode }">
@@ -70,6 +83,7 @@ import STToolbar from '#navigation/STToolbar.vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useFreshAction } from './useFreshAction';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = defineProps<{
     totpSetup: TOTPSetupResponse;

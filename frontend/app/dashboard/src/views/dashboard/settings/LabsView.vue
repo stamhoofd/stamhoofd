@@ -19,6 +19,15 @@
                     <h3 class="style-title-list">
                         {{ $t('%Zgu') }}
                     </h3>
+                    <p class="style-description-small">
+                        <I18nComponent :t="$t('Deel zeker <button>onze gids</button> met alle beheerders voor informatie hoe je dit kan instellen.')">
+                            <template #button="{content}">
+                                <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
+                                    {{ content }}
+                                </a>
+                            </template>
+                        </I18nComponent>
+                    </p>
                 </STListItem>
 
                 <STListItem :selectable="true" data-testid="sign-out-admins" @click.prevent="signOutAdmins">
@@ -260,6 +269,7 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const context = useContext();
 const baseOrganization = useRequiredOrganization();

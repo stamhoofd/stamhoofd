@@ -46,7 +46,13 @@
                     {{ $t('%Zgt') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('%ZgS') }}
+                    <I18nComponent :t="$t('Deel zeker <button>onze gids</button> met alle beheerders voor informatie hoe je dit kan instellen.')">
+                        <template #button="{content}">
+                            <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
+                                {{ content }}
+                            </a>
+                        </template>
+                    </I18nComponent>
                 </p>
             </STListItem>
 
@@ -124,6 +130,7 @@ import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { LoginMethod, LoginMethodConfig, LoginProviderType, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
