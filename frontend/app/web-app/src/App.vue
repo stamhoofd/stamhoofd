@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <ModalStackComponent ref="modalStack" :root="root" />
+        <ModalStackComponent ref="modalStack" :root="root" :disable-animations="true" />
         <ToastBox />
     </div>
 </template>
