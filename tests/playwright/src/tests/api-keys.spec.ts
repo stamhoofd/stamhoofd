@@ -5,10 +5,12 @@ setup();
 // other imports
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { MFATestHelper } from '@stamhoofd/backend/tests/helpers';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User as UserModel, UserFactory } from '@stamhoofd/models';
 import { appToUri, PermissionLevel, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { WorkerData } from '../helpers/index.js';
 
 const PASSWORD = 'testAbc123456';
@@ -120,3 +122,66 @@ test.describe('API keys @api-keys', () => {
         await expect(page.getByTestId('reauthenticate-view')).toBeHidden();
     });
 });
+
+/**
+ * A second factor puts more views on top of the re-authentication view, and the sheet that
+ * holds them is a popup on a wide screen but a pushed view on a phone-sized screen. Both
+ * have to end with the whole flow closed and the action retried.
+ */
+const viewports = [
+    { name: 'desktop', use: {} },
+    { name: 'mobile', use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
+];
+
+for (const viewport of viewports) {
+    test.describe(`Re-authentication with two-factor authentication on ${viewport.name} @api-keys-two-factor-${viewport.name}`, () => {
+        test.use(viewport.use);
+
+        let organization: Organization;
+
+        test.beforeAll(async () => {
+            TestUtils.setPermanentEnvironment('userMode', 'platform');
+            TestUtils.setPermanentEnvironment('singleOrganization', undefined);
+
+            organization = await new OrganizationFactory({}).create();
+        });
+
+        test.afterAll(async () => {
+            await WorkerData.resetDatabase();
+        });
+
+        test('an authenticator app closes the re-authentication flow and retries the action', async ({ page }) => {
+            const user = await new UserFactory({
+                organization,
+                email: randomEmail('api-keys-mfa-' + viewport.name),
+                password: PASSWORD,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const { secret } = await MFATestHelper.addConfirmedTOTP(user);
+
+            await loginAs({ page, user });
+            await openApiKeys(page, organization);
+
+            const name = 'Two-factor key ' + viewport.name;
+            await fillInNewApiKey(page, name);
+
+            const reauthView = page.getByTestId('reauthenticate-view');
+            await expect(reauthView).toBeVisible({ timeout: 20_000 });
+
+            await reauthView.getByTestId('reauth-password').fill(PASSWORD);
+            await reauthView.getByTestId('reauth-submit').click();
+
+            await new TwoFactorFlow({ page }).passTOTPChallenge(secret);
+
+            // The whole flow closed itself, instead of stepping back to the password screen.
+            await expect(reauthView).toBeHidden({ timeout: 20_000 });
+
+            // ... and the create was retried on its own.
+            await expect(page.getByTestId('copy-api-token-view')).toBeVisible({ timeout: 30_000 });
+
+            const [apiUser] = await UserModel.where({ organizationId: organization.id, firstName: name }, { limit: 1 });
+            expect(apiUser).toBeDefined();
+            expect(apiUser.isApiUser).toBe(true);
+        });
+    });
+}

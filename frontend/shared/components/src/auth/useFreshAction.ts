@@ -1,7 +1,8 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 
 /**
  * Wraps a sensitive action that requires a "fresh" access token.
@@ -22,17 +23,28 @@ export function useFreshAction() {
                 const c = await new Promise<boolean>((resolve, reject) => {
                     present({
                         components: [
-                            AsyncComponent(() => import('./ReauthenticateView.vue'), {
-                                onAuthenticated: () => {
-                                    resolve(true);
-                                },
-                                onCancel: (error?: Error) => {
-                                    if (error) {
-                                        reject(error);
-                                        return;
-                                    }
-                                    resolve(false);
-                                },
+                            // Two-factor authentication adds views on top of the first one. They
+                            // need a navigation controller of their own, because a sheet only gets
+                            // one on a wide screen: without it they are pushed onto the stack that
+                            // holds the sheet itself, and dismissing steps back one view instead
+                            // of closing the flow.
+                            new ComponentWithProperties(NavigationController, {
+                                root: AsyncComponent(() => import('./ReauthenticateView.vue'), {
+                                    // We opened this flow in a sheet, so we are the one that closes
+                                    // it again - using the actions of the view that finished it,
+                                    // which can sit deeper than the root of the sheet.
+                                    onAuthenticated: async (navigation: NavigationActions) => {
+                                        await navigation.dismiss({ force: true });
+                                        resolve(true);
+                                    },
+                                    onCancel: (error?: Error) => {
+                                        if (error) {
+                                            reject(error);
+                                            return;
+                                        }
+                                        resolve(false);
+                                    },
+                                }),
                             }),
                         ],
                         modalDisplayStyle: 'sheet',

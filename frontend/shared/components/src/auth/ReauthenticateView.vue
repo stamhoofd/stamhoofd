@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 import { computed, onUnmounted, ref } from 'vue';
@@ -48,30 +48,32 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
+import { useAppNavigate } from '#hooks/useAppNavigate.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useLoginMethod, useLoginMethodEnabled } from '#hooks/useLoginMethods.ts';
 import { useUser } from '#hooks/useUser.ts';
-import LoginMethodButton from './LoginMethodButton.vue';
 import EmailInput from '#inputs/EmailInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import LoadingButton from '#navigation/LoadingButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
-import STToolbar from '#navigation/STToolbar.vue';
-import { useForgotPassword } from './useForgotPassword.ts';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { useAppNavigate } from '#hooks/useAppNavigate.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { AppRoute } from '@stamhoofd/structures/AppRoute.js';
+import LoginMethodButton from './LoginMethodButton.vue';
+import { useForgotPassword } from './useForgotPassword.ts';
 
 const props = defineProps<{
-    // Called once the session holds a fresh token again.
-    onAuthenticated: () => void | Promise<void>;
+    // Called once the session holds a fresh token again, with the actions of the view that
+    // finished the flow: two-factor authentication adds views on top of this one, and only
+    // those can close what is on screen by then.
+    onAuthenticated: (navigation: NavigationActions) => void | Promise<void>;
     onCancel: (error?: Error) => void;
 }>();
 
 const $context = useContext();
 const $user = useUser();
 const errors = useErrors();
-const dismiss = useDismiss();
+const navigationActions = useNavigationActions();
 const show = useShow();
 
 const email = ref($user.value?.email ?? '');
@@ -94,14 +96,12 @@ const usesSSO = computed(() => ssoEnabled.value && !!ssoConfig.value && ($user.v
 // the shorter screen without it.
 const showPassword = computed(() => usesPassword.value || !usesSSO.value);
 
-async function complete() {
+async function complete(navigation: NavigationActions) {
     if (didComplete) {
         return;
     }
     didComplete = true;
-    // Dismiss the re-auth flow first, then let the caller retry its action.
-    await dismiss({ force: true });
-    await props.onAuthenticated();
+    await props.onAuthenticated(navigation);
 }
 const appNavigate = useAppNavigate();
 
@@ -201,7 +201,7 @@ async function submit() {
             });
         } else {
             // Password alone produced a fresh token (user without 2FA enforcement).
-            await complete();
+            await complete(navigationActions);
         }
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
