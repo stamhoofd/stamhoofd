@@ -330,7 +330,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      * When enabled, users with permissions in this organization are required to have
      * two-factor authentication and are forced to enroll on their next password login.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 408 })
     requireTwoFactor = false;
 
     get actualTestPayments(): boolean {

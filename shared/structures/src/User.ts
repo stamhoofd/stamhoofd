@@ -94,14 +94,14 @@ export class User extends AutoEncoder {
     /**
      * Readonly. The last time this user signed in or refreshed their session.
      */
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 408 })
     lastActiveAt: Date | null = null;
 
     /**
      * Readonly. Whether this user has at least one second factor (an authenticator app or
      * a passkey) enrolled. The factors themselves are only visible to the user itself.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 408 })
     hasTwoFactor = false;
 
     get name() {

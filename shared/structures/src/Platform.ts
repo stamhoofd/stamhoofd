@@ -38,7 +38,7 @@ export class PlatformPrivateConfig extends AutoEncoder {
      * When enabled, users with platform permissions are required to have two-factor
      * authentication and are forced to enroll on their next password login.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 408 })
     requireTwoFactor = false;
 }
 

@@ -62,6 +62,6 @@ export class StartOpenIDFlowStruct extends AutoEncoder {
      * the session the authToken was requested with counts as freshly authenticated again
      * when the provider returns the same user. Requires an authToken.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 408 })
     reauthenticate = false;
 }
