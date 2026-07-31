@@ -1,5 +1,9 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import { BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, DESCRIPTION_TITLED_BALANCE_ITEM_TYPES, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
+import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
+import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
+import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import { TranslatedString } from './TranslatedString.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';
 import { Platform } from './Platform.js';
@@ -259,5 +263,108 @@ describe('DetailedPayableBalance VAT helpers', () => {
         const balance = createBalance([createItem({ VATPercentage: null })]);
         expect(balance.hasExclusiveVAT).toBe(false);
         expect(balance.VATBreakdown).toEqual([]);
+    });
+});
+
+describe('BalanceItem.categoryFilter / articleFilter', () => {
+    beforeEach(() => {
+        TestUtils.setEnvironment('userMode', 'organization');
+        TestUtils.setEnvironment('platformName', 'stamhoofd');
+    });
+
+    function createItem(type: BalanceItemType, relations: [BalanceItemRelationType, string][] = [], description = '') {
+        return BalanceItem.create({
+            type,
+            description,
+            relations: new Map(relations.map(([relationType, id]) => [
+                relationType,
+                BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
+            ])),
+        });
+    }
+
+    /**
+     * Mirrors how the api compiles these filters to SQL (see sql-filters/balance-items.ts): a relation
+     * the item doesn't have reads as null there, so it matches `{ id: null }`.
+     */
+    const balanceItemFilterCompilers: InMemoryFilterDefinitions = {
+        ...baseInMemoryFilterCompilers,
+        type: createInMemoryFilterCompiler('type'),
+        description: createInMemoryFilterCompiler('description'),
+        relations: {
+            ...baseInMemoryFilterCompilers,
+            ...Object.fromEntries(
+                Object.values(BalanceItemRelationType).map(relationType => [
+                    relationType,
+                    {
+                        ...baseInMemoryFilterCompilers,
+                        id: (filter) => {
+                            // A plain value has to be wrapped, as compileToInMemoryFilter reads a bare null as 'no filter'
+                            const condition = filter !== null && typeof filter === 'object' ? filter : { $eq: filter };
+                            const runner = compileToInMemoryFilter(condition, baseInMemoryFilterCompilers);
+
+                            return (item: BalanceItem) => runner(item.relations.get(relationType)?.id ?? null);
+                        },
+                    },
+                ]),
+            ),
+        },
+    };
+
+    function matches(filter: StamhoofdFilter, item: BalanceItem): boolean {
+        return compileToInMemoryFilter(filter, balanceItemFilterCompilers)(item);
+    }
+
+    describe('categoryFilter selects exactly the items with the same categoryId', () => {
+        test('a cancellation fee without any relation does not select the ones that have one', () => {
+            const bare = createItem(BalanceItemType.CancellationFee);
+            const forGroup = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a']]);
+            const forWebshop = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Webshop, 'shop-a']]);
+
+            expect(new Set([bare.categoryId, forGroup.categoryId, forWebshop.categoryId]).size).toBe(3);
+
+            for (const item of [bare, forGroup, forWebshop]) {
+                for (const other of [bare, forGroup, forWebshop]) {
+                    expect(matches(item.categoryFilter, other)).toBe(item.categoryId === other.categoryId);
+                }
+            }
+        });
+
+        test('a cancellation fee is named after its group, so its webshop is not part of the category', () => {
+            const forGroup = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a']]);
+            const forBoth = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a'], [BalanceItemRelationType.Webshop, 'shop-a']]);
+
+            expect(forBoth.categoryId).toBe(forGroup.categoryId);
+            expect(matches(forGroup.categoryFilter, forBoth)).toBe(true);
+        });
+    });
+
+    describe('articleFilter selects exactly the items with the same articleCode', () => {
+        test('an administration fee with a description is a different article than one without', () => {
+            const named = createItem(BalanceItemType.AdministrationFee, [], 'Kosten');
+            const unnamed = createItem(BalanceItemType.AdministrationFee);
+
+            expect(named.articleCode).not.toBe(unnamed.articleCode);
+            expect(matches(named.articleFilter, unnamed)).toBe(false);
+            expect(matches(unnamed.articleFilter, named)).toBe(false);
+        });
+
+        test('a registration is not told apart by its description', () => {
+            const first = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen');
+            const second = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen 2026');
+
+            expect(first.articleCode).toBe(second.articleCode);
+            expect(matches(first.articleFilter, second)).toBe(true);
+        });
+    });
+
+    test('DESCRIPTION_TITLED_BALANCE_ITEM_TYPES lists exactly the types whose itemTitle is their description', () => {
+        const description = 'A description no itemTitle would ever build on its own';
+
+        for (const type of Object.values(BalanceItemType)) {
+            const usesDescription = BalanceItem.create({ type, description }).itemTitle === description;
+
+            expect([type, DESCRIPTION_TITLED_BALANCE_ITEM_TYPES.has(type)]).toEqual([type, usesDescription]);
+        }
     });
 });

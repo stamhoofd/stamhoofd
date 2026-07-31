@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%Oy')" :title="$t(`%Oy`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="hasBreakdown ? $t('Doorgaan') : $t('%Oy')" :title="$t(`%Oy`)" @save="save">
         <h1>
             {{ $t('%95') }}
         </h1>
@@ -80,6 +80,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
@@ -95,6 +96,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
+import { useBreakdown } from '../../breakdown/openBreakdown';
 import { getSelectableWorkbook } from '../../payments/getSelectableWorkbook';
 
 class DateRangeSuggestion {
@@ -111,7 +113,9 @@ class DateRangeSuggestion {
 
 const context = useContext();
 const organization = useRequiredOrganization();
+const { openPayments } = useBreakdown();
 const show = useShow();
+const hasBreakdown = useFeatureFlag()('payment-breakdown');
 const requestOwner = {};
 const errorBox = ref<ErrorBox | null>(null);
 const saving = ref(false);
@@ -306,34 +310,52 @@ async function save() {
 
     saving.value = true;
     try {
-        await show({
-            components: [
-                AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
-                    type: ExcelExportType.Payments,
-                    filter: new LimitedFilteredRequest({
-                        filter: buildFilter(),
-                        limit: 100,
-                        sort: [
-                            {
-                                key: 'paidAt',
-                                order: SortItemDirection.ASC,
-                            },
-                            {
-                                key: 'id',
-                                order: SortItemDirection.ASC,
-                            },
-                        ],
+        const selectionName = [
+            methods.value.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(methods.value[0]!) : $t('%1JH'),
+            Formatter.dateRange(startDate.value, endDate.value, ' ' + $t('t.e.m.') + ' ', false),
+        ].filter(Boolean).join(' - ');
+
+        const title = [
+            context.value.auth.hasSomePlatformAccess() ? organization.value.name : null,
+            selectionName,
+        ].filter(Boolean).join(' - ');
+
+        if (hasBreakdown) {
+            // Show what the selection adds up to first: from there the user can narrow it down and export
+            await openPayments({
+                filter: buildFilter(),
+                title: selectionName,
+                rootTitle: title,
+                getSelectableWorkbook,
+                configurationId: 'configure-payment-export',
+            });
+        }
+        else {
+            await show({
+                components: [
+                    AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
+                        type: ExcelExportType.Payments,
+                        filter: new LimitedFilteredRequest({
+                            filter: buildFilter(),
+                            limit: 100,
+                            sort: [
+                                {
+                                    key: 'paidAt',
+                                    order: SortItemDirection.ASC,
+                                },
+                                {
+                                    key: 'id',
+                                    order: SortItemDirection.ASC,
+                                },
+                            ],
+                        }),
+                        workbook: getSelectableWorkbook(),
+                        configurationId: 'configure-payment-export',
+                        title,
                     }),
-                    workbook: getSelectableWorkbook(),
-                    configurationId: 'configure-payment-export',
-                    title: [
-                        context.value.auth.hasSomePlatformAccess() ? organization.value.name : null,
-                        methods.value.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(methods.value[0]!) : $t('%1JH'),
-                        Formatter.dateRange(startDate.value, endDate.value, ' tem ', false),
-                    ].filter(Boolean).join(' - '),
-                }),
-            ],
-        });
+                ],
+            });
+        }
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);
     }

@@ -6,7 +6,8 @@
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-sort-direction="SortItemDirection.DESC"
         :default-filter="defaultFilter"
-        :title="title"
+        :default-search="defaultSearch"
+        :title="tableTitle"
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
@@ -24,6 +25,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
 import { useBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
@@ -36,13 +38,28 @@ import { BalanceItemStatus, ExcelExportType, getApplicableBalanceItemRelationTyp
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { useBreakdown } from '../breakdown/openBreakdown';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 
 const props = withDefaults(
     defineProps<{
         defaultFilter?: StamhoofdFilter | null;
+        /**
+         * Selects the balance items this table shows, without the user being able to widen it again.
+         * Used to show the balance items behind one row of a breakdown.
+         */
+        requiredFilter?: StamhoofdFilter | null;
+        defaultSearch?: string | null;
+        /**
+         * Overrides the name of this table, e.g. with the group of a breakdown these balance items
+         * came from, so it says what you drilled into.
+         */
+        title?: string | null;
     }>(), {
         defaultFilter: null,
+        requiredFilter: null,
+        defaultSearch: null,
+        title: null,
     },
 );
 
@@ -56,16 +73,19 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const filterBuilders = useBalanceItemsUIFilterBuilders();
 const organization = useOrganization();
 const platform = usePlatform();
-const title = computed(() => {
-    return $t('%1LA');
+const $feature = useFeatureFlag();
+const tableTitle = computed(() => {
+    return props.title || $t('%1LA');
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
-    return {
+    const hideHidden: StamhoofdFilter = {
         status: {
             $neq: BalanceItemStatus.Hidden,
         },
     };
+
+    return props.requiredFilter ? { $and: [hideHidden, props.requiredFilter] } : hideHidden;
 }
 
 const objectFetcher = useBalanceItemsFetcher({
@@ -279,7 +299,33 @@ const route = {
 
 const present = usePresent();
 const { getSelectableWorkbook } = useSelectableWorkbook();
+const { openBalanceItems } = useBreakdown();
+const excelTitle = computed(() => [organization.value?.name, $t('%1LA')].filter(Boolean).join(' - '));
 const actions = [
+    ...($feature('payment-breakdown')
+        ? [
+                new AsyncTableAction({
+                    name: $t('Statistieken'),
+                    icon: 'stats',
+                    priority: 1,
+                    groupIndex: 2,
+                    needsSelection: true,
+                    allowAutoSelectAll: true,
+                    handler: async (selection) => {
+                        await openBalanceItems({
+                            filter: selection.filter.filter,
+                            search: selection.filter.search,
+                            title: $t('%1LA'),
+                            rootTitle: excelTitle.value,
+                            getSelectableWorkbook,
+                            configurationId: configurationId.value,
+                            present: true,
+                        });
+                    },
+                }),
+            ]
+        : []),
+
     new AsyncTableAction({
         name: $t('%V8'),
         icon: 'download',
@@ -296,7 +342,7 @@ const actions = [
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
                             configurationId: configurationId.value,
-                            title: [organization.value?.name, $t('%1LA')].filter(Boolean).join(' - '),
+                            title: excelTitle.value,
                         }),
                     }),
                 ],

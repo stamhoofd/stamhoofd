@@ -9,7 +9,7 @@ import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEn
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
-type PaymentWithItem = {
+export type PaymentWithItem = {
     payment: PaymentGeneralWithStripeAccount;
     balanceItemPayment: PaymentExportBalanceItemPayment;
 };
@@ -82,45 +82,53 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
                 payment: data,
                 balanceItemPayment: p,
             })),
-            columns: [
-                ...getBalanceItemColumns(),
-
-                // Repeating columns need to de-transform again
-                ...[
-                    ...getGeneralColumns(),
-                    ...getInvoiceColumns(),
-                    ...getPayingOrganizationColumns(),
-                ].map((c) => {
-                    if ('match' in c) {
-                        return {
-                            ...c,
-                            match: (id: string) => {
-                                const result = c.match(id);
-                                if (!result) {
-                                    return result;
-                                }
-
-                                return result.map(cc => ({
-                                    ...cc,
-                                    getValue: (object: PaymentWithItem) => {
-                                        return cc.getValue(object.payment);
-                                    },
-                                }));
-                            },
-                        };
-                    }
-
-                    return {
-                        ...c,
-                        getValue: (object: PaymentWithItem) => {
-                            return c.getValue(object.payment);
-                        },
-                    };
-                }),
-            ],
+            columns: getBalanceItemPaymentColumns(),
         },
     ],
 });
+
+/**
+ * What one payment paying one part of one balance item is written out as: what it was for, plus the
+ * payment it came in with.
+ */
+export function getBalanceItemPaymentColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
+    return [
+        ...getBalanceItemColumns(),
+
+        // Repeating columns need to de-transform again
+        ...[
+            ...getGeneralColumns(),
+            ...getInvoiceColumns(),
+            ...getPayingOrganizationColumns(),
+        ].map((c) => {
+            if ('match' in c) {
+                return {
+                    ...c,
+                    match: (id: string) => {
+                        const result = c.match(id);
+                        if (!result) {
+                            return result;
+                        }
+
+                        return result.map(cc => ({
+                            ...cc,
+                            getValue: (object: PaymentWithItem) => {
+                                return cc.getValue(object.payment);
+                            },
+                        }));
+                    },
+                };
+            }
+
+            return {
+                ...c,
+                getValue: (object: PaymentWithItem) => {
+                    return c.getValue(object.payment);
+                },
+            };
+        }),
+    ];
+}
 
 export function expandPaymentBalanceItemPayments(
     payment: PaymentGeneral,

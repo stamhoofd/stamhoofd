@@ -20,10 +20,10 @@
 withDefaults(
     defineProps<{
         icon?: string;
-        asideIcon?: string;
+        asideIcon?: string | null;
     }>(), {
         icon: '',
-        asideIcon: '',
+        asideIcon: null,
     },
 );
 </script>

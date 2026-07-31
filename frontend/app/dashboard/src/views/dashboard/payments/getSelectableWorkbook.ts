@@ -51,90 +51,114 @@ export function getSelectableWorkbook() {
 
                 ],
             }),
-            new SelectableSheet({
-                id: 'balanceItemPayments',
-                name: $t(`%Ly`),
-                description: $t(`%Lz`),
-                columns: [
-                    new SelectableColumn({
-                        id: 'id',
-                        name: $t(`%1LS`),
-                        description: $t(`%M0`),
-                        enabled: false,
-                    }),
+            getBalanceItemPaymentSheet({ description: $t(`%Lz`) }),
+        ],
+    });
+}
 
-                    new SelectableColumn({
-                        id: 'balanceItem.id',
-                        name: $t(`%1LE`),
-                        description: $t(`%1Lr`),
-                        enabled: false,
-                    }),
+/**
+ * What one payment paid for one balance item, as a row of its own.
+ *
+ * A webshop order is not split into the articles that were ordered here: a row is one balance item
+ * payment, which is the unit a breakdown adds up.
+ */
+export function getBalanceItemPaymentSheet({ description }: { description: string }) {
+    return new SelectableSheet({
+        id: 'balanceItemPayments',
+        name: $t(`%Ly`),
+        description,
+        columns: [
+            new SelectableColumn({
+                id: 'id',
+                name: $t(`%1LS`),
+                description: $t(`%M0`),
+                enabled: false,
+            }),
 
-                    new SelectableColumn({
-                        id: 'paymentId',
-                        name: $t(`%wU`),
-                        description: $t(`%Lw`),
-                    }),
+            new SelectableColumn({
+                id: 'balanceItem.id',
+                name: $t(`%1LE`),
+                description: $t(`%1Lr`),
+                enabled: false,
+            }),
 
-                    new SelectableColumn({
-                        id: 'balanceItem.type',
-                        name: $t(`%1B`),
-                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
-                    }),
+            new SelectableColumn({
+                id: 'paymentId',
+                name: $t(`%wU`),
+                description: $t(`%Lw`),
+            }),
 
-                    new SelectableColumn({
-                        id: 'balanceItem.category',
-                        name: $t(`%M2`),
-                        description: $t(`%M3`),
-                    }),
+            new SelectableColumn({
+                id: 'balanceItem.type',
+                name: $t(`%1B`),
+                description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
+            }),
 
-                    new SelectableColumn({
-                        id: 'balanceItem.title',
-                        name: $t('%vC'),
-                    }),
+            new SelectableColumn({
+                id: 'balanceItem.category',
+                name: $t(`%M2`),
+                description: $t(`%M3`),
+            }),
 
-                    new SelectableColumn({
-                        id: 'balanceItem.description',
-                        name: $t(`%6o`),
-                    }),
+            new SelectableColumn({
+                id: 'balanceItem.title',
+                name: $t('%vC'),
+            }),
 
-                    new SelectableColumn({
-                        id: 'balanceItem.createdAt',
-                        name: $t(`%wV`),
-                    }),
+            new SelectableColumn({
+                id: 'balanceItem.description',
+                name: $t(`%6o`),
+            }),
 
-                    new SelectableColumn({
-                        id: 'balanceItem.dueAt',
-                        name: $t(`%wW`),
-                    }),
+            new SelectableColumn({
+                id: 'balanceItem.createdAt',
+                name: $t(`%wV`),
+            }),
 
-                    ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
-                        id: `balanceItem.relations.${relationType}`,
-                        name: getBalanceItemRelationTypeName(relationType),
-                        description: getBalanceItemRelationTypeDescription(relationType),
-                    })),
+            new SelectableColumn({
+                id: 'balanceItem.dueAt',
+                name: $t(`%wW`),
+            }),
 
-                    new SelectableColumn({
-                        id: 'amount',
-                        name: $t(`%M4`),
-                    }),
+            ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
+                id: `balanceItem.relations.${relationType}`,
+                name: getBalanceItemRelationTypeName(relationType),
+                description: getBalanceItemRelationTypeDescription(relationType),
+            })),
 
-                    new SelectableColumn({
-                        id: 'unitPrice',
-                        name: $t(`%6q`),
-                    }),
+            new SelectableColumn({
+                id: 'amount',
+                name: $t(`%M4`),
+            }),
 
-                    new SelectableColumn({
-                        id: 'price',
-                        name: $t(`%1IP`),
-                    }),
+            new SelectableColumn({
+                id: 'unitPrice',
+                name: $t(`%6q`),
+            }),
 
-                    ...getGeneralColumns({ category: $t(`%M5`) }),
+            new SelectableColumn({
+                id: 'price',
+                name: $t(`%1IP`),
+            }),
 
-                    // Facturatiegegevens
-                    ...getInvoiceColumns(),
-                    ...getPayingOrganizationColumns(),
-                ],
+            ...getGeneralColumns({ category: $t(`%M5`) }),
+
+            // Facturatiegegevens
+            ...getInvoiceColumns(),
+            ...getPayingOrganizationColumns(),
+        ],
+    });
+}
+
+/**
+ * The same rows on their own, without the payments around them: what a breakdown exports when a row
+ * holds only a part of its payments.
+ */
+export function getBalanceItemPaymentSelectableWorkbook() {
+    return new SelectableWorkbook({
+        sheets: [
+            getBalanceItemPaymentSheet({
+                description: $t('Elke lijn is één betaling die één aanrekening (deels) betaalde. Samen zijn ze precies het bedrag dat je hiervoor zag. Een webshopbestelling blijft één lijn: die wordt als één geheel aangerekend.'),
             }),
         ],
     });

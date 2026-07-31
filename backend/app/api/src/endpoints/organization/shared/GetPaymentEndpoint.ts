@@ -20,7 +20,9 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         const params = Endpoint.parseParameters(request.url, '/payments/@id', { id: String });
 
-        if (params) {
+        // /payments/count and /payments/breakdown are endpoints of their own, which are not guaranteed
+        // to be matched before this one
+        if (params && params.id !== 'count' && params.id !== 'breakdown') {
             return [true, params as Params];
         }
         return [false];

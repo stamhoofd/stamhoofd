@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 import { getPricingTypeSuffix, STPricingType } from './billing/STPackage.js';
+import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import type { Organization } from './Organization.js';
 import type { Platform } from './Platform.js';
@@ -136,7 +137,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
 
 export function getBalanceItemTypeIcon(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return 'membership-filled';
+        case BalanceItemType.Registration: return 'group';
         case BalanceItemType.AdministrationFee: return 'calculator';
         case BalanceItemType.FreeContribution: return 'gift';
         case BalanceItemType.Order: return 'basket';
@@ -291,6 +292,32 @@ export class BalanceItemRelation extends AutoEncoder {
     name = new TranslatedString();
 }
 
+/**
+ * Whether a relation says which article an item is. The ones a member's own balance adds up across
+ * (see shouldAggregateOnRelationType) don't, except the price: a member only ever has one price, but a
+ * report over many members has to tell them apart.
+ */
+function isArticleRelationType(item: BalanceItem, relationType: BalanceItemRelationType): boolean {
+    return relationType === BalanceItemRelationType.GroupPrice || !shouldAggregateOnRelationType(relationType, item);
+}
+
+/**
+ * The types whose itemTitle is their description, which is then the only thing that tells two of their
+ * articles apart. Kept in sync with itemTitle by a test.
+ *
+ * Decided per type instead of per item: two items of the same type have to agree on what makes them the
+ * same article, otherwise no filter can select exactly one of those articles.
+ */
+export const DESCRIPTION_TITLED_BALANCE_ITEM_TYPES: ReadonlySet<BalanceItemType> = new Set([
+    BalanceItemType.AdministrationFee,
+    BalanceItemType.Other,
+    BalanceItemType.ReferralDiscount,
+]);
+
+function getArticleDescriptionCode(item: BalanceItem): string {
+    return DESCRIPTION_TITLED_BALANCE_ITEM_TYPES.has(item.type) ? '-description-' + item.description : '';
+}
+
 export function doBalanceItemRelationsMatch(a: Map<BalanceItemRelationType, BalanceItemRelation>, b: Map<BalanceItemRelationType, BalanceItemRelation>, allowedDifference = 0) {
     if (allowedDifference === 0 && a.size !== b.size) {
         return false;
@@ -431,6 +458,18 @@ export class BalanceItem extends AutoEncoder {
             return 0;
         }
         return this.priceWithVAT;
+    }
+
+    /**
+     * The number of pieces that are actually charged.
+     *
+     * The difference with quantity is that it takes into account canceled and hidden balance items
+     */
+    get payableQuantity() {
+        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+            return 0;
+        }
+        return this.amount;
     }
 
     /**
@@ -789,6 +828,132 @@ export class BalanceItem extends AutoEncoder {
         }
     }
 
+    /**
+     * The relations this kind of item can be named after in `category`, most specific first. The first
+     * one that is set names the item, the ones before it are missing.
+     */
+    get categoryRelationTypes(): BalanceItemRelationType[] {
+        switch (this.type) {
+            case BalanceItemType.Registration:
+                // Options that were bought for a registration belong to the same group
+                return [BalanceItemRelationType.Group];
+            case BalanceItemType.RegistrationBundleDiscount:
+                return [BalanceItemRelationType.Discount];
+            case BalanceItemType.CancellationFee:
+                return [BalanceItemRelationType.Group, BalanceItemRelationType.Webshop, BalanceItemRelationType.MembershipType];
+            case BalanceItemType.Order:
+                return [BalanceItemRelationType.Webshop];
+            case BalanceItemType.PlatformMembership:
+                return [BalanceItemRelationType.MembershipType];
+        }
+
+        return [];
+    }
+
+    /**
+     * The relation this item is named after in `category`, if it has one. An item can carry more
+     * relations than this one: a bundle discount is for a group, but it is a discount.
+     */
+    get categoryRelationType(): BalanceItemRelationType | null {
+        return this.categoryRelationTypes.find(type => this.relations.has(type)) ?? null;
+    }
+
+    /**
+     * Identifies the category of this item, so items of the same category can be added together even
+     * when the name they are shown under changed in the meantime (e.g. a renamed group or webshop).
+     *
+     * Follows the same rules as `category`: whatever that getter names the item after, this getter
+     * identifies.
+     */
+    get categoryId(): string {
+        const relationType = this.categoryRelationType;
+
+        if (relationType) {
+            return this.type + ':' + this.relations.get(relationType)!.id;
+        }
+
+        if (this.type === BalanceItemType.Other) {
+            // These have no relations: the description is the only thing that distinguishes them
+            return this.type + ':' + this.description;
+        }
+
+        // Everything else is one category per type
+        return this.type;
+    }
+
+    /**
+     * Selects every balance item of the same category, so a selection can be narrowed down to it.
+     *
+     * Follows `categoryId`: the items this selects are exactly the ones that have the same categoryId.
+     */
+    get categoryFilter(): StamhoofdFilter {
+        const relationType = this.categoryRelationType;
+        const filters: StamhoofdFilter[] = [{ type: this.type }];
+
+        // The item is named after the first relation that is set, so every relation that is more
+        // specific than that one has to be missing here too
+        for (const candidate of this.categoryRelationTypes) {
+            filters.push({ relations: { [candidate]: { id: candidate === relationType ? this.relations.get(candidate)!.id : null } } });
+
+            if (candidate === relationType) {
+                break;
+            }
+        }
+
+        if (this.type === BalanceItemType.Other) {
+            // These have no relations: the description is the only thing that distinguishes them
+            filters.push({ description: this.description });
+        }
+
+        return { $and: filters };
+    }
+
+    /**
+     * Identifies the article this item is for.
+     *
+     * This is the same unit a member sees on their own balance (see groupCode), with two differences
+     * that matter for a report over many members:
+     * - the chosen price is part of the article, because a member only ever has one price and doesn't
+     *   need to tell them apart;
+     * - what the article costs is not, because the same article sold at a reduced price to one member
+     *   is still the same article. The same goes for the due date and the status.
+     */
+    get articleCode(): string {
+        const relations = Array.from(this.relations.entries())
+            .filter(([key]) => isArticleRelationType(this, key))
+            .map(([key, value]) => key + '-' + value.id)
+            // The order in which relations were added is not part of the article
+            .sort();
+
+        return 'type-' + this.type
+            + getArticleDescriptionCode(this)
+            + '-relations-' + relations.join('-');
+    }
+
+    /**
+     * Selects every balance item of the same article, so a selection can be narrowed down to it.
+     *
+     * Follows `articleCode`: the items this selects are exactly the ones that have the same
+     * articleCode, so a relation this article doesn't have has to be missing there too.
+     */
+    get articleFilter(): StamhoofdFilter {
+        const filters: StamhoofdFilter[] = [{ type: this.type }];
+
+        for (const relationType of Object.values(BalanceItemRelationType)) {
+            if (!isArticleRelationType(this, relationType)) {
+                continue;
+            }
+
+            filters.push({ relations: { [relationType]: { id: this.relations.get(relationType)?.id ?? null } } });
+        }
+
+        if (DESCRIPTION_TITLED_BALANCE_ITEM_TYPES.has(this.type)) {
+            filters.push({ description: this.description });
+        }
+
+        return { $and: filters };
+    }
+
     get groupDescription() {
         switch (this.type) {
             case BalanceItemType.Registration: {
@@ -1143,6 +1308,23 @@ export class BalanceItemWithPayments extends BalanceItem {
 export class BalanceItemWithPrivatePayments extends BalanceItemWithPayments {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentWithPrivatePayment) })
     payments: BalanceItemPaymentWithPrivatePayment[] = [];
+}
+
+/**
+ * What one balance item is called on a balance, or what a group of them is called together.
+ *
+ * Only whether there is more than one changes the title, not how many, so a caller that counts its
+ * items elsewhere doesn't have to hand them all over (see BreakdownRow.describeArticle).
+ */
+export function getBalanceItemTitle(item: BalanceItem, isPlural: boolean): string {
+    const grouped = new GroupedBalanceItems();
+    grouped.add(item);
+
+    if (isPlural) {
+        grouped.add(item);
+    }
+
+    return grouped.itemTitle;
 }
 
 export class GroupedBalanceItems {
