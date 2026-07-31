@@ -23,6 +23,10 @@ platforms:
         target: resources/string[@name="custom_url_scheme"]
         replace: |
           <string name="custom_url_scheme">$APP_ID</string>
+      - resFile: values/strings.xml
+        target: resources/string[@name="asset_statements"]
+        replace: |
+          <string name="asset_statements" translatable="false">[{\"include\": \"https://$HOSTNAME/.well-known/assetlinks.json\"}]</string>
   ios:
     targets:
       App:
