@@ -242,6 +242,11 @@ const props = withDefaults(
         defaultSortColumn?: Column<Value, any> | null;
         defaultSortDirection?: SortItemDirection | null;
         defaultFilter?: StamhoofdFilter | null;
+        /**
+         * The search this table starts with, e.g. the one a user already typed in the table they came
+         * from.
+         */
+        defaultSearch?: string | null;
         route?: {
             component: () => Promise<Component>;
             objectKey: string;
@@ -256,6 +261,7 @@ const props = withDefaults(
         defaultSortDirection: null,
         actions: () => [],
         defaultFilter: null,
+        defaultSearch: null,
         route: null,
     },
 );
@@ -359,7 +365,7 @@ const sortDirection = ref(props.defaultSortDirection ?? SortItemDirection.ASC) a
 
 const values = computed(() => props.tableObjectFetcher.objects);
 const visibleRows = ref([]) as Ref<VisibleRow<Value>[]>;
-const searchQuery = ref('');
+const searchQuery = ref(props.defaultSearch ?? '');
 const selectedUIFilter = ref(props.filterBuilders?.length && props.defaultFilter ? props.filterBuilders[0]?.fromFilter(props.defaultFilter) : null) as Ref<null | UIFilter>;
 
 watchEffect(() => {

@@ -1,5 +1,7 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import { BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
+import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import { TranslatedString } from './TranslatedString.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';
 import { Platform } from './Platform.js';
@@ -259,5 +261,87 @@ describe('DetailedPayableBalance VAT helpers', () => {
         const balance = createBalance([createItem({ VATPercentage: null })]);
         expect(balance.hasExclusiveVAT).toBe(false);
         expect(balance.VATBreakdown).toEqual([]);
+    });
+});
+
+describe('BalanceItem.categoryFilter / articleFilter', () => {
+    beforeEach(() => {
+        TestUtils.setEnvironment('userMode', 'organization');
+        TestUtils.setEnvironment('platformName', 'stamhoofd');
+    });
+
+    function createItem(type: BalanceItemType, relations: [BalanceItemRelationType, string][] = [], description = '') {
+        return BalanceItem.create({
+            type,
+            description,
+            relations: new Map(relations.map(([relationType, id]) => [
+                relationType,
+                BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
+            ])),
+        });
+    }
+
+    /**
+     * A filter is a list of conditions that all have to hold, which is what an item matches when it has
+     * exactly the values they ask for.
+     */
+    function matches(filter: StamhoofdFilter, item: BalanceItem): boolean {
+        const conditions = (filter as { $and: Record<string, any>[] }).$and;
+
+        return conditions.every((condition) => {
+            if ('type' in condition) {
+                return condition.type === item.type;
+            }
+
+            if ('description' in condition) {
+                return condition.description === item.description;
+            }
+
+            const [relationType, expected] = Object.entries(condition.relations as Record<string, { id: string | null }>)[0];
+            return (item.relations.get(relationType as BalanceItemRelationType)?.id ?? null) === expected.id;
+        });
+    }
+
+    describe('categoryFilter selects exactly the items with the same categoryId', () => {
+        test('a cancellation fee without any relation does not select the ones that have one', () => {
+            const bare = createItem(BalanceItemType.CancellationFee);
+            const forGroup = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a']]);
+            const forWebshop = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Webshop, 'shop-a']]);
+
+            expect(new Set([bare.categoryId, forGroup.categoryId, forWebshop.categoryId]).size).toBe(3);
+
+            for (const item of [bare, forGroup, forWebshop]) {
+                for (const other of [bare, forGroup, forWebshop]) {
+                    expect(matches(item.categoryFilter, other)).toBe(item.categoryId === other.categoryId);
+                }
+            }
+        });
+
+        test('a cancellation fee is named after its group, so its webshop is not part of the category', () => {
+            const forGroup = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a']]);
+            const forBoth = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a'], [BalanceItemRelationType.Webshop, 'shop-a']]);
+
+            expect(forBoth.categoryId).toBe(forGroup.categoryId);
+            expect(matches(forGroup.categoryFilter, forBoth)).toBe(true);
+        });
+    });
+
+    describe('articleFilter selects exactly the items with the same articleCode', () => {
+        test('an administration fee with a description is a different article than one without', () => {
+            const named = createItem(BalanceItemType.AdministrationFee, [], 'Kosten');
+            const unnamed = createItem(BalanceItemType.AdministrationFee);
+
+            expect(named.articleCode).not.toBe(unnamed.articleCode);
+            expect(matches(named.articleFilter, unnamed)).toBe(false);
+            expect(matches(unnamed.articleFilter, named)).toBe(false);
+        });
+
+        test('a registration is not told apart by its description', () => {
+            const first = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen');
+            const second = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen 2026');
+
+            expect(first.articleCode).toBe(second.articleCode);
+            expect(matches(first.articleFilter, second)).toBe(true);
+        });
     });
 });

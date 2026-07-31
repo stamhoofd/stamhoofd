@@ -6,6 +6,7 @@
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-sort-direction="SortItemDirection.DESC"
         :default-filter="defaultFilter"
+        :default-search="defaultSearch"
         :title="title"
         :column-configuration-id="configurationId"
         :actions="actions"
@@ -37,9 +38,17 @@ const props = withDefaults(
     defineProps<{
         methods?: PaymentMethod[] | null;
         defaultFilter?: StamhoofdFilter | null;
+        /**
+         * Selects the payments this table shows, without the user being able to widen it again. Used
+         * to show the payments behind one row of a breakdown.
+         */
+        requiredFilter?: StamhoofdFilter | null;
+        defaultSearch?: string | null;
     }>(), {
         methods: null,
         defaultFilter: null,
+        requiredFilter: null,
+        defaultSearch: null,
     },
 );
 
@@ -61,14 +70,21 @@ const title = computed(() => {
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
+    const filters: StamhoofdFilter[] = props.requiredFilter ? [props.requiredFilter] : [];
+
     if (props.methods !== null) {
-        return {
+        filters.push({
             method: {
                 $in: props.methods,
             },
-        };
+        });
     }
-    return null;
+
+    if (filters.length === 0) {
+        return null;
+    }
+
+    return filters.length === 1 ? filters[0] : { $and: filters };
 }
 
 const objectFetcher = usePaymentsObjectFetcher({

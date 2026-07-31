@@ -6,6 +6,7 @@
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-sort-direction="SortItemDirection.DESC"
         :default-filter="defaultFilter"
+        :default-search="defaultSearch"
         :title="title"
         :column-configuration-id="configurationId"
         :actions="actions"
@@ -36,13 +37,22 @@ import { BalanceItemStatus, ExcelExportType, getApplicableBalanceItemRelationTyp
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { useBreakdown } from '../breakdown/openBreakdown';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 
 const props = withDefaults(
     defineProps<{
         defaultFilter?: StamhoofdFilter | null;
+        /**
+         * Selects the balance items this table shows, without the user being able to widen it again.
+         * Used to show the balance items behind one row of a breakdown.
+         */
+        requiredFilter?: StamhoofdFilter | null;
+        defaultSearch?: string | null;
     }>(), {
         defaultFilter: null,
+        requiredFilter: null,
+        defaultSearch: null,
     },
 );
 
@@ -61,11 +71,13 @@ const title = computed(() => {
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
-    return {
+    const hideHidden: StamhoofdFilter = {
         status: {
             $neq: BalanceItemStatus.Hidden,
         },
     };
+
+    return props.requiredFilter ? { $and: [hideHidden, props.requiredFilter] } : hideHidden;
 }
 
 const objectFetcher = useBalanceItemsFetcher({
@@ -279,7 +291,27 @@ const route = {
 
 const present = usePresent();
 const { getSelectableWorkbook } = useSelectableWorkbook();
+const { openBalanceItems } = useBreakdown();
 const actions = [
+    new AsyncTableAction({
+        name: $t('Statistieken'),
+        icon: 'stats',
+        priority: 1,
+        groupIndex: 2,
+        needsSelection: true,
+        allowAutoSelectAll: true,
+        handler: async (selection) => {
+            await openBalanceItems({
+                filter: selection.filter.filter,
+                search: selection.filter.search,
+                title: [$t('%1LA')].filter(Boolean).join(' - '),
+                getSelectableWorkbook,
+                configurationId: configurationId.value,
+                present: true,
+            });
+        },
+    }),
+
     new AsyncTableAction({
         name: $t('%V8'),
         icon: 'download',

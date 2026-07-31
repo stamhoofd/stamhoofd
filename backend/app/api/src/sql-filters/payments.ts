@@ -3,29 +3,22 @@ import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments.js';
 import { organizationFilterCompilers } from './organizations.js';
+import { paymentSettlementFilterCompilers } from './shared/PaymentSettlementFilterCompilers.js';
 
 /**
  * Defines how to filter payments in the database from StamhoofdFilter objects
  */
 export const paymentFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
+    // method, provider, status and settlement
+    ...paymentSettlementFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
     }),
-    method: createColumnFilter({
-        expression: SQL.column(Payment.table, 'method'),
-        type: SQLValueType.String,
-        nullable: false,
-    }),
     type: createColumnFilter({
         expression: SQL.column('type'),
-        type: SQLValueType.String,
-        nullable: false,
-    }),
-    status: createColumnFilter({
-        expression: SQL.column(Payment.table, 'status'),
         type: SQLValueType.String,
         nullable: false,
     }),
@@ -68,11 +61,30 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
-    provider: createColumnFilter({
-        expression: SQL.column('provider'),
+
+    stripeAccountId: createColumnFilter({
+        expression: SQL.column(Payment.table, 'stripeAccountId'),
         type: SQLValueType.String,
         nullable: true,
     }),
+
+    /**
+     * The account a transfer was made to. Used to narrow a breakdown down to the money that arrived on
+     * one account (see PaymentBreakdown).
+     */
+    transferSettings: {
+        ...baseSQLFilterCompilers,
+        iban: createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column(Payment.table, 'transferSettings'), '$.value.iban'),
+            type: SQLValueType.JSONString,
+            nullable: true,
+        }),
+        creditor: createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column(Payment.table, 'transferSettings'), '$.value.creditor'),
+            type: SQLValueType.JSONString,
+            nullable: true,
+        }),
+    },
     transferDescription: createColumnFilter({
         expression: SQL.column(Payment.table, 'transferDescription'),
         type: SQLValueType.String,

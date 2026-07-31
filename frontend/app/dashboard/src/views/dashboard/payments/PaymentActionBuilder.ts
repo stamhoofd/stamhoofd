@@ -17,6 +17,7 @@ import type { Organization, Platform } from '@stamhoofd/structures';
 import { EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import type { ComputedRef, Ref } from 'vue';
+import { useBreakdown } from '../breakdown/openBreakdown';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 
@@ -30,10 +31,12 @@ export function usePaymentActions({ configurationId, methods }: { configurationI
     const selectableWorkbook = useSelectableWorkbook();
     const $feature = useFeatureFlag();
     const context = useContext();
+    const { openPayments } = useBreakdown();
 
     return new PaymentActionBuilder({
         markPaid,
         present,
+        openPaymentBreakdown: openPayments,
         selectableWorkbook,
         configurationId,
         organization: organization.value,
@@ -48,6 +51,7 @@ export class PaymentActionBuilder {
     private present: ReturnType<typeof usePresent>;
     private markPaid: ReturnType<typeof useMarkPaymentsPaid>;
     private selectableWorkbook: ReturnType<typeof useSelectableWorkbook>;
+    private openPaymentBreakdown: ReturnType<typeof useBreakdown>['openPayments'];
     private configurationId: ComputedRef<string>;
     private organization: Organization | null;
     private platform: Platform;
@@ -59,6 +63,7 @@ export class PaymentActionBuilder {
     constructor(settings: {
         markPaid: ReturnType<typeof useMarkPaymentsPaid>;
         present: ReturnType<typeof usePresent>;
+        openPaymentBreakdown: ReturnType<typeof useBreakdown>['openPayments'];
         selectableWorkbook: ReturnType<typeof useSelectableWorkbook>;
         configurationId: ComputedRef<string>;
         organization: Organization | null;
@@ -69,6 +74,7 @@ export class PaymentActionBuilder {
     }) {
         this.markPaid = settings.markPaid;
         this.present = settings.present;
+        this.openPaymentBreakdown = settings.openPaymentBreakdown;
         this.selectableWorkbook = settings.selectableWorkbook;
         this.configurationId = settings.configurationId;
         this.organization = settings.organization;
@@ -106,6 +112,24 @@ export class PaymentActionBuilder {
             }),
             this.getCancelPaymentsAction(),
             new AsyncTableAction({
+                name: $t('Statistieken'),
+                icon: 'stats',
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: true,
+                handler: async (selection) => {
+                    await this.openPaymentBreakdown({
+                        filter: selection.filter.filter,
+                        search: selection.filter.search,
+                        title: this.getExcelTitle(false),
+                        getSelectableWorkbook: this.selectableWorkbook.getSelectableWorkbook,
+                        configurationId: this.configurationId.value,
+                        present: true,
+                    });
+                },
+            }),
+            new AsyncTableAction({
                 name: $t('%V8'),
                 icon: 'download',
                 priority: 0,
@@ -137,9 +161,9 @@ export class PaymentActionBuilder {
         return actions.filter(action => action !== null);
     }
 
-    private getExcelTitle() {
+    private getExcelTitle(withOrganization = true) {
         const parts = [
-            this.organization && this.context.value.auth.hasSomePlatformAccess() ? this.organization.name : null,
+            withOrganization && this.organization && this.context.value.auth.hasSomePlatformAccess() ? this.organization.name : null,
             this.methods?.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('%1JH'),
         ];
 

@@ -242,6 +242,10 @@ export * from './filters/SelectablePdfDocumentFilter.js';
 // Balance
 export * from './BalanceItem.js';
 export * from './BalanceItemDetailed.js';
+export * from './PaymentAccount.js';
+export * from './PaymentBreakdown.js';
+export * from './PaymentBreakdownBuilder.js';
+export * from './PaymentSettlement.js';
 export * from './SponsorConfig.js';
 
 export * from './filters/ExcelExportRequest.js';

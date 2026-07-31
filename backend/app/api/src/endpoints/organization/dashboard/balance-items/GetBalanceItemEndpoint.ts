@@ -20,7 +20,9 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
 
         const params = Endpoint.parseParameters(request.url, '/balance-items/@id', { id: String });
 
-        if (params && params.id !== 'count') {
+        // The endpoints for /balance-items/count and /balance-items/breakdown live in this same folder,
+        // so they are not guaranteed to be matched before this one
+        if (params && params.id !== 'count' && params.id !== 'breakdown') {
             return [true, params as Params];
         }
         return [false];

@@ -16,13 +16,13 @@
                 <STList class="illustration-list">
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Export)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('%95') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t("%5Q") }}
+                            {{ $t("Handig overzicht van betalingen, transactiekosten en uitbetalingen die je vervolgens kan exporteren naar Excel.") }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
