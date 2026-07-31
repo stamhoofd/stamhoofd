@@ -12,6 +12,9 @@
             <p v-for="[type, relation] of relationsToShow(group)" :key="type" class="style-description-small">
                 {{ getBalanceItemRelationTypeName(type) }}: {{ relation.name }}
             </p>
+            <p v-if="group.count" class="style-description-small">
+                {{ countText(group.count) }}
+            </p>
             <div v-if="total && group.price > 0" class="breakdown-share" :style="{ '--share': getShare(group) }" />
 
             <template #middleRight>
@@ -36,6 +39,7 @@ import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 import type { BalanceItemRelation, BalanceItemRelationType, BreakdownGroup } from '@stamhoofd/structures';
 import { getBalanceItemRelationTypeName } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 /**
  * The rows of one tab of a breakdown, shown like the items on a member's balance: an icon, what it is
@@ -47,9 +51,19 @@ const props = defineProps<{
      * Used to draw the share of each row. Pass 0 to hide the bars.
      */
     total: number;
+    /**
+     * What the count of a row is a number of, which is the same for every tab of one breakdown.
+     */
+    countUnit: 'payments' | 'balanceItems';
 }>();
 
 defineEmits<{ (e: 'select', group: BreakdownGroup): void }>();
+
+function countText(count: number): string {
+    return props.countUnit === 'payments'
+        ? Formatter.pluralText(count, $t('betaling'), $t('betalingen'))
+        : Formatter.pluralText(count, $t('aanrekening'), $t('aanrekeningen'));
+}
 
 /**
  * The name of a group already says what it is, so only the relations that add something are shown.
@@ -63,7 +77,7 @@ function relationsToShow(group: BreakdownGroup): [BalanceItemRelationType, Balan
  * is made of.
  */
 function canOpen(group: BreakdownGroup): boolean {
-    return group.canNarrowDown || group.filter !== null;
+    return group.canNarrowDown || group.selection !== null;
 }
 
 function getShare(group: BreakdownGroup): number {

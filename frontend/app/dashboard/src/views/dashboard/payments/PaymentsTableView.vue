@@ -7,7 +7,7 @@
         :default-sort-direction="SortItemDirection.DESC"
         :default-filter="defaultFilter"
         :default-search="defaultSearch"
-        :title="title"
+        :title="tableTitle"
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
@@ -44,11 +44,17 @@ const props = withDefaults(
          */
         requiredFilter?: StamhoofdFilter | null;
         defaultSearch?: string | null;
+        /**
+         * Overrides the name of this table, e.g. with the group of a breakdown these payments came
+         * from, so it says what you drilled into.
+         */
+        title?: string | null;
     }>(), {
         methods: null,
         defaultFilter: null,
         requiredFilter: null,
         defaultSearch: null,
+        title: null,
     },
 );
 
@@ -61,7 +67,11 @@ const configurationId = computed(() => {
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = usePaymentsUIFilterBuilders();
 const organization = useOrganization();
-const title = computed(() => {
+const tableTitle = computed(() => {
+    if (props.title) {
+        return props.title;
+    }
+
     if (props.methods?.length === 1) {
         return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);
     }

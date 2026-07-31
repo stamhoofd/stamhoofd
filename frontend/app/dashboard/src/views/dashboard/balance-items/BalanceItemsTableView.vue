@@ -7,7 +7,7 @@
         :default-sort-direction="SortItemDirection.DESC"
         :default-filter="defaultFilter"
         :default-search="defaultSearch"
-        :title="title"
+        :title="tableTitle"
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
@@ -49,10 +49,16 @@ const props = withDefaults(
          */
         requiredFilter?: StamhoofdFilter | null;
         defaultSearch?: string | null;
+        /**
+         * Overrides the name of this table, e.g. with the group of a breakdown these balance items
+         * came from, so it says what you drilled into.
+         */
+        title?: string | null;
     }>(), {
         defaultFilter: null,
         requiredFilter: null,
         defaultSearch: null,
+        title: null,
     },
 );
 
@@ -66,8 +72,8 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const filterBuilders = useBalanceItemsUIFilterBuilders();
 const organization = useOrganization();
 const platform = usePlatform();
-const title = computed(() => {
-    return $t('%1LA');
+const tableTitle = computed(() => {
+    return props.title || $t('%1LA');
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
@@ -304,7 +310,7 @@ const actions = [
             await openBalanceItems({
                 filter: selection.filter.filter,
                 search: selection.filter.search,
-                title: [$t('%1LA')].filter(Boolean).join(' - '),
+                title: $t('%1LA'),
                 getSelectableWorkbook,
                 configurationId: configurationId.value,
                 present: true,

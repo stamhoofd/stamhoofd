@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="exporting" :title="title" :save-text="$t('Exporteren')" save-icon="download" :cancel-text="$t('Sluiten')" :disabled="!breakdown" @save="startExport">
+    <SaveView :loading="exporting" :title="title" :save-text="$t('Exporteren')" save-icon="download" :cancel-text="$t('Sluiten')" :disabled="!canExport" @save="startExport">
         <template #buttons>
-            <button v-if="breakdown" v-tooltip="$t('Toon de betalingen')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.exportFilter)" />
+            <button v-if="breakdown" v-tooltip="$t('Toon de betalingen')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.selection)" />
         </template>
 
         <h1 class="style-navigation-title">
@@ -14,7 +14,17 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Spinner v-if="loading" class="center" />
+        <p v-if="canExportWithoutBreakdown" class="warning-box">
+            {{ $t('We konden geen statistieken maken van deze selectie, maar je kan ze wel nog exporteren naar Excel.') }}
+        </p>
+
+        <template v-if="loading">
+            <Spinner class="center" />
+
+            <p class="style-description-small center">
+                {{ $t('Dit kan even duren bij een grote selectie.') }}
+            </p>
+        </template>
 
         <template v-else-if="breakdown">
             <STList class="info">
@@ -27,6 +37,30 @@
                     </p>
                     <p class="style-description-small">
                         {{ pluralText(breakdown.paymentCount, $t('betaling'), $t('betalingen')) }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="breakdown.pricePending">
+                    <h3 class="style-definition-label">
+                        {{ $t('In verwerking') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatPrice(breakdown.pricePending) }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ $t('Deze betalingen zijn nog niet afgerond, dus er werd nog niets ontvangen.') }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="breakdown.priceFailed">
+                    <h3 class="style-definition-label">
+                        {{ $t('Mislukte betalingen') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatPrice(breakdown.priceFailed) }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ $t('Er werd geprobeerd te betalen, maar dat is niet gelukt.') }}
                     </p>
                 </STListItem>
 
@@ -65,11 +99,14 @@
                         {{ $t('Dit bedrag wordt automatisch ingehouden van je uitbetalingen.') }}
                     </p>
                 </STListItem>
-
             </STList>
 
-            <p v-if="breakdown.isPartial" class="info-box">
-                {{ $t('De bedragen hierboven horen bij volledige betalingen: ze kunnen niet opgesplitst worden over de onderdelen waarvoor betaald werd.') }}
+            <p v-if="breakdown.pricePending || breakdown.priceFailed" class="warning-box">
+                {{ $t('Deze selectie bevat betalingen die (nog) niet ontvangen werden, dus het totaal hierboven is niet wat er op je rekening kwam.') }}
+            </p>
+
+            <p v-if="amountMessage" class="info-box">
+                {{ amountMessage }}
             </p>
 
             <template v-if="breakdown.graph.points.length > 3">
@@ -83,7 +120,11 @@
                 {{ $t('Er zijn geen gegevens voor deze selectie.') }}
             </p>
 
-            <BreakdownList v-else :groups="visibleGroups" :total="breakdown.price" @select="openGroup" />
+            <BreakdownList v-else :groups="visibleGroups" :total="breakdown.price" count-unit="payments" @select="openGroup" />
+
+            <p v-if="hasClosedGroups" class="info-box">
+                {{ $t('Rijen zonder pijl kan je niet openen: hun bedrag maakt deel uit van een groter geheel, zoals een webshopbestelling die als één geheel aangerekend wordt.') }}
+            </p>
         </template>
     </SaveView>
 </template>
@@ -99,7 +140,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import type { BreakdownGroup } from '@stamhoofd/structures';
-import { BreakdownTab, ExcelExportType, PaymentBreakdown } from '@stamhoofd/structures';
+import { BreakdownAmountType, BreakdownTab, ExcelExportType, PaymentBreakdown } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, shallowRef } from 'vue';
 import BreakdownGraphView from './BreakdownGraphView.vue';
@@ -115,18 +156,24 @@ import { useBreakdownView } from './useBreakdownView';
 const props = withDefaults(
     defineProps<BreakdownViewProps>(), {
         search: null,
+        rootTitle: null,
         path: () => [],
         pathNames: () => [],
     },
 );
 
 const show = useShow();
-const { breakdown, loading, exporting, errors, startExport, getNarrowedProps, openTable, isTabVisible } = useBreakdownView<PaymentBreakdown>(props, {
+const { breakdown, loading, exporting, errors, canExport, canExportWithoutBreakdown, amountMessage, startExport, getNarrowedProps, openTable, isTabVisible } = useBreakdownView<PaymentBreakdown>(props, {
     endpoint: '/payments/breakdown',
     decoder: PaymentBreakdown as Decoder<PaymentBreakdown>,
     exportType: ExcelExportType.Payments,
     exportSortKey: 'paidAt',
     tableView: () => import('../payments/PaymentsTableView.vue'),
+    isEmpty: breakdown => breakdown.paymentCount === 0,
+    partialListMessage: $t('Deze betalingen hebben ook voor andere dingen betaald. De lijst en de export bevatten de volledige betalingen, het bedrag hierboven is enkel het deel dat hier meetelt.'),
+    amountTypeMessages: {
+        [BreakdownAmountType.Rounding]: $t('Dit is wat deze betalingen afgerond hebben, niet wat ermee betaald werd.'),
+    },
 });
 
 function getGroups(id: BreakdownTab): BreakdownGroup[] {
@@ -143,11 +190,12 @@ function getGroups(id: BreakdownTab): BreakdownGroup[] {
 }
 
 const tabs = computed(() => [
-    { id: BreakdownTab.Account, name: $t('Ontvangen via') },
-    { id: BreakdownTab.Category, name: $t('Categorie') },
-    { id: BreakdownTab.Article, name: $t('Artikels') },
+    // Not 'received via': a selection can hold payments that never arrived
+    { id: BreakdownTab.Account, name: $t('Betaalwijze') },
     // Without online payments there is nothing to pay out, so the server leaves this one empty
     { id: BreakdownTab.Settlement, name: $t('Uitbetalingen') },
+    { id: BreakdownTab.Category, name: $t('Categorie') },
+    { id: BreakdownTab.Article, name: $t('Artikels') },
 ].filter(t => isTabVisible(t.id, getGroups(t.id))));
 
 const tabLabels = computed(() => tabs.value.map(t => t.name));
@@ -161,6 +209,7 @@ const tab = computed({
 });
 
 const visibleGroups = computed(() => tab.value ? getGroups(tab.value.id) : []);
+const hasClosedGroups = computed(() => visibleGroups.value.some(group => !group.canNarrowDown && group.selection === null));
 
 /**
  * Opening a group breaks it down further. The articles of an order are the deepest level: there we
@@ -168,8 +217,8 @@ const visibleGroups = computed(() => tab.value ? getGroups(tab.value.id) : []);
  */
 async function openGroup(group: BreakdownGroup) {
     if (!group.canNarrowDown) {
-        if (group.filter) {
-            await openTable(group.filter);
+        if (group.selection) {
+            await openTable(group.selection);
         }
         return;
     }

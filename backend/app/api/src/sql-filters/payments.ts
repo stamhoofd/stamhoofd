@@ -69,6 +69,16 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
     }),
 
     /**
+     * What a payment rounded away, which belongs to the payment as a whole instead of to one of the
+     * things it paid for (see PaymentBreakdownBuilder.addRounding).
+     */
+    roundingAmount: createColumnFilter({
+        expression: SQL.column(Payment.table, 'roundingAmount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+
+    /**
      * The account a transfer was made to. Used to narrow a breakdown down to the money that arrived on
      * one account (see PaymentBreakdown).
      */

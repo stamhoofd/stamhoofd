@@ -7,9 +7,9 @@
                 <span v-else class="icon empty" />
             </button>
 
-            <h3 v-else class="style-label">
+            <span v-else class="style-label">
                 {{ title }}
-            </h3>
+            </span>
 
             <div>
                 <GraphDateRangeSelector v-if="options === null || options.length > 1" v-model="range" :options="options" />
@@ -124,7 +124,8 @@ async function loadData() {
         const newGraphData = await configuration.load(configuration.selectedRange);
         graphData.value = newGraphData;
         loadGraph(newGraphData);
-    } catch (e) {
+    }
+    catch (e) {
         console.error(e);
         Toast.fromError(e).show();
     }
@@ -167,7 +168,8 @@ function loadGraph(graph: Graph) {
             Filler,
             Tooltip,
         );
-    } else {
+    }
+    else {
         // chart.destroy()
         update = true;
     }
@@ -342,10 +344,12 @@ function loadGraph(graph: Graph) {
         chart.data.datasets[0].label! = datasets[0].label ?? '';
         chart.data.labels = graph.labels;
         chart.update();
-    } else {
+    }
+    else {
         if (canvas.value === null) {
             console.error('Canvas is null');
-        } else {
+        }
+        else {
             chart = new Chart(canvas.value, {
                 type: 'line',
                 data: {

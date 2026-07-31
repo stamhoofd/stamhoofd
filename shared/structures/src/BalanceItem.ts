@@ -137,7 +137,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
 
 export function getBalanceItemTypeIcon(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return 'edit';
+        case BalanceItemType.Registration: return 'group';
         case BalanceItemType.AdministrationFee: return 'calculator';
         case BalanceItemType.FreeContribution: return 'gift';
         case BalanceItemType.Order: return 'basket';

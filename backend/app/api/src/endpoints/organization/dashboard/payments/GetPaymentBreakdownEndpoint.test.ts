@@ -260,7 +260,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             ]);
 
             // An order is one balance item, so its articles can't be selected on their own
-            expect(response.body.byArticle.every(g => g.filter === null)).toBe(true);
+            expect(response.body.byArticle.every(g => g.selection === null)).toBe(true);
         });
 
         test('the options that were chosen for a product are counted on their own', async () => {
@@ -336,7 +336,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(response.body.byArticle.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
         });
 
-        test('a partially paid or changed order is not attributed to single articles', async () => {
+        test('an order that was not paid in full is not attributed to single articles', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
@@ -358,8 +358,31 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.byArticle).toHaveLength(1);
-            expect(response.body.byArticle[0].name.toString()).toBe('Gewijzigde bestelling');
+            expect(response.body.byArticle[0].name.toString()).toBe($t('Deels betaalde bestelling'));
             expect(response.body.byArticle[0].price).toBe(1_00);
+        });
+
+        test('an order that was paid for more than it costs was changed afterwards', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            const order = await new OrderFactory({ webshop, data: createOrderData([['T-shirt', 15_00, 2]]) }).create();
+
+            const balanceItem = await new BalanceItemFactory({
+                organizationId: organization.id,
+                orderId: order.id,
+                type: BalanceItemType.Order,
+                amount: 1,
+                unitPrice: order.data.totalPrice,
+            }).create();
+
+            await createPayment(organization, { items: [[balanceItem, 40_00]] });
+
+            const response = await getBreakdown({ organization, user });
+
+            expect(response.status).toBe(200);
+            expect(response.body.byArticle.map(g => g.name.toString())).toEqual([$t('Gewijzigde bestelling')]);
         });
     });
 
@@ -424,10 +447,10 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(narrowed.body.price).toBe(60_00);
 
             // The payment as a whole paid for more than what is shown
-            expect(narrowed.body.isPartial).toBe(true);
+            expect(narrowed.body.selection.isListPartial).toBe(true);
 
             // Exporting gives the payments that paid for at least one matching item
-            expect(narrowed.body.exportFilter).toMatchObject({
+            expect(narrowed.body.selection.filter).toMatchObject({
                 balanceItemPayments: {
                     $elemMatch: {
                         balanceItem: {
@@ -461,7 +484,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(narrowed.status).toBe(200);
             expect(narrowed.body.price).toBe(30_00);
-            expect(narrowed.body.exportFilter).toMatchObject({
+            expect(narrowed.body.selection.filter).toMatchObject({
                 transferSettings: { iban: 'BE68539007547034' },
             });
         });
@@ -488,7 +511,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(narrowed.body.price).toBe(60_00);
 
             // Running the export filter through the database selects the same payments
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.price).toBe(60_00);
             expect(exported.body.paymentCount).toBe(1);
         });
@@ -524,7 +547,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(narrowed.body.price).toBe(30_00);
 
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.price).toBe(30_00);
         });
 
@@ -561,7 +584,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(narrowed.body.price).toBe(-10_00);
 
             // The registration of the same group is not part of it
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.price).toBe(-10_00);
         });
 
@@ -587,7 +610,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(narrowed.body.price).toBe(20_00);
 
             // Exporting the narrowed selection gives back exactly what was shown
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.price).toBe(20_00);
         });
     });
@@ -662,7 +685,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(narrowed.body.paymentCount).toBe(1);
 
             // Running the export filter through the database selects the same payments
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.price).toBe(40_00);
             expect(exported.body.paymentCount).toBe(1);
         });
@@ -682,7 +705,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             const all = await getBreakdown({ organization, user });
             const pending = all.body.bySettlement.find(g => g.name.toString() === $t('Nog niet uitbetaald'))!;
 
-            const exported = await getBreakdown({ organization, user, filter: pending.filter });
+            const exported = await getBreakdown({ organization, user, filter: pending.selection!.filter });
             expect(exported.body.price).toBe(30_00);
             expect(exported.body.paymentCount).toBe(1);
         });
@@ -700,7 +723,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             const all = await getBreakdown({ organization, user });
             const offline = all.body.bySettlement.find(g => g.name.toString() === $t('Niet online betaald'))!;
 
-            const exported = await getBreakdown({ organization, user, filter: offline.filter });
+            const exported = await getBreakdown({ organization, user, filter: offline.selection!.filter });
             expect(exported.body.price).toBe(30_00);
             expect(exported.body.paymentCount).toBe(2);
         });
@@ -726,7 +749,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             ]);
 
             const row = all.body.bySettlement.find(g => g.name.toString() === getPaymentProviderName(PaymentProvider.Buckaroo))!;
-            const exported = await getBreakdown({ organization, user, filter: row.filter });
+            const exported = await getBreakdown({ organization, user, filter: row.selection!.filter });
             expect(exported.body.price).toBe(25_00);
             expect(exported.body.paymentCount).toBe(1);
         });
@@ -771,7 +794,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.price).toBe(14_6700);
-            expect(response.body.isPartial).toBe(false);
+            expect(response.body.selection.isListPartial).toBe(false);
 
             expect(response.body.byCategory.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
                 { name: 'Kapoenen', price: 14_6652 },
@@ -800,6 +823,49 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.transferFee).toBe(39);
+        });
+
+        test('a selection that holds unfinished payments says what of it never arrived', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const item = await createRegistrationItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen' });
+
+            await createPayment(organization, { items: [[item, 40_00]] });
+            await createPayment(organization, { items: [[item, 30_00]], status: PaymentStatus.Pending });
+            await createPayment(organization, { items: [[item, 20_00]], status: PaymentStatus.Failed });
+
+            const response = await getBreakdown({ organization, user });
+
+            expect(response.status).toBe(200);
+            expect(response.body.price).toBe(90_00);
+            expect(response.body.pricePending).toBe(30_00);
+            expect(response.body.priceFailed).toBe(20_00);
+        });
+
+        test('a deduction from another balance is not money that came in', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const item = await createRegistrationItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen' });
+
+            await createPayment(organization, { items: [[item, 40_00]] });
+            await createPayment(organization, { items: [[item, 10_00]], method: PaymentMethod.AccountDeductions });
+
+            const response = await getBreakdown({ organization, user });
+
+            expect(response.status).toBe(200);
+            expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
+                { name: $t('Niet online betaald'), price: 40_00 },
+                { name: PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), price: 10_00 },
+            ]);
+
+            // Running the rows through the database keeps them apart
+            for (const [name, price] of [[$t('Niet online betaald'), 40_00], [PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), 10_00]] as [string, number][]) {
+                const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
+                const exported = await getBreakdown({ organization, user, filter: row.selection!.filter });
+                expect(exported.body.price).toBe(price);
+            }
         });
     });
 

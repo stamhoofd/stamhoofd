@@ -35,6 +35,85 @@ export enum BreakdownTab {
 }
 
 /**
+ * The objects that can hold the money of a breakdown.
+ */
+export enum BreakdownObjectType {
+    Payments = 'Payments',
+    BalanceItems = 'BalanceItems',
+
+    /**
+     * The link between the two: one payment paying one part of one balance item. Money that is spread
+     * over several payments or that paid for several things only exists at this level.
+     */
+    BalanceItemPayments = 'BalanceItemPayments',
+}
+
+/**
+ * Which money of an object an amount is. Every value names one getter, see getWholeAmount.
+ */
+export enum BreakdownAmountType {
+    /**
+     * Payment.price, BalanceItem.payablePriceWithVAT or BalanceItemPayment.price.
+     */
+    Total = 'Total',
+
+    /**
+     * BalanceItem.pricePaid
+     */
+    Paid = 'Paid',
+
+    /**
+     * BalanceItem.pricePending
+     */
+    Pending = 'Pending',
+
+    /**
+     * BalanceItem.priceOpen
+     */
+    Open = 'Open',
+
+    /**
+     * Payment.roundingAmount
+     */
+    Rounding = 'Rounding',
+}
+
+/**
+ * Where the money of an amount lives: the amount is the sum of `amountType` over the objects `filter`
+ * selects, so an amount and everything that is shown behind it describe the same money.
+ */
+export class BreakdownSelection extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(BreakdownObjectType) })
+    objectType = BreakdownObjectType.Payments;
+
+    @field({ decoder: new EnumDecoder(BreakdownAmountType) })
+    amountType = BreakdownAmountType.Total;
+
+    /**
+     * Selects the objects this amount was added up from, at the level of objectType.
+     */
+    @field({ decoder: StamhoofdFilterDecoder, nullable: true })
+    filter: StamhoofdFilter = null;
+
+    /**
+     * The objects to show in a list, which are coarser than the ones the amount was added up from when
+     * those say nothing on their own: a balance item payment has no name, no member and no date.
+     */
+    @field({ decoder: new EnumDecoder(BreakdownObjectType) })
+    listObjectType = BreakdownObjectType.Payments;
+
+    @field({ decoder: StamhoofdFilterDecoder, nullable: true })
+    listFilter: StamhoofdFilter = null;
+
+    /**
+     * Whether the objects in the list are worth more than this amount, e.g. payments that also paid for
+     * something else.
+     */
+    @field({ decoder: BooleanDecoder })
+    isListPartial = false;
+}
+
+/**
  * One row of a breakdown: everything that was grouped together, and what it adds up to.
  *
  * Carries enough to be shown like a balance item on a member's balance: an icon, a title, a
@@ -98,14 +177,14 @@ export class BreakdownGroup extends AutoEncoder {
     canNarrowDown = false;
 
     /**
-     * Selects the objects of this group, ready to show them in a list: everything that was already
-     * narrowed down plus this group itself.
+     * Where the money of this row lives: everything that was already narrowed down plus this row
+     * itself.
      *
-     * Null when a group can't be selected on its own, which is the case for the articles of a webshop
+     * Null when a row can't be selected on its own, which is the case for the articles of a webshop
      * order: an order is one balance item, so there is no way to ask the server for one of its lines.
      */
-    @field({ decoder: StamhoofdFilterDecoder, nullable: true })
-    filter: StamhoofdFilter = null;
+    @field({ decoder: BreakdownSelection, nullable: true })
+    selection: BreakdownSelection | null = null;
 }
 
 /**
@@ -201,6 +280,19 @@ export class PaymentBreakdown extends AutoEncoder {
     paymentCount = 0;
 
     /**
+     * The part of the price above that is still on its way: the payment was started but never
+     * finished, so nothing came in for it.
+     */
+    @field({ decoder: IntegerDecoder })
+    pricePending = 0;
+
+    /**
+     * The part of the price above that was tried and failed, so nothing came in for it either.
+     */
+    @field({ decoder: IntegerDecoder })
+    priceFailed = 0;
+
+    /**
      * Transaction costs that were withheld by the payment provider on the payments below.
      */
     @field({ decoder: IntegerDecoder })
@@ -211,13 +303,6 @@ export class PaymentBreakdown extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     serviceFeePayout = 0;
-
-    /**
-     * True when only a part of the payments is shown: the amounts above belong to the payments as a
-     * whole, which paid for more than what is broken down here.
-     */
-    @field({ decoder: BooleanDecoder })
-    isPartial = false;
 
     /**
      * What was received over time.
@@ -242,13 +327,10 @@ export class PaymentBreakdown extends AutoEncoder {
     bySettlement: BreakdownGroup[] = [];
 
     /**
-     * Selects the payments that are broken down here, to export them to Excel.
-     *
-     * Note that a payment is exported as a whole: when narrowed down to balance item metadata, the
-     * export contains every payment that paid for at least one matching item.
+     * Where the money of the price above lives, which is what an export writes out.
      */
-    @field({ decoder: StamhoofdFilterDecoder, nullable: true })
-    exportFilter: StamhoofdFilter = null;
+    @field({ decoder: BreakdownSelection })
+    selection = BreakdownSelection.create({});
 }
 
 /**
@@ -295,8 +377,11 @@ export class BalanceItemBreakdown extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(BreakdownGroup) })
     bySettlement: BreakdownGroup[] = [];
 
-    @field({ decoder: StamhoofdFilterDecoder, nullable: true })
-    exportFilter: StamhoofdFilter = null;
+    /**
+     * Where the money of the price above lives, which is what an export writes out.
+     */
+    @field({ decoder: BreakdownSelection })
+    selection = BreakdownSelection.create({});
 }
 
 /**

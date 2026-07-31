@@ -1,6 +1,6 @@
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
-import { BalanceItem, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType } from './BalanceItem.js';
+import { BalanceItem, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getBalanceItemTypeName } from './BalanceItem.js';
 import { BalanceItemPaymentDetailed } from './BalanceItemDetailed.js';
 import { PrivatePayment, Settlement } from './members/Payment.js';
 import { PaymentGeneral } from './members/PaymentGeneral.js';
@@ -8,10 +8,15 @@ import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
 import { getPaymentProviderName, PaymentProvider } from './PaymentProvider.js';
 import { PaymentStatus } from './PaymentStatus.js';
 import { Formatter } from '@stamhoofd/utility';
-import { BreakdownGraphUnit, BreakdownPathItem, BreakdownTab } from './PaymentBreakdown.js';
+import type { BalanceItemBreakdown, BreakdownGroup } from './PaymentBreakdown.js';
+import { BreakdownAmountType, BreakdownGraphUnit, BreakdownPathItem, BreakdownTab } from './PaymentBreakdown.js';
 import { BalanceItemBreakdownBuilder, PaymentBreakdownBuilder } from './PaymentBreakdownBuilder.js';
-import { PENDING_PAYMENT_ID } from './PaymentSettlement.js';
+import { PENDING_PAYMENT_ID, PENDING_PAYMENT_STATUSES } from './PaymentSettlement.js';
 import { StripeAccount, StripeBusinessProfile, StripeMetaData } from './StripeAccount.js';
+import { Cart } from './webshops/Cart.js';
+import { CartItem, CartItemPrice } from './webshops/CartItem.js';
+import { OrderData } from './webshops/Order.js';
+import { Product, ProductPrice } from './webshops/Product.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
 import { TranslatedString } from './TranslatedString.js';
 
@@ -144,20 +149,66 @@ describe('Payment breakdown', () => {
     /**
      * Breaks down payments the way an endpoint does: page by page.
      */
-    function breakDownPayments(pages: PaymentGeneral[][], options: { path?: BreakdownPathItem[]; stripeAccounts?: StripeAccount[]; filter?: StamhoofdFilter } = {}) {
+    function breakDownPayments(pages: PaymentGeneral[][], options: { path?: BreakdownPathItem[]; stripeAccounts?: StripeAccount[]; filter?: StamhoofdFilter; orders?: Map<string, OrderData> } = {}) {
         const builder = new PaymentBreakdownBuilder(options.path ?? []);
 
         for (const page of pages) {
-            builder.add(page, { stripeAccounts: options.stripeAccounts ?? [] });
+            builder.add(page, { stripeAccounts: options.stripeAccounts ?? [], orders: options.orders });
         }
 
         return builder.build(options.filter ?? null);
     }
 
-    function breakDownBalanceItems(items: BalanceItem[], options: { path?: BreakdownPathItem[]; filter?: StamhoofdFilter; balanceItemPayments?: Map<string, BalanceItemPaymentWithPrivatePayment[]> } = {}) {
+    function breakDownBalanceItems(items: BalanceItem[], options: { path?: BreakdownPathItem[]; filter?: StamhoofdFilter; balanceItemPayments?: Map<string, BalanceItemPaymentWithPrivatePayment[]>; orders?: Map<string, OrderData> } = {}) {
         const builder = new BalanceItemBreakdownBuilder(options.path ?? []);
-        builder.add(items, { balanceItemPayments: options.balanceItemPayments });
+        cachePaidAmounts(items, options.balanceItemPayments);
+        builder.add(items, { balanceItemPayments: options.balanceItemPayments, orders: options.orders });
         return builder.build(options.filter ?? null);
+    }
+
+    /**
+     * Fills in what a balance item caches about its payments, the way the database keeps it up to date.
+     * Without this an item would say nothing was ever paid for it while its payments say otherwise.
+     */
+    function cachePaidAmounts(items: BalanceItem[], balanceItemPayments?: Map<string, BalanceItemPaymentWithPrivatePayment[]>) {
+        for (const item of items) {
+            const payments = balanceItemPayments?.get(item.id) ?? [];
+
+            item.pricePaid = payments.reduce((total, p) => total + (p.payment.status === PaymentStatus.Succeeded ? p.price : 0), 0);
+            item.pricePending = payments.reduce((total, p) => total + (PENDING_PAYMENT_STATUSES.includes(p.payment.status) ? p.price : 0), 0);
+        }
+    }
+
+    /**
+     * A webshop order of one product, with the balance item it was charged with.
+     */
+    function createWebshopOrder({ webshopId, webshopName, unitPrice, amount }: { webshopId: string; webshopName: string; unitPrice: number; amount: number }) {
+        const product = Product.create({ name: 'T-shirt', prices: [ProductPrice.create({ name: 'Standaard', price: unitPrice })] });
+
+        const order = OrderData.create({
+            cart: Cart.create({
+                items: [CartItem.create({
+                    product,
+                    productPrice: product.prices[0],
+                    amount,
+                    // Normally calculated during checkout
+                    unitPrice,
+                    calculatedPrices: Array.from({ length: amount }, () => CartItemPrice.create({ price: unitPrice })),
+                })],
+            }),
+        });
+
+        const balanceItem = BalanceItem.create({
+            type: BalanceItemType.Order,
+            orderId: 'order-' + webshopId,
+            amount: 1,
+            unitPrice: order.totalPrice,
+            relations: new Map([
+                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshopId, name: new TranslatedString(webshopName) })],
+            ]),
+        });
+
+        return { order, balanceItem, orders: new Map([[balanceItem.orderId!, order]]) };
     }
 
     describe('Splitting payments over what they paid for', () => {
@@ -171,7 +222,7 @@ describe('Payment breakdown', () => {
 
             expect(breakdown.price).toBe(100_00);
             expect(breakdown.paymentCount).toBe(1);
-            expect(breakdown.isPartial).toBe(false);
+            expect(breakdown.selection.isListPartial).toBe(false);
             expect(breakdown.byCategory.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: 'Kapoenen', price: 60_00 },
                 { name: 'Wafelverkoop', price: 40_00 },
@@ -208,7 +259,7 @@ describe('Payment breakdown', () => {
             ]]);
 
             expect(breakdown.price).toBe(12_1200 + 10_00);
-            expect(breakdown.isPartial).toBe(false);
+            expect(breakdown.selection.isListPartial).toBe(false);
 
             // What it was for holds what was charged, plus a row for what was rounded away
             expect(breakdown.byCategory.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
@@ -227,10 +278,12 @@ describe('Payment breakdown', () => {
                 { name: $t('Niet online betaald'), price: 10_00 },
             ]);
 
-            // It is not for one thing in particular, so it can't be opened
+            // It is not for one thing in particular, so it can't be broken down further, but the
+            // payments that rounded something away can still be listed
             const rounding = breakdown.byArticle.find(r => r.id === 'rounding')!;
             expect(rounding.canNarrowDown).toBe(false);
-            expect(rounding.filter).toBeNull();
+            expect(rounding.selection!.amountType).toBe(BreakdownAmountType.Rounding);
+            expect(rounding.selection!.filter).toEqual({ roundingAmount: { $neq: 0 } });
         });
 
         test('narrowing down to a category leaves out what the payment rounded away', () => {
@@ -244,7 +297,7 @@ describe('Payment breakdown', () => {
 
             // The rounding belongs to the payment, so it survives narrowing down to where it arrived
             expect(byAccount.price).toBe(12_1200);
-            expect(byAccount.isPartial).toBe(false);
+            expect(byAccount.selection.isListPartial).toBe(false);
 
             const category = breakDownPayments([payments]).byCategory.find(r => r.name.toString() === 'Kapoenen')!;
             const byCategory = breakDownPayments([payments], {
@@ -253,7 +306,7 @@ describe('Payment breakdown', () => {
 
             // But it is not part of what was paid for, so only a part of the payment is left
             expect(byCategory.price).toBe(12_1234);
-            expect(byCategory.isPartial).toBe(true);
+            expect(byCategory.selection.isListPartial).toBe(true);
         });
     });
 
@@ -299,7 +352,7 @@ describe('Payment breakdown', () => {
             expect(breakdown.byAccount[0].description).toBe('xxxx 4242');
             expect(breakdown.byAccount[0].icon).toBe('card');
             // Every payment that was not made via Stripe has no Stripe account either
-            expect(breakdown.byAccount[0].filter).toEqual({
+            expect(breakdown.byAccount[0].selection!.filter).toEqual({
                 $and: [
                     { provider: PaymentProvider.Stripe },
                     { stripeAccountId: 'acct_1' },
@@ -356,7 +409,7 @@ describe('Payment breakdown', () => {
             ]]);
 
             expect(breakdown.bySettlement.map(r => r.price)).toEqual([40_00, 25_00]);
-            expect(breakdown.bySettlement[0].filter).toMatchObject({ $and: expect.arrayContaining([{ provider: PaymentProvider.Mollie }]) });
+            expect(breakdown.bySettlement[0].selection!.filter).toMatchObject({ $and: expect.arrayContaining([{ provider: PaymentProvider.Mollie }]) });
         });
 
         test('what was not paid online, and what is still waiting to be paid out, are rows of their own', () => {
@@ -446,7 +499,7 @@ describe('Payment breakdown', () => {
 
             expect(narrowed.price).toBe(40_00);
             expect(narrowed.paymentCount).toBe(1);
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 $and: [
                     // A payment that failed can still carry the payout it was meant to be part of
                     { status: PaymentStatus.Succeeded },
@@ -499,15 +552,61 @@ describe('Payment breakdown', () => {
                 ]),
             });
 
-            // What is still open sits under the failed payment that tried to cover it, whatever that
-            // payment was worth: it is owed once, not once per attempt
+            // Only the 20 euro that was tried sits under the failed payment: the 10 euro that is left
+            // was never attempted
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
                 { name: $t('In verwerking'), price: 30_00 },
-                { name: $t('Mislukte betaling'), price: 30_00 },
+                { name: $t('Mislukte betaling'), price: 20_00 },
+                { name: $t('Openstaand na mislukte poging'), price: 10_00 },
             ]);
 
             // Every part of what was charged ends up in exactly one row
+            expect(breakdown.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
+        });
+
+        test('a failed attempt never absorbs more than what is still open', () => {
+            const item = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 100_00 });
+
+            const breakdown = breakDownBalanceItems([item], {
+                balanceItemPayments: new Map([
+                    [item.id, [
+                        createOnlinePaymentFor(60_00, { settlement: march }),
+                        // Tried to pay the whole price again after a part of it already came in
+                        createOnlinePaymentFor(100_00, { status: PaymentStatus.Failed }),
+                    ]],
+                ]),
+            });
+
+            expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: '1234567.0312.01', price: 60_00 },
+                { name: $t('Mislukte betaling'), price: 40_00 },
+            ]);
+            expect(breakdown.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
+        });
+
+        test('what was paid for something that is not owed anymore is money to pay back', () => {
+            const canceled = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 50_00, status: BalanceItemStatus.Canceled });
+            canceled.pricePaid = 50_00;
+
+            const due = createRegistration({ groupId: 'group-b', groupName: 'Welpen', price: 25_00 });
+
+            const breakdown = breakDownBalanceItems([canceled, due], {
+                balanceItemPayments: new Map([
+                    [canceled.id, [createOnlinePaymentFor(50_00, { settlement: march })]],
+                ]),
+            });
+
+            // A canceled item is not charged anymore, so what came in for it has to go back
+            const refund = breakdown.bySettlement.find(r => r.name.toString() === $t('Terug te betalen'))!;
+            expect(refund.price).toBe(-50_00);
+            expect(refund.selection!.filter).toEqual({ priceOpen: { $lt: 0 } });
+
+            expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: '1234567.0312.01', price: 50_00 },
+                { name: $t('Terug te betalen'), price: -50_00 },
+                { name: $t('Openstaand'), price: 25_00 },
+            ]);
             expect(breakdown.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
         });
 
@@ -552,7 +651,7 @@ describe('Payment breakdown', () => {
             expect(narrowed.byCategory.map(r => r.name.toString())).toEqual(['Welpen']);
 
             // Selected through the payments, because a balance item doesn't know how it was paid
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 payments: {
                     $elemMatch: {
                         payment: {
@@ -563,7 +662,7 @@ describe('Payment breakdown', () => {
             });
         });
 
-        test('narrowing down to a payout keeps the part that was paid out there', () => {
+        test('narrowing down to a payout keeps only the money that was paid out there', () => {
             const item = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 100_00 });
             const other = createRegistration({ groupId: 'group-b', groupName: 'Welpen', price: 25_00 });
 
@@ -578,20 +677,25 @@ describe('Payment breakdown', () => {
                 path: [BreakdownPathItem.create({ tab: BreakdownTab.Settlement, id: row.id })],
             });
 
-            // Only the balance item that was part of this payout is left, at the price it was charged
+            // The amount the row showed, not what the item behind it was charged
             expect(narrowed.balanceItemCount).toBe(1);
-            expect(narrowed.price).toBe(100_00);
-            expect(narrowed.byCategory.map(r => r.name.toString())).toEqual(['Kapoenen']);
+            expect(narrowed.price).toBe(60_00);
+            expect(narrowed.price).toBe(row.price);
+            expect(narrowed.selection.amountType).toBe(BreakdownAmountType.Paid);
 
-            // The payout tab keeps every part of that item, so it still explains the price above it
-            expect(narrowed.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
-                { name: '1234567.0312.01', price: 60_00 },
-                { name: '1234567.0409.01', price: 40_00 },
+            // Everything below says the same thing about the same money
+            expect(narrowed.byCategory.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: 'Kapoenen', price: 60_00 },
             ]);
-            expect(narrowed.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(narrowed.price);
+
+            // Only one part is left, so the payout tab would repeat the total above it
+            expect(narrowed.bySettlement).toEqual([]);
+
+            // The item is worth more than this, so the list behind it holds more
+            expect(narrowed.selection.isListPartial).toBe(true);
 
             // A balance item is selected through the payments that paid for it
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 payments: {
                     $elemMatch: {
                         payment: {
@@ -876,7 +980,7 @@ describe('Payment breakdown', () => {
 
             // Both steps end up in the same $elemMatch: a payment that paid for something in this
             // category and for something else that is this article paid for neither
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 balanceItemPayments: {
                     $elemMatch: {
                         balanceItem: {
@@ -903,10 +1007,10 @@ describe('Payment breakdown', () => {
             expect(narrowed.byCategory).toHaveLength(1);
 
             // The whole payment paid for more than what is shown
-            expect(narrowed.isPartial).toBe(true);
+            expect(narrowed.selection.isListPartial).toBe(true);
 
             // The payment is exported as a whole: it contains at least one matching balance item
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 $and: [
                     { organizationId: 'org' },
                     {
@@ -940,7 +1044,7 @@ describe('Payment breakdown', () => {
 
             expect(narrowed.price).toBe(20_00);
             expect(narrowed.paymentCount).toBe(1);
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 method: PaymentMethod.Transfer,
                 provider: null,
                 // Transfers to a known bank account are their own group. An account number that was
@@ -964,7 +1068,7 @@ describe('Payment breakdown', () => {
             });
 
             expect(narrowed.price).toBe(40_00);
-            expect(narrowed.exportFilter).toEqual({
+            expect(narrowed.selection.filter).toEqual({
                 $and: [
                     { type: BalanceItemType.Registration },
                     { relations: { [BalanceItemRelationType.Group]: { id: 'group-a' } } },
@@ -980,11 +1084,261 @@ describe('Payment breakdown', () => {
             // A group can empty out between the moment it was shown and the moment it was opened
             const payments = breakDownPayments([[createPayment({ items: [[item, 40_00]] })]], { filter, path });
             expect(payments.price).toBe(0);
-            expect(payments.exportFilter).toEqual({ id: { $in: [] } });
+            expect(payments.selection.filter).toEqual({ id: { $in: [] } });
 
             const balanceItems = breakDownBalanceItems([item], { filter, path });
             expect(balanceItems.price).toBe(0);
-            expect(balanceItems.exportFilter).toEqual({ id: { $in: [] } });
+            expect(balanceItems.selection.filter).toEqual({ id: { $in: [] } });
         });
+    });
+
+    describe('Money that never arrived', () => {
+        test('a deduction from another balance is not money that came in', () => {
+            const item = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 100_00 });
+
+            const breakdown = breakDownPayments([[
+                createPayment({ items: [[item, 40_00]], method: PaymentMethod.Transfer }),
+                createPayment({ items: [[item, 10_00]], method: PaymentMethod.AccountDeductions }),
+            ]]);
+
+            expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: $t('Niet online betaald'), price: 40_00 },
+                { name: PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), price: 10_00 },
+            ]);
+
+            // The two rows stay apart: what arrived outside a payment provider never holds a deduction
+            const offline = breakdown.bySettlement[0].selection!.filter as { $and: { method?: { $in: PaymentMethod[] } }[] };
+            expect(offline.$and[1].method!.$in).not.toContain(PaymentMethod.AccountDeductions);
+        });
+
+        test('the part of a selection that was never received is counted apart', () => {
+            const item = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 100_00 });
+
+            const breakdown = breakDownPayments([[
+                createPayment({ items: [[item, 40_00]] }),
+                createPayment({ items: [[item, 30_00]], status: PaymentStatus.Pending }),
+                createPayment({ items: [[item, 10_00]], status: PaymentStatus.Created }),
+                createPayment({ items: [[item, 20_00]], status: PaymentStatus.Failed }),
+            ]]);
+
+            expect(breakdown.price).toBe(100_00);
+            expect(breakdown.pricePending).toBe(40_00);
+            expect(breakdown.priceFailed).toBe(20_00);
+        });
+
+        test('nothing is pending or failed when every payment succeeded', () => {
+            const item = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 40_00 });
+            const breakdown = breakDownPayments([[createPayment({ items: [[item, 40_00]] })]]);
+
+            expect(breakdown.pricePending).toBe(0);
+            expect(breakdown.priceFailed).toBe(0);
+        });
+    });
+
+    describe('Naming what a row holds', () => {
+        test('an order that was paid in parts is not a changed order', () => {
+            const { balanceItem, orders } = createWebshopOrder({ webshopId: 'shop-a', webshopName: 'Wafelverkoop', unitPrice: 15_00, amount: 2 });
+
+            const partial = breakDownPayments([[createPayment({ items: [[balanceItem, 10_00]] })]], { orders });
+            expect(partial.byArticle.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: $t('Deels betaalde bestelling'), price: 10_00 },
+            ]);
+
+            // More than the order costs can only mean the order changed after it was paid
+            const changed = breakDownPayments([[createPayment({ items: [[balanceItem, 40_00]] })]], { orders });
+            expect(changed.byArticle.map(r => r.name.toString())).toEqual([$t('Gewijzigde bestelling')]);
+
+            const refunded = breakDownPayments([[createPayment({ items: [[balanceItem, -5_00]] })]], { orders });
+            expect(refunded.byArticle.map(r => r.name.toString())).toEqual([$t('Terugbetaling bestelling')]);
+        });
+
+        test('what was charged for an order can never be a partial payment', () => {
+            const { balanceItem, orders } = createWebshopOrder({ webshopId: 'shop-a', webshopName: 'Wafelverkoop', unitPrice: 15_00, amount: 2 });
+
+            // Charged less than the order costs, which is a changed order and not an instalment
+            balanceItem.unitPrice = 20_00;
+
+            const breakdown = breakDownBalanceItems([balanceItem], { orders });
+            expect(breakdown.byArticle.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: $t('Gewijzigde bestelling'), price: 20_00 },
+            ]);
+        });
+
+        test('two categories with the same name say which kind of item they hold', () => {
+            const registration = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 40_00 });
+            const cancellationFee = BalanceItem.create({
+                type: BalanceItemType.CancellationFee,
+                amount: 1,
+                unitPrice: 5_00,
+                relations: new Map([
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: new TranslatedString('Kapoenen') })],
+                ]),
+            });
+
+            const breakdown = breakDownBalanceItems([registration, cancellationFee]);
+
+            expect(breakdown.byCategory.map(r => ({ name: r.name.toString(), description: r.description }))).toEqual([
+                { name: 'Kapoenen', description: getBalanceItemTypeName(BalanceItemType.Registration) },
+                { name: expect.stringContaining('Kapoenen'), description: getBalanceItemTypeName(BalanceItemType.CancellationFee) },
+            ]);
+
+            expect(breakdown.byCategory[0].id).not.toBe(breakdown.byCategory[1].id);
+        });
+    });
+
+    describe('Keeping the number of rows readable', () => {
+        /**
+         * A one-off correction has no relations, so every description is a category of its own.
+         */
+        function createCorrection(index: number) {
+            return BalanceItem.create({
+                type: BalanceItemType.Other,
+                description: 'Correctie ' + index,
+                amount: 1,
+                unitPrice: (200 - index) * 100,
+            });
+        }
+
+        test('everything below the biggest rows is added together in one row at the end', () => {
+            const items = Array.from({ length: 150 }, (_, index) => createCorrection(index));
+            const breakdown = breakDownBalanceItems(items);
+
+            expect(breakdown.byCategory).toHaveLength(100);
+
+            const last = breakdown.byCategory[99];
+            expect(last.name.toString()).toBe($t('Overige'));
+            expect(last.canNarrowDown).toBe(false);
+            expect(last.selection).toBeNull();
+
+            // The tab still adds up to the total above it
+            expect(breakdown.byCategory.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
+
+            // The biggest amounts are still on top, so the rolled up row is genuinely the tail
+            expect(breakdown.byCategory[0].price).toBeGreaterThan(breakdown.byCategory[98].price);
+            expect(last.price).toBe(items.slice(99).reduce((total, item) => total + item.priceWithVAT, 0));
+        });
+
+        test('nothing is rolled up as long as the rows fit', () => {
+            const breakdown = breakDownBalanceItems(Array.from({ length: 100 }, (_, index) => createCorrection(index)));
+
+            expect(breakdown.byCategory).toHaveLength(100);
+            expect(breakdown.byCategory.every(r => r.name.toString() !== $t('Overige'))).toBe(true);
+        });
+    });
+
+    /**
+     * What has to hold for every row of every tab, whatever it groups by, so a tab that is added later
+     * is either right or fails here.
+     */
+    describe('What a row promises', () => {
+        const payoutTabs = [BreakdownTab.Category, BreakdownTab.Article, BreakdownTab.Settlement];
+
+        /**
+         * A registration paid over two payouts, one that is still open, and a payment that paid for two
+         * things at once: every kind of row a breakdown can build.
+         */
+        function createMixedBalanceItems() {
+            const march = createSettlement({ reference: '1234567.0312.01', settledAt: '2026-03-12T09:00:00.000Z' });
+            const april = createSettlement({ reference: '1234567.0409.01', settledAt: '2026-04-09T09:00:00.000Z' });
+
+            const split = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 100_00 });
+            const open = createRegistration({ groupId: 'group-b', groupName: 'Welpen', price: 25_00 });
+            const pending = createRegistration({ groupId: 'group-c', groupName: 'Jonggivers', price: 40_00 });
+
+            return {
+                items: [split, open, pending],
+                balanceItemPayments: new Map([
+                    [split.id, [createOnlinePaymentFor(60_00, { settlement: march }), createOnlinePaymentFor(40_00, { settlement: april })]],
+                    [pending.id, [createOnlinePaymentFor(40_00, { status: PaymentStatus.Pending })]],
+                ]),
+            };
+        }
+
+        function getRows(breakdown: { byCategory: BreakdownGroup[]; byArticle: BreakdownGroup[]; bySettlement: BreakdownGroup[] }, tab: BreakdownTab): BreakdownGroup[] {
+            switch (tab) {
+                case BreakdownTab.Article: return breakdown.byArticle;
+                case BreakdownTab.Settlement: return breakdown.bySettlement;
+                default: return breakdown.byCategory;
+            }
+        }
+
+        test.each(payoutTabs)('every row of the %s tab measures what it opens', (tab) => {
+            const { items, balanceItemPayments } = createMixedBalanceItems();
+            const breakdown = breakDownBalanceItems(items, { balanceItemPayments });
+            const rows = getRows(breakdown, tab).filter(row => row.selection !== null);
+
+            expect(rows.length).toBeGreaterThan(0);
+
+            const measured = rows.map((row) => {
+                const narrowed = breakDownBalanceItems(items, {
+                    balanceItemPayments,
+                    path: [BreakdownPathItem.create({ tab, id: row.id })],
+                });
+
+                return {
+                    row: row.name.toString(),
+                    price: row.price,
+                    // The page a row opens reports the same money under the same measure
+                    measured: getMeasuredAmount(narrowed, row.selection!.amountType),
+                    amountType: row.selection!.amountType,
+                    pageAmountType: narrowed.selection.amountType,
+                    // A row that holds everything of its items opens a page that says the same
+                    isListPartial: row.selection!.isListPartial,
+                    pageIsListPartial: narrowed.selection.isListPartial,
+                };
+            });
+
+            for (const row of measured) {
+                expect(row).toEqual({
+                    ...row,
+                    measured: row.price,
+                    pageAmountType: row.amountType,
+                    pageIsListPartial: row.isListPartial,
+                });
+            }
+        });
+
+        test.each(payoutTabs)('the %s tab adds up to the total above it, also after narrowing down', (tab) => {
+            const { items, balanceItemPayments } = createMixedBalanceItems();
+            const breakdown = breakDownBalanceItems(items, { balanceItemPayments });
+
+            for (const row of getRows(breakdown, tab)) {
+                if (!row.canNarrowDown) {
+                    continue;
+                }
+
+                const narrowed = breakDownBalanceItems(items, {
+                    balanceItemPayments,
+                    path: [BreakdownPathItem.create({ tab, id: row.id })],
+                });
+
+                // Opening a row shows the amount that row showed, not what the objects behind it hold
+                expect({ row: row.name.toString(), price: narrowed.price }).toEqual({ row: row.name.toString(), price: row.price });
+
+                // And every tab below it still explains that amount
+                for (const narrowedTab of payoutTabs) {
+                    const rows = getRows(narrowed, narrowedTab);
+
+                    if (rows.length === 0) {
+                        continue;
+                    }
+
+                    expect(rows.reduce((total, r) => total + r.price, 0)).toBe(narrowed.price);
+                }
+            }
+        });
+
+        /**
+         * What a breakdown reports under one measure, which is what a row that holds that measure
+         * promises to be worth.
+         */
+        function getMeasuredAmount(breakdown: BalanceItemBreakdown, amountType: BreakdownAmountType): number {
+            switch (amountType) {
+                case BreakdownAmountType.Paid: return breakdown.pricePaid;
+                case BreakdownAmountType.Pending: return breakdown.pricePending;
+                case BreakdownAmountType.Open: return breakdown.priceOpen;
+                default: return breakdown.price;
+            }
+        }
     });
 });

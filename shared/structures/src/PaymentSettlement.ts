@@ -1,7 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import type { Settlement } from './members/Payment.js';
-import { PaymentMethod } from './PaymentMethod.js';
+import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
 import { getPaymentProviderName, PaymentProvider } from './PaymentProvider.js';
 import { PaymentStatus } from './PaymentStatus.js';
 
@@ -16,6 +16,12 @@ export const OFFLINE_PAYMENT_METHODS = [
     // Moving money between two balances doesn't bring anything in
     PaymentMethod.AccountDeductions,
 ];
+
+/**
+ * The offline methods that actually bring money in. A deduction only moves money between two balances,
+ * so it is grouped on its own instead of next to the money that arrived.
+ */
+const RECEIVED_OFFLINE_PAYMENT_METHODS = OFFLINE_PAYMENT_METHODS.filter(method => method !== PaymentMethod.AccountDeductions);
 
 const ONLINE_PAYMENT_METHODS = Object.values(PaymentMethod).filter(method => !OFFLINE_PAYMENT_METHODS.includes(method));
 
@@ -128,6 +134,21 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
             });
     }
 
+    if (payment.method === PaymentMethod.AccountDeductions) {
+        return new PaymentSettlementGroup({
+            id: ACCOUNT_DEDUCTIONS_ID,
+            name: PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions),
+            description: $t('Dit werd verrekend met een ander openstaand bedrag, er kwam geen geld binnen.'),
+            icon: 'sync',
+            filter: {
+                $and: [
+                    { status: PaymentStatus.Succeeded },
+                    { method: PaymentMethod.AccountDeductions },
+                ],
+            },
+        });
+    }
+
     if (isOnlinePayment(payment)) {
         // Per provider: without payout information the provider is the only thing that says where the
         // money is
@@ -155,7 +176,7 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
         filter: {
             $and: [
                 { status: PaymentStatus.Succeeded },
-                { method: { $in: OFFLINE_PAYMENT_METHODS } },
+                { method: { $in: RECEIVED_OFFLINE_PAYMENT_METHODS } },
                 { provider: { $in: UNSETTLED_PAYMENT_PROVIDERS } },
             ],
         },
@@ -164,6 +185,7 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
 
 export const PENDING_PAYMENT_ID = 'pending';
 export const FAILED_PAYMENT_ID = 'failed';
+export const ACCOUNT_DEDUCTIONS_ID = 'account-deductions';
 
 /**
  * Money that is on its way: the payment was started but is not finished, so nothing came in yet.

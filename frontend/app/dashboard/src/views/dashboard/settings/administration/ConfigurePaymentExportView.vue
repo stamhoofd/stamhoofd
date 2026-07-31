@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%Oy')" :title="$t(`%Oy`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('Doorgaan')" :title="$t(`%Oy`)" @save="save">
         <h1>
             {{ $t('%95') }}
         </h1>

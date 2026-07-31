@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { BalanceItemBreakdown, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BreakdownPathItem, BreakdownRequest, BreakdownTab, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BreakdownAmountType, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BreakdownPathItem, BreakdownRequest, BreakdownTab, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, TranslatedString } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemBreakdownEndpoint } from './GetBalanceItemBreakdownEndpoint.js';
 import { GetBalanceItemEndpoint } from './GetBalanceItemEndpoint.js';
@@ -163,7 +163,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
         expect(narrowed.status).toBe(200);
         expect(narrowed.body.price).toBe(40_00);
-        expect(narrowed.body.exportFilter).toMatchObject({
+        expect(narrowed.body.selection.filter).toMatchObject({
             $and: [
                 { type: BalanceItemType.Registration },
                 { relations: { [BalanceItemRelationType.Group]: { id: 'group-a' } } },
@@ -190,7 +190,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         expect(narrowed.body.price).toBe(40_00);
 
         // Running the export filter through the database selects the same balance items
-        const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+        const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
         expect(exported.body.price).toBe(40_00);
         expect(exported.body.balanceItemCount).toBe(1);
     });
@@ -214,7 +214,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
         expect(narrowed.body.price).toBe(12_00);
 
-        const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+        const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
         expect(exported.body.price).toBe(12_00);
     });
 
@@ -243,7 +243,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const article = all.body.byArticle.find(g => g.name.toString() === 'Inschrijving voor Kapoenen')!;
 
         // Listing the article shows the two registrations, not the option that was bought on top
-        const listed = await getBreakdown({ organization, user, filter: article.filter });
+        const listed = await getBreakdown({ organization, user, filter: article.selection!.filter });
 
         expect(listed.body.price).toBe(80_00);
         expect(listed.body.balanceItemCount).toBe(2);
@@ -314,17 +314,52 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
                 { name: $t('In verwerking'), price: 30_00 },
-                // What is still open sits under the failed payment that tried to cover it
-                { name: $t('Mislukte betaling'), price: 30_00 },
+                // Only what was tried sits under the failed payment, the rest was never attempted
+                { name: $t('Mislukte betaling'), price: 20_00 },
+                { name: $t('Openstaand na mislukte poging'), price: 10_00 },
             ]);
 
             // Every part of what was charged ends up in exactly one row
             expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
 
-            // Running the row through the database gives back the balance items it was added up from
-            const row = response.body.bySettlement.find(g => g.name.toString() === $t('Mislukte betaling'))!;
-            const exported = await getBreakdown({ organization, user, filter: row.filter });
-            expect(exported.body.balanceItemCount).toBe(1);
+            // Running the rows through the database gives back the balance items they were added up from
+            for (const name of [$t('Mislukte betaling'), $t('Openstaand na mislukte poging')]) {
+                const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
+                const exported = await getBreakdown({ organization, user, filter: row.selection!.filter });
+                expect(exported.body.balanceItemCount).toBe(1);
+            }
+        });
+
+        test('what was paid for something that is not owed anymore is money to pay back', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const canceled = await createItem(organization, { price: 50_00, groupId: 'group-a', groupName: 'Kapoenen', status: BalanceItemStatus.Canceled, pricePaid: 50_00 });
+            await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen' });
+
+            await payItem(organization, canceled, { price: 50_00, settlement: march });
+
+            const response = await getBreakdown({ organization, user });
+
+            expect(response.status).toBe(200);
+            expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
+                { name: '1234567.0312.01', price: 50_00 },
+                { name: $t('Terug te betalen'), price: -50_00 },
+                { name: $t('Openstaand'), price: 25_00 },
+            ]);
+
+            // A canceled item is not charged anymore, so it doesn't add to what is open
+            expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
+
+            // Each row selects exactly the balance items it was added up from
+            const refund = response.body.bySettlement.find(g => g.name.toString() === $t('Terug te betalen'))!;
+            const refunded = await getBreakdown({ organization, user, filter: refund.selection!.filter });
+            expect(refunded.body.balanceItemCount).toBe(1);
+
+            const open = response.body.bySettlement.find(g => g.name.toString() === $t('Openstaand'))!;
+            const stillOpen = await getBreakdown({ organization, user, filter: open.selection!.filter });
+            expect(stillOpen.body.balanceItemCount).toBe(1);
+            expect(stillOpen.body.price).toBe(25_00);
         });
 
         test('what is still open is split over whether paying it was already tried', async () => {
@@ -350,7 +385,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             // Both rows select exactly the balance items they were added up from
             for (const [name, count] of [[$t('Mislukte betaling'), 1], [$t('Openstaand'), 1]] as [string, number][]) {
                 const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
-                const exported = await getBreakdown({ organization, user, filter: row.filter });
+                const exported = await getBreakdown({ organization, user, filter: row.selection!.filter });
                 expect(exported.body.balanceItemCount).toBe(count);
             }
         });
@@ -379,7 +414,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             expect(narrowed.body.price).toBe(25_00);
 
             // Running the export filter through the database selects the same balance items
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.balanceItemCount).toBe(1);
             expect(exported.body.price).toBe(25_00);
         });
@@ -417,13 +452,18 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
                 path: [BreakdownPathItem.create({ tab: BreakdownTab.Settlement, id: payout.id })],
             });
 
-            // Only the balance item that was part of this payout is left, at the price it was charged
+            // The amount the row showed, not what the item behind it was charged
             expect(narrowed.status).toBe(200);
             expect(narrowed.body.balanceItemCount).toBe(1);
-            expect(narrowed.body.price).toBe(100_00);
+            expect(narrowed.body.price).toBe(60_00);
+            expect(narrowed.body.price).toBe(payout.price);
+            expect(narrowed.body.selection.amountType).toBe(BreakdownAmountType.Paid);
+
+            // The item is worth more than what this payout holds, so the list behind it holds more
+            expect(narrowed.body.selection.isListPartial).toBe(true);
 
             // Running the export filter through the database selects the same balance items
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.exportFilter });
+            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.filter });
             expect(exported.body.balanceItemCount).toBe(1);
             expect(exported.body.price).toBe(100_00);
         });
