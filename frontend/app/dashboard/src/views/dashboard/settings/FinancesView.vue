@@ -127,68 +127,70 @@
                     </STList>
                 </div>
 
-                <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
-                    <hr>
-                    <h2>{{ $t('%NH', {organization: item.organization.name}) }}</h2>
-                    <p v-if="$isPlatform">
-                        {{ $t('%NI', {organization: item.organization.name}) }}
-                    </p>
+                <template v-if="!salesDisabled">
+                    <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
+                        <hr>
+                        <h2>{{ $t('%NH', {organization: item.organization.name}) }}</h2>
+                        <p v-if="$isPlatform">
+                            {{ $t('%NI', {organization: item.organization.name}) }}
+                        </p>
 
-                    <STList class="illustration-list">
-                        <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalanceItems, {params: {uri: item.organization.uri}})">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%76') }}
-                            </h2>
-                            <p class="style-description">
-                                {{ $t('%NJ') }}
-                            </p>
-
-                            <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).pricePending > 0" class="style-description">
-                                {{ $t('%NK', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
-                            </p>
-
-                            <template #right>
-                                <p class="style-price">
-                                    {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
+                        <STList class="illustration-list">
+                            <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalanceItems, {params: {uri: item.organization.uri}})">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('%76') }}
+                                </h2>
+                                <p class="style-description">
+                                    {{ $t('%NJ') }}
                                 </p>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
 
-                        <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PayableBalance, {params: {uri: item.organization.uri}})">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ item.organization.meta.invoicesEnabled ? $t('%1S7') : $t('%NL') }}
-                            </h2>
-                            <p class="style-description">
-                                {{ item.organization.meta.invoicesEnabled ? $t('%1QW') : $t('%NM', {organization: item.organization.name}) }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                                <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).pricePending > 0" class="style-description">
+                                    {{ $t('%NK', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
+                                </p>
 
-                        <STListItem v-if="!$isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
-                            <template #left>
-                                <img src="@stamhoofd/assets/images/illustrations/stock.svg">
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%1HV') }}
-                            </h2>
-                            <p class="style-description">
-                                {{ $t('%1HW') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-                    </STList>
-                </div>
+                                <template #right>
+                                    <p class="style-price">
+                                        {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
+                                    </p>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
+                            <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PayableBalance, {params: {uri: item.organization.uri}})">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ item.organization.meta.invoicesEnabled ? $t('%1S7') : $t('%NL') }}
+                                </h2>
+                                <p class="style-description">
+                                    {{ item.organization.meta.invoicesEnabled ? $t('%1QW') : $t('%NM', {organization: item.organization.name}) }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
+                            <STListItem v-if="!$isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/stock.svg">
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('%1HV') }}
+                                </h2>
+                                <p class="style-description">
+                                    {{ $t('%1HW') }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+                        </STList>
+                    </div>
+                </template>
             </main>
         </div>
     </LoadingViewTransition>
@@ -210,6 +212,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, BalanceItem, DetailedPayableBalance, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.ts';
 
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
@@ -227,6 +230,7 @@ enum Routes {
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
+const salesDisabled = useSalesDisabled();
 
 defineRoute({
     name: Routes.Transfers,
