@@ -131,7 +131,7 @@ public class QRScannerPlugin: CAPPlugin, CAPBridgedPlugin {
             let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             self.previewLayer = previewLayer
             previewLayer.frame = listenerView.layer.bounds
-            previewLayer.videoGravity = .resizeAspect
+            previewLayer.videoGravity = .resizeAspectFill
             listenerView.layer.insertSublayer(previewLayer, at: 0)
             self.updatePreviewLayerOrientation()
             
