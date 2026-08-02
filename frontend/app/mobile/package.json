@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "android": "cap open android",
+    "assets:android": "node scripts/generate-android-icons.mjs",
     "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
     "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
     "ios": "cap open ios",
@@ -55,6 +56,7 @@
     "@stamhoofd/vite-config": "*",
     "@trapezedev/configure": "7.1.4",
     "eslint-plugin-stamhoofd": "*",
+    "sharp": "0.35.1",
     "vite": "8.1.5"
   }
 }
