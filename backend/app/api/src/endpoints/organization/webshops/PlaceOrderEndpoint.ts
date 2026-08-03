@@ -234,7 +234,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 const balanceItemPayment = new BalanceItemPayment();
                 balanceItemPayment.balanceItemId = balanceItem.id;
                 balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = organization.id;
+                balanceItemPayment.organizationId = payment.organizationId;
                 balanceItemPayment.price = balanceItem.price;
                 await balanceItemPayment.save();
 

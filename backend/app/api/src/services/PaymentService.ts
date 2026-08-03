@@ -1349,7 +1349,7 @@ export class PaymentService {
                 const balanceItemPayment = new BalanceItemPayment();
                 balanceItemPayment.balanceItemId = balanceItem.id;
                 balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = organization.id;
+                balanceItemPayment.organizationId = payment.organizationId;
                 balanceItemPayment.price = price;
 
                 await balanceItemPayment.save();
