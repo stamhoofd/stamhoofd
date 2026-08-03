@@ -7,7 +7,7 @@ android {
         applicationId "com.stamhoofd.stamhoofd"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 488
+        versionCode 491
         versionName "2.138.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
