@@ -7,7 +7,8 @@
 import { registerCron } from '@stamhoofd/crons';
 import { Order, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { PaymentStatus, SETTLING_PAYMENT_PROVIDERS, Settlement } from '@stamhoofd/structures';
+import { PaymentStatus, Settlement } from '@stamhoofd/structures';
+import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlement.js';
 import { Formatter } from '@stamhoofd/utility';
 import type { DateTime } from 'luxon';
 
@@ -16,7 +17,7 @@ registerCron('fake-settlements', createFakeSettlements);
 /**
  * Days between the end of a week and the payout of the payments of that week.
  */
-const PAYOUT_DELAY_DAYS = 0;
+const PAYOUT_DELAY_DAYS = 2;
 
 /**
  * Maximum number of payments that are settled in one go: a development database can be a copy of a

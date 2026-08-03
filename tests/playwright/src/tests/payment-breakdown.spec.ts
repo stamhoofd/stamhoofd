@@ -63,7 +63,18 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         return organization;
     }
 
-    async function createPaidRegistration({ organization, member, group, price, priceName, method, iban, daysAgo, provider, settlement }: {
+    /**
+     * Noon on a day of the current month. The export starts out on the current month, so only days of
+     * that month end up in the breakdown, no matter which day of the month the test runs on.
+     */
+    function dayOfMonth(day: number): Date {
+        const date = new Date();
+        date.setDate(day);
+        date.setHours(12, 0, 0, 0);
+        return date;
+    }
+
+    async function createPaidRegistration({ organization, member, group, price, priceName, method, iban, paidAt, provider, settlement }: {
         organization: Organization;
         member: Member;
         group: Group;
@@ -74,7 +85,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         /**
          * When the money was received, so a breakdown has something to show over time.
          */
-        daysAgo?: number;
+        paidAt?: Date;
         provider?: PaymentProvider;
         /**
          * The payout of the provider this payment was part of.
@@ -112,7 +123,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         payment.status = PaymentStatus.Succeeded;
         payment.type = PaymentType.Payment;
         payment.price = price;
-        payment.paidAt = daysAgo ? new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000) : new Date();
+        payment.paidAt = paidAt ?? new Date();
         payment.provider = provider ?? null;
         payment.settlement = settlement ?? null;
 
@@ -143,10 +154,10 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         const third = await new MemberFactory({ organization, firstName: 'Marie', lastName: 'Willems' }).create();
 
         // Kapoenen: 40 euro standard and 20 euro reduced (60 in total), Welpen: 2 x 25 euro, received on four different days
-        await createPaidRegistration({ organization, member: first, group: kapoenen, price: 40_0000, priceName: 'Standaardtarief', method: PaymentMethod.Transfer, iban: 'BE68539007547034', daysAgo: 4 });
-        await createPaidRegistration({ organization, member: second, group: kapoenen, price: 20_0000, priceName: 'Verminderd tarief', method: PaymentMethod.PointOfSale, daysAgo: 3 });
-        await createPaidRegistration({ organization, member: second, group: welpen, price: 25_0000, priceName: 'Standaardtarief', method: PaymentMethod.Transfer, iban: 'BE68539007547034', daysAgo: 2 });
-        await createPaidRegistration({ organization, member: third, group: welpen, price: 25_0000, priceName: 'Standaardtarief', method: PaymentMethod.Transfer, iban: 'BE68539007547034' });
+        await createPaidRegistration({ organization, member: first, group: kapoenen, price: 40_0000, priceName: 'Standaardtarief', method: PaymentMethod.Transfer, iban: 'BE68539007547034', paidAt: dayOfMonth(1) });
+        await createPaidRegistration({ organization, member: second, group: kapoenen, price: 20_0000, priceName: 'Verminderd tarief', method: PaymentMethod.PointOfSale, paidAt: dayOfMonth(2) });
+        await createPaidRegistration({ organization, member: second, group: welpen, price: 25_0000, priceName: 'Standaardtarief', method: PaymentMethod.Transfer, iban: 'BE68539007547034', paidAt: dayOfMonth(3) });
+        await createPaidRegistration({ organization, member: third, group: welpen, price: 25_0000, priceName: 'Standaardtarief', method: PaymentMethod.Transfer, iban: 'BE68539007547034', paidAt: dayOfMonth(4) });
 
         const admin = await new UserFactory({
             email: `admin-breakdown-${WorkerData.id}-${Date.now()}@test.be`,

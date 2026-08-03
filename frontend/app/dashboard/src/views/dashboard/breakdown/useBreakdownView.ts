@@ -7,8 +7,11 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { BalanceItemBreakdown, BreakdownGroup, BreakdownSelection, BreakdownTab, ExcelExportType, PaymentBreakdown, StamhoofdFilter } from '@stamhoofd/structures';
-import { BreakdownAmountType, BreakdownObjectType, BreakdownPathItem, BreakdownRequest, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import type { ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
+import type { BalanceItemBreakdown, BreakdownGroup, BreakdownSelection, BreakdownTab, PaymentBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
+import { BreakdownAmountType, BreakdownObjectType, BreakdownPathItem } from '@stamhoofd/structures/PaymentBreakdown.js';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, shallowRef } from 'vue';
 

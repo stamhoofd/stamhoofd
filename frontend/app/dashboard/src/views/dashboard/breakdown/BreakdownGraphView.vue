@@ -6,8 +6,9 @@
 import { DateOption } from '@stamhoofd/components/views/DateRange';
 import GraphView from '@stamhoofd/components/views/GraphView.vue';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration';
-import type { BreakdownGraph, BreakdownGraphPoint } from '@stamhoofd/structures';
-import { BreakdownGraphUnit, Graph, GraphData } from '@stamhoofd/structures';
+import { Graph, GraphData } from '@stamhoofd/structures';
+import type { BreakdownGraph, BreakdownGraphPoint } from '@stamhoofd/structures/PaymentBreakdown.js';
+import { BreakdownGraphUnit } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { Formatter } from '@stamhoofd/utility';
 import type { DurationLike } from 'luxon';
 import { computed } from 'vue';

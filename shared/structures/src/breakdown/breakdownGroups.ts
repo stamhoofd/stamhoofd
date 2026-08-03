@@ -104,6 +104,23 @@ export function createRoundingGroup(): BreakdownGroup {
 }
 
 /**
+ * The rows that hold what a payment doesn't say it paid for. See PaymentBreakdownBuilder.addUnallocated.
+ */
+export const UNALLOCATED_ID = 'unallocated';
+
+export function createUnallocatedGroup(): BreakdownGroup {
+    return BreakdownGroup.create({
+        id: UNALLOCATED_ID,
+        name: new TranslatedString($t('Niet toegewezen')),
+        description: $t('Deze betalingen zeggen niet waarvoor ze bedoeld waren, bijvoorbeeld omdat ze geïmporteerd werden.'),
+        icon: 'help',
+        // There is no filter that selects the part of a payment that isn't linked to anything, so this
+        // row can only be shown
+        selection: null,
+    });
+}
+
+/**
  * Selects nothing at all. Used when a group that was opened turned out to hold nothing: the objects of
  * that group are the ones that would be exported, and there are none.
  */

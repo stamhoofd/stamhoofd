@@ -17,7 +17,7 @@ import { getPaymentSettlement } from '../PaymentSettlement.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import type { OrderData } from '../webshops/Order.js';
 import type { BreakdownPageContext } from './BreakdownPageContext.js';
-import { canOpenPartialRow, createBalanceItemSelection, createCategoryGroup, createNamedGroup, createRoundingGroup, NOTHING, onlyIfSplit, ROUNDING_ID } from './breakdownGroups.js';
+import { canOpenPartialRow, createBalanceItemSelection, createCategoryGroup, createNamedGroup, createRoundingGroup, createUnallocatedGroup, NOTHING, onlyIfSplit, ROUNDING_ID, UNALLOCATED_ID } from './breakdownGroups.js';
 import { BreakdownRows, PaymentBreakdownItem } from './BreakdownRows.js';
 import { BreakdownTimeline } from './BreakdownTimeline.js';
 import { createOrderArticleGroup, getOrderArticles } from './orderArticles.js';
@@ -101,6 +101,12 @@ export class PaymentBreakdownBuilder {
 
             if (payment.roundingAmount !== 0) {
                 this.addRounding(payment, account, settlement);
+            }
+
+            const unallocated = this.getUnallocatedPrice(payment);
+
+            if (unallocated !== 0) {
+                this.addUnallocated(payment, unallocated, account, settlement);
             }
         }
     }
@@ -223,6 +229,51 @@ export class PaymentBreakdownBuilder {
 
         this.byArticle
             .row(ROUNDING_ID, createRoundingGroup)
+            .addPrice(price)
+            .countPayment(payment.id, price);
+    }
+
+    /**
+     * What a payment is worth beyond the things it says it paid for, e.g. an imported payment that
+     * carries no balance items at all. Without it that money would be exported with the payment while
+     * none of the rows hold it.
+     */
+    private getUnallocatedPrice(payment: PaymentGeneral): number {
+        return payment.balanceItemPayments.reduce(
+            (rest, balanceItemPayment) => rest - balanceItemPayment.price,
+            payment.price - payment.roundingAmount,
+        );
+    }
+
+    /**
+     * What a payment is worth on top of the things it paid for, as an article of its own.
+     *
+     * Like the rounding above it belongs to the payment as a whole, so it is added next to it: in the
+     * same account and payout, but in a row that says it is not known what it was for.
+     */
+    private addUnallocated(payment: PaymentGeneral, price: number, account: PaymentAccount, settlement: PaymentSettlementGroup) {
+        this.price += price;
+        this.addStatusPrice(payment, price);
+        this.timeline.add(payment.paidAt ?? payment.createdAt, price);
+
+        this.byAccount
+            .row(account.id, () => createNamedGroup(account))
+            .addPrice(price)
+            .countPayment(payment.id, payment.price);
+
+        this.bySettlement
+            .row(settlement.id, () => createNamedGroup(settlement))
+            .addPrice(price)
+            .countPayment(payment.id, payment.price);
+
+        // These rows hold what the payment didn't say anything about, not what it is worth as a whole
+        this.byCategory
+            .row(UNALLOCATED_ID, createUnallocatedGroup)
+            .addPrice(price)
+            .countPayment(payment.id, price);
+
+        this.byArticle
+            .row(UNALLOCATED_ID, createUnallocatedGroup)
             .addPrice(price)
             .countPayment(payment.id, price);
     }

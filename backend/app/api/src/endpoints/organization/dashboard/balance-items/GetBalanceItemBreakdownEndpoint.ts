@@ -1,8 +1,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import type { BalanceItem as BalanceItemStruct, BalanceItemBreakdown } from '@stamhoofd/structures';
-import { BalanceItemBreakdownBuilder, BreakdownRequest } from '@stamhoofd/structures';
+import type { BalanceItem as BalanceItemStruct } from '@stamhoofd/structures';
+import { BalanceItemBreakdownBuilder } from '@stamhoofd/structures/breakdown/BalanceItemBreakdownBuilder.js';
+import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
+import type { BalanceItemBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { loadOrdersForBreakdown, loadPaymentsForBreakdown } from '../../../../helpers/breakdownRelations.js';
 import { Context } from '../../../../helpers/Context.js';
 import { streamForBreakdown } from '../../../../helpers/streamForBreakdown.js';

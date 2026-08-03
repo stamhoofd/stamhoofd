@@ -89,7 +89,7 @@ describe('Breakdown builders', () => {
         });
     }
 
-    function createPayment({ items, method = PaymentMethod.Transfer, provider = null, transferSettings = null, stripeAccountId = null, settlement = null, status = PaymentStatus.Succeeded, roundingAmount = 0 }: {
+    function createPayment({ items, method = PaymentMethod.Transfer, provider = null, transferSettings = null, stripeAccountId = null, settlement = null, status = PaymentStatus.Succeeded, roundingAmount = 0, price }: {
         items: [BalanceItem, number][];
         method?: PaymentMethod;
         provider?: PaymentProvider | null;
@@ -102,6 +102,10 @@ describe('Breakdown builders', () => {
          * goes to four digits after the comma.
          */
         roundingAmount?: number;
+        /**
+         * What the payment is worth, when that is more than the things it says it paid for.
+         */
+        price?: number;
     }) {
         return PaymentGeneral.create({
             method,
@@ -111,7 +115,7 @@ describe('Breakdown builders', () => {
             settlement,
             status,
             roundingAmount,
-            price: items.reduce((total, [_, price]) => total + price, 0) + roundingAmount,
+            price: price ?? items.reduce((total, [_, price]) => total + price, 0) + roundingAmount,
             balanceItemPayments: items.map(([balanceItem, price]) => BalanceItemPaymentDetailed.create({
                 price,
                 balanceItem,
@@ -285,6 +289,45 @@ describe('Breakdown builders', () => {
             expect(rounding.canNarrowDown).toBe(false);
             expect(rounding.selection!.amountType).toBe(BreakdownAmountType.Rounding);
             expect(rounding.selection!.filter).toEqual({ roundingAmount: { $neq: 0 } });
+        });
+
+        test('a payment that says nothing about what it paid for keeps its money in the breakdown', () => {
+            const registration = createRegistration({ groupId: 'group-a', groupName: 'Kapoenen', price: 60_00 });
+
+            // An imported payment: it is worth 40 euro, but it doesn't say what it was for
+            const payments = [
+                createPayment({ items: [[registration, 60_00]] }),
+                createPayment({ items: [], price: 40_00 }),
+            ];
+
+            const breakdown = breakDownPayments([payments]);
+
+            expect(breakdown.price).toBe(100_00);
+            expect(breakdown.paymentCount).toBe(2);
+            expect(breakdown.selection.isListPartial).toBe(false);
+
+            // It arrived on the same account as the rest, so that tab holds everything that came in
+            expect(breakdown.byAccount.map(r => r.price)).toEqual([100_00]);
+            expect(breakdown.graph.points.map(p => p.price)).toEqual([100_00]);
+
+            // What it was for is not known, so it gets a row of its own instead of disappearing
+            expect(breakdown.byCategory.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
+                { name: 'Kapoenen', price: 60_00 },
+                { name: $t('Niet toegewezen'), price: 40_00 },
+            ]);
+            expect(breakdown.byArticle.map(r => r.price)).toEqual([60_00, 40_00]);
+
+            // There is no way to ask the server for the part of a payment that isn't linked to anything
+            const unallocated = breakdown.byArticle.find(r => r.id === 'unallocated')!;
+            expect(unallocated.count).toBe(1);
+            expect(unallocated.canNarrowDown).toBe(false);
+            expect(unallocated.selection).toBeNull();
+
+            // It belongs to the payment, so it survives narrowing down to where it arrived
+            const byAccount = breakDownPayments([payments], {
+                path: [BreakdownPathItem.create({ tab: BreakdownTab.Account, id: breakdown.byAccount[0].id })],
+            });
+            expect(byAccount.price).toBe(100_00);
         });
 
         test('narrowing down to a category leaves out what the payment rounded away', () => {

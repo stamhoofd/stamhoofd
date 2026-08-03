@@ -1,8 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import type { PaymentBreakdown, StamhoofdFilter } from '@stamhoofd/structures';
-import { BreakdownObjectType, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, BreakdownGraphUnit, BreakdownPathItem, BreakdownRequest, BreakdownTab, Cart, CartItem, CartItemOption, CartItemPrice, Customer, getBalanceItemTypeIcon, getPaymentProviderName, OptionMenu, OrderData, Option, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, StripeBusinessProfile, StripeMetaData, TransferSettings, TranslatedString } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, getBalanceItemTypeIcon, getPaymentProviderName, OptionMenu, OrderData, Option, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, StripeBusinessProfile, StripeMetaData, TransferSettings, TranslatedString } from '@stamhoofd/structures';
+import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
+import type { PaymentBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
+import { BreakdownGraphUnit, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { exportSlice } from '../../../../../tests/helpers/ExportSlice.js';

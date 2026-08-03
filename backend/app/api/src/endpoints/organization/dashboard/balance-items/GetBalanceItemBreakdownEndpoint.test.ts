@@ -1,8 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import type { BalanceItemBreakdown, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelation, BreakdownAmountType, BreakdownObjectType, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BreakdownPathItem, BreakdownRequest, BreakdownTab, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, TranslatedString } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, TranslatedString } from '@stamhoofd/structures';
+import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
+import type { BalanceItemBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
+import { BreakdownAmountType, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { exportSlice } from '../../../../../tests/helpers/ExportSlice.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemBreakdownEndpoint } from './GetBalanceItemBreakdownEndpoint.js';

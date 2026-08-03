@@ -2,13 +2,11 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
-import type { PaymentGeneral,
-    PaymentBreakdown } from '@stamhoofd/structures';
-import {
-    BreakdownRequest,
-    PaymentBreakdownBuilder,
-    StripeAccount as StripeAccountStruct,
-} from '@stamhoofd/structures';
+import type { PaymentGeneral } from '@stamhoofd/structures';
+import { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
+import { PaymentBreakdownBuilder } from '@stamhoofd/structures/breakdown/PaymentBreakdownBuilder.js';
+import type { PaymentBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { Formatter } from '@stamhoofd/utility';
 import { loadOrdersForBreakdown } from '../../../../helpers/breakdownRelations.js';
 import { Context } from '../../../../helpers/Context.js';

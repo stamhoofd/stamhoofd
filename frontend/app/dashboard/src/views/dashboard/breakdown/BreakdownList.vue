@@ -37,8 +37,9 @@
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
-import type { BalanceItemRelation, BalanceItemRelationType, BreakdownGroup } from '@stamhoofd/structures';
+import type { BalanceItemRelation, BalanceItemRelationType } from '@stamhoofd/structures';
 import { getBalanceItemRelationTypeName } from '@stamhoofd/structures';
+import type { BreakdownGroup } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { Formatter } from '@stamhoofd/utility';
 
 /**

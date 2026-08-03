@@ -1,6 +1,8 @@
 import { compileToSQLFilter } from '@stamhoofd/sql';
-import type { SettleablePayment } from '@stamhoofd/structures';
-import { ACCOUNT_DEDUCTIONS_ID, FAILED_PAYMENT_ID, getPaymentSettlement, PaymentMethod, PaymentProvider, PaymentStatus, PENDING_PAYMENT_ID, Settlement, toBalanceItemFilter } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentProvider, PaymentStatus, Settlement } from '@stamhoofd/structures';
+import { toBalanceItemFilter } from '@stamhoofd/structures/breakdown/breakdownFilters.js';
+import type { SettleablePayment } from '@stamhoofd/structures/PaymentSettlement.js';
+import { ACCOUNT_DEDUCTIONS_ID, FAILED_PAYMENT_ID, getPaymentSettlement, PENDING_PAYMENT_ID } from '@stamhoofd/structures/PaymentSettlement.js';
 import { balanceItemFilterCompilers } from './balance-items.js';
 import { paymentFilterCompilers } from './payments.js';
 
