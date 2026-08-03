@@ -1,4 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
+import type { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { User } from '@stamhoofd/models';
 import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, Token, WebauthnCredential } from '@stamhoofd/models';
 import type { User as UserStruct } from '@stamhoofd/structures';
@@ -6,6 +7,7 @@ import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupRespo
 
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server';
 
+import { PasswordForgotService } from '../services/PasswordForgotService.js';
 import { RecoveryCodeHelper } from './RecoveryCodeHelper.js';
 import { WebauthnHelper } from './WebauthnHelper.js';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -30,13 +32,42 @@ export const mfaVerificationRateLimiter = new RateLimiter({
 });
 
 /**
+ * An admin who has to enroll a second factor, but never did, first has to prove they still
+ * read the email address on the account when they were inactive for this long. A dormant
+ * account is the one most likely to have a leaked or reused password, and enrolling a
+ * factor with only that password would hand the account to whoever holds it — protected by
+ * the very second factor the organization asked for.
+ */
+export const INACTIVE_ADMIN_ENROLLMENT_DAYS = 45;
+
+/**
+ * The confirmation email is triggered by a login attempt, so cap how often one account can
+ * send it: whoever knows the password could otherwise flood the mailbox. Like every rate
+ * limiter here this counts per process and in a window shared by all keys, so it thins out
+ * a flood rather than enforcing an exact number of emails.
+ */
+const enrollmentConfirmationRateLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 3,
+            duration: 60 * 60 * 1000,
+        },
+        {
+            limit: 10,
+            duration: 24 * 60 * 60 * 1000,
+        },
+    ],
+});
+
+/**
  * What still has to happen before a session may be issued for a user whose primary
  * credential was just accepted.
  */
 export type SecondFactorRequirement
     = | { type: 'none' }
         | { type: 'challenge'; challenge: MFAChallengeResponse }
-        | { type: 'setup'; setupToken: MFAToken };
+        | { type: 'setup'; setupToken: MFAToken }
+        | { type: 'confirm-email' };
 
 export class TwoFactorHelper {
     /**
@@ -88,20 +119,34 @@ export class TwoFactorHelper {
     }
 
     /**
+     * Whether the account was unused for long enough that its password alone is no longer
+     * enough to start a forced enrollment. Accounts that never signed in fall back to their
+     * creation date, so an admin who was just invited is not locked out right away.
+     */
+    static isInactiveForEnrollment(user: User): boolean {
+        const lastActiveAt = user.lastActiveAt ?? user.createdAt;
+        return lastActiveAt.getTime() < Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * 24 * 60 * 60 * 1000;
+    }
+
+    /**
      * What still has to happen before a session may be handed out, after a primary
      * credential was accepted.
      *
      * `loginMethod` describes the credential that was just verified:
-     *  - 'password': a password, password token or email verification code. All of these
-     *    are single credentials owned by the user, so a required second factor must be
-     *    set up here if the user does not have one yet.
+     *  - 'password': the account password. A single credential that says nothing about
+     *    whether the user still reads the email address on the account, so a required
+     *    second factor must be set up here if the user does not have one yet — and a
+     *    long-inactive admin has to confirm their email address before they may.
+     *  - 'email': a password token or email verification code. Also a single credential,
+     *    but one that only reaches someone who reads the account's email, so it is the way
+     *    out of that email confirmation.
      *  - 'sso': an external identity provider already authenticated the user, and is
      *    trusted to apply its own second factor. An enrolled factor is still verified
      *    (the user asked us to protect their account), but we do not force enrollment —
      *    unless the account ALSO has a password, because then the password remains a way
      *    in that bypasses whatever the provider enforces.
      */
-    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: 'password' | 'sso' }): Promise<SecondFactorRequirement> {
+    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: 'password' | 'email' | 'sso' }): Promise<SecondFactorRequirement> {
         if (await TwoFactorHelper.userHasFactors(user.id)) {
             return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user) };
         }
@@ -111,6 +156,9 @@ export class TwoFactorHelper {
         }
 
         if (await TwoFactorHelper.isTwoFactorRequired(user, organization)) {
+            if (loginMethod === 'password' && TwoFactorHelper.isInactiveForEnrollment(user)) {
+                return { type: 'confirm-email' };
+            }
             return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup') };
         }
 
@@ -118,10 +166,33 @@ export class TwoFactorHelper {
     }
 
     /**
+     * Send the password recovery link a long-inactive admin needs to get back to enrolling
+     * their second factor. Never throws: the login is blocked either way, and turning a
+     * mail failure into a 500 would only hide why the user cannot sign in.
+     */
+    static async sendEnrollmentConfirmationEmail(user: User, organization: Organization | null, i18n: I18n): Promise<void> {
+        try {
+            enrollmentConfirmationRateLimiter.track(user.id);
+        }
+        catch {
+            // Sent often enough already.
+            return;
+        }
+
+        try {
+            await PasswordForgotService.sendPasswordRecoveryEmail(user, organization, i18n);
+        }
+        catch (e) {
+            console.error('Could not send the two-factor enrollment confirmation email', e);
+        }
+    }
+
+    /**
      * Enforce the second-factor / forced-enrollment step after a successful primary
      * authentication (password login, password-reset token, email verification). Throws a
-     * `require_mfa` or `require_mfa_setup` error when the user must still complete a second
-     * factor before a session may be issued; returns normally when the login may proceed.
+     * `require_mfa`, `require_mfa_setup` or `require_email_confirmation` error when the user
+     * must still do something before a session may be issued; returns normally when the
+     * login may proceed. The last one also emails the user the link they need to get past it.
      *
      * This MUST be called from every path that mints a full session from a single primary
      * credential, otherwise that path becomes an MFA bypass. The SSO callback is a redirect
@@ -132,8 +203,19 @@ export class TwoFactorHelper {
      * whoever holds the link could enroll one and get a session anyway, and the client
      * needs a session to let the user choose a password before enrolling.
      */
-    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { allowTemporarySession = false }: { allowTemporarySession?: boolean } = {}): Promise<void> {
-        const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'password' });
+    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { loginMethod, i18n, allowTemporarySession = false }: { loginMethod: 'password' | 'email'; i18n: I18n; allowTemporarySession?: boolean }): Promise<void> {
+        const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod });
+
+        if (requirement.type === 'confirm-email') {
+            await TwoFactorHelper.sendEnrollmentConfirmationEmail(user, organization, i18n);
+
+            throw new SimpleError({
+                code: 'require_email_confirmation',
+                message: 'Email confirmation required before two-factor authentication setup',
+                human: $t('Je account is beheerder en moet beveiligd worden met tweestapsverificatie, maar je logde al meer dan {days} dagen niet meer in. Bevestig eerst je e-mailadres: we stuurden je een e-mail met een link waarmee je opnieuw toegang krijgt en tweestapsverificatie kan instellen. Kreeg je geen e-mail? Dan kan je ook een nieuwe link aanvragen via wachtwoord vergeten.', { days: INACTIVE_ADMIN_ENROLLMENT_DAYS.toString() }),
+                statusCode: 403,
+            });
+        }
 
         if (requirement.type === 'challenge') {
             throw new SimpleError({

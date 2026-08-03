@@ -116,7 +116,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // the request already comes from a session of that same user (changing your email
         // address while signed in): the second factor was checked when it was created.
         if (authenticatedUser?.id !== user.id) {
-            await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion());
+            await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: 'email', i18n: request.i18n });
         }
 
         const token = await Token.createToken(user);

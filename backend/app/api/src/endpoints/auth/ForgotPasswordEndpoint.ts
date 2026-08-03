@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
-import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../helpers/Context.js';
@@ -74,28 +74,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
             return new Response(undefined);
         }
 
-        const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(user, organization, request.i18n);
-
-        // Create e-mail builder
-        await sendEmailTemplate(organization, {
-            recipients: [
-                Recipient.create({
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: request.body.email,
-                    replacements: [
-                        Replacement.create({
-                            token: 'resetUrl',
-                            value: recoveryUrl,
-                        }),
-                    ],
-                }),
-            ],
-            template: {
-                type: EmailTemplateType.ForgotPassword,
-            },
-            type: 'transactional',
-        });
+        await PasswordForgotService.sendPasswordRecoveryEmail(user, organization, request.i18n);
 
         return new Response(undefined);
     }

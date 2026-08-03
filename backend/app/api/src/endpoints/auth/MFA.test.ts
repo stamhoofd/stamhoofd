@@ -1,15 +1,17 @@
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
-import { AuditLogReplacementType, AuditLogType, MFAMethodType, PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
+import { EmailMocker } from '@stamhoofd/email';
+import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
+import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MFAMethodType, PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
 import { authenticator } from 'otplib';
 import crypto from 'crypto';
 
 import { MFATestHelper } from '../../../tests/helpers/MFATestHelper.js';
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { RECOVERY_CODE_ALPHABET, RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
-import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
+import { INACTIVE_ADMIN_ENROLLMENT_DAYS, TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { WebauthnHelper } from '../../helpers/WebauthnHelper.js';
+import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 import { ConfirmTOTPEndpoint } from './ConfirmTOTPEndpoint.js';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
 import { DeletePasskeyEndpoint } from './DeletePasskeyEndpoint.js';
@@ -508,6 +510,188 @@ describe('MFA', () => {
             // authenticateFresh() only accepts Bearer, so the MFASetup scheme is refused.
             expect(err.statusCode).toBeGreaterThanOrEqual(400);
             expect(['not_supported_authentication', 'not_authenticated'].includes(err.code)).toBe(true);
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // Forced enrollment of accounts that were not used for a long time
+    // -----------------------------------------------------------------------
+    describe('inactive admins confirm their email before enrolling', () => {
+        const day = 24 * 60 * 60 * 1000;
+
+        beforeEach(async () => {
+            // Without a template no email is built at all, and the assertions below would
+            // pass on a version that never sends one.
+            await new EmailTemplateFactory({ type: EmailTemplateType.ForgotPassword }).create();
+        });
+
+        async function inactiveAdmin({ inactiveDays = INACTIVE_ADMIN_ENROLLMENT_DAYS + 1, requireTwoFactor = true }: { inactiveDays?: number; requireTwoFactor?: boolean } = {}) {
+            const organization = await new OrganizationFactory({}).create();
+            organization.privateMeta.requireTwoFactor = requireTwoFactor;
+            await organization.save();
+
+            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            user.lastActiveAt = new Date(Date.now() - inactiveDays * day);
+            await user.save();
+            return { organization, user };
+        }
+
+        async function passwordTokensFor(user: User): Promise<PasswordToken[]> {
+            return await PasswordToken.select().where('userId', user.id).fetch();
+        }
+
+        async function recoveryEmailsFor(user: User) {
+            return (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.to.includes(user.email));
+        }
+
+        test('a long inactive admin is locked out and gets a password recovery link', async () => {
+            const { organization, user } = await inactiveAdmin();
+
+            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            expect(err.code).toBe('require_email_confirmation');
+            expect(err.statusCode).toBe(403);
+
+            const [passwordToken] = await passwordTokensFor(user);
+            expect(passwordToken).toBeDefined();
+
+            // The link in the email is the one that gets them back in.
+            const emails = await recoveryEmailsFor(user);
+            expect(emails).toHaveLength(1);
+            expect(emails[0].html).toContain(encodeURIComponent(passwordToken.token));
+
+            // No setup token was handed out: the enrollment may not start from the password alone.
+            expect(await MFAToken.select().where('userId', user.id).fetch()).toHaveLength(0);
+            expect((await User.getByID(user.id))!.lastActiveAt!.getTime()).toBeLessThan(Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day);
+        });
+
+        test('an admin who signed in recently is only forced to enroll', async () => {
+            const { organization, user } = await inactiveAdmin({ inactiveDays: INACTIVE_ADMIN_ENROLLMENT_DAYS - 1 });
+
+            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            expect(err.code).toBe('require_mfa_setup');
+            expect(await passwordTokensFor(user)).toHaveLength(0);
+            expect(await recoveryEmailsFor(user)).toHaveLength(0);
+        });
+
+        test('a long inactive platform admin is locked out too', async () => {
+            await setPlatformRequiresTwoFactor(true);
+            const user = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            user.lastActiveAt = new Date(Date.now() - (INACTIVE_ADMIN_ENROLLMENT_DAYS + 1) * day);
+            await user.save();
+
+            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(null, user.email, password)));
+            expect(err.code).toBe('require_email_confirmation');
+        });
+
+        test('an inactive admin who already enrolled is challenged as usual', async () => {
+            const { organization, user } = await inactiveAdmin();
+            const { secret } = await addConfirmedTOTP(user);
+
+            const challenge = await requireMfa(organization, user.email, password);
+            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) }));
+            expect(response.body).toBeInstanceOf(TokenStruct);
+            expect(await passwordTokensFor(user)).toHaveLength(0);
+        });
+
+        test('an inactive user without permissions logs in normally', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            organization.privateMeta.requireTwoFactor = true;
+            await organization.save();
+
+            const user = await new UserFactory({ organization, password }).create();
+            user.lastActiveAt = new Date(Date.now() - 400 * day);
+            await user.save();
+
+            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            expect(response.body).toBeInstanceOf(TokenStruct);
+        });
+
+        test('an inactive admin is not blocked when 2FA is not required', async () => {
+            const { organization, user } = await inactiveAdmin({ requireTwoFactor: false });
+
+            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            expect(response.body).toBeInstanceOf(TokenStruct);
+        });
+
+        test('an admin who never signed in is judged on the creation date', async () => {
+            const { organization, user } = await inactiveAdmin();
+            user.lastActiveAt = null;
+            await user.save();
+
+            const fresh = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            expect(fresh.code).toBe('require_mfa_setup');
+
+            user.createdAt = new Date(Date.now() - (INACTIVE_ADMIN_ENROLLMENT_DAYS + 1) * day);
+            await user.save();
+
+            const stale = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            expect(stale.code).toBe('require_email_confirmation');
+        });
+
+        test('the emailed link confirms the email address and unlocks the enrollment', async () => {
+            const { organization, user } = await inactiveAdmin();
+            await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+
+            const [passwordToken] = await passwordTokensFor(user);
+            expect(passwordToken).toBeDefined();
+
+            const err = await captureError(testServer.test(tokenEndpoint, Request.buildJson('POST', '/oauth/token', organization.getApiHost(), { grant_type: 'password_token', token: passwordToken.token })));
+            expect(err.code).toBe('require_mfa_setup');
+            expect((err.meta as { setupToken: string }).setupToken).toBeTruthy();
+        });
+
+        test('an email verification code also unlocks the enrollment', async () => {
+            const { organization, user } = await inactiveAdmin();
+
+            const code = await EmailVerificationCode.createFor(user, user.email);
+            const err = await captureError(testServer.test(new VerifyEmailEndpoint(), Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code })));
+            expect(err.code).toBe('require_mfa_setup');
+        });
+
+        test('repeated logins stop sending new recovery links', async () => {
+            const { organization, user } = await inactiveAdmin();
+
+            for (let i = 0; i < 6; i++) {
+                const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+                expect(err.code).toBe('require_email_confirmation');
+            }
+
+            expect(await passwordTokensFor(user)).toHaveLength(3);
+            expect(await recoveryEmailsFor(user)).toHaveLength(3);
+        });
+
+        test('a failing email does not turn the lockout into a server error', async () => {
+            const { organization, user } = await inactiveAdmin();
+            const send = vi.spyOn(PasswordForgotService, 'sendPasswordRecoveryEmail').mockRejectedValue(new Error('Mail server down'));
+
+            try {
+                const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+                expect(err.code).toBe('require_email_confirmation');
+                expect(send).toHaveBeenCalledOnce();
+            }
+            finally {
+                send.mockRestore();
+            }
+        });
+
+        test('the limit is only crossed after a full 45 days', async () => {
+            const { user } = await inactiveAdmin();
+
+            // A minute on either side of the limit, so the datetime column losing
+            // milliseconds cannot decide the outcome.
+            user.lastActiveAt = new Date(Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day + 60 * 1000);
+            expect(TwoFactorHelper.isInactiveForEnrollment(user)).toBe(false);
+
+            user.lastActiveAt = new Date(Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day - 60 * 1000);
+            expect(TwoFactorHelper.isInactiveForEnrollment(user)).toBe(true);
+        });
+
+        test('an SSO login of an inactive admin is not blocked', async () => {
+            // The identity provider authenticated the user, so there is nothing to confirm.
+            const { organization, user } = await inactiveAdmin();
+
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'sso' });
+            expect(requirement.type).toBe('setup');
         });
     });
 

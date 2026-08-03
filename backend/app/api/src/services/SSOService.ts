@@ -707,7 +707,7 @@ export class SSOServiceWithSession {
                     // enrollment endpoints check this themselves.
                     redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
                     redirectUri.searchParams.set('s', session.spaState);
-                } else {
+                } else if (requirement.type === 'none') {
                     const token = await Token.createExpiredToken(user);
 
                     if (!token) {
@@ -722,6 +722,19 @@ export class SSOServiceWithSession {
                     const st = new TokenStruct(token);
                     redirectUri.searchParams.set('oid_rt', st.refreshToken);
                     redirectUri.searchParams.set('s', session.spaState);
+                } else if (requirement.type === 'confirm-email') {
+                    // Only password logins reach this: an SSO login is not the credential
+                    // that has to be confirmed. Fail closed rather than fall through to a
+                    // session, which would make this redirect an enrollment bypass.
+                    throw new SimpleError({
+                        code: 'error',
+                        message: 'Email confirmation is not supported for SSO logins',
+                        statusCode: 500,
+                    });
+                } else {
+                    // Compile error when a requirement is added without handling it here.
+                    const unsupported: never = requirement;
+                    throw new Error('Unsupported second factor requirement: ' + JSON.stringify(unsupported));
                 }
             } else if (this.session.reauthenticateAccessToken) {
                 // The provider confirmed the identity of the user that is already signed in,
