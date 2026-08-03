@@ -150,7 +150,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // Second factor / forced enrollment: block the session until the user
                 // completes (or first sets up) a second factor. Shared with every other
                 // grant that mints a session from a single primary credential.
-                await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion());
+                await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: 'password', i18n: request.i18n });
 
                 const token = await Token.createToken(user, new Date());
 
@@ -311,7 +311,10 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // Forced enrollment (the user has no factor yet) additionally returns a
                 // temporary session token: this flow is also used to choose a first
                 // password (invites), which the client can only do with a session.
-                await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion(), { allowTemporarySession: true });
+                //
+                // The link was emailed to the account, so this is also how a long-inactive
+                // admin confirms their email address and gets to enroll after all.
+                await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion(), { loginMethod: 'email', i18n: request.i18n, allowTemporarySession: true });
 
                 // Important to create a new token before adjusting the old token
                 const token = await Token.createToken(passwordToken.user, new Date());

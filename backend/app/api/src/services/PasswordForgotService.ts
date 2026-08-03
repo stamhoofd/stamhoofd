@@ -1,7 +1,9 @@
 import type { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization } from '@stamhoofd/models';
 import { PasswordToken, Platform, User } from '@stamhoofd/models';
-import { getAppHost } from '@stamhoofd/structures';
+import { EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
+
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 
 /**
  * Builds the password recovery links. Which app the link points to depends on whether the user is an
@@ -15,6 +17,34 @@ export class PasswordForgotService {
         // Send an e-mail to say you already have an account + follow password forgot flow
         const token = await PasswordToken.createToken(user, validUntil);
         return await this.getPasswordRecoveryUrlForToken(token, organization, i18n, user);
+    }
+
+    /**
+     * Create a new password token and email the recovery link to the user. Always sent to the
+     * stored address, never to whatever the request asked for.
+     */
+    static async sendPasswordRecoveryEmail(user: User, organization: Organization | null, i18n: I18n) {
+        const recoveryUrl = await this.getPasswordRecoveryUrl(user, organization, i18n);
+
+        await sendEmailTemplate(organization, {
+            recipients: [
+                Recipient.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    replacements: [
+                        Replacement.create({
+                            token: 'resetUrl',
+                            value: recoveryUrl,
+                        }),
+                    ],
+                }),
+            ],
+            template: {
+                type: EmailTemplateType.ForgotPassword,
+            },
+            type: 'transactional',
+        });
     }
 
     /**
