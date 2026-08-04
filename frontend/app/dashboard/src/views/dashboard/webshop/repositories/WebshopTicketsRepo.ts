@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
@@ -6,7 +6,7 @@ import { EventBus } from '@stamhoofd/components/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { CountFilteredRequest, SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import type { CountFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, TicketPrivate, Version } from '@stamhoofd/structures';
 import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import type { WebshopSettingsStore } from './WebshopSettingsStore';
@@ -164,12 +164,10 @@ export class WebshopTicketsRepo {
                 await this.patchAllTickets(patches);
                 this.isSavingPatches = false;
                 return this.trySavePatches();
-            }
-            catch (e: any) {
+            } catch (e: any) {
                 if (Request.isNetworkError(e as Error)) {
                     // failed.
-                }
-                else {
+                } else {
                     this.isSavingPatches = false;
                     throw e;
                 }
@@ -178,24 +176,8 @@ export class WebshopTicketsRepo {
         this.isSavingPatches = false;
     }
 
-    async streamAll(callback: (ticket: TicketPrivate) => void, networkFetch = true): Promise<void> {
-        try {
-            await this.store.streamAll(callback);
-        }
-        catch (e) {
-            console.error(e);
-            if (!networkFetch) {
-                throw e;
-            }
-        }
-
-        if (networkFetch) {
-            await this.apiClient.getAllUpdated({ onResultsReceived: (tickets: TicketPrivate[]) => {
-                for (const ticket of tickets) {
-                    callback(ticket);
-                }
-            } });
-        }
+    async streamAll(callback: (ticket: TicketPrivate) => void): Promise<void> {
+        await this.store.streamAll(callback);
     }
 
     async streamAllPatches(callback: (ticket: AutoEncoderPatchType<TicketPrivate>) => void): Promise<void> {
@@ -222,8 +204,7 @@ export class WebshopTicketsRepo {
         let patched: TicketPrivate[];
         try {
             patched = await this.apiClient.patchAll(patches);
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleErrors(e)) {
                 for (const error of e.errors) {
                     if (error.hasCode('ticket_not_found')) {
@@ -236,8 +217,7 @@ export class WebshopTicketsRepo {
                             try {
                                 // todo
                                 await this.patchesStore.delete(patch.secret);
-                            }
-                            catch (q) {
+                            } catch (q) {
                                 console.error(q);
                             }
                         }
@@ -250,8 +230,7 @@ export class WebshopTicketsRepo {
         // Move all data to original order
         try {
             await this.storeAll(patched);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             // No db support or other error. Should ignore
         }
@@ -305,8 +284,7 @@ export class WebshopTicketsStore {
 
                     tickets.push(ticket);
                     cursor.continue();
-                }
-                else {
+                } else {
                     // no more results
                     resolve();
                 }
@@ -349,8 +327,7 @@ export class WebshopTicketsStore {
                         callback(ticket);
                     }
                     cursor.continue();
-                }
-                else {
+                } else {
                     // no more results
                     resolve();
                 }
@@ -379,8 +356,7 @@ export class WebshopTicketsStore {
             for (const ticket of tickets) {
                 if (ticket.deletedAt) {
                     objectStore.delete(ticket.secret);
-                }
-                else {
+                } else {
                     objectStore.put(ticket.encode({ version: Version }));
                 }
             }
@@ -465,8 +441,7 @@ export class WebshopTicketPatchesStore {
                     const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }));
                     callback(patch);
                     cursor.continue();
-                }
-                else {
+                } else {
                     // no more results
                     resolve();
                 }
@@ -584,8 +559,7 @@ class WebshopTicketsApiClient {
 
         if (isFetchAll) {
             this.lastFetchedTicket = null;
-        }
-        else {
+        } else {
             await this.initLastFetchedTicket();
         }
 
@@ -643,8 +617,7 @@ class WebshopTicketsApiClient {
 
         try {
             await fetchAll(filteredRequest, fetcher, { onResultsReceived });
-        }
-        finally {
+        } finally {
             this._isFetching = false;
         }
     }
@@ -692,8 +665,7 @@ class WebshopTicketsApiClient {
 
         try {
             this.lastFetchedTicket = await this.settingsStore.get('lastFetchedTicket') ?? null;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             // Probably no database support. Ignore it and load everything.
             this.lastFetchedTicket = null;

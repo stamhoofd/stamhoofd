@@ -292,7 +292,7 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
                 // Only count tickets for not canceled orders
                 return callback(1, ticket.scannedAt);
             }
-        }, false);
+        });
     });
 }
 
@@ -494,12 +494,15 @@ async function reload() {
             } });
 
         if (props.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
+            // Store the updated tickets locally first: the graphs read the local database only, so
+            // streaming network results here (which are not stored) makes both totals diverge.
+            await props.webshopManager.tickets.fetchAllUpdated();
+
             await props.webshopManager.tickets.streamAll((ticket: TicketPrivate) => {
                 if (!orderIds.has(ticket.orderId)) {
                     return;
                 }
                 if (ticketIds.has(ticket.id)) {
-                    // Duplicate (e.g. network fetch + local storage)
                     return;
                 }
                 ticketIds.add(ticket.id);
