@@ -122,7 +122,8 @@ export class SheetJsWriterAdapter implements XlsxWriterAdapter {
 
     /**
      * Remove columns that don't contain any data ('', '/', 0, null or empty dates are
-     * considered empty). Same behaviour as ExcelHelper.deleteEmptyColumns.
+     * considered empty), except the columns that are marked with keepEmpty.
+     * Same behaviour as ExcelHelper.deleteEmptyColumns.
      */
     private deleteEmptyColumns(rows: CellValue[][], headerRowCount: number) {
         if (rows.length === 0) {
@@ -133,8 +134,13 @@ export class SheetJsWriterAdapter implements XlsxWriterAdapter {
         // can be rebuilt for the columns that are left
         const categoryRow = headerRowCount > 1 ? rows[0] : null;
         const categoryPerColumn = categoryRow ? this.getCategoryPerColumn(categoryRow) : null;
+        const headerRow = rows[headerRowCount - 1] ?? [];
 
         for (let columnIndex = rows[0].length - 1; columnIndex >= 0; columnIndex--) {
+            if (headerRow[columnIndex]?.keepEmpty) {
+                continue;
+            }
+
             let empty = true;
 
             for (const row of rows.slice(headerRowCount)) {

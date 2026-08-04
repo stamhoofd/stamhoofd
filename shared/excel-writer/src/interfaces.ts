@@ -5,6 +5,11 @@ export type XlsxTransformerConcreteColumn<T> = {
     width: number;
     category?: string;
     defaultCategory?: string;
+    /**
+     * Keep the column, even if it doesn't contain any data. Only relevant for writers that
+     * remove empty columns.
+     */
+    keepEmpty?: boolean;
     getValue(object: T): CellValue;
 };
 
@@ -33,6 +38,7 @@ export interface XlsxTransformerConcreteSheet<A, B = A> {
 export interface CellValue {
     value: string | number | Date | null;
     width?: number; // Only works for first row
+    keepEmpty?: boolean; // Only works for the header row
     style?: CellStyleRequest;
     merge?: MergeCells;
 }

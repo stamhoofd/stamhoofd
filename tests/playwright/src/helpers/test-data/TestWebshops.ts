@@ -11,6 +11,8 @@ export interface CreateWebshopOptions {
     ticketType?: WebshopTicketType;
     /** Number of distinct products in the shop */
     productCount?: number;
+    /** Use these products instead of the generated ones (for price choices, option menus, ...) */
+    products?: Product[];
     /** Whether a cart is used (multiple items) or each product goes straight to checkout */
     cartEnabled?: boolean;
     /** Add a seating plan to the products (only meaningful for Tickets per item) */
@@ -72,16 +74,13 @@ export class TestWebshops {
             seatingPlanId = seatingPlan.id;
         }
 
-        const products: Product[] = [];
         const productType = ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product;
-        for (let i = 0; i < productCount; i++) {
-            products.push(Product.create({
-                name: `Product ${i + 1}`,
-                prices: [ProductPrice.create({ name: `Price ${i + 1}`, price })],
-                type: productType,
-                seatingPlanId: withSeatingPlan ? seatingPlanId : null,
-            }));
-        }
+        const products: Product[] = options.products ?? Array.from({ length: productCount }, (_, i) => Product.create({
+            name: `Product ${i + 1}`,
+            prices: [ProductPrice.create({ name: `Price ${i + 1}`, price })],
+            type: productType,
+            seatingPlanId: withSeatingPlan ? seatingPlanId : null,
+        }));
 
         const paymentConfigurationPatch = PaymentConfiguration.patch({
             transferSettings: TransferSettings.create({

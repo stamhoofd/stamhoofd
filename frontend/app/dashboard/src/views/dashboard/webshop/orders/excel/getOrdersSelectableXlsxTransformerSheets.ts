@@ -95,6 +95,7 @@ function singleColumnGroup<R>(data: {
     category?: string;
     enabled?: boolean;
     width?: number;
+    keepEmpty?: boolean;
     getValue: (row: R) => CellValue;
 }): SelectableXlsxTransformerColumn<R> {
     return {
@@ -107,6 +108,7 @@ function singleColumnGroup<R>(data: {
             id: data.id,
             name: data.name,
             width: data.width ?? 0, // 0 = automatic width based on the column name
+            keepEmpty: data.keepEmpty,
             getValue: data.getValue,
         }],
     };
@@ -397,7 +399,8 @@ function getCartItemOptionValue(item: CartItem, slug: string): string {
 
 /**
  * One column per product combination (product + price + options) containing the ordered amount,
- * used in the 'orders' sheet.
+ * used in the 'orders' sheet. Every combination of the webshop keeps its column, also when it
+ * was not ordered (the column then only contains zeros).
  */
 function getItemAmountGroups(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerColumn<PrivateOrder>[] {
     const names = new Map<string, string>(); // slug -> group name
@@ -447,6 +450,7 @@ function getItemAmountGroups(webshop: Webshop, orders: PrivateOrder[]): Selectab
         name,
         category: columnCategories.orderedItems,
         width: name.length,
+        keepEmpty: true,
         getValue: (order) => {
             let amount = 0;
             for (const item of order.data.cart.items) {

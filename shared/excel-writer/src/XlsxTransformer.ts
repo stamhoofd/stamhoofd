@@ -87,6 +87,7 @@ export class XlsxTransformer<T> {
                 return {
                     value: col.name,
                     width: col.width,
+                    keepEmpty: col.keepEmpty,
                     style: {
                         font: {
                             bold: true,

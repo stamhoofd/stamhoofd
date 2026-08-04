@@ -7,11 +7,21 @@ import type { Download, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
-import { Organization, OrganizationFactory, Ticket, Token, UserFactory } from '@stamhoofd/models';
+import { OrderFactory, Organization, OrganizationFactory, Ticket, Token, UserFactory } from '@stamhoofd/models';
 import {
+    Cart,
+    CartItem,
+    CartItemOption,
+    CartItemPrice,
+    Customer,
+    Option,
+    OptionMenu,
+    OrderData,
     PaymentMethod,
     PermissionLevel,
     Permissions,
+    Product,
+    ProductPrice,
     STPackageBundle,
     Token as TokenStruct,
     Version,
@@ -292,6 +302,93 @@ test.describe('Webshop order Excel export @webshop-order-export', () => {
         expect(filtered.headers).toContain('Voornaam');
         expect(filtered.headers).not.toContain('Achternaam');
         expect(filtered.headers).not.toContain('Klant');
+
+        await adminContext.close();
+    });
+
+    test('keeps a column for every product combination of the webshop, also when it was not ordered', async ({ browser }) => {
+        const organization = await createWebshopOrganization('CombinationExport');
+        await enableExcelExportUi(organization);
+
+        // A product with two price choices and two options: four combinations
+        const sizes = OptionMenu.create({
+            name: 'Maat',
+            options: [Option.create({ name: 'S' }), Option.create({ name: 'M' })],
+        });
+        const product = Product.create({
+            name: 'T-shirt',
+            prices: [
+                ProductPrice.create({ name: 'Volwassene', price: 15_0000 }),
+                ProductPrice.create({ name: 'Kind', price: 10_0000 }),
+            ],
+            optionMenus: [sizes],
+        });
+
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Combination export ${WorkerData.id}`,
+            products: [product],
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        // One order, for only one of the four combinations
+        const unitPrice = product.prices[0].price;
+        await new OrderFactory({
+            webshop,
+            data: OrderData.create({
+                customer: Customer.create({ firstName: 'Jane', lastName: 'Janssens', email: 'jane@test.be' }),
+                cart: Cart.create({
+                    items: [CartItem.create({
+                        product,
+                        productPrice: product.prices[0],
+                        options: [CartItemOption.create({ optionMenu: sizes, option: sizes.options[0] })],
+                        amount: 2,
+                        // Normally calculated during checkout
+                        unitPrice,
+                        calculatedPrices: [CartItemPrice.create({ price: unitPrice }), CartItemPrice.create({ price: unitPrice })],
+                    })],
+                }),
+            }),
+        }).create();
+
+        const admin = await createAdmin(organization);
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+        await openWebshopOrders(adminPage, organization, webshop.meta.name);
+
+        const table = new TableHelper(adminPage);
+        await table.waitForFirstRow();
+        await table.toggleSelectAllRows();
+        await table.clickAction('Exporteer naar Excel');
+
+        const exportView = adminPage.getByTestId('save-view');
+        await expect(exportView.getByRole('heading', { name: 'Exporteren naar Excel' })).toBeVisible();
+
+        const downloadPromise = adminPage.waitForEvent('download');
+        await exportView.getByTestId('save-button').click();
+        const download = await downloadPromise;
+        const workbook = await readWorkbook(download, test.info().outputPath('export-combinations.xlsx'));
+
+        // Every combination of the webshop has its own column, also the three that were not ordered
+        const orders = getSheet(workbook, 'Bestelling per lijn');
+        expect(orders.headers).toEqual(expect.arrayContaining([
+            'T-shirt - Volwassene - S',
+            'T-shirt - Volwassene - M',
+            'T-shirt - Kind - S',
+            'T-shirt - Kind - M',
+        ]));
+
+        const janeOrder = orders.data.find(row => row.includes('Jane'))!;
+        expect(janeOrder).toBeDefined();
+        expect(getCell(orders.headers, janeOrder, 'T-shirt - Volwassene - S')).toBe(2);
+        expect(getCell(orders.headers, janeOrder, 'T-shirt - Volwassene - M')).toBe(0);
+        expect(getCell(orders.headers, janeOrder, 'T-shirt - Kind - S')).toBe(0);
+        expect(getCell(orders.headers, janeOrder, 'T-shirt - Kind - M')).toBe(0);
+
+        // Other columns without any data are still removed
+        expect(orders.headers).not.toContain('GSM-nummer');
+        expect(orders.headers).not.toContain('Kortingscode');
 
         await adminContext.close();
     });
