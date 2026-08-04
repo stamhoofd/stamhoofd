@@ -244,11 +244,11 @@ export class Token extends QueryableModel {
         }
 
         if (token.refreshTokenValidUntil < new Date()) {
-            // Sessions end on their own (inactivity, or the maximum session length), so an
-            // expired refresh token is an expected event and may only end this session.
-            // Ending the other sessions of the user would let one forgotten browser tab
-            // sign them out everywhere.
-            await this.delete().where(this.primary.name, token.accessToken).delete();
+            // If a user tries to use a refresh token that is expired - there is a possibility of a user
+            // being compromised.
+            // So we delete all tokens for this user.
+            console.error('Detected an expired refresh token, deleting all tokens for user', token.userId);
+            await this.delete().where('userId', token.userId);
             return undefined;
         }
 

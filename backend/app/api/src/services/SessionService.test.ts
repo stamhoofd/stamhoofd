@@ -171,7 +171,7 @@ describe('SessionService', () => {
             expect(await Token.getByRefreshToken(token.refreshToken)).toBeUndefined();
         });
 
-        test('an expired session does not end the other sessions of the user', async () => {
+        test('an expired refresh token ends every session of the user', async () => {
             const admin = await createAdmin();
             const expired = await SessionService.createSession(admin, { loginMethod: 'password' });
             const other = await SessionService.createSession(admin, { loginMethod: 'password' });
@@ -179,10 +179,12 @@ describe('SessionService', () => {
             expired.refreshTokenValidUntil = new Date(Date.now() - 1000);
             await expired.save();
 
+            // Using an expired refresh token can mean the token was stolen, so the account
+            // is signed out everywhere instead of only on this session.
             await Token.getByRefreshToken(expired.refreshToken);
 
             expect(await Token.getByAccessToken(expired.accessToken)).toBeUndefined();
-            expect(await Token.getByAccessToken(other.accessToken)).toBeDefined();
+            expect(await Token.getByAccessToken(other.accessToken)).toBeUndefined();
         });
     });
 
