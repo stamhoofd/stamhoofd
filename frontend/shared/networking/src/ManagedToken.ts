@@ -1,3 +1,4 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import type { Server } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import { Token } from '@stamhoofd/structures';
@@ -21,6 +22,18 @@ export class ManagedToken {
      * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
      */
     private async doRefresh(server: Server): Promise<void> {
+        if (this.token.isRefreshTokenExpired()) {
+            // The server signs out every session of the user when it receives a refresh
+            // token that expired, because that can mean the token was stolen. A session we
+            // know has ended may therefore never be sent: it would take the sessions on the
+            // other devices of this user with it.
+            throw new SimpleError({
+                code: 'invalid_refresh_token',
+                message: 'The session has expired',
+                human: $t(`%ky`),
+            });
+        }
+
         const result = await server.request({
             method: 'POST',
             path: '/oauth/token',

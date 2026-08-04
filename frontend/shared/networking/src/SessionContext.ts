@@ -165,6 +165,25 @@ export class SessionContext implements RequestMiddleware {
         this.callListeners('preventComplete');
     }
 
+    /**
+     * A stored session whose refresh token expired can never be used again: it is dropped
+     * instead of restored, so we never end up sending that refresh token to the server (it
+     * would sign the user out of their other sessions as well).
+     */
+    private async dropExpiredStoredToken(token: Token, key: string): Promise<boolean> {
+        if (!token.isRefreshTokenExpired()) {
+            return false;
+        }
+
+        console.log('[SessionContext] Dropping stored session: the refresh token expired');
+        try {
+            await Storage.secure.removeItem(key);
+        } catch (e) {
+            console.error(e);
+        }
+        return true;
+    }
+
     async loadTokenFromStorage() {
         if (this.isStorageDisabled) {
             return;
@@ -179,11 +198,15 @@ export class SessionContext implements RequestMiddleware {
         // Check localstorage
         try {
             let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform';
-            const json = await Storage.secure.getItem('token-' + (!usePlatformStorage ? this.organization!.id : 'platform'));
+            const key = 'token-' + (!usePlatformStorage ? this.organization!.id : 'platform');
+            const json = await Storage.secure.getItem(key);
             if (json) {
                 try {
                     const parsed = JSON.parse(json);
                     const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                    if (await this.dropExpiredStoredToken(token, key)) {
+                        return;
+                    }
                     this.setTokenWithoutSaving(token, usePlatformStorage);
                     return;
                 } catch (e) {
@@ -194,12 +217,14 @@ export class SessionContext implements RequestMiddleware {
             if (!usePlatformStorage) {
                 usePlatformStorage = true;
                 // Also try platform token
-                const json2 = await Storage.secure.getItem('token-' + 'platform');
+                const json2 = await Storage.secure.getItem('token-platform');
                 if (json2) {
                     try {
                         const parsed = JSON.parse(json2);
                         const token = Token.decode(new ObjectData(parsed, { version: Version }));
-                        this.setTokenWithoutSaving(token, usePlatformStorage);
+                        if (!await this.dropExpiredStoredToken(token, 'token-platform')) {
+                            this.setTokenWithoutSaving(token, usePlatformStorage);
+                        }
                     } catch (e) {
                         console.error(e);
                     }

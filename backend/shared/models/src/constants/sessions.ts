@@ -9,10 +9,10 @@ const DAY = 24 * HOUR;
 export const ACCESS_TOKEN_DURATION = 15 * MINUTE;
 
 /**
- * Refresh token lifetime of a token that is not part of a login (Token.createToken).
- * Sessions of a real login are limited by SESSION_DURATIONS instead.
+ * Refresh token lifetime of a token that is not part of a login (Token.createToken). Kept
+ * at the longest session below, so nothing can live longer than a real session.
  */
-export const DEFAULT_REFRESH_TOKEN_DURATION = 365 * DAY;
+export const DEFAULT_REFRESH_TOKEN_DURATION = 30 * DAY;
 
 /**
  * The kind of session, in the order it is decided: an SSO session is an SSO session no

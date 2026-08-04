@@ -1,5 +1,7 @@
-import type { SessionDurations, SessionLoginMethod, SessionType, User } from '@stamhoofd/models';
-import { SESSION_DURATIONS, Token } from '@stamhoofd/models';
+import type { SessionLoginMethod, User } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';
+import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
 
 import { ContextInstance } from '../helpers/Context.js';
 
