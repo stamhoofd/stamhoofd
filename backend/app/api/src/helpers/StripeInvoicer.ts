@@ -1,13 +1,17 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, User } from '@stamhoofd/models';
+import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
+import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { Formatter } from '@stamhoofd/utility';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import { PaymentService } from '../services/PaymentService.js';
+import { SettlementService } from '../services/SettlementService.js';
 import { VATService } from '../services/VATService.js';
 import { SQL } from '@stamhoofd/sql';
+import { StripeFeeSync } from './StripeFeeSync.js';
 
 export class ApplicationFeeDetails {
     transferFee = 0;
@@ -72,36 +76,16 @@ export class ApplicationFeeDetails {
 
 class StripeReport {
     readonly applicationFeesPerAccount = new Map<string, ApplicationFeeDetails>();
-
-    add(balanceTransaction: Stripe.BalanceTransaction) {
-        if (balanceTransaction.type === 'application_fee' || balanceTransaction.type === 'application_fee_refund') {
-            const source = balanceTransaction.source as Stripe.ApplicationFee;
-            const account = typeof source.account === 'string' ? source.account : source.account.id;
-
-            if (account) {
-                // We don't included refunded fees because these are test payments from test account
-                const currentAmount = this.applicationFeesPerAccount.get(account);
-                if (currentAmount === undefined) {
-                    this.applicationFeesPerAccount.set(account, ApplicationFeeDetails.fromStripe(balanceTransaction));
-                } else {
-                    currentAmount.add(balanceTransaction);
-                }
-            }
-        }
-    }
-
-    combine(report: StripeReport) {
-        for (const [account, amount] of report.applicationFeesPerAccount.entries()) {
-            const currentAmount = this.applicationFeesPerAccount.get(account);
-            if (currentAmount === undefined) {
-                this.applicationFeesPerAccount.set(account, amount);
-            } else {
-                currentAmount.combine(amount);
-            }
-        }
-        return this;
-    }
 }
+
+/**
+ * The balance items of one fee invoice, per fee kind. A kind is null when nothing of that kind was
+ * charged that month.
+ */
+export type FeeBalanceItems = {
+    serviceFee: BalanceItem | null;
+    transferFee: BalanceItem | null;
+};
 
 export class StripeReportInvoicer {
     private readonly report: StripeReport;
@@ -114,14 +98,16 @@ export class StripeReportInvoicer {
         this.end = end;
     }
 
-    async generateInvoices(sellingOrganization: Organization, reference: string) {
-        const payments: Payment[] = [];
+    /**
+     * Creates one invoice payment per account. `onInvoiced` runs directly after each created
+     * invoice: an error for one account (creating or the onInvoiced step) can never affect the
+     * invoices already created for other accounts.
+     */
+    async generateInvoices(sellingOrganization: Organization, reference: string, onInvoiced?: (accountId: string, balanceItems: FeeBalanceItems) => Promise<void>): Promise<void> {
         for (const [account, details] of this.report.applicationFeesPerAccount) {
+            let result: { payment: Payment; balanceItems: FeeBalanceItems } | undefined;
             try {
-                const payment = await this.generateInvoice(sellingOrganization, reference, account, details);
-                if (payment) {
-                    payments.push(payment);
-                }
+                result = await this.generateInvoice(sellingOrganization, reference, account, details);
             } catch (e) {
                 console.error(e);
                 // Send email notification of this error
@@ -129,9 +115,25 @@ export class StripeReportInvoicer {
                     subject: 'Aanmaken Stripe facturen voor ' + account + ' - ' + reference + ' mislukt',
                     html: 'Aanmaken Stripe facturen voor ' + account + ' - ' + reference + ' mislukt. <br><br> ' + e.toString(),
                 });
+                continue;
+            }
+
+            if (!result) {
+                continue;
+            }
+
+            try {
+                await onInvoiced?.(account, result.balanceItems);
+            } catch (e) {
+                // The invoice exists: only the follow-up failed, which needs a different repair
+                // (a re-run skips the account because the payment already exists)
+                console.error(e);
+                Email.sendWebmaster({
+                    subject: 'Factuur aangemaakt maar kosten markeren als gefactureerd mislukt voor ' + account + ' - ' + reference,
+                    html: 'De factuur voor ' + account + ' - ' + reference + ' is aangemaakt, maar de opgeslagen kosten konden niet gemarkeerd worden als gefactureerd. Een synchronisatie met backfill herstelt dit. <br><br> ' + e.toString(),
+                });
             }
         }
-        return payments;
     }
 
     static async hasPayment(sellingOrganization: Organization, reference: string) {
@@ -214,7 +216,7 @@ export class StripeReportInvoicer {
             });
         }
 
-        const balanceItems: BalanceItem[] = [];
+        const feeBalanceItems: FeeBalanceItems = { serviceFee: null, transferFee: null };
 
         if (applicationFee.serviceFee !== 0) {
             const item = new BalanceItem();
@@ -243,7 +245,7 @@ export class StripeReportInvoicer {
             item.startDate = this.start;
             item.endDate = this.end;
             await item.save();
-            balanceItems.push(item);
+            feeBalanceItems.serviceFee = item;
         }
 
         if (applicationFee.transferFee !== 0) {
@@ -273,8 +275,10 @@ export class StripeReportInvoicer {
             item.startDate = this.start;
             item.endDate = this.end;
             await item.save();
-            balanceItems.push(item);
+            feeBalanceItems.transferFee = item;
         }
+
+        const balanceItems = [feeBalanceItems.serviceFee, feeBalanceItems.transferFee].filter(item => item !== null);
 
         let total = 0;
         for (const balanceItem of balanceItems) {
@@ -323,15 +327,15 @@ export class StripeReportInvoicer {
         }
 
         await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, this.start);
-        return payment;
+        return { payment, balanceItems: feeBalanceItems };
     }
 }
 
 export class StripeInvoicer {
-    private stripe: Stripe;
+    private secretKey: string;
 
     constructor({ secretKey }: { secretKey: string }) {
-        this.stripe = new Stripe(secretKey, { apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 1, timeout: 10000 });
+        this.secretKey = secretKey;
     }
 
     static getMonthUnixStartEnd(date: Date) {
@@ -373,26 +377,20 @@ export class StripeInvoicer {
                 }
 
                 console.log('Generating invoices for ', reference, start, end);
-                const reportFees = await this.fetchBalanceItems({
-                    created: {
-                        gte: start,
-                        lte: end,
-                    },
-                    type: 'application_fee',
-                    expand: ['data.source', 'data.source.originating_transaction'],
-                });
-                const reportRefund = await this.fetchBalanceItems({
-                    created: {
-                        gte: start,
-                        lte: end,
-                    },
-                    type: 'application_fee_refund',
-                    expand: ['data.source', 'data.source.originating_transaction'],
+
+                // Only a complete, error-free fee sync may invoice the month: a missing fee means
+                // the month waits (and someone gets an email), never a short invoice
+                await new StripeFeeSync({ secretKey: this.secretKey }).syncFees({
+                    start: new Date(start * 1000),
+                    end: new Date(end * 1000),
                 });
 
-                const report = reportFees.combine(reportRefund);
+                const { report, rowsPerAccount } = await this.buildLocalReport(start, end);
                 const invoicer = new StripeReportInvoicer(report, new Date(start * 1000), new Date(end * 1000));
-                await invoicer.generateInvoices(sellingOrganization, reference);
+
+                await invoicer.generateInvoices(sellingOrganization, reference, async (accountId, balanceItems) => {
+                    await this.markRowsInvoiced(rowsPerAccount.get(accountId) ?? [], balanceItems);
+                });
             });
         } catch (e) {
             console.error(e);
@@ -405,15 +403,85 @@ export class StripeInvoicer {
         }
     }
 
-    private async fetchBalanceItems(options: Stripe.BalanceTransactionListParams) {
-        // For the given payout, fetch all balance items
-        const params = { ...options };
-        const report = new StripeReport();
+    /**
+     * The same report the old code built by scanning the Stripe API, now from the stored Received
+     * fee rows grouped per account.
+     */
+    private async buildLocalReport(startUnix: number, endUnix: number): Promise<{ report: StripeReport; rowsPerAccount: Map<string, SettlementCharge[]> }> {
+        const rows = await SettlementCharge.select()
+            .where('type', [SettlementChargeType.ReceivedApplicationFeeService, SettlementChargeType.ReceivedApplicationFeeTransfer])
+            .where('occurredAt', '>=', new Date(startUnix * 1000))
+            .where('occurredAt', '<=', new Date(endUnix * 1000))
+            .fetch();
 
-        for await (const balanceItem of this.stripe.balanceTransactions.list(params)) {
-            report.add(balanceItem);
+        const accountIds = Formatter.uniqueArray(rows.map(row => row.stripeAccountId)).filter((id): id is string => id !== null);
+        if (accountIds.length !== Formatter.uniqueArray(rows.map(row => row.stripeAccountId)).length) {
+            throw new SimpleError({
+                code: 'missing_stripe_account',
+                message: 'Received fee rows without a Stripe account in the invoiced month',
+            });
+        }
+        const accounts = accountIds.length > 0
+            ? await StripeAccount.select().where('id', accountIds).fetch()
+            : [];
+
+        const report = new StripeReport();
+        const rowsPerAccount = new Map<string, SettlementCharge[]>();
+        const feeIdsPerAccount = new Map<string, Set<string>>();
+
+        for (const row of rows) {
+            const account = accounts.find(a => a.id === row.stripeAccountId);
+            if (!account) {
+                throw new SimpleError({
+                    code: 'stripe_account_not_found',
+                    message: 'Stripe account ' + row.stripeAccountId + ' of fee row ' + row.externalId + ' does not exist',
+                });
+            }
+
+            // The report is keyed on Stripe's acct_… id, like the API scan was
+            const accountRows = rowsPerAccount.get(account.accountId) ?? [];
+            accountRows.push(row);
+            rowsPerAccount.set(account.accountId, accountRows);
+
+            const feeIds = feeIdsPerAccount.get(account.accountId) ?? new Set<string>();
+            if (row.applicationFeeId) {
+                feeIds.add(row.applicationFeeId);
+            }
+            feeIdsPerAccount.set(account.accountId, feeIds);
+
+            const details = report.applicationFeesPerAccount.get(account.accountId) ?? new ApplicationFeeDetails({
+                serviceFee: 0,
+                transferFee: 0,
+                minimumDate: null,
+                maximumDate: null,
+            });
+            details.combine(new ApplicationFeeDetails({
+                serviceFee: row.type === SettlementChargeType.ReceivedApplicationFeeService ? row.amount : 0,
+                transferFee: row.type === SettlementChargeType.ReceivedApplicationFeeTransfer ? row.amount : 0,
+                minimumDate: row.occurredAt,
+                maximumDate: row.occurredAt,
+            }));
+            details.count = feeIdsPerAccount.get(account.accountId)!.size;
+            report.applicationFeesPerAccount.set(account.accountId, details);
         }
 
-        return report;
+        return { report, rowsPerAccount };
+    }
+
+    /**
+     * Records for every invoiced fee row which balance item billed it: service rows the ServiceFee
+     * item, transfer rows the TransferFee item.
+     */
+    private async markRowsInvoiced(rows: SettlementCharge[], balanceItems: FeeBalanceItems) {
+        for (const row of rows) {
+            const item = row.type === SettlementChargeType.ReceivedApplicationFeeService ? balanceItems.serviceFee : balanceItems.transferFee;
+            if (!item) {
+                throw new SimpleError({
+                    code: 'missing_balance_item',
+                    message: 'No ' + row.type + ' balance item was created for fee row ' + row.externalId,
+                });
+            }
+            await SettlementService.markInvoiced(row, item.id);
+        }
     }
 }
