@@ -452,7 +452,16 @@ async function reload() {
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.orders.fetchAllUpdated();
+        let hasFetchOrdersError = false;
+
+        try {
+            await props.webshopManager.orders.fetchAllUpdated();
+        } catch (e) {
+            hasFetchOrdersError = true;
+            // Only show the error, the orders can still be streamed from the offline cache
+            Toast.fromError(e).show();
+        }
+
         await props.webshopManager.orders.stream({
             callback: (order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
@@ -496,7 +505,16 @@ async function reload() {
         if (props.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
             // Store the updated tickets locally first: the graphs read the local database only, so
             // streaming network results here (which are not stored) makes both totals diverge.
-            await props.webshopManager.tickets.fetchAllUpdated();
+
+            try {
+                await props.webshopManager.tickets.fetchAllUpdated();
+            } catch (e) {
+                // only show toast if there was no error fetching orders (avoid duplicate toasts)
+                if (!hasFetchOrdersError) {
+                    // Only show the error, the tickets can still be streamed from the offline cache
+                    Toast.fromError(e).show();
+                }
+            }
 
             await props.webshopManager.tickets.streamAll((ticket: TicketPrivate) => {
                 if (!orderIds.has(ticket.orderId)) {
