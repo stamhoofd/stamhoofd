@@ -517,6 +517,14 @@ export class PaymentService {
             }
         }
 
+        // DirectDebit expires after 3 weeks
+        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method === PaymentMethod.DirectDebit) {
+            // If payment is not succeeded after one day, mark as failed
+            if (payment.createdAt < new Date(new Date().getTime() - 60 * 1000 * 60 * 24 * 7 * 3)) {
+                return true;
+            }
+        }
+
         if (STAMHOOFD.environment === 'development') {
             // In development, we expire all direct debits and other paymetns after 1 hour, because they need manual changes
             // otherwise they will remain stuck in the dev environment, poluting the UI
