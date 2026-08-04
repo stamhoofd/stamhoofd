@@ -112,6 +112,10 @@
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
             {{ $t('%15o') }}
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('payment-breakdown')" data-testid="payment-breakdown-checkbox" @update:model-value="setFeatureFlag('payment-breakdown', !!$event)">
+            {{ $t('Statistieken van betalingen en aanrekeningen') }}
+        </Checkbox>
     </SaveView>
 </template>
 

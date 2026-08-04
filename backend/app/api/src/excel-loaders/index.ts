@@ -4,4 +4,5 @@ import './organizations.js';
 import './receivable-balances.js';
 import './event-notifications.js';
 import './balance-items.js';
+import './balance-item-payments.js';
 import './platform-memberships.js';

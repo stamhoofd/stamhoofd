@@ -6,7 +6,8 @@
         :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-sort-direction="SortItemDirection.DESC"
         :default-filter="defaultFilter"
-        :title="title"
+        :default-search="defaultSearch"
+        :title="tableTitle"
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
@@ -37,9 +38,23 @@ const props = withDefaults(
     defineProps<{
         methods?: PaymentMethod[] | null;
         defaultFilter?: StamhoofdFilter | null;
+        /**
+         * Selects the payments this table shows, without the user being able to widen it again. Used
+         * to show the payments behind one row of a breakdown.
+         */
+        requiredFilter?: StamhoofdFilter | null;
+        defaultSearch?: string | null;
+        /**
+         * Overrides the name of this table, e.g. with the group of a breakdown these payments came
+         * from, so it says what you drilled into.
+         */
+        title?: string | null;
     }>(), {
         methods: null,
         defaultFilter: null,
+        requiredFilter: null,
+        defaultSearch: null,
+        title: null,
     },
 );
 
@@ -52,7 +67,11 @@ const configurationId = computed(() => {
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = usePaymentsUIFilterBuilders();
 const organization = useOrganization();
-const title = computed(() => {
+const tableTitle = computed(() => {
+    if (props.title) {
+        return props.title;
+    }
+
     if (props.methods?.length === 1) {
         return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);
     }
@@ -61,14 +80,21 @@ const title = computed(() => {
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
+    const filters: StamhoofdFilter[] = props.requiredFilter ? [props.requiredFilter] : [];
+
     if (props.methods !== null) {
-        return {
+        filters.push({
             method: {
                 $in: props.methods,
             },
-        };
+        });
     }
-    return null;
+
+    if (filters.length === 0) {
+        return null;
+    }
+
+    return filters.length === 1 ? filters[0] : { $and: filters };
 }
 
 const objectFetcher = usePaymentsObjectFetcher({

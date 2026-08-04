@@ -5,12 +5,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { paymentFilterCompilers } from '../../../../sql-filters/payments.js';
+import { getPaymentSearchFilter, paymentFilterCompilers } from '../../../../sql-filters/payments.js';
 import { paymentSorters } from '../../../../sql-sorters/payments.js';
 
 type Params = Record<string, never>;
@@ -69,83 +69,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (q.search) {
-            // todo
-
-            let searchFilter: StamhoofdFilter | null = null;
-            searchFilter = {
-                $or: [
-                    {
-                        customer: {
-                            name: {
-                                $contains: q.search,
-                            },
-                        },
-                    },
-                    {
-                        customer: {
-                            company: {
-                                name: {
-                                    $contains: q.search,
-                                },
-                            },
-                        },
-                    },
-                    {
-                        balanceItemPayments: {
-                            $elemMatch: {
-                                balanceItem: {
-                                    description: {
-                                        $contains: q.search,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    {
-                        transferDescription: {
-                            $contains: q.search,
-                        },
-                    },
-                ],
-            };
-
-            if (q.search.includes('@')) {
-                searchFilter = {
-                    $or: [
-                        {
-                            customer: {
-                                email: {
-                                    $contains: q.search,
-                                },
-                            },
-                        },
-                        {
-                            customer: {
-                                company: {
-                                    administrationEmail: {
-                                        $contains: q.search,
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                };
-            }
-
-            const transferDescription = q.search.replaceAll('+', '').replaceAll('/', '');
-            if (transferDescription.length === '562100153542'.length && !isNaN(parseInt(transferDescription))) {
-                // Format to
-                const formatted = TransferSettings.structureOGM(transferDescription);
-
-                // Search for structured transfer
-                searchFilter = {
-                    transferDescription: formatted,
-                };
-            }
-
-            if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
-            }
+            query.where(await compileToSQLFilter(getPaymentSearchFilter(q.search), filterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {

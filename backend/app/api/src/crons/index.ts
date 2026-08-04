@@ -9,6 +9,7 @@ import './delete-expired-mfa-tokens.js';
 import './delete-archived-data.js';
 import './mollie-chargebacks.js';
 import './mollie-refunds.js';
+import './fake-settlements.js';
 import './invoices.js';
 import './service-fees.js';
 import './members-fees.js';

@@ -235,6 +235,18 @@
                         {{ $t('%NW') }}
                     </h3>
                 </STListItem>
+
+                <STListItem :selectable="true" element-name="label" data-testid="payment-breakdown-checkbox">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('payment-breakdown')" @update:model-value="setFeatureFlag('payment-breakdown', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Statistieken van betalingen en aanrekeningen') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Toont waaruit een selectie van betalingen of aanrekeningen bestaat, opgesplitst per rekening, categorie, artikel en uitbetaling, met de export daarvan.') }}
+                    </p>
+                </STListItem>
             </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">

@@ -1,6 +1,7 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { BalanceItemRelationType } from '@stamhoofd/structures';
+import { paymentSettlementFilterCompilers } from './payment-settlement.js';
 
 /**
  * Filters on the relations of a balance item (registration group, webshop order and membership type).
@@ -52,6 +53,29 @@ export const balanceItemRelationFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONString,
         nullable: true,
     }),
+
+    /**
+     * Filter on the id of any relation, e.g. { relations: { Group: { id: '...' } } }.
+     *
+     * Used to narrow down to one category of a breakdown (see PaymentBreakdown), so every kind of
+     * metadata a balance item carries is filterable without a dedicated compiler per relation.
+     */
+    relations: {
+        ...baseSQLFilterCompilers,
+        ...Object.fromEntries(
+            Object.values(BalanceItemRelationType).map(relationType => [
+                relationType,
+                {
+                    ...baseSQLFilterCompilers,
+                    id: createColumnFilter({
+                        expression: SQL.jsonExtract(SQL.column('balance_items', 'relations'), `$.value.${relationType}.id`),
+                        type: SQLValueType.JSONString,
+                        nullable: true,
+                    }),
+                },
+            ]),
+        ),
+    },
 };
 
 /**
@@ -113,4 +137,35 @@ export const balanceItemFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
+
+    /**
+     * The payments that paid (a part of) this balance item, e.g.
+     * `{ payments: { $elemMatch: { payment: { settlement: { reference: '...' } } } } }`.
+     *
+     * Used to narrow a breakdown down to the balance items that were part of one payout (see
+     * PaymentSettlementGroup): a balance item doesn't know how it was paid, its payments do.
+     */
+    payments: createExistsFilter(
+        SQL.select()
+            .from(SQL.table('balance_item_payments'))
+            .join(
+                SQL.join(SQL.table('payments')).where(
+                    SQL.column('payments', 'id'),
+                    SQL.column('balance_item_payments', 'paymentId'),
+                ),
+            )
+            .where(
+                SQL.column('balance_item_payments', 'balanceItemId'),
+                SQL.column('balance_items', 'id'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            price: createColumnFilter({
+                expression: SQL.column('balance_item_payments', 'price'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            payment: paymentSettlementFilterCompilers,
+        },
+    ),
 };

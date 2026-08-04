@@ -16,13 +16,14 @@
                 <STList class="illustration-list">
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Export)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
+                            <img v-if="hasBreakdown" src="@stamhoofd/assets/images/illustrations/diagram.svg">
+                            <img v-else src="@stamhoofd/assets/images/illustrations/calculator.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('%95') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t("%5Q") }}
+                            {{ hasBreakdown ? $t("Handig overzicht van betalingen, transactiekosten en uitbetalingen die je vervolgens kan exporteren naar Excel.") : $t("%5Q") }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -204,6 +205,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -392,6 +394,7 @@ const context = useContext();
 const errors = useErrors();
 const organization = useOrganization();
 const platform = usePlatform();
+const hasBreakdown = useFeatureFlag()('payment-breakdown');
 const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
 
 // Manual Stripe payout reports: only for the platform membership organization itself

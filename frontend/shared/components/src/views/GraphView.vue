@@ -1,11 +1,15 @@
 <template>
     <div class="container graph">
         <h2 class="style-with-button">
-            <button class="button style-label" type="button" @click="chooseConfiguration">
+            <button v-if="hasMultipleConfigurations" class="button style-label" type="button" @click="chooseConfiguration">
                 <span class="">{{ title }}</span>
                 <span v-if="hasMultipleConfigurations" class="icon arrow-down-small" />
                 <span v-else class="icon empty" />
             </button>
+
+            <span v-else class="style-label">
+                {{ title }}
+            </span>
 
             <div>
                 <GraphDateRangeSelector v-if="options === null || options.length > 1" v-model="range" :options="options" />
@@ -26,7 +30,7 @@ import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import Spinner from '#Spinner.vue';
 import { Toast } from '#overlays/Toast.ts';
 import type { Graph } from '@stamhoofd/structures';
-import type { ChartArea, ChartDataset, ChartOptions} from 'chart.js';
+import type { ChartArea, ChartDataset, ChartOptions } from 'chart.js';
 import {
     CategoryScale,
     Chart, Filler, LinearScale,
@@ -59,7 +63,7 @@ const range = computed<DateOption | null>({
     },
 }) as WritableComputedRef<DateOption | null>;
 
-const hasMultipleConfigurations = computed(() => props.configurations.length || props.configurations.find(c => c.length));
+const hasMultipleConfigurations = computed(() => props.configurations.length > 1 || props.configurations.reduce((cc, c) => cc + c.length, 0) > 1);
 const loading = ref(false);
 let chart: Chart;
 const graphData = ref<Graph | null>(null);
@@ -369,8 +373,13 @@ function loadGraph(graph: Graph) {
 .canvas-box {
     position: relative;
     width: 100%;
-    height: 500px;
+    height: 400px;
     max-height: 30vh;
+
+    .popup & {
+        height: 300px;
+        max-height: 25vh;
+    }
 
     .spinner-container {
         position: absolute;

@@ -9,6 +9,11 @@ export enum ExcelExportType {
     ReceivableBalances = 'receivable-balances',
     EventNotifications = 'event-notifications',
     BalanceItems = 'BalanceItems',
+    /**
+     * One payment paying one part of one balance item, which is where money that is spread over
+     * several payments or that paid for several things at once lives.
+     */
+    BalanceItemPayments = 'balance-item-payments',
     PlatformMemberships = 'platform-memberships',
 }
 

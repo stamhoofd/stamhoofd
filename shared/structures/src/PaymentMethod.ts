@@ -17,6 +17,18 @@ export enum PaymentMethod {
     AccountDeductions = 'AccountDeducations',
 }
 
+/**
+ * Money that was paid via one of these methods never passes through a payment provider, so it is
+ * received on the bank account right away instead of being paid out afterwards.
+ */
+export const OFFLINE_PAYMENT_METHODS = [
+    PaymentMethod.Transfer,
+    PaymentMethod.PointOfSale,
+    PaymentMethod.Unknown,
+    // Moving money between two balances doesn't bring anything in
+    PaymentMethod.AccountDeductions,
+];
+
 export enum PaymentMethodV150 {
     Unknown = 'Unknown',
     Transfer = 'Transfer',
@@ -125,6 +137,6 @@ export class PaymentMethodHelper {
     }
 
     static isOnline(method: PaymentMethod) {
-        return method === PaymentMethod.Bancontact || method === PaymentMethod.CreditCard || method === PaymentMethod.iDEAL || method === PaymentMethod.Payconiq || method === PaymentMethod.DirectDebit;
+        return !OFFLINE_PAYMENT_METHODS.includes(method);
     }
 }
