@@ -178,10 +178,10 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'web');
 
             expect(token.isNativeApp).toBe(false);
-            expect(token.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 7 * DAY);
+            expect(token.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 3 * DAY);
         });
 
-        test('an administrator that signs in in the native app keeps a long lived session', async () => {
+        test('an administrator that signs in in the native app gets a longer session', async () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await new UserFactory({
                 organization,
@@ -192,7 +192,8 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'ios');
 
             expect(token.isNativeApp).toBe(true);
-            expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now() + 300 * DAY);
+            expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now() + 29 * DAY);
+            expect(token.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 30 * DAY);
         });
 
         test('renewing an access token does not extend the session past its maximum length', async () => {
@@ -206,7 +207,7 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'web');
 
             // Almost at the end of the maximum session length of an organization administrator
-            const sessionStartedAt = new Date(Date.now() - 90 * DAY + DAY);
+            const sessionStartedAt = new Date(Date.now() - 14 * DAY + DAY);
             sessionStartedAt.setMilliseconds(0);
             token.sessionStartedAt = sessionStartedAt;
             await token.save();
@@ -214,7 +215,7 @@ describe('Endpoint.CreateToken', () => {
             const renewed = await refresh(organization, token.refreshToken);
 
             expect(renewed.sessionStartedAt).toEqual(sessionStartedAt);
-            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + 90 * DAY);
+            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + 14 * DAY);
             expect(renewed.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now());
         });
 
@@ -227,7 +228,7 @@ describe('Endpoint.CreateToken', () => {
             }).create();
 
             const token = await login(organization, admin, 'web');
-            token.sessionStartedAt = new Date(Date.now() - 91 * DAY);
+            token.sessionStartedAt = new Date(Date.now() - 15 * DAY);
             token.refreshTokenValidUntil = new Date(Date.now() - 1000);
             await token.save();
 

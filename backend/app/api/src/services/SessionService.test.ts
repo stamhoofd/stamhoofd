@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, User } from '@stamhoofd/models';
+import type { Organization, SessionLoginMethod, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -7,8 +7,13 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { ContextInstance } from '../helpers/Context.js';
 import { SessionService } from './SessionService.js';
 
-const DAY = 24 * 60 * 60 * 1000;
-const HOUR = 60 * 60 * 1000;
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+function humanDuration(duration: number): string {
+    return duration % DAY === 0 ? `${duration / DAY} days` : `${duration / HOUR} hours`;
+}
 
 /**
  * Run inside a request context, so the service sees the platform the request came from.
@@ -32,6 +37,10 @@ describe('SessionService', () => {
         organization = await new OrganizationFactory({}).create();
     });
 
+    async function createMember(): Promise<User> {
+        return await new UserFactory({ organization }).create();
+    }
+
     async function createAdmin(): Promise<User> {
         return await new UserFactory({
             organization,
@@ -45,86 +54,64 @@ describe('SessionService', () => {
         }).create();
     }
 
-    describe('maximum session length', () => {
-        test('a user without permissions keeps a long lived session', async () => {
-            const user = await new UserFactory({ organization }).create();
-            const token = await SessionService.createSession(user, { loginMethod: 'password' });
+    /**
+     * The policy itself, written out instead of read from SESSION_DURATIONS: a test that
+     * takes its expectations from the constants it checks would accept any change to them.
+     */
+    const policy: { name: string; platform: string; loginMethod: SessionLoginMethod; createUser: () => Promise<User>; session: number; refreshToken: number }[] = [
+        { name: 'a member in a browser', platform: 'web', loginMethod: 'password', createUser: () => createMember(), session: 14 * DAY, refreshToken: 3 * DAY },
+        { name: 'a member in the native app', platform: 'ios', loginMethod: 'password', createUser: () => createMember(), session: 90 * DAY, refreshToken: 30 * DAY },
+        { name: 'an administrator in a browser', platform: 'web', loginMethod: 'password', createUser: () => createAdmin(), session: 14 * DAY, refreshToken: 3 * DAY },
+        { name: 'an administrator in the native app', platform: 'android', loginMethod: 'password', createUser: () => createAdmin(), session: 60 * DAY, refreshToken: 30 * DAY },
+        { name: 'a platform administrator in a browser', platform: 'web', loginMethod: 'password', createUser: () => createPlatformAdmin(), session: 12 * HOUR, refreshToken: 3 * HOUR },
+        { name: 'a platform administrator in the native app', platform: 'ios', loginMethod: 'password', createUser: () => createPlatformAdmin(), session: 7 * DAY, refreshToken: 36 * HOUR },
+        { name: 'an SSO login in a browser', platform: 'web', loginMethod: 'sso', createUser: () => createMember(), session: 12 * HOUR, refreshToken: 3 * HOUR },
+        { name: 'an SSO login in the native app', platform: 'ios', loginMethod: 'sso', createUser: () => createAdmin(), session: 7 * DAY, refreshToken: 36 * HOUR },
+    ];
 
-            expectValidFor(token.refreshTokenValidUntil, 365 * DAY);
-        });
+    describe('session length', () => {
+        for (const { name, platform, loginMethod, createUser, session, refreshToken } of policy) {
+            test(`${name} may go unused for ${humanDuration(refreshToken)}`, async () => {
+                const user = await createUser();
+                const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
 
-        test('an organization administrator is signed out after 90 days', async () => {
+                expectValidFor(token.refreshTokenValidUntil, refreshToken);
+            });
+
+            test(`${name} is signed out after ${humanDuration(session)}`, async () => {
+                const user = await createUser();
+                const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
+
+                // An hour before the session reaches its maximum length: renewing may not
+                // hand out a refresh token that outlives it.
+                token.sessionStartedAt = new Date(Date.now() - session + HOUR);
+                await token.save();
+
+                const rotated = await SessionService.rotateSession(token);
+                expectValidFor(rotated.refreshTokenValidUntil, HOUR);
+            });
+        }
+
+        test('the access token is valid for 15 minutes', async () => {
             const admin = await createAdmin();
             const token = await SessionService.createSession(admin, { loginMethod: 'password' });
 
-            token.sessionStartedAt = new Date(Date.now() - 89 * DAY);
-            await token.save();
-
-            const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 1 * DAY);
-        });
-
-        test('a platform administrator is signed out after 30 days', async () => {
-            const admin = await createPlatformAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: 'password' });
-
-            token.sessionStartedAt = new Date(Date.now() - 29 * DAY);
-            await token.save();
-
-            const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 1 * DAY);
-        });
-
-        test('an administrator that signed in through SSO is signed out after a week', async () => {
-            const admin = await createPlatformAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: 'sso' });
-
-            expectValidFor(token.refreshTokenValidUntil, 7 * DAY);
-            expectValidFor(token.accessTokenValidUntil, 1 * HOUR);
-
-            token.sessionStartedAt = new Date(Date.now() - 6 * DAY);
-            await token.save();
-
-            const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 1 * DAY);
+            expectValidFor(token.accessTokenValidUntil, 15 * MINUTE);
         });
 
         test('the access token never outlives the session', async () => {
             const admin = await createPlatformAdmin();
             const token = await SessionService.createSession(admin, { loginMethod: 'sso' });
 
-            token.sessionStartedAt = new Date(Date.now() - 7 * DAY + 60 * 1000);
+            token.sessionStartedAt = new Date(Date.now() - 12 * HOUR + MINUTE);
             await token.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.accessTokenValidUntil, 60 * 1000);
-        });
-
-        test('a session in the native app is not limited', async () => {
-            const admin = await createPlatformAdmin();
-            const token = await onPlatform('ios', () => SessionService.createSession(admin, { loginMethod: 'password' }));
-
-            expect(token.isNativeApp).toBe(true);
-            expectValidFor(token.refreshTokenValidUntil, 365 * DAY);
-        });
-
-        test('a session in the browser of a mobile device is limited', async () => {
-            const admin = await createPlatformAdmin();
-            const token = await onPlatform('web', () => SessionService.createSession(admin, { loginMethod: 'password' }));
-
-            expect(token.isNativeApp).toBe(false);
-            expectValidFor(token.refreshTokenValidUntil, 7 * DAY);
+            expectValidFor(rotated.accessTokenValidUntil, MINUTE);
         });
     });
 
     describe('inactivity', () => {
-        test('an administrator is signed out after a week without renewing', async () => {
-            const admin = await createAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: 'password' });
-
-            expectValidFor(token.refreshTokenValidUntil, 7 * DAY);
-        });
-
         test('renewing the access token moves the inactivity limit', async () => {
             const admin = await createAdmin();
             const token = await SessionService.createSession(admin, { loginMethod: 'password' });
@@ -133,7 +120,7 @@ describe('SessionService', () => {
             await token.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 7 * DAY);
+            expectValidFor(rotated.refreshTokenValidUntil, 3 * DAY);
         });
     });
 
@@ -156,20 +143,20 @@ describe('SessionService', () => {
             const rotated = await onPlatform('ios', () => SessionService.rotateSession(token));
 
             expect(rotated.isNativeApp).toBe(false);
-            expectValidFor(rotated.refreshTokenValidUntil, 7 * DAY);
+            expectValidFor(rotated.refreshTokenValidUntil, 3 * DAY);
         });
 
-        test('a user that becomes an administrator is limited from that moment on', async () => {
-            const user = await new UserFactory({ organization }).create();
+        test('a member that becomes a platform administrator is limited from that moment on', async () => {
+            const user = await createMember();
             const token = await SessionService.createSession(user, { loginMethod: 'password' });
-            expectValidFor(token.refreshTokenValidUntil, 365 * DAY);
+            expectValidFor(token.refreshTokenValidUntil, 3 * DAY);
 
-            const admin = await createAdmin();
-            token.user.permissions = admin.permissions;
+            const platformAdmin = await createPlatformAdmin();
+            token.user.permissions = platformAdmin.permissions;
             await token.user.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 7 * DAY);
+            expectValidFor(rotated.refreshTokenValidUntil, 3 * HOUR);
         });
     });
 
@@ -205,7 +192,7 @@ describe('SessionService', () => {
             const token = await SessionService.createExpiredSession(admin, { loginMethod: 'sso' });
 
             expect(token.isAccessTokenExpired()).toBe(true);
-            expectValidFor(token.refreshTokenValidUntil, 7 * DAY);
+            expectValidFor(token.refreshTokenValidUntil, 3 * HOUR);
 
             const rotated = await SessionService.rotateSession(token);
             expect(rotated.loginMethod).toBe('sso');
