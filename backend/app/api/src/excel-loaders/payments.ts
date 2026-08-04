@@ -3,7 +3,7 @@ import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stam
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';
 import type { OrderData } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, OrderStatus, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
@@ -17,6 +17,7 @@ export type PaymentWithItem = {
 type PaymentExportOrder = {
     id: string;
     number: number | null;
+    isDeleted: boolean;
     data: OrderData;
 };
 
@@ -35,6 +36,12 @@ export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
      * the export is loaded.
      */
     orderNumbers: number[] = [];
+
+    /**
+     * A deleted order has no number left to export, so it is named in the number column instead of
+     * leaving a cell that reads the same as a payment that never had a webshop order.
+     */
+    hasDeletedOrders = false;
 }
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
@@ -55,7 +62,12 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             })),
         );
         const orders = orderIds.length > 0 ? await Order.getByIDs(...orderIds) : [];
-        const orderMap = new Map<string, PaymentExportOrder>(orders.map(order => [order.id, order]));
+        const orderMap = new Map<string, PaymentExportOrder>(orders.map(order => [order.id, {
+            id: order.id,
+            number: getExportOrderNumber(order),
+            isDeleted: order.status === OrderStatus.Deleted,
+            data: order.data,
+        }]));
         const addedOrderIds = new Set<string>();
 
         return new PaginatedResponse({
@@ -63,7 +75,9 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             results: data.results.map((p) => {
                 const payment = PaymentGeneralWithStripeAccount.create(p);
                 payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
-                payment.orderNumbers = getPaymentOrderNumbers(payment, orderMap);
+                const orderNumbers = getPaymentOrderNumbers(payment, orderMap);
+                payment.orderNumbers = orderNumbers.numbers;
+                payment.hasDeletedOrders = orderNumbers.hasDeleted;
                 payment.expandedBalanceItemPayments = expandPaymentBalanceItemPayments(payment, orderMap, addedOrderIds);
                 return payment;
             }),
@@ -139,24 +153,32 @@ export function getBalanceItemPaymentColumns(): XlsxTransformerColumn<PaymentWit
 }
 
 /**
+ * Deleting an order replaces its number with a random 13 digit one, so the number it held can be handed
+ * out again to a new order. That replacement means nothing to a reader, so it counts as no number.
+ */
+export function getExportOrderNumber(order: { status: OrderStatus; number: number | null }): number | null {
+    return order.status === OrderStatus.Deleted ? null : order.number;
+}
+
+/**
  * The numbers of the webshop orders this payment paid for, in the order they appear in the payment. One
- * payment can settle more than one order, and an order that was deleted no longer has a number.
+ * payment can settle more than one order, and a deleted order is only reported as deleted: the number it
+ * used to have is gone.
  */
 export function getPaymentOrderNumbers(
     payment: PaymentGeneral,
     orderMap: Map<string, PaymentExportOrder>,
-): number[] {
-    return Formatter.uniqueArray(
-        payment.balanceItemPayments.flatMap((item) => {
-            const orderId = item.balanceItem.orderId;
-            if (!orderId) {
-                return [];
-            }
+): { numbers: number[]; hasDeleted: boolean } {
+    const orders = payment.balanceItemPayments.flatMap((item) => {
+        const orderId = item.balanceItem.orderId;
+        const order = orderId ? orderMap.get(orderId) : undefined;
+        return order ? [order] : [];
+    });
 
-            const number = orderMap.get(orderId)?.number;
-            return number !== null && number !== undefined ? [number] : [];
-        }),
-    );
+    return {
+        numbers: Formatter.uniqueArray(orders.flatMap(order => order.number !== null ? [order.number] : [])),
+        hasDeleted: orders.some(order => order.isDeleted),
+    };
 }
 
 export function expandPaymentBalanceItemPayments(
@@ -581,14 +603,14 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
     ];
 }
 
-function getOrderColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
+export function getOrderColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
     return [
         {
             id: 'orderNumbers',
             name: $t('Bestelnummer'),
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
-                if (object.orderNumbers.length === 1) {
+                if (object.orderNumbers.length === 1 && !object.hasDeletedOrders) {
                     return {
                         value: object.orderNumbers[0],
                         style: {
@@ -599,8 +621,13 @@ function getOrderColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                     };
                 }
 
+                const parts = object.orderNumbers.map(number => number.toString());
+                if (object.hasDeletedOrders) {
+                    parts.push($t(`%1FX`));
+                }
+
                 return {
-                    value: object.orderNumbers.join(', '),
+                    value: parts.join(', '),
                 };
             },
         },
