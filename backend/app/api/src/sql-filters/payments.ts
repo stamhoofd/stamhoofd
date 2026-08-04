@@ -180,6 +180,79 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
             ),
         balanceItemPaymentsCompilers,
     ),
+    // The stored payouts this payment was part of (the m2m rows, not the legacy JSON blob above)
+    settlements: createExistsFilter(
+        SQL.select()
+            .from(
+                SQL.table('payment_settlements'),
+            ).join(
+                SQL.join(
+                    SQL.table('settlements'),
+                ).where(
+                    SQL.column('settlements', 'id'),
+                    SQL.column('payment_settlements', 'settlementId'),
+                ),
+            ).where(
+                SQL.column('payment_settlements', 'paymentId'),
+                SQL.column('payments', 'id'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            amount: createColumnFilter({
+                expression: SQL.column('payment_settlements', 'amount'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            externalId: createColumnFilter({
+                expression: SQL.column('payment_settlements', 'externalId'),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+            occurredAt: createColumnFilter({
+                expression: SQL.column('payment_settlements', 'occurredAt'),
+                type: SQLValueType.Datetime,
+                nullable: false,
+            }),
+            settlement: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.column('settlements', 'id'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+                provider: createColumnFilter({
+                    expression: SQL.column('settlements', 'provider'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+                externalId: createColumnFilter({
+                    expression: SQL.column('settlements', 'externalId'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+                reference: createColumnFilter({
+                    expression: SQL.column('settlements', 'reference'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+                settledAt: createColumnFilter({
+                    expression: SQL.column('settlements', 'settledAt'),
+                    type: SQLValueType.Datetime,
+                    nullable: false,
+                }),
+                amount: createColumnFilter({
+                    expression: SQL.column('settlements', 'amount'),
+                    type: SQLValueType.Number,
+                    nullable: false,
+                }),
+                stripeAccountId: createColumnFilter({
+                    expression: SQL.column('settlements', 'stripeAccountId'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            },
+        },
+    ),
 };
 
 /**

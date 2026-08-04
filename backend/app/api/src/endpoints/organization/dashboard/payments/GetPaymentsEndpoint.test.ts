@@ -1,9 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { PaginatedResponse, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PaymentMethod, PaymentStatus, PermissionLevel, Permissions, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, TranslatedString } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { SettlementService } from '../../../../services/SettlementService.js';
 import { GetPaymentsEndpoint } from './GetPaymentsEndpoint.js';
 
 // These tests exercise the balance-item filters reused inside the payments query (balanceItemPayments ->
@@ -153,6 +155,152 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.results.map(r => r.id)).toEqual([matchingPayment.id]);
+        });
+    });
+
+    describe('Settlements of a payment', () => {
+        const createSettledPayment = async (organization: Organization) => {
+            const payment = new Payment();
+            payment.method = PaymentMethod.Bancontact;
+            payment.provider = PaymentProvider.Stripe;
+            payment.status = PaymentStatus.Succeeded;
+            payment.organizationId = organization.id;
+            payment.price = 50_00_00;
+            payment.paidAt = new Date();
+            await payment.save();
+
+            const settlement = await SettlementService.upsertSettlement({
+                provider: PaymentProvider.Stripe,
+                externalId: 'po_' + payment.id,
+                organizationId: organization.id,
+                reference: 'STRIPE PAYOUT',
+                amount: 49_00_00,
+                settledAt: new Date(2026, 0, 15),
+            });
+            await SettlementService.upsertPaymentLine(settlement, {
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_' + payment.id,
+                occurredAt: new Date(2026, 0, 14),
+            });
+
+            return { payment, settlement };
+        };
+
+        test('the m2m settlement filter selects only payments in a matching payout', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const { payment, settlement } = await createSettledPayment(organization);
+
+            // Negative control: a payment without settlement rows
+            const other = new Payment();
+            other.method = PaymentMethod.Bancontact;
+            other.provider = PaymentProvider.Stripe;
+            other.status = PaymentStatus.Succeeded;
+            other.organizationId = organization.id;
+            other.price = 10_00_00;
+            await other.save();
+
+            const response = await getPayments({
+                filter: {
+                    settlements: {
+                        $elemMatch: {
+                            settlement: {
+                                externalId: settlement.externalId,
+                            },
+                        },
+                    },
+                },
+                organization,
+                user,
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.body.results.map(r => r.id)).toEqual([payment.id]);
+        });
+
+        test('an admin of the organization receives the settlements of a payment', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const { payment, settlement } = await createSettledPayment(organization);
+
+            const response = await getPayments({
+                filter: { id: payment.id },
+                organization,
+                user,
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.body.results).toHaveLength(1);
+
+            const result = response.body.results[0];
+            expect(result.settlements).toHaveLength(1);
+            expect(result.settlements[0]).toMatchObject({
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_' + payment.id,
+            });
+            expect(result.settlements[0].settlement).toMatchObject({
+                externalId: settlement.externalId,
+                reference: 'STRIPE PAYOUT',
+                amount: 49_00_00,
+            });
+        });
+
+        test('the platform payout of a destination charge is never returned to the organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await createFinanceUser(organization);
+
+            const stripeAccount = new StripeAccount();
+            stripeAccount.organizationId = organization.id;
+            stripeAccount.accountId = 'acct_' + uuidv4();
+            await stripeAccount.save();
+
+            const payment = new Payment();
+            payment.method = PaymentMethod.Bancontact;
+            payment.provider = PaymentProvider.Stripe;
+            payment.status = PaymentStatus.Succeeded;
+            payment.organizationId = organization.id;
+            payment.stripeAccountId = stripeAccount.id;
+            payment.price = 50_00_00;
+            payment.paidAt = new Date();
+            await payment.save();
+
+            const organizationPayout = await SettlementService.upsertSettlement({
+                provider: PaymentProvider.Stripe,
+                externalId: 'po_org_' + payment.id,
+                stripeAccountId: stripeAccount.id,
+                organizationId: organization.id,
+                amount: 49_00_00,
+                settledAt: new Date(2026, 0, 15),
+            });
+            await SettlementService.upsertPaymentLine(organizationPayout, {
+                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_org_' + payment.id, occurredAt: new Date(2026, 0, 14),
+            });
+
+            // The same gross charge also sits in our platform payout, owned by the membership
+            // organization
+            const membershipOrganization = await new OrganizationFactory({}).create();
+            const platformPayout = await SettlementService.upsertSettlement({
+                provider: PaymentProvider.Stripe,
+                externalId: 'po_platform_' + payment.id,
+                stripeAccountId: null,
+                organizationId: membershipOrganization.id,
+                amount: 1234_00_00,
+                settledAt: new Date(2026, 0, 12),
+            });
+            await SettlementService.upsertPaymentLine(platformPayout, {
+                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_platform_' + payment.id, occurredAt: new Date(2026, 0, 11),
+            });
+
+            const response = await getPayments({ filter: { id: payment.id }, organization, user });
+
+            expect(response.status).toBe(200);
+            const result = response.body.results[0];
+            expect(result.settlements).toHaveLength(1);
+            expect(result.settlements[0].settlement.externalId).toBe(organizationPayout.externalId);
         });
     });
 });

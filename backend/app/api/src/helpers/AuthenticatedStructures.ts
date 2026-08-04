@@ -46,12 +46,15 @@ export class AuthenticatedStructures {
         const includeSettlements = checkPermissions && !!Context.user && !!Context.user.permissions && payments.every(p => !!Context.optionalAuth?.checkScope(p.organizationId));
 
         const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
+        const { paymentSettlements, settlements } = includeSettlements ? await Payment.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };
 
         return Payment.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
             balanceItems,
             payingOrganizations,
+            paymentSettlements,
+            settlements,
         }, includeSettlements);
     }
 
