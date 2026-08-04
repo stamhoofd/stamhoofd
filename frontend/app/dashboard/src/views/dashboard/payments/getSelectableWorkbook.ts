@@ -39,6 +39,12 @@ export function getSelectableWorkbook() {
                         description: $t(`%Lx`),
                     }),
 
+                    new SelectableColumn({
+                        id: 'orderNumbers',
+                        name: $t('Bestelnummer'),
+                        description: $t('Het nummer van de webshopbestelling die werd betaald'),
+                    }),
+
                     ...getGeneralColumns(),
 
                     ...getSettlementColumns(),

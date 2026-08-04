@@ -1,5 +1,5 @@
 import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedString } from '@stamhoofd/structures';
-import { expandPaymentBalanceItemPayments } from './payments.js';
+import { expandPaymentBalanceItemPayments, getPaymentOrderNumbers } from './payments.js';
 
 function createOrderData(options: {
     percentageDiscount?: number;
@@ -69,6 +69,34 @@ function createPayment(price: number): PaymentGeneral {
             }),
         ],
     });
+}
+
+function createPaymentForOrders(orderIds: (string | null)[]): PaymentGeneral {
+    return PaymentGeneral.create({
+        id: 'payment-1',
+        method: PaymentMethod.Transfer,
+        status: PaymentStatus.Succeeded,
+        price: 1000 * orderIds.length,
+        balanceItemPayments: orderIds.map((orderId, index) => BalanceItemPaymentDetailed.create({
+            id: 'balance-item-payment-' + index,
+            price: 1000,
+            balanceItem: BalanceItem.create({
+                id: 'balance-item-' + index,
+                type: orderId ? BalanceItemType.Order : BalanceItemType.Other,
+                orderId,
+                description: 'Bestelling',
+                amount: 1,
+                unitPrice: 1000,
+            }),
+        })),
+    });
+}
+
+function createOrderMap(orders: { id: string; number: number | null }[]) {
+    const data = createOrderData();
+    return new Map<string, { id: string; number: number | null; data: OrderData }>(
+        orders.map(order => [order.id, { ...order, data }]),
+    );
 }
 
 function expectRowsToMatchReplacedPayment(rows: BalanceItemPaymentDetailed[], payment: PaymentGeneral) {
@@ -196,6 +224,37 @@ describe('payments excel loader', () => {
             expect(secondRows[0].price).toBe(orderData.totalPrice);
             expectRowsToMatchReplacedPayment(firstRows, createPayment(orderData.totalPrice));
             expectRowsToMatchReplacedPayment(secondRows, createPayment(orderData.totalPrice));
+        });
+    });
+
+    describe('getPaymentOrderNumbers', () => {
+        it('looks up the number of the order that was paid', () => {
+            const orderMap = createOrderMap([{ id: 'order-1', number: 123 }]);
+
+            expect(getPaymentOrderNumbers(createPaymentForOrders(['order-1']), orderMap)).toEqual([123]);
+        });
+
+        it('lists every order a payment paid for, without repeating one', () => {
+            const orderMap = createOrderMap([
+                { id: 'order-1', number: 123 },
+                { id: 'order-2', number: 124 },
+            ]);
+
+            const payment = createPaymentForOrders(['order-1', 'order-2', 'order-1']);
+
+            expect(getPaymentOrderNumbers(payment, orderMap)).toEqual([123, 124]);
+        });
+
+        it('skips balance items without a known order number', () => {
+            const orderMap = createOrderMap([
+                { id: 'order-1', number: null },
+                { id: 'order-2', number: 124 },
+            ]);
+
+            expect(getPaymentOrderNumbers(createPaymentForOrders([null]), orderMap)).toEqual([]);
+            expect(getPaymentOrderNumbers(createPaymentForOrders(['order-1']), orderMap)).toEqual([]);
+            expect(getPaymentOrderNumbers(createPaymentForOrders(['deleted-order']), orderMap)).toEqual([]);
+            expect(getPaymentOrderNumbers(createPaymentForOrders([null, 'order-1', 'order-2']), orderMap)).toEqual([124]);
         });
     });
 });
