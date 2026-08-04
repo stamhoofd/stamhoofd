@@ -362,6 +362,7 @@ export class SQLWhereLike extends SQLWhere {
     column: SQLExpression;
     notLike = false;
     value: SQLExpression;
+    nullable = false;
 
     constructor(column: SQLExpression, value: SQLExpression) {
         super();
@@ -371,6 +372,11 @@ export class SQLWhereLike extends SQLWhere {
 
     static escape(str: string) {
         return str.replace(/([%_\\])/g, '\\$1');
+    }
+
+    setNullable(nullable: boolean = true): this {
+        this.nullable = nullable;
+        return this;
     }
 
     clone(): this {
@@ -393,11 +399,25 @@ export class SQLWhereLike extends SQLWhere {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
+        const comparison = joinSQLQuery([
             this.column.getSQL(options),
             ` ${this.notLike ? 'NOT LIKE' : 'LIKE'} `,
             this.value.getSQL(options),
         ]);
+
+        if (this.nullable) {
+            // A nullable column yields NULL (not false) when the value IS NULL, so a negated $contains
+            // (NOT (value LIKE ...)) would drop those rows (NOT NULL is NULL). Coalesce the comparison to
+            // false so it is two-valued, matching the in-memory engine: a null value never contains the
+            // needle, so its negation matches.
+            return joinSQLQuery([
+                'COALESCE(',
+                comparison,
+                ', 0)',
+            ]);
+        }
+
+        return comparison;
     }
 }
 

@@ -30,13 +30,17 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     timeSlotEndTime: createColumnFilter({
+        // Stored as a number (minutes since midnight), so it must be typed as a JSON number to allow
+        // numeric comparisons and to match the in-memory filter.
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.endTime'),
-        type: SQLValueType.JSONString,
+        type: SQLValueType.JSONNumber,
         nullable: true,
     }),
     timeSlotStartTime: createColumnFilter({
+        // Stored as a number (minutes since midnight), so it must be typed as a JSON number to allow
+        // numeric comparisons and to match the in-memory filter.
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.startTime'),
-        type: SQLValueType.JSONString,
+        type: SQLValueType.JSONNumber,
         nullable: true,
     }),
     createdAt: createColumnFilter({

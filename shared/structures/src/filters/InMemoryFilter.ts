@@ -307,9 +307,8 @@ export function createInMemoryFilterCompiler(path: string | string[], overrideFi
         return (object) => {
             const value = objectPathValue(object, splitted);
             if (value === undefined) {
-                // Cannot filter on property that does not exists
-                // (no need to continue here on the filters as these will throw on an undefined value)
-                return false;
+                // undefined values should be handled as null values for parity with the backend
+                return runner(null);
             }
             return runner(value);
         };

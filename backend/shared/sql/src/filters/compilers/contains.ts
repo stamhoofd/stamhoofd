@@ -41,6 +41,6 @@ export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilt
             scalarToSQLExpression(
                 '%' + SQLWhereLike.escape(value) + '%',
             ),
-        );
+        ).setNullable(column.nullable);
     };
 }

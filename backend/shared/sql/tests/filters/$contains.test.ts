@@ -811,6 +811,79 @@ describe('$contains', () => {
                 });
             });
 
+            it('Negated $contains also matches null and missing values', async () => {
+                // Rows that do not contain the needle (null, missing key, or a non-matching string) must all
+                // match a negated $contains. In three-valued SQL, NOT (NULL LIKE ...) is NULL and would drop
+                // the null/missing rows; the nullable column coalesces the comparison to false so they match,
+                // like the in-memory engine.
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: null,
+                            },
+                        },
+                        {
+                            settings: {
+                                other: 15,
+                            },
+                        },
+                        {
+                            settings: {
+                                scalar: 'nothing here',
+                            },
+                        },
+                    ],
+                    doMatch: [
+                        {
+                            $not: {
+                                'settings.scalar': {
+                                    $contains: '15',
+                                },
+                            },
+                        },
+                    ],
+                    doNotMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '15',
+                            },
+                        },
+                    ],
+                });
+
+                // A row that does contain the needle must be excluded by the negated $contains.
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: 'has 15 here',
+                            },
+                        },
+                    ],
+                    doMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '15',
+                            },
+                        },
+                    ],
+                    doNotMatch: [
+                        {
+                            $not: {
+                                'settings.scalar': {
+                                    $contains: '15',
+                                },
+                            },
+                        },
+                    ],
+                });
+            });
+
             it('Number fields are converted to strings', async () => {
                 await testMatch({
                     tableDefinition,

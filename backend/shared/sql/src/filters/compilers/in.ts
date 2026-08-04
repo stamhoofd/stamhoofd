@@ -1,10 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { assertFilterCompareValue } from '@stamhoofd/structures';
-import { scalarToSQLExpression, SQLArray } from '../../SQLExpressions.js';
+import { scalarToSQLExpression, SQLArray, SQLLower } from '../../SQLExpressions.js';
 import { SQLJsonOverlaps } from '../../SQLJsonExpressions.js';
 import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere.js';
-import type { SQLCurrentColumn, SQLSyncFilterRunner} from '../SQLFilter.js';
+import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilter.js';
 import { normalizeColumn, SQLValueType } from '../SQLFilter.js';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 import { $equalsSQLFilterCompiler } from './equals.js';
@@ -49,7 +49,7 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             const valuesExpression = scalarToSQLExpression(jsonValues);
 
             return new SQLJsonOverlaps(
-                column.expression,
+                new SQLLower(column.expression),
                 valuesExpression,
             );
         }
