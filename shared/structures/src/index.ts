@@ -107,6 +107,7 @@ export * from './members/UitpasNumberDetails.js';
 export * from './getActivePeriods.js';
 
 // UserPermissions
+export * from './Impersonation.js';
 export * from './UserPermissions.js';
 export * from './UserWithMembers.js';
 

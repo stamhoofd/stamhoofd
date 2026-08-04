@@ -28,6 +28,11 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const organization = await Context.setOptionalOrganizationScope();
         const { user, token } = await Context.authenticate({ allowWithoutAccount: true });
 
+        // This deletes the account of the session, which while impersonating is the
+        // administrator's own - never what they meant to do from inside somebody else's
+        // account.
+        Context.assertNotImpersonating();
+
         // Send an e-mail to inform everyone about this action
 
         // Delete the account

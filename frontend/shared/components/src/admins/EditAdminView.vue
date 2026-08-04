@@ -70,6 +70,16 @@
         </p>
         <code v-if="STAMHOOFD.environment === 'development'" class="style-code">{{ JSON.stringify(getUnloadedPermissions(user)?.encode({version: 1000}), undefined, '    ') }}</code>
 
+        <template v-if="!isNew && showImpersonate">
+            <hr><h2>{{ $t('Aanmelden als deze beheerder') }}</h2>
+            <p>{{ $t('Bekijk het platform zoals deze beheerder het ziet. Je krijgt een link die je in een privévenster opent.') }}</p>
+
+            <button class="button secundary" type="button" data-testid="impersonate-admin" @click="impersonate(user)">
+                <span class="icon eye" />
+                <span>{{ $t('Link aanmaken') }}</span>
+            </button>
+        </template>
+
         <template v-if="!isNew && getUnloadedPermissions(user)">
             <hr v-if="!isNew"><h2>
                 {{ $t('%CJ') }}
@@ -106,6 +116,7 @@ import { computed, ref } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdminLabels } from './hooks/useAdminLabels';
 import { useAdmins, usePermissionsCache } from './hooks/useAdmins';
+import { useImpersonation } from './hooks/useImpersonation';
 
 const $errors = useErrors();
 const saving = ref(false);
@@ -143,6 +154,9 @@ const resources = computed(() => {
 const canEditDetails = computed(() => {
     return patched.value.id === $context.value?.user?.id || (!patched.value.hasAccount && (!patched.value?.permissions?.globalPermissions || $context.value.auth.hasPlatformFullAccess()));
 });
+
+const { canImpersonate, impersonate } = useImpersonation();
+const showImpersonate = computed(() => canImpersonate(props.user));
 
 const addPermissionPatch = (patch: AutoEncoderPatchType<Permissions>) => {
     addPatch(User.patch({

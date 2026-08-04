@@ -6,6 +6,7 @@ import './cleanup-orphaned-cached-balances.js';
 import './balance-emails.js';
 import './delete-old-email-drafts.js';
 import './delete-expired-mfa-tokens.js';
+import './delete-expired-impersonation-tokens.js';
 import './delete-archived-data.js';
 import './mollie-chargebacks.js';
 import './mollie-refunds.js';

@@ -8,6 +8,10 @@
             </h1>
             <p>{{ $t('%jj') }}</p>
 
+            <p v-if="impersonatedBy" class="warning-box icon eye" data-testid="impersonation-notice">
+                {{ $t('Een beheerder meldde zich aan als {name} om te bekijken wat deze gebruiker ziet. Alles wat je wijzigt, wordt geregistreerd op naam van {email}.', {name: $user?.name || $user?.email || '', email: impersonatedBy.email}) }}
+            </p>
+
             <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
                 {{ $t('%jk') }}
             </p>
@@ -18,17 +22,17 @@
                 <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%jx`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`%1MT`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword || !canEditAccount" :placeholder="$t(`%1MT`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`%1MU`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword || !canEditAccount" :placeholder="$t(`%1MU`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
+                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword || !canEditAccount" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
 
-                <div v-if="usesPassword" class="style-button-bar">
+                <div v-if="usesPassword && canEditAccount" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
                             <span>{{ $t('%1Op') }}</span>
@@ -57,7 +61,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="passwordEnabled" :selectable="true" @click.prevent="openChangePassword">
+                <STListItem v-if="passwordEnabled && canEditAccount" :selectable="true" @click.prevent="openChangePassword">
                     <template #left>
                         <IconContainer icon="key" aside-icon="retry" />
                     </template>
@@ -70,7 +74,7 @@
                     </h3>
                 </STListItem>
 
-                <STListItem v-if="twoFactorEnabled || $user?.hasTwoFactor" :selectable="true" data-testid="open-mfa-settings" @click.prevent="openMFASettings">
+                <STListItem v-if="(twoFactorEnabled || $user?.hasTwoFactor) && canEditAccount" :selectable="true" data-testid="open-mfa-settings" @click.prevent="openMFASettings">
                     <template #left>
                         <IconContainer icon="privacy" />
                     </template>
@@ -84,7 +88,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!usesGoogle && googleEnabled" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
+                <STListItem v-if="!usesGoogle && googleEnabled && canEditAccount" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/partners/icons/google.svg" width="24" height="24">
                     </template>
@@ -97,7 +101,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="ssoEnabled && !usesSSO" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
+                <STListItem v-if="ssoEnabled && !usesSSO && canEditAccount" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
                     <template #left>
                         <IconContainer icon="lock" />
                     </template>
@@ -112,12 +116,15 @@
                         <IconContainer icon="logout" class="error" />
                     </template>
 
-                    <h3 class="style-title-list">
+                    <h3 v-if="impersonatedBy" class="style-title-list">
+                        {{ $t('Stoppen met aanmelden als deze gebruiker') }}
+                    </h3>
+                    <h3 v-else class="style-title-list">
                         {{ $t('%12N') }}
                     </h3>
                 </STListItem>
 
-                <STListItem :selectable="true" @click.prevent="deleteRequest">
+                <STListItem v-if="canEditAccount" :selectable="true" @click.prevent="deleteRequest">
                     <template #left>
                         <LoadingButton>
                             <IconContainer icon="trash" class="error" />
@@ -138,7 +145,7 @@
                 </p>
             </template>
 
-            <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
+            <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled) && canEditAccount" class="container">
                 <hr><h2>{{ googleConfig.fullName || $t('%15b') }}</h2>
                 <p>{{ $t('%jq') }}</p>
 
@@ -162,7 +169,7 @@
                 </STList>
             </div>
 
-            <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled)" class="container">
+            <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled) && canEditAccount" class="container">
                 <hr><h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
                 <p>{{ $t('%js', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
 
@@ -186,7 +193,7 @@
                 </STList>
             </div>
 
-            <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO)" class="container">
+            <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO) && canEditAccount" class="container">
                 <hr><h2>{{ $t('%ju') }}</h2>
                 <p>{{ $t('%jv') }}</p>
 
@@ -280,6 +287,14 @@ const usesSSO = computed(() => {
 });
 
 const isUserModeOrganization = STAMHOOFD.userMode === 'organization';
+
+/**
+ * The administrator behind an impersonated session. They are the one this session really
+ * acts as, so nothing that touches the credentials of this account is offered here.
+ */
+const impersonatedBy = computed(() => $user.value?.impersonatedBy ?? null);
+const canEditAccount = computed(() => !impersonatedBy.value);
+
 const saving = ref(false);
 const policies = computed(() => $platform.value.config.privacy.policies);
 
