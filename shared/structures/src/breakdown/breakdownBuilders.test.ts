@@ -12,7 +12,7 @@ import type { BalanceItemBreakdown, BreakdownGroup } from '../PaymentBreakdown.j
 import { BreakdownAmountType, BreakdownGraphUnit, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '../PaymentBreakdown.js';
 import { BalanceItemBreakdownBuilder } from './BalanceItemBreakdownBuilder.js';
 import { PaymentBreakdownBuilder } from './PaymentBreakdownBuilder.js';
-import { PENDING_PAYMENT_ID, PENDING_PAYMENT_STATUSES } from '../PaymentSettlement.js';
+import { PENDING_PAYMENT_ID, PENDING_PAYMENT_STATUSES } from '../PaymentSettlementGroups.js';
 import { StripeAccount, StripeBusinessProfile, StripeMetaData } from '../StripeAccount.js';
 import { Cart } from '../webshops/Cart.js';
 import { CartItem, CartItemPrice } from '../webshops/CartItem.js';

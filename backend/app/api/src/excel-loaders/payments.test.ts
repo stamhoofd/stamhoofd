@@ -1,5 +1,8 @@
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedString } from '@stamhoofd/structures';
-import { expandPaymentBalanceItemPayments } from './payments.js';
+import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Product, ProductPrice, SettlementReference, TranslatedString } from '@stamhoofd/structures';
+import { PaymentSettlementDetailed } from '@stamhoofd/structures/settlements/PaymentSettlement.js';
+import { Settlement } from '@stamhoofd/structures/settlements/Settlement.js';
+import { expandPaymentBalanceItemPayments, getSettlementColumns } from './payments.js';
 
 function createOrderData(options: {
     percentageDiscount?: number;
@@ -197,5 +200,64 @@ describe('payments excel loader', () => {
             expectRowsToMatchReplacedPayment(firstRows, createPayment(orderData.totalPrice));
             expectRowsToMatchReplacedPayment(secondRows, createPayment(orderData.totalPrice));
         });
+    });
+});
+
+describe('getSettlementColumns', () => {
+    function getValue(useStored: boolean, id: string, payment: PaymentGeneral): unknown {
+        const column = getSettlementColumns(useStored).find(c => 'id' in c && c.id === id) as XlsxTransformerConcreteColumn<PaymentGeneral>;
+        return column.getValue(payment).value;
+    }
+
+    const createSettledPayment = ({ settlements = true } = {}) => {
+        return PaymentGeneral.create({
+            method: PaymentMethod.Bancontact,
+            settlement: SettlementReference.create({
+                id: 'po_legacy',
+                reference: 'LEGACY',
+                settledAt: new Date(2026, 0, 10),
+                amount: 100_00_00,
+            }),
+            settlements: settlements
+                ? [PaymentSettlementDetailed.create({
+                        settlementId: 'settlement-1',
+                        paymentId: 'payment-1',
+                        amount: 50_00_00,
+                        externalId: 'txn_1',
+                        occurredAt: new Date(2026, 0, 14),
+                        settlement: Settlement.create({
+                            provider: PaymentProvider.Stripe,
+                            externalId: 'po_stored',
+                            reference: 'STORED',
+                            settledAt: new Date(2026, 0, 15),
+                            amount: 90_00_00,
+                        }),
+                    })]
+                : [],
+        });
+    };
+
+    it('reads the legacy blob without the feature flag', () => {
+        const payment = createSettledPayment();
+
+        expect(getValue(false, 'settlement.reference', payment)).toBe('LEGACY');
+        expect(getValue(false, 'settlement.settledAt', payment)).toEqual(new Date(2026, 0, 10));
+        expect(getValue(false, 'settlement.amount', payment)).toBe(100);
+    });
+
+    it('reads the stored settlements with the feature flag', () => {
+        const payment = createSettledPayment();
+
+        expect(getValue(true, 'settlement.reference', payment)).toBe('STORED');
+        expect(getValue(true, 'settlement.settledAt', payment)).toEqual(new Date(2026, 0, 15));
+        expect(getValue(true, 'settlement.amount', payment)).toBe(90);
+    });
+
+    it('shows nothing when there are no stored settlements yet', () => {
+        const payment = createSettledPayment({ settlements: false });
+
+        expect(getValue(true, 'settlement.reference', payment)).toBe('');
+        expect(getValue(true, 'settlement.settledAt', payment)).toBeNull();
+        expect(getValue(true, 'settlement.amount', payment)).toBeNull();
     });
 });

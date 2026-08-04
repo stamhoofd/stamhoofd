@@ -2,11 +2,13 @@ import { field } from '@simonbackx/simple-encoding';
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';
-import type { OrderData } from '@stamhoofd/structures';
+import type { OrderData, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { getPrimaryPaymentSettlement } from '@stamhoofd/structures/settlements/PaymentSettlement.js';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
+import { Context } from '../helpers/Context.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 export type PaymentWithItem = {
@@ -62,7 +64,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             }),
         });
     },
-    getSheets: () => [
+    getSheets: (platform) => [
         {
             id: 'payments',
             name: $t(`%1JH`),
@@ -70,7 +72,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
                 ...getGeneralColumns(),
                 ...getInvoiceColumns(),
                 ...getPayingOrganizationColumns(),
-                ...getSettlementColumns(),
+                ...getSettlementColumns(useStoredSettlements(platform)),
                 ...getStripeColumns(),
                 ...getTransferColumns(),
             ],
@@ -552,7 +554,34 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
     ];
 }
 
-function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
+/**
+ * Behind the 'settlements' feature flag the payout columns come from the stored settlement rows
+ * instead of the legacy blob (same deterministic primary, so the values only differ when the blob
+ * is stale).
+ */
+function useStoredSettlements(platform: PlatformStruct): boolean {
+    return platform.config.featureFlags.includes('settlements')
+        || (Context.organization?.privateMeta?.featureFlags.includes('settlements') ?? false);
+}
+
+/**
+ * Exported for tests.
+ */
+export function getSettlementColumns(useStored: boolean): XlsxTransformerColumn<PaymentGeneral>[] {
+    const getSettlement = (object: PaymentGeneral): { reference: string; settledAt: Date; amount: number } | null => {
+        if (useStored) {
+            const primary = getPrimaryPaymentSettlement(object.settlements);
+            return primary
+                ? {
+                        reference: primary.settlement.reference || primary.settlement.externalId,
+                        settledAt: primary.settlement.settledAt,
+                        amount: primary.settlement.amount,
+                    }
+                : null;
+        }
+        return object.settlement;
+    };
+
     return [
         {
             id: 'settlement.reference',
@@ -560,7 +589,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 21,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.settlement?.reference || '',
+                    value: getSettlement(object)?.reference || '',
                 };
             },
         },
@@ -570,7 +599,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.settlement?.settledAt ?? null,
+                    value: getSettlement(object)?.settledAt ?? null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.DateSlash,
@@ -584,8 +613,9 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             name: $t(`%MD`),
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
+                const settlement = getSettlement(object);
                 return {
-                    value: object.settlement?.amount !== undefined ? (object.settlement?.amount / 1_0000) : null,
+                    value: settlement ? (settlement.amount / 1_0000) : null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
