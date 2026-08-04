@@ -1463,7 +1463,7 @@ describe('MFA', () => {
 
             const token = await Token.getByAccessToken(response.body.accessToken);
             expect(token!.loginMethod).toBe('sso');
-            expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 3 * 60 * 60 * 1000);
         });
     });
 

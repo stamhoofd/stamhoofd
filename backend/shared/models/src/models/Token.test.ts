@@ -48,8 +48,8 @@ describe('Model.Token', () => {
         expect(token.user.id).toEqual(user.id);
         expect(token.accessToken).toHaveLength(256);
         expect(token.refreshToken).toHaveLength(256);
-        expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(new Date().getTime() + (3600 * 1000) / 2 - 1);
-        expect(token.accessTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
+        expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(new Date().getTime() + 14 * 60 * 1000);
+        expect(token.accessTokenValidUntil.getTime()).toBeLessThanOrEqual(new Date().getTime() + 15 * 60 * 1000);
 
         expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(token.accessTokenValidUntil.getTime());
         expect(token.refreshTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);

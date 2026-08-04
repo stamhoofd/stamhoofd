@@ -5,6 +5,7 @@ import { ApiUser } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ACCESS_TOKEN_DURATION, DEFAULT_REFRESH_TOKEN_DURATION } from '../constants/sessions.js';
 import { User } from './User.js';
 
 export type TokenWithUser = Token & { user: User };
@@ -314,11 +315,11 @@ export class Token extends QueryableModel {
         token.sessionStartedAt.setMilliseconds(0);
 
         token.accessTokenValidUntil = new Date();
-        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 3600 * 1000);
+        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + ACCESS_TOKEN_DURATION);
         token.accessTokenValidUntil.setMilliseconds(0);
 
         token.refreshTokenValidUntil = new Date();
-        token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + 3600 * 1000 * 24 * 365);
+        token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + DEFAULT_REFRESH_TOKEN_DURATION);
         token.refreshTokenValidUntil.setMilliseconds(0);
 
         token.accessToken = (await randomBytes(192)).toString('base64').toUpperCase();
