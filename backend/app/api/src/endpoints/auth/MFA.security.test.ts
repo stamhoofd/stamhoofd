@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, OrganizationFactory, PasswordToken, Token, User, UserFactory, WebauthnCredential } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
+import { NewUser, PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import crypto from 'crypto';
 import { authenticator } from 'otplib';
@@ -16,6 +16,7 @@ import { DeletePasskeyEndpoint } from './DeletePasskeyEndpoint.js';
 import { DeleteTOTPEndpoint } from './DeleteTOTPEndpoint.js';
 import { GetMFAChallengeEndpoint } from './GetMFAChallengeEndpoint.js';
 import { GetMFAStatusEndpoint } from './GetMFAStatusEndpoint.js';
+import { PatchUserEndpoint } from './PatchUserEndpoint.js';
 import { RegisterPasskeyOptionsEndpoint } from './RegisterPasskeyOptionsEndpoint.js';
 import { SetupTOTPEndpoint } from './SetupTOTPEndpoint.js';
 import { VerifyEmailEndpoint } from './VerifyEmailEndpoint.js';
@@ -505,6 +506,80 @@ describe('MFA security', () => {
             const code = await EmailVerificationCode.createFor(user, user.email);
             const err = await captureError(testServer.test(new VerifyEmailEndpoint(), bearer(Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }), expired)));
             expect(err.code).toBe('require_mfa');
+        });
+    });
+
+    // -----------------------------------------------------------------------
+    // Absorbing someone else's account by taking over their email address
+    // -----------------------------------------------------------------------
+    describe('merging accounts', () => {
+        /**
+         * Verifying an email address that already belongs to another account merges that
+         * account into yours. Reading the victim's mailbox is a single primary credential,
+         * exactly the one a second factor exists to back up, so it must not be enough to
+         * pull an account that has a second factor (and its permissions) into an account
+         * that does not.
+         */
+        async function requestEmailChange(user: User, token: Token, newEmail: string, organization: Organization): Promise<EmailVerificationCode> {
+            const request = Request.patch({
+                path: '/user/' + user.id,
+                host: organization.getApiHost(),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+                body: NewUser.patch({ id: user.id, email: newEmail }),
+            });
+
+            const err = await captureError(testServer.test(new PatchUserEndpoint(), request));
+            expect(err.code).toBe('verify_email');
+
+            const verificationToken = (err.meta as { token: string }).token;
+            const code = await EmailVerificationCode.select().where('token', verificationToken).first(true);
+            expect(code.email).toBe(newEmail);
+            return code;
+        }
+
+        test('taking over the email address of an account with a second factor is refused', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const victim = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const victimTotp = await addConfirmedTOTP(victim);
+
+            const attacker = await new UserFactory({ organization, password }).create();
+            const attackerToken = await freshToken(attacker);
+
+            const code = await requestEmailChange(attacker, attackerToken, victim.email, organization);
+
+            const err = await captureError(testServer.test(new VerifyEmailEndpoint(), bearer(Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }), attackerToken)));
+            expect(err.code).toBe('email_in_use');
+
+            // The victim still owns their account, their permissions and their factor.
+            const storedVictim = await User.getByID(victim.id);
+            expect(storedVictim).toBeDefined();
+            expect(storedVictim!.email).toBe(victim.email);
+            expect(await MFATOTP.getByID(victimTotp.id)).toBeDefined();
+
+            const storedAttacker = await User.getByID(attacker.id);
+            expect(storedAttacker!.email).toBe(attacker.email);
+            expect(storedAttacker!.permissions).toBeNull();
+        });
+
+        test('an account without a second factor can still be merged', async () => {
+            // Merging is a real feature for people who signed up twice. Without a factor,
+            // whoever reads the mailbox could take that account over with a password reset
+            // anyway, so nothing is bypassed here.
+            const organization = await new OrganizationFactory({}).create();
+            const other = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+
+            const user = await new UserFactory({ organization, password }).create();
+            const token = await freshToken(user);
+
+            const code = await requestEmailChange(user, token, other.email, organization);
+
+            const response = await testServer.test(new VerifyEmailEndpoint(), bearer(Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }), token));
+            expect(response.body).toBeInstanceOf(TokenStruct);
+
+            expect(await User.getByID(other.id)).toBeUndefined();
+            const stored = await User.getByID(user.id);
+            expect(stored!.email).toBe(other.email);
+            expect(stored!.permissions).not.toBeNull();
         });
     });
 
