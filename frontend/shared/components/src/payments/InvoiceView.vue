@@ -154,6 +154,28 @@
             <STList v-else>
                 <PaymentRow v-for="payment of invoice.payments" :key="payment.id" :payment="payment" :payments="invoice.payments" :price="payment.isFailed ? 0 : payment.price" />
             </STList>
+
+            <template v-if="hasSettlementsFlag && invoiceSettlements.length > 0">
+                <hr>
+                <h2>{{ $t('Uitbetalingen') }}</h2>
+                <p class="style-description">
+                    {{ $t('Hoeveel van de betalingen van deze factuur in elke uitbetaling zat.') }}
+                </p>
+
+                <STList>
+                    <STListItem v-for="row of invoiceSettlements" :key="row.settlement.id">
+                        <h3 class="style-title-list">
+                            {{ row.settlement.reference || row.settlement.externalId }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ formatDate(row.settlement.settledAt) }}
+                        </p>
+                        <template #right>
+                            {{ formatPrice(row.amount) }}
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
         </main>
     </div>
 </template>
@@ -174,6 +196,8 @@ import InvoiceItemsBox from './InvoiceItemsBox.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 import { useDownloadInvoice } from './hooks/useDownloadInvoice.ts';
 import { useContext } from '#hooks/useContext.ts';
+import { useFeatureFlagComputed } from '#hooks/useFeatureFlag.ts';
+import type { Settlement } from '@stamhoofd/structures/settlements/Settlement.js';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import LoadingButton from '#navigation/LoadingButton.vue';
@@ -191,6 +215,24 @@ const props = withDefaults(
 );
 
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('invoice', props);
+const hasSettlementsFlag = useFeatureFlagComputed('settlements');
+
+// How much of this invoice's payments each payout contained
+const invoiceSettlements = computed(() => {
+    const grouped = new Map<string, { settlement: Settlement; amount: number }>();
+    for (const payment of props.invoice.payments) {
+        for (const line of payment.settlements) {
+            const existing = grouped.get(line.settlement.id);
+            if (existing) {
+                existing.amount += line.amount;
+            }
+            else {
+                grouped.set(line.settlement.id, { settlement: line.settlement, amount: line.amount });
+            }
+        }
+    }
+    return [...grouped.values()].sort((a, b) => Sorter.byDateValue(b.settlement.settledAt, a.settlement.settledAt));
+});
 const errors = useErrors();
 const title = props.invoice.number ?? '/';
 const { downloadInvoice, downloadInvoicePdf } = useDownloadInvoice();
