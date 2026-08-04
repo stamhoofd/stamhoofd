@@ -1,7 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import type { StripeAccount } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
+import { Payment, StripeAccount } from '@stamhoofd/models';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { PaymentProvider } from '@stamhoofd/structures';
@@ -14,6 +13,7 @@ import { passthroughFetch } from './passthroughFetch.js';
 import type { StripePaymentIdCache } from './resolveStripePaymentId.js';
 import { resolveStripePaymentId } from './resolveStripePaymentId.js';
 import { StripeFeeSync } from './StripeFeeSync.js';
+import { ApplicationFeeDetails } from './StripeInvoicer.js';
 
 /**
  * Walks paid payouts and stores every balance transaction in them: payments become
@@ -53,6 +53,37 @@ export class StripePayoutSync {
 
         this.stripe = new Stripe(secretKey, { ...options, stripeAccount: this.stripeAccount?.accountId });
         this.stripePlatform = new Stripe(secretKey, options);
+    }
+
+    /**
+     * Walks the payouts of every active connected account, after the platform walk warmed the
+     * shared payment id cache.
+     */
+    static async syncConnectedPayouts({ secretKey, start, end, force, cache }: { secretKey: string; start: Date; end?: Date; force?: boolean; cache?: StripePaymentIdCache }): Promise<{ synced: number; skipped: number; failed: number }> {
+        const sharedCache = cache ?? new Map<string, string>();
+        const totals = { synced: 0, skipped: 0, failed: 0 };
+
+        const accounts = await StripeAccount.select().where('status', 'active').fetch();
+
+        for (const account of accounts) {
+            try {
+                const sync = new StripePayoutSync({ secretKey, stripeAccount: account, cache: sharedCache });
+                const result = await sync.syncPayouts({ start, end, force });
+                totals.synced += result.synced;
+                totals.skipped += result.skipped;
+                totals.failed += result.failed;
+            } catch (e) {
+                console.error('Failed to sync payouts of Stripe account ' + account.accountId, e);
+                totals.failed += 1;
+
+                Email.sendWebmaster({
+                    subject: 'Synchroniseren Stripe uitbetalingen van account ' + account.accountId + ' mislukt',
+                    html: 'Synchroniseren van de Stripe uitbetalingen van account ' + account.accountId + ' is mislukt. <br><br> ' + (e as Error).toString(),
+                });
+            }
+        }
+
+        return totals;
     }
 
     /**
@@ -304,6 +335,11 @@ export class StripePayoutSync {
                 continue;
             }
 
+            if (detail.type === 'application_fee') {
+                await this.#storeApplicationFeeDeduction(transaction, detail, settlement, reported, { paymentId });
+                continue;
+            }
+
             const charge = await SettlementService.upsertCharge({
                 type: getFeeDetailType(detail, transaction),
                 externalId: transaction.id + ':fee:' + index,
@@ -312,8 +348,80 @@ export class StripePayoutSync {
                 paymentId,
                 organizationId: settlement.organizationId,
                 stripeAccountId: this.stripeAccount?.id ?? null,
-                providerInvoiceId: detail.type === 'application_fee' ? null : getStripeInvoiceId(occurredAt),
+                providerInvoiceId: getStripeInvoiceId(occurredAt),
                 description: detail.description ?? '',
+                occurredAt,
+            });
+            reported.charge(charge);
+        }
+    }
+
+    /**
+     * On the connected account the application fee is not a separate transaction: it sits inside
+     * the payment's fee_details, and the fee id comes from the charge's application_fee. The two
+     * negative deduction rows mirror the Received rows of the platform payout, so per
+     * applicationFeeId both sides of one kind sum to zero.
+     */
+    async #storeApplicationFeeDeduction(transaction: Stripe.BalanceTransaction, detail: Stripe.BalanceTransaction.FeeDetail, settlement: Settlement, reported: ReportedRows, { paymentId }: { paymentId: string | null }) {
+        if (!this.stripeAccount) {
+            throw new SimpleError({
+                code: 'unexpected_application_fee_detail',
+                message: 'Transaction ' + transaction.id + ' on the platform account has an application_fee fee detail',
+            });
+        }
+
+        if (detail.amount < 0) {
+            // A refunded fee inside an organization payout walk: give it its own mirrored type
+            // first instead of writing wrong rows
+            throw new SimpleError({
+                code: 'negative_application_fee_detail',
+                message: 'Transaction ' + transaction.id + ' has a negative application_fee fee detail',
+            });
+        }
+
+        const source = transaction.source;
+        if (!source || typeof source === 'string' || source.object !== 'charge') {
+            throw new SimpleError({
+                code: 'missing_charge',
+                message: 'Transaction ' + transaction.id + ' with an application fee has no expanded charge source',
+            });
+        }
+
+        const applicationFee = source.application_fee;
+        if (!applicationFee || typeof applicationFee === 'string') {
+            throw new SimpleError({
+                code: 'missing_application_fee',
+                message: 'Charge ' + source.id + ' of transaction ' + transaction.id + ' has no expanded application fee',
+            });
+        }
+
+        // Reuse the platform-side split verbatim, so both sides of the fee (and its serviceFee
+        // metadata errors) can never diverge
+        const details = ApplicationFeeDetails.fromStripe({
+            source: applicationFee,
+            amount: detail.amount,
+            created: transaction.created,
+        });
+
+        const occurredAt = new Date(transaction.created * 1000);
+
+        for (const [type, amount] of [
+            [SettlementChargeType.ApplicationFeeService, details.serviceFee],
+            [SettlementChargeType.ApplicationFeeTransfer, details.transferFee],
+        ] as const) {
+            if (amount === 0) {
+                continue;
+            }
+
+            const charge = await SettlementService.upsertCharge({
+                type,
+                externalId: applicationFee.id + ':' + type,
+                amount: -amount,
+                settlementId: settlement.id,
+                applicationFeeId: applicationFee.id,
+                paymentId,
+                organizationId: this.stripeAccount.organizationId,
+                stripeAccountId: this.stripeAccount.id,
                 occurredAt,
             });
             reported.charge(charge);
@@ -349,7 +457,21 @@ export class StripePayoutSync {
             });
         }
 
+        this.#assertPaymentScope(payment, source.id);
         return payment;
+    }
+
+    /**
+     * Charge metadata is writable by the connected account's owner: a walked payment must belong
+     * to the walked account, or spoofed metadata could attach another organization's payment.
+     */
+    #assertPaymentScope(payment: Payment, chargeId: string) {
+        if (this.stripeAccount && payment.stripeAccountId !== this.stripeAccount.id) {
+            throw new SimpleError({
+                code: 'payment_scope_mismatch',
+                message: 'Payment ' + payment.id + ' referenced by charge ' + chargeId + ' does not belong to Stripe account ' + this.stripeAccount.accountId,
+            });
+        }
     }
 
     /**
@@ -412,6 +534,7 @@ export class StripePayoutSync {
             });
         }
 
+        this.#assertPaymentScope(candidates[0], charge.id);
         return candidates[0];
     }
 

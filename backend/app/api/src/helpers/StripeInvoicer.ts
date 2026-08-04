@@ -28,7 +28,7 @@ export class ApplicationFeeDetails {
         return this.transferFee + this.serviceFee;
     }
 
-    static fromStripe(transaction: Stripe.BalanceTransaction) {
+    static fromStripe(transaction: Pick<Stripe.BalanceTransaction, 'source' | 'amount' | 'created'>) {
         const source = transaction.source as Stripe.ApplicationFee;
         const metadata = (source.originating_transaction as Stripe.Charge).metadata;
 
