@@ -1,5 +1,5 @@
 import { MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, StripeAccount } from '@stamhoofd/models';
-import { Settlement } from '@stamhoofd/structures';
+import { SettlementReference } from '@stamhoofd/structures';
 import axios from 'axios';
 
 import { StripePayoutChecker } from './StripePayoutChecker.js';
@@ -203,7 +203,7 @@ async function applySettlementToPayment(settlement: MollieSettlement, mollieId: 
         const mp = mps[0];
         const payment = await Payment.getByID(mp.paymentId);
         if (payment) {
-            payment.settlement = Settlement.create({
+            payment.settlement = SettlementReference.create({
                 id: settlement.id,
                 reference: settlement.reference,
                 settledAt: new Date(settlement.settledAt),

@@ -1,6 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
-import type { Settlement } from './members/Payment.js';
+import type { SettlementReference } from './members/Payment.js';
 import { OFFLINE_PAYMENT_METHODS, PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
 import { getPaymentProviderName, PaymentProvider } from './PaymentProvider.js';
 import { PaymentStatus } from './PaymentStatus.js';
@@ -39,7 +39,7 @@ export const PENDING_PAYMENT_STATUSES = [PaymentStatus.Created, PaymentStatus.Pe
 export type SettleablePayment = {
     method: PaymentMethod;
     provider: PaymentProvider | null;
-    settlement: Settlement | null;
+    settlement: SettlementReference | null;
     status: PaymentStatus;
 };
 
@@ -198,7 +198,7 @@ export function getFailedPaymentGroup(): PaymentSettlementGroup {
     });
 }
 
-function getSettledGroup(provider: PaymentProvider | null, settlement: Settlement): PaymentSettlementGroup {
+function getSettledGroup(provider: PaymentProvider | null, settlement: SettlementReference): PaymentSettlementGroup {
     const date = Formatter.date(settlement.settledAt, true);
 
     return new PaymentSettlementGroup({

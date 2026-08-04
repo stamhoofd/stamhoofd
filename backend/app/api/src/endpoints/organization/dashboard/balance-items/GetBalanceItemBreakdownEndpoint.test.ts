@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, SettlementReference, TranslatedString } from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import type { BalanceItemBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { BreakdownAmountType, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
@@ -254,13 +254,13 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
     });
 
     describe('Grouping by payout', () => {
-        const march = Settlement.create({ id: 'stl_march', reference: '1234567.0312.01', settledAt: new Date(2026, 2, 12), amount: 0 });
-        const april = Settlement.create({ id: 'stl_april', reference: '1234567.0409.01', settledAt: new Date(2026, 3, 9), amount: 0 });
+        const march = SettlementReference.create({ id: 'stl_march', reference: '1234567.0312.01', settledAt: new Date(2026, 2, 12), amount: 0 });
+        const april = SettlementReference.create({ id: 'stl_april', reference: '1234567.0409.01', settledAt: new Date(2026, 3, 9), amount: 0 });
 
         /**
          * Pays a part of a balance item, the way a payment provider settles it afterwards.
          */
-        const payItem = async (organization: Organization, balanceItem: BalanceItem, options: { price: number; settlement?: Settlement; status?: PaymentStatus; method?: PaymentMethod }) => {
+        const payItem = async (organization: Organization, balanceItem: BalanceItem, options: { price: number; settlement?: SettlementReference; status?: PaymentStatus; method?: PaymentMethod }) => {
             const payment = new Payment();
             payment.organizationId = organization.id;
             payment.method = options.method ?? PaymentMethod.Bancontact;

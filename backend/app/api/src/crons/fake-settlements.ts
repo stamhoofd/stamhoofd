@@ -7,7 +7,7 @@
 import { registerCron } from '@stamhoofd/crons';
 import { Order, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { PaymentStatus, Settlement } from '@stamhoofd/structures';
+import { PaymentStatus, SettlementReference } from '@stamhoofd/structures';
 import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlement.js';
 import { Formatter } from '@stamhoofd/utility';
 import type { DateTime } from 'luxon';
@@ -100,7 +100,7 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
         const amount = group.reduce((total, payment) => total + payment.price, 0);
 
         for (const payment of group) {
-            payment.settlement = Settlement.create({ id, reference, settledAt, amount });
+            payment.settlement = SettlementReference.create({ id, reference, settledAt, amount });
             await payment.save();
 
             // Mark order as 'updated', or the frontend won't pull in the updates

@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -225,8 +225,8 @@ export class Payment extends QueryableModel {
     paidAt: Date | null = null;
 
     /// Settlement meta data
-    @column({ type: 'json', decoder: Settlement, nullable: true })
-    settlement: Settlement | null = null;
+    @column({ type: 'json', decoder: SettlementReference, nullable: true })
+    settlement: SettlementReference | null = null;
 
     @column({ type: 'string', nullable: true })
     iban: string | null = null;

@@ -189,7 +189,7 @@ export class Payment extends AutoEncoder {
         ];
 
         for (const replacement of data) {
-            if (replacement.value.length == 0) {
+            if (replacement.value.length === 0) {
                 continue;
             }
             str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${Formatter.escapeHtml(replacement.value)}</td></tr>`;
@@ -211,7 +211,7 @@ export class Payment extends AutoEncoder {
     }
 }
 
-export class Settlement extends AutoEncoder {
+export class SettlementReference extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
@@ -236,8 +236,8 @@ export class Settlement extends AutoEncoder {
 }
 
 export class PrivatePayment extends Payment {
-    @field({ decoder: Settlement, nullable: true })
-    settlement: Settlement | null = null;
+    @field({ decoder: SettlementReference, nullable: true })
+    settlement: SettlementReference | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 153 })
     iban: string | null = null;

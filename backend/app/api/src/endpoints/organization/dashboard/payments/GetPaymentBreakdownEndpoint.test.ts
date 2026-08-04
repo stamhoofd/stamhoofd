@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, getBalanceItemTypeIcon, getPaymentProviderName, OptionMenu, OrderData, Option, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, Settlement, StripeBusinessProfile, StripeMetaData, TransferSettings, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, getBalanceItemTypeIcon, getPaymentProviderName, OptionMenu, OrderData, Option, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, Product, ProductPrice, SettlementReference, StripeBusinessProfile, StripeMetaData, TransferSettings, TranslatedString } from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import type { PaymentBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { BreakdownGraphUnit, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
@@ -142,7 +142,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
         iban?: string;
         transferDescription?: string;
         transferFee?: number;
-        settlement?: Settlement;
+        settlement?: SettlementReference;
         /**
          * What this payment rounded away, because a payment goes to the cent while what was charged
          * goes to four digits after the comma.
@@ -631,7 +631,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
     describe('Grouping by payout', () => {
         const createSettlement = (reference: string, settledAt: Date) => {
-            return Settlement.create({ id: 'stl_' + reference, reference, settledAt, amount: 0 });
+            return SettlementReference.create({ id: 'stl_' + reference, reference, settledAt, amount: 0 });
         };
 
         test('per payout, with what is not online and what still has to be paid out apart', async () => {
