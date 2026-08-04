@@ -1,7 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, DocumentTemplateFactory, Organization } from '@stamhoofd/models';
-import { Address, DocumentData, DocumentStatus, File, Image, OrganizationMetaData, PlatformConfig, Platform as PlatformStruct, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { render } from '@stamhoofd/models/helpers/Handlebars.js';
+import type { RecordAnswer } from '@stamhoofd/structures';
+import { Address, DocumentData, DocumentStatus, File, Image, OrganizationMetaData, PlatformConfig, Platform as PlatformStruct, RecordCheckboxAnswer, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
+import { Formatter } from '@stamhoofd/utility';
 import { DocumentRenderService } from './DocumentRenderService.js';
 
 function createImage(id: string) {
@@ -65,6 +68,49 @@ function createInvalidFieldAnswers() {
 }
 
 const xmlExport = '<documents>{{#each documents}}<document>{{{this.number}}}</document>{{/each}}</documents>';
+
+/**
+ * The day price row of the participation template (templates/participation.html in the dashboard).
+ */
+const dayPriceTemplate = '{{#if (and registration.showDayPrice (coalesce registration.price registration.priceOriginal 0)) }}'
+    + 'Bedrag per dag: {{ formatPrice (div (coalesce registration.price registration.priceOriginal 0) (coalesce registration.days (days registration.startDate registration.endDate))) round=true }}'
+    + '{{/if}}';
+
+function createParticipationDocument(answers: { showDayPrice: boolean; price?: number | null; priceOriginal?: number | null; startDate?: Date; endDate?: Date }) {
+    const settingsFor = (id: string, type: RecordType) => RecordSettings.create({ id, type });
+
+    const fieldAnswers = new Map<string, RecordAnswer>([
+        ['registration.showDayPrice', RecordCheckboxAnswer.create({
+            settings: settingsFor('registration.showDayPrice', RecordType.Checkbox),
+            selected: answers.showDayPrice,
+        })],
+        ['registration.price', RecordPriceAnswer.create({
+            settings: settingsFor('registration.price', RecordType.Price),
+            value: answers.price ?? null,
+        })],
+        ['registration.priceOriginal', RecordPriceAnswer.create({
+            settings: settingsFor('registration.priceOriginal', RecordType.Price),
+            value: answers.priceOriginal ?? null,
+        })],
+        ['registration.startDate', RecordDateAnswer.create({
+            settings: settingsFor('registration.startDate', RecordType.Date),
+            dateValue: answers.startDate ?? new Date(2024, 6, 1),
+        })],
+        ['registration.endDate', RecordDateAnswer.create({
+            settings: settingsFor('registration.endDate', RecordType.Date),
+            dateValue: answers.endDate ?? new Date(2024, 6, 7),
+        })],
+    ]);
+
+    const document = createDocument();
+    document.data.fieldAnswers = fieldAnswers;
+    return document;
+}
+
+async function renderDayPrice(answers: Parameters<typeof createParticipationDocument>[0]) {
+    const context = DocumentRenderService.buildDocumentContext(createParticipationDocument(answers), createOrganization(), createPlatform({}));
+    return await render(dayPriceTemplate, context);
+}
 
 /**
  * Builds a locked template: a locked template makes buildAll return the documents unchanged, so the
@@ -147,6 +193,31 @@ describe('DocumentRenderService', () => {
 
             // The platform logo remains available separately
             expect(context['platform'].logo.id).toBe(platformLogo.id);
+        });
+    });
+
+    describe('day price', () => {
+        // 1 July until 7 July are 7 days, so €25 is rounded to €3,57 per day
+        const dayPriceOf25 = 'Bedrag per dag: ' + Formatter.price(3_5700);
+
+        test('It divides the price by the amount of days, both start and end date included', async () => {
+            await expect(renderDayPrice({ showDayPrice: true, price: 25_0000 })).resolves.toBe(dayPriceOf25);
+        });
+
+        test('It uses the original price when the price itself is hidden on the document', async () => {
+            await expect(renderDayPrice({ showDayPrice: true, price: null, priceOriginal: 25_0000 })).resolves.toBe(dayPriceOf25);
+        });
+
+        test('It prefers the price of the document over the original price', async () => {
+            await expect(renderDayPrice({ showDayPrice: true, price: 14_0000, priceOriginal: 25_0000 })).resolves.toBe('Bedrag per dag: ' + Formatter.price(2_0000));
+        });
+
+        test('It is left out when the checkbox is not selected', async () => {
+            await expect(renderDayPrice({ showDayPrice: false, price: 25_0000 })).resolves.toBe('');
+        });
+
+        test('It is left out when no price is known', async () => {
+            await expect(renderDayPrice({ showDayPrice: true, price: null, priceOriginal: null })).resolves.toBe('');
         });
     });
 

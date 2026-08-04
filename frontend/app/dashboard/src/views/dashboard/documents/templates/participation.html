@@ -321,6 +321,18 @@
                             <td>Bedrag</td>
                             <td>{{ formatPrice registration.price }}</td>
                         </tr>
+                        {{/if}} {{#if (and registration.showDayPrice (coalesce
+                        registration.price registration.priceOriginal 0)) }}
+                        <tr>
+                            <td>Bedrag per dag</td>
+                            <td>
+                                {{ formatPrice (div (coalesce
+                                registration.price registration.priceOriginal 0)
+                                (coalesce registration.days (days
+                                registration.startDate registration.endDate)))
+                                round=true }}
+                            </td>
+                        </tr>
                         {{/if}} {{#if (and registration.showPaidAt
                         registration.paidAt) }}
                         <tr>
