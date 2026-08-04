@@ -29,6 +29,12 @@ export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
     stripeAccount: StripeAccountStruct | null = null;
 
     expandedBalanceItemPayments: PaymentExportBalanceItemPayment[] = [];
+
+    /**
+     * A balance item only stores the id of the order it belongs to, so the numbers are looked up while
+     * the export is loaded.
+     */
+    orderNumbers: number[] = [];
 }
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
@@ -57,6 +63,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             results: data.results.map((p) => {
                 const payment = PaymentGeneralWithStripeAccount.create(p);
                 payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
+                payment.orderNumbers = getPaymentOrderNumbers(payment, orderMap);
                 payment.expandedBalanceItemPayments = expandPaymentBalanceItemPayments(payment, orderMap, addedOrderIds);
                 return payment;
             }),
@@ -68,6 +75,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             name: $t(`%1JH`),
             columns: [
                 ...getGeneralColumns(),
+                ...getOrderColumns(),
                 ...getInvoiceColumns(),
                 ...getPayingOrganizationColumns(),
                 ...getSettlementColumns(),
@@ -128,6 +136,27 @@ export function getBalanceItemPaymentColumns(): XlsxTransformerColumn<PaymentWit
             };
         }),
     ];
+}
+
+/**
+ * The numbers of the webshop orders this payment paid for, in the order they appear in the payment. One
+ * payment can settle more than one order, and an order that was deleted no longer has a number.
+ */
+export function getPaymentOrderNumbers(
+    payment: PaymentGeneral,
+    orderMap: Map<string, PaymentExportOrder>,
+): number[] {
+    return Formatter.uniqueArray(
+        payment.balanceItemPayments.flatMap((item) => {
+            const orderId = item.balanceItem.orderId;
+            if (!orderId) {
+                return [];
+            }
+
+            const number = orderMap.get(orderId)?.number;
+            return number !== null && number !== undefined ? [number] : [];
+        }),
+    );
 }
 
 export function expandPaymentBalanceItemPayments(
@@ -548,6 +577,32 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                     },
                 },
             }),
+        },
+    ];
+}
+
+function getOrderColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
+    return [
+        {
+            id: 'orderNumbers',
+            name: $t('Bestelnummer'),
+            width: 16,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                if (object.orderNumbers.length === 1) {
+                    return {
+                        value: object.orderNumbers[0],
+                        style: {
+                            numberFormat: {
+                                id: XlsxBuiltInNumberFormat.Number,
+                            },
+                        },
+                    };
+                }
+
+                return {
+                    value: object.orderNumbers.join(', '),
+                };
+            },
         },
     ];
 }
