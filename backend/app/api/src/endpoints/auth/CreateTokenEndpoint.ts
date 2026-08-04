@@ -10,6 +10,7 @@ import { RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
 import { TOTPHelper } from '../../helpers/TOTPHelper.js';
 import { mfaVerificationRateLimiter, TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { WebauthnHelper } from '../../helpers/WebauthnHelper.js';
+import { SessionService } from '../../services/SessionService.js';
 import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
 type Params = Record<string, never>;
@@ -64,7 +65,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
 
                 // Important to create a new token before adjusting the old token
-                const token = await Token.createToken(oldToken.user);
+                const token = await SessionService.rotateSession(oldToken);
 
                 // In the rare event our response doesn't reach the client anymore, we don't want the client to sign out...
                 // So we allow a small rotation overlap period
@@ -152,7 +153,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // grant that mints a session from a single primary credential.
                 await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: 'password', i18n: request.i18n });
 
-                const token = await Token.createToken(user, new Date());
+                const token = await SessionService.createSession(user, { loginMethod: 'password', authenticatedAt: new Date() });
 
                 if (!token) {
                     throw new SimpleError({
@@ -264,7 +265,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                const token = await Token.createToken(user, new Date());
+                const token = await SessionService.createSession(user, { loginMethod: mfaToken.loginMethod, authenticatedAt: new Date() });
                 await user.markActive();
 
                 const st = new TokenStruct(token);
@@ -317,7 +318,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion(), { loginMethod: 'email', i18n: request.i18n, allowTemporarySession: true });
 
                 // Important to create a new token before adjusting the old token
-                const token = await Token.createToken(passwordToken.user, new Date());
+                const token = await SessionService.createSession(passwordToken.user, { loginMethod: 'email', authenticatedAt: new Date() });
 
                 // TODO: make token short lived until renewal
 
