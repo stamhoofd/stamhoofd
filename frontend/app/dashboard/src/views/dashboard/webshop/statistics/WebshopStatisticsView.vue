@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view webshop-statistics-view background">
+    <div class="st-view webshop-statistics-view background" data-testid="webshop-statistics-view">
         <STNavigationBar />
 
         <main class="center">
@@ -14,21 +14,21 @@
             <hr><div class="stats-grid">
                 <STInputBox :title="$t(`%1JX`)">
                     <p class="style-statistic">
-                        <span>
+                        <span data-testid="statistics-orders-count">
                             {{ loading ? '-' : totalOrders }}
                         </span>
                     </p>
-                    <p class="style-description-small">
+                    <p class="style-description-small" data-testid="statistics-orders-average">
                         {{ loading ? '-' : formatPrice(averagePrice) + ' / bestelling' }}
                     </p>
                 </STInputBox>
 
                 <template v-if="hasTickets">
                     <STInputBox :title="$t(`%1t`)">
-                        <p class="style-statistic">
+                        <p class="style-statistic" data-testid="statistics-tickets-count">
                             {{ loading ? '-' : totalTickets }}
                         </p>
-                        <p class="style-description-small">
+                        <p class="style-description-small" data-testid="statistics-tickets-scanned">
                             {{ loading ? '-' : totalScannedTickets + ' gescand' }}
                         </p>
                     </STInputBox>
@@ -36,10 +36,10 @@
 
                 <template v-if="hasVouchers">
                     <STInputBox :title="$t(`%21`)">
-                        <p class="style-statistic">
+                        <p class="style-statistic" data-testid="statistics-vouchers-count">
                             {{ loading ? '-' : totalVouchers }}
                         </p>
-                        <p class="style-description-small">
+                        <p class="style-description-small" data-testid="statistics-vouchers-scanned">
                             {{ loading ? '-' : totalScannedVouchers + ' gescand' }}
                         </p>
                     </STInputBox>
@@ -50,15 +50,15 @@
                 <hr><h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
 
                 <STList>
-                    <STListItem v-for="(info, index) in category.products" :key="index" class="right-small">
+                    <STListItem v-for="(info, index) in category.products" :key="index" class="right-small" data-testid="statistics-product-row">
                         <h3>{{ info.name }}</h3>
                         <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description" />
 
                         <template #right>
-                            <p class="style-price-big">
+                            <p class="style-price-big" data-testid="statistics-product-amount">
                                 {{ loading ? '-' : info.amount }}
                             </p>
-                            <p class="style-description-small">
+                            <p class="style-description-small" data-testid="statistics-product-price">
                                 {{ loading ? '-' : formatPrice(info.price) }}
                             </p>
                         </template>
@@ -459,7 +459,7 @@ async function reload() {
         } catch (e) {
             hasFetchOrdersError = true;
             // Only show the error, the orders can still be streamed from the offline cache
-            Toast.fromError(e).show();
+            Toast.fromError(e).setTestId('statistics-fetch-error-toast').show();
         }
 
         await props.webshopManager.orders.stream({
@@ -512,7 +512,7 @@ async function reload() {
                 // only show toast if there was no error fetching orders (avoid duplicate toasts)
                 if (!hasFetchOrdersError) {
                     // Only show the error, the tickets can still be streamed from the offline cache
-                    Toast.fromError(e).show();
+                    Toast.fromError(e).setTestId('statistics-fetch-error-toast').show();
                 }
             }
 

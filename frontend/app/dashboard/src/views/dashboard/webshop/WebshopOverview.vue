@@ -102,7 +102,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="$navigate(Routes.Statistics)">
+                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" data-testid="open-statistics-button" @click="$navigate(Routes.Statistics)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                     </template>
