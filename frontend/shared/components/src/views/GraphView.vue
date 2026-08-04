@@ -1,5 +1,5 @@
 <template>
-    <div class="container graph">
+    <div class="container graph" data-testid="graph">
         <h2 class="style-with-button">
             <button v-if="hasMultipleConfigurations" class="button style-label" type="button" @click="chooseConfiguration">
                 <span class="">{{ title }}</span>
@@ -15,7 +15,7 @@
                 <GraphDateRangeSelector v-if="options === null || options.length > 1" v-model="range" :options="options" />
             </div>
         </h2>
-        <p class="style-statistic">
+        <p class="style-statistic" data-testid="graph-value">
             {{ loading ? '-' : format(lastValue) }}
         </p>
         <div class="canvas-box">
