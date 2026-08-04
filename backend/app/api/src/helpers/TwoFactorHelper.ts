@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
-import type { User } from '@stamhoofd/models';
+import type { SessionLoginMethod, User } from '@stamhoofd/models';
 import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, Token, WebauthnCredential } from '@stamhoofd/models';
 import type { User as UserStruct } from '@stamhoofd/structures';
 import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
@@ -8,6 +8,7 @@ import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupRespo
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server';
 
 import { PasswordForgotService } from '../services/PasswordForgotService.js';
+import { SessionService } from '../services/SessionService.js';
 import { RecoveryCodeHelper } from './RecoveryCodeHelper.js';
 import { WebauthnHelper } from './WebauthnHelper.js';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -146,9 +147,9 @@ export class TwoFactorHelper {
      *    unless the account ALSO has a password, because then the password remains a way
      *    in that bypasses whatever the provider enforces.
      */
-    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: 'password' | 'email' | 'sso' }): Promise<SecondFactorRequirement> {
+    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<SecondFactorRequirement> {
         if (await TwoFactorHelper.userHasFactors(user.id)) {
-            return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user) };
+            return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user, { loginMethod }) };
         }
 
         if (loginMethod === 'sso' && !user.hasPasswordBasedAccount()) {
@@ -159,7 +160,7 @@ export class TwoFactorHelper {
             if (loginMethod === 'password' && TwoFactorHelper.isInactiveForEnrollment(user)) {
                 return { type: 'confirm-email' };
             }
-            return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup') };
+            return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup', { loginMethod }) };
         }
 
         return { type: 'none' };
@@ -228,7 +229,7 @@ export class TwoFactorHelper {
         }
 
         if (requirement.type === 'setup') {
-            const temporaryToken = allowTemporarySession ? new TokenStruct(await Token.createToken(user, new Date())) : null;
+            const temporaryToken = allowTemporarySession ? new TokenStruct(await SessionService.createSession(user, { loginMethod, authenticatedAt: new Date() })) : null;
 
             throw new SimpleError({
                 code: 'require_mfa_setup',
@@ -313,7 +314,7 @@ export class TwoFactorHelper {
     /**
      * Create a login MFA session token and the challenge payload returned to the client.
      */
-    static async createLoginChallenge(user: User): Promise<MFAChallengeResponse> {
+    static async createLoginChallenge(user: User, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<MFAChallengeResponse> {
         const { methods, passkeys } = await TwoFactorHelper.getEnrolledMethods(user.id);
 
         let webauthnOptions: PublicKeyCredentialRequestOptionsJSON | null = null;
@@ -323,7 +324,7 @@ export class TwoFactorHelper {
             challenge = webauthnOptions.challenge;
         }
 
-        const mfaToken = await MFAToken.createFor(user.id, 'login', challenge);
+        const mfaToken = await MFAToken.createFor(user.id, 'login', { webauthnChallenge: challenge, loginMethod });
 
         return MFAChallengeResponse.create({
             token: mfaToken.token,
@@ -381,7 +382,7 @@ export class TwoFactorHelper {
         let token: TokenStruct | null = null;
         if (setupToken) {
             await setupToken.consume();
-            const t = await Token.createToken(user, new Date());
+            const t = await SessionService.createSession(user, { loginMethod: setupToken.loginMethod, authenticatedAt: new Date() });
             await user.markActive();
             token = new TokenStruct(t);
         }
