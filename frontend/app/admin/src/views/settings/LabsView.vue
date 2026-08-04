@@ -46,7 +46,7 @@
                     {{ $t('%Zgt') }}
                 </h3>
                 <p class="style-description-small">
-                    <I18nComponent :t="$t('Deel zeker <button>onze gids</button> met alle beheerders voor informatie hoe je dit kan instellen.')">
+                    <I18nComponent :t="$t('%ZiX')">
                         <template #button="{content}">
                             <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
                                 {{ content }}
@@ -114,7 +114,7 @@
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('payment-breakdown')" data-testid="payment-breakdown-checkbox" @update:model-value="setFeatureFlag('payment-breakdown', !!$event)">
-            {{ $t('Statistieken van betalingen en aanrekeningen') }}
+            {{ $t('%ZiO') }}
         </Checkbox>
     </SaveView>
 </template>

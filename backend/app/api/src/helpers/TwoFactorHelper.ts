@@ -212,7 +212,7 @@ export class TwoFactorHelper {
             throw new SimpleError({
                 code: 'require_email_confirmation',
                 message: 'Email confirmation required before two-factor authentication setup',
-                human: $t('Je account is beheerder en moet beveiligd worden met tweestapsverificatie, maar je logde al meer dan {days} dagen niet meer in. Bevestig eerst je e-mailadres: we stuurden je een e-mail met een link waarmee je opnieuw toegang krijgt en tweestapsverificatie kan instellen. Kreeg je geen e-mail? Dan kan je ook een nieuwe link aanvragen via wachtwoord vergeten.', { days: INACTIVE_ADMIN_ENROLLMENT_DAYS.toString() }),
+                human: $t('%Zjm', { days: INACTIVE_ADMIN_ENROLLMENT_DAYS.toString() }),
                 statusCode: 403,
             });
         }

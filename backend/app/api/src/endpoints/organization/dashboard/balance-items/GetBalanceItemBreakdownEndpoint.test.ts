@@ -317,17 +317,17 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
-                { name: $t('In verwerking'), price: 30_00 },
+                { name: $t('%1OL'), price: 30_00 },
                 // Only what was tried sits under the failed payment, the rest was never attempted
-                { name: $t('Mislukte betaling'), price: 20_00 },
-                { name: $t('Openstaand na mislukte poging'), price: 10_00 },
+                { name: $t('%ZjW'), price: 20_00 },
+                { name: $t('%ZjC'), price: 10_00 },
             ]);
 
             // Every part of what was charged ends up in exactly one row
             expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
 
             // Running the rows through the database gives back the balance items they were added up from
-            for (const name of [$t('Mislukte betaling'), $t('Openstaand na mislukte poging')]) {
+            for (const name of [$t('%ZjW'), $t('%ZjC')]) {
                 const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
                 const exported = await getBreakdown({ organization, user, filter: row.selection!.listFilter });
                 expect(exported.body.balanceItemCount).toBe(1);
@@ -348,19 +348,19 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
                 { name: '1234567.0312.01', price: 50_00 },
-                { name: $t('Terug te betalen'), price: -50_00 },
-                { name: $t('Openstaand'), price: 25_00 },
+                { name: $t('%10b'), price: -50_00 },
+                { name: $t('%1Ni'), price: 25_00 },
             ]);
 
             // A canceled item is not charged anymore, so it doesn't add to what is open
             expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
 
             // Each row selects exactly the balance items it was added up from
-            const refund = response.body.bySettlement.find(g => g.name.toString() === $t('Terug te betalen'))!;
+            const refund = response.body.bySettlement.find(g => g.name.toString() === $t('%10b'))!;
             const refunded = await getBreakdown({ organization, user, filter: refund.selection!.listFilter });
             expect(refunded.body.balanceItemCount).toBe(1);
 
-            const open = response.body.bySettlement.find(g => g.name.toString() === $t('Openstaand'))!;
+            const open = response.body.bySettlement.find(g => g.name.toString() === $t('%1Ni'))!;
             const stillOpen = await getBreakdown({ organization, user, filter: open.selection!.listFilter });
             expect(stillOpen.body.balanceItemCount).toBe(1);
             expect(stillOpen.body.price).toBe(25_00);
@@ -381,13 +381,13 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
-                { name: $t('Mislukte betaling'), price: 100_00 },
+                { name: $t('%ZjW'), price: 100_00 },
                 { name: '1234567.0312.01', price: 40_00 },
-                { name: $t('Openstaand'), price: 25_00 },
+                { name: $t('%1Ni'), price: 25_00 },
             ]);
 
             // Both rows select exactly the balance items they were added up from
-            for (const [name, count] of [[$t('Mislukte betaling'), 1], [$t('Openstaand'), 1]] as [string, number][]) {
+            for (const [name, count] of [[$t('%ZjW'), 1], [$t('%1Ni'), 1]] as [string, number][]) {
                 const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
                 const exported = await getBreakdown({ organization, user, filter: row.selection!.listFilter });
                 expect(exported.body.balanceItemCount).toBe(count);
@@ -405,7 +405,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             await payItem(organization, processing, { price: 25_00, status: PaymentStatus.Pending });
 
             const all = await getBreakdown({ organization, user });
-            const row = all.body.bySettlement.find(g => g.name.toString() === $t('In verwerking'))!;
+            const row = all.body.bySettlement.find(g => g.name.toString() === $t('%1OL'))!;
 
             const narrowed = await getBreakdown({
                 organization,

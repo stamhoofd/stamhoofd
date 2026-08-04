@@ -104,8 +104,8 @@ export const participation = DocumentTemplateDefinition.create({
                 }),
                 RecordSettings.create({
                     id: 'registration.showDayPrice',
-                    name: TranslatedString.create($t('Toon bedrag per dag')),
-                    description: TranslatedString.create($t('Het bedrag gedeeld door het aantal dagen tussen de start- en einddatum.')),
+                    name: TranslatedString.create($t('%Zip')),
+                    description: TranslatedString.create($t('%ZiN')),
                     required: false,
                     type: RecordType.Checkbox,
                 }),

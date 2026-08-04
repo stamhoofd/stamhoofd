@@ -50,10 +50,10 @@ const end = computed(() => {
 const start = computed(() => first.value?.date ?? end.value);
 
 const periods: { name: string; duration: DurationLike }[] = [
-    { name: $t('Laatste week'), duration: { weeks: 1 } },
-    { name: $t('Laatste maand'), duration: { months: 1 } },
-    { name: $t('Laatste 6 maanden'), duration: { months: 6 } },
-    { name: $t('Laatste 12 maanden'), duration: { months: 12 } },
+    { name: $t('%Zjp'), duration: { weeks: 1 } },
+    { name: $t('%Zio'), duration: { months: 1 } },
+    { name: $t('%Zib'), duration: { months: 6 } },
+    { name: $t('%Zie'), duration: { months: 12 } },
 ];
 
 function pointsIn(range: { start: Date; end: Date }): BreakdownGraphPoint[] {
@@ -65,7 +65,7 @@ function pointsIn(range: { start: Date; end: Date }): BreakdownGraphPoint[] {
  * enough to draw a line.
  */
 const rangeOptions = computed(() => {
-    const options = [new DateOption($t('Volledige periode'), { start: start.value, end: end.value })];
+    const options = [new DateOption($t('%ZiU'), { start: start.value, end: end.value })];
 
     for (const period of periods) {
         const range = { start: Formatter.luxon(end.value).minus(period.duration).toJSDate(), end: end.value };
@@ -85,7 +85,7 @@ function getLabel(point: BreakdownGraphPoint): string {
         return Formatter.date(point.date, true);
     }
 
-    return $t('Week van {date}', { date: Formatter.date(point.date, true) });
+    return $t('%ZjI', { date: Formatter.date(point.date, true) });
 }
 
 const configurations = computed(() => [[

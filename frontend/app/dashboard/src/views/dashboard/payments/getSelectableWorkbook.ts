@@ -158,7 +158,7 @@ export function getBalanceItemPaymentSelectableWorkbook() {
     return new SelectableWorkbook({
         sheets: [
             getBalanceItemPaymentSheet({
-                description: $t('Elke lijn is één betaling die één aanrekening (deels) betaalde. Samen zijn ze precies het bedrag dat je hiervoor zag. Een webshopbestelling blijft één lijn: die wordt als één geheel aangerekend.'),
+                description: $t('%ZjJ'),
             }),
         ],
     });

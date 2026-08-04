@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="exporting" :title="title" :save-text="$t('Exporteren')" save-icon="download" :cancel-text="$t('Sluiten')" :disabled="!canExport" @save="startExport">
+    <SaveView :loading="exporting" :title="title" :save-text="$t('%Oy')" save-icon="download" :cancel-text="$t('%9b')" :disabled="!canExport" @save="startExport">
         <template #buttons>
-            <button v-if="breakdown" v-tooltip="$t('Toon de aanrekeningen')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.selection)" />
+            <button v-if="breakdown" v-tooltip="$t('%Zic')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.selection)" />
         </template>
 
         <h1 class="style-navigation-title">
@@ -15,14 +15,14 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="canExportWithoutBreakdown" class="warning-box">
-            {{ $t('We konden geen statistieken maken van deze selectie, maar je kan ze wel nog exporteren naar Excel.') }}
+            {{ $t('%ZiT') }}
         </p>
 
         <template v-if="loading">
             <Spinner class="center" />
 
             <p class="style-description-small center">
-                {{ $t('Dit kan even duren bij een grote selectie.') }}
+                {{ $t('%ZiZ') }}
             </p>
         </template>
 
@@ -36,13 +36,13 @@
                         {{ formatPrice(breakdown.price) }}
                     </p>
                     <p class="style-description-small">
-                        {{ pluralText(breakdown.balanceItemCount, $t('aanrekening'), $t('aanrekeningen')) }}
+                        {{ pluralText(breakdown.balanceItemCount, $t('%Zj5'), $t('%Zjf')) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="breakdown.pricePaid">
                     <h3 class="style-definition-label">
-                        {{ $t('Betaald') }}
+                        {{ $t('%1OD') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.pricePaid) }}
@@ -51,7 +51,7 @@
 
                 <STListItem v-if="breakdown.pricePending">
                     <h3 class="style-definition-label">
-                        {{ $t('In verwerking') }}
+                        {{ $t('%1OL') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.pricePending) }}
@@ -60,7 +60,7 @@
 
                 <STListItem v-if="breakdown.priceOpen">
                     <h3 class="style-definition-label">
-                        {{ $t('Openstaand') }}
+                        {{ $t('%1Ni') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.priceOpen) }}
@@ -80,13 +80,13 @@
             <ScrollableSegmentedControl v-if="tabs.length > 1" v-model="tab" :items="tabs" :labels="tabLabels" />
 
             <p v-if="visibleGroups.length === 0" class="info-box">
-                {{ $t('Er zijn geen gegevens voor deze selectie.') }}
+                {{ $t('%ZiQ') }}
             </p>
 
             <BreakdownList v-else :groups="visibleGroups" :total="breakdown.price" count-unit="balanceItems" @select="openGroup" />
 
             <p v-if="hasClosedGroups" class="info-box">
-                {{ $t('Rijen zonder pijl kan je niet openen: hun bedrag maakt deel uit van een groter geheel, zoals een webshopbestelling die als één geheel aangerekend wordt.') }}
+                {{ $t('%ZiW') }}
             </p>
         </template>
     </SaveView>
@@ -136,22 +136,22 @@ const { breakdown, loading, exporting, errors, canExport, canExportWithoutBreakd
         getSelectableWorkbook: getBalanceItemPaymentSelectableWorkbook,
         configurationId: 'balance-item-payments',
     },
-    partialListMessage: $t('Deze aanrekeningen werden ook elders betaald. De lijst bevat de volledige aanrekeningen, het bedrag waarmee je ze opende is enkel het deel dat daar meetelde.'),
+    partialListMessage: $t('%Zjs'),
     partialAmountMessage: {
-        slice: $t('Deze aanrekeningen werden ook elders betaald. Het bedrag hierboven is enkel het deel dat hier meetelt, en dat is ook exact wat de export bevat. De lijst toont wel de volledige aanrekeningen.'),
-        whole: $t('Deze aanrekeningen werden ook elders betaald. De lijst en de export bevatten de volledige aanrekeningen, het bedrag hierboven is enkel het deel dat hier meetelt.'),
+        slice: $t('%Zj8'),
+        whole: $t('%Zil'),
     },
     amountTypeMessages: {
-        [BreakdownAmountType.Paid]: $t('Dit is wat er van deze aanrekeningen ontvangen werd, niet wat er aangerekend werd.'),
-        [BreakdownAmountType.Pending]: $t('Dit is wat er van deze aanrekeningen onderweg is, niet wat er aangerekend werd.'),
-        [BreakdownAmountType.Open]: $t('Dit is wat er van deze aanrekeningen openstaat, niet wat er aangerekend werd.'),
+        [BreakdownAmountType.Paid]: $t('%Zir'),
+        [BreakdownAmountType.Pending]: $t('%Zid'),
+        [BreakdownAmountType.Open]: $t('%Zjg'),
     },
     tabs: [
-        { id: BreakdownTab.Category, name: $t('Categorie') },
-        { id: BreakdownTab.Article, name: $t('Artikels') },
+        { id: BreakdownTab.Category, name: $t('%M2') },
+        { id: BreakdownTab.Article, name: $t('%Rv') },
         // Where the money stands: paid out, still on its way, or not paid at all. Without online
         // payments the server leaves this one empty, because then it only repeats what is above.
-        { id: BreakdownTab.Settlement, name: $t('Betaalstatus') },
+        { id: BreakdownTab.Settlement, name: $t('%M6') },
     ],
     getGroups: (breakdown, tab) => {
         switch (tab) {
@@ -170,10 +170,10 @@ const { breakdown, loading, exporting, errors, canExport, canExportWithoutBreakd
  */
 const priceLabel = computed(() => {
     switch (breakdown.value?.selection.amountType) {
-        case BreakdownAmountType.Paid: return $t('Ontvangen');
-        case BreakdownAmountType.Pending: return $t('In verwerking');
-        case BreakdownAmountType.Open: return $t('Openstaand');
-        default: return $t('Aangerekend');
+        case BreakdownAmountType.Paid: return $t('%ZjM');
+        case BreakdownAmountType.Pending: return $t('%1OL');
+        case BreakdownAmountType.Open: return $t('%1Ni');
+        default: return $t('%BO');
     }
 });
 

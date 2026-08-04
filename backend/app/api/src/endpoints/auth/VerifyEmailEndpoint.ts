@@ -91,7 +91,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'email_in_use',
                         message: 'This e-mail is already in use by an account with two-factor authentication',
-                        human: $t('Er bestaat al een account met dit e-mailadres dat beveiligd is met tweestapsverificatie. Log in op het bestaande account in plaats van je e-mailadres te wijzigen.'),
+                        human: $t('%Zis'),
                         statusCode: 400,
                     });
                 }

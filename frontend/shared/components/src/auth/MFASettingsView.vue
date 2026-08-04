@@ -6,7 +6,7 @@
             <main class="center">
                 <h1>{{ $t('%Zgk') }}</h1>
                 <p>
-                    <I18nComponent :t="$t('Beveilig je account met een extra verificatiestap naast je wachtwoord. <button>Meer info</button>')">
+                    <I18nComponent :t="$t('%Zih')">
                         <template #button="{content}">
                             <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
                                 {{ content }}

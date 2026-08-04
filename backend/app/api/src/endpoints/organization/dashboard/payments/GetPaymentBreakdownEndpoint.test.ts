@@ -367,7 +367,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.byArticle).toHaveLength(1);
-            expect(response.body.byArticle[0].name.toString()).toBe($t('Deels betaalde bestelling'));
+            expect(response.body.byArticle[0].name.toString()).toBe($t('%Zjb'));
             expect(response.body.byArticle[0].price).toBe(1_00);
         });
 
@@ -391,7 +391,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             const response = await getBreakdown({ organization, user });
 
             expect(response.status).toBe(200);
-            expect(response.body.byArticle.map(g => g.name.toString())).toEqual([$t('Gewijzigde bestelling')]);
+            expect(response.body.byArticle.map(g => g.name.toString())).toEqual([$t('%Zik')]);
         });
     });
 
@@ -652,8 +652,8 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price, count: g.count }))).toEqual([
                 { name: '1234567.0312.01', price: 50_00, count: 2 },
-                { name: $t('Nog niet uitbetaald'), price: 30_00, count: 1 },
-                { name: $t('Niet online betaald'), price: 20_00, count: 1 },
+                { name: $t('%Zjn'), price: 30_00, count: 1 },
+                { name: $t('%ZjN'), price: 20_00, count: 1 },
             ]);
         });
 
@@ -717,7 +717,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             await createPayment(organization, { items: [[item, 20_00]], method: PaymentMethod.PointOfSale });
 
             const all = await getBreakdown({ organization, user });
-            const pending = all.body.bySettlement.find(g => g.name.toString() === $t('Nog niet uitbetaald'))!;
+            const pending = all.body.bySettlement.find(g => g.name.toString() === $t('%Zjn'))!;
 
             const exported = await getBreakdown({ organization, user, filter: pending.selection!.filter });
             expect(exported.body.price).toBe(30_00);
@@ -735,7 +735,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             await createPayment(organization, { items: [[item, 10_00]], iban: 'BE68539007547034' });
 
             const all = await getBreakdown({ organization, user });
-            const offline = all.body.bySettlement.find(g => g.name.toString() === $t('Niet online betaald'))!;
+            const offline = all.body.bySettlement.find(g => g.name.toString() === $t('%ZjN'))!;
 
             const exported = await getBreakdown({ organization, user, filter: offline.selection!.filter });
             expect(exported.body.price).toBe(30_00);
@@ -756,9 +756,9 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
             const all = await getBreakdown({ organization, user });
 
             expect(all.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
-                { name: $t('Nog niet uitbetaald'), price: 40_00 },
+                { name: $t('%Zjn'), price: 40_00 },
                 { name: getPaymentProviderName(PaymentProvider.Buckaroo), price: 25_00 },
-                { name: $t('Niet online betaald'), price: 20_00 },
+                { name: $t('%ZjN'), price: 20_00 },
                 { name: getPaymentProviderName(PaymentProvider.Payconiq), price: 15_00 },
             ]);
 
@@ -812,7 +812,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(response.body.byCategory.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
                 { name: 'Kapoenen', price: 14_6652 },
-                { name: $t('Afronding'), price: 48 },
+                { name: $t('%1b6'), price: 48 },
             ]);
 
             // Everything the payment is worth is accounted for
@@ -870,12 +870,12 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
-                { name: $t('Niet online betaald'), price: 40_00 },
+                { name: $t('%ZjN'), price: 40_00 },
                 { name: PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), price: 10_00 },
             ]);
 
             // Running the rows through the database keeps them apart
-            for (const [name, price] of [[$t('Niet online betaald'), 40_00], [PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), 10_00]] as [string, number][]) {
+            for (const [name, price] of [[$t('%ZjN'), 40_00], [PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), 10_00]] as [string, number][]) {
                 const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
                 const exported = await getBreakdown({ organization, user, filter: row.selection!.listFilter });
                 expect(exported.body.price).toBe(price);

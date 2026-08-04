@@ -52,7 +52,7 @@ export async function streamForBreakdown<T>(options: {
         throw new SimpleError({
             code: 'breakdown_pending',
             message: 'A breakdown is already running for this user',
-            human: $t('Er worden al statistieken berekend, probeer het zo opnieuw.'),
+            human: $t('%Zj3'),
             statusCode: 429,
         });
     }
@@ -96,7 +96,7 @@ function assertBreakdownSize(count: number) {
     throw new SimpleError({
         code: 'too_many_objects',
         message: 'Too many objects to break down',
-        human: $t('Deze selectie bevat meer dan {limit} items, dat zijn er te veel om statistieken van te maken. Kies een kortere periode of verfijn je selectie.', {
+        human: $t('%Ziw', {
             limit: Formatter.integer(MAX_BREAKDOWN_OBJECTS),
         }),
         statusCode: 400,

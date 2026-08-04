@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="exporting" :title="title" :save-text="$t('Exporteren')" save-icon="download" :cancel-text="$t('Sluiten')" :disabled="!canExport" @save="startExport">
+    <SaveView :loading="exporting" :title="title" :save-text="$t('%Oy')" save-icon="download" :cancel-text="$t('%9b')" :disabled="!canExport" @save="startExport">
         <template #buttons>
-            <button v-if="breakdown" v-tooltip="$t('Toon de betalingen')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.selection)" />
+            <button v-if="breakdown" v-tooltip="$t('%Ziy')" class="button icon ul" type="button" data-testid="show-list-button" @click="openTable(breakdown.selection)" />
         </template>
 
         <h1 class="style-navigation-title">
@@ -15,14 +15,14 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="canExportWithoutBreakdown" class="warning-box">
-            {{ $t('We konden geen statistieken maken van deze selectie, maar je kan ze wel nog exporteren naar Excel.') }}
+            {{ $t('%ZiT') }}
         </p>
 
         <template v-if="loading">
             <Spinner class="center" />
 
             <p class="style-description-small center">
-                {{ $t('Dit kan even duren bij een grote selectie.') }}
+                {{ $t('%ZiZ') }}
             </p>
         </template>
 
@@ -30,79 +30,79 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Totaal') }}
+                        {{ $t('%xL') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.price) }}
                     </p>
                     <p class="style-description-small">
-                        {{ pluralText(breakdown.paymentCount, $t('betaling'), $t('betalingen')) }}
+                        {{ pluralText(breakdown.paymentCount, $t('%14a'), $t('%Zj2')) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="breakdown.pricePending">
                     <h3 class="style-definition-label">
-                        {{ $t('In verwerking') }}
+                        {{ $t('%1OL') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.pricePending) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Deze betalingen zijn nog niet afgerond, dus er werd nog niets ontvangen.') }}
+                        {{ $t('%Ziv') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="breakdown.priceFailed">
                     <h3 class="style-definition-label">
-                        {{ $t('Mislukte betalingen') }}
+                        {{ $t('%Zig') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.priceFailed) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Er werd geprobeerd te betalen, maar dat is niet gelukt.') }}
+                        {{ $t('%ZjU') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="breakdown.transferFee">
                     <h3 class="style-definition-label">
-                        {{ $t('Transactiekosten') }}
+                        {{ $t('%wZ') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.transferFee) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Ingehouden door de betaalprovider.') }}
+                        {{ $t('%ZiP') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="breakdown.serviceFeeManual">
                     <h3 class="style-definition-label">
-                        {{ $t('Servicekosten') }}
+                        {{ $t('%1UX') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.serviceFeeManual) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Dit bedrag wordt maandelijks aangerekend via jouw gekoppelde bankkaart.') }}
+                        {{ $t('%Zif') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="breakdown.serviceFeePayout">
                     <h3 class="style-definition-label">
-                        {{ $t('Servicekosten via Stripe') }}
+                        {{ $t('%Zjl') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(breakdown.serviceFeePayout) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Dit bedrag wordt automatisch ingehouden van je uitbetalingen.') }}
+                        {{ $t('%Zim') }}
                     </p>
                 </STListItem>
             </STList>
 
             <p v-if="breakdown.pricePending || breakdown.priceFailed" class="warning-box">
-                {{ $t('Deze selectie bevat betalingen die (nog) niet ontvangen werden, dus het totaal hierboven is niet wat er op je rekening kwam.') }}
+                {{ $t('%ZjL') }}
             </p>
 
             <p v-if="amountMessage" class="info-box">
@@ -111,19 +111,19 @@
 
             <template v-if="breakdown.graph.points.length > 3">
                 <hr>
-                <BreakdownGraphView :graph="breakdown.graph" :title="$t('Totaal')" />
+                <BreakdownGraphView :graph="breakdown.graph" :title="$t('%xL')" />
             </template>
 
             <ScrollableSegmentedControl v-if="tabs.length > 1" v-model="tab" :items="tabs" :labels="tabLabels" />
 
             <p v-if="visibleGroups.length === 0" class="info-box">
-                {{ $t('Er zijn geen gegevens voor deze selectie.') }}
+                {{ $t('%ZiQ') }}
             </p>
 
             <BreakdownList v-else :groups="visibleGroups" :total="breakdown.price" count-unit="payments" @select="openGroup" />
 
             <p v-if="hasClosedGroups" class="info-box">
-                {{ $t('Rijen zonder pijl kan je niet openen: hun bedrag maakt deel uit van een groter geheel, zoals een webshopbestelling die als één geheel aangerekend wordt.') }}
+                {{ $t('%ZiW') }}
             </p>
         </template>
     </SaveView>
@@ -174,21 +174,21 @@ const { breakdown, loading, exporting, errors, canExport, canExportWithoutBreakd
         getSelectableWorkbook: getBalanceItemPaymentSelectableWorkbook,
         configurationId: 'balance-item-payments',
     },
-    partialListMessage: $t('Deze betalingen hebben ook voor andere dingen betaald. De lijst bevat de volledige betalingen, het bedrag waarmee je ze opende is enkel het deel dat daar meetelde.'),
+    partialListMessage: $t('%Zij'),
     partialAmountMessage: {
-        slice: $t('Deze betalingen hebben ook voor andere dingen betaald. Het bedrag hierboven en de export bevatten enkel het deel dat hier meetelt.'),
-        whole: $t('Deze betalingen hebben ook voor andere dingen betaald. De lijst en de export bevatten de volledige betalingen, het bedrag hierboven is enkel het deel dat hier meetelt.'),
+        slice: $t('%Zjt'),
+        whole: $t('%ZjD'),
     },
     amountTypeMessages: {
-        [BreakdownAmountType.Rounding]: $t('Dit is wat deze betalingen afgerond hebben, niet wat ermee betaald werd.'),
+        [BreakdownAmountType.Rounding]: $t('%Zj1'),
     },
     tabs: [
         // Not 'received via': a selection can hold payments that never arrived
-        { id: BreakdownTab.Account, name: $t('Betaalwijze') },
+        { id: BreakdownTab.Account, name: $t('%Zji') },
         // Without online payments there is nothing to pay out, so the server leaves this one empty
-        { id: BreakdownTab.Settlement, name: $t('Uitbetalingen') },
-        { id: BreakdownTab.Category, name: $t('Categorie') },
-        { id: BreakdownTab.Article, name: $t('Artikels') },
+        { id: BreakdownTab.Settlement, name: $t('%Zj6') },
+        { id: BreakdownTab.Category, name: $t('%M2') },
+        { id: BreakdownTab.Article, name: $t('%Rv') },
     ],
     getGroups: (breakdown, tab) => {
         switch (tab) {

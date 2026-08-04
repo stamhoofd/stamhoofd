@@ -54,7 +54,7 @@ export function getPaymentAccount(payment: PaymentGeneral, stripeAccounts: Strip
             name: holder || getPaymentProviderName(PaymentProvider.Stripe),
             description: account
                 ? (account.meta.bank_account_last4 ? `xxxx ${account.meta.bank_account_last4}` : '')
-                : $t('Verwijderd Stripe account'),
+                : $t('%Zia'),
             icon: 'card',
             // Every payment that was not made via Stripe has no Stripe account either, so the provider
             // has to be part of the filter
@@ -100,7 +100,7 @@ export function getPaymentAccount(payment: PaymentGeneral, stripeAccounts: Strip
         return new PaymentAccount({
             id: 'provider-' + payment.provider,
             name: getPaymentProviderName(payment.provider),
-            description: $t('Rekening gekoppeld aan deze betaalprovider'),
+            description: $t('%Ziu'),
             icon: 'card',
             filter: {
                 provider: payment.provider,

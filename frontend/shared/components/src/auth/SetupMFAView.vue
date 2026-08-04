@@ -6,7 +6,7 @@
             <h1>{{ $t('%Zgx') }}</h1>
 
             <p>
-                <I18nComponent :t="$t('Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan. <button>Meer info</button>')">
+                <I18nComponent :t="$t('%ZjA')">
                     <template #button="{content}">
                         <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
                             {{ content }}

@@ -6,7 +6,7 @@
             <h1>{{ $t('%ZhV') }}</h1>
 
             <p v-if="showQRCode">
-                <I18nComponent :t="$t('Scan de QR-code met je authenticator-app en voer daarna de code in. <button>Meer info</button>')">
+                <I18nComponent :t="$t('%Ziq')">
                     <template #button="{content}">
                         <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
                             {{ content }}
@@ -15,7 +15,7 @@
                 </I18nComponent>
             </p>
             <p v-else>
-                <I18nComponent :t="$t('Open je authenticator-app via de knop hieronder, of voeg de sleutel handmatig toe. Voer daarna de code in. <button>Meer info</button>')">
+                <I18nComponent :t="$t('%Zin')">
                     <template #button="{content}">
                         <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
                             {{ content }}
@@ -34,7 +34,7 @@
             <p class="style-button-bar">
                 <a :href="totpSetup.otpauthUri" class="button text" data-testid="open-authenticator-app">
                     <span class="icon external" />
-                    <span>{{ $t('Open in authenticator-app') }}</span>
+                    <span>{{ $t('%ZjY') }}</span>
                 </a>
             </p>
 

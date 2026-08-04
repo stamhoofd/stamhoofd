@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="hasBreakdown ? $t('Doorgaan') : $t('%Oy')" :title="$t(`%Oy`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="hasBreakdown ? $t('%16p') : $t('%Oy')" :title="$t(`%Oy`)" @save="save">
         <h1>
             {{ $t('%95') }}
         </h1>
@@ -312,7 +312,7 @@ async function save() {
     try {
         const selectionName = [
             methods.value.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(methods.value[0]!) : $t('%1JH'),
-            Formatter.dateRange(startDate.value, endDate.value, ' ' + $t('t.e.m.') + ' ', false),
+            Formatter.dateRange(startDate.value, endDate.value, ' ' + $t('%ZiS') + ' ', false),
         ].filter(Boolean).join(' - ');
 
         const title = [

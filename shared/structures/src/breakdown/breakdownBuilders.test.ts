@@ -270,17 +270,17 @@ describe('Breakdown builders', () => {
             expect(breakdown.byCategory.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: 'Kapoenen', price: 12_1234 },
                 { name: 'Welpen', price: 10_00 },
-                { name: $t('Afronding'), price: -34 },
+                { name: $t('%1b6'), price: -34 },
             ]);
             expect(breakdown.byArticle.map(r => r.price)).toEqual([12_1234, 10_00, -34]);
-            expect(breakdown.byArticle[2].name.toString()).toBe($t('Afronding'));
+            expect(breakdown.byArticle[2].name.toString()).toBe($t('%1b6'));
 
             // It arrived on the same account and in the same payout as the rest of the payment, so
             // those tabs hold what the bank account actually saw
             expect(breakdown.byAccount.map(r => r.price)).toEqual([12_1200, 10_00]);
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 12_1200 },
-                { name: $t('Niet online betaald'), price: 10_00 },
+                { name: $t('%ZjN'), price: 10_00 },
             ]);
 
             // It is not for one thing in particular, so it can't be broken down further, but the
@@ -313,7 +313,7 @@ describe('Breakdown builders', () => {
             // What it was for is not known, so it gets a row of its own instead of disappearing
             expect(breakdown.byCategory.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: 'Kapoenen', price: 60_00 },
-                { name: $t('Niet toegewezen'), price: 40_00 },
+                { name: $t('%Zjq'), price: 40_00 },
             ]);
             expect(breakdown.byArticle.map(r => r.price)).toEqual([60_00, 40_00]);
 
@@ -470,8 +470,8 @@ describe('Breakdown builders', () => {
             // The biggest amounts first
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
-                { name: $t('Niet online betaald'), price: 35_00 },
-                { name: $t('Nog niet uitbetaald'), price: 30_00 },
+                { name: $t('%ZjN'), price: 35_00 },
+                { name: $t('%Zjn'), price: 30_00 },
             ]);
         });
 
@@ -488,7 +488,7 @@ describe('Breakdown builders', () => {
             // Only Mollie and Stripe tell us when they paid out, so the others say nothing more than
             // which provider is holding the money
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
-                { name: $t('Nog niet uitbetaald'), price: 40_00 },
+                { name: $t('%Zjn'), price: 40_00 },
                 { name: getPaymentProviderName(PaymentProvider.Buckaroo), price: 25_00 },
                 { name: getPaymentProviderName(PaymentProvider.Payconiq), price: 20_00 },
             ]);
@@ -507,8 +507,8 @@ describe('Breakdown builders', () => {
             // Created and Pending are the same thing to an admin: the money is on its way
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
-                { name: $t('In verwerking'), price: 30_00 },
-                { name: $t('Mislukte betaling'), price: 25_00 },
+                { name: $t('%1OL'), price: 30_00 },
+                { name: $t('%ZjW'), price: 25_00 },
             ]);
 
             // Every payment ends up in exactly one row
@@ -600,9 +600,9 @@ describe('Breakdown builders', () => {
             // was never attempted
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
-                { name: $t('In verwerking'), price: 30_00 },
-                { name: $t('Mislukte betaling'), price: 20_00 },
-                { name: $t('Openstaand na mislukte poging'), price: 10_00 },
+                { name: $t('%1OL'), price: 30_00 },
+                { name: $t('%ZjW'), price: 20_00 },
+                { name: $t('%ZjC'), price: 10_00 },
             ]);
 
             // Every part of what was charged ends up in exactly one row
@@ -624,7 +624,7 @@ describe('Breakdown builders', () => {
 
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 60_00 },
-                { name: $t('Mislukte betaling'), price: 40_00 },
+                { name: $t('%ZjW'), price: 40_00 },
             ]);
             expect(breakdown.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
         });
@@ -642,14 +642,14 @@ describe('Breakdown builders', () => {
             });
 
             // A canceled item is not charged anymore, so what came in for it has to go back
-            const refund = breakdown.bySettlement.find(r => r.name.toString() === $t('Terug te betalen'))!;
+            const refund = breakdown.bySettlement.find(r => r.name.toString() === $t('%10b'))!;
             expect(refund.price).toBe(-50_00);
             expect(refund.selection!.filter).toEqual({ priceOpen: { $lt: 0 } });
 
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
                 { name: '1234567.0312.01', price: 50_00 },
-                { name: $t('Terug te betalen'), price: -50_00 },
-                { name: $t('Openstaand'), price: 25_00 },
+                { name: $t('%10b'), price: -50_00 },
+                { name: $t('%1Ni'), price: 25_00 },
             ]);
             expect(breakdown.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
         });
@@ -669,8 +669,8 @@ describe('Breakdown builders', () => {
             });
 
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
-                { name: $t('Mislukte betaling'), price: 100_00 },
-                { name: $t('Openstaand'), price: 25_00 },
+                { name: $t('%ZjW'), price: 100_00 },
+                { name: $t('%1Ni'), price: 25_00 },
             ]);
 
             expect(breakdown.bySettlement.reduce((total, r) => total + r.price, 0)).toBe(breakdown.price);
@@ -1208,7 +1208,7 @@ describe('Breakdown builders', () => {
             ]]);
 
             expect(breakdown.bySettlement.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
-                { name: $t('Niet online betaald'), price: 40_00 },
+                { name: $t('%ZjN'), price: 40_00 },
                 { name: PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions), price: 10_00 },
             ]);
 
@@ -1247,15 +1247,15 @@ describe('Breakdown builders', () => {
 
             const partial = breakDownPayments([[createPayment({ items: [[balanceItem, 10_00]] })]], { orders });
             expect(partial.byArticle.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
-                { name: $t('Deels betaalde bestelling'), price: 10_00 },
+                { name: $t('%Zjb'), price: 10_00 },
             ]);
 
             // More than the order costs can only mean the order changed after it was paid
             const changed = breakDownPayments([[createPayment({ items: [[balanceItem, 40_00]] })]], { orders });
-            expect(changed.byArticle.map(r => r.name.toString())).toEqual([$t('Gewijzigde bestelling')]);
+            expect(changed.byArticle.map(r => r.name.toString())).toEqual([$t('%Zik')]);
 
             const refunded = breakDownPayments([[createPayment({ items: [[balanceItem, -5_00]] })]], { orders });
-            expect(refunded.byArticle.map(r => r.name.toString())).toEqual([$t('Terugbetaling bestelling')]);
+            expect(refunded.byArticle.map(r => r.name.toString())).toEqual([$t('%ZjK')]);
         });
 
         test('what was charged for an order can never be a partial payment', () => {
@@ -1266,7 +1266,7 @@ describe('Breakdown builders', () => {
 
             const breakdown = breakDownBalanceItems([balanceItem], { orders });
             expect(breakdown.byArticle.map(r => ({ name: r.name.toString(), price: r.price }))).toEqual([
-                { name: $t('Gewijzigde bestelling'), price: 20_00 },
+                { name: $t('%Zik'), price: 20_00 },
             ]);
         });
 
@@ -1312,7 +1312,7 @@ describe('Breakdown builders', () => {
             expect(breakdown.byCategory).toHaveLength(100);
 
             const last = breakdown.byCategory[99];
-            expect(last.name.toString()).toBe($t('Overige'));
+            expect(last.name.toString()).toBe($t('%mV'));
             expect(last.canNarrowDown).toBe(false);
             expect(last.selection).toBeNull();
 
@@ -1328,7 +1328,7 @@ describe('Breakdown builders', () => {
             const breakdown = breakDownBalanceItems(Array.from({ length: 100 }, (_, index) => createCorrection(index)));
 
             expect(breakdown.byCategory).toHaveLength(100);
-            expect(breakdown.byCategory.every(r => r.name.toString() !== $t('Overige'))).toBe(true);
+            expect(breakdown.byCategory.every(r => r.name.toString() !== $t('%mV'))).toBe(true);
         });
     });
 

@@ -18431,10 +18431,6 @@
     "original": "Je moet de tweestapsverificatie voltooien om verder te gaan. Herlaad deze pagina om het opnieuw te proberen.",
     "translation": "You must complete two-factor authentication to continue. Reload this page to try again."
   },
-  "%ZgS": {
-    "original": "Gebruikers met rechten op het platform moeten tweestapsverificatie instellen om aan te melden.",
-    "translation": "Users with rights on the platform are required to set up two-factor authentication to sign in."
-  },
   "%ZgT": {
     "original": "Passkey of beveiligingssleutel toevoegen",
     "translation": "Add passkey or security key"
@@ -18462,10 +18458,6 @@
   "%ZgZ": {
     "original": "Naam toestel of app",
     "translation": "Device or app name"
-  },
-  "%Zga": {
-    "original": "Scan de QR-code met je authenticator-app en voer daarna de code in.",
-    "translation": "Scan the QR code with your authenticator app and then enter the code."
   },
   "%Zgc": {
     "original": "Bevestig je aanmelding met je ingestelde tweedestapsverificatie-methode.",
@@ -18683,10 +18675,6 @@
     "original": "Authenticator-app instellen",
     "translation": "Set up authenticator app"
   },
-  "%ZhW": {
-    "original": "Beveilig je account met een extra verificatiestap naast je wachtwoord.",
-    "translation": "Secure your account with an extra verification step in addition to your password."
-  },
   "%ZhX": {
     "original": "Nog nooit aangemeld",
     "translation": "Never signed in"
@@ -18823,10 +18811,6 @@
     "original": "Alle beheerders afmelden",
     "translation": "Sign out all administrators"
   },
-  "%Zi5": {
-    "original": "Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan.",
-    "translation": "Your account requires two-factor authentication, but you have not set this up yet. Please configure an extra verification step to continue."
-  },
   "%Zi6": {
     "original": "Voer je wachtwoord opnieuw in om deze gevoelige actie te bevestigen.",
     "translation": "Re-enter your password to confirm this sensitive action."
@@ -18879,9 +18863,309 @@
     "original": "Beheerders moeten tweestapsverificatie pas verplicht instellen bij hun volgende aanmelding. Daarom raden we aan om alle beheerders af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.",
     "translation": "Administrators are only required to set up two-factor authentication the next time they log in. That’s why we recommend signing out all administrators so they must set it up immediately. Your own session stays active."
   },
+  "%ZiN": {
+    "original": "Het bedrag gedeeld door het aantal dagen tussen de start- en einddatum.",
+    "translation": "The amount divided by the number of days between the start and end date."
+  },
+  "%ZiO": {
+    "original": "Statistieken van betalingen en aanrekeningen",
+    "translation": "Statistics for payments and charges"
+  },
+  "%ZiP": {
+    "original": "Ingehouden door de betaalprovider.",
+    "translation": "Held by the payment provider."
+  },
+  "%ZiQ": {
+    "original": "Er zijn geen gegevens voor deze selectie.",
+    "translation": "There is no data for this selection."
+  },
+  "%ZiR": {
+    "original": "{count} kleinere groepen",
+    "translation": "{count} smaller groups"
+  },
+  "%ZiS": {
+    "original": "t.e.m.",
+    "translation": "until"
+  },
+  "%ZiT": {
+    "original": "We konden geen statistieken maken van deze selectie, maar je kan ze wel nog exporteren naar Excel.",
+    "translation": "We couldn't generate statistics for this selection, but you can still export them to Excel."
+  },
+  "%ZiU": {
+    "original": "Volledige periode",
+    "translation": "Full period"
+  },
+  "%ZiV": {
+    "original": "Deze betalingen komen niet via een betaalprovider binnen.",
+    "translation": "These payments do not go through a payment provider."
+  },
+  "%ZiW": {
+    "original": "Rijen zonder pijl kan je niet openen: hun bedrag maakt deel uit van een groter geheel, zoals een webshopbestelling die als één geheel aangerekend wordt.",
+    "translation": "Rows without an arrow cannot be opened: their amount is part of a larger whole, such as a webshop order that is charged as a single total."
+  },
+  "%ZiX": {
+    "original": "Deel zeker <button>onze gids</button> met alle beheerders voor informatie hoe je dit kan instellen.",
+    "translation": "Be sure to <button>share our guide</button> with all administrators for information on how to configure this."
+  },
+  "%ZiZ": {
+    "original": "Dit kan even duren bij een grote selectie.",
+    "translation": "This may take a while for a large selection."
+  },
+  "%Zia": {
+    "original": "Verwijderd Stripe account",
+    "translation": "Deleted Stripe account"
+  },
+  "%Zib": {
+    "original": "Laatste 6 maanden",
+    "translation": "Last 6 months"
+  },
+  "%Zic": {
+    "original": "Toon de aanrekeningen",
+    "translation": "Show the charges"
+  },
+  "%Zid": {
+    "original": "Dit is wat er van deze aanrekeningen onderweg is, niet wat er aangerekend werd.",
+    "translation": "This is what is in progress for these charges, not what has been charged."
+  },
+  "%Zie": {
+    "original": "Laatste 12 maanden",
+    "translation": "Last 12 months"
+  },
+  "%Zif": {
+    "original": "Dit bedrag wordt maandelijks aangerekend via jouw gekoppelde bankkaart.",
+    "translation": "This amount is charged monthly via your connected bank card."
+  },
+  "%Zig": {
+    "original": "Mislukte betalingen",
+    "translation": "Failed payments"
+  },
+  "%Zih": {
+    "original": "Beveilig je account met een extra verificatiestap naast je wachtwoord. <button>Meer info</button>",
+    "translation": "Protect your account with an extra verification step in addition to your password. <button>More info</button>"
+  },
+  "%Zij": {
+    "original": "Deze betalingen hebben ook voor andere dingen betaald. De lijst bevat de volledige betalingen, het bedrag waarmee je ze opende is enkel het deel dat daar meetelde.",
+    "translation": "These payments also covered other items. The list shows the complete payments, but the amount you opened shows only the part that was counted for this purpose."
+  },
+  "%Zik": {
+    "original": "Gewijzigde bestelling",
+    "translation": "Modified order"
+  },
+  "%Zil": {
+    "original": "Deze aanrekeningen werden ook elders betaald. De lijst en de export bevatten de volledige aanrekeningen, het bedrag hierboven is enkel het deel dat hier meetelt.",
+    "translation": "These charges were also paid elsewhere. The list and the export include the full charges, but the amount above is only the part counted here."
+  },
+  "%Zim": {
+    "original": "Dit bedrag wordt automatisch ingehouden van je uitbetalingen.",
+    "translation": "This amount is automatically withheld from your payouts."
+  },
+  "%Zin": {
+    "original": "Open je authenticator-app via de knop hieronder, of voeg de sleutel handmatig toe. Voer daarna de code in. <button>Meer info</button>",
+    "translation": "Open your authenticator app using the button below, or add the key manually. Then enter the code. <button>More info</button>"
+  },
+  "%Zio": {
+    "original": "Laatste maand",
+    "translation": "Last month"
+  },
+  "%Zip": {
+    "original": "Toon bedrag per dag",
+    "translation": "Show amount per day"
+  },
+  "%Ziq": {
+    "original": "Scan de QR-code met je authenticator-app en voer daarna de code in. <button>Meer info</button>",
+    "translation": "Scan the QR code with your authenticator app and then enter the code. <button>More info</button>"
+  },
+  "%Zir": {
+    "original": "Dit is wat er van deze aanrekeningen ontvangen werd, niet wat er aangerekend werd.",
+    "translation": "This is what has been received from these charges, not what has been charged."
+  },
+  "%Zis": {
+    "original": "Er bestaat al een account met dit e-mailadres dat beveiligd is met tweestapsverificatie. Log in op het bestaande account in plaats van je e-mailadres te wijzigen.",
+    "translation": "There already exists an account with this email address secured with two-factor authentication. Log in to the existing account instead of changing your email address."
+  },
+  "%Zit": {
+    "original": "Een betaling gaat tot op de cent, wat aangerekend werd tot op vier cijfers na de komma.",
+    "translation": "A payment is rounded to the cent, but charges are registered up to four decimal places."
+  },
+  "%Ziu": {
+    "original": "Rekening gekoppeld aan deze betaalprovider",
+    "translation": "Account linked to this payment provider"
+  },
+  "%Ziv": {
+    "original": "Deze betalingen zijn nog niet afgerond, dus er werd nog niets ontvangen.",
+    "translation": "These payments are not yet complete, so nothing has been received yet."
+  },
+  "%Ziw": {
+    "original": "Deze selectie bevat meer dan {limit} items, dat zijn er te veel om statistieken van te maken. Kies een kortere periode of verfijn je selectie.",
+    "translation": "This selection contains more than {limit} items, which is too many to generate statistics. Choose a shorter period or refine your selection."
+  },
+  "%Ziy": {
+    "original": "Toon de betalingen",
+    "translation": "Show the payments"
+  },
   "%Zj": {
     "original": "Vergeten",
     "translation": "Forgotten"
+  },
+  "%Zj1": {
+    "original": "Dit is wat deze betalingen afgerond hebben, niet wat ermee betaald werd.",
+    "translation": "This is what these payments have completed, not what was paid with them."
+  },
+  "%Zj2": {
+    "original": "betalingen",
+    "translation": "payments"
+  },
+  "%Zj3": {
+    "original": "Er worden al statistieken berekend, probeer het zo opnieuw.",
+    "translation": "Statistics are currently being calculated, please try again soon."
+  },
+  "%Zj5": {
+    "original": "aanrekening",
+    "translation": "charge"
+  },
+  "%Zj6": {
+    "original": "Uitbetalingen",
+    "translation": "Payouts"
+  },
+  "%Zj7": {
+    "original": "We krijgen geen informatie over de uitbetalingen van deze betaalprovider.",
+    "translation": "We do not receive information about payouts from this payment provider."
+  },
+  "%Zj8": {
+    "original": "Deze aanrekeningen werden ook elders betaald. Het bedrag hierboven is enkel het deel dat hier meetelt, en dat is ook exact wat de export bevat. De lijst toont wel de volledige aanrekeningen.",
+    "translation": "These charges were also paid elsewhere. The amount above is just the part counted here, and that's exactly what the export includes. The list, however, shows the full charges."
+  },
+  "%ZjA": {
+    "original": "Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan. <button>Meer info</button>",
+    "translation": "Your account requires two-factor authentication, but you have not set this up yet. Configure an extra verification step to continue. <button>More info</button>"
+  },
+  "%ZjB": {
+    "original": "Deze betalingen zeggen niet waarvoor ze bedoeld waren, bijvoorbeeld omdat ze geïmporteerd werden.",
+    "translation": "These payments don't specify their purpose, for example because they were imported."
+  },
+  "%ZjC": {
+    "original": "Openstaand na mislukte poging",
+    "translation": "Open after failed attempt"
+  },
+  "%ZjD": {
+    "original": "Deze betalingen hebben ook voor andere dingen betaald. De lijst en de export bevatten de volledige betalingen, het bedrag hierboven is enkel het deel dat hier meetelt.",
+    "translation": "These payments also covered other items. The list and export include the full payments, but the amount above is only the part counted here."
+  },
+  "%ZjG": {
+    "original": "Toont waaruit een selectie van betalingen of aanrekeningen bestaat, opgesplitst per rekening, categorie, artikel en uitbetaling, met de export daarvan.",
+    "translation": "Shows how a selection of payments or charges is made up, split by account, category, item, and payout, along with their export."
+  },
+  "%ZjI": {
+    "original": "Week van {date}",
+    "translation": "Week of {date}"
+  },
+  "%ZjJ": {
+    "original": "Elke lijn is één betaling die één aanrekening (deels) betaalde. Samen zijn ze precies het bedrag dat je hiervoor zag. Een webshopbestelling blijft één lijn: die wordt als één geheel aangerekend.",
+    "translation": "Each line is one payment that (partly) paid one charge. Together, the total matches what you saw before. A webshop order is always a single line: it is charged as one total."
+  },
+  "%ZjK": {
+    "original": "Terugbetaling bestelling",
+    "translation": "Order refund"
+  },
+  "%ZjL": {
+    "original": "Deze selectie bevat betalingen die (nog) niet ontvangen werden, dus het totaal hierboven is niet wat er op je rekening kwam.",
+    "translation": "This selection includes payments that have not (yet) been received, so the total above does not reflect what was actually deposited into your account."
+  },
+  "%ZjM": {
+    "original": "Ontvangen",
+    "translation": "Received"
+  },
+  "%ZjN": {
+    "original": "Niet online betaald",
+    "translation": "Not paid online"
+  },
+  "%ZjO": {
+    "original": "Dit werd verrekend met een ander openstaand bedrag, er kwam geen geld binnen.",
+    "translation": "This was settled with another open amount, so no funds were received."
+  },
+  "%ZjP": {
+    "original": "Hiervoor werd nog niet betaald: een mislukte poging dekte maar een deel van dit bedrag.",
+    "translation": "This amount has not been fully paid: a failed attempt only covered part of this amount."
+  },
+  "%ZjR": {
+    "original": "Uitbetaald op {date} via {provider}",
+    "translation": "Paid out on {date} via {provider}"
+  },
+  "%ZjS": {
+    "original": "Dit bedrag werd betaald maar is niet meer verschuldigd.",
+    "translation": "This amount was paid but is no longer due."
+  },
+  "%ZjT": {
+    "original": "Handig overzicht van betalingen, transactiekosten en uitbetalingen die je vervolgens kan exporteren naar Excel.",
+    "translation": "A handy overview of payments, transaction costs, and payouts, which you can export to Excel."
+  },
+  "%ZjU": {
+    "original": "Er werd geprobeerd te betalen, maar dat is niet gelukt.",
+    "translation": "A payment attempt was made but was not successful."
+  },
+  "%ZjW": {
+    "original": "Mislukte betaling",
+    "translation": "Failed payment"
+  },
+  "%ZjY": {
+    "original": "Open in authenticator-app",
+    "translation": "Open in authenticator app"
+  },
+  "%Zja": {
+    "original": "Onbekende betaalprovider",
+    "translation": "Unknown payment provider"
+  },
+  "%Zjb": {
+    "original": "Deels betaalde bestelling",
+    "translation": "Partially paid order"
+  },
+  "%Zjd": {
+    "original": "Deze betalingen moeten nog uitbetaald worden door de betaalprovider.",
+    "translation": "These payments still need to be paid out by the payment provider."
+  },
+  "%Zjf": {
+    "original": "aanrekeningen",
+    "translation": "charges"
+  },
+  "%Zjg": {
+    "original": "Dit is wat er van deze aanrekeningen openstaat, niet wat er aangerekend werd.",
+    "translation": "This is the outstanding amount for these charges, not the total charged."
+  },
+  "%Zji": {
+    "original": "Betaalwijze",
+    "translation": "Payment method"
+  },
+  "%Zjj": {
+    "original": "Hiervoor werd nog niet betaald.",
+    "translation": "No payment has been made yet."
+  },
+  "%Zjl": {
+    "original": "Servicekosten via Stripe",
+    "translation": "Service fees via Stripe"
+  },
+  "%Zjm": {
+    "original": "Je account is beheerder en moet beveiligd worden met tweestapsverificatie, maar je logde al meer dan {days} dagen niet meer in. Bevestig eerst je e-mailadres: we stuurden je een e-mail met een link waarmee je opnieuw toegang krijgt en tweestapsverificatie kan instellen. Kreeg je geen e-mail? Dan kan je ook een nieuwe link aanvragen via wachtwoord vergeten.",
+    "translation": "Your account is an administrator and must be secured with two-factor authentication, but you haven't logged in for more than {days} days. Please confirm your email address first: we've sent you an email with a link you can use to regain access and set up two-factor authentication. Didn't receive an email? You can also request a new link via forgot password."
+  },
+  "%Zjn": {
+    "original": "Nog niet uitbetaald",
+    "translation": "Not yet paid out"
+  },
+  "%Zjp": {
+    "original": "Laatste week",
+    "translation": "Last week"
+  },
+  "%Zjq": {
+    "original": "Niet toegewezen",
+    "translation": "Not assigned"
+  },
+  "%Zjs": {
+    "original": "Deze aanrekeningen werden ook elders betaald. De lijst bevat de volledige aanrekeningen, het bedrag waarmee je ze opende is enkel het deel dat daar meetelde.",
+    "translation": "These charges were also paid elsewhere. The list shows the full charges, and the amount you opened them with only counts for the part that was relevant there."
+  },
+  "%Zjt": {
+    "original": "Deze betalingen hebben ook voor andere dingen betaald. Het bedrag hierboven en de export bevatten enkel het deel dat hier meetelt.",
+    "translation": "These payments also paid for other items. The amount above and the export include only the portion that applies here."
   },
   "%Zk": {
     "original": "Inloggen via SSO",

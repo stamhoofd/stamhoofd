@@ -20,7 +20,7 @@
                         {{ $t('%Zgu') }}
                     </h3>
                     <p class="style-description-small">
-                        <I18nComponent :t="$t('Deel zeker <button>onze gids</button> met alle beheerders voor informatie hoe je dit kan instellen.')">
+                        <I18nComponent :t="$t('%ZiX')">
                             <template #button="{content}">
                                 <a class="inline-link" :href="LocalizedDomains.getDocs('tweestapsverificatie')" target="_blank">
                                     {{ content }}
@@ -241,10 +241,10 @@
                         <Checkbox :model-value="getFeatureFlag('payment-breakdown')" @update:model-value="setFeatureFlag('payment-breakdown', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Statistieken van betalingen en aanrekeningen') }}
+                        {{ $t('%ZiO') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Toont waaruit een selectie van betalingen of aanrekeningen bestaat, opgesplitst per rekening, categorie, artikel en uitbetaling, met de export daarvan.') }}
+                        {{ $t('%ZjG') }}
                     </p>
                 </STListItem>
             </STList>

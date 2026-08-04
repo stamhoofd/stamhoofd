@@ -62,8 +62,8 @@ defineEmits<{ (e: 'select', group: BreakdownGroup): void }>();
 
 function countText(count: number): string {
     return props.countUnit === 'payments'
-        ? Formatter.pluralText(count, $t('betaling'), $t('betalingen'))
-        : Formatter.pluralText(count, $t('aanrekening'), $t('aanrekeningen'));
+        ? Formatter.pluralText(count, $t('%14a'), $t('%Zj2'))
+        : Formatter.pluralText(count, $t('%Zj5'), $t('%Zjf'));
 }
 
 /**

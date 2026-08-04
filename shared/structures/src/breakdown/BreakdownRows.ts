@@ -201,8 +201,8 @@ export class BreakdownRows {
 
         shown.push(BreakdownGroup.create({
             id: OTHER_GROUPS_ID,
-            name: new TranslatedString($t('Overige')),
-            description: $t('{count} kleinere groepen', { count: Formatter.integer(rest.length) }),
+            name: new TranslatedString($t('%mV')),
+            description: $t('%ZiR', { count: Formatter.integer(rest.length) }),
             icon: 'box',
             price: rest.reduce((total, group) => total + group.price, 0),
             quantity: rest.reduce((total, group) => total + group.quantity, 0),

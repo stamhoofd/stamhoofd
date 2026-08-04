@@ -18615,10 +18615,6 @@
     "original": "Je moet de tweestapsverificatie voltooien om verder te gaan. Herlaad deze pagina om het opnieuw te proberen.",
     "translation": "Vous devez terminer la vérification en deux étapes pour continuer. Rechargez cette page pour réessayer."
   },
-  "%ZgS": {
-    "original": "Gebruikers met rechten op het platform moeten tweestapsverificatie instellen om aan te melden.",
-    "translation": "Les utilisateurs disposant de droits sur la plateforme doivent activer la vérification en deux étapes pour se connecter."
-  },
   "%ZgT": {
     "original": "Passkey of beveiligingssleutel toevoegen",
     "translation": "Ajouter une passkey ou une clé de sécurité"
@@ -18646,10 +18642,6 @@
   "%ZgZ": {
     "original": "Naam toestel of app",
     "translation": "Nom de l'appareil ou de l'application"
-  },
-  "%Zga": {
-    "original": "Scan de QR-code met je authenticator-app en voer daarna de code in.",
-    "translation": "Scannez le QR-code avec votre application d’authentification puis entrez le code."
   },
   "%Zgc": {
     "original": "Bevestig je aanmelding met je ingestelde tweedestapsverificatie-methode.",
@@ -18867,10 +18859,6 @@
     "original": "Authenticator-app instellen",
     "translation": "Configurer l’application d’authentification"
   },
-  "%ZhW": {
-    "original": "Beveilig je account met een extra verificatiestap naast je wachtwoord.",
-    "translation": "Protégez votre compte avec une étape de vérification supplémentaire en plus de votre mot de passe."
-  },
   "%ZhX": {
     "original": "Nog nooit aangemeld",
     "translation": "Jamais connecté"
@@ -19007,10 +18995,6 @@
     "original": "Alle beheerders afmelden",
     "translation": "Déconnecter tous les administrateurs"
   },
-  "%Zi5": {
-    "original": "Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan.",
-    "translation": "Votre compte requiert la vérification en deux étapes, mais elle n’est pas encore configurée. Veuillez ajouter une étape de vérification supplémentaire pour continuer."
-  },
   "%Zi6": {
     "original": "Voer je wachtwoord opnieuw in om deze gevoelige actie te bevestigen.",
     "translation": "Saisissez à nouveau votre mot de passe pour confirmer cette action sensible."
@@ -19063,9 +19047,309 @@
     "original": "Beheerders moeten tweestapsverificatie pas verplicht instellen bij hun volgende aanmelding. Daarom raden we aan om alle beheerders af te melden, zodat ze het meteen moeten instellen. Jouw eigen sessie blijft actief.",
     "translation": "Les administrateurs devront uniquement activer la vérification en deux étapes lors de leur prochaine connexion. C’est pourquoi nous recommandons de les déconnecter, afin qu’ils l’activent directement. Votre propre session restera active."
   },
+  "%ZiN": {
+    "original": "Het bedrag gedeeld door het aantal dagen tussen de start- en einddatum.",
+    "translation": "Le montant divisé par le nombre de jours entre la date de début et la date de fin."
+  },
+  "%ZiO": {
+    "original": "Statistieken van betalingen en aanrekeningen",
+    "translation": "Statistiques des paiements et des facturations"
+  },
+  "%ZiP": {
+    "original": "Ingehouden door de betaalprovider.",
+    "translation": "Retenu par le prestataire de paiement."
+  },
+  "%ZiQ": {
+    "original": "Er zijn geen gegevens voor deze selectie.",
+    "translation": "Aucune donnée n'est disponible pour cette sélection."
+  },
+  "%ZiR": {
+    "original": "{count} kleinere groepen",
+    "translation": "{count} groupes plus petits"
+  },
+  "%ZiS": {
+    "original": "t.e.m.",
+    "translation": "jusqu'au"
+  },
+  "%ZiT": {
+    "original": "We konden geen statistieken maken van deze selectie, maar je kan ze wel nog exporteren naar Excel.",
+    "translation": "Nous n'avons pas pu générer de statistiques pour cette sélection, mais vous pouvez quand même les exporter vers Excel."
+  },
+  "%ZiU": {
+    "original": "Volledige periode",
+    "translation": "Période complète"
+  },
+  "%ZiV": {
+    "original": "Deze betalingen komen niet via een betaalprovider binnen.",
+    "translation": "Ces paiements ne passent pas par un prestataire de paiement."
+  },
+  "%ZiW": {
+    "original": "Rijen zonder pijl kan je niet openen: hun bedrag maakt deel uit van een groter geheel, zoals een webshopbestelling die als één geheel aangerekend wordt.",
+    "translation": "Les lignes sans flèche ne peuvent pas être ouvertes : leur montant fait partie d'un ensemble plus large, comme une commande de boutique en ligne comptabilisée en une seule fois."
+  },
+  "%ZiX": {
+    "original": "Deel zeker <button>onze gids</button> met alle beheerders voor informatie hoe je dit kan instellen.",
+    "translation": "Partagez <button>notre guide</button> avec tous les gestionnaires pour savoir comment configurer ceci."
+  },
+  "%ZiZ": {
+    "original": "Dit kan even duren bij een grote selectie.",
+    "translation": "Cela peut prendre un peu de temps pour une sélection large."
+  },
+  "%Zia": {
+    "original": "Verwijderd Stripe account",
+    "translation": "Compte Stripe supprimé"
+  },
+  "%Zib": {
+    "original": "Laatste 6 maanden",
+    "translation": "6 derniers mois"
+  },
+  "%Zic": {
+    "original": "Toon de aanrekeningen",
+    "translation": "Afficher les facturations"
+  },
+  "%Zid": {
+    "original": "Dit is wat er van deze aanrekeningen onderweg is, niet wat er aangerekend werd.",
+    "translation": "Ceci concerne ce qui est en cours pour ces facturations, pas ce qui a déjà été facturé."
+  },
+  "%Zie": {
+    "original": "Laatste 12 maanden",
+    "translation": "12 derniers mois"
+  },
+  "%Zif": {
+    "original": "Dit bedrag wordt maandelijks aangerekend via jouw gekoppelde bankkaart.",
+    "translation": "Ce montant est débité chaque mois via votre carte bancaire liée."
+  },
+  "%Zig": {
+    "original": "Mislukte betalingen",
+    "translation": "Paiements échoués"
+  },
+  "%Zih": {
+    "original": "Beveilig je account met een extra verificatiestap naast je wachtwoord. <button>Meer info</button>",
+    "translation": "Sécurisez votre compte avec une étape de vérification supplémentaire en plus de votre mot de passe. <button>Plus d'infos</button>"
+  },
+  "%Zij": {
+    "original": "Deze betalingen hebben ook voor andere dingen betaald. De lijst bevat de volledige betalingen, het bedrag waarmee je ze opende is enkel het deel dat daar meetelde.",
+    "translation": "Ces paiements ont aussi servi à payer d'autres choses. La liste montre le paiement complet, le montant affiché ici est uniquement la partie qui s'applique à cela."
+  },
+  "%Zik": {
+    "original": "Gewijzigde bestelling",
+    "translation": "Commande modifiée"
+  },
+  "%Zil": {
+    "original": "Deze aanrekeningen werden ook elders betaald. De lijst en de export bevatten de volledige aanrekeningen, het bedrag hierboven is enkel het deel dat hier meetelt.",
+    "translation": "Ces facturations ont aussi été payées ailleurs. La liste et l'export incluent les facturations complètes, le montant ci-dessus est seulement la part concernée ici."
+  },
+  "%Zim": {
+    "original": "Dit bedrag wordt automatisch ingehouden van je uitbetalingen.",
+    "translation": "Cette somme est automatiquement retenue de vos règlements."
+  },
+  "%Zin": {
+    "original": "Open je authenticator-app via de knop hieronder, of voeg de sleutel handmatig toe. Voer daarna de code in. <button>Meer info</button>",
+    "translation": "Ouvrez votre application d'authentification avec le bouton ci-dessous ou saisissez la clé manuellement. Ensuite, entrez le code. <button>Plus d'infos</button>"
+  },
+  "%Zio": {
+    "original": "Laatste maand",
+    "translation": "Dernier mois"
+  },
+  "%Zip": {
+    "original": "Toon bedrag per dag",
+    "translation": "Afficher le montant par jour"
+  },
+  "%Ziq": {
+    "original": "Scan de QR-code met je authenticator-app en voer daarna de code in. <button>Meer info</button>",
+    "translation": "Scannez le code QR avec votre application d'authentification, puis entrez le code. <button>Plus d'infos</button>"
+  },
+  "%Zir": {
+    "original": "Dit is wat er van deze aanrekeningen ontvangen werd, niet wat er aangerekend werd.",
+    "translation": "Ceci correspond à ce qui a été reçu pour ces facturations, pas ce qui a été facturé."
+  },
+  "%Zis": {
+    "original": "Er bestaat al een account met dit e-mailadres dat beveiligd is met tweestapsverificatie. Log in op het bestaande account in plaats van je e-mailadres te wijzigen.",
+    "translation": "Il existe déjà un compte avec cette adresse e-mail qui est sécurisé via la vérification en deux étapes. Connectez-vous à ce compte existant plutôt que de modifier votre adresse e-mail."
+  },
+  "%Zit": {
+    "original": "Een betaling gaat tot op de cent, wat aangerekend werd tot op vier cijfers na de komma.",
+    "translation": "Un paiement se fait jusqu'au centime près, ce qui a été facturé est arrondi à quatre décimales."
+  },
+  "%Ziu": {
+    "original": "Rekening gekoppeld aan deze betaalprovider",
+    "translation": "Compte lié à ce prestataire de paiement"
+  },
+  "%Ziv": {
+    "original": "Deze betalingen zijn nog niet afgerond, dus er werd nog niets ontvangen.",
+    "translation": "Ces paiements ne sont pas encore finalisés, donc rien n'a encore été reçu."
+  },
+  "%Ziw": {
+    "original": "Deze selectie bevat meer dan {limit} items, dat zijn er te veel om statistieken van te maken. Kies een kortere periode of verfijn je selectie.",
+    "translation": "Cette sélection contient plus de {limit} éléments, c'est trop pour générer des statistiques. Sélectionnez une période plus courte ou affinez votre sélection."
+  },
+  "%Ziy": {
+    "original": "Toon de betalingen",
+    "translation": "Afficher les paiements"
+  },
   "%Zj": {
     "original": "Vergeten",
     "translation": "Mot de passe oublié"
+  },
+  "%Zj1": {
+    "original": "Dit is wat deze betalingen afgerond hebben, niet wat ermee betaald werd.",
+    "translation": "Ceci est le montant que ces paiements ont finalisé, pas ce qui a été payé avec."
+  },
+  "%Zj2": {
+    "original": "betalingen",
+    "translation": "paiements"
+  },
+  "%Zj3": {
+    "original": "Er worden al statistieken berekend, probeer het zo opnieuw.",
+    "translation": "Des statistiques sont déjà en cours de calcul, réessayez un peu plus tard."
+  },
+  "%Zj5": {
+    "original": "aanrekening",
+    "translation": "facturation"
+  },
+  "%Zj6": {
+    "original": "Uitbetalingen",
+    "translation": "Versements"
+  },
+  "%Zj7": {
+    "original": "We krijgen geen informatie over de uitbetalingen van deze betaalprovider.",
+    "translation": "Nous ne recevons aucune information concernant les versements de ce prestataire de paiement."
+  },
+  "%Zj8": {
+    "original": "Deze aanrekeningen werden ook elders betaald. Het bedrag hierboven is enkel het deel dat hier meetelt, en dat is ook exact wat de export bevat. De lijst toont wel de volledige aanrekeningen.",
+    "translation": "Ces facturations ont aussi été payées ailleurs. Le montant ci-dessus montre seulement la part concernée ici, qui correspond exactement à ce que contient l'export. La liste affiche cependant les facturations complètes."
+  },
+  "%ZjA": {
+    "original": "Je account vereist tweestapsverificatie, maar je hebt dit nog niet ingesteld. Stel een extra verificatiestap in om verder te gaan. <button>Meer info</button>",
+    "translation": "Votre compte exige une vérification en deux étapes, mais vous ne l'avez pas encore configurée. Ajoutez une étape de vérification supplémentaire pour continuer. <button>Plus d'infos</button>"
+  },
+  "%ZjB": {
+    "original": "Deze betalingen zeggen niet waarvoor ze bedoeld waren, bijvoorbeeld omdat ze geïmporteerd werden.",
+    "translation": "Ces paiements n'indiquent pas à quoi ils servent, par exemple parce qu'ils ont été importés."
+  },
+  "%ZjC": {
+    "original": "Openstaand na mislukte poging",
+    "translation": "En attente après une tentative échouée"
+  },
+  "%ZjD": {
+    "original": "Deze betalingen hebben ook voor andere dingen betaald. De lijst en de export bevatten de volledige betalingen, het bedrag hierboven is enkel het deel dat hier meetelt.",
+    "translation": "Ces paiements ont aussi servi à d'autres fins. La liste et l'export incluent les paiements complets, le montant ci-dessus n'est que la partie concernée."
+  },
+  "%ZjG": {
+    "original": "Toont waaruit een selectie van betalingen of aanrekeningen bestaat, opgesplitst per rekening, categorie, artikel en uitbetaling, met de export daarvan.",
+    "translation": "Indique la composition d'une sélection de paiements ou de facturations, répartie par compte, catégorie, article et versement, avec export disponible."
+  },
+  "%ZjI": {
+    "original": "Week van {date}",
+    "translation": "Semaine du {date}"
+  },
+  "%ZjJ": {
+    "original": "Elke lijn is één betaling die één aanrekening (deels) betaalde. Samen zijn ze precies het bedrag dat je hiervoor zag. Een webshopbestelling blijft één lijn: die wordt als één geheel aangerekend.",
+    "translation": "Chaque ligne correspond à un paiement qui a réglé (en partie) une facturation. Ensemble, ils totalisent exactement le montant affiché auparavant. Une commande webshop reste une seule ligne : elle est calculée en une seule fois."
+  },
+  "%ZjK": {
+    "original": "Terugbetaling bestelling",
+    "translation": "Remboursement de commande"
+  },
+  "%ZjL": {
+    "original": "Deze selectie bevat betalingen die (nog) niet ontvangen werden, dus het totaal hierboven is niet wat er op je rekening kwam.",
+    "translation": "Cette sélection contient des paiements qui n'ont pas (encore) été reçus, donc le total ci-dessus ne correspond pas à ce qui a été versé sur votre compte."
+  },
+  "%ZjM": {
+    "original": "Ontvangen",
+    "translation": "Reçu"
+  },
+  "%ZjN": {
+    "original": "Niet online betaald",
+    "translation": "Non payé en ligne"
+  },
+  "%ZjO": {
+    "original": "Dit werd verrekend met een ander openstaand bedrag, er kwam geen geld binnen.",
+    "translation": "Ce montant a été compensé avec un autre solde ouvert, aucun argent n'a été reçu."
+  },
+  "%ZjP": {
+    "original": "Hiervoor werd nog niet betaald: een mislukte poging dekte maar een deel van dit bedrag.",
+    "translation": "Ce montant n'a pas encore été payé : une tentative échouée n'a couvert qu'une partie de ce montant."
+  },
+  "%ZjR": {
+    "original": "Uitbetaald op {date} via {provider}",
+    "translation": "Payé le {date} via {provider}"
+  },
+  "%ZjS": {
+    "original": "Dit bedrag werd betaald maar is niet meer verschuldigd.",
+    "translation": "Ce montant a été payé mais n'est plus dû."
+  },
+  "%ZjT": {
+    "original": "Handig overzicht van betalingen, transactiekosten en uitbetalingen die je vervolgens kan exporteren naar Excel.",
+    "translation": "Vue d'ensemble pratique des paiements, frais de transaction et paiements que vous pouvez ensuite exporter vers Excel."
+  },
+  "%ZjU": {
+    "original": "Er werd geprobeerd te betalen, maar dat is niet gelukt.",
+    "translation": "Un paiement a été tenté, mais n'a pas abouti."
+  },
+  "%ZjW": {
+    "original": "Mislukte betaling",
+    "translation": "Paiement échoué"
+  },
+  "%ZjY": {
+    "original": "Open in authenticator-app",
+    "translation": "Ouvrir dans l'application d'authentification"
+  },
+  "%Zja": {
+    "original": "Onbekende betaalprovider",
+    "translation": "Fournisseur de paiement inconnu"
+  },
+  "%Zjb": {
+    "original": "Deels betaalde bestelling",
+    "translation": "Commande partiellement payée"
+  },
+  "%Zjd": {
+    "original": "Deze betalingen moeten nog uitbetaald worden door de betaalprovider.",
+    "translation": "Ces paiements doivent encore être versés par le fournisseur de paiement."
+  },
+  "%Zjf": {
+    "original": "aanrekeningen",
+    "translation": "factures"
+  },
+  "%Zjg": {
+    "original": "Dit is wat er van deze aanrekeningen openstaat, niet wat er aangerekend werd.",
+    "translation": "Ceci correspond au solde encore ouvert de ces factures, pas au montant total facturé."
+  },
+  "%Zji": {
+    "original": "Betaalwijze",
+    "translation": "Mode de paiement"
+  },
+  "%Zjj": {
+    "original": "Hiervoor werd nog niet betaald.",
+    "translation": "Ce montant n'a pas encore été payé."
+  },
+  "%Zjl": {
+    "original": "Servicekosten via Stripe",
+    "translation": "Frais de service via Stripe"
+  },
+  "%Zjm": {
+    "original": "Je account is beheerder en moet beveiligd worden met tweestapsverificatie, maar je logde al meer dan {days} dagen niet meer in. Bevestig eerst je e-mailadres: we stuurden je een e-mail met een link waarmee je opnieuw toegang krijgt en tweestapsverificatie kan instellen. Kreeg je geen e-mail? Dan kan je ook een nieuwe link aanvragen via wachtwoord vergeten.",
+    "translation": "Votre compte est administrateur et doit être sécurisé avec la vérification en deux étapes, mais vous ne vous êtes pas connecté depuis plus de {days} jours. Veuillez d'abord confirmer votre adresse e-mail : nous vous avons envoyé un e-mail avec un lien pour accéder de nouveau à votre compte et configurer la vérification en deux étapes. Vous n'avez pas reçu d'e-mail ? Vous pouvez également demander un nouveau lien via mot de passe oublié."
+  },
+  "%Zjn": {
+    "original": "Nog niet uitbetaald",
+    "translation": "Pas encore payé"
+  },
+  "%Zjp": {
+    "original": "Laatste week",
+    "translation": "La semaine dernière"
+  },
+  "%Zjq": {
+    "original": "Niet toegewezen",
+    "translation": "Non attribué"
+  },
+  "%Zjs": {
+    "original": "Deze aanrekeningen werden ook elders betaald. De lijst bevat de volledige aanrekeningen, het bedrag waarmee je ze opende is enkel het deel dat daar meetelde.",
+    "translation": "Ces factures ont aussi été payées ailleurs. La liste reprend l'intégralité des factures, le montant avec lequel vous avez ouvert celles-ci représente uniquement la partie qui a été prise en compte là-bas."
+  },
+  "%Zjt": {
+    "original": "Deze betalingen hebben ook voor andere dingen betaald. Het bedrag hierboven en de export bevatten enkel het deel dat hier meetelt.",
+    "translation": "Ces paiements ont aussi servi à payer d'autres éléments. Le montant indiqué ci-dessus et l'export ne reprennent que la partie prise en compte ici."
   },
   "%Zk": {
     "original": "Inloggen via SSO",

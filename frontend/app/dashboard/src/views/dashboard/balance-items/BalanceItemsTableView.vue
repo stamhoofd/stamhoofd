@@ -305,7 +305,7 @@ const actions = [
     ...($feature('payment-breakdown')
         ? [
                 new AsyncTableAction({
-                    name: $t('Statistieken'),
+                    name: $t('%Pa'),
                     icon: 'stats',
                     priority: 1,
                     groupIndex: 2,

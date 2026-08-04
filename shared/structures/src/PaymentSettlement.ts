@@ -108,8 +108,8 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
             ? getSettledGroup(payment.provider, payment.settlement)
             : new PaymentSettlementGroup({
                 id: 'not-settled',
-                name: $t('Nog niet uitbetaald'),
-                description: $t('Deze betalingen moeten nog uitbetaald worden door de betaalprovider.'),
+                name: $t('%Zjn'),
+                description: $t('%Zjd'),
                 icon: 'bank',
                 asideIcon: 'clock',
                 filter: {
@@ -126,7 +126,7 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
         return new PaymentSettlementGroup({
             id: ACCOUNT_DEDUCTIONS_ID,
             name: PaymentMethodHelper.getNameCapitalized(PaymentMethod.AccountDeductions),
-            description: $t('Dit werd verrekend met een ander openstaand bedrag, er kwam geen geld binnen.'),
+            description: $t('%ZjO'),
             icon: 'sync',
             filter: {
                 $and: [
@@ -142,8 +142,8 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
         // money is
         return new PaymentSettlementGroup({
             id: 'no-payout-info-' + (payment.provider ?? 'none'),
-            name: payment.provider ? getPaymentProviderName(payment.provider) : $t('Onbekende betaalprovider'),
-            description: $t('We krijgen geen informatie over de uitbetalingen van deze betaalprovider.'),
+            name: payment.provider ? getPaymentProviderName(payment.provider) : $t('%Zja'),
+            description: $t('%Zj7'),
             icon: 'card',
             asideIcon: 'help',
             filter: {
@@ -158,8 +158,8 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
 
     return new PaymentSettlementGroup({
         id: 'offline',
-        name: $t('Niet online betaald'),
-        description: $t('Deze betalingen komen niet via een betaalprovider binnen.'),
+        name: $t('%ZjN'),
+        description: $t('%ZiV'),
         icon: 'card-off',
         filter: {
             $and: [
@@ -181,8 +181,8 @@ export const ACCOUNT_DEDUCTIONS_ID = 'account-deductions';
 export function getPendingPaymentGroup(): PaymentSettlementGroup {
     return new PaymentSettlementGroup({
         id: PENDING_PAYMENT_ID,
-        name: $t('In verwerking'),
-        description: $t('Deze betalingen zijn nog niet afgerond, dus er werd nog niets ontvangen.'),
+        name: $t('%1OL'),
+        description: $t('%Ziv'),
         icon: 'clock',
         filter: { status: { $in: PENDING_PAYMENT_STATUSES } },
     });
@@ -191,8 +191,8 @@ export function getPendingPaymentGroup(): PaymentSettlementGroup {
 export function getFailedPaymentGroup(): PaymentSettlementGroup {
     return new PaymentSettlementGroup({
         id: FAILED_PAYMENT_ID,
-        name: $t('Mislukte betaling'),
-        description: $t('Er werd geprobeerd te betalen, maar dat is niet gelukt.'),
+        name: $t('%ZjW'),
+        description: $t('%ZjU'),
         icon: 'canceled',
         filter: { status: PaymentStatus.Failed },
     });
@@ -205,10 +205,10 @@ function getSettledGroup(provider: PaymentProvider | null, settlement: Settlemen
         id: 'settlement-' + (provider ?? '') + '-' + settlement.reference + '-' + settlement.settledAt.getTime(),
         // Providers don't always fill in a reference, e.g. Stripe only does when a statement descriptor
         // is set on the account
-        name: settlement.reference || $t('Uitbetaling'),
+        name: settlement.reference || $t('%MA'),
         description: provider
-            ? $t('Uitbetaald op {date} via {provider}', { date, provider: getPaymentProviderName(provider) })
-            : $t('Uitbetaald op {date}', { date }),
+            ? $t('%ZjR', { date, provider: getPaymentProviderName(provider) })
+            : $t('%ZaX', { date }),
         icon: 'download',
         filter: {
             $and: [

@@ -94,8 +94,8 @@ export const ROUNDING_ID = 'rounding';
 export function createRoundingGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: ROUNDING_ID,
-        name: new TranslatedString($t('Afronding')),
-        description: $t('Een betaling gaat tot op de cent, wat aangerekend werd tot op vier cijfers na de komma.'),
+        name: new TranslatedString($t('%1b6')),
+        description: $t('%Zit'),
         icon: 'calculator',
         // What a payment rounded away is a part of the payment itself, not of one of the things it
         // paid for
@@ -111,8 +111,8 @@ export const UNALLOCATED_ID = 'unallocated';
 export function createUnallocatedGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNALLOCATED_ID,
-        name: new TranslatedString($t('Niet toegewezen')),
-        description: $t('Deze betalingen zeggen niet waarvoor ze bedoeld waren, bijvoorbeeld omdat ze geïmporteerd werden.'),
+        name: new TranslatedString($t('%Zjq')),
+        description: $t('%ZjB'),
         icon: 'help',
         // There is no filter that selects the part of a payment that isn't linked to anything, so this
         // row can only be shown
@@ -189,8 +189,8 @@ export function createBalanceItemGroup(group: PaymentSettlementGroup, amountType
 export function createFailedGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNPAID_FAILED_ID,
-        name: new TranslatedString($t('Mislukte betaling')),
-        description: $t('Er werd geprobeerd te betalen, maar dat is niet gelukt.'),
+        name: new TranslatedString($t('%ZjW')),
+        description: $t('%ZjU'),
         icon: 'canceled',
         canNarrowDown: true,
         selection: createBalanceItemSelection(OPEN_AFTER_FAILED_ATTEMPT, BreakdownAmountType.Open),
@@ -200,8 +200,8 @@ export function createFailedGroup(): BreakdownGroup {
 export function createOpenAfterFailedGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNPAID_OPEN_AFTER_FAILED_ID,
-        name: new TranslatedString($t('Openstaand na mislukte poging')),
-        description: $t('Hiervoor werd nog niet betaald: een mislukte poging dekte maar een deel van dit bedrag.'),
+        name: new TranslatedString($t('%ZjC')),
+        description: $t('%ZjP'),
         icon: 'label',
         canNarrowDown: true,
         selection: createBalanceItemSelection(OPEN_AFTER_FAILED_ATTEMPT, BreakdownAmountType.Open),
@@ -211,8 +211,8 @@ export function createOpenAfterFailedGroup(): BreakdownGroup {
 export function createOpenGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNPAID_OPEN_ID,
-        name: new TranslatedString($t('Openstaand')),
-        description: $t('Hiervoor werd nog niet betaald.'),
+        name: new TranslatedString($t('%1Ni')),
+        description: $t('%Zjj'),
         icon: 'label',
         canNarrowDown: true,
         selection: createBalanceItemSelection({ $and: [{ priceOpen: { $gt: 0 } }, { $not: HAS_FAILED_PAYMENT }] }, BreakdownAmountType.Open),
@@ -222,8 +222,8 @@ export function createOpenGroup(): BreakdownGroup {
 export function createRefundGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: REFUND_ID,
-        name: new TranslatedString($t('Terug te betalen')),
-        description: $t('Dit bedrag werd betaald maar is niet meer verschuldigd.'),
+        name: new TranslatedString($t('%10b')),
+        description: $t('%ZjS'),
         icon: 'undo',
         canNarrowDown: true,
         selection: createBalanceItemSelection({ priceOpen: { $lt: 0 } }, BreakdownAmountType.Open),

@@ -23,7 +23,7 @@
                             {{ $t('%95') }}
                         </h2>
                         <p class="style-description">
-                            {{ hasBreakdown ? $t("Handig overzicht van betalingen, transactiekosten en uitbetalingen die je vervolgens kan exporteren naar Excel.") : $t("%5Q") }}
+                            {{ hasBreakdown ? $t("%ZjT") : $t("%5Q") }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

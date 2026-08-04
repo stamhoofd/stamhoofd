@@ -79,15 +79,15 @@ export function getOrderArticles(balanceItem: BalanceItem, price: number, orders
     const discount = getOrderDiscount(order);
 
     if (discount) {
-        articles.push({ id: 'order-discount', name: $t('Korting'), description: '', icon: 'label', price: -discount, quantity: 0 });
+        articles.push({ id: 'order-discount', name: $t('%176'), description: '', icon: 'label', price: -discount, quantity: 0 });
     }
 
     if (order.deliveryPrice) {
-        articles.push({ id: 'order-delivery', name: $t('Leveringskost'), description: '', icon: 'send', price: order.deliveryPrice, quantity: 1 });
+        articles.push({ id: 'order-delivery', name: $t('%Sn'), description: '', icon: 'send', price: order.deliveryPrice, quantity: 1 });
     }
 
     if (order.administrationFee) {
-        articles.push({ id: 'order-administration-fee', name: $t('Administratiekosten'), description: '', icon: 'calculator', price: order.administrationFee, quantity: 1 });
+        articles.push({ id: 'order-administration-fee', name: $t('%xK'), description: '', icon: 'calculator', price: order.administrationFee, quantity: 1 });
     }
 
     return mergeArticles(articles);
@@ -99,14 +99,14 @@ export function getOrderArticles(balanceItem: BalanceItem, price: number, orders
  */
 function getUnmatchedOrderArticle(price: number, order: OrderData, isPaymentShare: boolean): OrderArticle {
     if (price < 0) {
-        return { id: 'order-refund', name: $t('Terugbetaling bestelling'), description: '', icon: 'undo', price, quantity: 0 };
+        return { id: 'order-refund', name: $t('%ZjK'), description: '', icon: 'undo', price, quantity: 0 };
     }
 
     if (isPaymentShare && price < order.totalPrice) {
-        return { id: 'order-partial', name: $t('Deels betaalde bestelling'), description: '', icon: 'partially', price, quantity: 0 };
+        return { id: 'order-partial', name: $t('%Zjb'), description: '', icon: 'partially', price, quantity: 0 };
     }
 
-    return { id: 'order-changed', name: $t('Gewijzigde bestelling'), description: '', icon: 'edit', price, quantity: 0 };
+    return { id: 'order-changed', name: $t('%Zik'), description: '', icon: 'edit', price, quantity: 0 };
 }
 
 /**
