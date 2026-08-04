@@ -208,6 +208,7 @@ export * from './webshops/TransferSettings.js';
 export * from './webshops/Webshop.js';
 export * from './webshops/WebshopField.js';
 export * from './webshops/WebshopMetaData.js';
+export * from './webshops/WebshopUitpasNumberStruct.js';
 export * from './webshops/WebshopWithOrganization.js';
 export * from './webshops/UitpasNumberAndPrice.js';
 
