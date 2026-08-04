@@ -59,11 +59,15 @@ export class StripePayoutSync {
      * Walks the payouts of every active connected account, after the platform walk warmed the
      * shared payment id cache.
      */
-    static async syncConnectedPayouts({ secretKey, start, end, force, cache }: { secretKey: string; start: Date; end?: Date; force?: boolean; cache?: StripePaymentIdCache }): Promise<{ synced: number; skipped: number; failed: number }> {
+    static async syncConnectedPayouts({ secretKey, start, end, force, cache, accountIds }: { secretKey: string; start: Date; end?: Date; force?: boolean; cache?: StripePaymentIdCache; accountIds?: string[] | null }): Promise<{ synced: number; skipped: number; failed: number }> {
         const sharedCache = cache ?? new Map<string, string>();
         const totals = { synced: 0, skipped: 0, failed: 0 };
 
-        const accounts = await StripeAccount.select().where('status', 'active').fetch();
+        let query = StripeAccount.select().where('status', 'active');
+        if (accountIds && accountIds.length > 0) {
+            query = query.where('id', accountIds);
+        }
+        const accounts = await query.fetch();
 
         for (const account of accounts) {
             try {

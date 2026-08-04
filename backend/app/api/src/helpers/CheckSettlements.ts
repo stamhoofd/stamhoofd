@@ -124,26 +124,32 @@ export async function checkSettlements(checkAll = false) {
         }
     }
 
-    // Loop all mollie tokens created after given date (when settlement permission was added)
     try {
         // Stripe payouts
         await checkAllStripePayouts(checkAll);
 
-        const mollieTokens = await MollieToken.all();
-        for (const token of mollieTokens) {
-            if (token.createdAt < new Date(2021, 8 /* september! */, 8)) {
-                console.log('Skipped mollie token that is too old');
-            } else {
-                try {
-                    await token.refreshIfNeeded();
-                    await checkMollieSettlementsFor(token.accessToken, token.organizationId, checkAll);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        }
+        await checkAllMollieTokenSettlements(checkAll);
     } catch (e) {
         console.error(e);
+    }
+}
+
+/**
+ * Loop all mollie tokens created after given date (when settlement permission was added).
+ */
+export async function checkAllMollieTokenSettlements(checkAll = false) {
+    const mollieTokens = await MollieToken.all();
+    for (const token of mollieTokens) {
+        if (token.createdAt < new Date(2021, 8 /* september! */, 8)) {
+            console.log('Skipped mollie token that is too old');
+        } else {
+            try {
+                await token.refreshIfNeeded();
+                await checkMollieSettlementsFor(token.accessToken, token.organizationId, checkAll);
+            } catch (e) {
+                console.error(e);
+            }
+        }
     }
 }
 
