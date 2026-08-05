@@ -346,6 +346,10 @@ export class StripeInvoicer {
 
     // Loops all months until all invoices are generated
     async generateAllInvoices(sellingOrganization: Organization, options?: { force?: boolean; start?: Date; forceLast?: boolean }) {
+        if ((STAMHOOFD.environment as any) === 'production') {
+            // Disabled for now
+            return;
+        }
         const startMonth = options?.start ?? new Date(2026, 0, 1);
         const stopAt = new Date(Date.now() + (STAMHOOFD.environment === 'production' ? (-60 * 60 * 24 * 1000) : (60 * 60 * 24 * 1000 * 31))); // One day margin before creating invoices
         let currentMonth = new Date(startMonth);
