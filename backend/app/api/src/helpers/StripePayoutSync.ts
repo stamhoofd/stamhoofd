@@ -133,6 +133,14 @@ export class StripePayoutSync {
     #organizationId: string | null = null;
 
     /**
+     * Re-sync one payout by its id, e.g. to retry a settlement that stayed unsynced.
+     */
+    async syncPayoutById(externalId: string, options: { force?: boolean } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
+        const payout = await this.stripe.payouts.retrieve(externalId);
+        return await this.syncPayout(payout, options);
+    }
+
+    /**
      * The organization that owns the walked account: the connected account's organization, or the
      * platform membership organization for our own platform account (resolved once per instance).
      */

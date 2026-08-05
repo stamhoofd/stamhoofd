@@ -13,6 +13,7 @@ import './fake-settlements.js';
 import './invoices.js';
 import './service-fees.js';
 import './members-fees.js';
+import './stripe-settlement-sync.js';
 import './stripe-invoices.js';
 import './stripe-payout-reports.js';
 import './transfer-fees.js';
