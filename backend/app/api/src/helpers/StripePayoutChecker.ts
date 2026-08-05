@@ -1,11 +1,14 @@
-import { Order, Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
+import { Order, Payment } from '@stamhoofd/models';
 import { SettlementReference } from '@stamhoofd/structures';
 import Stripe from 'stripe';
 import { passthroughFetch } from './passthroughFetch.js';
+import type { StripePaymentIdCache } from './resolveStripePaymentId.js';
+import { resolveStripePaymentId } from './resolveStripePaymentId.js';
 
 export class StripePayoutChecker {
     private stripe: Stripe;
     private stripePlatform: Stripe;
+    private paymentIdCache: StripePaymentIdCache = new Map();
 
     constructor({ secretKey, stripeAccount }: { secretKey: string; stripeAccount?: string }) {
         this.stripe = new Stripe(
@@ -89,60 +92,10 @@ export class StripePayoutChecker {
             return;
         }
 
-        let paymentId = balanceItem.source.metadata.payment;
-
-        if (!paymentId) {
-            // Search in the metadata of the application fee, originating transaction
-            if (typeof balanceItem.source.application_fee !== 'string' && balanceItem.source.application_fee) {
-                const applicationFee = balanceItem.source.application_fee;
-
-                if (applicationFee.originating_transaction !== 'string' && applicationFee.originating_transaction) {
-                    const originatingTransaction = applicationFee.originating_transaction as Stripe.Charge;
-                    paymentId = originatingTransaction.metadata.payment;
-
-                    if (!paymentId) {
-                        // Historical bug where we didn't save payment in metadata
-                        // Try to look it up by payment intent id
-
-                        if (originatingTransaction.payment_intent) {
-                            const paymentIntentId = typeof originatingTransaction.payment_intent === 'string' ? originatingTransaction.payment_intent : originatingTransaction.payment_intent.id;
-                            const stripePayments = await StripePaymentIntent.where({
-                                stripeIntentId: paymentIntentId,
-                            }, { limit: 1 });
-
-                            if (stripePayments.length === 1) {
-                                paymentId = stripePayments[0].paymentId;
-                                console.log('Found missing payment metadata for payment intent ', originatingTransaction.payment_intent, paymentId);
-                            } else {
-                                // Probably a card payment
-                                // Search for the checkout session
-                                const checkoutSession = await this.stripePlatform.checkout.sessions.list({
-                                    payment_intent: paymentIntentId,
-                                });
-                                if (checkoutSession.data.length === 1) {
-                                    const session = checkoutSession.data[0];
-                                    console.log('Found checkout session for payment intent ', paymentIntentId, session);
-
-                                    // Search
-                                    const stripeCheckoutSessions = await StripeCheckoutSession.where({
-                                        stripeSessionId: session.id,
-                                    }, { limit: 1 });
-
-                                    if (stripeCheckoutSessions.length === 1) {
-                                        paymentId = stripeCheckoutSessions[0].paymentId;
-                                        console.log('Found missing payment metadata for payment intent ', originatingTransaction.payment_intent, paymentId);
-                                    } else {
-                                        console.log('No payment found for checkout session ' + session.id);
-                                    }
-                                } else {
-                                    console.log('No Stripe Checkout Sessions found for payment intent ' + paymentIntentId);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        const paymentId = await resolveStripePaymentId(balanceItem.source, {
+            stripePlatform: this.stripePlatform,
+            cache: this.paymentIdCache,
+        });
 
         if (!paymentId) {
             console.log(balanceItem);

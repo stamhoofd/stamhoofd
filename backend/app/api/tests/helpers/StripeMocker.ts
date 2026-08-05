@@ -10,14 +10,27 @@ import { testServer } from './TestServer.js';
 import { resetNock } from './resetNock.js';
 
 export type PaymentIntent = { id: string; return_url?: string };
+
+/**
+ * Loose Stripe API object: the mocker serves back exactly what a test built, so only the id is
+ * mandatory.
+ */
+export type StripeObject = { id: string } & Record<string, any>;
+
 export class StripeMocker {
     paymentIntents: PaymentIntent[] = [];
-    charges: { id: string }[] = [];
+    charges: StripeObject[] = [];
+    payouts: StripeObject[] = [];
+    balanceTransactions: StripeObject[] = [];
+    checkoutSessions: StripeObject[] = [];
     #forceFailure = false;
 
     reset() {
         this.paymentIntents = [];
         this.charges = [];
+        this.payouts = [];
+        this.balanceTransactions = [];
+        this.checkoutSessions = [];
         this.#forceFailure = false;
     }
 
@@ -30,25 +43,15 @@ export class StripeMocker {
             throw new Error('Invalid STRIPE_SECRET_KEY. Even in test mode it should start with sk_test_');
         }
 
+        const mocker = this;
         nock('https://api.stripe.com')
             .persist()
             .get(/v1\/.*/)
-            .reply((uri, body) => {
-                const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/(\w+)){0,2}/) || [null];
-
-                if (!match) {
-                    return [500];
-                }
-
-                if (resource === 'payment_intents') {
-                    return this.#getPaymentIntent(id);
-                }
-
-                if (resource === 'charges') {
-                    return this.#getCharge(id);
-                }
-
-                return [500];
+            // A regular function: nock exposes the intercepted request (and its Stripe-Account
+            // header) on `this`
+            .reply(function (uri) {
+                const stripeAccount = (this.req.headers['stripe-account'] as string | undefined) ?? null;
+                return mocker.#handleGet(uri, stripeAccount);
             });
 
         nock('https://api.stripe.com')
@@ -84,10 +87,175 @@ export class StripeMocker {
     clear() {
         this.paymentIntents = [];
         this.charges = [];
+        this.payouts = [];
+        this.balanceTransactions = [];
+        this.checkoutSessions = [];
     }
 
     createId(prefix: string) {
         return prefix + '_' + uuidv4().replaceAll('-', '');
+    }
+
+    #handleGet(uri: string, stripeAccount: string | null) {
+        const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/(\w+)){0,2}/) || [null];
+
+        if (!match) {
+            return [500];
+        }
+
+        const query = this.decodeBody(uri.split('?')[1] ?? '') as Record<string, any>;
+
+        if (resource === 'payment_intents') {
+            return this.#getPaymentIntent(id);
+        }
+
+        if (resource === 'charges') {
+            return this.#getCharge(id);
+        }
+
+        if (resource === 'payouts') {
+            return this.#listPayouts(id, query, stripeAccount);
+        }
+
+        if (resource === 'balance_transactions') {
+            return this.#listBalanceTransactions(query, stripeAccount);
+        }
+
+        if (resource === 'checkout' && id === 'sessions') {
+            return this.#listCheckoutSessions(query);
+        }
+
+        return [500];
+    }
+
+    #list(data: StripeObject[], url: string) {
+        return [200, { object: 'list', data, has_more: false, url }];
+    }
+
+    #listPayouts(id: string | undefined, query: Record<string, any>, stripeAccount: string | null) {
+        let data = this.payouts.filter(p => (p.stripeAccount ?? null) === stripeAccount);
+
+        if (id) {
+            const payout = data.find(p => p.id === id);
+            return payout ? [200, payout] : [404];
+        }
+
+        if (query.status) {
+            data = data.filter(p => p.status === query.status);
+        }
+        if (query.arrival_date?.gte !== undefined) {
+            data = data.filter(p => p.arrival_date >= query.arrival_date.gte);
+        }
+        if (query.arrival_date?.lte !== undefined) {
+            data = data.filter(p => p.arrival_date <= query.arrival_date.lte);
+        }
+        return this.#list(data, '/v1/payouts');
+    }
+
+    #listBalanceTransactions(query: Record<string, any>, stripeAccount: string | null) {
+        let data = this.balanceTransactions.filter(t => (t.stripeAccount ?? null) === stripeAccount);
+
+        if (query.payout) {
+            data = data.filter(t => t.payout === query.payout);
+        }
+        if (query.type) {
+            data = data.filter(t => t.type === query.type);
+        }
+        if (query.created?.gte !== undefined) {
+            data = data.filter(t => t.created >= query.created.gte);
+        }
+        if (query.created?.lte !== undefined) {
+            data = data.filter(t => t.created <= query.created.lte);
+        }
+        return this.#list(data, '/v1/balance_transactions');
+    }
+
+    #listCheckoutSessions(query: Record<string, any>) {
+        let data = this.checkoutSessions;
+
+        if (query.payment_intent) {
+            data = data.filter(s => s.payment_intent === query.payment_intent);
+        }
+        return this.#list(data, '/v1/checkout/sessions');
+    }
+
+    /**
+     * Amounts are in Stripe cents, like the real API.
+     */
+    createPayout(data: { amount: number; arrivalDate: Date; status?: string; statementDescriptor?: string; stripeAccount?: string | null } & Record<string, any>): StripeObject {
+        const { arrivalDate, statementDescriptor, stripeAccount, ...rest } = data;
+        const payout: StripeObject = {
+            id: this.createId('po'),
+            object: 'payout',
+            status: 'paid',
+            currency: 'eur',
+            arrival_date: Math.floor(arrivalDate.getTime() / 1000),
+            statement_descriptor: statementDescriptor ?? 'STAMHOOFD',
+            stripeAccount: stripeAccount ?? null,
+            ...rest,
+        };
+        this.payouts.push(payout);
+        return payout;
+    }
+
+    /**
+     * The `payout` field links the transaction to a payout, `stripeAccount` scopes it to a
+     * connected account (null = platform account). Sources are served exactly as passed, so tests
+     * control the expansions.
+     */
+    createBalanceTransaction(data: { type: string; amount: number; created: Date; payout?: string | null; stripeAccount?: string | null; fee?: number; source?: unknown } & Record<string, any>): StripeObject {
+        const { created, payout, stripeAccount, ...rest } = data;
+        const transaction: StripeObject = {
+            id: this.createId('txn'),
+            object: 'balance_transaction',
+            fee: 0,
+            fee_details: [],
+            created: Math.floor(created.getTime() / 1000),
+            payout: payout ?? null,
+            stripeAccount: stripeAccount ?? null,
+            ...rest,
+        };
+        this.balanceTransactions.push(transaction);
+        return transaction;
+    }
+
+    /**
+     * An expanded ApplicationFee object, used as the source of application_fee transactions and as
+     * charge.application_fee expansions.
+     */
+    createApplicationFee(data: { amount: number; account: string; originatingTransaction?: StripeObject | null; charge?: StripeObject | null } & Record<string, any>): StripeObject {
+        const { account, originatingTransaction, charge, ...rest } = data;
+        return {
+            id: this.createId('fee'),
+            object: 'application_fee',
+            account,
+            originating_transaction: originatingTransaction ?? null,
+            charge: charge ?? null,
+            ...rest,
+        };
+    }
+
+    createChargeObject(data: Record<string, any> = {}): StripeObject {
+        const charge: StripeObject = {
+            id: this.createId('ch'),
+            object: 'charge',
+            metadata: {},
+            ...data,
+        };
+        this.charges.push(charge);
+        return charge;
+    }
+
+    createCheckoutSession(data: { paymentIntent: string } & Record<string, any>): StripeObject {
+        const { paymentIntent, ...rest } = data;
+        const session: StripeObject = {
+            id: this.createId('cs'),
+            object: 'checkout.session',
+            payment_intent: paymentIntent,
+            ...rest,
+        };
+        this.checkoutSessions.push(session);
+        return session;
     }
 
     #getPaymentIntent(id: string) {
