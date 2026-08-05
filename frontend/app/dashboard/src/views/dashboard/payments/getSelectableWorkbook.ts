@@ -42,7 +42,7 @@ export function getSelectableWorkbook() {
                     new SelectableColumn({
                         id: 'orderNumbers',
                         name: $t('Bestelnummer'),
-                        description: $t('Het nummer van de webshopbestelling die werd betaald'),
+                        description: $t('Het nummer van de webshopbestelling die werd betaald (indien van toepassing)'),
                     }),
 
                     ...getGeneralColumns(),
@@ -114,6 +114,12 @@ export function getBalanceItemPaymentSheet({ description }: { description: strin
             new SelectableColumn({
                 id: 'balanceItem.description',
                 name: $t(`%6o`),
+            }),
+
+            new SelectableColumn({
+                id: 'orderNumber',
+                name: $t('Bestelnummer'),
+                description: $t('Het nummer van de webshopbestelling waarvoor deze lijn werd betaald (indien van toepassing)'),
             }),
 
             new SelectableColumn({
