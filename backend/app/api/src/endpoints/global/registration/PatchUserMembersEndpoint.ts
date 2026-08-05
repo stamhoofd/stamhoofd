@@ -52,7 +52,13 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope();
-        const { user } = await Context.authenticate();
+        await Context.authenticate();
+
+        // The family of this session's account, which while impersonating is the account
+        // being looked at - the same one GetUserMembersEndpoint returns, so the list and
+        // the changes made to it stay about the same people. What may actually be changed
+        // is still checked for both accounts (see ImpersonatedPermissionChecker).
+        const user = Context.impersonatedUserOrUser;
 
         // Process changes
         const addedMembers: Member[] = [];

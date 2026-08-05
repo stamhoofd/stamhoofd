@@ -31,8 +31,25 @@ export class Token extends QueryableModel {
      */
     static FRESH_WINDOW = 10 * 60 * 1000;
 
+    /**
+     * How long a session that impersonates another user stays valid. It cannot be
+     * refreshed, so this is the total lifetime: an administrator that needs more time
+     * starts a new impersonation, which is audit logged again.
+     */
+    static IMPERSONATION_DURATION = 2 * 60 * 60 * 1000;
+
     @column({ type: 'string' })
     userId: string;
+
+    /**
+     * When set, this session belongs to `userId` but presents itself as this other user:
+     * an administrator is looking at the application through the eyes of that account.
+     *
+     * The session never stops being the administrator's: everything it changes is
+     * attributed to `userId`, and every access check has to pass for both accounts.
+     */
+    @column({ type: 'string', nullable: true })
+    impersonatedUserId: string | null = null;
 
     // Columns
     @column({ primary: true, type: 'string' })
@@ -79,6 +96,10 @@ export class Token extends QueryableModel {
 
     static user: ManyToOneRelation<'user', User>;
 
+    get isImpersonating(): boolean {
+        return this.impersonatedUserId !== null;
+    }
+
     isAccessTokenExpired(): boolean {
         return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date();
     }
@@ -86,8 +107,14 @@ export class Token extends QueryableModel {
     /**
      * A token is fresh if it was minted by a real authentication (not a refresh) within
      * the FRESH_WINDOW. Sensitive endpoints require a fresh token.
+     *
+     * An impersonated session is never fresh: it was minted from an administrator's
+     * permissions, not from the credentials of the account it acts as.
      */
     isFresh(): boolean {
+        if (this.isImpersonating) {
+            return false;
+        }
         return this.authenticatedAt !== null && this.authenticatedAt.getTime() > Date.now() - Token.FRESH_WINDOW;
     }
 
@@ -211,6 +238,13 @@ export class Token extends QueryableModel {
             return undefined;
         }
 
+        // An impersonated session cannot be renewed: it ends when its access token expires.
+        // Returning early also keeps it away from the expired-refresh-token handling below,
+        // which would sign out every session of the administrator behind it.
+        if (token.impersonatedUserId) {
+            return undefined;
+        }
+
         if (token.refreshTokenValidUntil < new Date()) {
             // If a user tries to use a refresh token that is expired - there is a possibility of a user
             // being compromised.
@@ -304,6 +338,24 @@ export class Token extends QueryableModel {
         return token;
     }
 
+    /**
+     * A session for `user` that presents itself as `impersonatedUser`.
+     *
+     * Deliberately not created through createToken(): it is never fresh (so it cannot be
+     * used for sensitive actions) and it is short lived, because it cannot be refreshed.
+     */
+    static async createImpersonationToken<U extends User>(user: U, impersonatedUser: User): Promise<(Token & { user: U })> {
+        const token = await this.createUnsavedToken(user);
+        token.impersonatedUserId = impersonatedUser.id;
+
+        token.accessTokenValidUntil = new Date(Date.now() + Token.IMPERSONATION_DURATION);
+        token.accessTokenValidUntil.setMilliseconds(0);
+        token.refreshTokenValidUntil = new Date(token.accessTokenValidUntil);
+
+        await token.save();
+        return token;
+    }
+
     static async createApiToken<U extends User>(user: U): Promise<(Token & { user: U })> {
         const token = await this.createUnsavedToken(user);
 
@@ -320,8 +372,14 @@ export class Token extends QueryableModel {
         return token;
     }
 
+    /**
+     * Sign out every session of this user, except the one the request was made with.
+     *
+     * Sessions that impersonate the user are dropped too: after a credential change the
+     * account expects to be alone, and an administrator can always start over.
+     */
     static async clearFor(userId: string, currentToken: string) {
-        const query = `DELETE from ${this.table} where userId = ? AND accessToken != ?`;
-        await Database.delete(query, [userId, currentToken]);
+        const query = `DELETE from ${this.table} where (userId = ? OR impersonatedUserId = ?) AND accessToken != ?`;
+        await Database.delete(query, [userId, userId, currentToken]);
     }
 }

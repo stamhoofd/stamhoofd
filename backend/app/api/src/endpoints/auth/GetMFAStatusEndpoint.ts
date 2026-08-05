@@ -26,6 +26,11 @@ export class GetMFAStatusEndpoint extends Endpoint<Params, Query, Body, Response
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate({ allowWithoutAccount: true, allowUnscoped: true });
 
+        // The second factors of the session belong to the administrator behind it, not to
+        // the account they are looking at: showing them there would be showing the wrong
+        // person's credentials, and they cannot be managed from here anyway.
+        Context.assertNotImpersonating();
+
         return new Response(await TwoFactorHelper.buildStatus(user));
     }
 }

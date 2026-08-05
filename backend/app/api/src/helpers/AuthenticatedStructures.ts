@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { BaseOrganization, getAppHost, OrganizationPrivateMetaData } from '@stamhoofd/structures';
+import { BaseOrganization, getAppHost, ImpersonatedBy, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -411,7 +411,7 @@ export class AuthenticatedStructures {
         return Promise.resolve(structs);
     }
 
-    static async userWithMembers(user: User): Promise<UserWithMembers> {
+    static async userWithMembers(user: User, options?: { impersonatedBy?: User | null }): Promise<UserWithMembers> {
         const members = await Member.getMembersWithRegistrationForUser(user);
         const filtered: MemberWithUsersRegistrationsAndGroups[] = [];
         for (const member of members) {
@@ -429,6 +429,8 @@ export class AuthenticatedStructures {
             }
         }
 
+        const impersonatedBy = options?.impersonatedBy;
+
         const struct = UserWithMembers.create({
             ...user,
             hasAccount: user.hasAccount(),
@@ -436,6 +438,15 @@ export class AuthenticatedStructures {
 
             // Always include the current context organization - because it is possible we switch organization and we don't want to refetch every time
             members: await this.membersBlob(filtered, true, user),
+
+            impersonatedBy: impersonatedBy
+                ? ImpersonatedBy.create({
+                    id: impersonatedBy.id,
+                    email: impersonatedBy.email,
+                    firstName: impersonatedBy.firstName,
+                    lastName: impersonatedBy.lastName,
+                })
+                : null,
         });
         await TwoFactorHelper.fillTwoFactorStatus([struct]);
         return struct;

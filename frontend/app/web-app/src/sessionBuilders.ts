@@ -6,6 +6,7 @@ export async function sessionFromOrganization(organization: Organization, platfo
     const session = await SessionContext.createFrom({ organization }, platform);
     await session.loadFromStorage();
     await session.checkSSO();
+    await session.checkImpersonation();
     session.updateOrganization(organization);
     session._lastFetchedOrganization = new Date();
     await SessionManager.prepareSessionForUsage(session, false);
@@ -15,6 +16,7 @@ export async function sessionFromOrganization(organization: Organization, platfo
 export async function sessionGlobal(platform: Platform) {
     const session = await SessionManager.getLastGlobalSession(platform);
     await session.checkSSO();
+    await session.checkImpersonation();
     await SessionManager.prepareSessionForUsage(session, false);
     return session;
 }
