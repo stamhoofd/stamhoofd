@@ -15,7 +15,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-database": "1.39.0",
         "@simonbackx/simple-endpoints": "1.22.0",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "2.140.0",

@@ -1,3 +1,4 @@
+import type { StatisticsEnvironment } from '@stamhoofd/types/Environment';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
@@ -6,13 +7,12 @@ async function fileExists(path: string): Promise<boolean> {
     try {
         await promises.access(path);
         return true;
-    }
-    catch {
+    } catch {
         return false;
     }
 }
 
-export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
+export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' | 'statistics-syncer' }) {
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
@@ -20,8 +20,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         const builder = await import('@stamhoofd/test-utils');
         builder.TestUtils.loadEnvironment();
         env = STAMHOOFD;
-    }
-    else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
+    } else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
         const builder = await import('@stamhoofd/cli');
         env = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
             backend: settings?.service ?? 'api',
@@ -30,8 +29,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         if (await fileExists(settings?.path ?? '.env.json')) {
             console.warn(chalk.red('Warning: please delete your local .env.json file, as it is not used in development any longer.'));
         }
-    }
-    else {
+    } else {
         env = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
     }
 
@@ -45,6 +43,28 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         return;
     }
     if (settings?.service === 'renderer') {
+        return;
+    }
+
+    // The syncer reads the administration through the models, so the shared connection is pointed at
+    // the database it was given. It writes to the statistics database, which lives on the Metabase
+    // server and which it connects to separately.
+    if (settings?.service === 'statistics-syncer') {
+        const database = (env as StatisticsEnvironment).stamhoofdDatabase;
+
+        if (!database?.DB_DATABASE) {
+            throw new Error('Expected environment variable stamhoofdDatabase.DB_DATABASE');
+        }
+
+        process.env.DB_DATABASE = database.DB_DATABASE + '';
+        process.env.DB_HOST = database.DB_HOST + '';
+        process.env.DB_PASS = database.DB_PASS + '';
+        process.env.DB_USER = database.DB_USER + '';
+        if (database.DB_PORT !== undefined) {
+            process.env.DB_PORT = database.DB_PORT + '';
+        }
+        process.env.DB_CHARSET = 'utf8mb4_0900_ai_ci';
+        process.env.DB_MULTIPLE_STATEMENTS = 'true';
         return;
     }
 

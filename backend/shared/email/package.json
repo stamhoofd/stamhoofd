@@ -15,7 +15,7 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-database": "1.39.0",
         "html-to-text": "10.0.0",
         "nodemailer": "9.0.3",
         "uuid": "14.0.1"

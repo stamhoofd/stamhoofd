@@ -1,0 +1,70 @@
+-- @tab netwerk
+-- title: Netwerk
+-- description: Leden en eenheden per netwerk voor het gekozen scoutsjaar.
+-- filters: scoutsjaar, aansluiting, ingeschreven_voor
+--
+-- Het netwerk van een eenheid is een tag op de organisatie, bijgehouden per periode: een afgesloten
+-- jaar houdt het netwerk waarmee het toen geregistreerd stond.
+
+-- @card leden-per-netwerk
+-- title: Aantal leden per netwerk
+-- display: bar
+-- size: half
+-- height: 10
+-- dimensions: Netwerk
+-- metrics: Aantal kinderen, Aantal leiding, Aantal volwassenen
+-- stacked: stacked
+-- @include facts
+-- @include leden
+SELECT
+    t.name AS `Netwerk`,
+    COUNT(DISTINCT CASE WHEN f.effective_category = 'child' THEN f.member_id END) AS `Aantal kinderen`,
+    COUNT(DISTINCT CASE WHEN f.effective_category = 'leader' THEN f.member_id END) AS `Aantal leiding`,
+    COUNT(DISTINCT CASE WHEN f.effective_category = 'adult' THEN f.member_id END) AS `Aantal volwassenen`
+FROM leden f
+JOIN _organizations_organization_tags link
+    ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
+JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
+GROUP BY t.name
+ORDER BY t.name
+
+-- @card locatie-eenheden
+-- title: Locatie eenheden
+-- display: map
+-- latitude: Breedtegraad
+-- longitude: Lengtegraad
+-- size: half
+-- span: 2
+-- dimensions: Postcode
+-- metrics: Aantal eenheden
+-- description: Een punt per postcode waar eenheden zitten. Het originele rapport zet een stip per eenheid; zonder coordinaat per eenheid is de postcode het dichtstbij.
+-- @include facts
+-- @include leden
+-- @include postcode-coordinaten
+SELECT
+    f.eenheid_postcode AS `Postcode`,
+    c.latitude AS `Breedtegraad`,
+    c.longitude AS `Lengtegraad`,
+    COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
+FROM leden f
+LEFT JOIN postcode_coordinaten c ON c.postalCode = f.eenheid_postcode
+GROUP BY f.eenheid_postcode, c.latitude, c.longitude
+ORDER BY `Aantal eenheden` DESC
+
+-- @card eenheden-per-netwerk
+-- title: Aantal eenheden per netwerk
+-- display: pie
+-- size: half
+-- dimensions: Netwerk
+-- metrics: Aantal eenheden
+-- @include facts
+-- @include leden
+SELECT
+    t.name AS `Netwerk`,
+    COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
+FROM leden f
+JOIN _organizations_organization_tags link
+    ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
+JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
+GROUP BY t.name
+ORDER BY t.name

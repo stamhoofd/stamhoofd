@@ -11,7 +11,7 @@
         "test:trace": "yarn -s test --trace on"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-database": "1.39.0",
         "@stamhoofd/backend": "*",
         "@stamhoofd/backend-i18n": "*",
         "@stamhoofd/cli": "*",
