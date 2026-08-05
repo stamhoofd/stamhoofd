@@ -14,5 +14,8 @@ export function buildPorts(context: CliContext) {
         rustfs: Number.parseInt(process.env.RUSTFS_PORT ?? String(rustfsInternalApiPort), 10),
         rustfsConsole: Number.parseInt(process.env.RUSTFS_CONSOLE_PORT ?? String(rustfsInternalConsolePort), 10),
         sso: 5556 + offset,
+        // Metabase listens on 3000 in the container, but that host port is contested enough on a
+        // development machine that it gets its own.
+        metabase: Number.parseInt(process.env.METABASE_PORT ?? '3030', 10),
     };
 }

@@ -121,6 +121,7 @@ function buildDevelopmentDomains(context: CliContext) {
         filesConsole: `files-console.${domain}`,
         sso: appDomain('sso'),
         mysql: `mysql.${domain}`,
+        metabase: `metabase.${domain}`,
     };
 }
 

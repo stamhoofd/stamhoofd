@@ -46,6 +46,10 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 | SSO         | `yarn stam sso start <redirect-uri>` | Start Keycloak and import the local realm.                               |
 | SSO         | `yarn stam sso logs`                 | Tail Keycloak logs.                                                      |
 | SSO         | `yarn stam sso stop`                 | Stop the local Keycloak container.                                       |
+| Metabase    | `yarn stam metabase start`           | Start Metabase and print its data source settings.                       |
+| Metabase    | `yarn stam metabase config`          | Print the Metabase URL and data source settings.                         |
+| Metabase    | `yarn stam metabase logs`            | Tail Metabase logs.                                                      |
+| Metabase    | `yarn stam metabase stop`            | Stop the local Metabase container.                                       |
 | Tests       | `yarn stam test unit`                | Run unit tests with isolated MySQL.                                      |
 | Tests       | `yarn stam test e2e`                 | Run Playwright tests.                                                    |
 | Tests       | `yarn stam test all --ci`            | Run unit and E2E tests in CI mode.                                       |
@@ -55,6 +59,7 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 | Cleanup     | `yarn stam clean build`              | Remove build artifacts.                                                  |
 | Cleanup     | `yarn stam clean db`                 | Drop the selected local MySQL database after confirmation.               |
 | Cleanup     | `yarn stam clean sso`                | Stop the local SSO server.                                               |
+| Cleanup     | `yarn stam clean metabase`           | Stop Metabase and drop its application database after confirmation.      |
 | Cleanup     | `yarn stam clean services`           | Stop shared services.                                                    |
 | Cleanup     | `yarn stam clean all`                | Clean build artifacts and stop shared services.                          |
 
@@ -118,6 +123,9 @@ Shared services run as Docker containers:
 - CoreDNS: `stamhoofd-coredns`
 - Caddy: `stamhoofd-caddy`
 
+Metabase (`stamhoofd-metabase`) is not part of that baseline: it is a JVM service that costs a lot of
+memory and start-up time, so it runs on demand through `stam metabase start` (see Local Metabase).
+
 The setup is intentionally different where Docker behaves differently:
 
 - Linux runs Caddy on unprivileged ports `8080/8443` and uses `sudo iptables` redirects from `80/443`.
@@ -153,6 +161,39 @@ yarn stam sso start "https://<organization-id>.api.stamhoofd/openid/callback"
 The command imports a local realm with the printed client and test user.
 
 `yarn stam test e2e` starts a second Keycloak from the same `SsoService`, on its own container, port (6400) and host (`playwright-sso.stamhoofd`), with a realm that allows the `/openid/callback` of every Playwright worker. It is started and stopped by the Playwright global setup, so it never restarts the server you started for manual testing. Like the other e2e services it binds a fixed port, so only one e2e run can be up at a time.
+
+### Local Metabase
+
+Metabase runs locally as an on-demand container, so it only costs memory while you actually use it:
+
+```bash
+yarn stam metabase start
+```
+
+The command starts the shared services if needed, reloads Caddy, and waits until Metabase answers
+`/api/health` (the first start migrates its application database and takes a few minutes). It then
+prints the URL and the data source settings.
+
+Metabase keeps its own questions, dashboards and users in an **application database**, which gets its
+own `stamhoofd-metabase` database on the shared MySQL container rather than the embedded H2 database
+Metabase defaults to. H2 is unsupported for anything but a throwaway trial and cannot be migrated in
+place later, so local and server setups both use a real database.
+
+The database Metabase *reports on* is a separate thing you add once through the UI. Metabase dials it
+from inside its own container, so the host is the Docker host gateway rather than `127.0.0.1`. Print
+the settings again with:
+
+```bash
+yarn stam metabase config
+```
+
+Reset Metabase (drops all local questions and dashboards) with:
+
+```bash
+yarn stam clean metabase
+```
+
+`METABASE_PORT` overrides the host port, which defaults to `3030`.
 
 ### Tests
 
