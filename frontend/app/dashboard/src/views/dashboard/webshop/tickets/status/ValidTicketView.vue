@@ -265,8 +265,8 @@
                 {{ $t('%W3') }}
             </p>
 
-            <p v-if="order.payment && order.payment.status !== 'Succeeded'" class="warning-box">
-                {{ $t('%W5') }}
+            <p v-if="order.pricePaid < order.totalToPay" class="warning-box">
+                {{ $t('%W0') }}
             </p>
 
             <p v-if="changedSeatString" class="warning-box">

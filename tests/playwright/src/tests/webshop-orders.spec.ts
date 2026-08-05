@@ -203,6 +203,82 @@ function registerWebshopOrderTests() {
         await flow.expectTicketsDownloadable({ immediate: false });
     });
 
+    test('Opening a ticket of an unpaid PointOfSale order warns the order is not paid', async ({ page, browser }) => {
+        const organization = await createWebshopOrganization('PosScanShop');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Pos scan shop ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1');
+        await flow.goToCheckout();
+        await flow.fillCustomer({ lastName: 'Posscan' });
+        await flow.selectPaymentMethod(PaymentLabel.PointOfSale);
+        await flow.confirmPayment();
+        await flow.expectPaymentPending();
+
+        const admin = await createAdmin(organization);
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await table.getRow('Posscan').click();
+        await adminPage.getByTestId('tickets-button').click();
+        await adminPage.getByTestId('ticket-row').first().click();
+
+        await expect(adminPage.getByTestId('valid-ticket-view')).toContainText($t('%W0'));
+
+        await adminContext.close();
+    });
+
+    test('Opening a ticket of a paid transfer order shows no unpaid warning', async ({ page, browser }) => {
+        const organization = await createWebshopOrganization('TransferScanShop');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Transfer scan shop ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.Transfer],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await flow.addProduct('Product 1');
+        await flow.goToCheckout();
+        await flow.fillCustomer({ lastName: 'Transferscan' });
+        await flow.selectPaymentMethod(PaymentLabel.Transfer);
+        await flow.confirmPayment();
+        await flow.expectTransferInstructions();
+
+        const admin = await createAdmin(organization);
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        // Transfer tickets only exist once the order was paid
+        await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await new WebshopOrdersView(adminPage).markAllOrdersPaid();
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await table.getRow('Transferscan').click();
+        await adminPage.getByTestId('tickets-button').click();
+        await adminPage.getByTestId('ticket-row').first().click();
+
+        const validTicketView = adminPage.getByTestId('valid-ticket-view');
+        await expect(validTicketView).toContainText($t('%WA'));
+        await expect(validTicketView).not.toContainText($t('%W0'));
+
+        await adminContext.close();
+    });
+
     test('Bancontact via Stripe: multiple tickets downloadable immediately (custom domain + suffix)', async ({ page }) => {
         const organization = await createWebshopOrganization('StripeShop');
         stripeMocker = new StripeMocker();
