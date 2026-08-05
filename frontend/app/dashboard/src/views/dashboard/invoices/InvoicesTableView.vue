@@ -38,6 +38,7 @@ import type { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
 import { InvoiceStruct } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { InvoicesExcelExport } from './InvoicesExcelExport';
 import InvoiceView from '@stamhoofd/components/payments/InvoiceView.vue';
 
@@ -58,6 +59,7 @@ const configurationId = computed(() => {
 const organization = useOrganization();
 const platform = usePlatform();
 const context = useContext();
+const hasSettlementsFlag = useFeatureFlagComputed('settlements');
 const filterBuilders = getInvoicesUIFilterBuilders();
 const title = computed(() => {
     return $t('%1JA');
@@ -407,7 +409,7 @@ async function downloadInvoices(invoices: Invoice[], onlyVAT?: boolean) {
             // Sort group based on number here
             group.sort((a, b) => Sorter.byStringValue(b.number ?? '0', a.number ?? '0'));
 
-            const excel = await InvoicesExcelExport.export(group);
+            const excel = await InvoicesExcelExport.export(group, { useStoredSettlements: hasSettlementsFlag.value });
             folder.file('0000-overzicht-' + month + '.xlsx', excel);
 
             for (const invoice of group) {
