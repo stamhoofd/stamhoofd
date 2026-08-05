@@ -53,6 +53,13 @@ export type MollieMockRefund = {
     metadata: Record<string, unknown> | null;
 };
 
+export type MollieMockSettlementCost = {
+    description: string;
+    method: string | null;
+    amountNet: { currency: string; value: string };
+    amountVat: { currency: string; value: string } | null;
+};
+
 export type MollieMockSettlement = {
     id: string;
     reference: string;
@@ -61,6 +68,10 @@ export type MollieMockSettlement = {
     createdAt: string;
     /** null for the still-open settlement, a date once it has been paid out */
     settledAt: string | null;
+    /** id of the invoice Mollie created for the settlement costs, null until it exists */
+    invoiceId: string | null;
+    /** Mollie's own costs per period, keyed year → month */
+    periods: Record<string, Record<string, { costs: MollieMockSettlementCost[]; invoiceId?: string | null }>>;
     /** Mollie payment ids (tr_...) settled in this settlement */
     paymentIds: string[];
     /** Mollie refund ids (re_...) settled in this settlement */
@@ -556,7 +567,7 @@ export class MollieMocker {
      * Register a settled (paid out) settlement that groups the given payments and refunds.
      * Used to drive the settlements cron (CheckSettlements).
      */
-    createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date } = {}): MollieMockSettlement {
+    createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date; invoiceId?: string | null; periods?: Record<string, Record<string, { costs: MollieMockSettlementCost[]; invoiceId?: string | null }>> } = {}): MollieMockSettlement {
         const settlement: MollieMockSettlement = {
             id: this.createId('stl'),
             reference: '1234567.' + (this.settlements.length + 1).toString().padStart(4, '0') + '.01',
@@ -564,6 +575,8 @@ export class MollieMocker {
             amount: { currency: 'EUR', value: options.value ?? '0.00' },
             createdAt: new Date().toISOString(),
             settledAt: (options.settledAt ?? new Date()).toISOString(),
+            invoiceId: options.invoiceId ?? null,
+            periods: options.periods ?? {},
             paymentIds: (options.payments ?? []).map(p => p.id),
             refundIds: (options.refunds ?? []).map(r => r.id),
             chargebackIds: (options.chargebacks ?? []).map(c => c.id),
@@ -581,6 +594,8 @@ export class MollieMocker {
             amount: settlement.amount,
             createdAt: settlement.createdAt,
             settledAt: settlement.settledAt ?? null,
+            invoiceId: settlement.invoiceId,
+            periods: settlement.periods,
             _links: { self: { href: 'https://api.mollie.com/v2/settlements/' + settlement.id, type: 'application/hal+json' } },
         };
     }

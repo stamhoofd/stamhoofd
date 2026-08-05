@@ -53,7 +53,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             await service.setupOnboarding();
 
             // Check settlements after linking (shouldn't block)
-            checkMollieSettlementsFor(mollieToken.accessToken, true).catch(console.error);
+            checkMollieSettlementsFor(mollieToken.accessToken, organization.id, true).catch(console.error);
         }
 
         return new Response(await AuthenticatedStructures.organization(organization));
