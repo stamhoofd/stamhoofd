@@ -191,6 +191,32 @@ export class User extends QueryableModel {
         // Hide api accounts
         global = global.filter(a => !a.isApiUser);
 
+        {
+            // Also load global admins with explicit permissions set
+            const q = User.select()
+                .where('organizationId', null)
+                .where('permissions', '!=', null)
+                .where(
+                    SQL.jsonOverlaps(
+                        SQL.jsonKeys(SQL.jsonExtract(SQL.column('permissions'), '$.value.organizationPermissions')),
+                        SQL.cast(SQL.scalar(JSON.stringify(Array.isArray(organizationId) ? organizationId : [organizationId])), 'JSON'),
+                    ),
+                    '=',
+                    1,
+                )
+            ;
+
+            if (options?.verified !== undefined) {
+                q.where('verified', options.verified);
+            }
+
+            let xtra = await q.fetch();
+            // Hide api accounts
+            xtra = xtra.filter(a => !a.isApiUser);
+
+            global.push(...xtra);
+        }
+
         return global;
     }
 
