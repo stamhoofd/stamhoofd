@@ -193,7 +193,6 @@ async function checkOldPayments() {
 // 5 days - 10 days
 async function checkOldDirectDebitPayments() {
     let timeout = 60 * 1000 * 60 * 24 * 5;
-    const timeout2 = 60 * 1000 * 60 * 24 * 10;
 
     if (STAMHOOFD.environment === 'development') {
         // For Mollie, webhooks won't work, so we poll in the backend
@@ -207,8 +206,7 @@ async function checkOldDirectDebitPayments() {
                 PaymentMethod.DirectDebit,
             ])
                 .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
-                .and('createdAt', '<', new Date(new Date().getTime() - timeout))
-                .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
+                .and('createdAt', '<', new Date(new Date().getTime() - timeout)),
         )
         .orderBy('createdAt', 'ASC')
         .limit(500)
