@@ -20,43 +20,49 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 
 ### Commands
 
-| Area        | Command                              | Purpose                                                                  |
-| ----------- | ------------------------------------ | ------------------------------------------------------------------------ |
-| Build       | `yarn stam build`                    | Build shared packages and all app packages for the selected environment. |
-| Setup       | `yarn stam setup`                    | Check the machine and offer recommended setup fixes.                     |
-| Setup       | `yarn stam setup node`               | Install the Node.js version from `.nvmrc` using fnm or nvm.              |
-| Setup       | `yarn stam setup dns`                | Configure local `.stamhoofd` DNS.                                        |
-| Setup       | `yarn stam setup cert`               | Trust the local Caddy HTTPS authority.                                   |
-| Development | `yarn stam dev all`                  | Start shared services and the full app stack.                            |
-| Development | `yarn stam dev backend`              | Start backend apps for the current instance.                             |
-| Development | `yarn stam dev frontend`             | Start frontend apps only.                                                |
-| Development | `yarn stam dev instance`             | Start this workspace instance using shared services.                     |
-| Services    | `yarn stam services up`              | Start shared Docker services.                                            |
-| Services    | `yarn stam services status`          | Show shared service status.                                              |
-| Services    | `yarn stam services logs`            | Tail shared service logs.                                                |
-| Services    | `yarn stam services restart`         | Restart shared services with interactive progress output.                |
-| Services    | `yarn stam services down`            | Stop shared services.                                                    |
-| Services    | `yarn stam services stop`            | Alias for `yarn stam services down`.                                     |
-| Status      | `yarn stam status`                   | Show shared services, active instances, URLs, and credentials.           |
-| Config      | `yarn stam config explain`           | Explain resolved instance config.                                        |
-| Config      | `yarn stam config print`             | Print resolved domains and backend environment values as JSON.           |
-| Database    | `yarn stam db shell`                 | Open a MySQL shell for the current local database.                       |
-| Database    | `yarn stam db migrate`               | Build shared packages and run migrations.                                |
-| SSO         | `yarn stam sso config`               | Print local SSO client, user, and issuer settings.                       |
-| SSO         | `yarn stam sso start <redirect-uri>` | Start Keycloak and import the local realm.                               |
-| SSO         | `yarn stam sso logs`                 | Tail Keycloak logs.                                                      |
-| SSO         | `yarn stam sso stop`                 | Stop the local Keycloak container.                                       |
-| Tests       | `yarn stam test unit`                | Run unit tests with isolated MySQL.                                      |
-| Tests       | `yarn stam test e2e`                 | Run Playwright tests.                                                    |
-| Tests       | `yarn stam test all --ci`            | Run unit and E2E tests in CI mode.                                       |
-| Checks      | `yarn stam check lint`               | Run ESLint across the monorepo.                                          |
-| Checks      | `yarn stam check typecheck`          | Run TypeScript checks across the monorepo.                               |
-| Checks      | `yarn stam check all`                | Run build, lint, typecheck, unit tests, and E2E tests.                   |
-| Cleanup     | `yarn stam clean build`              | Remove build artifacts.                                                  |
-| Cleanup     | `yarn stam clean db`                 | Drop the selected local MySQL database after confirmation.               |
-| Cleanup     | `yarn stam clean sso`                | Stop the local SSO server.                                               |
-| Cleanup     | `yarn stam clean services`           | Stop shared services.                                                    |
-| Cleanup     | `yarn stam clean all`                | Clean build artifacts and stop shared services.                          |
+| Area        | Command                                | Purpose                                                                    |
+| ----------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| Build       | `yarn stam build`                      | Build shared packages and all app packages for the selected environment.   |
+| Setup       | `yarn stam setup`                      | Check the machine and offer recommended setup fixes.                       |
+| Setup       | `yarn stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                |
+| Setup       | `yarn stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
+| Setup       | `yarn stam setup cert`                 | Trust the local Caddy HTTPS authority.                                     |
+| Development | `yarn stam dev all`                    | Start shared services and the full app stack.                              |
+| Development | `yarn stam dev backend`                | Start backend apps for the current instance.                               |
+| Development | `yarn stam dev frontend`               | Start frontend apps only.                                                  |
+| Development | `yarn stam dev instance`               | Start this workspace instance using shared services.                       |
+| Services    | `yarn stam services up`                | Start shared Docker services.                                              |
+| Services    | `yarn stam services status`            | Show shared service status.                                                |
+| Services    | `yarn stam services logs`              | Tail shared service logs.                                                  |
+| Services    | `yarn stam services restart`           | Restart shared services with interactive progress output.                  |
+| Services    | `yarn stam services down`              | Stop shared services.                                                      |
+| Services    | `yarn stam services stop`              | Alias for `yarn stam services down`.                                       |
+| Status      | `yarn stam status`                     | Show shared services, active instances, URLs, and credentials.             |
+| Config      | `yarn stam config explain`             | Explain resolved instance config.                                          |
+| Config      | `yarn stam config print`               | Print resolved domains and backend environment values as JSON.             |
+| Database    | `yarn stam db shell`                   | Open a MySQL shell for the current local database.                         |
+| Database    | `yarn stam db migrate`                 | Build shared packages and run migrations.                                  |
+| SSO         | `yarn stam sso config`                 | Print local SSO client, user, and issuer settings.                         |
+| SSO         | `yarn stam sso start <redirect-uri>`   | Start Keycloak and import the local realm.                                 |
+| SSO         | `yarn stam sso logs`                   | Tail Keycloak logs.                                                        |
+| SSO         | `yarn stam sso stop`                   | Stop the local Keycloak container.                                         |
+| Report      | `yarn stam platform-report start`      | Migrate the statistics database, start Metabase with the report, and sync. |
+| Report      | `yarn stam platform-report dashboards` | Rewrite the report's questions and dashboards in Metabase.                 |
+| Report      | `yarn stam platform-report config`     | Print the Metabase URL, login, and data source settings.                   |
+| Report      | `yarn stam platform-report logs`       | Tail Metabase logs.                                                        |
+| Report      | `yarn stam platform-report stop`       | Stop the local Metabase container.                                         |
+| Tests       | `yarn stam test unit`                  | Run unit tests with isolated MySQL.                                        |
+| Tests       | `yarn stam test e2e`                   | Run Playwright tests.                                                      |
+| Tests       | `yarn stam test all --ci`              | Run unit and E2E tests in CI mode.                                         |
+| Checks      | `yarn stam check lint`                 | Run ESLint across the monorepo.                                            |
+| Checks      | `yarn stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
+| Checks      | `yarn stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
+| Cleanup     | `yarn stam clean build`                | Remove build artifacts.                                                    |
+| Cleanup     | `yarn stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
+| Cleanup     | `yarn stam clean sso`                  | Stop the local SSO server.                                                 |
+| Cleanup     | `yarn stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
+| Cleanup     | `yarn stam clean services`             | Stop shared services.                                                      |
+| Cleanup     | `yarn stam clean all`                  | Clean build artifacts and stop shared services.                            |
 
 ### Development Configuration
 
@@ -95,6 +101,8 @@ Useful environment variables:
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE` tunes the MySQL container InnoDB buffer pool size (e.g. `512M`, `1G`), defaulting to `4G`.
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container InnoDB buffer pool instances defaulting to `4`.
 - `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
+- `METABASE_PORT` overrides the local Metabase host port, defaulting to `3030`.
+- `METABASE_ADMIN_EMAIL` and `METABASE_ADMIN_PASSWORD` override the Metabase admin account the CLI signs in with, for an instance that was set up by hand (see Local Metabase).
 - `PUBLIC_IP`: Publish DNS records to your computers public IP address, and make Caddy listen on 0.0.0.0 instead of localhost. Useful for testing on local devices. E.g. `PUBLIC_IP=192.168.1.7 stam services restart` `PUBLIC_IP=192.168.1.7 stam dev all`
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
@@ -117,6 +125,10 @@ Shared services run as Docker containers:
 - RustFS: `stamhoofd-rustfs`
 - CoreDNS: `stamhoofd-coredns`
 - Caddy: `stamhoofd-caddy`
+
+Metabase (`stamhoofd-metabase`) is not part of that baseline: it is a JVM service that costs a lot of
+memory and start-up time, so it runs on demand through `stam platform-report start` (see Local
+platform report).
 
 The setup is intentionally different where Docker behaves differently:
 
@@ -153,6 +165,96 @@ yarn stam sso start "https://<organization-id>.api.stamhoofd/openid/callback"
 The command imports a local realm with the printed client and test user.
 
 `yarn stam test e2e` starts a second Keycloak from the same `SsoService`, on its own container, port (6400) and host (`playwright-sso.stamhoofd`), with a realm that allows the `/openid/callback` of every Playwright worker. It is started and stopped by the Playwright global setup, so it never restarts the server you started for manual testing. Like the other e2e services it binds a fixed port, so only one e2e run can be up at a time.
+
+### Local platform report
+
+The ledenstatistieken read off a **platform statistics database** that a syncer keeps in step with
+the administration, and are drawn by a local Metabase that only costs memory while you use it. One
+command brings up all three:
+
+```bash
+yarn stam platform-report start
+```
+
+It starts the shared services if needed, reloads Caddy, migrates the statistics database of the
+environment, starts Metabase and waits until it answers `/api/health` (the first start migrates its
+application database and takes a few minutes), registers the statistics database as a data source,
+writes the report, and then runs the syncer until you stop it with Ctrl+C. No wizard, no manual data
+source, no separate migrate step.
+
+Metabase keeps running after Ctrl+C, so the dashboards stay readable while nothing syncs. Stop it
+with `stam platform-report stop`.
+
+The syncer is the same service `stam dev backend` runs, so there is no need for this command while a
+development session is up: in development it syncs on every cron tick.
+
+While working on the report itself, rewrite its questions and dashboards without restarting anything:
+
+```bash
+yarn stam platform-report dashboards --env keeo
+```
+
+#### Platform statistics per environment
+
+Each environment reports on its own **platform statistics database**, so a dashboard built against
+Keeo never reads Ravot numbers. `stam platform-report start` creates and migrates that database, and
+registers it as a data source named after the environment:
+
+| Command                                 | Data source                       | MySQL database                    |
+| --------------------------------------- | --------------------------------- | --------------------------------- |
+| `stam platform-report start`            | `Platform statistics (stamhoofd)` | `platform-statistics-development` |
+| `stam platform-report start --env keeo` | `Platform statistics (keeo)`      | `platform-statistics-keeo`        |
+| `stam platform-report start --env ravot`| `Platform statistics (ravot)`     | `platform-statistics-ravot`       |
+| `stam platform-report start --env jambo`| `Platform statistics (jambo)`     | `platform-statistics-jamboree`    |
+
+The names come from `databases.platformStatistics` in `src/config/development-config.ts`, which
+follows the same rules as the main development database: environments keep their historical label
+(`stamhoofd` → `development`, `jambo` → `jamboree`), and a secondary instance suffixes its own name so
+worktrees never share data.
+
+The **tables** in that database belong to `backend/app/statistics-syncer`, which keeps a migration
+history of its own. `stam platform-report start` runs those migrations before it registers the data
+source, because Metabase caches the schema it found and only refreshes on its own schedule: a
+database registered while it was still empty keeps showing no tables. Every run asks Metabase to
+re-read the schema, and warns when the database has no tables. `stam db migrate` runs the same
+migrations along with the ones of the main database.
+
+Every run also tidies up the instance: it drops Metabase's demo database (new containers never create
+one) and hides the `migrations` table of the data source it configured, which is schema history
+rather than something to report on. The tables listed in `metabaseHiddenTables` are the ones hidden.
+
+One Metabase serves every environment, and shows one report: `Ledenstatistieken`, holding the
+platform that was written last. Starting `--env keeo` points the questions in that collection at
+keeo's data source, so there is never a second report to pick the wrong platform from, and nothing
+carries an environment in its name. Switching back is the same command with another `--env`.
+
+The **data sources** stay registered, all of them, one per environment. An already registered data
+source is left untouched, so edits made in the UI survive. Print the settings of an environment with
+`stam platform-report config --env keeo`.
+
+#### Login
+
+The CLI completes the setup wizard itself and owns the admin account, so it can keep configuring the
+instance later. `stam platform-report config` prints the credentials.
+
+If you set Metabase up by hand with your own account, the CLI cannot sign in. Either point it at your
+account with `METABASE_ADMIN_EMAIL` and `METABASE_ADMIN_PASSWORD`, or start over with
+`stam clean metabase`.
+
+#### Storage
+
+Metabase keeps its own questions, dashboards and users in an **application database**, which gets its
+own `stamhoofd-metabase` database on the shared MySQL container rather than the embedded H2 database
+Metabase defaults to. H2 is unsupported for anything but a throwaway trial and cannot be migrated in
+place later, so local and server setups both use a real database.
+
+Reset Metabase (drops all local questions and dashboards, keeps the statistics data) with:
+
+```bash
+yarn stam clean metabase
+```
+
+`METABASE_PORT` overrides the host port, which defaults to `3030`.
 
 ### Tests
 

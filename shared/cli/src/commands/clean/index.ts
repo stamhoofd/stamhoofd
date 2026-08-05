@@ -1,10 +1,12 @@
 import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
+import { localIpv4Host, metabaseAppDatabase, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
 import { currentDatabase, dropDatabase } from '../../runtime/database-command-helpers.js';
 import { cleanBuild } from '../../runtime/monorepo-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 import { confirm, warning } from '../../runtime/ux.js';
+import { metabaseService } from '../../services/definitions/metabase-service.js';
 import { ssoService } from '../../services/definitions/sso-service.js';
 import { deleteSharedServicesData, stopSharedServices } from '../../services/shared-services.js';
 
@@ -12,11 +14,12 @@ export enum CleanTarget {
     All = 'all',
     Build = 'build',
     Db = 'db',
+    Metabase = 'metabase',
     Services = 'services',
     Sso = 'sso',
 }
 
-const cleanTargets = [CleanTarget.All, CleanTarget.Build, CleanTarget.Db, CleanTarget.Services, CleanTarget.Sso] as const;
+const cleanTargets = [CleanTarget.All, CleanTarget.Build, CleanTarget.Db, CleanTarget.Metabase, CleanTarget.Services, CleanTarget.Sso] as const;
 
 export default class Clean extends BaseCommand {
     static summary = 'Remove local generated state';
@@ -35,7 +38,7 @@ export default class Clean extends BaseCommand {
         }),
     };
 
-    static flags = { ...BaseCommand.instanceFlags, yes: yesFlag, 'dry-run': dryRunFlag };
+    static flags = { ...BaseCommand.instanceFlags, 'yes': yesFlag, 'dry-run': dryRunFlag };
 
     async run(): Promise<void> {
         const { args, flags } = await this.parse(Clean);
@@ -65,6 +68,11 @@ export default class Clean extends BaseCommand {
             return;
         }
 
+        if (target === CleanTarget.Metabase) {
+            await this.cleanMetabase(context, { yes: flags.yes, dryRun: flags['dry-run'] });
+            return;
+        }
+
         if (target === CleanTarget.Sso) {
             await this.cleanSso(context, { dryRun: flags['dry-run'] });
             return;
@@ -78,11 +86,12 @@ export default class Clean extends BaseCommand {
             await cleanBuild(context, { dryRun: true });
             console.log(`Would drop local MySQL database ${currentDatabase(context)}.`);
             console.log('Would stop local SSO server.');
+            console.log('Would stop local Metabase server.');
             console.log('Would stop shared services and delete MySQL, RustFS, and Caddy data.');
             return;
         }
 
-        if (!options.yes && !(await confirm('Clean build artifacts, drop the local database, stop local SSO, and delete shared service data?'))) {
+        if (!options.yes && !(await confirm('Clean build artifacts, drop the local database, stop local SSO and Metabase, and delete shared service data?'))) {
             warning('Clean skipped.');
             return;
         }
@@ -90,6 +99,7 @@ export default class Clean extends BaseCommand {
         await cleanBuild(context);
         await this.dropCurrentDatabase(context);
         await ssoService.stop(context);
+        await metabaseService.stop(context);
         await stopSharedServices(context);
         await deleteSharedServicesData(context);
     }
@@ -126,6 +136,23 @@ export default class Clean extends BaseCommand {
         await deleteSharedServicesData(context);
     }
 
+    private async cleanMetabase(context: Awaited<ReturnType<Clean['createContext']>>, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+        if (options.dryRun) {
+            console.log('Would stop local Metabase server.');
+            console.log(`Would drop local MySQL database ${metabaseAppDatabase}.`);
+            return;
+        }
+
+        if (!options.yes && !(await confirm(`Stop local Metabase and drop its application database ${metabaseAppDatabase}? This deletes all local questions and dashboards.`))) {
+            warning('Clean skipped.');
+            return;
+        }
+
+        await metabaseService.stop(context);
+        await this.dropMetabaseDatabase();
+        this.log('Local Metabase server stopped and application database dropped.');
+    }
+
     private async cleanSso(context: Awaited<ReturnType<Clean['createContext']>>, options: { dryRun: boolean }): Promise<void> {
         if (options.dryRun) {
             console.log('Would stop local SSO server.');
@@ -138,6 +165,10 @@ export default class Clean extends BaseCommand {
 
     private async dropCurrentDatabase(context: Awaited<ReturnType<Clean['createContext']>>): Promise<void> {
         await dropDatabase(currentDatabase(context));
+    }
+
+    private async dropMetabaseDatabase(): Promise<void> {
+        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `DROP DATABASE IF EXISTS \`${metabaseAppDatabase.replaceAll('`', '``')}\`;`], { allowFailure: true });
     }
 
     private validateTargetFlags(target: CleanTarget, flags: { env?: string; name?: string }): void {

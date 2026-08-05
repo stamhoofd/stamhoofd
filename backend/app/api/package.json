@@ -58,7 +58,7 @@
         "@aws-sdk/client-sqs": "3.1090.0",
         "@aws-sdk/s3-request-presigner": "3.1090.0",
         "@bwip-js/node": "4.11.2",
-        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-database": "1.39.0",
         "@simonbackx/simple-encoding": "2.26.11",
         "@simonbackx/simple-endpoints": "1.22.0",
         "@simonbackx/simple-errors": "1.5.0",

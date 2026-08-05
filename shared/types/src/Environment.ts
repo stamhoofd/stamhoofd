@@ -37,6 +37,40 @@ export type SharedEnvironment = {
     readonly singleOrganization?: string;
 };
 
+export type StatisticsEnvironment = {
+    /**
+     * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
+     */
+    readonly environment: 'production' | 'development' | 'staging' | 'test';
+    readonly PORT: number;
+
+    readonly statisticsDatabase: {
+        readonly DB_HOST: string;
+        readonly DB_DATABASE: string;
+        readonly DB_USER: string;
+        readonly DB_PASS: string;
+        readonly DB_PORT?: number;
+    };
+
+    readonly stamhoofdDatabase: {
+        readonly DB_HOST: string;
+        readonly DB_DATABASE: string;
+        readonly DB_USER: string;
+        readonly DB_PASS: string;
+        readonly DB_PORT?: number;
+    };
+
+    /**
+     * The date up to which the statistics come from an imported external source instead of
+     * from this administration, as an ISO date (e.g. '2024-09-01'). Every registration period ending
+     * before it is frozen on first sight, so the sync leaves those years to the import.
+     *
+     * Leave unset for a platform without external history: nothing is frozen and the sync owns
+     * everything.
+     */
+    readonly IMPORTED_UNTIL?: string;
+};
+
 /**
  * The specific backend environment values, only available in the backend services
  */

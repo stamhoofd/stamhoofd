@@ -37,7 +37,7 @@
         "jsvat-next": "3.0.4"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-database": "1.39.0",
         "@stamhoofd/backend-i18n": "2.147.0",
         "@stamhoofd/test-utils": "2.147.0",
         "nock": "14.0.16",
