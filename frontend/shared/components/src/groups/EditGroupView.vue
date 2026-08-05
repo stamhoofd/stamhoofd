@@ -58,7 +58,7 @@
                     {{ $t('%cK') }}
                 </p>
 
-                <STList v-if="STAMHOOFD.userMode === 'organization' || hasCustomDates">
+                <STList v-if="(STAMHOOFD.userMode === 'organization' && type === GroupType.Membership) || hasCustomDates">
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
                             <Checkbox v-model="hasCustomDates" />
@@ -794,16 +794,16 @@ import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
 
 import GroupPriceBox from './components/GroupPriceBox.vue';
 
+import GroupTag from '#auth/components/GroupTag.vue';
+import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import ImageInput from '#inputs/ImageInput.vue';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import { useOrganizationRegistrationRecordSettingsRoute } from '#records/useOrganizationRegistrationRecordSettingsRoute.ts';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { Request } from '@simonbackx/simple-networking';
-import GroupTag from '#auth/components/GroupTag.vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = withDefaults(
     defineProps<{
