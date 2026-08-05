@@ -178,8 +178,8 @@ export class SettlementService {
     /**
      * Upsert on the globally unique externalId. Fields that are undefined keep their stored value,
      * so the fee sync (which doesn't know the settlement yet) can't unlink a charge the payout sync
-     * linked earlier. balanceItemId is deliberately not settable here: it is only stamped when
-     * invoicing.
+     * attached earlier. balanceItemId is deliberately not settable here: only markInvoiced writes
+     * it, when the fee is invoiced.
      */
     static async upsertCharge(data: ChargeData): Promise<SettlementCharge> {
         const charge = await SettlementCharge.select()
@@ -214,6 +214,16 @@ export class SettlementService {
         }
         await charge.save();
         return charge;
+    }
+
+    /**
+     * Records that the charge was invoiced, and by which balance item. The only writer of
+     * balanceItemId: called when the fee is invoiced, or by StripeFeeInvoiceBackfill for months
+     * that were already invoiced before these rows existed.
+     */
+    static async markInvoiced(charge: SettlementCharge, balanceItemId: string) {
+        charge.balanceItemId = balanceItemId;
+        await charge.save();
     }
 
     /**
