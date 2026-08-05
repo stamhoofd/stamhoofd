@@ -253,6 +253,26 @@
                 <span class="icon gift" /><span>{{ $t('%NX') }}</span>
             </button>
         </div>
+
+        <div v-if="hasPlatformFullAccess" key="platform-settings" class="container">
+            <hr><h2>
+                {{ $t('Platform') }}
+            </h2>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label" data-testid="settlements-checkbox">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('settlements')" @update:model-value="setFeatureFlag('settlements', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Uitbetalingen opslaan en exporteren') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Gebruikt de opgeslagen uitbetalingen in de betalings- en factuurexports van deze organisatie. Op de ledenorganisatie van het platform toont dit ook de export en synchronisatie in het financiënmenu.') }}
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
     </SaveView>
 </template>
 
@@ -266,6 +286,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
@@ -303,6 +324,8 @@ const organizationPatch = shallowRef<AutoEncoderPatchType<Organization> & AutoEn
 
 const organization = computed(() => baseOrganization.value.patch(organizationPatch.value));
 const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
+const auth = useAuth();
+const hasPlatformFullAccess = computed(() => auth.hasPlatformFullAccess());
 const blockCreatingNewMembers = computed({
     get: () => organization.value.meta.blockCreatingNewMembers,
     set: (value: boolean) => {

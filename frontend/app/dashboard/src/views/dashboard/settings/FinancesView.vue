@@ -90,6 +90,36 @@
                         </template>
                     </STListItem>
 
+                    <STListItem v-if="canExportSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsExport)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/bank.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Opgeslagen uitbetalingen exporteren') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Exporteer de opgeslagen uitbetalingen, betalingen en kosten als Excel-bestand.') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="canSyncSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsSync)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/sync.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Uitbetalingen synchroniseren') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Haal de uitbetalingen van de betaalproviders op en sla ze lokaal op.') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/box.svg">
@@ -229,6 +259,8 @@ enum Routes {
     ReceivableBalance = 'ReceivableBalance',
     Packages = 'pakketten',
     StripePayouts = 'StripePayouts',
+    SettlementsExport = 'SettlementsExport',
+    SettlementsSync = 'SettlementsSync',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -385,6 +417,20 @@ if (!isPlatform) {
         present: 'popup',
         component: async () => (await import('./administration/StripePayoutExportView.vue')).default,
     });
+
+    defineRoute({
+        name: Routes.SettlementsExport,
+        url: 'uitbetalingen-export',
+        present: 'popup',
+        component: async () => (await import('./administration/SettlementExportView.vue')).default,
+    });
+
+    defineRoute({
+        name: Routes.SettlementsSync,
+        url: 'uitbetalingen-synchroniseren',
+        present: 'popup',
+        component: async () => (await import('./administration/SettlementSyncView.vue')).default,
+    });
 }
 
 const auth = useAuth();
@@ -403,6 +449,19 @@ const canExportStripePayouts = computed(() => {
         && !!platform.value.membershipOrganizationId
         && organization.value?.id === platform.value.membershipOrganizationId
         && auth.hasPlatformFullAccess();
+});
+
+const getFeatureFlag = useFeatureFlag();
+
+// Any finance admin can export their own organization's stored settlements, behind the labs
+// feature flag
+const canExportSettlements = computed(() => {
+    return getFeatureFlag('settlements') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector);
+});
+
+// Syncing is platform tooling: only for full platform admins on the membership organization
+const canSyncSettlements = computed(() => {
+    return canExportStripePayouts.value && getFeatureFlag('settlements');
 });
 
 const balancePromise = updateBalance().catch(console.error);
