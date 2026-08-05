@@ -46,8 +46,8 @@ Run `yarn stam --help` or `yarn stam <topic> --help` for command help.
 | SSO         | `yarn stam sso start <redirect-uri>` | Start Keycloak and import the local realm.                               |
 | SSO         | `yarn stam sso logs`                 | Tail Keycloak logs.                                                      |
 | SSO         | `yarn stam sso stop`                 | Stop the local Keycloak container.                                       |
-| Metabase    | `yarn stam metabase start`           | Start Metabase and print its data source settings.                       |
-| Metabase    | `yarn stam metabase config`          | Print the Metabase URL and data source settings.                         |
+| Metabase    | `yarn stam metabase start`           | Start Metabase and register the environment's statistics database.       |
+| Metabase    | `yarn stam metabase config`          | Print the Metabase URL, login, and data source settings.                 |
 | Metabase    | `yarn stam metabase logs`            | Tail Metabase logs.                                                      |
 | Metabase    | `yarn stam metabase stop`            | Stop the local Metabase container.                                       |
 | Tests       | `yarn stam test unit`                | Run unit tests with isolated MySQL.                                      |
@@ -100,6 +100,8 @@ Useful environment variables:
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE` tunes the MySQL container InnoDB buffer pool size (e.g. `512M`, `1G`), defaulting to `4G`.
 - `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container InnoDB buffer pool instances defaulting to `4`.
 - `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
+- `METABASE_PORT` overrides the local Metabase host port, defaulting to `3030`.
+- `METABASE_ADMIN_EMAIL` and `METABASE_ADMIN_PASSWORD` override the Metabase admin account the CLI signs in with, for an instance that was set up by hand (see Local Metabase).
 - `PUBLIC_IP`: Publish DNS records to your computers public IP address, and make Caddy listen on 0.0.0.0 instead of localhost. Useful for testing on local devices. E.g. `PUBLIC_IP=192.168.1.7 stam services restart` `PUBLIC_IP=192.168.1.7 stam dev all`
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
@@ -170,24 +172,49 @@ Metabase runs locally as an on-demand container, so it only costs memory while y
 yarn stam metabase start
 ```
 
-The command starts the shared services if needed, reloads Caddy, and waits until Metabase answers
-`/api/health` (the first start migrates its application database and takes a few minutes). It then
-prints the URL and the data source settings.
+The command starts the shared services if needed, reloads Caddy, waits until Metabase answers
+`/api/health` (the first start migrates its application database and takes a few minutes), and then
+configures it. No wizard, no manual data source.
+
+#### Platform statistics per environment
+
+Each environment reports on its own **platform statistics database**, so a dashboard built against
+Keeo never reads Ravot numbers. `stam metabase start` creates that database if needed and registers
+it as a data source named after the environment:
+
+| Command                          | Data source                     | MySQL database                    |
+| -------------------------------- | ------------------------------- | --------------------------------- |
+| `stam metabase start`            | `Platform statistics (stamhoofd)` | `platform-statistics-development` |
+| `stam metabase start --env keeo` | `Platform statistics (keeo)`    | `platform-statistics-keeo`        |
+| `stam metabase start --env ravot`| `Platform statistics (ravot)`   | `platform-statistics-ravot`       |
+| `stam metabase start --env jambo`| `Platform statistics (jambo)`   | `platform-statistics-jamboree`    |
+
+The names come from `databases.platformStatistics` in `src/config/development-config.ts`, which
+follows the same rules as the main development database: environments keep their historical label
+(`stamhoofd` → `development`, `jambo` → `jamboree`), and a secondary instance suffixes its own name so
+worktrees never share data.
+
+One Metabase serves every environment. Running the command for a second environment adds that data
+source next to the existing ones, and an already registered data source is left untouched, so edits
+made in the UI survive. Print the settings of an environment with `stam metabase config --env keeo`.
+
+#### Login
+
+The CLI completes the setup wizard itself and owns the admin account, so it can keep configuring the
+instance later. `stam metabase config` prints the credentials.
+
+If you set Metabase up by hand with your own account, the CLI cannot sign in. Either point it at your
+account with `METABASE_ADMIN_EMAIL` and `METABASE_ADMIN_PASSWORD`, or start over with
+`stam clean metabase`.
+
+#### Storage
 
 Metabase keeps its own questions, dashboards and users in an **application database**, which gets its
 own `stamhoofd-metabase` database on the shared MySQL container rather than the embedded H2 database
 Metabase defaults to. H2 is unsupported for anything but a throwaway trial and cannot be migrated in
 place later, so local and server setups both use a real database.
 
-The database Metabase *reports on* is a separate thing you add once through the UI. Metabase dials it
-from inside its own container, so the host is the Docker host gateway rather than `127.0.0.1`. Print
-the settings again with:
-
-```bash
-yarn stam metabase config
-```
-
-Reset Metabase (drops all local questions and dashboards) with:
+Reset Metabase (drops all local questions and dashboards, keeps the statistics data) with:
 
 ```bash
 yarn stam clean metabase

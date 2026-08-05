@@ -1,0 +1,109 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MetabaseApi, MetabaseApiError } from './metabase-api.js';
+
+type Route = { status?: number; body: unknown };
+
+/**
+ * Answer each `METHOD /path` with a canned response and record what was sent.
+ */
+function mockFetch(routes: Record<string, Route>) {
+    const calls: { key: string; body: any }[] = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+        const key = `${init?.method ?? 'GET'} ${new URL(url).pathname}`;
+        const route = routes[key];
+        if (!route) {
+            throw new Error(`Unexpected request ${key}`);
+        }
+        const body = typeof init?.body === 'string' ? init.body : undefined;
+        calls.push({ key, body: body === undefined ? undefined : JSON.parse(body) });
+        return new Response(JSON.stringify(route.body), { status: route.status ?? 200 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    return calls;
+}
+
+const admin = { email: 'dev@stamhoofd.local', password: 'secret', firstName: 'Stamhoofd', lastName: 'Development' };
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+});
+
+describe('MetabaseApi.authenticate', () => {
+    it('completes the setup wizard when the instance is still fresh', async () => {
+        const calls = mockFetch({
+            'GET /api/session/properties': { body: { 'setup-token': 'token-1' } },
+            'POST /api/setup': { body: { id: 'session-1' } },
+        });
+
+        const result = await new MetabaseApi('http://localhost:3030').authenticate(admin);
+
+        expect(result.created).toBe(true);
+        const setup = calls.find(call => call.key === 'POST /api/setup');
+        expect(setup?.body.token).toBe('token-1');
+        expect(setup?.body.user.email).toBe(admin.email);
+    });
+
+    it('logs in when the instance was already set up', async () => {
+        const calls = mockFetch({
+            'GET /api/session/properties': { body: { 'setup-token': null } },
+            'POST /api/session': { body: { id: 'session-1' } },
+        });
+
+        const result = await new MetabaseApi('http://localhost:3030').authenticate(admin);
+
+        expect(result.created).toBe(false);
+        expect(calls.find(call => call.key === 'POST /api/session')?.body).toEqual({ username: admin.email, password: admin.password });
+    });
+
+    it('reports a rejected login as a 401 so the caller can explain it', async () => {
+        mockFetch({
+            'GET /api/session/properties': { body: { 'setup-token': null } },
+            'POST /api/session': { status: 401, body: { errors: { password: 'did not match stored password' } } },
+        });
+
+        const error = await new MetabaseApi('http://localhost:3030').authenticate(admin).catch((thrown: unknown) => thrown);
+
+        expect(error).toBeInstanceOf(MetabaseApiError);
+        expect((error as MetabaseApiError).status).toBe(401);
+    });
+});
+
+describe('MetabaseApi.ensureDatabase', () => {
+    const input = { name: 'Platform statistics (keeo)', host: 'host.docker.internal', port: 3307, database: 'platform-statistics-keeo', user: 'root', password: 'root' };
+
+    it('registers the database when it is not registered yet', async () => {
+        const calls = mockFetch({
+            'GET /api/database': { body: { data: [{ id: 1, name: 'Sample Database', engine: 'sqlite' }] } },
+            'POST /api/database': { body: { id: 2 } },
+        });
+
+        const result = await new MetabaseApi('http://localhost:3030').ensureDatabase(input);
+
+        expect(result.created).toBe(true);
+        expect(calls.find(call => call.key === 'POST /api/database')?.body).toEqual({
+            name: input.name,
+            engine: 'mysql',
+            details: { host: input.host, port: input.port, dbname: input.database, user: input.user, password: input.password, ssl: false },
+        });
+    });
+
+    it('leaves an existing data source of the same name untouched', async () => {
+        const calls = mockFetch({
+            'GET /api/database': { body: { data: [{ id: 2, name: input.name, engine: 'mysql' }] } },
+        });
+
+        const result = await new MetabaseApi('http://localhost:3030').ensureDatabase(input);
+
+        expect(result.created).toBe(false);
+        expect(calls.some(call => call.key === 'POST /api/database')).toBe(false);
+    });
+
+    it('accepts a bare array, which older Metabase versions return', async () => {
+        mockFetch({
+            'GET /api/database': { body: [{ id: 2, name: input.name, engine: 'mysql' }] },
+        });
+
+        expect((await new MetabaseApi('http://localhost:3030').ensureDatabase(input)).created).toBe(false);
+    });
+});

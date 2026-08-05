@@ -1,10 +1,12 @@
-import { buildDomains } from '../../config/build-config.js';
+import { buildDatabases, buildDomains } from '../../config/build-config.js';
 import { dockerHostGateway, localIpv4Host, localhostPortMapping, metabaseAppDatabase, metabaseContainer, metabaseImage, metabaseInternalPort, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
 import type { CliContext } from '../../context/create-context.js';
 import { buildPorts } from '../../context/ports.js';
 import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
+import { MetabaseApi, MetabaseApiError } from '../metabase-api.js';
+import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName } from '../metabase-config.js';
 
 export class MetabaseService extends SharedDockerService {
     static readonly container = metabaseContainer;
@@ -21,12 +23,8 @@ export class MetabaseService extends SharedDockerService {
         return link(url, url);
     }
 
-    /**
-     * Metabase has no seeded account: the first visit opens a setup wizard that creates the admin
-     * user. See buildMetabaseConfigOutput for what to fill in there.
-     */
     getLogin(): string {
-        return 'setup wizard';
+        return `${metabaseAdminEmail} / ${metabaseAdminPassword}`;
     }
 
     /**
@@ -34,10 +32,46 @@ export class MetabaseService extends SharedDockerService {
      * Metabase creates its own schema on boot, but not the database itself.
      */
     async beforeRun(context: CliContext): Promise<void> {
-        if (!await docker.containerIsRunning(mysqlContainer)) {
-            throw new Error(`${this.name} stores its data on the shared MySQL container, which is not running. Start it with: stam services up`);
+        await this.assertMysqlRunning();
+        await this.createMysqlDatabase(context, metabaseAppDatabase);
+    }
+
+    /**
+     * Register the platform statistics database of the selected environment as a data source, so a
+     * fresh Metabase is immediately usable and switching environments needs no clicking. Creates
+     * the MySQL database as well: Metabase refuses a connection to a database that does not exist.
+     *
+     * Runs on every start rather than only on a fresh container, so `--env keeo` after `--env ravot`
+     * adds the second data source to the same Metabase.
+     */
+    async provision(context: CliContext): Promise<{ database: string; dataSource: string; created: boolean }> {
+        await this.assertMysqlRunning();
+
+        const database = buildDatabases(context).platformStatistics;
+        const dataSource = metabaseDataSourceName(context.env);
+        await this.createMysqlDatabase(context, database);
+
+        const api = new MetabaseApi(`http://${localIpv4Host}:${buildPorts(context).metabase}`);
+        try {
+            await api.authenticate(metabaseAdmin);
         }
-        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `CREATE DATABASE IF NOT EXISTS \`${metabaseAppDatabase}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`], { quiet: true, verbose: context.verbose });
+        catch (error) {
+            if (error instanceof MetabaseApiError && error.status === 401) {
+                throw new Error(`Cannot sign in to the local Metabase as ${metabaseAdminEmail}: this instance was set up with a different account. Set METABASE_ADMIN_EMAIL and METABASE_ADMIN_PASSWORD to those credentials, or start over with: stam clean metabase`, { cause: error });
+            }
+            throw error;
+        }
+
+        const { created } = await api.ensureDatabase({
+            name: dataSource,
+            host: dockerHostGateway,
+            port: buildPorts(context).mysql,
+            database,
+            user: mysqlRootUser,
+            password: mysqlRootPassword,
+        });
+
+        return { database, dataSource, created };
     }
 
     async afterRun(context: CliContext): Promise<void> {
@@ -82,6 +116,16 @@ export class MetabaseService extends SharedDockerService {
         }
 
         throw new Error(`Timed out waiting for ${this.name} to become ready at ${url} (${lastError})`);
+    }
+
+    private async assertMysqlRunning(): Promise<void> {
+        if (!await docker.containerIsRunning(mysqlContainer)) {
+            throw new Error(`${this.name} stores its data on the shared MySQL container, which is not running. Start it with: stam services up`);
+        }
+    }
+
+    private async createMysqlDatabase(context: CliContext, database: string): Promise<void> {
+        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `CREATE DATABASE IF NOT EXISTS \`${database.replaceAll('`', '``')}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`], { quiet: true, verbose: context.verbose });
     }
 
     /**

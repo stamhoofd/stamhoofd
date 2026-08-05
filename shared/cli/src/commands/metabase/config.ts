@@ -1,11 +1,11 @@
 import { BaseCommand } from '../../base-command.js';
-import { buildBackendEnv, buildDomains } from '../../config/build-config.js';
+import { buildDatabases, buildDomains } from '../../config/build-config.js';
 import { buildPorts } from '../../context/ports.js';
-import { buildMetabaseConfigOutput } from '../../services/metabase-config.js';
+import { buildMetabaseConfigOutput, metabaseDataSourceName } from '../../services/metabase-config.js';
 
 export default class MetabaseConfig extends BaseCommand {
-    static summary = 'Print local Metabase URL and data source settings';
-    static description = 'Use this to look up the connection details of the development database again when adding or repairing the data source in Metabase.';
+    static summary = 'Print local Metabase URL, login and data source settings';
+    static description = 'Use this to look up the Metabase login of an environment, or the connection details of its platform statistics database when adding or repairing the data source by hand.';
     static examples = [
         'stam metabase config',
         'stam metabase config --env keeo',
@@ -17,7 +17,8 @@ export default class MetabaseConfig extends BaseCommand {
         const { flags } = await this.parse(MetabaseConfig);
         const context = await this.createContext(flags);
         this.log(buildMetabaseConfigOutput(buildDomains(context), {
-            database: buildBackendEnv(context).DB_DATABASE ?? '',
+            name: metabaseDataSourceName(context.env),
+            database: buildDatabases(context).platformStatistics,
             mysqlPort: buildPorts(context).mysql,
         }));
     }

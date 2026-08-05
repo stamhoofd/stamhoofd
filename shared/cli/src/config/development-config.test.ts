@@ -101,6 +101,31 @@ describe('buildDevelopmentConfig', () => {
         expect(config.appEnv.PORT).toBe(9280);
     });
 
+    it('gives every environment its own platform statistics database', () => {
+        const databaseFor = (env: string) => buildDevelopmentConfig(context({ env })).databases.platformStatistics;
+
+        expect(databaseFor('stamhoofd')).toBe('platform-statistics-development');
+        expect(databaseFor('keeo')).toBe('platform-statistics-keeo');
+        expect(databaseFor('ravot')).toBe('platform-statistics-ravot');
+        // Historical label, kept in step with the main database of the same environment.
+        expect(databaseFor('jambo')).toBe('platform-statistics-jamboree');
+    });
+
+    it('keeps the platform statistics database of a secondary instance separate', () => {
+        const config = buildDevelopmentConfig(context({
+            env: 'keeo',
+            instance: {
+                name: 'keeo-feature',
+                prefix: 'feature',
+                primary: false,
+                portOffset: 1200,
+            },
+        }));
+
+        expect(config.databases.platformStatistics).toBe('platform-statistics-keeo-keeo-feature');
+        expect(config.databases.main).toBe(config.backendEnv.DB_DATABASE);
+    });
+
     it('uses custom shared domains for infrastructure', () => {
         vi.stubEnv('STAMHOOFD_DOMAIN', 'example');
         const config = buildDevelopmentConfig(context());

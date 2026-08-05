@@ -34,9 +34,11 @@ export type BackendAppService = { backend: BackendAppName };
 export type FrontendAppService = { frontend: FrontendAppName };
 
 export type DevelopmentDomains = ReturnType<typeof buildDevelopmentDomains>;
+export type DevelopmentDatabases = ReturnType<typeof buildDevelopmentDatabases>;
 
 export type DevelopmentConfig = {
     domains: DevelopmentDomains;
+    databases: DevelopmentDatabases;
     ports: ReturnType<typeof buildPorts>;
     backendEnv: NodeJS.ProcessEnv;
     appEnv: SharedEnvironment;
@@ -60,9 +62,9 @@ const fileSigningPrivateKey = { ...fileSigningPublicKey, d: 'C0xuuMOMKeIDP6YPOz2
 
 export function buildDevelopmentConfig(context: CliContext, service: AppService = { backend: BackendApp.Api }): DevelopmentConfig {
     const domains = buildDevelopmentDomains(context);
+    const databases = buildDevelopmentDatabases(context);
     const ports = buildPorts(context);
-    const database = baseDatabase(context.env);
-    const instanceDatabase = process.env.DB_NAME ?? (context.instance.primary ? database : `${database}-${context.instance.name}`);
+    const instanceDatabase = databases.main;
     const bucket = context.instance.name === 'stamhoofd' ? localPrimaryBucket : `${localPrimaryBucket}-${context.instance.name}`;
     const backendEnv = {
         STAMHOOFD_ENV: context.env,
@@ -83,9 +85,23 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
 
     return {
         domains,
+        databases,
         ports,
         backendEnv,
         appEnv: buildAppEnvironment(context, domains, ports, backendEnv, service),
+    };
+}
+
+/**
+ * Every database this instance owns. Secondary instances suffix their own name, so worktrees never
+ * share data, exactly like the main development database.
+ */
+function buildDevelopmentDatabases(context: CliContext) {
+    const forInstance = (database: string) => context.instance.primary ? database : `${database}-${context.instance.name}`;
+
+    return {
+        main: process.env.DB_NAME ?? forInstance(baseDatabase(context.env)),
+        platformStatistics: forInstance(basePlatformStatisticsDatabase(context.env)),
     };
 }
 
@@ -236,14 +252,30 @@ function backendPort(service: BackendAppService['backend'], ports: ReturnType<ty
     return ports.api;
 }
 
-function baseDatabase(env: string): string {
+/**
+ * The label an environment uses in the names of the resources it owns. Two environments predate the
+ * convention and keep their historical label.
+ */
+function environmentLabel(env: string): string {
     if (env === 'stamhoofd') {
-        return 'stamhoofd-development';
+        return 'development';
     }
     if (env === 'jambo') {
-        return 'stamhoofd-jamboree';
+        return 'jamboree';
     }
-    return `stamhoofd-${env}`;
+    return env;
+}
+
+function baseDatabase(env: string): string {
+    return `stamhoofd-${environmentLabel(env)}`;
+}
+
+/**
+ * The database the platform statistics live in, which Metabase reports on. Every environment gets
+ * its own, so a dashboard built against `platform-statistics-keeo` never reads Ravot numbers.
+ */
+function basePlatformStatisticsDatabase(env: string): string {
+    return `platform-statistics-${environmentLabel(env)}`;
 }
 
 function environmentPreset(env: string): EnvironmentPreset {

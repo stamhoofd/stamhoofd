@@ -1,25 +1,46 @@
 import type { DevelopmentDomains } from '../config/development-config.js';
 import { dockerHostGateway, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
+import type { MetabaseAdmin } from './metabase-api.js';
+
+/**
+ * The admin account the CLI creates when it completes the setup wizard, so it can keep configuring
+ * the instance later. Override both when the instance was set up by hand with another account:
+ * without valid credentials the CLI cannot register the platform statistics database.
+ */
+export const metabaseAdminEmail = process.env.METABASE_ADMIN_EMAIL ?? 'dev@stamhoofd.local';
+export const metabaseAdminPassword = process.env.METABASE_ADMIN_PASSWORD ?? 'stamhoofd-local-1';
+
+export const metabaseAdmin: MetabaseAdmin = {
+    email: metabaseAdminEmail,
+    password: metabaseAdminPassword,
+    firstName: 'Stamhoofd',
+    lastName: 'Development',
+};
 
 export type MetabaseDataSource = {
+    name: string;
     database: string;
     mysqlPort: number;
 };
 
 /**
- * The connection details to fill in when adding the development database as a data source in
- * Metabase. The host is the Docker host gateway, not 127.0.0.1: Metabase dials it from inside its
- * own container, where localhost is the container itself.
+ * The name a platform statistics database is registered under in Metabase. One Metabase serves every
+ * environment, so the environment has to be visible in the name.
  */
+export function metabaseDataSourceName(env: string): string {
+    return `Platform statistics (${env})`;
+}
+
 export function buildMetabaseConfigOutput(domains: DevelopmentDomains, dataSource: MetabaseDataSource): string {
     return `Local Metabase:
 
   URL:           https://${domains.metabase}
+  Email:         ${metabaseAdminEmail}
+  Password:      ${metabaseAdminPassword}
 
-The first visit opens the Metabase setup wizard, where you create the admin account.
-Skip the "Add your data" step there, then add the development database under
-Settings > Admin settings > Databases > Add database:
+Platform statistics database, registered automatically:
 
+  Name:          ${dataSource.name}
   Database type: MySQL
   Host:          ${dockerHostGateway}
   Port:          ${dataSource.mysqlPort}
@@ -29,6 +50,7 @@ Settings > Admin settings > Databases > Add database:
 
 Commands:
 
+  stam metabase start --env keeo
   stam metabase logs
   stam metabase stop`;
 }
