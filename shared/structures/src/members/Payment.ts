@@ -1,8 +1,9 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PaymentCustomer } from '../PaymentCustomer.js';
+import { PaymentSettlementDetailed } from '../settlements/PaymentSettlement.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
 import { PaymentProvider } from '../PaymentProvider.js';
 import { PaymentStatus } from '../PaymentStatus.js';
@@ -238,6 +239,13 @@ export class SettlementReference extends AutoEncoder {
 export class PrivatePayment extends Payment {
     @field({ decoder: SettlementReference, nullable: true })
     settlement: SettlementReference | null = null;
+
+    /**
+     * All settlements this payment was part of (e.g. the payment in one payout, its refund in a
+     * later one). Admin-only, stripped like the legacy settlement blob.
+     */
+    @field({ decoder: new ArrayDecoder(PaymentSettlementDetailed), ...NextVersion })
+    settlements: PaymentSettlementDetailed[] = [];
 
     @field({ decoder: StringDecoder, nullable: true, version: 153 })
     iban: string | null = null;

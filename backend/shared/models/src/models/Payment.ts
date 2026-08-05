@@ -1,5 +1,9 @@
 import { column } from '@simonbackx/simple-database';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference, TransferSettings } from '@stamhoofd/structures';
+import { PaymentSettlementDetailed } from '@stamhoofd/structures/settlements/PaymentSettlement.js';
+import { Settlement as SettlementStruct } from '@stamhoofd/structures/settlements/Settlement.js';
+import type { PaymentSettlement as PaymentSettlementModel } from './PaymentSettlement.js';
+import type { Settlement as SettlementModel } from './Settlement.js';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -271,20 +275,25 @@ export class Payment extends QueryableModel {
 
         const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
         const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
+        const { paymentSettlements, settlements } = includeSettlements ? await Payment.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };
 
         return this.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
             balanceItems,
             payingOrganizations,
+            paymentSettlements,
+            settlements,
         }, includeSettlements);
     }
 
-    static getGeneralStructureFromRelations({ payments, balanceItemPayments, balanceItems, payingOrganizations }: {
+    static getGeneralStructureFromRelations({ payments, balanceItemPayments, balanceItems, payingOrganizations, paymentSettlements, settlements }: {
         payments: Payment[];
         balanceItemPayments: BalanceItemPayment[];
         balanceItems: BalanceItem[];
         payingOrganizations: Organization[];
+        paymentSettlements?: PaymentSettlementModel[];
+        settlements?: SettlementModel[];
     }, includeSettlements = false): PaymentGeneral[] {
         if (payments.length === 0) {
             return [];
@@ -310,7 +319,26 @@ export class Payment extends QueryableModel {
                     });
                 }),
                 ...(payment.provider !== PaymentProvider.Stripe ? { stripeAccountId: null } : {}),
-                ...(!includeSettlements) ? { settlement: null, transferFee: 0, stripeAccountId: null, serviceFeeManual: 0, serviceFeeManualCharged: 0, serviceFeePayout: 0 } : {},
+                ...(includeSettlements
+                    ? {
+                            settlements: (paymentSettlements ?? []).filter((line) => {
+                                if (line.paymentId !== payment.id) {
+                                    return false;
+                                }
+                                // A destination charge also sits gross in our platform payout:
+                                // only the payout of the payment's own account may be returned,
+                                // or the organization would see our platform payout
+                                const settlement = (settlements ?? []).find(s => s.id === line.settlementId);
+                                return settlement !== undefined && settlement.stripeAccountId === payment.stripeAccountId;
+                            }).map((line) => {
+                                const settlement = (settlements ?? []).find(s => s.id === line.settlementId);
+                                return PaymentSettlementDetailed.create({
+                                    ...line,
+                                    settlement: SettlementStruct.create({ ...settlement }),
+                                });
+                            }),
+                        }
+                    : { settlement: null, settlements: [], transferFee: 0, stripeAccountId: null, serviceFeeManual: 0, serviceFeeManualCharged: 0, serviceFeePayout: 0 }),
             });
         });
     }
@@ -342,6 +370,28 @@ export class Payment extends QueryableModel {
         const balanceItems = await BalanceItem.getByIDs(...ids);
 
         return { balanceItemPayments, balanceItems };
+    }
+
+    /**
+     * Mirrors loadBalanceItems for the settlements a payment was part of.
+     */
+    static async loadSettlements(payments: Payment[]) {
+        if (payments.length === 0) {
+            return { paymentSettlements: [], settlements: [] };
+        }
+        const { PaymentSettlement } = await import('./PaymentSettlement.js');
+        const { Settlement } = await import('./Settlement.js');
+
+        const paymentSettlements = await PaymentSettlement.select()
+            .where('paymentId', payments.map(p => p.id))
+            .fetch();
+
+        const ids = Formatter.uniqueArray(paymentSettlements.map(line => line.settlementId));
+        const settlements = ids.length > 0
+            ? await Settlement.select().where('id', ids).fetch()
+            : [];
+
+        return { paymentSettlements, settlements };
     }
 
     static async loadPayingOrganizations(payments: Payment[]) {
