@@ -1,5 +1,5 @@
 import { Order, Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
-import { Settlement } from '@stamhoofd/structures';
+import { SettlementReference } from '@stamhoofd/structures';
 import Stripe from 'stripe';
 import { passthroughFetch } from './passthroughFetch.js';
 
@@ -167,7 +167,7 @@ export class StripePayoutChecker {
             return;
         }
 
-        const settlement = Settlement.create({
+        const settlement = SettlementReference.create({
             id: payout.id,
             reference: payout.statement_descriptor ?? '',
             settledAt: new Date(payout.arrival_date * 1000),

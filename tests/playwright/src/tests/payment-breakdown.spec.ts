@@ -19,7 +19,7 @@ import {
     PaymentType,
     PermissionLevel,
     Permissions,
-    Settlement,
+    SettlementReference,
     STPackageBundle,
     Token as TokenStruct,
     TransferSettings,
@@ -90,7 +90,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         /**
          * The payout of the provider this payment was part of.
          */
-        settlement?: Settlement;
+        settlement?: SettlementReference;
     }): Promise<BalanceItem> {
         const registration = await new RegistrationFactory({ member, group }).create();
 
@@ -236,7 +236,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         const second = await new MemberFactory({ organization, firstName: 'Jonas', lastName: 'Claes' }).create();
         const third = await new MemberFactory({ organization, firstName: 'Marie', lastName: 'Willems' }).create();
 
-        const payout = Settlement.create({
+        const payout = SettlementReference.create({
             id: 'stl_playwright',
             reference: '1234567.0312.01',
             settledAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),

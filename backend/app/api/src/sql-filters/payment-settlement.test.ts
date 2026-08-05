@@ -1,5 +1,5 @@
 import { compileToSQLFilter } from '@stamhoofd/sql';
-import { PaymentMethod, PaymentProvider, PaymentStatus, Settlement } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
 import { toBalanceItemFilter } from '@stamhoofd/structures/breakdown/breakdownFilters.js';
 import type { SettleablePayment } from '@stamhoofd/structures/PaymentSettlement.js';
 import { ACCOUNT_DEDUCTIONS_ID, FAILED_PAYMENT_ID, getPaymentSettlement, PENDING_PAYMENT_ID } from '@stamhoofd/structures/PaymentSettlement.js';
@@ -7,7 +7,7 @@ import { balanceItemFilterCompilers } from './balance-items.js';
 import { paymentFilterCompilers } from './payments.js';
 
 describe('paymentSettlementFilterCompilers', () => {
-    const settlement = Settlement.create({
+    const settlement = SettlementReference.create({
         id: 'settlement-1',
         reference: 'ST-2026-01',
         settledAt: new Date(2026, 0, 15),

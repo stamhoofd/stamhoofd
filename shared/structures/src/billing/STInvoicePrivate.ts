@@ -1,7 +1,7 @@
 import { field, StringDecoder } from '@simonbackx/simple-encoding';
 import { StringCompare } from '@stamhoofd/utility';
 
-import { Settlement } from '../members/Payment.js';
+import { SettlementReference } from '../members/Payment.js';
 import { OrganizationSimple } from '../OrganizationSimple.js';
 import { STInvoice } from './STInvoice.js';
 
@@ -9,8 +9,8 @@ export class STInvoicePrivate extends STInvoice {
     @field({ decoder: OrganizationSimple, optional: true })
     organization?: OrganizationSimple;
 
-    @field({ decoder: Settlement, nullable: true })
-    settlement: Settlement | null = null;
+    @field({ decoder: SettlementReference, nullable: true })
+    settlement: SettlementReference | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 186 })
     reference: string | null = null;

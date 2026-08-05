@@ -1,6 +1,6 @@
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Payment, StripeAccount } from '@stamhoofd/models';
-import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Settlement } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -138,7 +138,7 @@ describe('Cron.fake-settlements', () => {
     });
 
     test('A payment that was already paid out keeps its own payout', async () => {
-        const settlement = Settlement.create({
+        const settlement = SettlementReference.create({
             id: 'stl_1',
             reference: '1234.1234.1234',
             settledAt: inWeek(1),

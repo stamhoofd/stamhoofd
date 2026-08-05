@@ -2,7 +2,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { BalanceItem, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getBalanceItemTypeName } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
-import { PrivatePayment, Settlement } from '../members/Payment.js';
+import { PrivatePayment, SettlementReference } from '../members/Payment.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
 import { getPaymentProviderName, PaymentProvider } from '../PaymentProvider.js';
@@ -95,7 +95,7 @@ describe('Breakdown builders', () => {
         provider?: PaymentProvider | null;
         transferSettings?: TransferSettings | null;
         stripeAccountId?: string | null;
-        settlement?: Settlement | null;
+        settlement?: SettlementReference | null;
         status?: PaymentStatus;
         /**
          * What this payment rounded away, because a payment goes to the cent while what was charged
@@ -127,7 +127,7 @@ describe('Breakdown builders', () => {
      * A payout of a payment provider, e.g. everything Mollie transferred on one day.
      */
     function createSettlement({ reference, settledAt }: { reference: string; settledAt: string }) {
-        return Settlement.create({
+        return SettlementReference.create({
             id: 'stl_' + reference,
             reference,
             settledAt: new Date(settledAt),
@@ -138,7 +138,7 @@ describe('Breakdown builders', () => {
     /**
      * An online payment of one balance item, the way a balance item knows how it was paid.
      */
-    function createOnlinePaymentFor(price: number, options: { settlement?: Settlement | null; status?: PaymentStatus; provider?: PaymentProvider } = {}) {
+    function createOnlinePaymentFor(price: number, options: { settlement?: SettlementReference | null; status?: PaymentStatus; provider?: PaymentProvider } = {}) {
         return BalanceItemPaymentWithPrivatePayment.create({
             price,
             payment: PrivatePayment.create({
@@ -422,7 +422,7 @@ describe('Breakdown builders', () => {
         const march = createSettlement({ reference: '1234567.0312.01', settledAt: '2026-03-12T09:00:00.000Z' });
         const april = createSettlement({ reference: '1234567.0409.01', settledAt: '2026-04-09T09:00:00.000Z' });
 
-        function createOnlinePayment(item: BalanceItem, price: number, settlement: Settlement | null) {
+        function createOnlinePayment(item: BalanceItem, price: number, settlement: SettlementReference | null) {
             return createPayment({ items: [[item, price]], method: PaymentMethod.Bancontact, provider: PaymentProvider.Mollie, settlement });
         }
 
