@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { getStatisticsDatabase } from './migrations.js';
 
 /**
@@ -25,6 +26,20 @@ const personalDataColumns = [
     'details',
     'recordanswers',
 ];
+
+describe('getStatisticsDatabase', () => {
+    it('refuses to migrate the main database, whose tables it would collide with', () => {
+        TestUtils.setEnvironment('DB_STATISTICS_DATABASE', STAMHOOFD.DB_DATABASE);
+
+        expect(() => getStatisticsDatabase()).toThrow('has to be a separate one');
+    });
+
+    it('refuses to run when no statistics database is configured', () => {
+        TestUtils.setEnvironment('DB_STATISTICS_DATABASE', undefined);
+
+        expect(() => getStatisticsDatabase()).toThrow('is not set');
+    });
+});
 
 describe('migration.platform-statistics-schema', () => {
     async function getColumns(): Promise<{ tableName: string; columnName: string; dataType: string }[]> {

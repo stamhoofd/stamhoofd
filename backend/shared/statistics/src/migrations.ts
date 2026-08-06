@@ -12,6 +12,13 @@ export function getStatisticsDatabase(): string {
         throw new Error('STAMHOOFD.DB_STATISTICS_DATABASE is not set: configure the platform statistics database before running migrations');
     }
 
+    // The statistics migrations create tables that share their names with the main database
+    // (members, registrations, groups, ...). Pointed at the main database they would collide with
+    // it, so the one configuration that could damage it is refused outright.
+    if (database === STAMHOOFD.DB_DATABASE) {
+        throw new Error(`STAMHOOFD.DB_STATISTICS_DATABASE is the main database (${database}): the platform statistics database has to be a separate one`);
+    }
+
     return database;
 }
 
