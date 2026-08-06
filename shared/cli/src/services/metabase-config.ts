@@ -31,6 +31,12 @@ export function metabaseDataSourceName(env: string): string {
     return `Platform statistics (${env})`;
 }
 
+/**
+ * Tables of the statistics database that are infrastructure rather than data. They are hidden in
+ * Metabase so they stay out of the query builder and the data reference.
+ */
+export const metabaseHiddenTables = ['migrations'];
+
 export function buildMetabaseConfigOutput(domains: DevelopmentDomains, dataSource: MetabaseDataSource): string {
     return `Local Metabase:
 

@@ -18,6 +18,14 @@ export type MetabaseDatabase = {
     id: number;
     name: string;
     engine: string;
+    /** Metabase's own demo database, which it creates on setup unless told not to. */
+    is_sample?: boolean;
+};
+
+export type MetabaseTable = {
+    id: number;
+    name: string;
+    visibility_type: string | null;
 };
 
 export class MetabaseApiError extends Error {
@@ -100,13 +108,14 @@ export class MetabaseApi {
      * Register `input` as a MySQL database unless a database with the same name is already
      * registered. An existing one is left untouched, so changes made in the UI survive.
      */
-    async ensureDatabase(input: MetabaseDatabaseInput): Promise<{ created: boolean }> {
+    async ensureDatabase(input: MetabaseDatabaseInput): Promise<{ id: number; created: boolean }> {
         const existing = await this.listDatabases();
-        if (existing.some(database => database.name === input.name)) {
-            return { created: false };
+        const match = existing.find(database => database.name === input.name);
+        if (match) {
+            return { id: match.id, created: false };
         }
 
-        await this.request('POST', '/api/database', {
+        const created = await this.request<{ id: number }>('POST', '/api/database', {
             name: input.name,
             engine: 'mysql',
             details: {
@@ -118,7 +127,59 @@ export class MetabaseApi {
                 ssl: false,
             },
         });
-        return { created: true };
+        return { id: created.id, created: true };
+    }
+
+    /**
+     * Make Metabase re-read the tables of a database. It caches the schema it found when the data
+     * source was registered and only refreshes on its own schedule, so a database that was still
+     * empty at that moment keeps showing no tables long after the migrations created them.
+     */
+    async syncDatabaseSchema(id: number): Promise<void> {
+        await this.request('POST', `/api/database/${id}/sync_schema`);
+    }
+
+    /**
+     * Hide tables from the query builder and the data reference. Used for the schema-history table,
+     * which is part of the database but has nothing to report on.
+     *
+     * Metabase discovers tables in a background sync, so a table that was only just created may not
+     * be known yet; this waits a bounded time for it and otherwise leaves it for the next run rather
+     * than holding up the command.
+     */
+    async hideTables(databaseId: number, names: string[], options: { timeoutMs?: number } = {}): Promise<string[]> {
+        const deadline = Date.now() + (options.timeoutMs ?? 30_000);
+        const hidden: string[] = [];
+
+        for (;;) {
+            const metadata = await this.request<{ tables?: MetabaseTable[] }>('GET', `/api/database/${databaseId}/metadata?include_hidden=true`);
+            const tables = (metadata.tables ?? []).filter(table => names.includes(table.name));
+
+            for (const table of tables.filter(table => table.visibility_type !== 'hidden')) {
+                await this.request('PUT', `/api/table/${table.id}`, { visibility_type: 'hidden' });
+                hidden.push(table.name);
+            }
+
+            if (tables.length === names.length || Date.now() >= deadline) {
+                return hidden;
+            }
+            await new Promise(resolve => setTimeout(resolve, 2_000));
+        }
+    }
+
+    /**
+     * Drop Metabase's demo database. Instances started before the image was told to skip it already
+     * have one, and it is only noise next to the platform statistics. Identified by the flag rather
+     * than by name, which is the only thing Metabase guarantees about it.
+     */
+    async removeSampleDatabase(): Promise<{ removed: boolean }> {
+        const sample = (await this.listDatabases()).find(database => database.is_sample === true);
+        if (!sample) {
+            return { removed: false };
+        }
+
+        await this.request('DELETE', `/api/database/${sample.id}`);
+        return { removed: true };
     }
 
     private async request<T>(method: string, path: string, body?: unknown): Promise<T> {

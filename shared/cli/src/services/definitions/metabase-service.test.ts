@@ -33,4 +33,8 @@ describe('MetabaseService.dockerArgs', () => {
     it('sets the site URL so Metabase builds links on its proxied hostname', () => {
         expect(envValue('MB_SITE_URL')).toBe('https://metabase.stamhoofd');
     });
+
+    it('starts without the demo database Metabase would otherwise create', () => {
+        expect(envValue('MB_LOAD_SAMPLE_CONTENT')).toBe('false');
+    });
 });

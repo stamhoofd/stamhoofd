@@ -6,7 +6,7 @@ import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import { MetabaseApi, MetabaseApiError } from '../metabase-api.js';
-import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName } from '../metabase-config.js';
+import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName, metabaseHiddenTables } from '../metabase-config.js';
 
 export class MetabaseService extends SharedDockerService {
     static readonly container = metabaseContainer;
@@ -44,7 +44,7 @@ export class MetabaseService extends SharedDockerService {
      * Runs on every start rather than only on a fresh container, so `--env keeo` after `--env ravot`
      * adds the second data source to the same Metabase.
      */
-    async provision(context: CliContext): Promise<{ database: string; dataSource: string; created: boolean }> {
+    async provision(context: CliContext): Promise<{ database: string; dataSource: string; created: boolean; removedSampleDatabase: boolean; hiddenTables: string[]; tableCount: number }> {
         await this.assertMysqlRunning();
 
         const database = buildDatabases(context).platformStatistics;
@@ -62,7 +62,7 @@ export class MetabaseService extends SharedDockerService {
             throw error;
         }
 
-        const { created } = await api.ensureDatabase({
+        const { id, created } = await api.ensureDatabase({
             name: dataSource,
             host: dockerHostGateway,
             port: buildPorts(context).mysql,
@@ -70,8 +70,12 @@ export class MetabaseService extends SharedDockerService {
             user: mysqlRootUser,
             password: mysqlRootPassword,
         });
+        await api.syncDatabaseSchema(id);
+        const { removed: removedSampleDatabase } = await api.removeSampleDatabase();
+        const tableCount = await this.countTables(context, database);
+        const hiddenTables = tableCount === 0 ? [] : await api.hideTables(id, metabaseHiddenTables);
 
-        return { database, dataSource, created };
+        return { database, dataSource, created, removedSampleDatabase, hiddenTables, tableCount };
     }
 
     async afterRun(context: CliContext): Promise<void> {
@@ -124,6 +128,15 @@ export class MetabaseService extends SharedDockerService {
         }
     }
 
+    /**
+     * The statistics schema is created by the backend migrations, not by this command, so a database
+     * without tables means those have not run yet.
+     */
+    private async countTables(context: CliContext, database: string): Promise<number> {
+        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${database.replaceAll("'", "''")}'`], { capture: true, quiet: true, verbose: context.verbose });
+        return Number.parseInt(result.stdout.trim(), 10) || 0;
+    }
+
     private async createMysqlDatabase(context: CliContext, database: string): Promise<void> {
         await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `CREATE DATABASE IF NOT EXISTS \`${database.replaceAll('`', '``')}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`], { quiet: true, verbose: context.verbose });
     }
@@ -146,6 +159,8 @@ export class MetabaseService extends SharedDockerService {
             '-e', `MB_DB_USER=${mysqlRootUser}`,
             '-e', `MB_DB_PASS=${mysqlRootPassword}`,
             '-e', `MB_SITE_URL=${siteUrl}`,
+            // Skip the demo database and example dashboards Metabase would otherwise create on setup.
+            '-e', 'MB_LOAD_SAMPLE_CONTENT=false',
             metabaseImage,
         ];
     }

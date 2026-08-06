@@ -80,7 +80,7 @@ describe('MetabaseApi.ensureDatabase', () => {
 
         const result = await new MetabaseApi('http://localhost:3030').ensureDatabase(input);
 
-        expect(result.created).toBe(true);
+        expect(result).toMatchObject({ id: 2, created: true });
         expect(calls.find(call => call.key === 'POST /api/database')?.body).toEqual({
             name: input.name,
             engine: 'mysql',
@@ -88,15 +88,69 @@ describe('MetabaseApi.ensureDatabase', () => {
         });
     });
 
-    it('leaves an existing data source of the same name untouched', async () => {
+    it('leaves an existing data source of the same name untouched, but reports its id so it can be resynced', async () => {
         const calls = mockFetch({
             'GET /api/database': { body: { data: [{ id: 2, name: input.name, engine: 'mysql' }] } },
         });
 
         const result = await new MetabaseApi('http://localhost:3030').ensureDatabase(input);
 
-        expect(result.created).toBe(false);
+        expect(result).toMatchObject({ id: 2, created: false });
         expect(calls.some(call => call.key === 'POST /api/database')).toBe(false);
+    });
+
+    it('hides the schema-history table, which is infrastructure rather than data', async () => {
+        const calls = mockFetch({
+            'GET /api/database/2/metadata': { body: { tables: [{ id: 9, name: 'migrations', visibility_type: null }, { id: 10, name: 'members', visibility_type: null }] } },
+            'PUT /api/table/9': { body: {} },
+        });
+
+        expect(await new MetabaseApi('http://localhost:3030').hideTables(2, ['migrations'])).toEqual(['migrations']);
+        expect(calls.find(call => call.key === 'PUT /api/table/9')?.body).toEqual({ visibility_type: 'hidden' });
+        // The tables holding the statistics themselves are never touched.
+        expect(calls.some(call => call.key === 'PUT /api/table/10')).toBe(false);
+    });
+
+    it('leaves an already hidden table alone, so a re-run makes no requests', async () => {
+        const calls = mockFetch({
+            'GET /api/database/2/metadata': { body: { tables: [{ id: 9, name: 'migrations', visibility_type: 'hidden' }] } },
+        });
+
+        expect(await new MetabaseApi('http://localhost:3030').hideTables(2, ['migrations'])).toEqual([]);
+        expect(calls.some(call => call.key.startsWith('PUT'))).toBe(false);
+    });
+
+    it('gives up waiting for a table the sync has not discovered yet', async () => {
+        mockFetch({ 'GET /api/database/2/metadata': { body: { tables: [] } } });
+
+        expect(await new MetabaseApi('http://localhost:3030').hideTables(2, ['migrations'], { timeoutMs: 0 })).toEqual([]);
+    });
+
+    it('removes the demo database an older instance was set up with', async () => {
+        const calls = mockFetch({
+            'GET /api/database': { body: { data: [{ id: 1, name: 'Sample Database', engine: 'sqlite', is_sample: true }, { id: 2, name: input.name, engine: 'mysql' }] } },
+            'DELETE /api/database/1': { body: {} },
+        });
+
+        expect(await new MetabaseApi('http://localhost:3030').removeSampleDatabase()).toEqual({ removed: true });
+        expect(calls.map(call => call.key)).toContain('DELETE /api/database/1');
+    });
+
+    it('never deletes a data source that is not the demo database', async () => {
+        const calls = mockFetch({
+            'GET /api/database': { body: { data: [{ id: 2, name: input.name, engine: 'mysql', is_sample: false }] } },
+        });
+
+        expect(await new MetabaseApi('http://localhost:3030').removeSampleDatabase()).toEqual({ removed: false });
+        expect(calls.some(call => call.key.startsWith('DELETE'))).toBe(false);
+    });
+
+    it('asks Metabase to re-read the schema, so tables created after registration show up', async () => {
+        const calls = mockFetch({ 'POST /api/database/2/sync_schema': { body: { status: 'ok' } } });
+
+        await new MetabaseApi('http://localhost:3030').syncDatabaseSchema(2);
+
+        expect(calls.map(call => call.key)).toEqual(['POST /api/database/2/sync_schema']);
     });
 
     it('accepts a bare array, which older Metabase versions return', async () => {

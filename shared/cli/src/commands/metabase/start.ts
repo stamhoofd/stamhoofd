@@ -6,7 +6,7 @@ import { metabaseService } from '../../services/definitions/metabase-service.js'
 import { allRunning, startServices } from '../../services/manager.js';
 import { buildMetabaseConfigOutput } from '../../services/metabase-config.js';
 import { sharedServiceDefinitions } from '../../services/registry.js';
-import { step } from '../../runtime/ux.js';
+import { command, step, warning } from '../../runtime/ux.js';
 
 export default class MetabaseStart extends BaseCommand {
     static summary = 'Start the local Metabase server';
@@ -31,6 +31,10 @@ export default class MetabaseStart extends BaseCommand {
         const provisioned = await step(`Configuring ${context.env} platform statistics`, async () => await metabaseService.provision(context), {
             successMessage: result => result.created ? `Added data source ${result.dataSource}` : `Data source ${result.dataSource} already configured`,
         });
+
+        if (provisioned.tableCount === 0) {
+            warning(`${provisioned.database} has no tables yet, so the data source shows up empty in Metabase. Run ${command(`stam db migrate --env ${context.env}`)} to create the statistics schema, then this command again to pick it up.`);
+        }
 
         this.log('');
         this.log(buildMetabaseConfigOutput(buildDomains(context), {

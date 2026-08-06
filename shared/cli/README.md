@@ -194,6 +194,22 @@ follows the same rules as the main development database: environments keep their
 (`stamhoofd` → `development`, `jambo` → `jamboree`), and a secondary instance suffixes its own name so
 worktrees never share data.
 
+The **tables** in that database are created by the backend migrations, not by this command:
+
+```bash
+yarn stam db migrate --env keeo    # creates the statistics schema
+yarn stam metabase start --env keeo
+```
+
+Run in the other order and Metabase registers a database that is still empty. It caches the schema it
+found and only refreshes on its own schedule, so the data source keeps showing no tables. Running
+`stam metabase start` again fixes that: it asks Metabase to re-read the schema every time, and warns
+when the database has no tables yet.
+
+Every run also tidies up the instance: it drops Metabase's demo database (new containers never create
+one) and hides the `migrations` table of the data source it configured, which is schema history
+rather than something to report on. The tables listed in `metabaseHiddenTables` are the ones hidden.
+
 One Metabase serves every environment. Running the command for a second environment adds that data
 source next to the existing ones, and an already registered data source is left untouched, so edits
 made in the UI survive. Print the settings of an environment with `stam metabase config --env keeo`.
