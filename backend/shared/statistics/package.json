@@ -29,6 +29,9 @@
         "vitest": "4.1.10"
     },
     "peerDependencies": {
+        "@stamhoofd/models": "*",
+        "@stamhoofd/sql": "*",
+        "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*"
     },
     "license": "UNLICENCED",

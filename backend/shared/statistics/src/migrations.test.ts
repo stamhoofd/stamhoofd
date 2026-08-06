@@ -68,6 +68,7 @@ describe('migration.platform-statistics-schema', () => {
             'registration_periods',
             'registrations',
             'responsibilities',
+            'stats_sync_state',
         ]);
     });
 
