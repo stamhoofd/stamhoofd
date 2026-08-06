@@ -7,6 +7,17 @@
 -- dropped, since `details` and `recordAnswers` hold exactly the personal data this database must not
 -- contain. Keep that property when adding tables here: the point of a separate database is that it
 -- can be handed to a reporting tool that must never reach the main one.
+--
+-- Two columns are not copies of anything in the source:
+--
+--   * `source` says which pipeline wrote a row. The nightly reconciliation checks rows against the
+--     main database, and rows that came from an import have no counterpart there — without this it
+--     would delete every one of them on the first night.
+--   * `registration_periods`.`cutoffAt` freezes a period. Once it has passed, the sync stops writing
+--     anything belonging to that period, so the numbers for that year are settled and later changes
+--     in the administration no longer move them. It is per period because the boundary differs per
+--     platform and per year, and it is what makes room for data imported from a client's own
+--     statistics database: those years are frozen, so nothing overwrites them.
 
 CREATE TABLE `registration_periods` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
@@ -19,10 +30,14 @@ CREATE TABLE `registration_periods` (
   `customName` varchar(200) DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
+  `cutoffAt` datetime DEFAULT NULL COMMENT 'From when this period is frozen: the sync stops writing rows belonging to it. Null means it is still live.',
   PRIMARY KEY (`id`),
   KEY `organizationId` (`organizationId`),
   KEY `previousPeriodId` (`previousPeriodId`),
-  KEY `startDate` (`startDate`)
+  KEY `startDate` (`startDate`),
+  KEY `source` (`source`),
+  KEY `cutoffAt` (`cutoffAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- An organization is a legal entity, not a natural person, so its name and city are not personal
@@ -37,11 +52,13 @@ CREATE TABLE `organizations` (
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uri` (`uri`) USING BTREE,
   KEY `periodId` (`periodId`),
   KEY `name` (`name`),
   KEY `city` (`city`),
+  KEY `source` (`source`),
   CONSTRAINT `organizations_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -54,15 +71,23 @@ CREATE TABLE `organization_tags` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Which netwerk an organization belongs to, per period. The source only knows the tags it carries
+-- now, so the sync records them against the period the organization is in; a settled year keeps the
+-- netwerk it was recorded with while it was live, instead of moving along with the organization.
 CREATE TABLE `_organizations_organization_tags` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `organizationsId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `organizationTagsId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `organizationsId,organizationTagsId` (`organizationsId`,`organizationTagsId`) USING BTREE,
+  UNIQUE KEY `organizationsId,organizationTagsId,periodId` (`organizationsId`,`organizationTagsId`,`periodId`) USING BTREE,
   KEY `organizationTagsId` (`organizationTagsId`),
+  KEY `periodId` (`periodId`),
+  KEY `source` (`source`),
   CONSTRAINT `_organizations_organization_tags_ibfk_1` FOREIGN KEY (`organizationsId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `_organizations_organization_tags_ibfk_2` FOREIGN KEY (`organizationTagsId`) REFERENCES `organization_tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `_organizations_organization_tags_ibfk_2` FOREIGN KEY (`organizationTagsId`) REFERENCES `organization_tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `_organizations_organization_tags_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- The takken every organization's groups map onto.
@@ -104,10 +129,12 @@ CREATE TABLE `groups` (
   `deletedAt` datetime DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   KEY `organizationId` (`organizationId`),
   KEY `periodId` (`periodId`),
   KEY `defaultAgeGroupId` (`defaultAgeGroupId`),
+  KEY `source` (`source`),
   CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `groups_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `groups_ibfk_3` FOREIGN KEY (`defaultAgeGroupId`) REFERENCES `default_age_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -115,6 +142,10 @@ CREATE TABLE `groups` (
 
 -- One row per member, carrying only what the reports group by. `birthYear` replaces the source
 -- `birthDay`: age distributions need the year, and a full date of birth is personal data.
+--
+-- Members are never deleted from here, even when their source row is gone: their row is what the
+-- facts of a settled year join to for demographics, and removing one cascades into the registrations
+-- of those years.
 CREATE TABLE `members` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `birthYear` smallint DEFAULT NULL,
@@ -123,10 +154,12 @@ CREATE TABLE `members` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `lastRegisteredAt` datetime DEFAULT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   KEY `organizationId` (`organizationId`),
   KEY `birthYear` (`birthYear`),
   KEY `gender` (`gender`),
+  KEY `source` (`source`),
   CONSTRAINT `members_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -148,12 +181,14 @@ CREATE TABLE `registrations` (
   `cycle` int NOT NULL COMMENT 'Cycle of the group the registration is for',
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   KEY `memberId` (`memberId`) USING BTREE,
   KEY `groupId` (`groupId`),
   KEY `organizationId` (`organizationId`),
   KEY `periodId` (`periodId`),
   KEY `registeredAt` (`registeredAt`),
+  KEY `source` (`source`),
   CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `registrations_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -175,11 +210,13 @@ CREATE TABLE `member_platform_memberships` (
   `deletedAt` datetime DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   KEY `memberId` (`memberId`),
   KEY `membershipTypeId` (`membershipTypeId`),
   KEY `organizationId` (`organizationId`),
   KEY `periodId` (`periodId`),
+  KEY `source` (`source`),
   CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `member_platform_memberships_ibfk_2` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `member_platform_memberships_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -194,13 +231,30 @@ CREATE TABLE `member_responsibility_records` (
   `responsibilityId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `startDate` datetime NOT NULL,
   `endDate` datetime DEFAULT NULL,
+  `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   KEY `memberId,organizationId` (`memberId`,`organizationId`) USING BTREE,
   KEY `responsibilityId` (`responsibilityId`) USING BTREE,
   KEY `organizationId` (`organizationId`),
   KEY `groupId` (`groupId`),
+  KEY `source` (`source`),
   CONSTRAINT `member_responsibility_records_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `member_responsibility_records_ibfk_2` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `member_responsibility_records_ibfk_3` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `member_responsibility_records_ibfk_4` FOREIGN KEY (`responsibilityId`) REFERENCES `responsibilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Bookkeeping for the sync job. One row per synced table, so every table advances on its own and a
+-- table that fails keeps retrying from where it got to without holding up the others.
+--
+-- `watermark` is the highest `updatedAt` of the source rows that made it in. The next run reads from
+-- slightly before it (see the overlap in the sync), which is what makes a crashed or half-finished
+-- run harmless: rows are written again rather than skipped.
+CREATE TABLE `stats_sync_state` (
+  `tableName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `watermark` datetime DEFAULT NULL COMMENT 'Highest updatedAt of the source rows synced so far. Null means nothing was synced yet, which is also how a full backfill starts.',
+  `lastSucceededAt` datetime DEFAULT NULL COMMENT 'End of the last incremental run that completed without an error',
+  `lastReconciledAt` datetime DEFAULT NULL COMMENT 'End of the last run that reconciled deletes against the source table',
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`tableName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -48,17 +48,20 @@ export async function deleteRows(table: string, ids: string[]): Promise<number> 
 }
 
 /**
- * Every id currently in a statistics table, in pages, so reconciling deletes never holds the whole
+ * The ids a source still holds in a statistics table, in pages, so reconciling never keeps the whole
  * table in memory.
+ *
+ * Scoped to one source on purpose: the rows an import produced have no counterpart in the main
+ * database, so reconciling them against it would delete every one of them on the first night.
  */
-export async function* iterateIds(table: string): AsyncGenerator<string[]> {
+export async function* iterateIds(table: string, source: string): AsyncGenerator<string[]> {
     const connection = getStatisticsConnection();
     let cursor = '';
 
     for (;;) {
         const [rows] = await connection.select(
-            `SELECT \`id\` FROM ${connection.escapeId(table)} WHERE \`id\` > ? ORDER BY \`id\` ASC LIMIT ${batchSize}`,
-            [cursor],
+            `SELECT \`id\` FROM ${connection.escapeId(table)} WHERE \`source\` = ? AND \`id\` > ? ORDER BY \`id\` ASC LIMIT ${batchSize}`,
+            [source, cursor],
             { nestTables: false },
         );
         const ids = (rows as unknown as { id: string }[]).map(row => row.id);

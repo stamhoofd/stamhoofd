@@ -94,6 +94,13 @@ describe('migration.platform-statistics-schema', () => {
         expect(typeOf('registrations', 'cycle')).toBe('int');
         expect(typeOf('registrations', 'registeredAt')).toBe('datetime');
         expect(typeOf('organizations', 'name')).toBe('varchar(100)');
+        expect(typeOf('registration_periods', 'cutoffAt')).toBe('datetime');
+        // Both replaced by the per-period cutoff: a settled year is protected by freezing it, not by
+        // a validity window on every row.
+        expect(typeOf('members', 'includeSince')).toBeUndefined();
+        expect(typeOf('members', 'excludeSince')).toBeUndefined();
+        // Netwerk membership is a fact of a period, so a settled year keeps the one it was recorded with.
+        expect(typeOf('_organizations_organization_tags', 'periodId')).toBe('varchar(36)');
     });
 
     it('holds no personally identifiable information in any table', async () => {

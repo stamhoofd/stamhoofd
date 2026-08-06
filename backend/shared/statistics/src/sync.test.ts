@@ -1,5 +1,5 @@
 import type { Member, Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { getStatisticsConnection } from './connection.js';
 import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
@@ -35,7 +35,7 @@ describe('statistics sync', () => {
 
         expect(row).toBeDefined();
         expect(row.birthYear).toBe(2011);
-        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'source', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain(member.details.firstName);
     });
 
@@ -79,7 +79,11 @@ describe('statistics sync', () => {
         expect(await statisticsRows('registrations', registration.id)).toHaveLength(1);
     });
 
-    it('removes a row whose source was deleted, but only once deletes are reconciled', async () => {
+    it('marks every row it writes as its own', async () => {
+        expect((await statisticsRows('members', member.id))[0].source).toBe('sync');
+    });
+
+    it('removes a row of a live period once its source row is gone', async () => {
         const deletedId = registration.id;
         await registration.delete();
 
@@ -90,7 +94,108 @@ describe('statistics sync', () => {
         await syncStatisticsDeletes();
 
         expect(await statisticsRows('registrations', deletedId)).toHaveLength(0);
-        // The member it belonged to is untouched.
-        expect(await statisticsRows('members', member.id)).toHaveLength(1);
+    });
+
+    it('keeps a member whose source row is gone, because deleting one cascades into settled years', async () => {
+        const orphan = await new MemberFactory({ organization }).create();
+        await syncStatistics();
+        await orphan.delete();
+
+        await syncStatisticsDeletes();
+
+        expect(await statisticsRows('members', orphan.id)).toHaveLength(1);
+    });
+
+    describe('a frozen period', () => {
+        let frozenPeriod: RegistrationPeriod;
+        let frozenRegistration: Registration;
+
+        beforeAll(async () => {
+            frozenPeriod = await new RegistrationPeriodFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+            group.periodId = frozenPeriod.id;
+            await group.save();
+            frozenRegistration = await new RegistrationFactory({ member, group }).create();
+            frozenRegistration.periodId = frozenPeriod.id;
+            await frozenRegistration.save();
+
+            await syncStatistics();
+            // Settle the period, as an operator would once its numbers are final.
+            await getStatisticsConnection().update('UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?', [new Date(Date.now() - 1000), frozenPeriod.id]);
+        });
+
+        it('is not rewritten by the sync when the source changes', async () => {
+            const before = (await statisticsRows('registrations', frozenRegistration.id))[0];
+
+            frozenRegistration.waitingList = !before.waitingList;
+            await frozenRegistration.save();
+            await syncStatistics();
+
+            expect((await statisticsRows('registrations', frozenRegistration.id))[0].waitingList).toBe(before.waitingList);
+        });
+
+        it('keeps its rows when the source is deleted, so the settled numbers stay', async () => {
+            await frozenRegistration.delete();
+
+            await syncStatistics();
+            await syncStatisticsDeletes();
+
+            expect(await statisticsRows('registrations', frozenRegistration.id)).toHaveLength(1);
+        });
+    });
+
+    describe('netwerk membership', () => {
+        it('is recorded against the period the organization is in', async () => {
+            const tag = await new OrganizationTagFactory({}).create();
+            organization.meta.tags = [tag.id];
+            await organization.save();
+
+            await syncStatistics();
+
+            const links = await statisticsRows('_organizations_organization_tags');
+            const link = links.find(row => row.organizationsId === organization.id && row.organizationTagsId === tag.id);
+            expect(link).toBeDefined();
+            expect(link!.periodId).toBe(organization.periodId);
+        });
+
+        it('leaves the netwerk of a settled year alone when the organization moves', async () => {
+            const settledPeriod = await new RegistrationPeriodFactory({}).create();
+            const tag = await new OrganizationTagFactory({}).create();
+            const connection = getStatisticsConnection();
+
+            // Get the period and the tag into the statistics database first: the link points at both.
+            await syncStatistics();
+
+            // A link as it was recorded while that year was still live, then the year is settled.
+            await connection.insert(
+                'INSERT INTO `_organizations_organization_tags` (`organizationsId`, `organizationTagsId`, `periodId`, `source`) VALUES (?, ?, ?, ?)',
+                [organization.id, tag.id, settledPeriod.id, 'sync'],
+            );
+            await connection.update('UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?', [new Date(Date.now() - 1000), settledPeriod.id]);
+
+            // The organization moves to another netwerk entirely.
+            const moved = await new OrganizationTagFactory({}).create();
+            organization.meta.tags = [moved.id];
+            await organization.save();
+            await syncStatistics();
+
+            const links = await statisticsRows('_organizations_organization_tags');
+            expect(links.some(row => row.periodId === settledPeriod.id && row.organizationTagsId === tag.id)).toBe(true);
+            expect(links.some(row => row.periodId === organization.periodId && row.organizationTagsId === moved.id)).toBe(true);
+        });
+    });
+
+    it('never deletes rows that came from an import, which have no source row to check against', async () => {
+        const connection = getStatisticsConnection();
+        // The statistics database is kept between runs, so start from a known state.
+        await connection.delete('DELETE FROM `members` WHERE `id` = ?', ['imported-member-1']);
+        await connection.insert(
+            'INSERT INTO `members` (`id`, `birthYear`, `gender`, `createdAt`, `updatedAt`, `source`) VALUES (?, ?, ?, ?, ?, ?)',
+            ['imported-member-1', 2004, 'Female', new Date(), new Date(), 'import'],
+        );
+
+        await syncStatisticsDeletes();
+
+        expect(await statisticsRows('members', 'imported-member-1')).toHaveLength(1);
     });
 });

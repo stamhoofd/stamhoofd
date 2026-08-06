@@ -59,6 +59,16 @@ export type BackendSpecificEnvironment = {
      */
     readonly DB_STATISTICS_DATABASE?: string;
 
+    /**
+     * The date up to which the platform statistics come from an imported external source instead of
+     * from this administration, as an ISO date (e.g. '2024-09-01'). Every registration period ending
+     * before it is frozen on first sight, so the sync leaves those years to the import.
+     *
+     * Leave unset for a platform without external history: nothing is frozen and the sync owns
+     * everything.
+     */
+    readonly STATISTICS_IMPORTED_UNTIL?: string;
+
     // E-mail
     readonly SMTP_HOST: string;
     readonly SMTP_USERNAME: string;

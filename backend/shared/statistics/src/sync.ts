@@ -4,6 +4,8 @@ import { getStatisticsConnection } from './connection.js';
 import type { StatisticsRow } from './rows.js';
 import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
 import { nextWatermark, readSyncState, writeSyncState } from './sync-state.js';
+import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds } from './periods.js';
+import { syncSource } from './sources.js';
 import { deleteRows, iterateIds, upsertRows } from './writer.js';
 
 /**
@@ -27,10 +29,49 @@ type IncrementalTable = {
     fetch: (since: Date | null, afterId: string, limit: number) => Promise<{ rows: StatisticsRow[]; updatedAt: Date[]; lastId: string }>;
     /** Which of these ids still exist in the source, used to reconcile deletes. */
     existingIds: (ids: string[]) => Promise<Set<string>>;
+    /**
+     * The column holding the period a row belongs to. Rows of a frozen period are neither rewritten
+     * nor excluded, which is what keeps a settled year settled. Absent for tables that are not tied
+     * to a period at all, such as members.
+     */
+    periodColumn?: string;
+    /**
+     * Rows that stay even when their source row is gone. Members and organizations are what the facts
+     * of a settled year join to for their demographics, and deleting one cascades to its
+     * registrations — the ones in frozen years included. Keeping a de-identified row of a birth year
+     * and a gender costs nothing next to losing those numbers.
+     */
+    neverDelete?: boolean;
 };
+
+/**
+ * Marks which pipeline wrote a row, so the reconciliation only ever checks its own against the main
+ * database and leaves imported rows alone.
+ */
+export const sourceColumns = ['source'];
+
+function withSource(rows: StatisticsRow[]): StatisticsRow[] {
+    return rows.map(row => ({ ...row, source: syncSource }));
+}
 
 function idsOf(rows: { id: string }[]): string[] {
     return rows.map(row => row.id);
+}
+
+function groupByPeriod(organizations: Organization[]): Map<string, Organization[]> {
+    const grouped = new Map<string, Organization[]>();
+
+    for (const organization of organizations) {
+        const group = grouped.get(organization.periodId);
+        if (group) {
+            group.push(organization);
+        }
+        else {
+            grouped.set(organization.periodId, [organization]);
+        }
+    }
+
+    return grouped;
 }
 
 async function existingModelIds(model: { select: () => any }, ids: string[]): Promise<Set<string>> {
@@ -58,7 +99,7 @@ async function loadIdSet(table: string): Promise<Set<string>> {
     return new Set((rows as unknown as { id: string }[]).map(row => row.id));
 }
 
-function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes: Set<string>; responsibilities: Set<string> }): IncrementalTable[] {
+function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes: Set<string>; responsibilities: Set<string> }, frozen: Set<string>): IncrementalTable[] {
     return [
         {
             table: 'registration_periods',
@@ -68,16 +109,18 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
                 return { rows: periods.map(flattenRegistrationPeriod), updatedAt: periods.map(period => period.updatedAt), lastId: periods.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(RegistrationPeriod, ids),
+            periodColumn: 'id',
         },
         {
             table: 'organizations',
             columns: ['id', 'name', 'uri', 'city', 'periodId', 'active', 'createdAt', 'updatedAt'],
             fetch: async (since, afterId, limit) => {
                 const organizations = await incrementalQuery(Organization, since, afterId, limit).fetch() as Organization[];
-                await syncOrganizationTagsAndResponsibilities(organizations);
+                await syncOrganizationTagsAndResponsibilities(organizations, frozen);
                 return { rows: organizations.map(flattenOrganization), updatedAt: organizations.map(organization => organization.updatedAt), lastId: organizations.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(Organization, ids),
+            neverDelete: true,
         },
         {
             table: 'groups',
@@ -94,6 +137,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
                 return { rows, updatedAt: groups.map(group => group.updatedAt), lastId: groups.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(Group, ids),
+            periodColumn: 'periodId',
         },
         {
             table: 'members',
@@ -103,6 +147,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
                 return { rows: members.map(flattenMember), updatedAt: members.map(member => member.updatedAt), lastId: members.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(Member, ids),
+            neverDelete: true,
         },
         {
             table: 'registrations',
@@ -112,6 +157,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
                 return { rows: registrations.map(flattenRegistration), updatedAt: registrations.map(registration => registration.updatedAt), lastId: registrations.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(Registration, ids),
+            periodColumn: 'periodId',
         },
         {
             table: 'member_platform_memberships',
@@ -122,6 +168,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
                 return { rows: kept.map(flattenMembership), updatedAt: kept.map(membership => membership.updatedAt), lastId: memberships.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(MemberPlatformMembership, ids),
+            periodColumn: 'periodId',
         },
     ];
 }
@@ -145,21 +192,37 @@ async function syncPlatformConfig(): Promise<void> {
  * organization record, so they are written along with the batch of organizations they belong to
  * rather than by scanning every organization again.
  */
-async function syncOrganizationTagsAndResponsibilities(organizations: Organization[]): Promise<void> {
+async function syncOrganizationTagsAndResponsibilities(organizations: Organization[], frozen: Set<string>): Promise<void> {
     if (organizations.length === 0) {
         return;
     }
 
     await upsertRows('responsibilities', ['id', 'name'], organizations.flatMap(organization => organization.privateMeta.responsibilities.map(flattenNamedConfig)));
 
+    // The source only knows the tags an organization carries now, so they are recorded against the
+    // period it is in. A frozen period keeps the netwerk it was recorded with while it was live.
+    const knownPeriods = await loadIdSet('registration_periods');
+    const live = organizations.filter(organization => knownPeriods.has(organization.periodId) && !isFrozen(frozen, organization.periodId));
+    if (live.length === 0) {
+        return;
+    }
+
     const knownTags = await loadIdSet('organization_tags');
     const connection = getStatisticsConnection();
-    await connection.delete(`DELETE FROM ${connection.escapeId('_organizations_organization_tags')} WHERE \`organizationsId\` IN (?)`, [idsOf(organizations)]);
 
-    const links = organizations.flatMap(organization => organization.meta.tags
+    // Replace the links of these organizations for the period they are in, leaving every other
+    // period exactly as it was recorded.
+    for (const [periodId, group] of groupByPeriod(live)) {
+        await connection.delete(
+            `DELETE FROM ${connection.escapeId('_organizations_organization_tags')} WHERE \`organizationsId\` IN (?) AND \`periodId\` = ?`,
+            [idsOf(group), periodId],
+        );
+    }
+
+    const links = live.flatMap(organization => organization.meta.tags
         .filter(tagId => knownTags.has(tagId))
-        .map(tagId => ({ organizationsId: organization.id, organizationTagsId: tagId })));
-    await upsertRows('_organizations_organization_tags', ['organizationsId', 'organizationTagsId'], links);
+        .map(tagId => ({ organizationsId: organization.id, organizationTagsId: tagId, periodId: organization.periodId })));
+    await upsertRows('_organizations_organization_tags', ['organizationsId', 'organizationTagsId', 'periodId', ...sourceColumns], withSource(links));
 }
 
 /**
@@ -181,14 +244,33 @@ async function syncResponsibilityRecords(knownResponsibilities: Set<string>): Pr
             return;
         }
 
-        await upsertRows('member_responsibility_records', columns, records
+        await upsertRows('member_responsibility_records', [...columns, ...sourceColumns], withSource(records
             .filter(record => knownResponsibilities.has(record.responsibilityId))
-            .map(flattenResponsibilityRecord));
+            .map(flattenResponsibilityRecord)));
         afterId = records[records.length - 1].id;
     }
 }
 
-async function syncIncrementalTable(definition: IncrementalTable): Promise<void> {
+/**
+ * Of these statistics rows, the ones that do not belong to a frozen period. A deleted source row in a
+ * settled year stays exactly as it was counted.
+ */
+async function withoutFrozen(table: string, ids: string[], frozen: Set<string>, periodColumn: string): Promise<string[]> {
+    if (ids.length === 0 || frozen.size === 0) {
+        return ids;
+    }
+
+    const connection = getStatisticsConnection();
+    const column = connection.escapeId(periodColumn);
+    const [rows] = await connection.select(
+        `SELECT \`id\` FROM ${connection.escapeId(table)} WHERE \`id\` IN (?) AND (${column} IS NULL OR ${column} NOT IN (?))`,
+        [ids, [...frozen]],
+        { nestTables: false },
+    );
+    return (rows as unknown as { id: string }[]).map(row => row.id);
+}
+
+async function syncIncrementalTable(definition: IncrementalTable, frozen: Set<string>): Promise<void> {
     const startedAt = new Date();
     const state = await readSyncState(definition.table);
     const since = state.watermark ? new Date(state.watermark.getTime() - watermarkOverlap) : null;
@@ -201,7 +283,10 @@ async function syncIncrementalTable(definition: IncrementalTable): Promise<void>
             break;
         }
 
-        await upsertRows(definition.table, definition.columns, rows);
+        const live = definition.periodColumn
+            ? rows.filter(row => !isFrozen(frozen, row[definition.periodColumn!] as string | null))
+            : rows;
+        await upsertRows(definition.table, [...definition.columns, ...sourceColumns], withSource(live));
         seen.push(...updatedAt);
         afterId = lastId;
     }
@@ -220,6 +305,8 @@ async function syncIncrementalTable(definition: IncrementalTable): Promise<void>
  */
 export async function syncStatistics(): Promise<void> {
     await syncPlatformConfig();
+    await applyImportedCutoff(getImportedUntil());
+    const frozen = await loadFrozenPeriodIds();
 
     const known = {
         ageGroups: await loadIdSet('default_age_groups'),
@@ -229,8 +316,8 @@ export async function syncStatistics(): Promise<void> {
 
     // Parents before children: the foreign keys are what let Metabase suggest joins, so a row is
     // only written once the rows it points at are there.
-    for (const definition of buildIncrementalTables(known)) {
-        await syncIncrementalTable(definition);
+    for (const definition of buildIncrementalTables(known, frozen)) {
+        await syncIncrementalTable(definition, frozen);
     }
 
     await syncResponsibilityRecords(await loadIdSet('responsibilities'));
@@ -243,18 +330,22 @@ export async function syncStatistics(): Promise<void> {
  */
 export async function syncStatisticsDeletes(): Promise<void> {
     const known = { ageGroups: new Set<string>(), membershipTypes: new Set<string>(), responsibilities: new Set<string>() };
+    const frozen = await loadFrozenPeriodIds();
 
-    // Children before parents: deleting a parent cascades, so the child pass has less to do and
-    // never trips over a row its parent already took with it.
-    for (const definition of buildIncrementalTables(known).reverse()) {
-        for await (const ids of iterateIds(definition.table)) {
+    for (const definition of buildIncrementalTables(known, frozen)) {
+        if (definition.neverDelete) {
+            continue;
+        }
+
+        for await (const ids of iterateIds(definition.table, syncSource)) {
             const existing = await definition.existingIds(ids);
-            await deleteRows(definition.table, ids.filter(id => !existing.has(id)));
+            const missing = ids.filter(id => !existing.has(id));
+            await deleteRows(definition.table, definition.periodColumn ? await withoutFrozen(definition.table, missing, frozen, definition.periodColumn) : missing);
         }
         await writeSyncState(definition.table, { lastReconciledAt: new Date() });
     }
 
-    for await (const ids of iterateIds('member_responsibility_records')) {
+    for await (const ids of iterateIds('member_responsibility_records', syncSource)) {
         const existing = await existingModelIds(MemberResponsibilityRecord, ids);
         await deleteRows('member_responsibility_records', ids.filter(id => !existing.has(id)));
     }

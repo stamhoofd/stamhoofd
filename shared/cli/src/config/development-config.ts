@@ -55,6 +55,7 @@ type EnvironmentPreset = {
     memberNumberAlgorithm?: BackendEnvironment['MEMBER_NUMBER_ALGORITHM'];
     memberNumberAlgorithmLength?: number;
     documentation?: string;
+    statisticsImportedUntil?: string;
 };
 
 const fileSigningPublicKey = { kty: 'EC', x: 'LZPou8JKNPoxgc1FXqLW_dqAYrv3_3ZoFHACwCiiunw', y: 'kBSKvtDVpa29J2mh5pICQD12dKO25fU3Bz-JItNAgEE', crv: 'P-256' };
@@ -176,6 +177,7 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, p
         DB_PASS: backendEnv.DB_PASS!,
         DB_DATABASE: backendEnv.DB_DATABASE!,
         DB_STATISTICS_DATABASE: backendEnv.DB_STATISTICS_DATABASE!,
+        STATISTICS_IMPORTED_UNTIL: preset.statisticsImportedUntil,
         DB_PORT: Number.parseInt(backendEnv.DB_PORT ?? String(mysqlInternalPort), 10),
         SMTP_HOST: localIpv4Host,
         SMTP_USERNAME: maildevUsername,
@@ -291,6 +293,9 @@ function environmentPreset(env: string): EnvironmentPreset {
             memberNumberAlgorithm: MemberNumberAlgorithm.Incremental,
             memberNumberAlgorithmLength: 10,
             documentation: 'docs.keeo.fos.be',
+            // External statistics cover everything up to the 2024-2025 period, which is the first
+            // one this administration has complete data for.
+            statisticsImportedUntil: '2024-09-01',
         };
     }
     if (env === 'ravot') {
