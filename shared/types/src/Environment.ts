@@ -52,6 +52,13 @@ export type BackendSpecificEnvironment = {
     readonly DB_PORT?: number;
     readonly DB_CONNECTION_LIMIT?: number;
 
+    /**
+     * The database holding the aggregated platform statistics that Metabase reports on. Lives on the
+     * same MySQL server as DB_DATABASE but is kept separate: it never contains personal data, so it
+     * can be exposed to reporting tools that must not reach the main database.
+     */
+    readonly DB_STATISTICS_DATABASE?: string;
+
     // E-mail
     readonly SMTP_HOST: string;
     readonly SMTP_USERNAME: string;

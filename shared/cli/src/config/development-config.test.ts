@@ -126,6 +126,13 @@ describe('buildDevelopmentConfig', () => {
         expect(config.databases.main).toBe(config.backendEnv.DB_DATABASE);
     });
 
+    it('passes the platform statistics database to the backend, which migrates it', () => {
+        const config = buildDevelopmentConfig(context({ env: 'ravot' }));
+
+        expect(config.backendEnv.DB_STATISTICS_DATABASE).toBe('platform-statistics-ravot');
+        expect(config.appEnv).toHaveProperty('DB_STATISTICS_DATABASE', 'platform-statistics-ravot');
+    });
+
     it('uses custom shared domains for infrastructure', () => {
         vi.stubEnv('STAMHOOFD_DOMAIN', 'example');
         const config = buildDevelopmentConfig(context());

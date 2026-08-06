@@ -10,6 +10,7 @@ process.env.TZ = 'UTC';
 // Polyfill require.resolve, since import.meta.resolve is not supported by vitest
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { QueryableModel } from '@stamhoofd/sql';
+import { runStatisticsMigrations } from '@stamhoofd/statistics/migrations';
 import { createRequire } from 'node:module';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
 const require = createRequire(import.meta.url);
@@ -68,6 +69,10 @@ const start = async () => {
         if (!await Migration.runAll(import.meta.dirname + '/migrations')) {
             throw new Error('Internal migrations failed');
         }
+
+        // Runs last: it points the shared connection at the statistics database, which keeps its own
+        // migration history, and restores it afterwards.
+        await runStatisticsMigrations();
 
         if (killSignalReceived) {
             console.error(chalk.red('Killing process due to received signal during migration'));
