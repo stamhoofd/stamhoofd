@@ -40,13 +40,14 @@ CREATE TABLE `registration_periods` (
   KEY `cutoffAt` (`cutoffAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- An organization is a legal entity, not a natural person, so its name and city are not personal
--- data. `city` is flattened out of the source `address` json: the reports break units down by city,
--- and copying the json would carry the rest of the address along for no reason.
+-- An organization is a legal entity, not a natural person, so its name and where it is are not
+-- personal data. `postalCode` and `city` are flattened out of the source `address` json: the report
+-- maps units by postal code and lists them by city. The rest of the address is left behind.
 CREATE TABLE `organizations` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `uri` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
@@ -57,6 +58,7 @@ CREATE TABLE `organizations` (
   UNIQUE KEY `uri` (`uri`) USING BTREE,
   KEY `periodId` (`periodId`),
   KEY `name` (`name`),
+  KEY `postalCode` (`postalCode`),
   KEY `city` (`city`),
   KEY `source` (`source`),
   CONSTRAINT `organizations_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -143,6 +145,12 @@ CREATE TABLE `groups` (
 -- One row per member, carrying only what the reports group by. `birthYear` replaces the source
 -- `birthDay`: age distributions need the year, and a full date of birth is personal data.
 --
+-- `postalCode` is the one field here that describes a natural person, kept because the report maps
+-- members by postal code and nothing coarser draws that map. It is the sharpest thing in this
+-- database: together with the unit and tak a registration already gives, plus a birth year and a
+-- gender, it can narrow a small tak to one person. Do not add anything finer, and keep access to
+-- this database in mind rather than only its contents.
+--
 -- Members are never deleted from here, even when their source row is gone: their row is what the
 -- facts of a settled year join to for demographics, and removing one cascades into the registrations
 -- of those years.
@@ -150,6 +158,7 @@ CREATE TABLE `members` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `birthYear` smallint DEFAULT NULL,
   `gender` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
@@ -159,6 +168,7 @@ CREATE TABLE `members` (
   KEY `organizationId` (`organizationId`),
   KEY `birthYear` (`birthYear`),
   KEY `gender` (`gender`),
+  KEY `postalCode` (`postalCode`),
   KEY `source` (`source`),
   CONSTRAINT `members_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

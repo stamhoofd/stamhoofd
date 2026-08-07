@@ -36,7 +36,7 @@ export type OrganizationSource = {
     id: string;
     name: string;
     uri: string;
-    address: { city: string };
+    address: { postalCode: string; city: string };
     periodId: string;
     active: boolean;
     createdAt: Date;
@@ -59,7 +59,7 @@ export type GroupSource = {
 
 export type MemberSource = {
     id: string;
-    details: { birthDay: Date | null; gender: string };
+    details: { birthDay: Date | null; gender: string; address: { postalCode: string } | null };
     organizationId: string | null;
     createdAt: Date;
     updatedAt: Date;
@@ -126,14 +126,15 @@ export function flattenRegistrationPeriod(period: RegistrationPeriodSource): Sta
 }
 
 /**
- * Only the city of the address survives: the reports break units down by city, and an organization is
- * a legal entity rather than a natural person.
+ * Only the postal code and city of the address survive: the report maps units by postal code and
+ * lists them by city. An organization is a legal entity rather than a natural person.
  */
 export function flattenOrganization(organization: OrganizationSource): StatisticsRow {
     return {
         id: organization.id,
         name: organization.name,
         uri: organization.uri,
+        postalCode: emptyToNull(organization.address.postalCode),
         city: emptyToNull(organization.address.city),
         periodId: organization.periodId,
         active: organization.active,
@@ -161,12 +162,16 @@ export function flattenGroup(group: GroupSource): StatisticsRow {
 /**
  * The date of birth is reduced to its year here, which is the whole point of the separate database:
  * age distributions stay possible and the birth date never leaves the main one.
+ *
+ * The postal code is the exception: the report maps members by it, and nothing coarser draws that
+ * map. The rest of the address stays behind.
  */
 export function flattenMember(member: MemberSource): StatisticsRow {
     return {
         id: member.id,
         birthYear: member.details.birthDay ? member.details.birthDay.getFullYear() : null,
         gender: member.details.gender,
+        postalCode: member.details.address ? emptyToNull(member.details.address.postalCode) : null,
         organizationId: member.organizationId,
         createdAt: member.createdAt,
         updatedAt: member.updatedAt,

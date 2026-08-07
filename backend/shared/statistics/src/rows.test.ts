@@ -4,7 +4,7 @@ import { flattenGroup, flattenMember, flattenOrganization, flattenRegistration }
 describe('flattenMember', () => {
     const member = {
         id: 'member-1',
-        details: { birthDay: new Date(2011, 4, 17), gender: 'Female' },
+        details: { birthDay: new Date(2011, 4, 17), gender: 'Female', address: { postalCode: '9000' } },
         organizationId: 'org-1',
         createdAt: new Date(2025, 0, 1),
         updatedAt: new Date(2026, 0, 1),
@@ -18,13 +18,25 @@ describe('flattenMember', () => {
     it('never carries a name, a contact detail or a date of birth', () => {
         const row = flattenMember({ ...member, details: { ...member.details, firstName: 'Jan', lastName: 'Jansen', email: 'jan@example.com' } as any });
 
-        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain('Jan');
         expect(JSON.stringify(row)).not.toContain('example.com');
     });
 
     it('keeps a member without a birth date', () => {
-        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other' } }).birthYear).toBeNull();
+        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other', address: null } }).birthYear).toBeNull();
+    });
+
+    it('keeps the postal code the member map needs, and nothing else of the address', () => {
+        const row = flattenMember({ ...member, details: { ...member.details, address: { postalCode: '9000', street: 'Somewhere', city: 'Gent' } as any } });
+
+        expect(row.postalCode).toBe('9000');
+        expect(JSON.stringify(row)).not.toContain('Somewhere');
+        expect(JSON.stringify(row)).not.toContain('Gent');
+    });
+
+    it('has no postal code for a member without an address', () => {
+        expect(flattenMember({ ...member, details: { ...member.details, address: null } }).postalCode).toBeNull();
     });
 });
 
@@ -33,24 +45,24 @@ describe('flattenOrganization', () => {
         id: 'org-1',
         name: 'Scouts Test',
         uri: 'scouts-test',
-        address: { city: 'Gent', street: 'Somewhere', postalCode: '9000' } as any,
+        address: { postalCode: '9000', city: 'Gent', street: 'Somewhere' } as any,
         periodId: 'period-1',
         active: true,
         createdAt: new Date(2025, 0, 1),
         updatedAt: new Date(2026, 0, 1),
     };
 
-    it('keeps only the city of the address', () => {
+    it('keeps the postal code the map needs and the city the ULDK table lists, and no more', () => {
         const row = flattenOrganization(organization);
 
+        expect(row.postalCode).toBe('9000');
         expect(row.city).toBe('Gent');
         expect(Object.keys(row)).not.toContain('address');
         expect(JSON.stringify(row)).not.toContain('Somewhere');
-        expect(JSON.stringify(row)).not.toContain('9000');
     });
 
-    it('stores a missing city as null rather than an empty string', () => {
-        expect(flattenOrganization({ ...organization, address: { city: '' } }).city).toBeNull();
+    it('stores a missing postal code as null rather than an empty string', () => {
+        expect(flattenOrganization({ ...organization, address: { postalCode: '', city: '' } }).postalCode).toBeNull();
     });
 });
 

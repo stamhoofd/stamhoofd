@@ -35,7 +35,7 @@ describe('statistics sync', () => {
 
         expect(row).toBeDefined();
         expect(row.birthYear).toBe(2011);
-        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'source', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'source', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain(member.details.firstName);
     });
 
@@ -47,12 +47,14 @@ describe('statistics sync', () => {
         expect(row.groupId).toBe(registration.groupId);
     });
 
-    it('copies the organization with only its city', async () => {
+    it('copies the organization with only its postal code', async () => {
         const [row] = await statisticsRows('organizations', organization.id);
 
         expect(row).toBeDefined();
         expect(row.name).toBe(organization.name);
+        expect(row.postalCode).toBe(organization.address.postalCode);
         expect(row.city).toBe(organization.address.city);
+        expect(JSON.stringify(row)).not.toContain(organization.address.street);
     });
 
     it('records a watermark it can resume from', async () => {

@@ -41,6 +41,19 @@ describe('getStatisticsDatabase', () => {
     });
 });
 
+/**
+ * Deliberate exceptions to the list above, as `table.column`.
+ *
+ * An organization is a legal entity, so where it is located is not personal data. A member's postal
+ * code is, and is here only because the report maps members by it and nothing coarser draws that
+ * map. Both are listed per table rather than removed from the list, so adding a postal code to a
+ * third table still fails.
+ */
+const allowedPersonalDataColumns = new Set([
+    'organizations.postalCode',
+    'members.postalCode',
+]);
+
 describe('migration.platform-statistics-schema', () => {
     async function getColumns(): Promise<{ tableName: string; columnName: string; dataType: string }[]> {
         const [rows] = await Database.select(
@@ -94,6 +107,9 @@ describe('migration.platform-statistics-schema', () => {
         expect(typeOf('registrations', 'cycle')).toBe('int');
         expect(typeOf('registrations', 'registeredAt')).toBe('datetime');
         expect(typeOf('organizations', 'name')).toBe('varchar(100)');
+        expect(typeOf('organizations', 'postalCode')).toBe('varchar(36)');
+        expect(typeOf('organizations', 'city')).toBe('varchar(100)');
+        expect(typeOf('members', 'postalCode')).toBe('varchar(36)');
         expect(typeOf('registration_periods', 'cutoffAt')).toBe('datetime');
         // Both replaced by the per-period cutoff: a settled year is protected by freezing it, not by
         // a validity window on every row.
@@ -105,6 +121,9 @@ describe('migration.platform-statistics-schema', () => {
 
     it('holds no personally identifiable information in any table', async () => {
         const offending = (await getColumns()).filter((column) => {
+            if (allowedPersonalDataColumns.has(`${column.tableName}.${column.columnName}`)) {
+                return false;
+            }
             const name = column.columnName.toLowerCase();
             return personalDataColumns.some(forbidden => name.includes(forbidden));
         });

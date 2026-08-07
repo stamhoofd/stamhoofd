@@ -113,7 +113,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
         },
         {
             table: 'organizations',
-            columns: ['id', 'name', 'uri', 'city', 'periodId', 'active', 'createdAt', 'updatedAt'],
+            columns: ['id', 'name', 'uri', 'postalCode', 'city', 'periodId', 'active', 'createdAt', 'updatedAt'],
             fetch: async (since, afterId, limit) => {
                 const organizations = await incrementalQuery(Organization, since, afterId, limit).fetch() as Organization[];
                 await syncOrganizationTagsAndResponsibilities(organizations, frozen);
@@ -141,7 +141,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
         },
         {
             table: 'members',
-            columns: ['id', 'birthYear', 'gender', 'organizationId', 'createdAt', 'updatedAt', 'lastRegisteredAt'],
+            columns: ['id', 'birthYear', 'gender', 'postalCode', 'organizationId', 'createdAt', 'updatedAt', 'lastRegisteredAt'],
             fetch: async (since, afterId, limit) => {
                 const members = await incrementalQuery(Member, since, afterId, limit).fetch() as Member[];
                 return { rows: members.map(flattenMember), updatedAt: members.map(member => member.updatedAt), lastId: members.at(-1)?.id ?? afterId };
