@@ -6,7 +6,7 @@ import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import { MetabaseApi, MetabaseApiError } from '../metabase-api.js';
-import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName, metabaseHiddenTables } from '../metabase-config.js';
+import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName, metabaseHiddenTables, metabaseReportCollectionName } from '../metabase-config.js';
 import type { ReportSyncResult } from '../metabase-report.js';
 import { syncReport } from '../metabase-report.js';
 import { loadReportDefinition } from '../report-definition.js';
@@ -61,12 +61,12 @@ export class MetabaseService extends SharedDockerService {
     /**
      * Recreate the ledenstatistieken dashboards on top of the statistics data source.
      */
-    async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; tableCount: number }> {
-        const { api, id, database } = await this.connectDataSource(context);
+    async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number }> {
+        const { api, id, database, dataSource } = await this.connectDataSource(context);
         const dashboards = await loadReportDefinition(context);
 
-        const result = await syncReport(api, id, dashboards);
-        return { ...result, database, tableCount: await this.countTables(context, database) };
+        const result = await syncReport(api, id, dashboards, metabaseReportCollectionName(context.env));
+        return { ...result, database, dataSource, tableCount: await this.countTables(context, database) };
     }
 
     /**

@@ -34,9 +34,6 @@ export type ReportDashboard = {
     cards: ReportCard[];
 };
 
-/** The collection every dashboard and question of the report is written to. */
-export const reportCollectionName = 'Ledenstatistieken';
-
 /**
  * The filters shown above the dashboards. `valuesFrom` names the card in the hidden `filters`
  * dashboard that fills the dropdown, and `column` the column to read the values from.
@@ -206,6 +203,7 @@ export function buildDashcards(dashboard: ReportDashboard, cardIds: Map<string, 
 }
 
 export type ReportSyncResult = {
+    collection: string;
     collectionId: number;
     createdCollection: boolean;
     cards: number;
@@ -215,9 +213,12 @@ export type ReportSyncResult = {
 /**
  * Write the whole report to Metabase. Cards first, because a dashboard can only point at cards that
  * exist, and the filter dropdowns point at cards too.
+ *
+ * Every question is tied to `databaseId`, so the collection has to belong to one environment: see
+ * `metabaseReportCollectionName`.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, dashboards: ReportDashboard[]): Promise<ReportSyncResult> {
-    const { id: collectionId, created: createdCollection } = await api.ensureCollection(reportCollectionName);
+export async function syncReport(api: MetabaseApi, databaseId: number, dashboards: ReportDashboard[], collection: string): Promise<ReportSyncResult> {
+    const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
     const existingCards = new Map((await api.listCards(collectionId)).map(card => [card.name, card.id]));
     const cardIds = new Map<string, number>();
@@ -259,5 +260,5 @@ export async function syncReport(api: MetabaseApi, databaseId: number, dashboard
         written.push(dashboard.title);
     }
 
-    return { collectionId, createdCollection, cards: cardIds.size, dashboards: written };
+    return { collection, collectionId, createdCollection, cards: cardIds.size, dashboards: written };
 }

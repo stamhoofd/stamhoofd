@@ -32,6 +32,17 @@ export function metabaseDataSourceName(env: string): string {
 }
 
 /**
+ * The collection the ledenstatistieken dashboards of an environment live in.
+ *
+ * Scoped per environment for the same reason the data source is: one Metabase serves them all, and a
+ * question can only read from one database. A shared collection would mean the last environment
+ * pushed silently repoints every dashboard of the others.
+ */
+export function metabaseReportCollectionName(env: string): string {
+    return `Ledenstatistieken (${env})`;
+}
+
+/**
  * Tables of the statistics database that are infrastructure rather than data. They are hidden in
  * Metabase so they stay out of the query builder and the data reference.
  */

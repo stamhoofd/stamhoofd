@@ -17,7 +17,7 @@ export default class MetabaseReport extends BaseCommand {
         const { flags } = await this.parse(MetabaseReport);
         const context = await this.createContext(flags);
 
-        const result = await step('Writing the report to Metabase', async () => await metabaseService.provisionReport(context), {
+        const result = await step(`Writing the ${context.env} report to Metabase`, async () => await metabaseService.provisionReport(context), {
             successMessage: result => `${result.cards} questions in ${result.dashboards.length} dashboards`,
         });
 
@@ -26,8 +26,10 @@ export default class MetabaseReport extends BaseCommand {
         }
 
         this.log('');
-        this.log(`Dashboards: ${result.dashboards.join(', ')}`);
+        this.log(`Environment: ${context.env}`);
+        this.log(`Data source: ${result.dataSource} (${result.database})`);
+        this.log(`Dashboards:  ${result.dashboards.join(', ')}`);
         const url = `https://${buildDomains(context).metabase}/collection/${result.collectionId}`;
-        this.log(`Collection: ${link(url, url)}`);
+        this.log(`Collection:  ${result.collection} — ${link(url, url)}`);
     }
 }
