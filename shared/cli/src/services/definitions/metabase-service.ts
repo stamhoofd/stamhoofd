@@ -7,6 +7,9 @@ import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import { MetabaseApi, MetabaseApiError } from '../metabase-api.js';
 import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName, metabaseHiddenTables } from '../metabase-config.js';
+import type { ReportSyncResult } from '../metabase-report.js';
+import { syncReport } from '../metabase-report.js';
+import { loadReportDefinition } from '../report-definition.js';
 
 export class MetabaseService extends SharedDockerService {
     static readonly container = metabaseContainer;
@@ -45,6 +48,32 @@ export class MetabaseService extends SharedDockerService {
      * adds the second data source to the same Metabase.
      */
     async provision(context: CliContext): Promise<{ database: string; dataSource: string; created: boolean; removedSampleDatabase: boolean; hiddenTables: string[]; tableCount: number }> {
+        const { api, id, created, database, dataSource } = await this.connectDataSource(context);
+
+        await api.syncDatabaseSchema(id);
+        const { removed: removedSampleDatabase } = await api.removeSampleDatabase();
+        const tableCount = await this.countTables(context, database);
+        const hiddenTables = tableCount === 0 ? [] : await api.hideTables(id, metabaseHiddenTables);
+
+        return { database, dataSource, created, removedSampleDatabase, hiddenTables, tableCount };
+    }
+
+    /**
+     * Recreate the ledenstatistieken dashboards on top of the statistics data source.
+     */
+    async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; tableCount: number }> {
+        const { api, id, database } = await this.connectDataSource(context);
+        const dashboards = await loadReportDefinition(context);
+
+        const result = await syncReport(api, id, dashboards);
+        return { ...result, database, tableCount: await this.countTables(context, database) };
+    }
+
+    /**
+     * Sign in and make sure the statistics database of the selected environment is registered. Also
+     * creates the MySQL database: Metabase refuses a connection to a database that does not exist.
+     */
+    private async connectDataSource(context: CliContext): Promise<{ api: MetabaseApi; id: number; created: boolean; database: string; dataSource: string }> {
         await this.assertMysqlRunning();
 
         const database = buildDatabases(context).platformStatistics;
@@ -70,12 +99,8 @@ export class MetabaseService extends SharedDockerService {
             user: mysqlRootUser,
             password: mysqlRootPassword,
         });
-        await api.syncDatabaseSchema(id);
-        const { removed: removedSampleDatabase } = await api.removeSampleDatabase();
-        const tableCount = await this.countTables(context, database);
-        const hiddenTables = tableCount === 0 ? [] : await api.hideTables(id, metabaseHiddenTables);
 
-        return { database, dataSource, created, removedSampleDatabase, hiddenTables, tableCount };
+        return { api, id, created, database, dataSource };
     }
 
     async afterRun(context: CliContext): Promise<void> {

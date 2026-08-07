@@ -103,7 +103,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
     return [
         {
             table: 'registration_periods',
-            columns: ['id', 'startDate', 'endDate', 'locked', 'organizationId', 'previousPeriodId', 'nextPeriodId', 'customName', 'createdAt', 'updatedAt'],
+            columns: ['id', 'startDate', 'endDate', 'locked', 'organizationId', 'previousPeriodId', 'nextPeriodId', 'customName', 'name', 'createdAt', 'updatedAt'],
             fetch: async (since, afterId, limit) => {
                 const periods = await incrementalQuery(RegistrationPeriod, since, afterId, limit).fetch() as RegistrationPeriod[];
                 return { rows: periods.map(flattenRegistrationPeriod), updatedAt: periods.map(period => period.updatedAt), lastId: periods.at(-1)?.id ?? afterId };
@@ -182,6 +182,8 @@ async function syncPlatformConfig(): Promise<void> {
     const config = platform.config;
 
     await upsertRows('organization_tags', ['id', 'name'], config.tags.map(flattenNamedConfig));
+    // `category` is left out on purpose: the platform configuration has no equivalent, and listing it
+    // here would overwrite whatever was set for the takken on every run.
     await upsertRows('default_age_groups', ['id', 'name', 'minAge', 'maxAge'], config.defaultAgeGroups.map(group => flattenDefaultAgeGroup({ id: group.id, name: group.name, minAge: group.minAge, maxAge: group.maxAge })));
     await upsertRows('platform_membership_types', ['id', 'name'], config.membershipTypes.map(flattenNamedConfig));
     await upsertRows('responsibilities', ['id', 'name'], config.responsibilities.map(flattenNamedConfig));

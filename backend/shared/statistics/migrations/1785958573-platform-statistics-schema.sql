@@ -32,6 +32,7 @@ CREATE TABLE `registration_periods` (
   `previousPeriodId` varchar(36) DEFAULT NULL,
   `nextPeriodId` varchar(36) DEFAULT NULL,
   `customName` varchar(200) DEFAULT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT 'The label the reports show for this period, e.g. "2024 - 2025". Derived from customName or the dates, because a Metabase filter can only offer the values of a real column.',
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
@@ -40,6 +41,7 @@ CREATE TABLE `registration_periods` (
   KEY `organizationId` (`organizationId`),
   KEY `previousPeriodId` (`previousPeriodId`),
   KEY `startDate` (`startDate`),
+  KEY `name` (`name`),
   KEY `source` (`source`),
   KEY `cutoffAt` (`cutoffAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -97,13 +99,22 @@ CREATE TABLE `_organizations_organization_tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- The takken every organization's groups map onto.
+--
+-- `category` is what splits the reports into kinderen, leiding and volwassenen. It is a property of
+-- the tak rather than of a member, and it cannot be derived from the ages: leiding and stam both
+-- carry no age range at all. The sync deliberately does not write this column — Stamhoofd's platform
+-- configuration has no equivalent field, so a synced platform starts out with it empty and the report
+-- falls back to the age range, which can only recognise children. Set it once per tak for a synced
+-- platform; an import that knows its own takken fills it in directly.
 CREATE TABLE `default_age_groups` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `minAge` int DEFAULT NULL,
   `maxAge` int DEFAULT NULL,
+  `category` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'child, leader or adult. Null means unknown, which the reports count separately rather than guessing at.',
   PRIMARY KEY (`id`),
-  KEY `minAge` (`minAge`)
+  KEY `minAge` (`minAge`),
+  KEY `category` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `platform_membership_types` (

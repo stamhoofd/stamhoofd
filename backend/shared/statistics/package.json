@@ -12,7 +12,8 @@
     },
     "files": [
         "dist",
-        "migrations"
+        "migrations",
+        "report"
     ],
     "scripts": {
         "build": "tsc --build tsconfig.build.json",

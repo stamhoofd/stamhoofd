@@ -28,6 +28,33 @@ export type MetabaseTable = {
     visibility_type: string | null;
 };
 
+export type MetabaseCollection = {
+    id: number;
+    name: string;
+    archived?: boolean;
+};
+
+export type MetabaseCardInput = {
+    name: string;
+    description?: string;
+    display: string;
+    databaseId: number;
+    query: string;
+    templateTags: Record<string, unknown>;
+    visualizationSettings: Record<string, unknown>;
+    collectionId: number;
+};
+
+export type MetabaseCard = {
+    id: number;
+    name: string;
+};
+
+export type MetabaseDashboard = {
+    id: number;
+    name: string;
+};
+
 export class MetabaseApiError extends Error {
     constructor(message: string, readonly status: number) {
         super(message);
@@ -180,6 +207,78 @@ export class MetabaseApi {
 
         await this.request('DELETE', `/api/database/${sample.id}`);
         return { removed: true };
+    }
+
+    /**
+     * The collection the report lives in, created if it is not there yet. Everything the CLI writes
+     * goes in one collection so it stays apart from whatever the client builds themselves.
+     */
+    async ensureCollection(name: string): Promise<{ id: number; created: boolean }> {
+        const collections = await this.request<MetabaseCollection[]>('GET', '/api/collection');
+        const match = collections.find(collection => collection.name === name && collection.archived !== true);
+        if (match) {
+            return { id: match.id, created: false };
+        }
+
+        const created = await this.request<{ id: number }>('POST', '/api/collection', { name, parent_id: null });
+        return { id: created.id, created: true };
+    }
+
+    async listCards(collectionId: number): Promise<MetabaseCard[]> {
+        const items = await this.request<{ data?: { id: number; name: string; model: string }[] }>('GET', `/api/collection/${collectionId}/items?models=card`);
+        return (items.data ?? []).map(item => ({ id: item.id, name: item.name }));
+    }
+
+    async listDashboards(collectionId: number): Promise<MetabaseDashboard[]> {
+        const items = await this.request<{ data?: { id: number; name: string; model: string }[] }>('GET', `/api/collection/${collectionId}/items?models=dashboard`);
+        return (items.data ?? []).map(item => ({ id: item.id, name: item.name }));
+    }
+
+    /**
+     * Write a native question. Updating an existing card rather than replacing it keeps its id, and
+     * with it every dashboard that points at it and every link the client saved.
+     */
+    async saveCard(input: MetabaseCardInput, existingId?: number): Promise<number> {
+        const body = {
+            name: input.name,
+            description: input.description ?? null,
+            display: input.display,
+            visualization_settings: input.visualizationSettings,
+            collection_id: input.collectionId,
+            dataset_query: {
+                type: 'native',
+                database: input.databaseId,
+                native: { query: input.query, 'template-tags': input.templateTags },
+            },
+        };
+
+        if (existingId !== undefined) {
+            await this.request('PUT', `/api/card/${existingId}`, body);
+            return existingId;
+        }
+        return (await this.request<{ id: number }>('POST', '/api/card', body)).id;
+    }
+
+    async createDashboard(name: string, description: string | undefined, collectionId: number): Promise<number> {
+        const created = await this.request<{ id: number }>('POST', '/api/dashboard', {
+            name,
+            description: description ?? null,
+            collection_id: collectionId,
+        });
+        return created.id;
+    }
+
+    /**
+     * Lay out a dashboard: its filters and which card sits where. Metabase replaces the whole set of
+     * cards with what is sent, so this is also what removes a card that the report no longer has.
+     */
+    async updateDashboard(id: number, body: { name: string; description?: string; parameters: unknown[]; dashcards: unknown[] }): Promise<void> {
+        await this.request('PUT', `/api/dashboard/${id}`, {
+            name: body.name,
+            description: body.description ?? null,
+            parameters: body.parameters,
+            dashcards: body.dashcards,
+        });
     }
 
     private async request<T>(method: string, path: string, body?: unknown): Promise<T> {

@@ -112,6 +112,25 @@ export type ResponsibilityRecordSource = {
 
 export type NamedConfigSource = { id: string; name: string };
 
+/**
+ * The label the reports show for a period, mirroring `RegistrationPeriodBase.nameShort`: the custom
+ * name when there is one, otherwise the years it spans.
+ *
+ * Reimplemented here rather than read off the model because the model's getter runs `$t`, which needs
+ * a request to take a language from and throws in the sync. The years are resolved in the application
+ * timezone, so a period starting at midnight in Brussels does not fall back into the previous year.
+ */
+export function periodName(period: { customName: string | null; startDate: Date; endDate: Date }): string {
+    const customName = period.customName?.trim();
+    if (customName) {
+        return customName;
+    }
+
+    const startYear = Formatter.year(period.startDate);
+    const endYear = Formatter.year(period.endDate);
+    return startYear === endYear ? `${startYear}` : `${startYear} - ${endYear}`;
+}
+
 export function flattenRegistrationPeriod(period: RegistrationPeriodSource): StatisticsRow {
     return {
         id: period.id,
@@ -122,6 +141,7 @@ export function flattenRegistrationPeriod(period: RegistrationPeriodSource): Sta
         previousPeriodId: period.previousPeriodId,
         nextPeriodId: period.nextPeriodId,
         customName: period.customName,
+        name: periodName(period),
         createdAt: period.createdAt,
         updatedAt: period.updatedAt,
     };

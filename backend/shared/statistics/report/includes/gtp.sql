@@ -1,0 +1,17 @@
+-- The GTP index (Gezond Toekomst Perspectief).
+--
+-- !! The real formula is not known. !!
+--
+-- The client's report describes it only as weighing potential future leiding (verkenners/gidsen and
+-- seniors) heavily, on a scale where 100 or more is healthy and which only says something for units
+-- up to roughly 150 members. The one worked example available — 9e Wandelaar in 2023-2024, with 48
+-- kinderen, 13 leiding, 6 volwassenen and 10 verkenners/gidsen — scores 42.28, which none of the
+-- obvious readings of that description reproduce.
+--
+-- What follows is a stand-in that has the right shape and the right inputs, not the client's number.
+-- Replace this one expression once they supply the formula: every card that shows a GTP index reads
+-- it from here, so there is nothing else to change.
+--
+-- Reads from a `gtp_basis` CTE aliased `gb`, which supplies per unit: kinderen, leiding, volwassenen
+-- and toekomstige_leiding (the verkenners/gidsen and seniors who could take up leiding next).
+ROUND(100 * gb.toekomstige_leiding / NULLIF(gb.leiding, 0), 2)
