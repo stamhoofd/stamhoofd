@@ -309,12 +309,18 @@ ORDER BY MIN(period_start)
 -- display: table
 -- size: half
 -- @include facts-alle-jaren
+-- @include leden-per-jaar
 -- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
 -- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, jaren AS (
+, alle_jaren AS (
     SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
     FROM registration_periods
     GROUP BY name
+)
+-- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
+-- nog niets voorbij de overnamedatum gesynchroniseerd is.
+, jaren AS (
+    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
 )
 SELECT
     j.name AS `Scoutsjaar`,
@@ -324,10 +330,9 @@ SELECT
     ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
 JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
-LEFT JOIN facts volgend
+LEFT JOIN leden_per_jaar volgend
     ON volgend.`Scoutsjaar` = j.volgend
     AND volgend.member_id = huidig.member_id
-    AND volgend.organization_id = huidig.organization_id
 WHERE j.volgend IS NOT NULL
 GROUP BY j.name, j.startDate
 ORDER BY j.startDate
@@ -337,12 +342,18 @@ ORDER BY j.startDate
 -- display: table
 -- size: half
 -- @include facts-alle-jaren
+-- @include leden-per-jaar
 -- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
 -- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, jaren AS (
+, alle_jaren AS (
     SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
     FROM registration_periods
     GROUP BY name
+)
+-- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
+-- nog niets voorbij de overnamedatum gesynchroniseerd is.
+, jaren AS (
+    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
 )
 , gekozen AS (
     SELECT name, volgend FROM jaren
@@ -358,10 +369,9 @@ SELECT
     ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM gekozen g
 JOIN facts huidig ON huidig.`Scoutsjaar` = g.name
-LEFT JOIN facts volgend
+LEFT JOIN leden_per_jaar volgend
     ON volgend.`Scoutsjaar` = g.volgend
     AND volgend.member_id = huidig.member_id
-    AND volgend.organization_id = huidig.organization_id
 GROUP BY huidig.`Tak`
 ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
 
@@ -372,22 +382,27 @@ ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
 -- dimensions: Scoutsjaar
 -- metrics: Percentage blijvers
 -- @include facts-alle-jaren
+-- @include leden-per-jaar
 -- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
 -- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, jaren AS (
+, alle_jaren AS (
     SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
     FROM registration_periods
     GROUP BY name
+)
+-- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
+-- nog niets voorbij de overnamedatum gesynchroniseerd is.
+, jaren AS (
+    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
 )
 SELECT
     j.name AS `Scoutsjaar`,
     ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
 JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
-LEFT JOIN facts volgend
+LEFT JOIN leden_per_jaar volgend
     ON volgend.`Scoutsjaar` = j.volgend
     AND volgend.member_id = huidig.member_id
-    AND volgend.organization_id = huidig.organization_id
 WHERE j.volgend IS NOT NULL
 GROUP BY j.name, j.startDate
 ORDER BY j.startDate
@@ -399,12 +414,18 @@ ORDER BY j.startDate
 -- dimensions: Scoutsjaar, Tak
 -- metrics: Percentage blijvers
 -- @include facts-alle-jaren
+-- @include leden-per-jaar
 -- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
 -- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, jaren AS (
+, alle_jaren AS (
     SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
     FROM registration_periods
     GROUP BY name
+)
+-- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
+-- nog niets voorbij de overnamedatum gesynchroniseerd is.
+, jaren AS (
+    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
 )
 SELECT
     j.name AS `Scoutsjaar`,
@@ -412,10 +433,9 @@ SELECT
     ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
 JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
-LEFT JOIN facts volgend
+LEFT JOIN leden_per_jaar volgend
     ON volgend.`Scoutsjaar` = j.volgend
     AND volgend.member_id = huidig.member_id
-    AND volgend.organization_id = huidig.organization_id
 WHERE j.volgend IS NOT NULL
 GROUP BY j.name, j.startDate, huidig.`Tak`
 ORDER BY j.startDate, huidig.`Tak`

@@ -104,6 +104,16 @@ describe('buildParameters', () => {
         expect(parameters[0].values_source_type).toEqual('card');
         expect(parameters[0].values_source_config).toEqual({ card_id: 42, value_field: ['field', 'Scoutsjaar', { 'base-type': 'type/Text' }] });
     });
+
+    /**
+     * The values source alone still leaves a text box; this is the setting that makes the widget a
+     * dropdown, so nobody has to type a scoutsjaar by hand.
+     */
+    it('asks for a dropdown rather than an input box', () => {
+        const parameters = buildParameters(dashboard({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] }), new Map([['scoutsjaar', 42], ['eenheid', 43]]));
+
+        expect(parameters.map(parameter => parameter.values_query_type)).toEqual(['list', 'list']);
+    });
 });
 
 describe('buildDashcards', () => {

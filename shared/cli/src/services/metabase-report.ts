@@ -165,6 +165,9 @@ export function buildParameters(dashboard: ReportDashboard, filterCardIds: Map<s
                 slug: filter.name,
                 type: 'string/=',
                 sectionId: 'string',
+                // Without this the widget is a plain text box, however well the values source is
+                // configured: it is what picks the dropdown over an input box.
+                values_query_type: 'list',
                 ...(cardId === undefined
                     ? {}
                     : {

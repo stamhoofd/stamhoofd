@@ -3,12 +3,13 @@ import type { ReportCard, ReportDashboard } from './report.js';
 import { loadReport, parameterNames, parseDashboard, resolveSql } from './report.js';
 
 /**
- * The years this test works in. Far enough in the past that no other test's periods fall between
- * them: the retention figures read the next scoutsjaar off the periods ordered by date, and this
- * package's suites share one database.
+ * The years this test works in. Deliberately later than any other suite's periods, and adjacent to
+ * each other: the retention figures read the next scoutsjaar off all periods ordered by date, and
+ * this package's suites share one database that is never emptied between runs. Sitting last also
+ * means the second year has no successor, which is the case the guard has to recognise.
  */
-const firstYear = 'Testjaar 1990 - 1991';
-const secondYear = 'Testjaar 1991 - 1992';
+const firstYear = 'Testjaar 2090 - 2091';
+const secondYear = 'Testjaar 2091 - 2092';
 const unit = '1e Rapporttest';
 
 async function run(card: ReportCard, values: Record<string, string | null> = {}): Promise<Record<string, any>[]> {
@@ -65,8 +66,8 @@ async function clean(): Promise<void> {
 async function seed(): Promise<void> {
     const now = new Date();
     await insert('registration_periods', [
-        { id: 'rt-p1', startDate: new Date(Date.UTC(1990, 8, 1)), endDate: new Date(Date.UTC(1991, 7, 31)), name: firstYear, customName: firstYear, createdAt: now, updatedAt: now },
-        { id: 'rt-p2', startDate: new Date(Date.UTC(1991, 8, 1)), endDate: new Date(Date.UTC(1992, 7, 31)), name: secondYear, customName: secondYear, createdAt: now, updatedAt: now },
+        { id: 'rt-p1', startDate: new Date(Date.UTC(2090, 8, 1)), endDate: new Date(Date.UTC(2091, 7, 31)), name: firstYear, customName: firstYear, createdAt: now, updatedAt: now },
+        { id: 'rt-p2', startDate: new Date(Date.UTC(2091, 8, 1)), endDate: new Date(Date.UTC(2092, 7, 31)), name: secondYear, customName: secondYear, createdAt: now, updatedAt: now },
     ]);
 
     await insert('default_age_groups', [
@@ -126,16 +127,18 @@ async function seed(): Promise<void> {
         { id: 'rt-r7', memberId: 'rt-m1', groupId: 'rt-g-a-bevers-p2', organizationId: 'rt-org-a', periodId: 'rt-p2' },
         { id: 'rt-r8', memberId: 'rt-m2', groupId: 'rt-g-a-bevers-p2', organizationId: 'rt-org-a', periodId: 'rt-p2' },
         { id: 'rt-r9', memberId: 'rt-m3', groupId: 'rt-g-a-verk-p2', organizationId: 'rt-org-a', periodId: 'rt-p2' },
+        // The unit-B bever moves to unit A: still a blijver, which is how the client counts it.
+        { id: 'rt-r10', memberId: 'rt-m6', groupId: 'rt-g-a-bevers-p2', organizationId: 'rt-org-a', periodId: 'rt-p2' },
     ];
     await insert('registrations', registrations.map(registration => ({
-        ...registration, registeredAt: new Date(Date.UTC(1990, 8, 15)), startDate: null, endDate: null,
+        ...registration, registeredAt: new Date(Date.UTC(2090, 8, 15)), startDate: null, endDate: null,
         trialUntil: null, deactivatedAt: null, waitingList: 0, cycle: 0, createdAt: now, updatedAt: now,
     })));
 
     await insert('platform_membership_types', [{ id: 'rt-mt-normal', name: 'Normal' }]);
     await insert('member_platform_memberships', members.slice(0, 5).map((member, index) => ({
         id: `rt-mpm-${index}`, memberId: member.id, membershipTypeId: 'rt-mt-normal', organizationId: 'rt-org-a',
-        periodId: 'rt-p1', startDate: new Date(Date.UTC(1990, 8, 1)), endDate: new Date(Date.UTC(1991, 7, 31)),
+        periodId: 'rt-p1', startDate: new Date(Date.UTC(2090, 8, 1)), endDate: new Date(Date.UTC(2091, 7, 31)),
         expireDate: null, trialUntil: null, deletedAt: null, createdAt: now, updatedAt: now,
     })));
 }
@@ -287,6 +290,28 @@ describe('report', () => {
             expect(Number(row!['Percentage blijvers'])).toEqual(60);
         });
 
+        /**
+         * The client's own figures for 9e Wandelaar only line up this way: counting only the members
+         * who stay at the same unit gives 37, 51 and 45 blijvers where their report says 38, 54, 46.
+         */
+        it('still counts a member who moves to another unit as a blijver', async () => {
+            const rows = await run(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid'), { scoutsjaar: firstYear });
+            const other = rows.find(row => row['Eenheid'] === '2e Rapporttest');
+
+            // Its one member turns up at the other unit the year after, so none were lost.
+            expect(Number(other!['Percentage blijvers'])).toEqual(100);
+        });
+
+        /**
+         * The last imported year has no year after it until the sync fills one in. Reporting 0%
+         * there would read as every member leaving.
+         */
+        it('leaves out a year whose successor has no members at all', async () => {
+            const rows = await run(cardOf(dashboards, 'eenheden', 'eenheid-ledenbehoud'), { eenheid: unit });
+
+            expect(rows.map(row => row['Scoutsjaar'])).toEqual([firstYear]);
+        });
+
         it('splits a unit by geslacht for the varia table', async () => {
             const rows = await run(cardOf(dashboards, 'varia', 'uldk'), { scoutsjaar: firstYear });
             const row = rows.find(row => row['Name'] === unit);
@@ -316,8 +341,9 @@ describe('report', () => {
             const rows = await run(cardOf(dashboards, 'nationaal', 'leden-per-tak-vergelijking'), { scoutsjaar: secondYear });
             const bevers = rows.find(row => row['Tak'] === 'Bevers');
 
-            expect(bevers!['Aantal leden dit jaar']).toEqual(2);
-            // The third unit-A bever of the first year was a verkenner, and unit B had one bever.
+            // Both unit-A bevers stay, and the unit-B bever joins them.
+            expect(bevers!['Aantal leden dit jaar']).toEqual(3);
+            // The year before: two at unit A and one at unit B.
             expect(bevers!['Aantal leden vorig jaar']).toEqual(3);
         });
     });
