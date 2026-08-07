@@ -1,6 +1,14 @@
 import { TestUtils } from '@stamhoofd/test-utils';
 import path from 'path';
 
+// Dates are stored and compared in UTC everywhere else in the repo; a date column read back in
+// another zone lands a day off.
+process.env.TZ = 'UTC';
+
+if (new Date().getTimezoneOffset() !== 0) {
+    throw new Error('Process should always run in UTC timezone');
+}
+
 const modelsPath = require.resolve('@stamhoofd/models');
 
 export async function setup() {

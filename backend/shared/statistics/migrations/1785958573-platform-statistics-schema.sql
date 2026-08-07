@@ -2,11 +2,15 @@
 -- reports on. Rows are kept at their source grain and every figure is aggregated at query time, so
 -- the tables mirror the main database: same table names, same column names, same column types.
 --
--- What is left out is everything that identifies a natural person. `members` carries no name, no
--- contact details and no date of birth, only the birth year; every json column of the source is
--- dropped, since `details` and `recordAnswers` hold exactly the personal data this database must not
--- contain. Keep that property when adding tables here: the point of a separate database is that it
--- can be handed to a reporting tool that must never reach the main one.
+-- What is left out is everything that identifies a natural person by name or lets you contact them:
+-- `members` carries no name, no email address and no phone number, and every json column of the
+-- source is dropped, since `details` and `recordAnswers` hold exactly that. Keep that property when
+-- adding tables here.
+--
+-- Two fields on `members` are deliberate exceptions, both because a report needs them and nothing
+-- coarser will do: the date of birth and the postal code. Together with the unit and tak a
+-- registration already gives, and a gender, they are enough to single out a person. This database is
+-- therefore not anonymous — treat who can reach it as part of protecting it, not only what is in it.
 --
 -- Two columns are not copies of anything in the source:
 --
@@ -142,21 +146,23 @@ CREATE TABLE `groups` (
   CONSTRAINT `groups_ibfk_3` FOREIGN KEY (`defaultAgeGroupId`) REFERENCES `default_age_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- One row per member, carrying only what the reports group by. `birthYear` replaces the source
--- `birthDay`: age distributions need the year, and a full date of birth is personal data.
+-- One row per member, carrying only what the reports group by.
 --
--- `postalCode` is the one field here that describes a natural person, kept because the report maps
--- members by postal code and nothing coarser draws that map. It is the sharpest thing in this
--- database: together with the unit and tak a registration already gives, plus a birth year and a
--- gender, it can narrow a small tak to one person. Do not add anything finer, and keep access to
--- this database in mind rather than only its contents.
+-- `birthDate` and `postalCode` are the two fields here that describe a natural person. The report
+-- charts members by age and by birth year and maps them by postal code, and an age is only exact
+-- with the date behind it. Stored as a real date rather than the source's `varchar(10)`, so age is a
+-- date calculation instead of string arithmetic.
+--
+-- Those two together with the unit and tak a registration already gives, plus a gender, are enough to
+-- single out a person in a small tak. This database is therefore not anonymous: treat who can reach
+-- it as part of protecting it, not only what is in it.
 --
 -- Members are never deleted from here, even when their source row is gone: their row is what the
 -- facts of a settled year join to for demographics, and removing one cascades into the registrations
 -- of those years.
 CREATE TABLE `members` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `birthYear` smallint DEFAULT NULL,
+  `birthDate` date DEFAULT NULL,
   `gender` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -166,7 +172,7 @@ CREATE TABLE `members` (
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
   KEY `organizationId` (`organizationId`),
-  KEY `birthYear` (`birthYear`),
+  KEY `birthDate` (`birthDate`),
   KEY `gender` (`gender`),
   KEY `postalCode` (`postalCode`),
   KEY `source` (`source`),

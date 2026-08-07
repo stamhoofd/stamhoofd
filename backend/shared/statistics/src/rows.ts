@@ -1,10 +1,12 @@
+import { Formatter } from '@stamhoofd/utility';
+
 /**
  * Turns source records into the rows of the statistics database.
  *
- * Every function here is pure and drops the personal data on the way: a member arrives with a full
- * `MemberDetails` and leaves as a birth year and a gender. Nothing in this file may start returning
- * a name, a contact detail or a date of birth — the statistics database has no columns for them, and
- * the schema test would fail if it did.
+ * Every function here is pure and drops most of the personal data on the way: a member arrives with a
+ * full `MemberDetails` and leaves as a date of birth, a gender and a postal code. Nothing in this
+ * file may start returning a name, an email address or a phone number — the statistics database has
+ * no columns for them, and the schema test would fail if it did.
  *
  * The inputs are described structurally rather than as model classes, so the models satisfy them
  * without this package depending on how they are loaded.
@@ -160,16 +162,18 @@ export function flattenGroup(group: GroupSource): StatisticsRow {
 }
 
 /**
- * The date of birth is reduced to its year here, which is the whole point of the separate database:
- * age distributions stay possible and the birth date never leaves the main one.
+ * The date of birth and the postal code are carried over because the report needs them: it charts
+ * members by age, which is only exact with the date behind it, and maps them by postal code. The
+ * rest of the address and everything that names or reaches the member stays behind.
  *
- * The postal code is the exception: the report maps members by it, and nothing coarser draws that
- * map. The rest of the address stays behind.
+ * The birth date is written as the calendar date the application means, not as an instant. A member
+ * born on 17 May is held as midnight in Europe/Brussels, which a process running in UTC would write
+ * to a date column as 16 May — a day early for every member.
  */
 export function flattenMember(member: MemberSource): StatisticsRow {
     return {
         id: member.id,
-        birthYear: member.details.birthDay ? member.details.birthDay.getFullYear() : null,
+        birthDate: member.details.birthDay ? Formatter.dateIso(member.details.birthDay) : null,
         gender: member.details.gender,
         postalCode: member.details.address ? emptyToNull(member.details.address.postalCode) : null,
         organizationId: member.organizationId,

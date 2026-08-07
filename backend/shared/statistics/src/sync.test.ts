@@ -34,8 +34,8 @@ describe('statistics sync', () => {
         const [row] = await statisticsRows('members', member.id);
 
         expect(row).toBeDefined();
-        expect(row.birthYear).toBe(2011);
-        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'source', 'updatedAt']);
+        expect(row.birthDate).toEqual(new Date(Date.UTC(2011, 4, 17)));
+        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'source', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain(member.details.firstName);
     });
 
@@ -70,7 +70,7 @@ describe('statistics sync', () => {
 
         await syncStatistics();
 
-        expect((await statisticsRows('members', member.id))[0].birthYear).toBe(2009);
+        expect((await statisticsRows('members', member.id))[0].birthDate).toEqual(new Date(Date.UTC(2009, 2, 3)));
     });
 
     it('writes the same rows again without complaining, so a repeated run is harmless', async () => {
@@ -192,8 +192,8 @@ describe('statistics sync', () => {
         // The statistics database is kept between runs, so start from a known state.
         await connection.delete('DELETE FROM `members` WHERE `id` = ?', ['imported-member-1']);
         await connection.insert(
-            'INSERT INTO `members` (`id`, `birthYear`, `gender`, `createdAt`, `updatedAt`, `source`) VALUES (?, ?, ?, ?, ?, ?)',
-            ['imported-member-1', 2004, 'Female', new Date(), new Date(), 'import'],
+            'INSERT INTO `members` (`id`, `birthDate`, `gender`, `createdAt`, `updatedAt`, `source`) VALUES (?, ?, ?, ?, ?, ?)',
+            ['imported-member-1', new Date(Date.UTC(2004, 0, 15)), 'Female', new Date(), new Date(), 'import'],
         );
 
         await syncStatisticsDeletes();

@@ -6,14 +6,12 @@ import { getStatisticsDatabase } from './migrations.js';
  * Column names that would mean a natural person ended up in the statistics database. This guards
  * every table in it, not only the ones the first migration created: the database is handed to
  * reporting tools that must never reach the main database.
- *
- * `birthDay` is on the list while `birthYear` is not, which is exactly the distinction that keeps
- * age distributions possible without storing a date of birth.
  */
 const personalDataColumns = [
     'firstname',
     'lastname',
     'birthday',
+    'birthdate',
     'dateofbirth',
     'email',
     'phone',
@@ -44,14 +42,15 @@ describe('getStatisticsDatabase', () => {
 /**
  * Deliberate exceptions to the list above, as `table.column`.
  *
- * An organization is a legal entity, so where it is located is not personal data. A member's postal
- * code is, and is here only because the report maps members by it and nothing coarser draws that
- * map. Both are listed per table rather than removed from the list, so adding a postal code to a
- * third table still fails.
+ * An organization is a legal entity, so where it is located is not personal data. A member's date of
+ * birth and postal code are, and are here because the report charts members by age and maps them by
+ * postal code. They are listed per table rather than removed from the list, so the same column
+ * appearing on a third table still fails.
  */
 const allowedPersonalDataColumns = new Set([
     'organizations.postalCode',
     'members.postalCode',
+    'members.birthDate',
 ]);
 
 describe('migration.platform-statistics-schema', () => {
@@ -110,6 +109,7 @@ describe('migration.platform-statistics-schema', () => {
         expect(typeOf('organizations', 'postalCode')).toBe('varchar(36)');
         expect(typeOf('organizations', 'city')).toBe('varchar(100)');
         expect(typeOf('members', 'postalCode')).toBe('varchar(36)');
+        expect(typeOf('members', 'birthDate')).toBe('date');
         expect(typeOf('registration_periods', 'cutoffAt')).toBe('datetime');
         // Both replaced by the per-period cutoff: a settled year is protected by freezing it, not by
         // a validity window on every row.

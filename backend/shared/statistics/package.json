@@ -32,7 +32,8 @@
         "@stamhoofd/models": "*",
         "@stamhoofd/sql": "*",
         "@stamhoofd/structures": "*",
-        "@stamhoofd/types": "*"
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

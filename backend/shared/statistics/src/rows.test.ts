@@ -11,20 +11,30 @@ describe('flattenMember', () => {
         lastRegisteredAt: new Date(2025, 8, 1),
     };
 
-    it('reduces the date of birth to a year', () => {
-        expect(flattenMember(member).birthYear).toBe(2011);
+    it('carries the date of birth, which is what makes an age exact', () => {
+        expect(flattenMember(member).birthDate).toBe('2011-05-17');
     });
 
-    it('never carries a name, a contact detail or a date of birth', () => {
+    /**
+     * A birth date is held as midnight in Europe/Brussels. Writing that instant into a date column
+     * from a process running in UTC would land on the day before.
+     */
+    it('writes the calendar date the application means, not the instant behind it', () => {
+        const brusselsMidnight = new Date('2011-05-16T22:00:00.000Z');
+
+        expect(flattenMember({ ...member, details: { ...member.details, birthDay: brusselsMidnight } }).birthDate).toBe('2011-05-17');
+    });
+
+    it('never carries a name or a way to contact the member', () => {
         const row = flattenMember({ ...member, details: { ...member.details, firstName: 'Jan', lastName: 'Jansen', email: 'jan@example.com' } as any });
 
-        expect(Object.keys(row).sort()).toEqual(['birthYear', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain('Jan');
         expect(JSON.stringify(row)).not.toContain('example.com');
     });
 
     it('keeps a member without a birth date', () => {
-        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other', address: null } }).birthYear).toBeNull();
+        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other', address: null } }).birthDate).toBeNull();
     });
 
     it('keeps the postal code the member map needs, and nothing else of the address', () => {
