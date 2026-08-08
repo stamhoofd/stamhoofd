@@ -12,7 +12,7 @@ import { balanceItemPaymentRootFilterCompilers } from '../sql-filters/balance-it
 import { getPaymentSearchFilter } from '../sql-filters/payments.js';
 import { balanceItemPaymentSorters } from '../sql-sorters/balance-item-payments.js';
 import type { PaymentWithItem } from './payments.js';
-import { getBalanceItemPaymentColumns, PaymentGeneralWithStripeAccount } from './payments.js';
+import { createExportBalanceItemPayment, getBalanceItemPaymentColumns, getExportOrder, loadPaymentExportOrders, PaymentGeneralWithStripeAccount } from './payments.js';
 
 const sorters = balanceItemPaymentSorters;
 const filterCompilers = balanceItemPaymentRootFilterCompilers;
@@ -128,7 +128,7 @@ async function toRows(balanceItemPayments: BalanceItemPayment[]): Promise<Paymen
         payments.map(payment => [payment.id, PaymentGeneralWithStripeAccount.create(payment)]),
     );
 
-    return balanceItemPayments.flatMap((balanceItemPayment) => {
+    const rows = balanceItemPayments.flatMap((balanceItemPayment) => {
         const payment = paymentsById.get(balanceItemPayment.paymentId);
         const detailed = payment?.balanceItemPayments.find(p => p.id === balanceItemPayment.id);
 
@@ -137,9 +137,15 @@ async function toRows(balanceItemPayments: BalanceItemPayment[]): Promise<Paymen
             return [];
         }
 
-        return [{
-            payment,
-            balanceItemPayment: Object.assign(detailed, { customTitle: null }),
-        }];
+        return [{ payment, detailed }];
     });
+
+    // A row that paid for a webshop order reports the number of that order, which the balance item only
+    // holds the id of
+    const orderMap = await loadPaymentExportOrders(rows.map(row => row.detailed.balanceItem));
+
+    return rows.map(({ payment, detailed }) => ({
+        payment,
+        balanceItemPayment: createExportBalanceItemPayment(detailed, null, getExportOrder(detailed, orderMap)),
+    }));
 }
