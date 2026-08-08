@@ -5,9 +5,18 @@ import { ApiUser } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ACCESS_TOKEN_DURATION, DEFAULT_REFRESH_TOKEN_DURATION } from '../constants/sessions.js';
 import { User } from './User.js';
 
 export type TokenWithUser = Token & { user: User };
+
+/**
+ * The kind of primary credential a session was authenticated with.
+ *
+ * 'password' is the account password, 'email' a password token or email verification code,
+ * and 'sso' means an external identity provider vouched for the user.
+ */
+export type SessionLoginMethod = 'password' | 'email' | 'sso';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -54,6 +63,29 @@ export class Token extends QueryableModel {
      */
     @column({ type: 'datetime', nullable: true })
     authenticatedAt: Date | null = null;
+
+    /**
+     * When the session this token belongs to was first authenticated. A refresh token
+     * rotation creates a new token but continues the same session, so this is copied over
+     * and is what the absolute session length is measured from.
+     */
+    @column({ type: 'datetime' })
+    sessionStartedAt: Date;
+
+    /**
+     * Whether the session was created in the native app. The app stores its tokens in the
+     * secure storage of the device instead of in a browser, so those sessions are not
+     * limited in length.
+     */
+    @column({ type: 'boolean' })
+    isNativeApp = false;
+
+    /**
+     * The primary credential this session was created with. Copied over on rotation: a
+     * session does not change the way it was authenticated.
+     */
+    @column({ type: 'string' })
+    loginMethod: SessionLoginMethod = 'password';
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
@@ -279,12 +311,15 @@ export class Token extends QueryableModel {
         }
 
         const token = new Token().setRelation(Token.user, user);
+        token.sessionStartedAt = new Date();
+        token.sessionStartedAt.setMilliseconds(0);
+
         token.accessTokenValidUntil = new Date();
-        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 3600 * 1000);
+        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + ACCESS_TOKEN_DURATION);
         token.accessTokenValidUntil.setMilliseconds(0);
 
         token.refreshTokenValidUntil = new Date();
-        token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + 3600 * 1000 * 24 * 365);
+        token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + DEFAULT_REFRESH_TOKEN_DURATION);
         token.refreshTokenValidUntil.setMilliseconds(0);
 
         token.accessToken = (await randomBytes(192)).toString('base64').toUpperCase();
@@ -293,6 +328,9 @@ export class Token extends QueryableModel {
     }
 
     /**
+     * Create a session without any of the length limits that apply to a real login: use
+     * SessionService in the api package for those.
+     *
      * @param authenticatedAt Pass the current date when this token is minted by a real
      * authentication (password/mfa/passkey/password_token) so it counts as "fresh".
      * Leave null (default) for refresh_token rotations.

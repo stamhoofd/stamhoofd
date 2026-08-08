@@ -1,0 +1,65 @@
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/**
+ * How long an access token can be used before it has to be renewed with the refresh token.
+ * Kept short: this is the window in which a leaked access token is still worth something.
+ */
+export const ACCESS_TOKEN_DURATION = 15 * MINUTE;
+
+/**
+ * Refresh token lifetime of a token that is not part of a login (Token.createToken). Kept
+ * at the longest session below, so nothing can live longer than a real session.
+ */
+export const DEFAULT_REFRESH_TOKEN_DURATION = 30 * DAY;
+
+/**
+ * The kind of session, in the order it is decided: an SSO session is an SSO session no
+ * matter which permissions the user has.
+ */
+export type SessionType = 'sso' | 'platformAdmin' | 'admin' | 'user';
+
+export type SessionClient = 'browser' | 'nativeApp';
+
+export type SessionDurations = {
+    /**
+     * Maximum length of the session, counted from the login. Renewing never extends it, so
+     * this is when the user has to sign in again however active they were.
+     */
+    session: number;
+
+    /**
+     * How long the session may go unused before it ends. Every renewal restarts it.
+     */
+    refreshToken: number;
+};
+
+/**
+ * How long a session lives, per kind of session and client.
+ *
+ * Sessions in a browser are the shortest: it is not a place we can trust to keep a token
+ * safe (shared computers, extensions, synced profiles), while the native app keeps its
+ * tokens in the secure storage of the device and renews them in the background. Sessions
+ * that give access to the data of other people are shorter than those of a member, and an
+ * SSO session is the shortest of all: access is granted and taken away at the identity
+ * provider, so we go back to it often.
+ */
+export const SESSION_DURATIONS: Record<SessionType, Record<SessionClient, SessionDurations>> = {
+    sso: {
+        browser: { session: 12 * HOUR, refreshToken: 3 * HOUR },
+        nativeApp: { session: 7 * DAY, refreshToken: 36 * HOUR },
+    },
+    platformAdmin: {
+        browser: { session: 12 * HOUR, refreshToken: 3 * HOUR },
+        nativeApp: { session: 7 * DAY, refreshToken: 36 * HOUR },
+    },
+    admin: {
+        browser: { session: 14 * DAY, refreshToken: 3 * DAY },
+        nativeApp: { session: 60 * DAY, refreshToken: 30 * DAY },
+    },
+    user: {
+        browser: { session: 14 * DAY, refreshToken: 3 * DAY },
+        nativeApp: { session: 90 * DAY, refreshToken: 30 * DAY },
+    },
+};

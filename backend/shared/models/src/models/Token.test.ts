@@ -22,6 +22,7 @@ describe('Model.Token', () => {
 
                 accessTokenValidUntil: '2050-08-29 14:30:15',
                 refreshTokenValidUntil: '2050-08-29 14:30:15',
+                sessionStartedAt: '2020-03-29 14:30:15',
                 userId: user.id,
                 // = "myPassword"
                 createdAt: '2020-03-29 14:30:15',
@@ -47,13 +48,16 @@ describe('Model.Token', () => {
         expect(token.user.id).toEqual(user.id);
         expect(token.accessToken).toHaveLength(256);
         expect(token.refreshToken).toHaveLength(256);
-        expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(new Date().getTime() + (3600 * 1000) / 2 - 1);
-        expect(token.accessTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
+        expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(new Date().getTime() + 14 * 60 * 1000);
+        expect(token.accessTokenValidUntil.getTime()).toBeLessThanOrEqual(new Date().getTime() + 15 * 60 * 1000);
 
         expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(token.accessTokenValidUntil.getTime());
         expect(token.refreshTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
 
         expect(token.userId).toEqual(user.id);
+        expect(token.sessionStartedAt.getTime()).toBeGreaterThan(Date.now() - 60 * 1000);
+        expect(token.isNativeApp).toBe(false);
+        expect(token.loginMethod).toBe('password');
 
         const search = await Token.getByAccessToken(token.accessToken);
         // Make sure we do not compare the organization, since that won't be loaded now, but is loaded on user, and on token

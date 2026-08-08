@@ -2,12 +2,13 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
+import { EmailVerificationCode, User } from '@stamhoofd/models';
 import { Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { BalanceItemService } from '../../services/BalanceItemService.js';
+import { SessionService } from '../../services/SessionService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -133,7 +134,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: 'email', i18n: request.i18n });
         }
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user, { loginMethod: 'email' });
         await user.markActive();
 
         const st = new TokenStruct(token);

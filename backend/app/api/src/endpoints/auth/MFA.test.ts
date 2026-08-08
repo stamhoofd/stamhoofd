@@ -1440,6 +1440,31 @@ describe('MFA', () => {
             const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'password' });
             expect(requirement.type).toBe('setup');
         });
+
+        test('the session of an SSO login that passed a second factor is an SSO session', async () => {
+            // The session is only created after the second factor, so the challenge has to
+            // remember how the user got there: it decides how long the session may live.
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
+            const { secret } = await addConfirmedTOTP(user);
+
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: 'sso' });
+            if (requirement.type !== 'challenge') {
+                throw new Error('Expected a challenge');
+            }
+
+            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, {
+                mfa_token: requirement.challenge.token,
+                method: 'TOTP',
+                code: authenticator.generate(secret),
+            }));
+            if (!(response.body instanceof TokenStruct)) {
+                throw new Error('Expected TokenStruct');
+            }
+
+            const token = await Token.getByAccessToken(response.body.accessToken);
+            expect(token!.loginMethod).toBe('sso');
+            expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 3 * 60 * 60 * 1000);
+        });
     });
 
     // -----------------------------------------------------------------------

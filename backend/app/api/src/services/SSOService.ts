@@ -11,6 +11,7 @@ import { Context } from '../helpers/Context.js';
 import type { ObjectWithHeaders } from '../helpers/CookieHelper.js';
 import { CookieHelper } from '../helpers/CookieHelper.js';
 import { TwoFactorHelper } from '../helpers/TwoFactorHelper.js';
+import { SessionService } from './SessionService.js';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -708,7 +709,7 @@ export class SSOServiceWithSession {
                     redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
                     redirectUri.searchParams.set('s', session.spaState);
                 } else if (requirement.type === 'none') {
-                    const token = await Token.createExpiredToken(user);
+                    const token = await SessionService.createExpiredSession(user, { loginMethod: 'sso' });
 
                     if (!token) {
                         throw new SimpleError({
