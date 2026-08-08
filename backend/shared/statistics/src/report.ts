@@ -10,9 +10,9 @@ import { fileURLToPath } from 'url';
  * query against the real schema. Turning them into Metabase questions is the CLI's job — nothing
  * here knows that Metabase exists.
  *
- * A file holds one dashboard and its cards:
+ * A file holds one tab of the report and its cards, mirroring a page of the client's own report:
  *
- *     -- @dashboard nationaal
+ *     -- @tab nationaal
  *     -- title: Nationaal
  *
  *     -- @card totaal-leden
@@ -45,17 +45,19 @@ export type ReportCard = {
     sql: string;
 };
 
-export type ReportDashboard = {
+export type ReportTab = {
     key: string;
     title: string;
     description?: string;
     /**
-     * The filters shown above this dashboard. Declared rather than taken from the cards: the shared
-     * query fragments offer both filters to every card, so a dashboard that only wants one has to
-     * say so.
+     * The filters that drive this tab. Declared rather than taken from the cards: the shared query
+     * fragments offer both filters to every card, so a tab that only wants one has to say so.
+     *
+     * Metabase shows filters above the whole dashboard rather than per tab, so every filter named by
+     * any tab is visible everywhere; this is what decides which cards it actually reaches.
      */
     filters: string[];
-    /** Cards that only feed the filter dropdowns; no dashboard is created for them. */
+    /** Cards that only feed the filter dropdowns. They live in the collection but on no tab. */
     hidden: boolean;
     cards: ReportCard[];
 };
@@ -63,27 +65,27 @@ export type ReportDashboard = {
 export const reportCardSizes = ['full', 'half', 'third', 'quarter', 'fifth'] as const;
 export type ReportCardSize = typeof reportCardSizes[number];
 
-/** The dashboards in the order the client's report shows them. */
-export const reportDashboardOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'filters'];
+/** The tabs in the order the client's report shows its pages. */
+export const reportTabOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'filters'];
 
 export function getReportDirectory(): string {
     return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'report');
 }
 
-export async function loadReport(directory = getReportDirectory()): Promise<ReportDashboard[]> {
+export async function loadReport(directory = getReportDirectory()): Promise<ReportTab[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'));
     const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql')).sort();
 
-    const dashboards = await Promise.all(files.map(async (file) => {
-        return parseDashboard(await fs.readFile(path.join(directory, file), 'utf-8'), file, includes);
+    const tabs = await Promise.all(files.map(async (file) => {
+        return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, includes);
     }));
 
-    return dashboards.sort((a, b) => orderOf(a.key) - orderOf(b.key));
+    return tabs.sort((a, b) => orderOf(a.key) - orderOf(b.key));
 }
 
 function orderOf(key: string): number {
-    const index = reportDashboardOrder.indexOf(key);
-    return index === -1 ? reportDashboardOrder.length : index;
+    const index = reportTabOrder.indexOf(key);
+    return index === -1 ? reportTabOrder.length : index;
 }
 
 async function loadIncludes(directory: string): Promise<Map<string, string>> {
@@ -97,15 +99,15 @@ async function loadIncludes(directory: string): Promise<Map<string, string>> {
 }
 
 /**
- * Splits a file into its `@dashboard` header and `@card` sections. Everything that is not a
- * directive stays as it is, so a card's sql keeps the comments written above it.
+ * Splits a file into its `@tab` header and `@card` sections. Everything that is not a directive
+ * stays as it is, so a card's sql keeps the comments written above it.
  */
-export function parseDashboard(contents: string, file: string, includes: Map<string, string>): ReportDashboard {
+export function parseTab(contents: string, file: string, includes: Map<string, string>): ReportTab {
     const sections = splitSections(contents);
-    const header = sections.find(section => section.kind === 'dashboard');
+    const header = sections.find(section => section.kind === 'tab');
 
     if (!header) {
-        throw new Error(`${file} has no "-- @dashboard <key>" header`);
+        throw new Error(`${file} has no "-- @tab <key>" header`);
     }
 
     const cards = sections.filter(section => section.kind === 'card').map(section => parseCard(section, file, includes));
@@ -130,16 +132,16 @@ export function parseDashboard(contents: string, file: string, includes: Map<str
     };
 }
 
-type Section = { kind: 'dashboard' | 'card'; key: string; attributes: Map<string, string>; body: string };
+type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, string>; body: string };
 
 function splitSections(contents: string): Section[] {
     const sections: Section[] = [];
     let current: Section | undefined;
 
     for (const line of contents.split('\n')) {
-        const directive = /^--[ \t]*@(dashboard|card)[ \t]+(\S+)[ \t]*$/.exec(line);
+        const directive = /^--[ \t]*@(tab|card)[ \t]+(\S+)[ \t]*$/.exec(line);
         if (directive) {
-            current = { kind: directive[1] as 'dashboard' | 'card', key: directive[2], attributes: new Map(), body: '' };
+            current = { kind: directive[1] as 'tab' | 'card', key: directive[2], attributes: new Map(), body: '' };
             sections.push(current);
             continue;
         }

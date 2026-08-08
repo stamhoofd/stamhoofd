@@ -1,4 +1,4 @@
--- @dashboard nationaal
+-- @tab nationaal
 -- title: Nationaal
 -- description: Ledenaantallen over het hele platform voor het gekozen scoutsjaar.
 -- filters: scoutsjaar

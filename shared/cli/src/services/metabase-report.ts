@@ -1,7 +1,8 @@
 import type { MetabaseApi } from './metabase-api.js';
 
 /**
- * Turns the report definition of `@stamhoofd/statistics` into Metabase questions and dashboards.
+ * Turns the report definition of `@stamhoofd/statistics` into one Metabase dashboard, with a tab per
+ * page of the client's report.
  *
  * The queries themselves live with the schema they read, in `backend/shared/statistics/report`. This
  * file only knows how to say them in Metabase's vocabulary: which display, which columns on which
@@ -24,11 +25,11 @@ export type ReportCard = {
     sql: string;
 };
 
-export type ReportDashboard = {
+export type ReportTab = {
     key: string;
     title: string;
     description?: string;
-    /** The filters shown above this dashboard, by name. */
+    /** The filters that drive this tab, by name. */
     filters: string[];
     hidden: boolean;
     cards: ReportCard[];
@@ -155,13 +156,17 @@ export function buildVisualizationSettings(card: ReportCard): Record<string, unk
 }
 
 /**
- * The dashboard filters, pointed at the cards that fill their dropdowns. Only the ones the dashboard
- * declares: the shared query fragments offer both filters to every card, so going by what the cards
- * accept would give the national page a unit filter the report does not have.
+ * The filters shown above the dashboard: every one that any tab asks for.
+ *
+ * Metabase puts filters above the whole dashboard rather than on a tab, so a filter named by one tab
+ * is visible on all of them. Which cards it actually reaches is decided per tab in `buildDashcards`,
+ * so the Eenheid filter cannot quietly turn the national figures into one unit's.
  */
-export function buildParameters(dashboard: ReportDashboard, filterCardIds: Map<string, number>, orderedValues: Map<string, string[]> = new Map()): Record<string, unknown>[] {
+export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, number>, orderedValues: Map<string, string[]> = new Map()): Record<string, unknown>[] {
+    const wanted = new Set(tabs.flatMap(tab => tab.filters));
+
     return reportFilters
-        .filter(filter => dashboard.filters.includes(filter.name))
+        .filter(filter => wanted.has(filter.name))
         .map((filter) => {
             const cardId = filterCardIds.get(filter.valuesFrom);
             const values = filter.keepOrder ? orderedValues.get(filter.valuesFrom) : undefined;
@@ -200,54 +205,72 @@ function buildValuesSource(column: string, cardId: number | undefined, values: s
     };
 }
 
-export function buildDashcards(dashboard: ReportDashboard, cardIds: Map<string, number>, parameters: Record<string, unknown>[]): Record<string, unknown>[] {
-    return layoutCards(dashboard.cards).map((placed, index) => {
-        const cardId = cardIds.get(placed.card.key)!;
+/**
+ * The tabs, in the order the report lists them. A tab that is already there keeps its id so links
+ * into it survive; a new one gets a negative id, which is how Metabase is told to create it.
+ */
+export function buildTabs(tabs: ReportTab[], existing: Map<string, number>): { id: number; name: string; position: number }[] {
+    return tabs.map((tab, position) => ({
+        id: existing.get(tab.title) ?? -(position + 1),
+        name: tab.title,
+        position,
+    }));
+}
 
-        return {
-            // Metabase reads a negative id as "this one is new".
-            id: -1 - index,
-            card_id: cardId,
-            row: placed.row,
-            col: placed.col,
-            size_x: placed.sizeX,
-            size_y: placed.sizeY,
-            visualization_settings: {},
-            parameter_mappings: parameters
-                .filter(parameter => placed.card.parameters.includes(parameter.slug as string))
-                .map(parameter => ({
-                    parameter_id: parameter.id,
-                    card_id: cardId,
-                    target: ['variable', ['template-tag', parameter.slug]],
-                })),
-        };
-    });
+export function buildDashcards(tabs: ReportTab[], cardIds: Map<string, number>, parameters: Record<string, unknown>[], tabIds: Map<string, number>): Record<string, unknown>[] {
+    const dashcards: Record<string, unknown>[] = [];
+
+    for (const tab of tabs) {
+        for (const placed of layoutCards(tab.cards)) {
+            const cardId = cardIds.get(placed.card.key)!;
+
+            dashcards.push({
+                // Metabase reads a negative id as "this one is new".
+                id: -1 - dashcards.length,
+                card_id: cardId,
+                dashboard_tab_id: tabIds.get(tab.title),
+                row: placed.row,
+                col: placed.col,
+                size_x: placed.sizeX,
+                size_y: placed.sizeY,
+                visualization_settings: {},
+                parameter_mappings: parameters
+                    // A filter reaches a card only when its own tab asks for it and its query takes it.
+                    .filter(parameter => tab.filters.includes(parameter.slug as string) && placed.card.parameters.includes(parameter.slug as string))
+                    .map(parameter => ({
+                        parameter_id: parameter.id,
+                        card_id: cardId,
+                        target: ['variable', ['template-tag', parameter.slug]],
+                    })),
+            });
+        }
+    }
+
+    return dashcards;
 }
 
 export type ReportSyncResult = {
     collection: string;
     collectionId: number;
     createdCollection: boolean;
+    dashboardId: number;
     cards: number;
-    dashboards: string[];
+    tabs: string[];
 };
 
 /**
- * Write the whole report to Metabase. Cards first, because a dashboard can only point at cards that
- * exist, and the filter dropdowns point at cards too.
- *
- * Every question is tied to `databaseId`, so the collection has to belong to one environment: see
- * `metabaseReportCollectionName`.
+ * Write the whole report to Metabase: one dashboard with a tab per page. Cards first, because a
+ * dashboard can only point at cards that exist, and the filter dropdowns point at cards too.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, dashboards: ReportDashboard[], collection: string): Promise<ReportSyncResult> {
+export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string): Promise<ReportSyncResult> {
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
     const existingCards = new Map((await api.listCards(collectionId)).map(card => [card.name, card.id]));
     const cardIds = new Map<string, number>();
     const filterCardIds = new Map<string, number>();
 
-    for (const dashboard of dashboards) {
-        for (const card of dashboard.cards) {
+    for (const tab of tabs) {
+        for (const card of tab.cards) {
             const id = await api.saveCard({
                 name: card.title,
                 description: card.description,
@@ -260,30 +283,45 @@ export async function syncReport(api: MetabaseApi, databaseId: number, dashboard
             }, existingCards.get(card.title));
 
             cardIds.set(card.key, id);
-            if (dashboard.key === 'filters') {
+            if (tab.hidden) {
                 filterCardIds.set(card.key, id);
             }
         }
     }
 
+    const visible = tabs.filter(tab => !tab.hidden);
     const orderedValues = await readOrderedValues(api, filterCardIds);
-    const existingDashboards = new Map((await api.listDashboards(collectionId)).map(dashboard => [dashboard.name, dashboard.id]));
-    const written: string[] = [];
+    const existingDashboards = await api.listDashboards(collectionId);
+    const dashboardId = existingDashboards.find(dashboard => dashboard.name === dashboardName)?.id
+        ?? await api.createDashboard(dashboardName, undefined, collectionId);
 
-    for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
-        const id = existingDashboards.get(dashboard.title) ?? await api.createDashboard(dashboard.title, dashboard.description, collectionId);
-        const parameters = buildParameters(dashboard, filterCardIds, orderedValues);
+    const existingTabs = new Map((await api.getDashboardTabs(dashboardId)).map(tab => [tab.name, tab.id]));
+    const parameters = buildParameters(visible, filterCardIds, orderedValues);
+    const dashboardTabs = buildTabs(visible, existingTabs);
+    const tabIds = new Map(dashboardTabs.map(tab => [tab.name, tab.id]));
 
-        await api.updateDashboard(id, {
-            name: dashboard.title,
-            description: dashboard.description,
-            parameters,
-            dashcards: buildDashcards(dashboard, cardIds, parameters),
-        });
-        written.push(dashboard.title);
+    await api.updateDashboard(dashboardId, {
+        name: dashboardName,
+        parameters,
+        tabs: dashboardTabs,
+        dashcards: buildDashcards(visible, cardIds, parameters, tabIds),
+    });
+
+    await archiveSupersededDashboards(api, existingDashboards, visible, dashboardName);
+
+    return { collection, collectionId, createdCollection, dashboardId, cards: cardIds.size, tabs: visible.map(tab => tab.title) };
+}
+
+/**
+ * Clear away the dashboard-per-page layout an earlier version of this command left behind. Only
+ * dashboards named exactly after a tab are touched, so anything the client built themselves stays.
+ */
+async function archiveSupersededDashboards(api: MetabaseApi, existing: { id: number; name: string }[], tabs: ReportTab[], dashboardName: string): Promise<void> {
+    const titles = new Set(tabs.map(tab => tab.title));
+
+    for (const dashboard of existing.filter(dashboard => dashboard.name !== dashboardName && titles.has(dashboard.name))) {
+        await api.archiveDashboard(dashboard.id);
     }
-
-    return { collection, collectionId, createdCollection, cards: cardIds.size, dashboards: written };
 }
 
 /**

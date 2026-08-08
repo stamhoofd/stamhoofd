@@ -42,6 +42,9 @@ export function metabaseReportCollectionName(env: string): string {
     return `Ledenstatistieken (${env})`;
 }
 
+/** The single dashboard the report writes, one tab per page of the client's own report. */
+export const metabaseReportDashboardName = 'Ledenstatistieken';
+
 /**
  * Tables of the statistics database that are infrastructure rather than data. They are hidden in
  * Metabase so they stay out of the query builder and the data reference.

@@ -18,7 +18,7 @@ export default class MetabaseReport extends BaseCommand {
         const context = await this.createContext(flags);
 
         const result = await step(`Writing the ${context.env} report to Metabase`, async () => await metabaseService.provisionReport(context), {
-            successMessage: result => `${result.cards} questions in ${result.dashboards.length} dashboards`,
+            successMessage: result => `${result.cards} questions across ${result.tabs.length} tabs`,
         });
 
         if (result.tableCount === 0) {
@@ -28,8 +28,9 @@ export default class MetabaseReport extends BaseCommand {
         this.log('');
         this.log(`Environment: ${context.env}`);
         this.log(`Data source: ${result.dataSource} (${result.database})`);
-        this.log(`Dashboards:  ${result.dashboards.join(', ')}`);
-        const url = `https://${buildDomains(context).metabase}/collection/${result.collectionId}`;
-        this.log(`Collection:  ${result.collection} — ${link(url, url)}`);
+        this.log(`Tabs:        ${result.tabs.join(', ')}`);
+        this.log(`Collection:  ${result.collection}`);
+        const url = `https://${buildDomains(context).metabase}/dashboard/${result.dashboardId}`;
+        this.log(`Dashboard:   ${link(url, url)}`);
     }
 }

@@ -1,6 +1,6 @@
 import { getStatisticsConnection } from './connection.js';
-import type { ReportCard, ReportDashboard } from './report.js';
-import { loadReport, parameterNames, parseDashboard, resolveSql } from './report.js';
+import type { ReportCard, ReportTab } from './report.js';
+import { loadReport, parameterNames, parseTab, resolveSql } from './report.js';
 
 /**
  * The years this test works in. Deliberately later than any other suite's periods, and adjacent to
@@ -37,10 +37,10 @@ async function insert(table: string, rows: Record<string, unknown>[]): Promise<v
     );
 }
 
-function cardOf(dashboards: ReportDashboard[], dashboard: string, card: string): ReportCard {
-    const found = dashboards.find(entry => entry.key === dashboard)?.cards.find(entry => entry.key === card);
+function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
+    const found = tabs.find(entry => entry.key === tab)?.cards.find(entry => entry.key === card);
     if (!found) {
-        throw new Error(`No card ${dashboard}/${card}`);
+        throw new Error(`No card ${tab}/${card}`);
     }
     return found;
 }
@@ -144,7 +144,7 @@ async function seed(): Promise<void> {
 }
 
 describe('report', () => {
-    let dashboards: ReportDashboard[];
+    let dashboards: ReportTab[];
 
     beforeAll(async () => {
         dashboards = await loadReport();
@@ -153,8 +153,9 @@ describe('report', () => {
     });
 
     describe('definition', () => {
-        it('has the four dashboards of the report plus the filter values', () => {
+        it('has the four pages of the report as tabs, plus the filter values', () => {
             expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'filters']);
+            expect(dashboards.find(tab => tab.key === 'filters')!.hidden).toBe(true);
         });
 
         it('reads a card with its metadata and expands the shared fragments', () => {
@@ -193,7 +194,7 @@ describe('report', () => {
             }
         });
 
-        it('gives the unit filter to the eenheden dashboard only, as the report does', () => {
+        it('gives the unit filter to the eenheden tab only, as the report does', () => {
             expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid']);
 
             for (const key of ['nationaal', 'netwerk', 'varia']) {
@@ -202,17 +203,17 @@ describe('report', () => {
         });
 
         it('rejects a filter no card can be driven by', () => {
-            expect(() => parseDashboard('-- @dashboard d\n-- title: D\n-- filters: eenheid\n\n-- @card c\n-- title: C\n-- display: table\nSELECT 1', 'x.sql', new Map()))
+            expect(() => parseTab('-- @tab d\n-- title: D\n-- filters: eenheid\n\n-- @card c\n-- title: C\n-- display: table\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('no card uses {{eenheid}}');
         });
 
         it('rejects a card without a title', () => {
-            expect(() => parseDashboard('-- @dashboard d\n-- title: D\n\n-- @card c\n-- display: table\nSELECT 1', 'x.sql', new Map()))
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- display: table\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('"c" has no title');
         });
 
         it('rejects an include that does not exist', () => {
-            expect(() => parseDashboard('-- @dashboard d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include nope\nSELECT 1', 'x.sql', new Map()))
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include nope\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('report/includes/nope.sql');
         });
     });

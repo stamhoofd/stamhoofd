@@ -1,4 +1,4 @@
--- @dashboard netwerk
+-- @tab netwerk
 -- title: Netwerk
 -- description: Leden en eenheden per netwerk voor het gekozen scoutsjaar.
 -- filters: scoutsjaar

@@ -280,17 +280,30 @@ export class MetabaseApi {
         return created.id;
     }
 
+    /** The tabs a dashboard already has, so writing it again can keep their ids. */
+    async getDashboardTabs(id: number): Promise<{ id: number; name: string }[]> {
+        const dashboard = await this.request<{ tabs?: { id: number; name: string }[] }>('GET', `/api/dashboard/${id}`);
+        return dashboard.tabs ?? [];
+    }
+
     /**
-     * Lay out a dashboard: its filters and which card sits where. Metabase replaces the whole set of
-     * cards with what is sent, so this is also what removes a card that the report no longer has.
+     * Lay out a dashboard: its tabs, its filters and which card sits where. Metabase replaces the
+     * whole set of tabs and cards with what is sent, so this is also what removes a card the report
+     * no longer has.
      */
-    async updateDashboard(id: number, body: { name: string; description?: string; parameters: unknown[]; dashcards: unknown[] }): Promise<void> {
+    async updateDashboard(id: number, body: { name: string; description?: string; parameters: unknown[]; tabs: unknown[]; dashcards: unknown[] }): Promise<void> {
         await this.request('PUT', `/api/dashboard/${id}`, {
             name: body.name,
             description: body.description ?? null,
             parameters: body.parameters,
+            tabs: body.tabs,
             dashcards: body.dashcards,
         });
+    }
+
+    /** Move a dashboard to the trash. Used to clear away the one-dashboard-per-page layout. */
+    async archiveDashboard(id: number): Promise<void> {
+        await this.request('PUT', `/api/dashboard/${id}`, { archived: true });
     }
 
     private async request<T>(method: string, path: string, body?: unknown): Promise<T> {

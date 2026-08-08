@@ -1,4 +1,4 @@
--- @dashboard filters
+-- @tab filters
 -- title: Filterwaarden
 -- hidden: true
 -- description: Deze vragen vullen de keuzelijsten van de filters bovenaan de dashboards. Ze staan zelf niet op een dashboard.

@@ -1,4 +1,4 @@
--- @dashboard eenheden
+-- @tab eenheden
 -- title: Eenheden
 -- description: Alles over een enkele eenheid. Kies een eenheid en een scoutsjaar bovenaan.
 -- filters: scoutsjaar, eenheid
