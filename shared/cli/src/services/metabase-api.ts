@@ -259,6 +259,18 @@ export class MetabaseApi {
         return (await this.request<{ id: number }>('POST', '/api/card', body)).id;
     }
 
+    /**
+     * Run a saved question and return the values of its first column. Used to read the values a
+     * filter offers straight out of the database Metabase is already connected to, so the CLI needs
+     * no database connection of its own.
+     */
+    async runCardValues(cardId: number): Promise<string[]> {
+        const result = await this.request<{ data?: { rows?: unknown[][] } }>('POST', `/api/card/${cardId}/query`);
+        return (result.data?.rows ?? [])
+            .map(row => row[0])
+            .filter((value): value is string => typeof value === 'string' && value.length > 0);
+    }
+
     async createDashboard(name: string, description: string | undefined, collectionId: number): Promise<number> {
         const created = await this.request<{ id: number }>('POST', '/api/dashboard', {
             name,

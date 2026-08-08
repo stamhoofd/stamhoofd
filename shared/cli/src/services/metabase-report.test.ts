@@ -114,6 +114,30 @@ describe('buildParameters', () => {
 
         expect(parameters.map(parameter => parameter.values_query_type)).toEqual(['list', 'list']);
     });
+
+    /**
+     * Metabase sorts a dropdown fed by a question alphabetically, which would put the oldest
+     * scoutsjaar first. A fixed list is the only source it leaves in the given order.
+     */
+    it('writes the scoutsjaren out as a list, newest first', () => {
+        const years = ['2024 - 2025', '2023 - 2024', '2013 - 2014'];
+        const entry = dashboard({ filters: ['scoutsjaar', 'eenheid'], cards: [card({ parameters: ['scoutsjaar', 'eenheid'] })] });
+
+        const parameters = buildParameters(entry, new Map([['scoutsjaar', 42], ['eenheid', 43]]), new Map([['scoutsjaar', years]]));
+
+        expect(parameters[0].values_source_type).toEqual('static-list');
+        expect(parameters[0].values_source_config).toEqual({ values: years });
+        // Unit names read fine alphabetically, so they stay on the question and keep updating.
+        expect(parameters[1].values_source_type).toEqual('card');
+    });
+
+    it('falls back to the question when the values could not be read', () => {
+        const entry = dashboard({ filters: ['scoutsjaar'], cards: [card({ parameters: ['scoutsjaar'] })] });
+
+        for (const values of [new Map(), new Map([['scoutsjaar', []]])]) {
+            expect(buildParameters(entry, new Map([['scoutsjaar', 42]]), values as Map<string, string[]>)[0].values_source_type).toEqual('card');
+        }
+    });
 });
 
 describe('buildDashcards', () => {

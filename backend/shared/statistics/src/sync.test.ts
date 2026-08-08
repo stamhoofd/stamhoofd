@@ -108,6 +108,20 @@ describe('statistics sync', () => {
         expect(await statisticsRows('members', orphan.id)).toHaveLength(1);
     });
 
+    /**
+     * Organizations, groups and registrations all point at a period with ON DELETE RESTRICT, so
+     * removing one is either refused outright or takes a settled year's numbers with it.
+     */
+    it('keeps a period whose source row is gone, since every figure hangs off it', async () => {
+        const orphan = await new RegistrationPeriodFactory({}).create();
+        await syncStatistics();
+        await orphan.delete();
+
+        await syncStatisticsDeletes();
+
+        expect(await statisticsRows('registration_periods', orphan.id)).toHaveLength(1);
+    });
+
     describe('a frozen period', () => {
         let frozenPeriod: RegistrationPeriod;
         let frozenRegistration: Registration;

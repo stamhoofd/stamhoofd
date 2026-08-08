@@ -110,6 +110,11 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
             },
             existingIds: ids => existingModelIds(RegistrationPeriod, ids),
             periodColumn: 'id',
+            // A period is what every historical figure hangs off, and organizations, groups and
+            // registrations all point at it with ON DELETE RESTRICT. Removing one would either be
+            // refused by the database or take a settled year's numbers with it, so a period that
+            // disappears from the administration stays here, like its members and organizations.
+            neverDelete: true,
         },
         {
             table: 'organizations',

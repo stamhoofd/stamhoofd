@@ -37,10 +37,16 @@ export type ReportDashboard = {
 /**
  * The filters shown above the dashboards. `valuesFrom` names the card in the hidden `filters`
  * dashboard that fills the dropdown, and `column` the column to read the values from.
+ *
+ * `keepOrder` says the order of that card matters. Metabase sorts a dropdown fed by a question
+ * alphabetically whatever the question's ORDER BY says, so the scoutsjaren would run oldest first.
+ * Those filters get the values written out as a fixed list instead, which Metabase leaves alone —
+ * at the cost of being a snapshot, so a new scoutsjaar appears once the report is written again.
+ * Unit names read fine alphabetically and stay on the live question.
  */
 export const reportFilters = [
-    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar' },
-    { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid' },
+    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: true },
+    { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false },
 ] as const;
 
 /** Metabase lays a dashboard out on a 24 column grid. */
@@ -153,11 +159,12 @@ export function buildVisualizationSettings(card: ReportCard): Record<string, unk
  * declares: the shared query fragments offer both filters to every card, so going by what the cards
  * accept would give the national page a unit filter the report does not have.
  */
-export function buildParameters(dashboard: ReportDashboard, filterCardIds: Map<string, number>): Record<string, unknown>[] {
+export function buildParameters(dashboard: ReportDashboard, filterCardIds: Map<string, number>, orderedValues: Map<string, string[]> = new Map()): Record<string, unknown>[] {
     return reportFilters
         .filter(filter => dashboard.filters.includes(filter.name))
         .map((filter) => {
             const cardId = filterCardIds.get(filter.valuesFrom);
+            const values = filter.keepOrder ? orderedValues.get(filter.valuesFrom) : undefined;
 
             return {
                 id: templateTagId('dashboard', filter.name).slice(0, 8),
@@ -168,17 +175,29 @@ export function buildParameters(dashboard: ReportDashboard, filterCardIds: Map<s
                 // Without this the widget is a plain text box, however well the values source is
                 // configured: it is what picks the dropdown over an input box.
                 values_query_type: 'list',
-                ...(cardId === undefined
-                    ? {}
-                    : {
-                            values_source_type: 'card',
-                            values_source_config: {
-                                card_id: cardId,
-                                value_field: ['field', filter.column, { 'base-type': 'type/Text' }],
-                            },
-                        }),
+                ...buildValuesSource(filter.column, cardId, values),
             };
         });
+}
+
+/**
+ * Where a dropdown gets its values. A fixed list when the order matters and the values are known,
+ * otherwise the question itself, which keeps the list up to date on its own.
+ */
+function buildValuesSource(column: string, cardId: number | undefined, values: string[] | undefined): Record<string, unknown> {
+    if (values !== undefined && values.length > 0) {
+        return { values_source_type: 'static-list', values_source_config: { values } };
+    }
+    if (cardId === undefined) {
+        return {};
+    }
+    return {
+        values_source_type: 'card',
+        values_source_config: {
+            card_id: cardId,
+            value_field: ['field', column, { 'base-type': 'type/Text' }],
+        },
+    };
 }
 
 export function buildDashcards(dashboard: ReportDashboard, cardIds: Map<string, number>, parameters: Record<string, unknown>[]): Record<string, unknown>[] {
@@ -247,12 +266,13 @@ export async function syncReport(api: MetabaseApi, databaseId: number, dashboard
         }
     }
 
+    const orderedValues = await readOrderedValues(api, filterCardIds);
     const existingDashboards = new Map((await api.listDashboards(collectionId)).map(dashboard => [dashboard.name, dashboard.id]));
     const written: string[] = [];
 
     for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
         const id = existingDashboards.get(dashboard.title) ?? await api.createDashboard(dashboard.title, dashboard.description, collectionId);
-        const parameters = buildParameters(dashboard, filterCardIds);
+        const parameters = buildParameters(dashboard, filterCardIds, orderedValues);
 
         await api.updateDashboard(id, {
             name: dashboard.title,
@@ -264,4 +284,31 @@ export async function syncReport(api: MetabaseApi, databaseId: number, dashboard
     }
 
     return { collection, collectionId, createdCollection, cards: cardIds.size, dashboards: written };
+}
+
+/**
+ * Run the filter questions whose order has to be kept and remember what they returned.
+ *
+ * A question that cannot run yet — an empty statistics database, most likely — is not worth failing
+ * the whole push for: that filter falls back to reading its values from the question, which costs
+ * the ordering but keeps the dashboards working.
+ */
+async function readOrderedValues(api: MetabaseApi, filterCardIds: Map<string, number>): Promise<Map<string, string[]>> {
+    const values = new Map<string, string[]>();
+
+    for (const filter of reportFilters.filter(filter => filter.keepOrder)) {
+        const cardId = filterCardIds.get(filter.valuesFrom);
+        if (cardId === undefined) {
+            continue;
+        }
+
+        try {
+            values.set(filter.valuesFrom, await api.runCardValues(cardId));
+        }
+        catch {
+            continue;
+        }
+    }
+
+    return values;
 }

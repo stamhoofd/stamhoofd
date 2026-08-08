@@ -10,11 +10,14 @@
 -- title: Scoutsjaren
 -- display: table
 -- size: half
--- Grouped rather than listed: the filter matches on the label, so two periods sharing one would
--- otherwise show up twice in the dropdown and select both.
+-- Elke eenheid houdt een eigen periode-rij voor hetzelfde jaar, dus hier staan alle rijen: precies de
+-- namen waarop de rapporten groeperen. Gegroepeerd in plaats van opgesomd, want de filter zoekt op de
+-- naam en een jaar zou anders meermaals in de lijst staan.
+--
+-- Nieuwste jaar eerst. Metabase sorteert een keuzelijst die uit een vraag komt zelf alfabetisch; de
+-- CLI neemt deze volgorde daarom over in een vaste lijst.
 SELECT name AS `Scoutsjaar`
 FROM registration_periods
-WHERE organizationId IS NULL
 GROUP BY name
 ORDER BY MAX(startDate) DESC
 
