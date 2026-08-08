@@ -1,9 +1,9 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerFeesTenantCron } from './helpers/registerTenantCron.js';
 import { Organization, Platform } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { StripePayoutReporter } from '../helpers/StripePayoutReporter.js';
 
-registerCron('stripe-payout-reports', createStripePayoutReports);
+registerFeesTenantCron('stripe-payout-reports', createStripePayoutReports);
 
 let lastStripeReport: Date | null = null;
 

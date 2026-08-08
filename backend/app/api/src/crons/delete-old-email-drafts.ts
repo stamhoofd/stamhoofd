@@ -1,10 +1,10 @@
-import { registerCron } from '@stamhoofd/crons';
+import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { Email } from '@stamhoofd/models';
 import { EmailStatus } from '@stamhoofd/structures';
 
 let lastRunDate: number | null = null;
 
-registerCron('deleteOldEmailDrafts', deleteOldEmailDrafts);
+registerTenantCron('deleteOldEmailDrafts', deleteOldEmailDrafts);
 
 /**
  * Run every night at 5 AM.
