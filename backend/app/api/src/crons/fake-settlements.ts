@@ -11,7 +11,7 @@ import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { SQL } from '@stamhoofd/sql';
 import { PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
-import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlement.js';
+import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlementGroups.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { Formatter } from '@stamhoofd/utility';
 import type { DateTime } from 'luxon';

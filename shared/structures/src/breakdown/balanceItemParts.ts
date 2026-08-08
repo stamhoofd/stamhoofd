@@ -1,7 +1,7 @@
 import type { BalanceItem, BalanceItemPaymentWithPrivatePayment } from '../BalanceItem.js';
 import type { BreakdownGroup } from '../PaymentBreakdown.js';
 import { BreakdownAmountType } from '../PaymentBreakdown.js';
-import { getPaymentSettlement, getPendingPaymentGroup, PENDING_PAYMENT_ID } from '../PaymentSettlement.js';
+import { getPaymentSettlement, getPendingPaymentGroup, PENDING_PAYMENT_ID } from '../PaymentSettlementGroups.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { createBalanceItemGroup, createFailedGroup, createOpenAfterFailedGroup, createOpenGroup, createRefundGroup, REFUND_ID, UNPAID_FAILED_ID, UNPAID_OPEN_AFTER_FAILED_ID, UNPAID_OPEN_ID } from './breakdownGroups.js';
 

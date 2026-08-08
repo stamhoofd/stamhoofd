@@ -3,7 +3,7 @@ import { getBalanceItemTypeIcon, getBalanceItemTypeName } from '../BalanceItem.j
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import type { PaymentAccount } from '../PaymentAccount.js';
 import { BreakdownAmountType, BreakdownGroup, BreakdownObjectType, BreakdownSelection } from '../PaymentBreakdown.js';
-import type { PaymentSettlementGroup } from '../PaymentSettlement.js';
+import type { PaymentSettlementGroup } from '../PaymentSettlementGroups.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { TranslatedString } from '../TranslatedString.js';
 import { toBalanceItemFilter } from './breakdownFilters.js';

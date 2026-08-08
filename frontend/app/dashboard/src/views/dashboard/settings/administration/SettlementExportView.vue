@@ -52,7 +52,7 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { PaymentProvider } from '@stamhoofd/structures';
-import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlement.js';
+import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlementGroups.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 

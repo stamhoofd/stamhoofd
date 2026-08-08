@@ -40,3 +40,25 @@ export class PaymentSettlementDetailed extends PaymentSettlement {
     @field({ decoder: Settlement })
     settlement: Settlement;
 }
+
+/**
+ * The one settlement to show when only a single one fits (exports, the legacy blob): the largest
+ * line wins, earliest settledAt as tiebreaker, so re-syncs never flip-flop the choice. Keep in sync
+ * with SettlementService.updateLegacySettlementReference, which applies the same rule on the
+ * database rows.
+ */
+export function getPrimaryPaymentSettlement(settlements: PaymentSettlementDetailed[]): PaymentSettlementDetailed | null {
+    if (settlements.length === 0) {
+        return null;
+    }
+
+    return [...settlements].sort((a, b) => {
+        if (Math.abs(a.amount) !== Math.abs(b.amount)) {
+            return Math.abs(b.amount) - Math.abs(a.amount);
+        }
+        if (a.settlement.settledAt.getTime() !== b.settlement.settledAt.getTime()) {
+            return a.settlement.settledAt.getTime() - b.settlement.settledAt.getTime();
+        }
+        return a.externalId.localeCompare(b.externalId);
+    })[0];
+}

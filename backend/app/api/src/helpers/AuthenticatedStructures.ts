@@ -74,7 +74,11 @@ export class AuthenticatedStructures {
         });
     }
 
-    static async invoices(invoices: Invoice[], incldueSettlements = false): Promise<InvoiceStruct[]> {
+    /**
+     * checkPermissions also decides whether the payments carry their settlement data: see
+     * paymentsGeneral.
+     */
+    static async invoices(invoices: Invoice[], checkPermissions = false): Promise<InvoiceStruct[]> {
         if (invoices.length === 0) {
             return [];
         }
@@ -82,7 +86,7 @@ export class AuthenticatedStructures {
         const { invoicedBalanceItems } = await Invoice.loadBalanceItems(invoices);
 
         const paymentModels = await Payment.select().where('invoiceId', invoices.map(i => i.id)).fetch();
-        const payments = await this.paymentsGeneral(paymentModels, incldueSettlements);
+        const payments = await this.paymentsGeneral(paymentModels, checkPermissions);
 
         return invoices.map((invoice) => {
             const items = invoicedBalanceItems.filter(i => i.invoiceId === invoice.id);
