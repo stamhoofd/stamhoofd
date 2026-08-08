@@ -1,5 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { getStatisticsConnection } from './connection.js';
 import { getStatisticsDatabase } from './migrations.js';
 
 /**
@@ -51,6 +52,8 @@ const allowedPersonalDataColumns = new Set([
     'organizations.postalCode',
     'members.postalCode',
     'members.birthDate',
+    // The lookup of where a postal code is. It describes an area, not anyone living in it.
+    'postal_codes.postalCode',
 ]);
 
 describe('migration.platform-statistics-schema', () => {
@@ -77,6 +80,7 @@ describe('migration.platform-statistics-schema', () => {
             'organization_tags',
             'organizations',
             'platform_membership_types',
+            'postal_codes',
             'registration_periods',
             'registrations',
             'responsibilities',
@@ -129,5 +133,60 @@ describe('migration.platform-statistics-schema', () => {
         });
 
         expect(offending).toEqual([]);
+    });
+});
+
+describe('migration.postal-code-coordinates', () => {
+    async function getPostalCodes(): Promise<{ postalCode: string; latitude: number; longitude: number }[]> {
+        // Its own connection: the main database has a `postal_codes` table of its own, which is what
+        // the shared one would reach.
+        const [rows] = await getStatisticsConnection().select(
+            'SELECT `postalCode`, `latitude` + 0E0 AS `latitude`, `longitude` + 0E0 AS `longitude` FROM `postal_codes`',
+            [],
+            { nestTables: false },
+        );
+        return rows as unknown as { postalCode: string; latitude: number; longitude: number }[];
+    }
+
+    it('loads a point for every Belgian postal code', async () => {
+        const rows = await getPostalCodes();
+
+        // Belgian postal codes run from 1000 to 9992. A handful are missing from any published list
+        // and the count shifts when bpost adds one, so this only guards against a partly loaded table.
+        expect(rows.length).toBeGreaterThan(1100);
+        expect(rows.every(row => /^\d{4}$/.test(row.postalCode))).toBe(true);
+        expect(new Set(rows.map(row => row.postalCode)).size).toBe(rows.length);
+    });
+
+    it('places every point inside Belgium', async () => {
+        const outside = (await getPostalCodes()).filter(row =>
+            row.latitude < 49.4 || row.latitude > 51.6 || row.longitude < 2.5 || row.longitude > 6.5);
+
+        expect(outside).toEqual([]);
+    });
+
+    it('puts the largest cities where they belong', async () => {
+        const byPostalCode = new Map((await getPostalCodes()).map(row => [row.postalCode, row]));
+
+        // Kilometres between the loaded point and where the city actually is. A postal code covers an
+        // area, so its centre is only ever near the city, not on it.
+        function distanceTo(postalCode: string, latitude: number, longitude: number): number {
+            const row = byPostalCode.get(postalCode);
+            if (!row) {
+                throw new Error(`Postal code ${postalCode} was not loaded`);
+            }
+            const north = (row.latitude - latitude) * 111;
+            const east = (row.longitude - longitude) * 111 * Math.cos((latitude * Math.PI) / 180);
+            return Math.sqrt(north * north + east * east);
+        }
+
+        expect(distanceTo('1000', 50.85, 4.35)).toBeLessThan(5);
+        expect(distanceTo('2000', 51.22, 4.40)).toBeLessThan(5);
+        expect(distanceTo('9000', 51.05, 3.72)).toBeLessThan(5);
+        expect(distanceTo('8000', 51.21, 3.22)).toBeLessThan(5);
+        expect(distanceTo('3500', 50.93, 5.34)).toBeLessThan(5);
+        expect(distanceTo('4000', 50.63, 5.57)).toBeLessThan(5);
+        expect(distanceTo('5000', 50.46, 4.87)).toBeLessThan(5);
+        expect(distanceTo('6000', 50.41, 4.44)).toBeLessThan(5);
     });
 });

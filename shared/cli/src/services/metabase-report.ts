@@ -16,6 +16,8 @@ export type ReportCard = {
     key: string;
     title: string;
     display: string;
+    latitude?: string;
+    longitude?: string;
     size: 'full' | 'half' | 'third' | 'quarter' | 'fifth';
     description?: string;
     dimensions: string[];
@@ -49,6 +51,18 @@ export const reportFilters = [
     { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: true },
     { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false },
 ] as const;
+
+/**
+ * What a question is called in the collection.
+ *
+ * Qualified with its tab because a title is not unique — the report shows "Aantal leden per postcode"
+ * on two pages, as the client's own does — and questions are matched by name to be updated in place.
+ * Two of them sharing a name means one silently overwrites the other. The dashboard still shows the
+ * plain title: that comes from the card's own `card.title` setting.
+ */
+export function cardName(card: ReportCard, tab: ReportTab): string {
+    return `${card.title} (${tab.title})`;
+}
 
 /** Metabase lays a dashboard out on a 24 column grid. */
 const gridWidth = 24;
@@ -125,20 +139,41 @@ export function buildTemplateTags(card: ReportCard): Record<string, unknown> {
     return tags;
 }
 
-export function buildVisualizationSettings(card: ReportCard): Record<string, unknown> {
+/**
+ * What Metabase actually draws. A map needs a coordinate per postal code, and those are loaded
+ * separately from anything Stamhoofd holds; while `postal_codes` is empty the card is a bar chart of
+ * the same figures rather than an empty map.
+ */
+export function effectiveDisplay(card: ReportCard, hasCoordinates: boolean): string {
+    return card.display === 'map' && !hasCoordinates ? 'bar' : card.display;
+}
+
+export function buildVisualizationSettings(card: ReportCard, hasCoordinates = true): Record<string, unknown> {
     const settings: Record<string, unknown> = { 'card.title': card.title };
 
     if (card.description !== undefined) {
         settings['card.description'] = card.description;
     }
 
-    if (card.display === 'pie') {
+    const display = effectiveDisplay(card, hasCoordinates);
+
+    if (display === 'map') {
+        // A pin map, which needs nothing but the two coordinate columns: Metabase only knows the
+        // outlines of countries and US states, and a map of Belgian postal code areas would mean
+        // hosting a GeoJSON on a public url for it to fetch.
+        settings['map.type'] = 'pin';
+        settings['map.latitude_column'] = card.latitude;
+        settings['map.longitude_column'] = card.longitude;
+        return settings;
+    }
+
+    if (display === 'pie') {
         settings['pie.dimension'] = card.dimensions[0];
         settings['pie.metric'] = card.metrics[0];
         return settings;
     }
 
-    if (['bar', 'line', 'combo', 'area', 'row'].includes(card.display)) {
+    if (['bar', 'line', 'combo', 'area', 'row'].includes(display)) {
         settings['graph.dimensions'] = card.dimensions;
         settings['graph.metrics'] = card.metrics;
 
@@ -147,7 +182,7 @@ export function buildVisualizationSettings(card: ReportCard): Record<string, unk
         }
         // A combo chart draws its first series as bars and the rest as a line, which is what the
         // "aantal leden + GTP index" chart of the report needs.
-        if (card.display === 'combo') {
+        if (display === 'combo') {
             settings['graph.series_settings'] = Object.fromEntries(card.metrics.map((metric, index) => [metric, { display: index === 0 ? 'bar' : 'line' }]));
         }
     }
@@ -257,6 +292,8 @@ export type ReportSyncResult = {
     cards: number;
     tabs: string[];
     bookmarked: boolean;
+    /** Map cards drawn as a bar chart because no postal code coordinates are loaded yet. */
+    mapsWithoutCoordinates: string[];
 };
 
 /** Pinned to the top of its collection: it is the only thing in there worth opening directly. */
@@ -266,7 +303,7 @@ export const reportCollectionPosition = 1;
  * Write the whole report to Metabase: one dashboard with a tab per page. Cards first, because a
  * dashboard can only point at cards that exist, and the filter dropdowns point at cards too.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string): Promise<ReportSyncResult> {
+export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string, hasCoordinates = false): Promise<ReportSyncResult> {
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
     const existingCards = new Map((await api.listCards(collectionId)).map(card => [card.name, card.id]));
@@ -276,15 +313,15 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
     for (const tab of tabs) {
         for (const card of tab.cards) {
             const id = await api.saveCard({
-                name: card.title,
+                name: cardName(card, tab),
                 description: card.description,
-                display: card.display,
+                display: effectiveDisplay(card, hasCoordinates),
                 databaseId,
                 query: card.sql,
                 templateTags: buildTemplateTags(card),
-                visualizationSettings: buildVisualizationSettings(card),
+                visualizationSettings: buildVisualizationSettings(card, hasCoordinates),
                 collectionId,
-            }, existingCards.get(card.title));
+            }, existingCards.get(cardName(card, tab)));
 
             cardIds.set(card.key, id);
             if (tab.hidden) {
@@ -313,9 +350,40 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
     });
 
     await archiveSupersededDashboards(api, existingDashboards, visible, dashboardName);
+    await archiveSupersededCards(api, collectionId, tabs);
     const { created: bookmarked } = await api.bookmarkDashboard(dashboardId);
 
-    return { collection, collectionId, createdCollection, dashboardId, cards: cardIds.size, tabs: visible.map(tab => tab.title), bookmarked };
+    // Deduplicated: two tabs show a map under the same title, and naming it twice reads as an error.
+    const mapsWithoutCoordinates = [...new Set(tabs
+        .flatMap(tab => tab.cards)
+        .filter(card => card.display === 'map' && !hasCoordinates)
+        .map(card => card.title))];
+
+    return { collection, collectionId, createdCollection, dashboardId, cards: cardIds.size, tabs: visible.map(tab => tab.title), bookmarked, mapsWithoutCoordinates };
+}
+
+/**
+ * Clear away questions this command wrote earlier that the report no longer has: a renamed card, a
+ * removed one, or one left behind by the older naming that did not qualify a title with its tab.
+ *
+ * Only names this command could have produced are touched, so a question the client saved into the
+ * collection themselves stays where it is.
+ */
+async function archiveSupersededCards(api: MetabaseApi, collectionId: number, tabs: ReportTab[]): Promise<void> {
+    const wanted = new Set(tabs.flatMap(tab => tab.cards.map(card => cardName(card, tab))));
+    const ours = new Set(tabs.flatMap(tab => tab.cards.map(card => card.title)));
+    const tabTitles = tabs.map(tab => tab.title);
+
+    for (const card of await api.listCards(collectionId)) {
+        if (wanted.has(card.name)) {
+            continue;
+        }
+
+        const qualified = tabTitles.some(title => card.name.endsWith(` (${title})`));
+        if (ours.has(card.name) || qualified) {
+            await api.archiveCard(card.id);
+        }
+    }
 }
 
 /**

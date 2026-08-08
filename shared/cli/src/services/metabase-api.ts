@@ -319,6 +319,11 @@ export class MetabaseApi {
         return { created: true };
     }
 
+    /** Move a question to the trash. */
+    async archiveCard(id: number): Promise<void> {
+        await this.request('PUT', `/api/card/${id}`, { archived: true });
+    }
+
     /** Move a dashboard to the trash. Used to clear away the one-dashboard-per-page layout. */
     async archiveDashboard(id: number): Promise<void> {
         await this.request('PUT', `/api/dashboard/${id}`, { archived: true });

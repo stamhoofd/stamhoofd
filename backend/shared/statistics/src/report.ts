@@ -29,8 +29,11 @@ import { fileURLToPath } from 'url';
 export type ReportCard = {
     key: string;
     title: string;
-    /** How Metabase should draw it: scalar, bar, line, pie, table, combo, gauge, row. */
+    /** How Metabase should draw it: scalar, bar, line, pie, table, combo, gauge, row, map. */
     display: string;
+    /** For a map, the columns holding the coordinates of each point. */
+    latitude?: string;
+    longitude?: string;
     /** Width on the dashboard: full, half, third, quarter or fifth of a row. */
     size: ReportCardSize;
     description?: string;
@@ -174,12 +177,21 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" has stacked "${stacked}", expected stacked or normalized`);
     }
 
+    const display = required(section.attributes, 'display', file, section.key);
+    const latitude = section.attributes.get('latitude');
+    const longitude = section.attributes.get('longitude');
+    if (display === 'map' && (latitude === undefined || longitude === undefined)) {
+        throw new Error(`${file}: card "${section.key}" is a map but names no latitude and longitude columns`);
+    }
+
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
 
     return {
         key: section.key,
         title: required(section.attributes, 'title', file, section.key),
-        display: required(section.attributes, 'display', file, section.key),
+        display,
+        latitude,
+        longitude,
         size: size as ReportCardSize,
         description: section.attributes.get('description'),
         dimensions: splitList(section.attributes.get('dimensions')),

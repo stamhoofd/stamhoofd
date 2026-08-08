@@ -2,7 +2,7 @@ import { BaseCommand } from '../../base-command.js';
 import { buildDomains } from '../../config/build-config.js';
 import { metabaseService } from '../../services/definitions/metabase-service.js';
 import { metabaseAdminEmail } from '../../services/metabase-config.js';
-import { link, step, warning } from '../../runtime/ux.js';
+import { command, link, step, warning } from '../../runtime/ux.js';
 
 export default class MetabaseReport extends BaseCommand {
     static summary = 'Recreate the ledenstatistieken dashboards in the local Metabase';
@@ -24,6 +24,10 @@ export default class MetabaseReport extends BaseCommand {
 
         if (result.tableCount === 0) {
             warning(`${result.database} has no tables yet, so every question will fail until the statistics schema exists.`);
+        }
+
+        if (result.mapsWithoutCoordinates.length > 0) {
+            warning(`Drawn as a bar chart instead of a map: ${result.mapsWithoutCoordinates.join(', ')}. A map needs a coordinate per postal code, and ${command('postal_codes')} in ${result.database} is still empty. Run ${command(`stam db migrate --env ${context.env}`)} to load them, then run this again.`);
         }
 
         this.log('');

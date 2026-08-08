@@ -183,7 +183,7 @@ describe('report', () => {
 
         it('names every column a chart plots', () => {
             for (const dashboard of dashboards) {
-                for (const card of dashboard.cards.filter(card => ['bar', 'line', 'combo', 'pie'].includes(card.display))) {
+                for (const card of dashboard.cards.filter(card => ['bar', 'line', 'combo', 'pie', 'map'].includes(card.display))) {
                     expect(`${card.key}: ${card.dimensions.length}`).not.toEqual(`${card.key}: 0`);
                     expect(`${card.key}: ${card.metrics.length}`).not.toEqual(`${card.key}: 0`);
 

@@ -70,6 +70,23 @@ CREATE TABLE `organizations` (
   CONSTRAINT `organizations_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Where a postal code is, so the reports can put members and units on a map.
+--
+-- Metabase plots a map from latitude and longitude columns, and nothing in Stamhoofd holds those:
+-- neither the postal codes it stores nor the addresses on its members. This table is therefore not a
+-- copy of anything and the sync never writes it — it is loaded once from a list of postal code
+-- centres. Until it is, the map cards simply have nothing to plot.
+--
+-- A centre point rather than an address: two members in the same postal code get the same
+-- coordinates, so this adds nothing to what the postal code already says about where someone lives.
+CREATE TABLE `postal_codes` (
+  `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `latitude` decimal(9,6) NOT NULL,
+  `longitude` decimal(9,6) NOT NULL,
+  PRIMARY KEY (`postalCode`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- Platform configuration that lives in json on the platform record in the main database. It is
 -- flattened into tables here so Metabase can join and group on it.
 CREATE TABLE `organization_tags` (

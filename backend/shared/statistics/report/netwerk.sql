@@ -45,9 +45,29 @@ ORDER BY t.name
 
 -- @card locatie-eenheden
 -- title: Locatie eenheden
+-- display: map
+-- latitude: Breedtegraad
+-- longitude: Lengtegraad
+-- size: half
+-- dimensions: Postcode
+-- metrics: Aantal eenheden
+-- description: Een punt per postcode waar eenheden zitten. Het originele rapport zet een stip per eenheid; zonder coordinaat per eenheid is de postcode het dichtstbij.
+-- @include facts
+-- @include postcode-coordinaten
+SELECT
+    f.eenheid_postcode AS `Postcode`,
+    c.latitude AS `Breedtegraad`,
+    c.longitude AS `Lengtegraad`,
+    COUNT(DISTINCT f.organization_id) AS `Aantal eenheden`
+FROM facts f
+LEFT JOIN postcode_coordinaten c ON c.postalCode = f.eenheid_postcode
+GROUP BY f.eenheid_postcode, c.latitude, c.longitude
+ORDER BY `Aantal eenheden` DESC
+
+-- @card eenheden-lijst
+-- title: Eenheden per netwerk
 -- display: table
--- size: full
--- description: De kaart uit het originele rapport vraagt coordinaten per eenheid; die staan niet in de statistiekendatabank.
+-- size: half
 -- @include facts
 SELECT
     f.`Eenheid`,

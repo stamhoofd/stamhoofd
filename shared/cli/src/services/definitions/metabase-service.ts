@@ -61,12 +61,14 @@ export class MetabaseService extends SharedDockerService {
     /**
      * Recreate the ledenstatistieken dashboard on top of the statistics data source.
      */
-    async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number }> {
+    async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
         const tabs = await loadReportDefinition(context);
+        const tableCount = await this.countTables(context, database);
+        const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 
-        const result = await syncReport(api, id, tabs, metabaseReportCollectionName(context.env), metabaseReportDashboardName);
-        return { ...result, database, dataSource, tableCount: await this.countTables(context, database) };
+        const result = await syncReport(api, id, tabs, metabaseReportCollectionName(context.env), metabaseReportDashboardName, postalCodeCount > 0);
+        return { ...result, database, dataSource, tableCount, postalCodeCount };
     }
 
     /**
@@ -159,6 +161,13 @@ export class MetabaseService extends SharedDockerService {
      */
     private async countTables(context: CliContext, database: string): Promise<number> {
         const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${database.replaceAll("'", "''")}'`], { capture: true, quiet: true, verbose: context.verbose });
+        return Number.parseInt(result.stdout.trim(), 10) || 0;
+    }
+
+    /** How many rows a table holds, used to tell whether the maps have coordinates to plot. */
+    private async countRows(context: CliContext, database: string, table: string): Promise<number> {
+        const query = `SELECT COUNT(*) FROM \`${database.replaceAll('`', '``')}\`.\`${table.replaceAll('`', '``')}\``;
+        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', query], { capture: true, quiet: true, verbose: context.verbose });
         return Number.parseInt(result.stdout.trim(), 10) || 0;
     }
 

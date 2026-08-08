@@ -63,15 +63,23 @@ FROM facts
 
 -- @card eenheid-leden-per-postcode
 -- title: Aantal leden per postcode
--- display: bar
+-- display: map
+-- latitude: Breedtegraad
+-- longitude: Lengtegraad
 -- size: full
 -- dimensions: Postcode
 -- metrics: Aantal leden
+-- description: Een punt per postcode. Een postcode zonder coordinaat in `postal_codes` telt wel mee, maar staat niet op de kaart.
 -- @include facts
-SELECT postcode AS `Postcode`, COUNT(DISTINCT member_id) AS `Aantal leden`
-FROM facts
-WHERE postcode IS NOT NULL
-GROUP BY postcode
+-- @include postcode-coordinaten
+SELECT
+    f.postcode AS `Postcode`,
+    c.latitude AS `Breedtegraad`,
+    c.longitude AS `Lengtegraad`,
+    COUNT(DISTINCT f.member_id) AS `Aantal leden`
+FROM facts f
+LEFT JOIN postcode_coordinaten c ON c.postalCode = f.postcode
+GROUP BY f.postcode, c.latitude, c.longitude
 ORDER BY `Aantal leden` DESC
 
 -- @card eenheid-leden-per-scoutsjaar
