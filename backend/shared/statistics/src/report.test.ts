@@ -12,6 +12,13 @@ const firstYear = 'Testjaar 2090 - 2091';
 const secondYear = 'Testjaar 2091 - 2092';
 const unit = '1e Rapporttest';
 
+/**
+ * A year in the shape the import leaves behind, before `firstYear` so it gives no successor to the
+ * years the other figures are checked against, and at a unit of its own so those figures do not move.
+ */
+const importedYear = 'Testjaar 2089 - 2090';
+const importedUnit = '3e Rapporttest';
+
 async function run(card: ReportCard, values: Record<string, string | null> = {}): Promise<Record<string, any>[]> {
     const connection = getStatisticsConnection();
     const [rows] = await connection.select(resolveSql(card.sql, values), [], { nestTables: false });
@@ -66,6 +73,7 @@ async function clean(): Promise<void> {
 async function seed(): Promise<void> {
     const now = new Date();
     await insert('registration_periods', [
+        { id: 'rt-p0', startDate: new Date(Date.UTC(2089, 8, 1)), endDate: new Date(Date.UTC(2090, 7, 31)), name: importedYear, customName: importedYear, createdAt: now, updatedAt: now },
         { id: 'rt-p1', startDate: new Date(Date.UTC(2090, 8, 1)), endDate: new Date(Date.UTC(2091, 7, 31)), name: firstYear, customName: firstYear, createdAt: now, updatedAt: now },
         { id: 'rt-p2', startDate: new Date(Date.UTC(2091, 8, 1)), endDate: new Date(Date.UTC(2092, 7, 31)), name: secondYear, customName: secondYear, createdAt: now, updatedAt: now },
     ]);
@@ -80,6 +88,7 @@ async function seed(): Promise<void> {
     await insert('organizations', [
         { id: 'rt-org-a', name: unit, uri: 'rt-org-a', postalCode: '9000', city: 'Gent', periodId: 'rt-p1', active: 1, createdAt: now, updatedAt: now },
         { id: 'rt-org-b', name: '2e Rapporttest', uri: 'rt-org-b', postalCode: '8000', city: 'Brugge', periodId: 'rt-p1', active: 1, createdAt: now, updatedAt: now },
+        { id: 'rt-org-c', name: importedUnit, uri: 'rt-org-c', postalCode: '2000', city: 'Antwerpen', periodId: 'rt-p0', active: 1, createdAt: now, updatedAt: now },
     ]);
 
     await insert('organization_tags', [
@@ -106,6 +115,14 @@ async function seed(): Promise<void> {
         deletedAt: null, createdAt: now, updatedAt: now,
     })));
 
+    // What the import leaves for the years it brought in: one tak per unit per year, with no name and
+    // no age group, holding the members whose real tak it did not record.
+    await insert('groups', [{
+        id: 'rt-g-c-import-p0', type: 'Membership', name: '', organizationId: 'rt-org-c',
+        periodId: 'rt-p0', defaultAgeGroupId: null, cycle: 0, status: 'Open',
+        deletedAt: null, createdAt: now, updatedAt: now,
+    }]);
+
     const members = [
         { id: 'rt-m1', birthDate: '1984-06-01', gender: 'Male', postalCode: '9000', organizationId: 'rt-org-a' },
         { id: 'rt-m2', birthDate: '1984-07-01', gender: 'Female', postalCode: '9000', organizationId: 'rt-org-a' },
@@ -113,6 +130,9 @@ async function seed(): Promise<void> {
         { id: 'rt-m4', birthDate: '1968-01-01', gender: 'Female', postalCode: '9000', organizationId: 'rt-org-a' },
         { id: 'rt-m5', birthDate: '1950-01-01', gender: null, postalCode: '9000', organizationId: 'rt-org-a' },
         { id: 'rt-m6', birthDate: '1984-02-01', gender: 'Male', postalCode: '8000', organizationId: 'rt-org-b' },
+        // In the imported tak: a child by age, and someone too old to place without a tak.
+        { id: 'rt-m7', birthDate: '2080-01-01', gender: 'Male', postalCode: '2000', organizationId: 'rt-org-c' },
+        { id: 'rt-m8', birthDate: '2060-01-01', gender: 'Female', postalCode: '2000', organizationId: 'rt-org-c' },
     ];
     await insert('members', members.map(member => ({ ...member, createdAt: now, updatedAt: now, lastRegisteredAt: null })));
 
@@ -132,6 +152,14 @@ async function seed(): Promise<void> {
     ];
     await insert('registrations', registrations.map(registration => ({
         ...registration, registeredAt: new Date(Date.UTC(2090, 8, 15)), startDate: null, endDate: null,
+        trialUntil: null, deactivatedAt: null, waitingList: 0, cycle: 0, createdAt: now, updatedAt: now,
+    })));
+
+    await insert('registrations', [
+        { id: 'rt-r11', memberId: 'rt-m7', groupId: 'rt-g-c-import-p0', organizationId: 'rt-org-c', periodId: 'rt-p0' },
+        { id: 'rt-r12', memberId: 'rt-m8', groupId: 'rt-g-c-import-p0', organizationId: 'rt-org-c', periodId: 'rt-p0' },
+    ].map(registration => ({
+        ...registration, registeredAt: new Date(Date.UTC(2089, 8, 15)), startDate: null, endDate: null,
         trialUntil: null, deactivatedAt: null, waitingList: 0, cycle: 0, createdAt: now, updatedAt: now,
     })));
 
@@ -336,6 +364,23 @@ describe('report', () => {
             expect(row!['Aantal kinderen']).toEqual(3);
             expect(row!['Aantal leiding']).toEqual(1);
             expect(row!['Aantal volwassenen']).toEqual(1);
+        });
+
+        /**
+         * The import recorded a tak only for leiding and volwassenen, and put every child in a
+         * nameless tak with no age range. Counted off the tak alone those members land in no
+         * category at all, which showed as "aantal kinderen" being zero for every imported year
+         * while the total counted them.
+         */
+        it('counts a member of the imported tak as a child on their own age', async () => {
+            const rows = await run(cardOf(dashboards, 'nationaal', 'leden-per-scoutsjaar'));
+            const row = rows.find(row => row['Scoutsjaar'] === importedYear);
+
+            expect(row!['Totaal leden']).toEqual(2);
+            expect(row!['Aantal kinderen']).toEqual(1);
+            // Nothing distinguishes leiding from volwassenen without a tak, so the adult stays out of both.
+            expect(row!['Aantal leiding']).toEqual(0);
+            expect(row!['Aantal volwassenen']).toEqual(0);
         });
 
         it('compares a tak with the same tak the year before', async () => {

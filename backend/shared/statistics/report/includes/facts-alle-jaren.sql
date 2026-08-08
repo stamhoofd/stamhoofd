@@ -12,7 +12,11 @@ WITH facts AS (
         p.name AS `Scoutsjaar`,
         p.startDate AS period_start,
         COALESCE(dag.name, g.name) AS `Tak`,
-        COALESCE(dag.category, CASE WHEN dag.maxAge < 18 THEN 'child' END) AS categorie,
+        COALESCE(
+            dag.category,
+            CASE WHEN dag.maxAge < 18 THEN 'child' END,
+            CASE WHEN TIMESTAMPDIFF(YEAR, m.birthDate, p.startDate) < 18 THEN 'child' END
+        ) AS categorie,
         dag.minAge AS tak_min_age,
         dag.maxAge AS tak_max_age,
         CASE m.gender
