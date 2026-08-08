@@ -556,6 +556,37 @@ export class PlatformConfig extends AutoEncoder {
 }
 
 export class Platform extends AutoEncoder {
+    /**
+     * Empty when it was decoded from data stored before tenants existed.
+     */
+    @field({ decoder: StringDecoder, ...NextVersion })
+    id: string = '';
+
+    /**
+     * The tenant this tenant belongs to. Null for a root tenant.
+     *
+     * Only the immediate parent, and only its public data: its own parentTenant and privateConfig are
+     * always null. Nesting the whole chain would put every ancestor's config on every response, and a
+     * child tenant's administrators have no rights on the parent.
+     */
+    @field({ decoder: Platform, nullable: true, ...NextVersion })
+    parentTenant: Platform | null = null;
+
+    /**
+     * The tenant that charges this one for packages, transfer fees, service fees and invoices.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    feesTenantId: string | null = null;
+
+    /**
+     * Globally unique, shares its namespace with Organization.uri.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    uri: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    domain: string | null = null;
+
     @field({ decoder: PlatformConfig })
     config: PlatformConfig = PlatformConfig.create({});
 
