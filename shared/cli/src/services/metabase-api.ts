@@ -291,14 +291,32 @@ export class MetabaseApi {
      * whole set of tabs and cards with what is sent, so this is also what removes a card the report
      * no longer has.
      */
-    async updateDashboard(id: number, body: { name: string; description?: string; parameters: unknown[]; tabs: unknown[]; dashcards: unknown[] }): Promise<void> {
+    async updateDashboard(id: number, body: { name: string; description?: string; parameters: unknown[]; tabs: unknown[]; dashcards: unknown[]; collectionPosition?: number }): Promise<void> {
         await this.request('PUT', `/api/dashboard/${id}`, {
             name: body.name,
             description: body.description ?? null,
             parameters: body.parameters,
             tabs: body.tabs,
             dashcards: body.dashcards,
+            // A position is what pins an item to the top of its collection; null leaves it unpinned.
+            collection_position: body.collectionPosition ?? null,
         });
+    }
+
+    /**
+     * Bookmark the dashboard, so it shows up under "Bookmarks" in the sidebar.
+     *
+     * A bookmark belongs to one account — the one the CLI signs in as — so this does nothing for
+     * anyone else who opens Metabase. Bookmarking twice is an error, hence the check first.
+     */
+    async bookmarkDashboard(id: number): Promise<{ created: boolean }> {
+        const bookmarks = await this.request<{ type?: string; item_id?: number }[]>('GET', '/api/bookmark');
+        if (bookmarks.some(bookmark => bookmark.type === 'dashboard' && bookmark.item_id === id)) {
+            return { created: false };
+        }
+
+        await this.request('POST', `/api/bookmark/dashboard/${id}`);
+        return { created: true };
     }
 
     /** Move a dashboard to the trash. Used to clear away the one-dashboard-per-page layout. */

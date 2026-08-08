@@ -256,7 +256,11 @@ export type ReportSyncResult = {
     dashboardId: number;
     cards: number;
     tabs: string[];
+    bookmarked: boolean;
 };
+
+/** Pinned to the top of its collection: it is the only thing in there worth opening directly. */
+export const reportCollectionPosition = 1;
 
 /**
  * Write the whole report to Metabase: one dashboard with a tab per page. Cards first, because a
@@ -305,11 +309,13 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         parameters,
         tabs: dashboardTabs,
         dashcards: buildDashcards(visible, cardIds, parameters, tabIds),
+        collectionPosition: reportCollectionPosition,
     });
 
     await archiveSupersededDashboards(api, existingDashboards, visible, dashboardName);
+    const { created: bookmarked } = await api.bookmarkDashboard(dashboardId);
 
-    return { collection, collectionId, createdCollection, dashboardId, cards: cardIds.size, tabs: visible.map(tab => tab.title) };
+    return { collection, collectionId, createdCollection, dashboardId, cards: cardIds.size, tabs: visible.map(tab => tab.title), bookmarked };
 }
 
 /**

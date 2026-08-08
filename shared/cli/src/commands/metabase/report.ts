@@ -1,6 +1,7 @@
 import { BaseCommand } from '../../base-command.js';
 import { buildDomains } from '../../config/build-config.js';
 import { metabaseService } from '../../services/definitions/metabase-service.js';
+import { metabaseAdminEmail } from '../../services/metabase-config.js';
 import { link, step, warning } from '../../runtime/ux.js';
 
 export default class MetabaseReport extends BaseCommand {
@@ -29,8 +30,13 @@ export default class MetabaseReport extends BaseCommand {
         this.log(`Environment: ${context.env}`);
         this.log(`Data source: ${result.dataSource} (${result.database})`);
         this.log(`Tabs:        ${result.tabs.join(', ')}`);
-        this.log(`Collection:  ${result.collection}`);
+        this.log(`Collection:  ${result.collection} (pinned)`);
         const url = `https://${buildDomains(context).metabase}/dashboard/${result.dashboardId}`;
         this.log(`Dashboard:   ${link(url, url)}`);
+
+        if (result.bookmarked) {
+            this.log('');
+            this.log(`Bookmarked for ${metabaseAdminEmail}. A bookmark is per account, so anyone else has to add their own.`);
+        }
     }
 }
