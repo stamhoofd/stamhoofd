@@ -1,6 +1,6 @@
 -- Wie in welk scoutsjaar lid was, over het hele platform en zonder filters.
 --
--- Dit is de "volgend jaar"-kant van het ledenbehoud. Een lid dat het jaar erna bij een andere eenheid
+-- Dit is de "is nog lid"-kant van het ledenbehoud. Een lid dat het jaar erna bij een andere eenheid
 -- opduikt telt als blijver: zo rekent het rapport van de klant het ook. De cijfers van 9e Wandelaar
 -- tonen het verschil — 38, 54 en 46 blijvers met deze telling, 37, 51 en 45 als alleen dezelfde
 -- eenheid meetelt.

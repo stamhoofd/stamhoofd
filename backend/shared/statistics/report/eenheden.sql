@@ -313,75 +313,54 @@ GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
 -- @card eenheid-ledenbehoud
--- title: Ledenbehoud: blijvers & vertrekkers na scoutsjaar
+-- title: Ledenbehoud: blijvers & vertrekkers per scoutsjaar
 -- display: table
 -- size: half
+-- description: Per scoutsjaar: hoeveel leden de eenheid het jaar ervoor had, en hoeveel daarvan in dat scoutsjaar nog lid waren.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
--- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
--- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, alle_jaren AS (
-    SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
-    FROM registration_periods
-    GROUP BY name
-)
--- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
--- nog niets voorbij de overnamedatum gesynchroniseerd is.
-, jaren AS (
-    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
-)
+-- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
-    COUNT(DISTINCT huidig.member_id) AS `Aantal leden`,
-    COUNT(DISTINCT volgend.member_id) AS `Aantal blijvers`,
-    COUNT(DISTINCT huidig.member_id) - COUNT(DISTINCT volgend.member_id) AS `Aantal vertrekkers`,
-    ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
+    COUNT(DISTINCT vorig.member_id) AS `Aantal leden vorig jaar`,
+    COUNT(DISTINCT gebleven.member_id) AS `Aantal blijvers`,
+    COUNT(DISTINCT vorig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
-LEFT JOIN leden_per_jaar volgend
-    ON volgend.`Scoutsjaar` = j.volgend
-    AND volgend.member_id = huidig.member_id
-WHERE j.volgend IS NOT NULL
+JOIN facts vorig ON vorig.`Scoutsjaar` = j.vorig
+LEFT JOIN leden_per_jaar gebleven
+    ON gebleven.`Scoutsjaar` = j.name
+    AND gebleven.member_id = vorig.member_id
 GROUP BY j.name, j.startDate
 ORDER BY j.startDate
 
 -- @card eenheid-ledenbehoud-per-tak
--- title: Ledenbehoud per tak: blijvers & vertrekkers na scoutsjaar
+-- title: Ledenbehoud per tak: blijvers & vertrekkers per scoutsjaar
 -- display: table
 -- size: half
+-- description: De leden van het jaar voor het gekozen scoutsjaar, per tak waar ze toen zaten, en hoeveel daarvan in het gekozen scoutsjaar nog lid waren.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
--- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
--- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, alle_jaren AS (
-    SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
-    FROM registration_periods
-    GROUP BY name
-)
--- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
--- nog niets voorbij de overnamedatum gesynchroniseerd is.
-, jaren AS (
-    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
-)
+-- @include jaren
 , gekozen AS (
-    SELECT name, volgend FROM jaren
-    WHERE 1 = 1 [[AND name = {{scoutsjaar}}]]
+    SELECT name, vorig FROM jaren
+    WHERE vorig IS NOT NULL [[AND name = {{scoutsjaar}}]]
     ORDER BY startDate DESC
     LIMIT 1
 )
 SELECT
-    huidig.`Tak`,
-    COUNT(DISTINCT huidig.member_id) AS `Aantal leden`,
-    COUNT(DISTINCT volgend.member_id) AS `Aantal blijvers`,
-    COUNT(DISTINCT huidig.member_id) - COUNT(DISTINCT volgend.member_id) AS `Aantal vertrekkers`,
-    ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
+    vorig.`Tak`,
+    COUNT(DISTINCT vorig.member_id) AS `Aantal leden vorig jaar`,
+    COUNT(DISTINCT gebleven.member_id) AS `Aantal blijvers`,
+    COUNT(DISTINCT vorig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
 FROM gekozen g
-JOIN facts huidig ON huidig.`Scoutsjaar` = g.name
-LEFT JOIN leden_per_jaar volgend
-    ON volgend.`Scoutsjaar` = g.volgend
-    AND volgend.member_id = huidig.member_id
-GROUP BY huidig.`Tak`
-ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
+JOIN facts vorig ON vorig.`Scoutsjaar` = g.vorig
+LEFT JOIN leden_per_jaar gebleven
+    ON gebleven.`Scoutsjaar` = g.name
+    AND gebleven.member_id = vorig.member_id
+GROUP BY vorig.`Tak`
+ORDER BY MIN(COALESCE(vorig.tak_min_age, 99)), vorig.`Tak`
 
 -- @card eenheid-evolutie-ledenbehoud
 -- title: Evolutie ledenbehoud op eenheidsniveau
@@ -391,27 +370,15 @@ ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
 -- metrics: Percentage blijvers
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
--- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
--- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, alle_jaren AS (
-    SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
-    FROM registration_periods
-    GROUP BY name
-)
--- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
--- nog niets voorbij de overnamedatum gesynchroniseerd is.
-, jaren AS (
-    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
-)
+-- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
-    ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
-LEFT JOIN leden_per_jaar volgend
-    ON volgend.`Scoutsjaar` = j.volgend
-    AND volgend.member_id = huidig.member_id
-WHERE j.volgend IS NOT NULL
+JOIN facts vorig ON vorig.`Scoutsjaar` = j.vorig
+LEFT JOIN leden_per_jaar gebleven
+    ON gebleven.`Scoutsjaar` = j.name
+    AND gebleven.member_id = vorig.member_id
 GROUP BY j.name, j.startDate
 ORDER BY j.startDate
 
@@ -423,27 +390,15 @@ ORDER BY j.startDate
 -- metrics: Percentage blijvers
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
--- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
--- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, alle_jaren AS (
-    SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
-    FROM registration_periods
-    GROUP BY name
-)
--- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
--- nog niets voorbij de overnamedatum gesynchroniseerd is.
-, jaren AS (
-    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
-)
+-- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
-    huidig.`Tak`,
-    ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
+    vorig.`Tak`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
-LEFT JOIN leden_per_jaar volgend
-    ON volgend.`Scoutsjaar` = j.volgend
-    AND volgend.member_id = huidig.member_id
-WHERE j.volgend IS NOT NULL
-GROUP BY j.name, j.startDate, huidig.`Tak`
-ORDER BY j.startDate, huidig.`Tak`
+JOIN facts vorig ON vorig.`Scoutsjaar` = j.vorig
+LEFT JOIN leden_per_jaar gebleven
+    ON gebleven.`Scoutsjaar` = j.name
+    AND gebleven.member_id = vorig.member_id
+GROUP BY j.name, j.startDate, vorig.`Tak`
+ORDER BY j.startDate, vorig.`Tak`

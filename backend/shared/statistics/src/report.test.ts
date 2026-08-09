@@ -4,20 +4,25 @@ import { loadReport, parameterNames, parseTab, resolveSql } from './report.js';
 
 /**
  * The years this test works in. Deliberately later than any other suite's periods, and adjacent to
- * each other: the retention figures read the next scoutsjaar off all periods ordered by date, and
- * this package's suites share one database that is never emptied between runs. Sitting last also
- * means the second year has no successor, which is the case the guard has to recognise.
+ * each other: the retention figures read the previous scoutsjaar off the years that have members
+ * ordered by date, and this package's suites share one database that is never emptied between runs.
+ * Sitting last also means the second year has no year after it, which is exactly the year the
+ * retention figures have to keep reporting on.
  */
 const firstYear = 'Testjaar 2090 - 2091';
 const secondYear = 'Testjaar 2091 - 2092';
 const unit = '1e Rapporttest';
 
 /**
- * A year in the shape the import leaves behind, before `firstYear` so it gives no successor to the
- * years the other figures are checked against, and at a unit of its own so those figures do not move.
+ * A year in the shape the import leaves behind, before `firstYear` and at a unit of its own so the
+ * other figures do not move. Being the year before `firstYear` makes it what `firstYear`'s retention
+ * is measured against.
  */
 const importedYear = 'Testjaar 2089 - 2090';
 const importedUnit = '3e Rapporttest';
+
+/** A period nobody is registered in, between two years that do have members. */
+const emptyYear = 'Testjaar zonder leden';
 
 async function run(card: ReportCard, values: Record<string, string | null> = {}): Promise<Record<string, any>[]> {
     const connection = getStatisticsConnection();
@@ -74,6 +79,7 @@ async function seed(): Promise<void> {
     const now = new Date();
     await insert('registration_periods', [
         { id: 'rt-p0', startDate: new Date(Date.UTC(2089, 8, 1)), endDate: new Date(Date.UTC(2090, 7, 31)), name: importedYear, customName: importedYear, createdAt: now, updatedAt: now },
+        { id: 'rt-p-leeg', startDate: new Date(Date.UTC(2090, 1, 1)), endDate: new Date(Date.UTC(2090, 7, 31)), name: emptyYear, customName: emptyYear, createdAt: now, updatedAt: now },
         { id: 'rt-p1', startDate: new Date(Date.UTC(2090, 8, 1)), endDate: new Date(Date.UTC(2091, 7, 31)), name: firstYear, customName: firstYear, createdAt: now, updatedAt: now },
         { id: 'rt-p2', startDate: new Date(Date.UTC(2091, 8, 1)), endDate: new Date(Date.UTC(2092, 7, 31)), name: secondYear, customName: secondYear, createdAt: now, updatedAt: now },
     ]);
@@ -311,11 +317,16 @@ describe('report', () => {
             expect(Number(rows[0]['Omkaderingscijfer'])).toEqual(3);
         });
 
-        it('counts a member who comes back the year after as a blijver', async () => {
-            const rows = await run(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid'), { scoutsjaar: firstYear });
+        /**
+         * The chosen scoutsjaar is the year the figure describes: how many of the year before are
+         * still there. The newest year is the one the report is read for, so it has to be answered
+         * even though no year follows it.
+         */
+        it('counts a member who comes back as a blijver of the year they come back in', async () => {
+            const rows = await run(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid'), { scoutsjaar: secondYear });
             const row = rows.find(row => row['Eenheid'] === unit);
 
-            // Three of the five members return.
+            // Three of the five members the unit had the year before return.
             expect(Number(row!['Percentage blijvers'])).toEqual(60);
         });
 
@@ -324,7 +335,7 @@ describe('report', () => {
          * who stay at the same unit gives 37, 51 and 45 blijvers where their report says 38, 54, 46.
          */
         it('still counts a member who moves to another unit as a blijver', async () => {
-            const rows = await run(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid'), { scoutsjaar: firstYear });
+            const rows = await run(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid'), { scoutsjaar: secondYear });
             const other = rows.find(row => row['Eenheid'] === '2e Rapporttest');
 
             // Its one member turns up at the other unit the year after, so none were lost.
@@ -332,13 +343,26 @@ describe('report', () => {
         });
 
         /**
-         * The last imported year has no year after it until the sync fills one in. Reporting 0%
-         * there would read as every member leaving.
+         * A period without a single member is not a year the retention can be measured from:
+         * reporting against it would read as every member of the year before leaving.
          */
-        it('leaves out a year whose successor has no members at all', async () => {
+        it('measures against the last year that had members, skipping an empty period', async () => {
+            const rows = await run(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid'), { scoutsjaar: firstYear });
+            const row = rows.find(row => row['Eenheid'] === importedUnit);
+
+            // Neither of the two members of the imported year is back, and the empty period in
+            // between is not what firstYear is compared with.
+            expect(Number(row!['Percentage blijvers'])).toEqual(0);
+        });
+
+        /**
+         * The unit's first year has nothing before it to compare against. Reporting 0% there would
+         * read as every member leaving.
+         */
+        it('leaves out a year the unit has no members before', async () => {
             const rows = await run(cardOf(dashboards, 'eenheden', 'eenheid-ledenbehoud'), { eenheid: unit });
 
-            expect(rows.map(row => row['Scoutsjaar'])).toEqual([firstYear]);
+            expect(rows.map(row => row['Scoutsjaar'])).toEqual([secondYear]);
         });
 
         it('splits a unit by geslacht for the varia table', async () => {

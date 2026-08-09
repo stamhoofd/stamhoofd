@@ -72,7 +72,8 @@ ORDER BY gb.leden DESC
 -- dimensions: Tak
 -- metrics: Aantal leden dit jaar, Aantal leden vorig jaar
 -- @include facts-alle-jaren
--- Zie de opmerking bij de andere jaren-CTE: het scoutsjaar is de naam, niet het id.
+-- Zie `includes/jaren.sql`: het scoutsjaar is de naam, niet het id. Hier tellen ook de jaren zonder
+-- leden mee, want een vergelijking met een leeg jaar is nog steeds een geldige vergelijking.
 , jaren AS (
     SELECT name, MIN(startDate) AS startDate, LAG(name) OVER (ORDER BY MIN(startDate)) AS vorig
     FROM registration_periods
@@ -186,35 +187,25 @@ ORDER BY MIN(period_start)
 -- size: full
 -- dimensions: Eenheid
 -- metrics: Percentage blijvers
--- description: Percentage blijvers na het gekozen scoutsjaar per eenheid. Links = laagste ledenbehoud.
+-- description: Van de leden in het scoutsjaar voor het gekozen scoutsjaar, het percentage dat in het gekozen scoutsjaar nog lid is, per eenheid waar ze toen zaten. Links = laagste ledenbehoud.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
--- Een scoutsjaar is de naam van de periode: elke eenheid houdt een eigen periode-rij voor hetzelfde
--- jaar, dus alleen de naam is over alle eenheden heen hetzelfde.
-, alle_jaren AS (
-    SELECT name, MIN(startDate) AS startDate, LEAD(name) OVER (ORDER BY MIN(startDate)) AS volgend
-    FROM registration_periods
-    GROUP BY name
-)
--- Alleen jaren waarvan het volgende jaar al leden heeft: anders leest het laatste jaar 0% omdat er
--- nog niets voorbij de overnamedatum gesynchroniseerd is.
-, jaren AS (
-    SELECT * FROM alle_jaren WHERE volgend IN (SELECT `Scoutsjaar` FROM leden_per_jaar)
-)
+-- @include jaren
 , gekozen AS (
-    SELECT name, volgend FROM jaren
-    WHERE 1 = 1 [[AND name = {{scoutsjaar}}]]
+    SELECT name, vorig FROM jaren
+    WHERE vorig IS NOT NULL [[AND name = {{scoutsjaar}}]]
     ORDER BY startDate DESC
     LIMIT 1
 )
--- Een blijver is lid in het gekozen jaar en het jaar erna, bij dezelfde eenheid.
+-- Een blijver is lid in het jaar voor het gekozen jaar en nog steeds lid in het gekozen jaar, waar
+-- ook op het platform: wie naar een andere eenheid verhuist telt mee, zoals de klant het ook rekent.
 SELECT
-    huidig.`Eenheid`,
-    ROUND(100 * COUNT(DISTINCT volgend.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
+    vorig.`Eenheid`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
 FROM gekozen g
-JOIN facts huidig ON huidig.`Scoutsjaar` = g.name
-LEFT JOIN leden_per_jaar volgend
-    ON volgend.`Scoutsjaar` = g.volgend
-    AND volgend.member_id = huidig.member_id
-GROUP BY huidig.`Eenheid`
+JOIN facts vorig ON vorig.`Scoutsjaar` = g.vorig
+LEFT JOIN leden_per_jaar gebleven
+    ON gebleven.`Scoutsjaar` = g.name
+    AND gebleven.member_id = vorig.member_id
+GROUP BY vorig.`Eenheid`
 ORDER BY `Percentage blijvers`
