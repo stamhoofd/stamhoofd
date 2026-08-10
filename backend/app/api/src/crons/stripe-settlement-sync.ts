@@ -15,8 +15,10 @@ import { SettlementService } from '../services/SettlementService.js';
 import { SettlementSyncRunner } from '../helpers/SettlementSyncRunner.js';
 import type { StripePaymentIdCache } from '../helpers/resolveStripePaymentId.js';
 import { StripePayoutSync } from '../helpers/StripePayoutSync.js';
+import { checkSettlements } from '../helpers/CheckSettlements.js';
 
 registerCron('stripe-settlement-sync', syncStripeSettlements);
+registerCron('checkSettlements', checkSettlements);
 
 /**
  * How many days of payouts the nightly run re-walks. Everything is an upsert and synced payouts
@@ -33,14 +35,6 @@ let lastSettlementSync: Date | null = null;
 
 async function syncStripeSettlements() {
     if (STAMHOOFD.environment !== 'production') {
-        return;
-    }
-
-    if (STAMHOOFD.userMode === 'platform') {
-        return;
-    }
-
-    if (STAMHOOFD.STRIPE_CONNECT_METHOD === 'standard') {
         return;
     }
 
