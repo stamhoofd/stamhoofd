@@ -44,6 +44,7 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
 -- size: full
 -- dimensions: Eenheid
 -- metrics: Aantal leden, GTP index
+-- xlabels: rotate-45
 -- description: De GTP index is een voorlopige berekening, zie de opmerking in de query.
 -- @include facts
 , gtp_basis AS (
@@ -71,6 +72,7 @@ ORDER BY gb.leden DESC
 -- size: half
 -- dimensions: Tak
 -- metrics: Aantal leden dit jaar, Aantal leden vorig jaar
+-- xlabels: rotate-45
 -- @include facts-alle-jaren
 -- Zie `includes/jaren.sql`: het scoutsjaar is de naam, niet het id. Hier tellen ook de jaren zonder
 -- leden mee, want een vergelijking met een leeg jaar is nog steeds een geldige vergelijking.
@@ -187,6 +189,7 @@ ORDER BY MIN(period_start)
 -- size: full
 -- dimensions: Eenheid
 -- metrics: Percentage blijvers
+-- xlabels: rotate-45
 -- description: Van de leden in het scoutsjaar voor het gekozen scoutsjaar, het percentage dat in het gekozen scoutsjaar nog lid is, per eenheid waar ze toen zaten. Links = laagste ledenbehoud.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar

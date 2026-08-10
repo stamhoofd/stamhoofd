@@ -43,6 +43,11 @@ export type ReportCard = {
     metrics: string[];
     /** How bars are stacked: absent, `stacked` or `normalized`. */
     stacked?: 'stacked' | 'normalized';
+    /**
+     * How the labels along the x-axis are drawn. Absent lets the chart decide, which drops them
+     * entirely when too many do not fit -- an eenheid or tak chart needs a rotation to keep them.
+     */
+    xLabels?: ReportCardXLabels;
     /** Parameters the query takes, read from the `{{...}}` in the sql. */
     parameters: string[];
     sql: string;
@@ -67,6 +72,9 @@ export type ReportTab = {
 
 export const reportCardSizes = ['full', 'half', 'third', 'quarter', 'fifth'] as const;
 export type ReportCardSize = typeof reportCardSizes[number];
+
+export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
+export type ReportCardXLabels = typeof reportCardXLabels[number];
 
 /** The tabs in the order the client's report shows its pages. */
 export const reportTabOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'filters'];
@@ -177,6 +185,11 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         throw new Error(`${file}: card "${section.key}" has stacked "${stacked}", expected stacked or normalized`);
     }
 
+    const xLabels = section.attributes.get('xlabels');
+    if (xLabels !== undefined && !(reportCardXLabels as readonly string[]).includes(xLabels)) {
+        throw new Error(`${file}: card "${section.key}" has xlabels "${xLabels}", expected one of ${reportCardXLabels.join(', ')}`);
+    }
+
     const display = required(section.attributes, 'display', file, section.key);
     const latitude = section.attributes.get('latitude');
     const longitude = section.attributes.get('longitude');
@@ -197,6 +210,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         dimensions: splitList(section.attributes.get('dimensions')),
         metrics: splitList(section.attributes.get('metrics')),
         stacked,
+        xLabels: xLabels as ReportCardXLabels | undefined,
         parameters: parameterNames(sql),
         sql,
     };

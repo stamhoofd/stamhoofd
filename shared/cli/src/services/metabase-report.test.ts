@@ -39,6 +39,38 @@ describe('layoutCards', () => {
         expect(placed[2]).toMatchObject({ row: 8, col: 0, sizeX: 24 });
     });
 
+    /**
+     * Rotated labels are drawn below the plot rather than beside it, so a card at the normal height
+     * is left with bars too short to compare. The room they take is paid for on top.
+     */
+    it('makes a chart with rotated labels taller, so the plot keeps its room', () => {
+        const [plain] = layoutCards([card({ key: 'a', size: 'full', display: 'bar' })]);
+        const [rotated] = layoutCards([card({ key: 'a', size: 'full', display: 'bar', xLabels: 'rotate-45' })]);
+        const [upright] = layoutCards([card({ key: 'a', size: 'full', display: 'bar', xLabels: 'rotate-90' })]);
+
+        expect(rotated.sizeY).toBeGreaterThan(plain.sizeY);
+        // Reading the label sideways takes more room than reading it at an angle.
+        expect(upright.sizeY).toBeGreaterThan(rotated.sizeY);
+    });
+
+    /**
+     * The band is as tall as the longest label, which does not change with the width of the card.
+     */
+    it('adds the same room to a half card as to a full one', () => {
+        const grew = (size: 'full' | 'half') =>
+            layoutCards([card({ key: 'a', size, display: 'bar', xLabels: 'rotate-45' })])[0].sizeY
+            - layoutCards([card({ key: 'a', size, display: 'bar' })])[0].sizeY;
+
+        expect(grew('half')).toEqual(grew('full'));
+    });
+
+    it('leaves a card that never rotates at its normal height', () => {
+        const [plain] = layoutCards([card({ key: 'a', size: 'full', display: 'bar' })]);
+        const [compact] = layoutCards([card({ key: 'a', size: 'full', display: 'bar', xLabels: 'compact' })]);
+
+        expect(compact.sizeY).toEqual(plain.sizeY);
+    });
+
     it('never lets a card hang over the edge of the grid', () => {
         const placed = layoutCards([card({ key: 'a', size: 'third' }), card({ key: 'b', size: 'full' })]);
 
@@ -64,6 +96,25 @@ describe('buildVisualizationSettings', () => {
 
     it('stacks a ratio chart to full width', () => {
         expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar'], metrics: ['Jong', 'Oud'], stacked: 'normalized' }))['stackable.stack_type']).toEqual('normalized');
+    });
+
+    /**
+     * Left to itself Metabase hides the labels along the x-axis as soon as too many of them do not
+     * fit, which is every chart with a bar per eenheid. It only makes that decision when the
+     * setting is absent, so naming a rotation is what keeps the names under the bars.
+     */
+    it('rotates the x-axis labels when the card asks for it', () => {
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Eenheid'], metrics: ['Percentage blijvers'], xLabels: 'rotate-45' }))['graph.x_axis.axis_enabled']).toEqual('rotate-45');
+        expect(buildVisualizationSettings(card({ display: 'combo', dimensions: ['Eenheid'], metrics: ['Aantal leden'], xLabels: 'rotate-90' }))['graph.x_axis.axis_enabled']).toEqual('rotate-90');
+    });
+
+    it('says nothing about the x-axis for a card that does not ask, so Metabase keeps deciding', () => {
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Scoutsjaar'], metrics: ['Jong'] }))).not.toHaveProperty('graph.x_axis.axis_enabled');
+    });
+
+    it('turns the report\'s own words for the x-axis into the ones Metabase uses', () => {
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'], xLabels: 'hide' }))['graph.x_axis.axis_enabled']).toEqual(false);
+        expect(buildVisualizationSettings(card({ display: 'bar', dimensions: ['Tak'], metrics: ['A'], xLabels: 'show' }))['graph.x_axis.axis_enabled']).toEqual(true);
     });
 
     it('uses the pie settings for a pie, which ignores the graph ones', () => {

@@ -23,6 +23,7 @@ export type ReportCard = {
     dimensions: string[];
     metrics: string[];
     stacked?: 'stacked' | 'normalized';
+    xLabels?: 'show' | 'hide' | 'compact' | 'rotate-45' | 'rotate-90';
     parameters: string[];
     sql: string;
 };
@@ -69,6 +70,21 @@ const gridWidth = 24;
 
 const widths: Record<ReportCard['size'], number> = { full: 24, half: 12, third: 8, quarter: 6, fifth: 4 };
 
+/**
+ * Extra rows for the band the rotated labels sit in.
+ *
+ * Rotated labels are drawn below the plot and eat into it, which leaves a card at the normal height
+ * with bars too short to tell apart. The band is as tall as the longest label, which has nothing to
+ * do with how wide the card is, so this is added on top rather than scaled.
+ */
+const xLabelRows: Record<NonNullable<ReportCard['xLabels']>, number> = {
+    show: 0,
+    hide: 0,
+    compact: 0,
+    'rotate-45': 4,
+    'rotate-90': 6,
+};
+
 function heightOf(card: ReportCard): number {
     if (card.display === 'scalar' || card.display === 'gauge') {
         return 3;
@@ -76,7 +92,7 @@ function heightOf(card: ReportCard): number {
     if (card.display === 'table') {
         return 8;
     }
-    return card.size === 'full' ? 7 : 6;
+    return (card.size === 'full' ? 7 : 6) + (card.xLabels === undefined ? 0 : xLabelRows[card.xLabels]);
 }
 
 /**
@@ -148,6 +164,17 @@ export function effectiveDisplay(card: ReportCard, hasCoordinates: boolean): str
     return card.display === 'map' && !hasCoordinates ? 'bar' : card.display;
 }
 
+/**
+ * How the report describes its x-axis labels, in what Metabase calls them.
+ */
+const xAxisLabels: Record<string, boolean | string> = {
+    show: true,
+    hide: false,
+    compact: 'compact',
+    'rotate-45': 'rotate-45',
+    'rotate-90': 'rotate-90',
+};
+
 export function buildVisualizationSettings(card: ReportCard, hasCoordinates = true): Record<string, unknown> {
     const settings: Record<string, unknown> = { 'card.title': card.title };
 
@@ -176,6 +203,12 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
     if (['bar', 'line', 'combo', 'area', 'row'].includes(display)) {
         settings['graph.dimensions'] = card.dimensions;
         settings['graph.metrics'] = card.metrics;
+
+        // Left unset, Metabase decides for itself and drops the labels when too many do not fit --
+        // which is every chart with a bar per eenheid. An explicit value is used as given.
+        if (card.xLabels !== undefined) {
+            settings['graph.x_axis.axis_enabled'] = xAxisLabels[card.xLabels];
+        }
 
         if (card.stacked !== undefined) {
             settings['stackable.stack_type'] = card.stacked === 'normalized' ? 'normalized' : 'stacked';

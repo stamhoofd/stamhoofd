@@ -236,6 +236,22 @@ describe('report', () => {
             }
         });
 
+        /**
+         * A chart with a bar per eenheid has more labels than fit, and Metabase drops them all
+         * rather than rotate on its own. The charts that need them say so.
+         */
+        it('reads how a card wants its x-axis labels drawn', () => {
+            expect(cardOf(dashboards, 'nationaal', 'leden-per-eenheid').xLabels).toEqual('rotate-45');
+            expect(cardOf(dashboards, 'nationaal', 'leden-per-tak-vergelijking').xLabels).toEqual('rotate-45');
+            expect(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid').xLabels).toEqual('rotate-45');
+            expect(cardOf(dashboards, 'nationaal', 'leden-per-geboortejaar').xLabels).toBeUndefined();
+        });
+
+        it('rejects an x-axis setting it cannot pass on', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xlabels: sideways\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('has xlabels "sideways"');
+        });
+
         it('rejects a filter no card can be driven by', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n-- filters: eenheid\n\n-- @card c\n-- title: C\n-- display: table\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('no card uses {{eenheid}}');
