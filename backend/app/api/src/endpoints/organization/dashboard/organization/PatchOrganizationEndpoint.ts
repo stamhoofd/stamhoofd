@@ -667,7 +667,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
      * A custom PEPPOL endpoint id may only be set by full platform admins for now.
      */
     private requirePeppolPermission() {
-        if (!Context.auth.hasPlatformFullAccess()) {
+        if (!Context.auth.hasPlatformFullAccess() && STAMHOOFD.userMode === 'platform') {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'Only platform admins can set a custom PEPPOL endpoint id',
