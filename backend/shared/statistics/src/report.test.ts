@@ -241,10 +241,27 @@ describe('report', () => {
          * rather than rotate on its own. The charts that need them say so.
          */
         it('reads how a card wants its x-axis labels drawn', () => {
-            expect(cardOf(dashboards, 'nationaal', 'leden-per-eenheid').xLabels).toEqual('rotate-45');
+            // A bar per eenheid leaves too little room to read a label at an angle: Metabase drops
+            // the ones that touch, so those two stand upright.
+            expect(cardOf(dashboards, 'nationaal', 'leden-per-eenheid').xLabels).toEqual('rotate-90');
+            expect(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid').xLabels).toEqual('rotate-90');
             expect(cardOf(dashboards, 'nationaal', 'leden-per-tak-vergelijking').xLabels).toEqual('rotate-45');
-            expect(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid').xLabels).toEqual('rotate-45');
             expect(cardOf(dashboards, 'nationaal', 'leden-per-geboortejaar').xLabels).toBeUndefined();
+        });
+
+        /**
+         * A setting only counts above the query. One comment written above it pushes the whole
+         * block below the line, and every setting under it would be dropped without a word.
+         */
+        it('rejects a setting that slipped below the query', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- A note.\n-- display: bar\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('has "display:" below the query');
+        });
+
+        it('leaves a comment that merely looks like a setting alone', () => {
+            const tab = parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- A note.\n-- see: the note above\nSELECT 1', 'x.sql', new Map());
+
+            expect(tab.cards[0].sql).toContain('-- see: the note above');
         });
 
         it('rejects an x-axis setting it cannot pass on', () => {

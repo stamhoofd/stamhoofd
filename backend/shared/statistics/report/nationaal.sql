@@ -44,8 +44,10 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
 -- size: full
 -- dimensions: Eenheid
 -- metrics: Aantal leden, GTP index
--- xlabels: rotate-45
+-- xlabels: rotate-90
 -- description: De GTP index is een voorlopige berekening, zie de opmerking in de query.
+-- Rechtop, niet schuin: Metabase laat een label vallen zodra het het vorige raakt, en schuin heeft
+-- een naam per eenheid daar net te weinig plaats voor.
 -- @include facts
 , gtp_basis AS (
     SELECT
@@ -189,8 +191,9 @@ ORDER BY MIN(period_start)
 -- size: full
 -- dimensions: Eenheid
 -- metrics: Percentage blijvers
--- xlabels: rotate-45
+-- xlabels: rotate-90
 -- description: Van de leden in het scoutsjaar voor het gekozen scoutsjaar, het percentage dat in het gekozen scoutsjaar nog lid is, per eenheid waar ze toen zaten. Links = laagste ledenbehoud.
+-- Rechtop, om dezelfde reden als bij de grafiek met het aantal leden per eenheid.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
 -- @include jaren

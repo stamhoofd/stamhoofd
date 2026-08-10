@@ -114,7 +114,7 @@ async function loadIncludes(directory: string): Promise<Map<string, string>> {
  * stays as it is, so a card's sql keeps the comments written above it.
  */
 export function parseTab(contents: string, file: string, includes: Map<string, string>): ReportTab {
-    const sections = splitSections(contents);
+    const sections = splitSections(contents, file);
     const header = sections.find(section => section.kind === 'tab');
 
     if (!header) {
@@ -145,7 +145,14 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
 
 type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, string>; body: string };
 
-function splitSections(contents: string): Section[] {
+/**
+ * Every setting a tab or card understands. A line shaped like one below the query is a setting that
+ * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
+ * comment above `-- size:` is enough to make the whole block below it stop counting.
+ */
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'stacked', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden']);
+
+function splitSections(contents: string, file: string): Section[] {
     const sections: Section[] = [];
     let current: Section | undefined;
 
@@ -164,9 +171,14 @@ function splitSections(contents: string): Section[] {
         // The value keeps its leading spaces here and is trimmed below: matching them separately
         // would let the two quantifiers split the same run of spaces in several ways.
         const attribute = /^--[ \t]*([a-z]+):(.*)$/.exec(line);
-        if (attribute && current.body.trim().length === 0) {
-            current.attributes.set(attribute[1], attribute[2].trim());
-            continue;
+        if (attribute) {
+            if (current.body.trim().length === 0) {
+                current.attributes.set(attribute[1], attribute[2].trim());
+                continue;
+            }
+            if (knownAttributes.has(attribute[1])) {
+                throw new Error(`${file}: "${current.key}" has "${attribute[1]}:" below the query, where it is read as a comment instead of a setting. Move it above the first comment and @include.`);
+            }
         }
         current.body += line + '\n';
     }
