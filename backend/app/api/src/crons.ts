@@ -356,7 +356,6 @@ async function checkReservedUntil() {
 }
 
 // Legacy blob writes for Stripe + the canonical Mollie walk; see crons/stripe-settlement-sync.ts
-registerCron('checkSettlements', checkSettlements);
 registerCron('checkExpirationEmails', checkExpirationEmails);
 registerCron('checkReservedUntil', checkReservedUntil);
 registerCron('checkDNS', checkDNS);
