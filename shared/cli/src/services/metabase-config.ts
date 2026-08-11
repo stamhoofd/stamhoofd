@@ -1,11 +1,13 @@
+import type { MetabaseAdmin } from '@stamhoofd/metabase/api';
 import type { DevelopmentDomains } from '../config/development-config.js';
 import { dockerHostGateway, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
-import type { MetabaseAdmin } from './metabase-api.js';
 
 /**
  * The admin account the CLI creates when it completes the setup wizard, so it can keep configuring
  * the instance later. Override both when the instance was set up by hand with another account:
  * without valid credentials the CLI cannot register the platform statistics database.
+ *
+ * Local only. A server is set up by a person, and its credentials come from 1Password.
  */
 export const metabaseAdminEmail = process.env.METABASE_ADMIN_EMAIL ?? 'dev@stamhoofd.local';
 export const metabaseAdminPassword = process.env.METABASE_ADMIN_PASSWORD ?? 'stamhoofd-local-1';
@@ -22,34 +24,6 @@ export type MetabaseDataSource = {
     database: string;
     mysqlPort: number;
 };
-
-/**
- * The name a platform statistics database is registered under in Metabase. One Metabase serves every
- * environment, so the environment has to be visible in the name.
- */
-export function metabaseDataSourceName(env: string): string {
-    return `Platform statistics (${env})`;
-}
-
-/**
- * The collection the ledenstatistieken dashboards of an environment live in.
- *
- * Scoped per environment for the same reason the data source is: one Metabase serves them all, and a
- * question can only read from one database. A shared collection would mean the last environment
- * pushed silently repoints every dashboard of the others.
- */
-export function metabaseReportCollectionName(env: string): string {
-    return `Ledenstatistieken (${env})`;
-}
-
-/** The single dashboard the report writes, one tab per page of the client's own report. */
-export const metabaseReportDashboardName = 'Ledenstatistieken';
-
-/**
- * Tables of the statistics database that are infrastructure rather than data. They are hidden in
- * Metabase so they stay out of the query builder and the data reference.
- */
-export const metabaseHiddenTables = ['migrations'];
 
 export function buildMetabaseConfigOutput(domains: DevelopmentDomains, dataSource: MetabaseDataSource): string {
     return `Local Metabase:

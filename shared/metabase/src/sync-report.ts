@@ -1,42 +1,16 @@
-import type { MetabaseApi } from './metabase-api.js';
+import type { MetabaseApi } from './api.js';
+import type { ReportCard, ReportTab } from './report.js';
 
 /**
- * Turns the report definition of `@stamhoofd/backend-statistics` into one Metabase dashboard, with a tab per
- * page of the client's report.
+ * Turns the report definition of `report.ts` into one Metabase dashboard, with a tab per page of the
+ * client's report.
  *
- * The queries themselves live with the schema they read, in `backend/app/statistics/report`. This
- * file only knows how to say them in Metabase's vocabulary: which display, which columns on which
- * axis, and which filter drives which card.
+ * This file only knows how to say the queries in Metabase's vocabulary: which display, which columns
+ * on which axis, and which filter drives which card.
  *
  * Everything here is written by name and updated in place, so running it twice changes nothing and
  * running it after an edit only moves what actually changed.
  */
-
-export type ReportCard = {
-    key: string;
-    title: string;
-    display: string;
-    latitude?: string;
-    longitude?: string;
-    size: 'full' | 'half' | 'third' | 'quarter' | 'fifth';
-    description?: string;
-    dimensions: string[];
-    metrics: string[];
-    stacked?: 'stacked' | 'normalized';
-    xLabels?: 'show' | 'hide' | 'compact' | 'rotate-45' | 'rotate-90';
-    parameters: string[];
-    sql: string;
-};
-
-export type ReportTab = {
-    key: string;
-    title: string;
-    description?: string;
-    /** The filters that drive this tab, by name. */
-    filters: string[];
-    hidden: boolean;
-    cards: ReportCard[];
-};
 
 /**
  * The filters shown above the dashboards. `valuesFrom` names the card in the hidden `filters`

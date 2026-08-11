@@ -1,4 +1,4 @@
-import { getStatisticsConnection } from './connection.js';
+import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
 import type { StatisticsRow } from './rows.js';
 
 /**

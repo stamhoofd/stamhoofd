@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MetabaseApi, MetabaseApiError } from './metabase-api.js';
+import { MetabaseApi, MetabaseApiError } from './api.js';
 
 type Route = { status?: number; body: unknown };
 

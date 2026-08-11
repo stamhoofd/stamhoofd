@@ -6,7 +6,7 @@ import { command, link, step, warning } from '../../runtime/ux.js';
 
 export default class MetabaseReport extends BaseCommand {
     static summary = 'Recreate the ledenstatistieken dashboards in the local Metabase';
-    static description = 'Writes the questions and dashboards defined in backend/app/statistics/report to Metabase, pointed at the platform statistics database of the selected environment. Safe to run again: everything is matched by name and updated in place, so edits made in Metabase to a card the report owns are overwritten while anything else is left alone.';
+    static description = 'Writes the questions and dashboards defined in shared/metabase/report to Metabase, pointed at the platform statistics database of the selected environment. Safe to run again: everything is matched by name and updated in place, so edits made in Metabase to a card the report owns are overwritten while anything else is left alone.';
     static examples = [
         'stam metabase report',
         'stam metabase report --env keeo',

@@ -32,6 +32,7 @@
         "@aws-sdk/client-s3": "3.1090.0",
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.11.14",
+        "@stamhoofd/metabase": "2.140.0",
         "@stamhoofd/types": "2.140.0",
         "chalk": "5.6.2",
         "log-update": "8.0.0",

@@ -1,7 +1,8 @@
 import { BaseCommand } from '../../base-command.js';
 import { buildDatabases, buildDomains } from '../../config/build-config.js';
 import { buildPorts } from '../../context/ports.js';
-import { buildMetabaseConfigOutput, metabaseDataSourceName } from '../../services/metabase-config.js';
+import { metabaseDataSourceName } from '@stamhoofd/metabase/naming';
+import { buildMetabaseConfigOutput } from '../../services/metabase-config.js';
 
 export default class MetabaseConfig extends BaseCommand {
     static summary = 'Print local Metabase URL, login and data source settings';

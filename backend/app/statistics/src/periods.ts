@@ -1,4 +1,4 @@
-import { getStatisticsConnection } from './connection.js';
+import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
 
 /**
  * The date up to which this platform's statistics come from an imported external source. Periods

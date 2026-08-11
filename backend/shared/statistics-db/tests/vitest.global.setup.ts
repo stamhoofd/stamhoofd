@@ -1,0 +1,19 @@
+import { TestUtils } from '@stamhoofd/test-utils';
+
+// Dates are stored and compared in UTC everywhere else in the repo; a date column read back in
+// another zone lands a day off.
+process.env.TZ = 'UTC';
+
+if (new Date().getTimezoneOffset() !== 0) {
+    throw new Error('Process should always run in UTC timezone');
+}
+
+export async function setup() {
+    TestUtils.globalSetup();
+
+    const { Database } = await import('@simonbackx/simple-database');
+    const { runStatisticsMigrations } = await import('../src/migrations.js');
+
+    await runStatisticsMigrations();
+    await Database.end();
+};

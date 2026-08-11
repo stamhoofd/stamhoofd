@@ -1,0 +1,38 @@
+{
+    "name": "@stamhoofd/statistics-db",
+    "version": "2.140.0",
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
+    "files": [
+        "dist",
+        "migrations"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint",
+        "typecheck": "tsc --build tsconfig.test.json",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@simonbackx/simple-database": "1.37.1"
+    },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "2.140.0",
+        "vitest": "4.1.10"
+    },
+    "peerDependencies": {
+        "@stamhoofd/types": "*"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}

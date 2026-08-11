@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { ReportCard, ReportTab } from './metabase-report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, layoutCards, templateTagId } from './metabase-report.js';
+import type { ReportCard, ReportTab } from './report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, layoutCards, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {

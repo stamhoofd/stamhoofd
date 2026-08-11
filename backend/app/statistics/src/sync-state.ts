@@ -1,4 +1,4 @@
-import { getStatisticsConnection } from './connection.js';
+import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
 
 export const syncStateTable = 'stats_sync_state';
 

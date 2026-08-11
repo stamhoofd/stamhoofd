@@ -1,4 +1,4 @@
-import { getStatisticsConnection } from './connection.js';
+import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
 import type { ReportCard, ReportTab } from './report.js';
 import { loadReport, parameterNames, parseTab, resolveSql } from './report.js';
 

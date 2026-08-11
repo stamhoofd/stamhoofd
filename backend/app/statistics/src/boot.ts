@@ -3,7 +3,7 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
-import { endStatisticsConnection } from './connection.js';
+import { endStatisticsConnection } from '@stamhoofd/statistics-db/connection';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');

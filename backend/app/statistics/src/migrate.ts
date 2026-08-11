@@ -1,6 +1,6 @@
 import { Column, Database } from '@simonbackx/simple-database';
 import { Version } from '@stamhoofd/structures';
-import { runStatisticsMigrations } from './migrations.js';
+import { runStatisticsMigrations } from '@stamhoofd/statistics-db/migrations';
 
 Column.setJSONVersion(Version);
 process.env.TZ = 'UTC';

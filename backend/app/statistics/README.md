@@ -1,16 +1,15 @@
 # Statistics
 
 Keeps the platform statistics database up to date: the separate, de-identified database that Metabase
-reports on. It runs the nightly sync from the main administration and owns the migrations of that
-database.
+reports on. It runs the nightly sync from the main administration.
 
 It is deliberately its own service. The sync reads the whole administration in one pass, and the cron
 scheduler has no distributed lock, so running it inside the API would mean one full pass per API
 instance, competing with request handling.
 
-The schema (`migrations/`), the sync (`src/`) and the report queries (`report/`) all live here. The
-CLI reads the report definition for `stam metabase report` by running the built `dist/src/print-report.js`,
-so that command needs this package to be built.
+The schema it writes into belongs to `@stamhoofd/statistics-db`, and the report read off it to
+`@stamhoofd/metabase`. This package is the only writer of that schema, which is why the two live
+apart: the reports are read by a tool that never runs here.
 
 ## Running
 

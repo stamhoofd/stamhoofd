@@ -5,11 +5,12 @@ import { buildPorts } from '../../context/ports.js';
 import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
-import { MetabaseApi, MetabaseApiError } from '../metabase-api.js';
-import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword, metabaseDataSourceName, metabaseHiddenTables, metabaseReportCollectionName, metabaseReportDashboardName } from '../metabase-config.js';
-import type { ReportSyncResult } from '../metabase-report.js';
-import { syncReport } from '../metabase-report.js';
-import { loadReportDefinition } from '../report-definition.js';
+import { MetabaseApi, MetabaseApiError } from '@stamhoofd/metabase/api';
+import { metabaseDataSourceName, metabaseHiddenTables, metabaseReportCollectionName, metabaseReportDashboardName } from '@stamhoofd/metabase/naming';
+import { loadReport } from '@stamhoofd/metabase/report';
+import type { ReportSyncResult } from '@stamhoofd/metabase/sync-report';
+import { syncReport } from '@stamhoofd/metabase/sync-report';
+import { metabaseAdmin, metabaseAdminEmail, metabaseAdminPassword } from '../metabase-config.js';
 
 export class MetabaseService extends SharedDockerService {
     static readonly container = metabaseContainer;
@@ -63,7 +64,7 @@ export class MetabaseService extends SharedDockerService {
      */
     async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
-        const tabs = await loadReportDefinition(context);
+        const tabs = await loadReport();
         const tableCount = await this.countTables(context, database);
         const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 
