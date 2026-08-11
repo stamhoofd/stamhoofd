@@ -8,9 +8,8 @@ to another server without dragging the main one along.
 
 Two packages read this:
 
-- `@stamhoofd/backend-statistics` — the service that writes into the schema every night.
+- `@stamhoofd/backend-statistics-syncer` — the service that writes into the schema every night.
 - `@stamhoofd/metabase` — the report queries, whose tests run against the schema this creates.
 
-The migrations are run by the statistics service (`yarn --cwd backend/app/statistics migrations`,
-part of `yarn migrate` from the repo root), the same way the API runs the migrations of
-`@stamhoofd/models`.
+The migrations are run by the syncer (`yarn --cwd backend/app/statistics-syncer migrations`, part of
+`yarn migrate` from the repo root), the same way the API runs the migrations of `@stamhoofd/models`.

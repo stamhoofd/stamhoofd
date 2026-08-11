@@ -88,7 +88,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'statistics-db', path: 'backend/shared/statistics-db', needsDatabase: true, typecheck: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
-    { name: 'statistics', path: 'backend/app/statistics', needsDatabase: true, typecheck: true },
+    { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true, typecheck: true },
     { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;

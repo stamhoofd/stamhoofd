@@ -1,4 +1,4 @@
-# Statistics
+# Statistics syncer
 
 Keeps the platform statistics database up to date: the separate, de-identified database that Metabase
 reports on. It runs the nightly sync from the main administration.

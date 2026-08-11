@@ -1,5 +1,5 @@
 {
-    "name": "@stamhoofd/backend-statistics",
+    "name": "@stamhoofd/backend-statistics-syncer",
     "version": "2.140.0",
     "type": "module",
     "main": "./dist/index.js",

@@ -18,7 +18,7 @@ export enum BackendApp {
     Renderer = 'renderer',
     Redirecter = 'redirecter',
     Backup = 'backup',
-    Statistics = 'statistics',
+    StatisticsSyncer = 'statistics-syncer',
 }
 
 export enum FrontendApp {

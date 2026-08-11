@@ -12,7 +12,7 @@ async function fileExists(path: string): Promise<boolean> {
     }
 }
 
-export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' | 'statistics' }) {
+export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' | 'statistics-syncer' }) {
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
@@ -55,7 +55,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         }
     }
 
-    if (settings?.service === 'api' || settings?.service === 'statistics') {
+    if (settings?.service === 'api' || settings?.service === 'statistics-syncer') {
         if (!STAMHOOFD.userMode || !['platform', 'organization'].includes(STAMHOOFD.userMode)) {
             throw new Error('Expected environment variable userMode');
         }

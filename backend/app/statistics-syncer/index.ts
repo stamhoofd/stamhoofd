@@ -1,7 +1,7 @@
 import backendEnv from '@stamhoofd/backend-env';
 
-process.title = 'stamhoofd-statistics';
-backendEnv.load({ service: 'statistics' }).catch((error) => {
+process.title = 'stamhoofd-statistics-syncer';
+backendEnv.load({ service: 'statistics-syncer' }).catch((error) => {
     console.error('Failed to load environment:', error);
     process.exit(1);
 }).then(async () => {
