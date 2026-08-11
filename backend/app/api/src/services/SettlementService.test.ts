@@ -253,7 +253,7 @@ describe('SettlementService', () => {
                 paymentId: payment.id, amount: 50_00_00, externalId: 'txn_pay', occurredAt: new Date(2026, 0, 14),
             });
 
-            // Written earlier by StripePayoutChecker
+            // A historically stored blob that still carries a fee
             payment.settlement = SettlementReference.create({
                 id: settlement.externalId,
                 reference: 'OLD',

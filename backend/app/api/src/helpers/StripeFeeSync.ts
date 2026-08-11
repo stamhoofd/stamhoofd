@@ -79,13 +79,13 @@ export class StripeFeeSync {
      */
     async syncFeeTransaction(transaction: Stripe.BalanceTransaction, options: { settlementId?: string } = {}): Promise<SettlementCharge[]> {
         const fee = transaction.source as Stripe.ApplicationFee;
-        const accountId = typeof fee.account === 'string' ? fee.account : fee.account.id;
+        const payingAccountId = typeof fee.account === 'string' ? fee.account : fee.account.id;
 
-        const stripeAccount = await StripeAccount.select().where('accountId', accountId).first(false);
-        if (!stripeAccount) {
+        const payingStripeAccount = await StripeAccount.select().where('accountId', payingAccountId).first(false);
+        if (!payingStripeAccount) {
             throw new SimpleError({
                 code: 'stripe_account_not_found',
-                message: 'No Stripe account found for ' + accountId,
+                message: 'No Stripe account found for ' + payingAccountId,
             });
         }
 
@@ -130,8 +130,10 @@ export class StripeFeeSync {
                 ...(options.settlementId !== undefined ? { settlementId: options.settlementId } : {}),
                 applicationFeeId: fee.id,
                 paymentId,
-                organizationId: stripeAccount.organizationId,
-                stripeAccountId: stripeAccount.id,
+
+                // Organization and stripe account that received these application fees
+                organizationId: payingStripeAccount.organizationId,
+                stripeAccountId: payingStripeAccount.id,
                 occurredAt,
             }));
         }

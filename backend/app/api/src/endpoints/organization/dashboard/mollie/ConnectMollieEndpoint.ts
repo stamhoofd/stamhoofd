@@ -7,8 +7,8 @@ import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
-import { checkMollieSettlementsFor } from '../../../../helpers/CheckSettlements.js';
 import { Context } from '../../../../helpers/Context.js';
+import { MollieSettlementSync } from '../../../../helpers/MollieSettlementSync.js';
 import { MollieService } from '../../../../services/MollieService.js';
 
 type Params = Record<string, never>;
@@ -53,7 +53,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             await service.setupOnboarding();
 
             // Check settlements after linking (shouldn't block)
-            checkMollieSettlementsFor(mollieToken.accessToken, organization.id, true).catch(console.error);
+            new MollieSettlementSync({ token: mollieToken }).syncSettlements({ start: organization.createdAt }).catch(console.error);
         }
 
         return new Response(await AuthenticatedStructures.organization(organization));
