@@ -1,3 +1,4 @@
+import type { MollieToken } from '@stamhoofd/models';
 import { MolliePayment, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
@@ -6,9 +7,10 @@ import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@sta
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import type { MollieMockPayment, MollieMockRefund } from '../../tests/helpers/MollieMocker.js';
 import { MollieMocker } from '../../tests/helpers/MollieMocker.js';
-import { checkMollieSettlementsFor } from './CheckSettlements.js';
+import { MollieSettlementSync } from './MollieSettlementSync.js';
+import type { SettlementSyncSummary } from './ProviderSettlementSyncRunner.js';
 
-describe('Helper.CheckSettlements', () => {
+describe('Helper.MollieSettlementSync', () => {
     let mollieMocker: MollieMocker;
 
     beforeAll(() => {
@@ -84,8 +86,12 @@ describe('Helper.CheckSettlements', () => {
         return { organization, token, payment, refundPayment, mockPayment, mockRefund };
     };
 
-    const runCron = async (token: { accessToken: string; organizationId: string }) => {
-        await checkMollieSettlementsFor(token.accessToken, token.organizationId, true);
+    const runCron = async (token: MollieToken, options: { start?: Date; end?: Date; summary?: SettlementSyncSummary } = {}) => {
+        await new MollieSettlementSync({ token }).syncSettlements({
+            start: options.start ?? new Date(2020, 0, 1),
+            end: options.end,
+            summary: options.summary,
+        });
     };
 
     /**
@@ -277,6 +283,61 @@ describe('Helper.CheckSettlements', () => {
             expect(after).toEqual(before);
             expect(await Settlement.select().where('externalId', settlement.id).count()).toBe(1);
         });
+    });
+
+    test('A settlement settled before the window start is not walked', async () => {
+        const { token, mockPayment } = await init();
+
+        // The list is newest-first: the walk must sync the recent settlement, then stop at the old one
+        const oldSettlement = mollieMocker.createSettlement({ payments: [mockPayment], value: '10.00', settledAt: new Date(2019, 5, 1) });
+        const recentSettlement = mollieMocker.createSettlement({ payments: [mockPayment], value: '50.00' });
+
+        await runCron(token);
+
+        expect(await Settlement.select().where('externalId', recentSettlement.id).count()).toBe(1);
+        expect(await Settlement.select().where('externalId', oldSettlement.id).count()).toBe(0);
+    });
+
+    test('A settlement settled after the window end is skipped, older ones are still walked', async () => {
+        const { token, mockPayment } = await init();
+
+        const afterEnd = mollieMocker.createSettlement({ payments: [mockPayment], value: '50.00', settledAt: new Date(2026, 5, 1) });
+        const inWindow = mollieMocker.createSettlement({ payments: [mockPayment], value: '20.00', settledAt: new Date(2026, 1, 1) });
+
+        await runCron(token, { start: new Date(2026, 0, 1), end: new Date(2026, 2, 1) });
+
+        expect(await Settlement.select().where('externalId', inWindow.id).count()).toBe(1);
+        expect(await Settlement.select().where('externalId', afterEnd.id).count()).toBe(0);
+    });
+
+    test('The walk follows pagination until it reaches the window start', async () => {
+        const { token, mockPayment } = await init();
+        mollieMocker.settlementsPageSize = 2;
+
+        // Two pages: [first, second] and [third, beforeWindow] — the third settlement only syncs
+        // if the walk follows the next link, and the pre-window one proves it still stops
+        const first = mollieMocker.createSettlement({ payments: [mockPayment], value: '50.00', settledAt: new Date(2026, 2, 3) });
+        const second = mollieMocker.createSettlement({ payments: [mockPayment], value: '20.00', settledAt: new Date(2026, 2, 2) });
+        const third = mollieMocker.createSettlement({ payments: [mockPayment], value: '10.00', settledAt: new Date(2026, 2, 1) });
+        const beforeWindow = mollieMocker.createSettlement({ payments: [mockPayment], value: '5.00', settledAt: new Date(2019, 0, 1) });
+
+        await runCron(token);
+
+        for (const settlement of [first, second, third]) {
+            expect(await Settlement.select().where('externalId', settlement.id).count()).toBe(1);
+        }
+        expect(await Settlement.select().where('externalId', beforeWindow.id).count()).toBe(0);
+    });
+
+    test('The summary counts synced settlements', async () => {
+        const { token, mockPayment } = await init();
+        mollieMocker.createSettlement({ payments: [mockPayment], value: '50.00' });
+
+        const summary: SettlementSyncSummary = { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
+        await runCron(token, { summary });
+
+        expect(summary.synced).toBe(1);
+        expect(summary.failed).toBe(0);
     });
 
     test('An unlinked refund entry in a settlement is skipped without affecting the known refund', async () => {

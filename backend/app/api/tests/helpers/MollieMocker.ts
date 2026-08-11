@@ -105,6 +105,12 @@ export class MollieMocker {
     refunds: MollieMockRefund[] = [];
     settlements: MollieMockSettlement[] = [];
 
+    /**
+     * Cap the settlements list page size below the requested limit, to exercise pagination
+     * without creating hundreds of settlements.
+     */
+    settlementsPageSize: number | null = null;
+
     #forceFailure = false;
 
     reset() {
@@ -114,6 +120,7 @@ export class MollieMocker {
         this.chargebacks = [];
         this.refunds = [];
         this.settlements = [];
+        this.settlementsPageSize = null;
         this.#forceFailure = false;
     }
 
@@ -235,10 +242,10 @@ export class MollieMocker {
             return this.#listResource('chargebacks', this.chargebacks.map(c => this.#chargebackResource(c)));
         }
 
-        // settlements + nested payments/refunds (drives the settlements cron)
+        // settlements + nested payments/refunds (drives the settlements sync)
         if (parts[0] === 'settlements' && method === 'GET') {
             if (parts.length === 1) {
-                return this.#listResource('settlements', this.settlements.map(s => this.#settlementResource(s)));
+                return this.#listSettlements(uri);
             }
             const settlement = this.settlements.find(s => s.id === parts[1]);
             if (settlement && parts.length === 3 && parts[2] === 'payments') {
@@ -565,7 +572,7 @@ export class MollieMocker {
 
     /**
      * Register a settled (paid out) settlement that groups the given payments and refunds.
-     * Used to drive the settlements cron (CheckSettlements).
+     * Used to drive the MollieSettlementSync walk.
      */
     createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date; invoiceId?: string | null; periods?: Record<string, Record<string, { costs: MollieMockSettlementCost[]; invoiceId?: string | null }>> } = {}): MollieMockSettlement {
         const settlement: MollieMockSettlement = {
@@ -585,6 +592,42 @@ export class MollieMocker {
         return settlement;
     }
 
+    /**
+     * Mollie lists settlements newest-first, with the open settlement (settledAt null) on top;
+     * the sync relies on this to stop at the first settlement before its window. Pagination works
+     * like Mollie's: `from` is the id of the first settlement of the page, and the `next` link
+     * points at the first settlement of the following page.
+     */
+    #listSettlements(uri: string): [number, unknown] {
+        const query = new URLSearchParams(uri.split('?')[1] ?? '');
+
+        const sorted = this.settlements.slice().sort((a, b) => {
+            if (a.settledAt === null || b.settledAt === null) {
+                if (a.settledAt === b.settledAt) {
+                    return 0;
+                }
+                return a.settledAt === null ? -1 : 1;
+            }
+            return new Date(b.settledAt).getTime() - new Date(a.settledAt).getTime();
+        });
+
+        const requestedLimit = parseInt(query.get('limit') ?? '250');
+        const limit = Math.min(requestedLimit, this.settlementsPageSize ?? requestedLimit);
+
+        const from = query.get('from');
+        const startIndex = from ? sorted.findIndex(s => s.id === from) : 0;
+        if (startIndex === -1) {
+            return [404, { status: 404, title: 'Not Found', detail: 'No settlement exists with token ' + from }];
+        }
+
+        const page = sorted.slice(startIndex, startIndex + limit);
+        const nextItem = sorted[startIndex + limit];
+
+        return this.#listResource('settlements', page.map(s => this.#settlementResource(s)), {
+            next: nextItem ? 'https://api.mollie.com/v2/settlements?limit=' + requestedLimit + '&from=' + nextItem.id : null,
+        });
+    }
+
     #settlementResource(settlement: MollieMockSettlement) {
         return {
             resource: 'settlement',
@@ -602,14 +645,14 @@ export class MollieMocker {
 
     // ---- List helper ------------------------------------------------------
 
-    #listResource(binderName: string, items: unknown[]): [number, unknown] {
+    #listResource(binderName: string, items: unknown[], options: { next?: string | null } = {}): [number, unknown] {
         return [200, {
             count: items.length,
             _embedded: { [binderName]: items },
             _links: {
                 self: { href: 'https://api.mollie.com/v2/' + binderName, type: 'application/hal+json' },
                 documentation: { href: 'https://docs.mollie.com', type: 'text/html' },
-                next: null,
+                next: options.next ? { href: options.next, type: 'application/hal+json' } : null,
                 previous: null,
             },
         }];

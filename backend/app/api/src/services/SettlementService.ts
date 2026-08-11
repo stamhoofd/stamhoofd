@@ -343,8 +343,8 @@ export class SettlementService {
             reference: settlement.reference,
             settledAt: settlement.settledAt,
             amount: settlement.amount,
-            // The deprecated fee field is still written by StripePayoutChecker; keep it when the
-            // primary settlement doesn't change
+            // Nothing writes the deprecated fee field anymore; preserve a historically stored
+            // value while the primary settlement doesn't change
             fee: payment.settlement?.id === settlement.externalId ? payment.settlement.fee : 0,
         });
         const saved = await payment.save();

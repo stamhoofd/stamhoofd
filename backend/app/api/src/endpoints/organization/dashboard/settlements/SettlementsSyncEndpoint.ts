@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -20,9 +20,6 @@ class Body extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentProvider)), nullable: true, optional: true })
     providers: PaymentProvider[] | null = null;
-
-    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true, optional: true })
-    accountIds: string[] | null = null;
 
     @field({ decoder: BooleanDecoder, optional: true })
     force = false;
@@ -62,7 +59,7 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const { organization } = await StripePayoutsExportEndpoint.authenticate();
 
-        const { start, end, providers, accountIds, force, backfillInvoiced } = request.body;
+        const { start, end, providers, force, backfillInvoiced } = request.body;
 
         const item = SettlementsSyncStatus.create({
             start,
@@ -78,7 +75,7 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
                     item.count = summary.synced + summary.skipped + summary.failed;
                     item.failed = summary.failed + summary.failedFeeMonths;
                 };
-                await runner.run({ start, end, providers, accountIds, force });
+                await runner.run({ start, end, providers, stripe: { force } });
 
                 if (backfillInvoiced) {
                     await StripeFeeInvoiceBackfill.backfillAll(organization, { start });

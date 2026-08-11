@@ -9,10 +9,9 @@ import type Stripe from 'stripe';
 export type StripePaymentIdCache = Map<string, string>;
 
 /**
- * Find the local payment behind a Stripe charge, the same ladder StripePayoutChecker has been using
- * in production: charge metadata → application fee's originating transaction metadata →
- * StripePaymentIntent → StripeCheckoutSession. Returns null when nothing matches: the caller
- * decides whether that is an error.
+ * Find the local payment behind a Stripe charge: charge metadata → application fee's originating
+ * transaction metadata → StripePaymentIntent → StripeCheckoutSession. Returns null when nothing
+ * matches: the caller decides whether that is an error.
  *
  * The `stripePlatform` client must not be account-scoped: checkout sessions live on the platform
  * account.

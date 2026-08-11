@@ -1,4 +1,3 @@
-import { EmailMocker } from '@stamhoofd/email';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
@@ -7,9 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import { SettlementService } from '../services/SettlementService.js';
-import { reportProblemSettlements, retryUnsyncedSettlements } from './stripe-settlement-sync.js';
+import { StripeSettlementSyncRunner } from './StripeSettlementSyncRunner.js';
 
-describe('Cron.stripe-settlement-sync', () => {
+describe('Helper.StripeSettlementSyncRunner', () => {
     const stripeMocker = new StripeMocker();
     let organization: Organization;
 
@@ -40,11 +39,16 @@ describe('Cron.stripe-settlement-sync', () => {
         return settlement;
     };
 
+    const retry = async () => {
+        const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
+        await runner.retryUnsyncedSettlements({ windowStart });
+    };
+
     test('a retry that cannot retrieve the payout anymore still counts towards the cap', async () => {
         const settlement = await createUnsyncedSettlement(1);
 
         // The mocker has no payout with this id: the retrieve fails with a 404
-        await retryUnsyncedSettlements(STAMHOOFD.STRIPE_SECRET_KEY!, windowStart);
+        await retry();
 
         const fresh = await Settlement.getByID(settlement.id);
         expect(fresh!.syncFailureCount).toBe(2);
@@ -54,18 +58,9 @@ describe('Cron.stripe-settlement-sync', () => {
     test('a settlement at the failure cap is not retried anymore', async () => {
         const settlement = await createUnsyncedSettlement(5);
 
-        await retryUnsyncedSettlements(STAMHOOFD.STRIPE_SECRET_KEY!, windowStart);
+        await retry();
 
         const fresh = await Settlement.getByID(settlement.id);
         expect(fresh!.syncFailureCount).toBe(5);
-    });
-
-    test('problem settlements are reported to the webmaster', async () => {
-        await createUnsyncedSettlement(5);
-
-        await reportProblemSettlements();
-
-        const emails = await EmailMocker.transactional.getSucceededEmails();
-        expect(emails.find(e => e.subject.startsWith('Uitbetalingen met problemen'))).toBeDefined();
     });
 });

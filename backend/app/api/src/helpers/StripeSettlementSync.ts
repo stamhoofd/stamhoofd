@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { Payment, StripeAccount } from '@stamhoofd/models';
+import type { StripeAccount } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { PaymentProvider } from '@stamhoofd/structures';
@@ -24,7 +25,7 @@ import { ApplicationFeeDetails } from './StripeInvoicer.js';
  * Fail loudly: a transaction that can't be attributed or an unknown transaction type fails the
  * whole payout. The settlement stays unsynced (`syncedAt IS NULL`) and is retried later.
  */
-export class StripePayoutSync {
+export class StripeSettlementSync {
     private stripe: Stripe;
     private stripePlatform: Stripe;
     private stripeAccount: StripeAccount | null;
@@ -53,41 +54,6 @@ export class StripePayoutSync {
 
         this.stripe = new Stripe(secretKey, { ...options, stripeAccount: this.stripeAccount?.accountId });
         this.stripePlatform = new Stripe(secretKey, options);
-    }
-
-    /**
-     * Walks the payouts of every active connected account, after the platform walk warmed the
-     * shared payment id cache.
-     */
-    static async syncConnectedPayouts({ secretKey, start, end, force, cache, accountIds }: { secretKey: string; start: Date; end?: Date; force?: boolean; cache?: StripePaymentIdCache; accountIds?: string[] | null }): Promise<{ synced: number; skipped: number; failed: number }> {
-        const sharedCache = cache ?? new Map<string, string>();
-        const totals = { synced: 0, skipped: 0, failed: 0 };
-
-        let query = StripeAccount.select().where('status', 'active');
-        if (accountIds && accountIds.length > 0) {
-            query = query.where('id', accountIds);
-        }
-        const accounts = await query.fetch();
-
-        for (const account of accounts) {
-            try {
-                const sync = new StripePayoutSync({ secretKey, stripeAccount: account, cache: sharedCache });
-                const result = await sync.syncPayouts({ start, end, force });
-                totals.synced += result.synced;
-                totals.skipped += result.skipped;
-                totals.failed += result.failed;
-            } catch (e) {
-                console.error('Failed to sync payouts of Stripe account ' + account.accountId, e);
-                totals.failed += 1;
-
-                Email.sendWebmaster({
-                    subject: 'Synchroniseren Stripe uitbetalingen van account ' + account.accountId + ' mislukt',
-                    html: 'Synchroniseren van de Stripe uitbetalingen van account ' + account.accountId + ' is mislukt. <br><br> ' + (e as Error).toString(),
-                });
-            }
-        }
-
-        return totals;
     }
 
     /**
@@ -213,6 +179,7 @@ export class StripePayoutSync {
                     occurredAt,
                 }));
                 await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId: payment.id });
+                await this.#updateTransferFee(transaction, settlement, payment);
                 await SettlementService.updateLegacySettlementReference(payment);
                 return;
             }
@@ -438,6 +405,35 @@ export class StripePayoutSync {
             });
             reported.charge(charge);
         }
+    }
+
+    /**
+     * The payout-time actual replaces the upfront estimate stored at payment time. A destination
+     * charge appears gross in both the organization payout and the platform payout: only the
+     * payout of the payment's own account may correct the fee, the same scoping rule as the
+     * legacy blob.
+     */
+    async #updateTransferFee(transaction: Stripe.BalanceTransaction, settlement: Settlement, payment: Payment) {
+        if (payment.stripeAccountId !== settlement.stripeAccountId) {
+            return;
+        }
+
+        // A charge that doesn't cover the payment's full price 1:1 can't attribute its fees to
+        // the payment as-is
+        if (payment.price !== transaction.amount * 100) {
+            return;
+        }
+
+        const source = transaction.source;
+        if (!source || typeof source === 'string' || source.object !== 'charge') {
+            return;
+        }
+
+        // With an application fee the Stripe processing fee is charged to the platform: from the
+        // organization's side the fee is whichever of the two applies
+        const totalFees = Math.max(transaction.fee, source.application_fee_amount ?? 0);
+        payment.transferFee = totalFees * 100 - payment.serviceFeePayout;
+        await payment.save();
     }
 
     async #resolvePayment(transaction: Stripe.BalanceTransaction): Promise<Payment> {
