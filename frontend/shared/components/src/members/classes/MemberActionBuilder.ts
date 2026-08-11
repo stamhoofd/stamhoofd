@@ -6,7 +6,6 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
 import { RegistrationInvitationEventBus } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
-import { fetchAll } from '#tables/classes/ObjectFetcher.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
@@ -18,13 +17,12 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
-import { EmailRecipientSubfilter, ExcelExportType, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { GlobalEventBus } from '../../EventBus';
 import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
-import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import type { NavigationActions } from '../../types/NavigationActions';
@@ -644,11 +642,15 @@ export class MemberActionBuilder {
             }
         }
 
-        if (periodTrees.length === 0) {
+        // An event waiting list reaches its event group only via parentGroup (event groups are
+        // never part of a category tree), so a missing period tree may not block those invites.
+        const parentGroups = this.groups.flatMap(g => g.parentGroup ? [g.parentGroup] : []);
+
+        if (periodTrees.length === 0 && parentGroups.length === 0) {
             return [];
         }
 
-        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.groups.flatMap(g => g.parentGroup ? [g.parentGroup] : []));
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(parentGroups);
         this._allGroupsLinkedToWaitingList = allGroups;
 
         if (allGroups.length === 0) {
@@ -731,6 +733,10 @@ export class MemberActionBuilder {
                         childActions: () => buildForTree(entry.categoryTree),
                     });
                 }));
+            }
+
+            if (periodTrees.length === 0) {
+                return childActions;
             }
 
             return childActions.concat(buildForTree(periodTrees[0].categoryTree));
