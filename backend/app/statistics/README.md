@@ -8,8 +8,9 @@ It is deliberately its own service. The sync reads the whole administration in o
 scheduler has no distributed lock, so running it inside the API would mean one full pass per API
 instance, competing with request handling.
 
-The schema, the sync itself and the report queries live in `backend/shared/statistics`, which the CLI
-also reads for `stam metabase report`.
+The schema (`migrations/`), the sync (`src/`) and the report queries (`report/`) all live here. The
+CLI reads the report definition for `stam metabase report` by running the built `dist/src/print-report.js`,
+so that command needs this package to be built.
 
 ## Running
 

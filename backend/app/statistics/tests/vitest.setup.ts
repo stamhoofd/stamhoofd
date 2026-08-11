@@ -1,6 +1,7 @@
-import { Column } from '@simonbackx/simple-database';
+import { Column, Database } from '@simonbackx/simple-database';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { endStatisticsConnection } from '../src/connection.js';
 
 Error.stackTraceLimit = 100;
 
@@ -15,8 +16,9 @@ if (new Date().getTimezoneOffset() !== 0) {
     throw new Error('Process should always run in UTC timezone');
 }
 
-beforeAll(() => {
-    TestUtils.loadEnvironment();
+afterAll(async () => {
+    await endStatisticsConnection();
+    await Database.end();
 });
 
 TestUtils.setup();

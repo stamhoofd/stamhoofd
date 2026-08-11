@@ -82,10 +82,9 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
     { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },
-    { name: 'statistics', path: 'backend/shared/statistics', needsDatabase: true, typecheck: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
-    { name: 'backend-statistics', path: 'backend/app/statistics', needsDatabase: false, typecheck: true },
+    { name: 'statistics', path: 'backend/app/statistics', needsDatabase: true, typecheck: true },
     { name: 'api', path: 'backend/app/api', needsDatabase: true, typecheck: true },
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;

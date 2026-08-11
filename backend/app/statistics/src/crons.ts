@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { syncStatistics, syncStatisticsDeletes } from '@stamhoofd/statistics/sync';
+import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 
 registerCron('syncPlatformStatistics', syncPlatformStatistics);
 

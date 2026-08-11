@@ -1,10 +1,10 @@
 import type { MetabaseApi } from './metabase-api.js';
 
 /**
- * Turns the report definition of `@stamhoofd/statistics` into one Metabase dashboard, with a tab per
+ * Turns the report definition of `@stamhoofd/backend-statistics` into one Metabase dashboard, with a tab per
  * page of the client's report.
  *
- * The queries themselves live with the schema they read, in `backend/shared/statistics/report`. This
+ * The queries themselves live with the schema they read, in `backend/app/statistics/report`. This
  * file only knows how to say them in Metabase's vocabulary: which display, which columns on which
  * axis, and which filter drives which card.
  *
