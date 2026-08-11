@@ -12,7 +12,7 @@ async function fileExists(path: string): Promise<boolean> {
     }
 }
 
-export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
+export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' | 'statistics' }) {
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
@@ -53,7 +53,9 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
             console.error('env', env);
             throw new Error('Expected environment variable domains');
         }
+    }
 
+    if (settings?.service === 'api' || settings?.service === 'statistics') {
         if (!STAMHOOFD.userMode || !['platform', 'organization'].includes(STAMHOOFD.userMode)) {
             throw new Error('Expected environment variable userMode');
         }

@@ -19,4 +19,3 @@ import './stripe-payout-reports.js';
 import './transfer-fees.js';
 import './drip-emails.js';
 import './update-organization-future-events.js';
-import './platform-statistics-sync.js';

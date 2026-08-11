@@ -76,7 +76,6 @@
         "@stamhoofd/object-differ": "2.140.0",
         "@stamhoofd/queues": "2.140.0",
         "@stamhoofd/sql": "2.140.0",
-        "@stamhoofd/statistics": "2.140.0",
         "@stamhoofd/structures": "2.140.0",
         "@stamhoofd/types": "2.140.0",
         "@stamhoofd/utility": "2.140.0",

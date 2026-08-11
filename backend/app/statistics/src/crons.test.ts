@@ -1,5 +1,5 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import { isStatisticsSyncEnabled, shouldRunStatisticsSync, statisticsPlatforms } from './platform-statistics-sync.js';
+import { isStatisticsSyncEnabled, shouldRunStatisticsSync, statisticsPlatforms } from './crons.js';
 
 describe('Cron.platform-statistics-sync', () => {
     function setEnvironment(options: { userMode: 'platform' | 'organization'; platformName: string; database?: string | undefined }) {

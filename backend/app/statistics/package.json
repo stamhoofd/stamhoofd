@@ -1,0 +1,52 @@
+{
+    "name": "@stamhoofd/backend-statistics",
+    "version": "2.140.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "exports": {
+        ".": {
+            "require": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:full": "yarn -s clear && yarn -s build",
+        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
+        "dev": "wait-on ../../shared/statistics/dist/sync.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5859 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "dev:build": "yarn -s build",
+        "dev:full": "yarn -s dev",
+        "lint": "eslint",
+        "migrations": "yarn -s build:full && node ./dist/migrations.js",
+        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "typecheck": "tsc --build tsconfig.test.json",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@simonbackx/simple-database": "1.37.1",
+        "@simonbackx/simple-encoding": "2.26.11",
+        "@simonbackx/simple-errors": "1.5.0",
+        "@simonbackx/simple-logging": "1.0.1",
+        "@stamhoofd/backend-env": "2.140.0",
+        "@stamhoofd/backend-i18n": "2.140.0",
+        "@stamhoofd/crons": "2.140.0",
+        "@stamhoofd/logging": "2.140.0",
+        "@stamhoofd/models": "2.140.0",
+        "@stamhoofd/queues": "2.140.0",
+        "@stamhoofd/sql": "2.140.0",
+        "@stamhoofd/statistics": "2.140.0",
+        "@stamhoofd/structures": "2.140.0",
+        "@stamhoofd/types": "2.140.0",
+        "@stamhoofd/utility": "2.140.0",
+        "mysql2": "3.23.1"
+    },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "2.140.0",
+        "@types/node": "22.20.1",
+        "vitest": "4.1.10"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}
