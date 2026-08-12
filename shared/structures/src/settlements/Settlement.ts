@@ -66,7 +66,7 @@ export class Settlement extends AutoEncoder {
      * Application fees received in this platform payout that are not invoiced yet, so no payment
      * line explains them yet.
      */
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 409 })
     pendingFees = 0;
 
     @field({ decoder: IntegerDecoder })
