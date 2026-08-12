@@ -1,14 +1,9 @@
-import { Database, DatabaseInstance, Migration } from '@simonbackx/simple-database';
-import path from 'node:path';
+import { DatabaseInstance } from '@simonbackx/simple-database';
 import type { StatisticsEnvironment } from '@stamhoofd/types/Environment';
 
 export type StatisticsDatabaseConfig = StatisticsEnvironment['statisticsDatabase'];
 
 const defaultMysqlPort = 3306;
-
-export function getStatisticsMigrationsPath(): string {
-    return path.join(import.meta.dirname, '../migrations');
-}
 
 export function getStatisticsDatabaseConfig(): StatisticsDatabaseConfig {
     const config = STAMHOOFD.statisticsDatabase;
@@ -58,36 +53,26 @@ export function getStatisticsPoolOptions(): { host: string; user: string; passwo
     };
 }
 
+let connection: DatabaseInstance | undefined;
+
 /**
- * Run the migrations of the platform statistics database.
+ * A connection of its own to the platform statistics database.
  *
- * That database keeps its own migration history, in its own `migrations` table, so it can be moved
- * to another server without dragging the main database along. `Migration.runAll` always applies and
- * records against the connection it finds, so the shared connection is pointed at the statistics
- * database for the duration and restored afterwards.
+ * The shared `Database` stays pointed at the main administration, which the sync reads through the
+ * models: the statistics database lives on the Metabase server, so the two are not even the same
+ * MySQL to point a single connection at.
  */
-export async function runStatisticsMigrations(): Promise<void> {
-    const database = getStatisticsDatabaseConfig().DB_DATABASE;
-    const options = getStatisticsPoolOptions();
-    const globalDatabase = new DatabaseInstance({ ...options, database: null });
+export function getStatisticsConnection(): DatabaseInstance {
+    connection ??= new DatabaseInstance({ ...getStatisticsPoolOptions(), database: getStatisticsDatabaseConfig().DB_DATABASE });
+    return connection;
+}
 
-    try {
-        await globalDatabase.statement(`CREATE DATABASE IF NOT EXISTS ${globalDatabase.escapeId(database)} DEFAULT CHARACTER SET = \`utf8mb4\` DEFAULT COLLATE = \`utf8mb4_0900_ai_ci\``);
-    }
-    finally {
-        await globalDatabase.end();
+export async function endStatisticsConnection(): Promise<void> {
+    if (!connection) {
+        return;
     }
 
-    await Database.reload({ ...options, database });
-
-    try {
-        if (!await Migration.runAll(getStatisticsMigrationsPath())) {
-            throw new Error('Platform statistics migrations failed');
-        }
-    }
-    finally {
-        // Empty options put the shared connection back on the main database, which the process holds
-        // in its environment.
-        await Database.reload({});
-    }
+    const ending = connection;
+    connection = undefined;
+    await ending.end();
 }

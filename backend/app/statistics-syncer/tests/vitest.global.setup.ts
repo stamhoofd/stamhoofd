@@ -15,7 +15,7 @@ export async function setup() {
     TestUtils.globalSetup();
 
     const { Database, Migration } = await import('@simonbackx/simple-database');
-    const { runStatisticsMigrations } = await import('@stamhoofd/statistics-db/migrations');
+    const { runStatisticsMigrations } = await import('../src/schema.js');
 
     // The sync reads the source tables, so the main database has to be migrated as well.
     if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {

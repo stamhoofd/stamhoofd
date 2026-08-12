@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url';
 /**
  * The report the client's own tool produces, expressed as queries on the statistics database.
  *
- * The definitions are plain `.sql` files, and the tests in this package run every query against the
- * schema `@stamhoofd/statistics-db` creates, so whoever changes a column sees what it breaks.
- * Turning them into Metabase questions is `sync-report.ts` — nothing here knows Metabase exists.
+ * The definitions are plain `.sql` files, read and checked for shape without ever being run: the
+ * schema they query belongs to the statistics syncer, which this package does not depend on. Turning
+ * them into Metabase questions is `sync-report.ts` — nothing here knows Metabase exists.
  *
  * A file holds one tab of the report and its cards, mirroring a page of the client's own report:
  *

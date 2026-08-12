@@ -1,6 +1,6 @@
 import type { Member, Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
+import { getStatisticsConnection } from './database.js';
 import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
 

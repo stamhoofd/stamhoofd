@@ -10,11 +10,4 @@ if (new Date().getTimezoneOffset() !== 0) {
 
 export async function setup() {
     TestUtils.globalSetup();
-
-    // The report queries run against the real schema, so it has to exist before they do.
-    const { Database } = await import('@simonbackx/simple-database');
-    const { runStatisticsMigrations } = await import('@stamhoofd/statistics-db/migrations');
-
-    await runStatisticsMigrations();
-    await Database.end();
 };

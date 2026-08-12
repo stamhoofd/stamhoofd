@@ -9,9 +9,13 @@ instance, competing with request handling. It runs on a replica server and pushe
 database on the Metabase server, so it holds two connections: `STAMHOOFD.stamhoofdDatabase` for the
 administration it reads, `STAMHOOFD.statisticsDatabase` for the schema it writes.
 
-The schema it writes into belongs to `@stamhoofd/statistics-db`, and the report read off it to
-`@stamhoofd/metabase`. This package is the only writer of that schema, which is why the two live
-apart: the reports are read by a tool that never runs here.
+It owns the schema it writes into: `src/migrations/` holds the migrations of the statistics database,
+`src/schema.ts` runs them and `src/database.ts` connects to it. That database keeps a migration
+history of its own, in its own `migrations` table, so it can be moved to another server without
+dragging the main one along.
+
+The report read off the schema lives in `@stamhoofd/metabase`. It depends on nothing here: it is a
+shared package, so the dependency could only run the wrong way.
 
 ## Running
 

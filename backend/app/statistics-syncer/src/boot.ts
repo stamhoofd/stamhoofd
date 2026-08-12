@@ -2,7 +2,7 @@ import { Column, Database } from '@simonbackx/simple-database';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
-import { endStatisticsConnection } from '@stamhoofd/statistics-db/connection';
+import { endStatisticsConnection } from './database.js';
 import { statisticsLanguage } from './rows.js';
 
 process.on('unhandledRejection', (error: Error) => {

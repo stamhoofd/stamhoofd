@@ -1,5 +1,5 @@
 import { Column, Database } from '@simonbackx/simple-database';
-import { endStatisticsConnection } from '@stamhoofd/statistics-db/connection';
+import { endStatisticsConnection } from '../src/database.js';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 

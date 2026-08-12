@@ -49,7 +49,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
 
     // The syncer reads the administration through the models, so the shared connection is pointed at
     // the database it was given. It writes to the statistics database, which lives on the Metabase
-    // server and is connected to separately by @stamhoofd/statistics-db.
+    // server and which it connects to separately.
     if (settings?.service === 'statistics-syncer') {
         const database = (env as StatisticsEnvironment).stamhoofdDatabase;
 

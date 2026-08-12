@@ -34,7 +34,6 @@ const backendSharedPackages = [
     'backend/shared/logging',
     'backend/shared/crons',
     'backend/shared/middleware',
-    'backend/shared/statistics-db',
 ];
 
 /**
@@ -76,7 +75,7 @@ export type UnitTestPackage = {
 // query `Database` from @simonbackx/simple-database).
 export const unitTestPackages: UnitTestPackage[] = [
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
-    { name: 'metabase', path: 'shared/metabase', needsDatabase: true, typecheck: true },
+    { name: 'metabase', path: 'shared/metabase', needsDatabase: false, typecheck: true },
     { name: 'structures', path: 'shared/structures', needsDatabase: false, typecheck: true },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
@@ -85,7 +84,6 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true, typecheck: true },
     { name: 'sql', path: 'backend/shared/sql', needsDatabase: true, typecheck: true },
-    { name: 'statistics-db', path: 'backend/shared/statistics-db', needsDatabase: true, typecheck: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false, typecheck: true },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
     { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true, typecheck: true },

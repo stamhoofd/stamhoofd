@@ -1,6 +1,6 @@
 import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
+import { getStatisticsConnection } from './database.js';
 import type { StatisticsRow } from './rows.js';
 import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
 import { nextWatermark, readSyncState, writeSyncState } from './sync-state.js';

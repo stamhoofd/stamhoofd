@@ -27,9 +27,11 @@ person, and nothing may store their password, so it uses an api key created unde
 Admin > Settings > Authentication > API keys. `verifyApiKey()` checks it belongs to an admin before
 anything is written, so a revoked key fails up front instead of halfway through the report.
 
-It deliberately has no runtime dependency on the backend. The report tests do use
-`@stamhoofd/statistics-db` to build the real schema and run every card against it, which is what
-catches a renamed column before a dashboard does.
+It deliberately depends on no part of the backend, not even in its tests: the schema the cards query
+is owned by `@stamhoofd/backend-statistics-syncer`, and reaching for it here would make a shared
+package depend on an app. So the tests check the shape of the report — its tabs, cards, parameters
+and filters — and never run a card. A column renamed in the statistics migrations therefore surfaces
+in Metabase rather than here.
 
 ```bash
 yarn stam test metabase

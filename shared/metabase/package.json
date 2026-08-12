@@ -22,8 +22,6 @@
         "test:coverage": "vitest --coverage"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.37.1",
-        "@stamhoofd/statistics-db": "2.140.0",
         "@stamhoofd/test-utils": "2.140.0",
         "vitest": "4.1.10"
     },
