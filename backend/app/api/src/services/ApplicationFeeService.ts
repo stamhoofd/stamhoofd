@@ -217,7 +217,9 @@ export class ApplicationFeeService {
             .where('id', balanceItemPayments.map(b => b.balanceItemId))
             .fetch();
         const balanceItemType = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
-        return balanceItems.find(item => item.type === balanceItemType) ?? null;
+
+        // In legacy migrations, the type has been set to 'Other' - fallback to that (contains both service fees and transfer fees in one balance item)
+        return balanceItems.find(item => item.type === balanceItemType) ?? (balanceItems.length === 1 ? balanceItems.find(item => item.type === BalanceItemType.Other) : null) ?? null;
     }
 
     /**
