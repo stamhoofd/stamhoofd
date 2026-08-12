@@ -54,9 +54,10 @@ describe('Endpoint.SettlementsSync', () => {
     };
 
     test('A platform admin can run the sync, which stores the payouts', async () => {
-        const organization = await new OrganizationFactory({}).create();
+        // A payment on our own platform account: a connected organization's payment only passes
+        // through our balance and is settled by its own payout
         const payment = new Payment();
-        payment.organizationId = organization.id;
+        payment.organizationId = membershipOrganization.id;
         payment.method = PaymentMethod.Bancontact;
         payment.provider = PaymentProvider.Stripe;
         payment.status = PaymentStatus.Succeeded;

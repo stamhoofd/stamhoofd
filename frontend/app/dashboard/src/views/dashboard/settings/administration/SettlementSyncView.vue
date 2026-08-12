@@ -24,17 +24,6 @@
                     {{ $t('Loopt ook alle uitbetalingen opnieuw af die al volledig gesynchroniseerd waren.') }}
                 </p>
             </STListItem>
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="backfillInvoiced" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('Historisch gefactureerde maanden markeren als gefactureerd') }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('Koppelt de opgeslagen kosten aan de facturen die er al voor gemaakt zijn, en controleert dat de bedragen exact overeenkomen.') }}
-                </p>
-            </STListItem>
         </STList>
 
         <div v-if="runningJobs.length" class="container">
@@ -80,7 +69,6 @@ const saving = ref(false);
 // Where the stored settlement history starts, the same default as the endpoint
 const startDate = ref(new Date(2025, 0, 1));
 const force = ref(false);
-const backfillInvoiced = ref(true);
 const runningJobs = shallowRef<SettlementsSyncStatus[]>([]);
 let loadingJobs = false;
 let interval: ReturnType<typeof setInterval> | null = null;
@@ -140,7 +128,6 @@ async function save() {
             body: {
                 start: startDate.value.getTime(),
                 force: force.value,
-                backfillInvoiced: backfillInvoiced.value,
             },
             owner: requestOwner,
         });

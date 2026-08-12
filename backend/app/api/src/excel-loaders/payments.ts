@@ -3,7 +3,7 @@ import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stam
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';
 import type { OrderData } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
@@ -591,6 +591,23 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
                         },
                     },
+                };
+            },
+        },
+        {
+            id: 'settlement.check',
+            name: $t('Uitbetaald'),
+            width: 24,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                // Only meaningful for fee payments: their payout lines are derived from the
+                // application fees they bill, so a matching sum means completely paid out. Other
+                // methods either don't pay out or always match
+                if (object.method !== PaymentMethod.AccountDeductions) {
+                    return { value: '' };
+                }
+                const settled = object.settlements.reduce((total, line) => total + line.amount, 0);
+                return {
+                    value: settled === object.price ? '✓' : $t('Nog niet (volledig) uitbetaald'),
                 };
             },
         },

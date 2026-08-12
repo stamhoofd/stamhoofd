@@ -1,14 +1,12 @@
-import { Email } from '@stamhoofd/email';
 import { StripeAccount } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { PaymentProvider } from '@stamhoofd/structures';
+import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 
 import { SettlementService } from '../services/SettlementService.js';
 import type { ProviderSettlementSyncRunner, ProviderSyncRunOptions } from './ProviderSettlementSyncRunner.js';
-import type { StripePaymentIdCache } from './resolveStripePaymentId.js';
-import { StripeFeeSync } from './StripeFeeSync.js';
-import { StripeInvoicer } from './StripeInvoicer.js';
 import { StripeSettlementSync } from './StripeSettlementSync.js';
+import { WebmasterReport } from './WebmasterReport.js';
 
 /**
  * A settlement that keeps failing needs a human: stop retrying after this many attempts.
@@ -32,34 +30,27 @@ export type StripeSyncOptions = {
 };
 
 export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner {
-    /**
-     * Warmed by the window walk, reused by the retry pass.
-     */
-    readonly cache: StripePaymentIdCache;
-
     readonly #secretKey: string;
     readonly #force: boolean;
     readonly #retryUnsynced: boolean;
 
-    constructor({ secretKey, cache, force = false, retryUnsynced = false }: { secretKey: string; cache?: StripePaymentIdCache } & StripeSyncOptions) {
+    constructor({ secretKey, force = false, retryUnsynced = false }: { secretKey: string } & StripeSyncOptions) {
         this.#secretKey = secretKey;
-        this.cache = cache ?? new Map();
         this.#force = force;
         this.#retryUnsynced = retryUnsynced;
     }
 
     /**
-     * Walks the window month by month: fees first, then our platform payouts (warming the shared
-     * payment id cache), then the connected accounts.
+     * Walks the window month by month: fees first, then our platform payouts, then the connected
+     * accounts.
      */
     async run({ start, end, summary, onProgress }: ProviderSyncRunOptions): Promise<void> {
-        const feeSync = new StripeFeeSync({ secretKey: this.#secretKey, cache: this.cache });
-        const platformSync = new StripeSettlementSync({ secretKey: this.#secretKey, cache: this.cache });
+        const platformSync = new StripeSettlementSync({ secretKey: this.#secretKey });
 
         let currentMonth = new Date(start.getFullYear(), start.getMonth(), 1);
 
         while (true) {
-            const { start: monthStartUnix, end: monthEndUnix } = StripeInvoicer.getMonthUnixStartEnd(currentMonth);
+            const { start: monthStartUnix, end: monthEndUnix } = SettlementService.getMonthUnixStartEnd(currentMonth);
             if (monthStartUnix * 1000 > end.getTime()) {
                 break;
             }
@@ -68,7 +59,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
             const windowEnd = new Date(Math.min(monthEndUnix * 1000, end.getTime()));
 
             try {
-                await feeSync.syncFees({ start: windowStart, end: windowEnd });
+                await platformSync.syncFees({ start: windowStart, end: windowEnd });
                 summary.feeMonths += 1;
             } catch (e) {
                 // syncFees already emailed nothing: it throws an aggregate, the month is retried by
@@ -97,8 +88,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
     }
 
     /**
-     * Walks the payouts of every active connected account, after the platform walk warmed the
-     * shared payment id cache.
+     * Walks the payouts of every active connected account.
      */
     async syncConnectedPayouts({ start, end }: { start: Date; end?: Date }): Promise<{ synced: number; skipped: number; failed: number }> {
         const totals = { synced: 0, skipped: 0, failed: 0 };
@@ -107,7 +97,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
 
         for (const account of accounts) {
             try {
-                const sync = new StripeSettlementSync({ secretKey: this.#secretKey, stripeAccount: account, cache: this.cache });
+                const sync = new StripeSettlementSync({ secretKey: this.#secretKey, stripeAccount: account });
                 const result = await sync.syncPayouts({ start, end, force: this.#force });
                 totals.synced += result.synced;
                 totals.skipped += result.skipped;
@@ -116,10 +106,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 console.error('Failed to sync payouts of Stripe account ' + account.accountId, e);
                 totals.failed += 1;
 
-                Email.sendWebmaster({
-                    subject: 'Synchroniseren Stripe uitbetalingen van account ' + account.accountId + ' mislukt',
-                    html: 'Synchroniseren van de Stripe uitbetalingen van account ' + account.accountId + ' is mislukt. <br><br> ' + (e as Error).toString(),
-                });
+                WebmasterReport.report('Synchroniseren Stripe uitbetalingen van account ' + account.accountId + ' mislukt', e);
             }
         }
 
@@ -136,6 +123,8 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
         const settlements = await Settlement.select()
             .where('provider', PaymentProvider.Stripe)
             .where('syncedAt', null)
+            // Only money that actually arrived holds transactions to walk
+            .where('status', SettlementStatus.Paid)
             .where('syncFailureCount', '<', MAXIMUM_FAILURE_COUNT)
             // The window walk already attempted (and counted) recent payouts
             .where('settledAt', '<', windowStart)
@@ -146,7 +135,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
             const failureCountBefore = settlement.syncFailureCount;
             try {
                 const stripeAccount = settlement.stripeAccountId ? await StripeAccount.getByID(settlement.stripeAccountId) : null;
-                const sync = new StripeSettlementSync({ secretKey: this.#secretKey, stripeAccount: stripeAccount ?? null, cache: this.cache });
+                const sync = new StripeSettlementSync({ secretKey: this.#secretKey, stripeAccount: stripeAccount ?? null });
                 await sync.syncPayoutById(settlement.externalId, { force: true });
             } catch (e) {
                 console.error('Retry of settlement ' + settlement.externalId + ' failed', e);

@@ -65,11 +65,18 @@ export class Settlement extends QueryableModel {
     syncFailureCount = 0;
 
     /**
-     * amount minus the sum of all stored payment lines and charges, cached after every sync.
-     * Expected to be 0.
+     * amount minus the sum of all stored payment lines, charges and pending fees, cached after
+     * every sync. Expected to be 0.
      */
     @column({ type: 'integer' })
     unexplainedAmount = 0;
+
+    /**
+     * Application fees received in this platform payout that are not invoiced yet, so no payment
+     * line explains them yet. Expected to reach 0 within a month, when the invoicer runs.
+     */
+    @column({ type: 'integer' })
+    pendingFees = 0;
 
     /**
      * Balance transactions processed during the last sync (diagnostic).

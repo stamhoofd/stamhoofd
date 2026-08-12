@@ -1,22 +1,28 @@
 import { registerCron } from '@stamhoofd/crons';
-import { Formatter } from '@stamhoofd/utility';
-import { StripeInvoicer } from '../helpers/StripeInvoicer.js';
 import { Organization, Platform } from '@stamhoofd/models';
+import { Formatter } from '@stamhoofd/utility';
+
+import { ApplicationFeeInvoicer } from '../helpers/ApplicationFeeInvoicer.js';
 
 registerCron('stripe-invoices', createStripeInvoices);
 
 let lastStripeInvoice: Date | null = null;
 
+/**
+ * Whether application fees are billed automatically. The sync stores what we received either way,
+ * so anything that reports on uninvoiced fees has to ask this first: while it is off, fees staying
+ * uninvoiced is the expected state, not a problem.
+ *
+ * The settlements feature is not released yet: allow production at go-live.
+ */
+export function isApplicationFeeInvoicingEnabled(): boolean {
+    return (STAMHOOFD.environment as string) === 'development'
+        && STAMHOOFD.userMode !== 'platform'
+        && STAMHOOFD.STRIPE_CONNECT_METHOD !== 'standard';
+}
+
 async function createStripeInvoices() {
-    if (STAMHOOFD.environment !== 'production' && STAMHOOFD.environment !== 'development') {
-        return;
-    }
-
-    if (STAMHOOFD.userMode === 'platform') {
-        return;
-    }
-
-    if (STAMHOOFD.STRIPE_CONNECT_METHOD === 'standard') {
+    if (!isApplicationFeeInvoicingEnabled()) {
         return;
     }
 
@@ -41,9 +47,9 @@ async function createStripeInvoices() {
 
     const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
 
-    const invoicer = new StripeInvoicer({
+    const invoicer = new ApplicationFeeInvoicer({
         secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
     });
-    await invoicer.generateAllInvoices(membershipOrganization, { forceLast: Formatter.dateIso(today) === '2026-07-04' });
+    await invoicer.generateInvoices(membershipOrganization);
     lastStripeInvoice = new Date();
 }

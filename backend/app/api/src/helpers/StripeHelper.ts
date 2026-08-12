@@ -38,7 +38,8 @@ export class StripeHelper {
                 // This is a direct charge
 
                 if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
-                    const fees = charge.balance_transaction.fee;
+                    // Stripe counts in cents, we count in 1/10000
+                    const fees = charge.balance_transaction.fee * 100;
                     payment.transferFee = fees - payment.serviceFeePayout;
                 }
             }

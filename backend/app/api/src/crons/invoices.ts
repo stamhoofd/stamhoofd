@@ -7,6 +7,7 @@ import { EmailTemplateType, InvoiceStruct, PaymentStatus, Replacement } from '@s
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
+import { WebmasterReport } from '../helpers/WebmasterReport.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { isOutside } from './helpers/isOutside.js';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
@@ -33,15 +34,19 @@ async function invoices() {
         return;
     }
 
-    // Get the next x organization to send e-mails for
-    for await (const organization of iterate()) {
-        if (!organization.meta.invoicesEnabled) {
-            continue;
-        }
+    // A problem in one invoice usually repeats in every invoice of this run: one email for all of
+    // them
+    await WebmasterReport.group('Aanmaken facturen', async () => {
+        // Get the next x organization to send e-mails for
+        for await (const organization of iterate()) {
+            if (!organization.meta.invoicesEnabled) {
+                continue;
+            }
 
-        // Create all invoices for this organization
-        await createInvoicesFor(organization);
-    }
+            // Create all invoices for this organization
+            await createInvoicesFor(organization);
+        }
+    });
 }
 
 async function createInvoicesFor(organization: Organization) {

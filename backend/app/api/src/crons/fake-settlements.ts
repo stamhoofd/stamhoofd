@@ -6,15 +6,18 @@
 
 import { registerCron } from '@stamhoofd/crons';
 import { Order, Payment, Platform } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { SQL } from '@stamhoofd/sql';
 import { PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
 import { SETTLING_PAYMENT_PROVIDERS } from '@stamhoofd/structures/PaymentSettlement.js';
+import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { Formatter } from '@stamhoofd/utility';
 import type { DateTime } from 'luxon';
+import { ApplicationFeeService } from '../services/ApplicationFeeService.js';
 import { SettlementService } from '../services/SettlementService.js';
 
 registerCron('fake-settlements', createFakeSettlements);
@@ -136,7 +139,8 @@ async function upsertFakeSettlement(data: { provider: PaymentProvider; externalI
 async function finishFakeSync(settlement: Settlement) {
     const lineCount = await PaymentSettlement.select().where('settlementId', settlement.id).count();
     const chargeCount = await SettlementCharge.select().where('settlementId', settlement.id).count();
-    await SettlementService.finishSync(settlement, { transactionCount: lineCount + chargeCount });
+    const feeCount = await ApplicationFee.select().where('settlementId', settlement.id).count();
+    await SettlementService.finishSync(settlement, { transactionCount: lineCount + chargeCount + feeCount });
 }
 
 async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: Date, platformOrganizationId: string | null): Promise<number> {
@@ -233,34 +237,34 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
 
 /**
  * The application fee of a Stripe payment is mirrored, like Stripe mirrors it: two negative
- * deduction rows on the organization payout, and two positive Received rows on a fake monthly
- * platform payout.
+ * deduction rows on the organization payout, and two application fee rows received in a fake
+ * monthly platform payout.
  */
 async function createStripeFeeRows(settlement: Settlement, group: Payment[], settledAt: Date, platformOrganizationId: string | null) {
     const month = SettlementService.getPeriodKey(settledAt);
     let addedFees = 0;
-    const feeRows: { payment: Payment; applicationFeeId: string; serviceFee: number; transferFee: number }[] = [];
+    const feeRows: { payment: Payment; applicationFeeId: string; parts: { type: ApplicationFeeType; amount: number; charge: SettlementCharge }[] }[] = [];
 
     for (const payment of group) {
         const { serviceFee, transferFee } = getStripeFakeFees(payment);
-        if (serviceFee === 0 && transferFee === 0) {
+        if ((serviceFee === 0 && transferFee === 0) || !payment.organizationId || !payment.stripeAccountId) {
             continue;
         }
 
         const applicationFeeId = 'fake-fee-' + payment.id;
-        feeRows.push({ payment, applicationFeeId, serviceFee, transferFee });
+        const parts: { type: ApplicationFeeType; amount: number; charge: SettlementCharge }[] = [];
         addedFees += serviceFee + transferFee;
 
-        for (const [type, feeAmount] of [
-            [SettlementChargeType.ApplicationFeeService, serviceFee],
-            [SettlementChargeType.ApplicationFeeTransfer, transferFee],
+        for (const [chargeType, feeType, feeAmount] of [
+            [SettlementChargeType.ApplicationFeeService, ApplicationFeeType.Service, serviceFee],
+            [SettlementChargeType.ApplicationFeeTransfer, ApplicationFeeType.Transfer, transferFee],
         ] as const) {
             if (feeAmount === 0) {
                 continue;
             }
-            await SettlementService.upsertCharge({
-                type,
-                externalId: applicationFeeId + ':' + type,
+            const charge = await SettlementService.upsertCharge({
+                type: chargeType,
+                externalId: applicationFeeId + ':' + chargeType,
                 amount: -feeAmount,
                 settlementId: settlement.id,
                 applicationFeeId,
@@ -269,7 +273,10 @@ async function createStripeFeeRows(settlement: Settlement, group: Payment[], set
                 stripeAccountId: payment.stripeAccountId,
                 occurredAt: payment.paidAt!,
             });
+            parts.push({ type: feeType, amount: feeAmount, charge });
         }
+
+        feeRows.push({ payment, applicationFeeId, parts });
     }
 
     if (feeRows.length === 0) {
@@ -292,27 +299,30 @@ async function createStripeFeeRows(settlement: Settlement, group: Payment[], set
         addedAmount: addedFees,
     });
 
-    for (const { payment, applicationFeeId, serviceFee, transferFee } of feeRows) {
-        for (const [type, feeAmount] of [
-            [SettlementChargeType.ReceivedApplicationFeeService, serviceFee],
-            [SettlementChargeType.ReceivedApplicationFeeTransfer, transferFee],
-        ] as const) {
-            if (feeAmount === 0) {
-                continue;
-            }
-            await SettlementService.upsertCharge({
+    const invoicedFeeBalanceItemIds = new Set<string>();
+    for (const { payment, applicationFeeId, parts } of feeRows) {
+        for (const { type, amount, charge } of parts) {
+            const fee = await ApplicationFeeService.upsertFee({
+                externalId: applicationFeeId,
                 type,
-                externalId: applicationFeeId + ':' + type,
-                amount: feeAmount,
+                amount,
+                organizationId: platformOrganizationId,
+                payingOrganizationId: payment.organizationId!,
+                payingStripeAccountId: payment.stripeAccountId!,
+                payingPaymentId: payment.id,
+                settlementChargeId: charge.id,
                 settlementId: platformSettlement.id,
-                applicationFeeId,
-                paymentId: payment.id,
-                organizationId: payment.organizationId,
-                stripeAccountId: payment.stripeAccountId,
                 occurredAt: payment.paidAt!,
             });
+            if (fee.balanceItemId) {
+                invoicedFeeBalanceItemIds.add(fee.balanceItemId);
+            }
         }
     }
+
+    // A dev database can contain fee payments (e.g. copied history): keep their derived lines
+    // in sync like a real payout walk does
+    await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]);
 
     await finishFakeSync(platformSettlement);
 }

@@ -1,26 +1,28 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email } from '@stamhoofd/email';
-import type { StripeAccount } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
+import { Payment, StripeAccount } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
-import { PaymentProvider } from '@stamhoofd/structures';
+import type { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
+import { PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import Stripe from 'stripe';
 
+import { ApplicationFeeService } from '../services/ApplicationFeeService.js';
 import { ReportedRows, SettlementService } from '../services/SettlementService.js';
+import { ApplicationFeeDetails } from './ApplicationFeeDetails.js';
 import { passthroughFetch } from './passthroughFetch.js';
-import type { StripePaymentIdCache } from './resolveStripePaymentId.js';
-import { resolveStripePaymentId } from './resolveStripePaymentId.js';
-import { StripeFeeSync } from './StripeFeeSync.js';
-import { ApplicationFeeDetails } from './StripeInvoicer.js';
+import { getPaymentIdForStripeCharge } from './getPaymentIdForStripeCharge.js';
+import { WebmasterReport } from './WebmasterReport.js';
 
 /**
  * Walks paid payouts and stores every balance transaction in them: payments become
  * payment_settlements rows, everything else becomes settlement_charges rows. One walker for both
  * scopes: `stripeAccount === null` walks our own platform account, otherwise the connected
- * account's payouts.
+ * account's payouts. The platform instance also ingests application fees before any payout
+ * contains them (syncFees).
  *
  * Fail loudly: a transaction that can't be attributed or an unknown transaction type fails the
  * whole payout. The settlement stays unsynced (`syncedAt IS NULL`) and is retried later.
@@ -29,18 +31,14 @@ export class StripeSettlementSync {
     private stripe: Stripe;
     private stripePlatform: Stripe;
     private stripeAccount: StripeAccount | null;
-    private feeSync: StripeFeeSync;
-    readonly cache: StripePaymentIdCache;
 
     /**
      * Explicitly fetched charges (when an expansion came back as an id), per run.
      */
     private fetchedCharges = new Map<string, Stripe.Charge>();
 
-    constructor({ secretKey, stripeAccount, cache }: { secretKey: string; stripeAccount?: StripeAccount | null; cache?: StripePaymentIdCache }) {
+    constructor({ secretKey, stripeAccount }: { secretKey: string; stripeAccount?: StripeAccount | null }) {
         this.stripeAccount = stripeAccount ?? null;
-        this.cache = cache ?? new Map();
-        this.feeSync = new StripeFeeSync({ secretKey, cache: this.cache });
 
         const options: Stripe.StripeConfig = {
             apiVersion: '2024-06-20',
@@ -57,7 +55,7 @@ export class StripeSettlementSync {
     }
 
     /**
-     * Sync all paid payouts that arrived in the window. A failing payout is marked, emailed and
+     * Sync all paid payouts that arrived in the window. A failing payout is marked, reported and
      * skipped so the other payouts still sync; the summary tells the caller how bad it was.
      */
     async syncPayouts({ start, end, force = false }: { start: Date; end?: Date; force?: boolean }): Promise<{ synced: number; skipped: number; failed: number }> {
@@ -67,8 +65,9 @@ export class StripeSettlementSync {
         // inside the per-payout error boundary
         await this.#getOrganizationId();
 
+        // Not filtered on status: a payout can still flip from paid to failed within five business
+        // days, and only re-reading it keeps the stored status true
         for await (const payout of this.stripe.payouts.list({
-            status: 'paid',
             arrival_date: {
                 gte: Math.floor(start.getTime() / 1000),
                 ...(end ? { lte: Math.floor(end.getTime() / 1000) } : {}),
@@ -86,10 +85,7 @@ export class StripeSettlementSync {
                 console.error('Failed to sync Stripe payout ' + payout.id, e);
                 result.failed += 1;
 
-                Email.sendWebmaster({
-                    subject: 'Synchroniseren Stripe uitbetaling ' + payout.id + ' mislukt',
-                    html: 'Synchroniseren van Stripe uitbetaling ' + payout.id + (this.stripeAccount ? (' van account ' + this.stripeAccount.accountId) : '') + ' is mislukt. <br><br> ' + (e as Error).toString(),
-                });
+                WebmasterReport.report('Synchroniseren Stripe uitbetaling ' + payout.id + (this.stripeAccount ? (' van account ' + this.stripeAccount.accountId) : '') + ' mislukt', e);
             }
         }
 
@@ -107,6 +103,159 @@ export class StripeSettlementSync {
     }
 
     /**
+     * Walks all application_fee balance transactions in the window, storing the payer's deduction
+     * charges and the application fee rows before any payout contains them; the payout walks fill
+     * in the settlement links later. A broken fee doesn't block storing the others, but the walk
+     * still fails loudly at the end: a month is only invoiced after a run without errors.
+     */
+    async syncFees({ start, end }: { start: Date; end: Date }) {
+        if (this.stripeAccount) {
+            throw new SimpleError({
+                code: 'invalid_scope',
+                message: 'Application fees live on the platform account, not on connected account ' + this.stripeAccount.accountId,
+            });
+        }
+
+        const errors: unknown[] = [];
+
+        // Storing a fee can link it to a balance item right away (a month the legacy invoicer
+        // billed). When it is already paid out, its payout needs the derived line for it
+        const invoicedFeeBalanceItemIds = new Set<string>();
+
+        for await (const transaction of this.stripe.balanceTransactions.list({
+            type: 'application_fee',
+            created: {
+                gte: Math.floor(start.getTime() / 1000),
+                lte: Math.floor(end.getTime() / 1000),
+            },
+            expand: ['data.source', 'data.source.originating_transaction'],
+            limit: 100,
+        })) {
+            try {
+                const { fees } = await this.#handleApplicationFee(transaction);
+                for (const fee of fees) {
+                    if (fee.balanceItemId && fee.settlementId) {
+                        invoicedFeeBalanceItemIds.add(fee.balanceItemId);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to sync application fee transaction ' + transaction.id, e);
+                errors.push(e);
+            }
+        }
+
+        await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]);
+
+        if (errors.length > 0) {
+            throw new SimpleError({
+                code: 'stripe_fee_sync_failed',
+                message: 'Fee sync failed for ' + errors.length + ' transaction(s): ' + errors.map(e => e instanceof Error ? e.message : String(e)).join('; '),
+            });
+        }
+    }
+
+    /**
+     * Stores one application_fee balance transaction: per non-zero part the payer's negative
+     * deduction charge (its settlement link belongs to the payer's own payout walk) and the
+     * application fee row. The platform payout walk passes `settlementId` to link the fee rows to
+     * the payout that contains them. Throws instead of writing a guessed row: missing serviceFee
+     * metadata, an unknown Stripe account or an unresolvable payment all mean someone has to look
+     * at it first.
+     */
+    async #handleApplicationFee(transaction: Stripe.BalanceTransaction, options: { settlementId?: string } = {}): Promise<{ fees: ApplicationFee[]; charges: SettlementCharge[] }> {
+        const fee = transaction.source as Stripe.ApplicationFee;
+        const payingAccountId = typeof fee.account === 'string' ? fee.account : fee.account.id;
+
+        const payingStripeAccount = await StripeAccount.select().where('accountId', payingAccountId).first(false);
+        if (!payingStripeAccount) {
+            throw new SimpleError({
+                code: 'stripe_account_not_found',
+                message: 'No Stripe account found for ' + payingAccountId,
+            });
+        }
+
+        const originatingTransaction = fee.originating_transaction;
+        if (!originatingTransaction || typeof originatingTransaction === 'string') {
+            throw new SimpleError({
+                code: 'missing_originating_transaction',
+                message: 'Application fee ' + fee.id + ' has no expanded originating transaction',
+            });
+        }
+
+        const details = ApplicationFeeDetails.fromStripe(transaction);
+
+        const paymentId = await getPaymentIdForStripeCharge(originatingTransaction as Stripe.Charge, {
+            stripePlatform: this.stripePlatform,
+        });
+
+        if (!paymentId) {
+            throw new SimpleError({
+                code: 'payment_not_found',
+                message: 'No payment found for application fee ' + fee.id,
+            });
+        }
+
+        // Charge metadata is writable by the connected account's owner: the fee is deducted from
+        // this account, so it can only be about a payment of its own organization
+        const payment = await Payment.getByID(paymentId);
+        if (!payment || payment.organizationId !== payingStripeAccount.organizationId) {
+            throw new SimpleError({
+                code: 'payment_scope_mismatch',
+                message: 'Payment ' + paymentId + ' of application fee ' + fee.id + ' does not belong to organization ' + payingStripeAccount.organizationId,
+            });
+        }
+
+        const occurredAt = new Date(transaction.created * 1000);
+
+        const fees: ApplicationFee[] = [];
+        const charges: SettlementCharge[] = [];
+
+        // Application fees are charged by the platform organization: it receives them, and bills
+        // them to the paying organization
+        const receivingOrganizationId = await SettlementService.getPlatformOrganizationId();
+
+        for (const [chargeType, feeType, amount] of [
+            [SettlementChargeType.ApplicationFeeService, ApplicationFeeType.Service, details.serviceFee],
+            [SettlementChargeType.ApplicationFeeTransfer, ApplicationFeeType.Transfer, details.transferFee],
+        ] as const) {
+            if (amount === 0) {
+                continue;
+            }
+
+            const charge = await SettlementService.upsertCharge({
+                type: chargeType,
+                externalId: fee.id + ':' + chargeType,
+                amount: -amount,
+                applicationFeeId: fee.id,
+                paymentId,
+
+                // The charge sits in the paying organization's payout
+                organizationId: payingStripeAccount.organizationId,
+                stripeAccountId: payingStripeAccount.id,
+                occurredAt,
+
+                // settlementId (settlement of the paying organization where the costs are deducted): still unknown, will be filled when looping the payouts of the paying organization
+            });
+            charges.push(charge);
+
+            fees.push(await ApplicationFeeService.upsertFee({
+                externalId: fee.id,
+                type: feeType,
+                amount,
+                organizationId: receivingOrganizationId,
+                payingOrganizationId: payingStripeAccount.organizationId,
+                payingStripeAccountId: payingStripeAccount.id,
+                payingPaymentId: paymentId,
+                settlementChargeId: charge.id,
+                occurredAt,
+                ...(options.settlementId !== undefined ? { settlementId: options.settlementId } : {}),
+            }));
+        }
+
+        return { fees, charges };
+    }
+
+    /**
      * The organization that owns the walked account: the connected account's organization, or the
      * platform membership organization for our own platform account (resolved once per instance).
      */
@@ -116,6 +265,15 @@ export class StripeSettlementSync {
     }
 
     async syncPayout(payout: Stripe.Payout, { force = false }: { force?: boolean } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
+        // All amounts are stored in the same unit: a payout in another currency would be stored as
+        // a plausible but wrong number
+        if (payout.currency && payout.currency.toUpperCase() !== 'EUR') {
+            throw new SimpleError({
+                code: 'unsupported_payout_currency',
+                message: 'Payout ' + payout.id + ' is in ' + payout.currency + ', only EUR is supported',
+            });
+        }
+
         return await SettlementService.lock(PaymentProvider.Stripe, payout.id, async () => {
             const settlement = await SettlementService.upsertSettlement({
                 provider: PaymentProvider.Stripe,
@@ -128,6 +286,26 @@ export class StripeSettlementSync {
                 status: getSettlementStatus(payout.status),
                 settledAt: new Date(payout.arrival_date * 1000),
             });
+
+            // Money that never arrived holds no transactions to walk. The status above is still
+            // refreshed, so a payout that flips to failed stops claiming it was paid out
+            if (payout.status !== 'paid') {
+                return { settlement, skipped: true };
+            }
+
+            // Stripe only lists the transactions of a payout once it finished reconciling it, and
+            // never for manual payouts. Walking anyway would store an empty payout and mark it
+            // synced, which no later run would ever revisit
+            if (payout.reconciliation_status !== 'completed') {
+                if (payout.reconciliation_status === 'not_applicable') {
+                    throw new SimpleError({
+                        code: 'unsupported_payout',
+                        message: 'Stripe does not report the transactions of payout ' + payout.id + ' (' + payout.reconciliation_status + '), which only happens for manual payouts',
+                    });
+                }
+                // Still reconciling at Stripe: it stays unsynced and the next run picks it up
+                return { settlement, skipped: true };
+            }
 
             if (settlement.syncedAt && !force) {
                 return { settlement, skipped: true };
@@ -148,6 +326,10 @@ export class StripeSettlementSync {
         const reported = new ReportedRows();
         let transactionCount = 0;
 
+        // Invoiced fees linked to or unlinked from this settlement during the walk: their fee
+        // payments' derived lines must follow
+        const invoicedFeeBalanceItemIds = new Set<string>();
+
         for await (const transaction of this.stripe.balanceTransactions.list({
             payout: payout.id,
             limit: 100,
@@ -156,14 +338,30 @@ export class StripeSettlementSync {
                 : ['data.source', 'data.source.originating_transaction', 'data.source.charge'],
         })) {
             transactionCount += 1;
-            await this.#handleTransaction(transaction, settlement, reported);
+            await this.#handleTransaction(transaction, settlement, reported, invoicedFeeBalanceItemIds);
         }
 
-        await SettlementService.sweepSettlement(settlement, reported);
+        // Stripe reported nothing for money that did move: storing that as a complete sync would
+        // silently hide the whole payout
+        if (transactionCount === 0 && settlement.amount !== 0) {
+            throw new SimpleError({
+                code: 'empty_payout',
+                message: 'Payout ' + payout.id + ' of ' + settlement.amount + ' has no balance transactions',
+            });
+        }
+
+        const { unlinkedFees } = await SettlementService.sweepSettlement(settlement, reported);
+        for (const fee of unlinkedFees) {
+            if (fee.balanceItemId) {
+                invoicedFeeBalanceItemIds.add(fee.balanceItemId);
+            }
+        }
+
+        await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]);
         await SettlementService.finishSync(settlement, { transactionCount });
     }
 
-    async #handleTransaction(transaction: Stripe.BalanceTransaction, settlement: Settlement, reported: ReportedRows) {
+    async #handleTransaction(transaction: Stripe.BalanceTransaction, settlement: Settlement, reported: ReportedRows, invoicedFeeBalanceItemIds: Set<string>) {
         const occurredAt = new Date(transaction.created * 1000);
 
         // A plain string switch: the pinned SDK's type union misses some real-world types
@@ -172,13 +370,21 @@ export class StripeSettlementSync {
             case 'charge':
             case 'payment': {
                 const payment = await this.#resolvePayment(transaction);
+
+                // A destination charge only passes through our balance on its way to the
+                // organization: its own payout settles it, ours stays out of it
+                if (payment.organizationId !== settlement.organizationId) {
+                    await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: null });
+                    return;
+                }
+
                 reported.paymentLine(await SettlementService.upsertPaymentLine(settlement, {
                     paymentId: payment.id,
                     amount: transaction.amount * 100,
                     externalId: transaction.id,
                     occurredAt,
                 }));
-                await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId: payment.id });
+                await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: payment.id });
                 await this.#updateTransferFee(transaction, settlement, payment);
                 await SettlementService.updateLegacySettlementReference(payment);
                 return;
@@ -188,24 +394,44 @@ export class StripeSettlementSync {
             case 'payment_refund':
             case 'payment_failure_refund':
             case 'refund_failure': {
-                // The failure types are SEPA debit failures after settling: locally a Chargeback
-                // payment, linked the same way as a refund
-                const payment = await this.#resolveReversingPayment(transaction);
+                // payment_failure_refund is a SEPA debit that failed after settling: locally a
+                // Chargeback payment, linked the same way as a refund. refund_failure is the
+                // opposite: a refund that never reached the customer, so the money comes back and
+                // its transaction is positive while the reversing payment stays negative
+                const isReturned = transaction.type === 'refund_failure';
+                const refunded = await this.#resolveRefundedPayment(transaction);
+
+                // The reverse of the pass-through above: refunding another organization's payment
+                // only moves the money back through our balance
+                if (refunded.organizationId !== settlement.organizationId) {
+                    await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: null });
+                    return;
+                }
+
+                const payment = await this.#resolveReversingPayment(transaction, refunded, { negated: isReturned });
                 reported.paymentLine(await SettlementService.upsertPaymentLine(settlement, {
                     paymentId: payment.id,
                     amount: transaction.amount * 100,
                     externalId: transaction.id,
                     occurredAt,
                 }));
-                await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId: payment.id });
+                await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: payment.id });
                 await SettlementService.updateLegacySettlementReference(payment);
                 return;
             }
 
             case 'application_fee': {
-                // The fee's two Received rows, now linked to the payout that contains them
-                reported.charges(await this.feeSync.syncFeeTransaction(transaction, { settlementId: settlement.id }));
-                await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId: null });
+                // The fee rows, now linked to the platform payout that contains them
+                const { fees } = await this.#handleApplicationFee(transaction, { settlementId: settlement.id });
+                reported.applicationFees(fees);
+                for (const fee of fees) {
+                    if (fee.balanceItemId) {
+                        // Make sure we update the AccountDeduction payments and settlements that are connected to this
+                        // application fee.
+                        invoicedFeeBalanceItemIds.add(fee.balanceItemId);
+                    }
+                }
+                await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: null });
                 return;
             }
 
@@ -213,41 +439,30 @@ export class StripeSettlementSync {
                 const source = transaction.source as Stripe.FeeRefund;
                 const applicationFeeId = typeof source.fee === 'string' ? source.fee : source.fee.id;
 
-                const charge = await SettlementService.upsertCharge({
-                    type: SettlementChargeType.ApplicationFeeRefund,
-                    externalId: source.id,
-                    amount: transaction.amount * 100,
-                    settlementId: settlement.id,
-                    applicationFeeId,
-                    description: transaction.description ?? '',
-                    occurredAt,
+                // We never refund application fees ourselves, so this can only come from the Stripe
+                // dashboard. Storing just the charge would leave the fee billed in full to the
+                // organization: what to give back is a decision someone has to make first
+                throw new SimpleError({
+                    code: 'unsupported_application_fee_refund',
+                    message: 'Application fee ' + applicationFeeId + ' was refunded in transaction ' + transaction.id + ', which is not billed back to the organization automatically',
                 });
-                reported.charge(charge);
-                await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId: null });
-                return;
             }
 
             case 'transfer':
             case 'transfer_cancel':
             case 'transfer_failure':
-            case 'transfer_refund': {
-                const charge = await SettlementService.upsertCharge({
-                    type: transaction.type === 'transfer' ? SettlementChargeType.Transfer : SettlementChargeType.TransferReversal,
-                    externalId: transaction.id,
-                    amount: transaction.amount * 100,
-                    settlementId: settlement.id,
-                    description: transaction.description ?? '',
-                    occurredAt,
-                });
-                reported.charge(charge);
-                await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId: null });
+            case 'transfer_refund':
+                // The other half of a pass-through: it moves the same gross back out of our
+                // balance, so ignoring both keeps the payout explained. We never transfer money
+                // ourselves, so a transfer without its charge can only be a real problem, and it
+                // surfaces as an unexplained amount
                 return;
-            }
 
             case 'stripe_fee':
-            case 'network_cost': {
+            case 'network_cost':
+            case 'tax_fee': {
                 const charge = await SettlementService.upsertCharge({
-                    type: SettlementChargeType.ProviderAccountFee,
+                    type: transaction.type === 'tax_fee' ? SettlementChargeType.Tax : SettlementChargeType.ProviderAccountFee,
                     externalId: transaction.id,
                     amount: transaction.amount * 100,
                     settlementId: settlement.id,
@@ -260,12 +475,16 @@ export class StripeSettlementSync {
                 return;
             }
 
-            case 'reserve_transaction': {
+            case 'reserve_transaction':
+            case 'reserved_funds':
+            case 'reserve_hold':
+            case 'reserve_release': {
                 const charge = await SettlementService.upsertCharge({
                     type: SettlementChargeType.Reserve,
                     externalId: transaction.id,
                     amount: transaction.amount * 100,
                     settlementId: settlement.id,
+                    organizationId: settlement.organizationId,
                     description: transaction.description ?? '',
                     occurredAt,
                 });
@@ -273,8 +492,9 @@ export class StripeSettlementSync {
                 return;
             }
 
-            case 'adjustment': {
-                const paymentId = await this.#tryResolveAdjustmentPayment(transaction);
+            case 'adjustment':
+            case 'payment_reversal': {
+                const paymentId = await this.#tryResolveAdjustmentPayment(transaction, settlement);
                 const charge = await SettlementService.upsertCharge({
                     type: SettlementChargeType.Adjustment,
                     externalId: transaction.id,
@@ -282,11 +502,36 @@ export class StripeSettlementSync {
                     settlementId: settlement.id,
                     // Unresolvable stays undefined: a re-sync may not clear an earlier stored link
                     ...(paymentId ? { paymentId } : {}),
+                    organizationId: settlement.organizationId,
                     description: transaction.description ?? '',
                     occurredAt,
                 });
                 reported.charge(charge);
-                await this.#storeProviderFeeDetails(transaction, settlement, reported, { paymentId });
+                await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId });
+                return;
+            }
+
+            // Money moving in or out of the balance around the payouts themselves: a returned
+            // payout, a top-up, or Stripe settling something against the balance. None of them
+            // belong to a payment, but they do change what a later payout holds
+            case 'payout_failure':
+            case 'payout_cancel':
+            case 'topup':
+            case 'topup_reversal':
+            case 'connect_collection_transfer':
+            case 'stripe_balance_payment_debit':
+            case 'stripe_balance_payment_debit_reversal': {
+                const charge = await SettlementService.upsertCharge({
+                    type: SettlementChargeType.BalanceMovement,
+                    externalId: transaction.id,
+                    amount: transaction.amount * 100,
+                    settlementId: settlement.id,
+                    organizationId: settlement.organizationId,
+                    description: transaction.description ?? transaction.type,
+                    occurredAt,
+                });
+                reported.charge(charge);
+                await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: null });
                 return;
             }
 
@@ -303,10 +548,11 @@ export class StripeSettlementSync {
     }
 
     /**
-     * The provider's own fees, deducted inside the transaction. The amounts always come from the
+     * The fees the walked account paid inside this transaction: the provider's own fees, and on a
+     * connected account also the application fee we charged. The amounts always come from the
      * balance transaction itself.
      */
-    async #storeProviderFeeDetails(transaction: Stripe.BalanceTransaction, settlement: Settlement, reported: ReportedRows, { paymentId }: { paymentId: string | null }) {
+    async #storePaidFeesForTransaction(transaction: Stripe.BalanceTransaction, settlement: Settlement, reported: ReportedRows, { paymentId }: { paymentId: string | null }) {
         const occurredAt = new Date(transaction.created * 1000);
 
         for (const [index, detail] of (transaction.fee_details ?? []).entries()) {
@@ -315,7 +561,7 @@ export class StripeSettlementSync {
             }
 
             if (detail.type === 'application_fee') {
-                await this.#storeApplicationFeeDeduction(transaction, detail, settlement, reported, { paymentId });
+                await this.#storePaidApplicationFeeForTransaction(transaction, detail, settlement, reported, { paymentId });
                 continue;
             }
 
@@ -324,7 +570,8 @@ export class StripeSettlementSync {
                 externalId: transaction.id + ':fee:' + index,
                 amount: -detail.amount * 100,
                 settlementId: settlement.id,
-                paymentId,
+                // Unresolvable stays undefined: a re-sync may not clear an earlier stored link
+                ...(paymentId ? { paymentId } : {}),
                 organizationId: settlement.organizationId,
                 stripeAccountId: this.stripeAccount?.id ?? null,
                 providerInvoiceId: getStripeInvoiceId(occurredAt),
@@ -338,10 +585,11 @@ export class StripeSettlementSync {
     /**
      * On the connected account the application fee is not a separate transaction: it sits inside
      * the payment's fee_details, and the fee id comes from the charge's application_fee. The two
-     * negative deduction rows mirror the Received rows of the platform payout, so per
-     * applicationFeeId both sides of one kind sum to zero.
+     * negative deduction rows mirror the application fee rows of the platform side, so per
+     * applicationFeeId both sides of one kind sum to zero. This walk fills their settlementId; the
+     * rows themselves usually already exist (created by the fee walk).
      */
-    async #storeApplicationFeeDeduction(transaction: Stripe.BalanceTransaction, detail: Stripe.BalanceTransaction.FeeDetail, settlement: Settlement, reported: ReportedRows, { paymentId }: { paymentId: string | null }) {
+    async #storePaidApplicationFeeForTransaction(transaction: Stripe.BalanceTransaction, detail: Stripe.BalanceTransaction.FeeDetail, settlement: Settlement, reported: ReportedRows, { paymentId }: { paymentId: string | null }) {
         if (!this.stripeAccount) {
             throw new SimpleError({
                 code: 'unexpected_application_fee_detail',
@@ -398,12 +646,24 @@ export class StripeSettlementSync {
                 amount: -amount,
                 settlementId: settlement.id,
                 applicationFeeId: applicationFee.id,
-                paymentId,
+                // Unresolvable stays undefined: it may not clear the link the fee walk stored
+                ...(paymentId ? { paymentId } : {}),
                 organizationId: this.stripeAccount.organizationId,
                 stripeAccountId: this.stripeAccount.id,
                 occurredAt,
             });
             reported.charge(charge);
+
+            // What the organization pays here is what we receive on the other side. The two are
+            // written from different Stripe transactions, so a divergence would silently bill the
+            // wrong amount
+            const fee = await ApplicationFee.select().where('settlementChargeId', charge.id).first(false);
+            if (fee && fee.amount !== -charge.amount) {
+                throw new SimpleError({
+                    code: 'application_fee_mismatched',
+                    message: 'Application fee ' + applicationFee.id + ' is stored as ' + fee.amount + ' but deducted as ' + charge.amount + ' in transaction ' + transaction.id,
+                });
+            }
         }
     }
 
@@ -429,9 +689,14 @@ export class StripeSettlementSync {
             return;
         }
 
-        // With an application fee the Stripe processing fee is charged to the platform: from the
-        // organization's side the fee is whichever of the two applies
-        const totalFees = Math.max(transaction.fee, source.application_fee_amount ?? 0);
+        // What the organization actually paid on this transaction. On a destination charge that is
+        // only our application fee; on a direct charge the transaction's fee also holds Stripe's
+        // own processing fee, which the application fee detail separates out
+        const applicationFeeDetail = (transaction.fee_details ?? []).find(detail => detail.type === 'application_fee');
+        const totalFees = applicationFeeDetail
+            ? applicationFeeDetail.amount
+            : Math.max(transaction.fee, source.application_fee_amount ?? 0);
+
         payment.transferFee = totalFees * 100 - payment.serviceFeePayout;
         await payment.save();
     }
@@ -445,9 +710,8 @@ export class StripeSettlementSync {
             });
         }
 
-        const paymentId = await resolveStripePaymentId(source, {
+        const paymentId = await getPaymentIdForStripeCharge(source, {
             stripePlatform: this.stripePlatform,
-            cache: this.cache,
         });
 
         if (!paymentId) {
@@ -483,11 +747,9 @@ export class StripeSettlementSync {
     }
 
     /**
-     * Stripe's refund transaction points at the original charge; locally the refund is its own
-     * Payment linked through reversingPaymentId, matched on amount. No match means someone refunded
-     * outside Stamhoofd: fix the data, don't paper over it.
+     * The payment a refund transaction reverses: Stripe's refund points at the original charge.
      */
-    async #resolveReversingPayment(transaction: Stripe.BalanceTransaction): Promise<Payment> {
+    async #resolveRefundedPayment(transaction: Stripe.BalanceTransaction): Promise<Payment> {
         const source = transaction.source;
         if (!source || typeof source === 'string' || source.object !== 'refund') {
             throw new SimpleError({
@@ -504,9 +766,8 @@ export class StripeSettlementSync {
         }
 
         const charge = await this.#getCharge(source.charge, transaction);
-        const originalPaymentId = await resolveStripePaymentId(charge, {
+        const originalPaymentId = await getPaymentIdForStripeCharge(charge, {
             stripePlatform: this.stripePlatform,
-            cache: this.cache,
         });
 
         if (!originalPaymentId) {
@@ -516,9 +777,32 @@ export class StripeSettlementSync {
             });
         }
 
+        const payment = await Payment.getByID(originalPaymentId);
+        if (!payment) {
+            throw new SimpleError({
+                code: 'payment_not_found',
+                message: 'Payment ' + originalPaymentId + ' referenced by refunded charge ' + charge.id + ' does not exist',
+            });
+        }
+
+        this.#assertPaymentScope(payment, charge.id);
+        return payment;
+    }
+
+    /**
+     * Locally a refund is its own Payment linked through reversingPaymentId, matched on amount. No
+     * match means someone refunded outside Stamhoofd: fix the data, don't paper over it.
+     *
+     * `negated` matches a transaction that moves the money the other way (a refund that came back)
+     * against the same reversing payment.
+     */
+    async #resolveReversingPayment(transaction: Stripe.BalanceTransaction, refunded: Payment, { negated = false }: { negated?: boolean } = {}): Promise<Payment> {
         let candidates = await Payment.select()
-            .where('reversingPaymentId', originalPaymentId)
-            .where('price', transaction.amount * 100)
+            .where('reversingPaymentId', refunded.id)
+            .where('price', (negated ? -transaction.amount : transaction.amount) * 100)
+            // A refund that failed locally keeps its payment: it never moved money, so it can't be
+            // the one this transaction settles
+            .where('status', '!=', PaymentStatus.Failed)
             .fetch();
 
         if (candidates.length > 1) {
@@ -538,15 +822,23 @@ export class StripeSettlementSync {
         if (candidates.length !== 1) {
             throw new SimpleError({
                 code: 'reversing_payment_not_found',
-                message: 'Found ' + candidates.length + ' reversing payments for payment ' + originalPaymentId + ' with amount ' + (transaction.amount * 100) + ' (transaction ' + transaction.id + ')',
+                message: 'Found ' + candidates.length + ' reversing payments for payment ' + refunded.id + ' with amount ' + (transaction.amount * 100) + ' (transaction ' + transaction.id + ')',
             });
         }
 
-        this.#assertPaymentScope(candidates[0], charge.id);
+        this.#assertPaymentScope(candidates[0], refunded.id);
         return candidates[0];
     }
 
-    async #tryResolveAdjustmentPayment(transaction: Stripe.BalanceTransaction): Promise<string | null> {
+    /**
+     * Returns the payment id associated with a dispute, dispute reversal, failed refund.
+     *
+     * Only when this payout's organization owns that payment: the liability for a dispute on a
+     * destination charge lands on our platform balance, while the payment itself belongs to the
+     * connected organization. The cost is still stored (it is deducted here), just without a link
+     * to another organization's payment.
+     */
+    async #tryResolveAdjustmentPayment(transaction: Stripe.BalanceTransaction, settlement: Settlement): Promise<string | null> {
         const source = transaction.source;
         if (!source || typeof source === 'string') {
             return null;
@@ -557,10 +849,10 @@ export class StripeSettlementSync {
             return null;
         }
 
+        let paymentId: string | null;
         try {
-            return await resolveStripePaymentId(await this.#getCharge(charge, transaction), {
+            paymentId = await getPaymentIdForStripeCharge(await this.#getCharge(charge, transaction), {
                 stripePlatform: this.stripePlatform,
-                cache: this.cache,
             });
         } catch (e) {
             // A charge that no longer exists is "not resolvable"; transient errors must still fail
@@ -570,6 +862,16 @@ export class StripeSettlementSync {
             }
             throw e;
         }
+
+        if (!paymentId) {
+            return null;
+        }
+
+        const payment = await Payment.getByID(paymentId);
+        if (!payment || payment.organizationId !== settlement.organizationId) {
+            return null;
+        }
+        return paymentId;
     }
 
     /**
@@ -626,9 +928,16 @@ function getStripeInvoiceId(occurredAt: Date): string {
 }
 
 function getFeeDetailType(detail: Stripe.BalanceTransaction.FeeDetail, transaction: Stripe.BalanceTransaction): SettlementChargeType {
-    switch (detail.type) {
-        case 'stripe_fee': return SettlementChargeType.ProviderTransactionFee;
-        case 'tax': return SettlementChargeType.Tax;
+    switch (detail.type as string) {
+        // payment_method_passthrough_fee: network costs itemized on top of the processing fee
+        case 'stripe_fee':
+        case 'payment_method_passthrough_fee':
+            return SettlementChargeType.ProviderTransactionFee;
+
+        // withheld_tax: tax the provider withholds and remits itself
+        case 'tax':
+        case 'withheld_tax':
+            return SettlementChargeType.Tax;
         default:
             throw new SimpleError({
                 code: 'unknown_fee_detail_type',

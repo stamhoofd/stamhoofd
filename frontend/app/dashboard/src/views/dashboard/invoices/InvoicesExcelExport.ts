@@ -1,9 +1,21 @@
-import type { InvoiceStruct } from '@stamhoofd/structures';
-import { PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
+import type { InvoiceStruct, PaymentGeneral } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 import type { RowValue } from '../../../classes/ExcelHelper';
 import { ExcelHelper } from '../../../classes/ExcelHelper';
+
+/**
+ * How long after a payment we still expect its payout to arrive: an incomplete payout younger than
+ * this is 'not paid out yet', older it is a real mismatch.
+ */
+const EXPECTED_PAYOUT_DELAY_MS = 14 * 24 * 60 * 60 * 1000;
+
+/**
+ * Offline methods that never produce payout rows: money that arrived directly, so a succeeded
+ * payment counts as completely paid out (a virtual payout at paidAt).
+ */
+const DIRECTLY_RECEIVED_METHODS = [PaymentMethod.Transfer, PaymentMethod.Unknown, PaymentMethod.PointOfSale];
 
 export class InvoicesExcelExport {
     /**
@@ -29,6 +41,7 @@ export class InvoicesExcelExport {
                 'BTW',
                 'Afrondingsverschil',
                 'Totaal',
+                ...(useStoredSettlements ? ['Uitbetaald?'] : []),
                 'Betaling',
                 'Betaalmethode',
                 'Uitbetalingsdatum',
@@ -61,6 +74,7 @@ export class InvoicesExcelExport {
                     value: invoice.totalWithVAT / 100_00,
                     format: '€0.00',
                 },
+                ...(useStoredSettlements ? [this.getPayoutCheck(invoice)] : []),
             ];
             const emptyInvoiceColumns: RowValue[] = invoiceColumns.map(() => '');
 
@@ -118,6 +132,46 @@ export class InvoicesExcelExport {
         return ExcelHelper.buildWorksheet(wsData, {
             defaultColumnWidth: 13,
         });
+    }
+
+    /**
+     * Whether the invoice is completely covered by payouts: the payout rows of its payments (plus
+     * the virtual full payout of succeeded directly-received payments) must sum to the invoiced
+     * payments total. Missing amounts of recent payments are still on their way; older ones are a
+     * real problem. Never returns an empty string: an all-empty column would be dropped by
+     * ExcelHelper.deleteEmptyColumns.
+     */
+    private static getPayoutCheck(invoice: InvoiceStruct): string {
+        if (invoice.payments.length === 0) {
+            return '/';
+        }
+
+        let covered = 0;
+        let onlyRecentIncomplete = true;
+
+        for (const payment of invoice.payments) {
+            const paymentCovered = this.getCoveredAmount(payment);
+            covered += paymentCovered;
+
+            if (paymentCovered !== payment.price) {
+                const referenceDate = payment.paidAt ?? payment.createdAt;
+                if (Date.now() - referenceDate.getTime() > EXPECTED_PAYOUT_DELAY_MS) {
+                    onlyRecentIncomplete = false;
+                }
+            }
+        }
+
+        if (covered === invoice.totalPaymentsAmount) {
+            return '✓';
+        }
+        return onlyRecentIncomplete ? 'Nog niet (volledig) uitbetaald' : 'Klopt niet!';
+    }
+
+    private static getCoveredAmount(payment: PaymentGeneral): number {
+        if (DIRECTLY_RECEIVED_METHODS.includes(payment.method)) {
+            return payment.status === PaymentStatus.Succeeded ? payment.price : 0;
+        }
+        return payment.settlements.reduce((total, line) => total + line.amount, 0);
     }
 
     static export(invoices: InvoiceStruct[], options: { useStoredSettlements?: boolean } = {}) {

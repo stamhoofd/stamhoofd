@@ -1,9 +1,11 @@
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Payment, Platform, StripeAccount } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference } from '@stamhoofd/structures';
+import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
@@ -245,13 +247,20 @@ describe('Cron.fake-settlements', () => {
                 amount: -50_00, settlementId: settlement.id,
             });
 
-            // The platform side receives the same fee: per applicationFeeId both sides of one kind
+            // The platform side receives the same fee: per application fee both sides of one kind
             // sum to zero
-            const received = byType.get(SettlementChargeType.ReceivedApplicationFeeService)!;
-            expect(received.amount).toBe(2_0000);
-            expect(byType.get(SettlementChargeType.ReceivedApplicationFeeTransfer)!.amount).toBe(50_00);
+            const fees = await ApplicationFee.select().where('externalId', applicationFeeId).fetch();
+            const feeByType = new Map(fees.map(fee => [fee.type, fee]));
+            expect(feeByType.get(ApplicationFeeType.Service)).toMatchObject({
+                amount: 2_0000,
+                organizationId: membershipOrganization.id,
+                payingOrganizationId: organization.id,
+                payingStripeAccountId: stripeAccount.id,
+                payingPaymentId: payment.id,
+            });
+            expect(feeByType.get(ApplicationFeeType.Transfer)!.amount).toBe(50_00);
 
-            const platformSettlement = await Settlement.getByID(received.settlementId!);
+            const platformSettlement = await Settlement.getByID(feeByType.get(ApplicationFeeType.Service)!.settlementId!);
             expect(platformSettlement!.stripeAccountId).toBeNull();
             expect(platformSettlement!.organizationId).toBe(membershipOrganization.id);
             expect(platformSettlement!.externalId).toContain('fake-settlement-Stripe-platform-');

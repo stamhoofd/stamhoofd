@@ -1,7 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 
-import { StripePayoutsExportEndpoint } from '../stripe/StripePayoutsExportEndpoint.js';
 import { SettlementsSyncStatus } from '@stamhoofd/structures/settlements/SettlementsSyncStatus.js';
 
 import { SettlementsSyncEndpoint } from './SettlementsSyncEndpoint.js';
@@ -26,7 +25,7 @@ export class GetSettlementsSyncStatusEndpoint extends Endpoint<Params, Query, Bo
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await StripePayoutsExportEndpoint.authenticate();
+        await SettlementsSyncEndpoint.authenticate();
 
         return new Response(SettlementsSyncEndpoint.queue.map((item) => {
             return SettlementsSyncStatus.create(item);

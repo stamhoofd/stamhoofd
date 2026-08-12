@@ -43,7 +43,17 @@ export class AuthenticatedStructures {
             }
         }
 
-        const includeSettlements = checkPermissions && !!Context.user && !!Context.user.permissions && payments.every(p => !!Context.optionalAuth?.checkScope(p.organizationId));
+        // A payout tells an organization's whole story: its total, the bank reference and our sync
+        // diagnostics. Being able to read a payment (e.g. as the manager of the member who made it)
+        // is not enough — only someone who may manage the organization's payments sees them
+        const includeSettlements = checkPermissions
+            && !!Context.user
+            && !!Context.user.permissions
+            && (await Promise.all(
+                Formatter.uniqueArray(payments.map(p => p.organizationId)).map(async organizationId =>
+                    !!Context.optionalAuth?.checkScope(organizationId) && !!(await Context.optionalAuth?.canManagePayments(organizationId)),
+                ),
+            )).every(allowed => allowed);
 
         const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
         const { paymentSettlements, settlements } = includeSettlements ? await Payment.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };

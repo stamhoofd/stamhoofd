@@ -128,8 +128,22 @@ export class StripeMocker {
         return [500];
     }
 
-    #list(data: StripeObject[], url: string) {
-        return [200, { object: 'list', data, has_more: false, url }];
+    /**
+     * Pages like the real API does, so the SDK's auto-pagination is actually exercised: a payout
+     * with more transactions than one page is the normal case in production.
+     */
+    #list(data: StripeObject[], url: string, query: Record<string, any> = {}) {
+        let page = data;
+
+        if (query.starting_after) {
+            const index = page.findIndex(item => item.id === query.starting_after);
+            page = index === -1 ? [] : page.slice(index + 1);
+        }
+
+        const limit = query.limit ? parseInt(String(query.limit)) : 10;
+        const hasMore = page.length > limit;
+
+        return [200, { object: 'list', data: page.slice(0, limit), has_more: hasMore, url }];
     }
 
     #listPayouts(id: string | undefined, query: Record<string, any>, stripeAccount: string | null) {
@@ -149,7 +163,7 @@ export class StripeMocker {
         if (query.arrival_date?.lte !== undefined) {
             data = data.filter(p => p.arrival_date <= query.arrival_date.lte);
         }
-        return this.#list(data, '/v1/payouts');
+        return this.#list(data, '/v1/payouts', query);
     }
 
     #listBalanceTransactions(query: Record<string, any>, stripeAccount: string | null) {
@@ -167,7 +181,7 @@ export class StripeMocker {
         if (query.created?.lte !== undefined) {
             data = data.filter(t => t.created <= query.created.lte);
         }
-        return this.#list(data, '/v1/balance_transactions');
+        return this.#list(data, '/v1/balance_transactions', query);
     }
 
     #listCheckoutSessions(query: Record<string, any>) {
@@ -176,7 +190,7 @@ export class StripeMocker {
         if (query.payment_intent) {
             data = data.filter(s => s.payment_intent === query.payment_intent);
         }
-        return this.#list(data, '/v1/checkout/sessions');
+        return this.#list(data, '/v1/checkout/sessions', query);
     }
 
     /**
@@ -188,6 +202,10 @@ export class StripeMocker {
             id: this.createId('po'),
             object: 'payout',
             status: 'paid',
+            // Stripe only reports the transactions of a payout it finished reconciling, and never
+            // for manual payouts
+            reconciliation_status: 'completed',
+            automatic: true,
             currency: 'eur',
             arrival_date: Math.floor(arrivalDate.getTime() / 1000),
             statement_descriptor: statementDescriptor ?? 'STAMHOOFD',
@@ -205,15 +223,21 @@ export class StripeMocker {
      */
     createBalanceTransaction(data: { type: string; amount: number; created: Date; payout?: string | null; stripeAccount?: string | null; fee?: number; source?: unknown } & Record<string, any>): StripeObject {
         const { created, payout, stripeAccount, ...rest } = data;
+        const feeDetails = (rest.fee_details ?? []) as { amount: number }[];
+
         const transaction: StripeObject = {
             id: this.createId('txn'),
             object: 'balance_transaction',
-            fee: 0,
+            currency: 'eur',
             fee_details: [],
             created: Math.floor(created.getTime() / 1000),
             payout: payout ?? null,
             stripeAccount: stripeAccount ?? null,
             ...rest,
+            // Stripe guarantees these: fee is the sum of its details, net is what the balance
+            // actually moved. Deriving them keeps fixtures from describing impossible transactions
+            fee: feeDetails.reduce((total, detail) => total + detail.amount, 0),
+            net: data.amount - feeDetails.reduce((total, detail) => total + detail.amount, 0),
         };
         this.balanceTransactions.push(transaction);
         return transaction;

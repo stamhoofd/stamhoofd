@@ -15,23 +15,6 @@ export enum SettlementChargeType {
     ApplicationFeeTransfer = 'ApplicationFeeTransfer',
 
     /**
-     * Service part of an application fee arriving on our platform payout (positive).
-     * These rows are the invoicing source.
-     */
-    ReceivedApplicationFeeService = 'ReceivedApplicationFeeService',
-
-    /**
-     * Transaction/transfer part of an application fee arriving on our platform payout (positive).
-     * These rows are the invoicing source.
-     */
-    ReceivedApplicationFeeTransfer = 'ReceivedApplicationFeeTransfer',
-
-    /**
-     * A refunded application fee on our platform payout (negative), unsplit.
-     */
-    ApplicationFeeRefund = 'ApplicationFeeRefund',
-
-    /**
      * The provider's own transaction fee, excluding VAT (Stripe: fee_details entries,
      * Mollie: settlement cost lines).
      */
@@ -48,19 +31,17 @@ export enum SettlementChargeType {
     Tax = 'Tax',
 
     /**
-     * Destination-charge transfer to the organization: minus gross on our platform payout.
-     */
-    Transfer = 'Transfer',
-
-    /**
-     * transfer_cancel / transfer_failure / transfer_refund.
-     */
-    TransferReversal = 'TransferReversal',
-
-    /**
-     * reserve_transaction: funds the provider holds back.
+     * Funds the provider holds back (reserve_transaction, reserved_funds, reserve_hold,
+     * reserve_release).
      */
     Reserve = 'Reserve',
+
+    /**
+     * Money moving in or out of the balance outside a payment: a payout that came back
+     * (payout_failure, payout_cancel), a top-up, or something the provider settled against the
+     * balance directly.
+     */
+    BalanceMovement = 'BalanceMovement',
 
     /**
      * Dispute adjustments.

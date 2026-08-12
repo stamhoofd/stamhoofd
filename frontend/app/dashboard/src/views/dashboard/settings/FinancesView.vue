@@ -75,21 +75,6 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="canExportStripePayouts" :selectable="true" class="left-center" @click="$navigate(Routes.StripePayouts)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/bank.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Zby') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zc0') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
                     <STListItem v-if="canExportSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsExport)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/bank.svg">
@@ -258,7 +243,6 @@ enum Routes {
     PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
     Packages = 'pakketten',
-    StripePayouts = 'StripePayouts',
     SettlementsExport = 'SettlementsExport',
     SettlementsSync = 'SettlementsSync',
 }
@@ -412,13 +396,6 @@ if (!isPlatform) {
     });
 
     defineRoute({
-        name: Routes.StripePayouts,
-        url: 'stripe-uitbetalingen',
-        present: 'popup',
-        component: async () => (await import('./administration/StripePayoutExportView.vue')).default,
-    });
-
-    defineRoute({
         name: Routes.SettlementsExport,
         url: 'uitbetalingen-export',
         present: 'popup',
@@ -443,8 +420,8 @@ const platform = usePlatform();
 const hasBreakdown = useFeatureFlag()('payment-breakdown');
 const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
 
-// Manual Stripe payout reports: only for the platform membership organization itself
-const canExportStripePayouts = computed(() => {
+// Platform tooling: only for full platform admins on the membership organization itself
+const isMembershipOrganizationAdmin = computed(() => {
     return !isPlatform
         && !!platform.value.membershipOrganizationId
         && organization.value?.id === platform.value.membershipOrganizationId
@@ -456,12 +433,13 @@ const getFeatureFlag = useFeatureFlag();
 // Any finance admin can export their own organization's stored settlements, behind the labs
 // feature flag
 const canExportSettlements = computed(() => {
-    return getFeatureFlag('settlements') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector);
+    // The route only exists outside platform mode
+    return !isPlatform && getFeatureFlag('settlements') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector);
 });
 
 // Syncing is platform tooling: only for full platform admins on the membership organization
 const canSyncSettlements = computed(() => {
-    return canExportStripePayouts.value && getFeatureFlag('settlements');
+    return isMembershipOrganizationAdmin.value && getFeatureFlag('settlements');
 });
 
 const balancePromise = updateBalance().catch(console.error);

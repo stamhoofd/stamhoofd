@@ -7,6 +7,8 @@ import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
+import { WebmasterReport } from '../helpers/WebmasterReport.js';
+import { ApplicationFeeService } from './ApplicationFeeService.js';
 import { BalanceItemService } from './BalanceItemService.js';
 import { InvoicePdfService } from './InvoicePdfService.js';
 import { InvoiceXMlService } from './InvoiceXMLService.js';
@@ -301,6 +303,16 @@ export class InvoiceService {
             throw e;
         }
 
+        try {
+            // The deduction charges of application fees billed by these payments now link to a
+            // numbered invoice. Only after the try/catch: a stamping error must never delete an
+            // invoice that was already sent
+            await ApplicationFeeService.stampInvoicedPayments(payments, model);
+        } catch (e) {
+            console.error('Failed to stamp application fee charges for invoice ' + model.id, e);
+            WebmasterReport.report('Factuurnummer op applicatiekosten zetten mislukt voor factuur ' + (model.number ?? model.id) + ' (de factuur zelf is wel verstuurd)', e);
+        }
+
         return model;
     }
 
@@ -337,14 +349,19 @@ export class InvoiceService {
      * After deletion the invoiced cache of the affected balance items is recalculated.
      */
     static async delete(invoice: Invoice) {
-        // Collect the affected balance items before deleting, because the invoiced balance items are cascade deleted.
+        // Collect the affected balance items and payments before deleting, because the invoiced
+        // balance items are cascade deleted and the payments' invoiceId is reset
         const { invoicedBalanceItems } = await Invoice.loadBalanceItems([invoice]);
         const balanceItemIds = Formatter.uniqueArray(invoicedBalanceItems.map(i => i.balanceItemId));
+        const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
 
         await invoice.delete();
 
         // Recalculate the invoiced amount cache of the balance items that were invoiced by this invoice.
         await BalanceItemService.updateInvoiced(balanceItemIds);
+
+        // The invoice number stamped on application fee deduction charges no longer exists
+        await ApplicationFeeService.stampInvoicedPayments(payments, null);
     }
 
     private static shouldForwardInvoice(invoice: Invoice, organization: Organization) {

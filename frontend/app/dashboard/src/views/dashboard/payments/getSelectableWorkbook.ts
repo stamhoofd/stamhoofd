@@ -220,6 +220,12 @@ function getSettlementColumns() {
             description: $t(`%ME`),
             category: $t(`%MA`),
         }),
+        new SelectableColumn({
+            id: 'settlement.check',
+            name: $t('Uitbetaald'),
+            description: $t('Toont bij verrekeningen of het volledige bedrag al is uitbetaald.'),
+            category: $t(`%MA`),
+        }),
     ];
 }
 
