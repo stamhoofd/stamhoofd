@@ -215,9 +215,10 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
@@ -371,10 +372,46 @@ async function deleteMe() {
         Toast.success($t('%1LO')).show();
         await pop({ force: true });
     } catch (e) {
-        Toast.fromError(e).show();
+        if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('organization_has_financial_records')) {
+            suggestDeactivation(e.getHuman());
+        } else {
+            Toast.fromError(e).show();
+        }
     }
 
     deleting.value = false;
+}
+
+function suggestDeactivation(description: string) {
+    const canDeactivate = props.organization.active;
+    const message = new CenteredMessage(
+        $t('Deze vereniging kan niet verwijderd worden'),
+        canDeactivate ? description + ' ' + $t('Zet ze op inactief in plaats van ze te verwijderen.') : description,
+        'error',
+    );
+
+    if (canDeactivate) {
+        message.addButton(new CenteredMessageButton($t('Op inactief zetten'), {
+            action: deactivate,
+        }));
+    }
+
+    message.addCloseButton().show();
+}
+
+async function deactivate() {
+    const patch = Organization.patch({ id: props.organization.id, active: false });
+    const response = await context.value.getAuthenticatedServerForOrganization(props.organization.id).request({
+        method: 'PATCH',
+        path: '/organization',
+        body: patch,
+        shouldRetry: false,
+        owner,
+        decoder: Organization as Decoder<Organization>,
+    });
+
+    props.organization.deepSet(response.data);
+    Toast.success($t('De vereniging staat nu op inactief')).show();
 }
 
 </script>

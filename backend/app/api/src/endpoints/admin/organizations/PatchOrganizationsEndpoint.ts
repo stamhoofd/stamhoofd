@@ -3,7 +3,8 @@ import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encodin
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { BalanceItem, Invoice, Organization, OrganizationRegistrationPeriod, Payment, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -58,6 +59,22 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',
                     human: $t(`%Cx`),
+                });
+            }
+
+            // Financial records may not disappear together with the organization that had to pay them
+            const payerRecordCounts = await Promise.all([
+                BalanceItem.select().where('payingOrganizationId', id).count(),
+                Payment.select().where('payingOrganizationId', id).count(),
+                ApplicationFee.select().where('payingOrganizationId', id).count(),
+                Invoice.select().where('payingOrganizationId', id).count(),
+            ]);
+
+            if (payerRecordCounts.some(count => count > 0)) {
+                throw new SimpleError({
+                    code: 'organization_has_financial_records',
+                    message: 'Organization is still referenced as paying organization',
+                    human: $t('Er zijn nog openstaande bedragen, betalingen, transactiekosten of facturen waarvoor {organization} moet betalen of betaald heeft. Die gegevens mogen niet verloren gaan.', { organization: organization.name }),
                 });
             }
 
