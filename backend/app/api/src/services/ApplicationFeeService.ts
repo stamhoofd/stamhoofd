@@ -142,7 +142,7 @@ export class ApplicationFeeService {
         periodStart: Date;
     }): Promise<Payment[]> {
         const reference = LEGACY_FEE_PAYMENT_REFERENCE_PREFIX + Formatter.dateIso(periodStart);
-        const key = organizationId + ':' + payingStripeAccountId + ':' + reference;
+        const key = organizationId + ':' + payingOrganizationId + ':' + payingStripeAccountId + ':' + reference;
 
         const cached = this.legacyFeePayments.get(key);
         if (cached && cached.length > 0) {
