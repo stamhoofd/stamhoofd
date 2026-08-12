@@ -1,3 +1,4 @@
+import { EmailMocker } from '@stamhoofd/email';
 import type { StripeAccount } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
@@ -15,6 +16,7 @@ import { initMembershipOrganization } from '../../tests/init/initMembershipOrgan
 import { ApplicationFeeService, LEGACY_FEE_PAYMENT_REFERENCE_PREFIX } from '../services/ApplicationFeeService.js';
 import { SettlementService } from '../services/SettlementService.js';
 import { ApplicationFeeInvoicer } from './ApplicationFeeInvoicer.js';
+import { WebmasterReport } from './WebmasterReport.js';
 
 describe('ApplicationFeeInvoicer', () => {
     const stripeMocker = new StripeMocker();
@@ -262,8 +264,18 @@ describe('ApplicationFeeInvoicer', () => {
         await createFee(organization, stripeAccount, { amount: 30_00 });
         await createFee(organization, broken, { amount: 40_00 });
 
-        // Deleting the account clears payingStripeAccountId: that group can't be billed anymore
-        await broken.delete();
+        // A month the legacy invoicer billed may never be billed again: that group throws
+        const legacy = new Payment();
+        legacy.organizationId = membershipOrganization.id;
+        legacy.payingOrganizationId = organization.id;
+        legacy.stripeAccountId = broken.id;
+        legacy.method = PaymentMethod.AccountDeductions;
+        legacy.provider = PaymentProvider.Stripe;
+        legacy.status = PaymentStatus.Succeeded;
+        legacy.reference = LEGACY_FEE_PAYMENT_REFERENCE_PREFIX + '2024-07-01';
+        legacy.price = 40_00;
+        legacy.paidAt = occurredAt;
+        await legacy.save();
 
         await invoiceMonth();
 
@@ -272,14 +284,63 @@ describe('ApplicationFeeInvoicer', () => {
         expect(payments[0].price).toBe(30_00);
     });
 
+    test('fees without the Stripe account they were deducted from are skipped, not retried forever', async () => {
+        const { organization, stripeAccount } = await init();
+        const removed = await stripeMocker.createStripeAccount(organization.id);
+
+        await createFee(organization, stripeAccount, { amount: 30_00 });
+        const orphaned = await createFee(organization, removed, { amount: 40_00 });
+
+        // Deleting the account row clears payingStripeAccountId: that fee can no longer be checked
+        // against what the legacy invoicer billed per account, so it is not billed at all
+        await removed.delete();
+
+        await WebmasterReport.group('Overslaan applicatiekosten', async () => {
+            await invoiceMonth();
+        });
+
+        const payments = await getFeePayments(organization);
+        expect(payments).toHaveLength(1);
+        expect(payments[0].price).toBe(30_00);
+        expect((await ApplicationFee.getByID(orphaned.id))!.balanceItemId).toBeNull();
+
+        // Skipping is silent here: the sync that stored the fee already reported it, and this run
+        // repeats every night
+        const emails = (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith('Overslaan applicatiekosten'));
+        expect(emails).toHaveLength(0);
+    });
+
     test('charges of a billed fee keep pointing at the deduction row', async () => {
         const { organization, stripeAccount } = await init();
         const fee = await createFee(organization, stripeAccount);
 
         await invoiceMonth();
 
-        const charge = await SettlementCharge.getByID(fee.settlementChargeId);
+        const charge = await SettlementCharge.getByID(fee.settlementChargeId!);
         expect(charge).toBeDefined();
         expect(charge!.amount).toBe(-30_00);
+    });
+
+    test('fees of a deleted organization are never billed, and do not block the other accounts', async () => {
+        const { organization, stripeAccount } = await init();
+        const { organization: other, stripeAccount: otherAccount } = await init();
+
+        const orphaned = await createFee(organization, stripeAccount, { amount: 30_00 });
+        await createFee(other, otherAccount, { amount: 40_00 });
+
+        // Takes the Stripe account and the deduction charge with it, but not our income
+        await organization.delete();
+
+        await invoiceMonth();
+
+        const payments = await getFeePayments(other);
+        expect(payments).toHaveLength(1);
+        expect(payments[0].price).toBe(40_00);
+
+        const stored = await ApplicationFee.getByID(orphaned.id);
+        expect(stored).toBeDefined();
+        expect(stored!.payingOrganizationId).toBeNull();
+        expect(stored!.settlementChargeId).toBeNull();
+        expect(stored!.balanceItemId).toBeNull();
     });
 });

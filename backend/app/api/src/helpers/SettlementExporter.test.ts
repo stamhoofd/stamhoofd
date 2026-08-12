@@ -363,4 +363,26 @@ describe('SettlementExporter', () => {
             expect((await exporter.getProviderInvoiceStatus(totals)).check).toBe('');
         });
     });
+
+    describe('getSettlementCheck', () => {
+        const check = (settlement: { amount: number; pendingFees?: number; uncollectibleFees?: number }, rows: { linesTotal: number; chargesTotal: number }) => {
+            return SettlementExporter.getSettlementCheck({ pendingFees: 0, uncollectibleFees: 0, ...settlement } as Settlement, rows);
+        };
+
+        test('a payout its rows fully explain is approved', () => {
+            expect(check({ amount: 49_70_00 }, { linesTotal: 50_00_00, chargesTotal: -30_00 })).toBe('✓');
+        });
+
+        test('a difference the stored rows do not cover is missing data', () => {
+            expect(check({ amount: 49_70_00 }, { linesTotal: 50_00_00, chargesTotal: 0 })).toBe('Ontbrekende gegevens');
+        });
+
+        test('fees still waiting for their invoice explain the rest, and say so', () => {
+            expect(check({ amount: 50_00_00, pendingFees: 30_00 }, { linesTotal: 49_70_00, chargesTotal: 0 })).toBe('Kosten nog niet gefactureerd');
+        });
+
+        test('fees that will never be invoiced explain the rest without waiting for one', () => {
+            expect(check({ amount: 50_00_00, uncollectibleFees: 30_00 }, { linesTotal: 49_70_00, chargesTotal: 0 })).toBe('✓');
+        });
+    });
 });

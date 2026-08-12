@@ -31,10 +31,11 @@ export type ApplicationFeeData = {
      */
     organizationId: string;
 
-    payingOrganizationId: string;
-    payingStripeAccountId: string;
+    payingOrganizationId?: string | null;
+    payingStripeAccountId?: string | null;
     payingPaymentId?: string | null;
-    settlementChargeId: string;
+
+    settlementChargeId?: string | null;
     settlementId?: string | null;
     occurredAt: Date;
 };
@@ -85,17 +86,28 @@ export class ApplicationFeeService {
         fee.type = data.type;
         fee.amount = data.amount;
         fee.organizationId = data.organizationId;
-        fee.payingOrganizationId = data.payingOrganizationId;
-        fee.payingStripeAccountId = data.payingStripeAccountId;
-        fee.settlementChargeId = data.settlementChargeId;
         fee.occurredAt = data.occurredAt;
 
         if (data.settlementId !== undefined) {
             fee.settlementId = data.settlementId;
         }
+
         if (data.payingPaymentId !== undefined) {
             fee.payingPaymentId = data.payingPaymentId;
         }
+
+        if (data.settlementChargeId !== undefined) {
+            fee.settlementChargeId = data.settlementChargeId;
+        }
+
+        if (data.payingOrganizationId !== undefined) {
+            fee.payingOrganizationId = data.payingOrganizationId;
+        }
+
+        if (data.payingStripeAccountId !== undefined) {
+            fee.payingStripeAccountId = data.payingStripeAccountId;
+        }
+
         await fee.save();
 
         if (fee.balanceItemId === null) {
@@ -162,7 +174,7 @@ export class ApplicationFeeService {
      * from being billed twice.
      */
     private static async linkLegacyInvoicedFee(fee: ApplicationFee) {
-        if (!fee.payingStripeAccountId) {
+        if (!fee.payingStripeAccountId || !fee.payingOrganizationId) {
             return;
         }
 
@@ -228,6 +240,10 @@ export class ApplicationFeeService {
      * no stamp: stampInvoicedPayments runs when the invoice is created later.
      */
     private static async stampProviderInvoiceId(fee: ApplicationFee, { payment }: { payment?: Payment } = {}) {
+        if (!fee.settlementChargeId) {
+            return;
+        }
+
         if (!payment) {
             if (!fee.balanceItemId) {
                 return;
@@ -277,7 +293,7 @@ export class ApplicationFeeService {
             .where('balanceItemId', balanceItemPayments.map(b => b.balanceItemId))
             .limit(FEE_BATCH_SIZE)
             .allBatched()) {
-            settlementChargeIds.push(...fees.map(fee => fee.settlementChargeId));
+            settlementChargeIds.push(...fees.map(fee => fee.settlementChargeId).filter((id): id is string => id !== null));
         }
 
         await SettlementService.setChargeProviderInvoiceIds(settlementChargeIds, invoice?.number ?? null);

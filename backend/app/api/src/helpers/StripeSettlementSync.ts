@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Payment, StripeAccount } from '@stamhoofd/models';
+import { Organization, Payment, StripeAccount } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
@@ -16,6 +16,27 @@ import { ApplicationFeeDetails } from './ApplicationFeeDetails.js';
 import { passthroughFetch } from './passthroughFetch.js';
 import { getPaymentIdForStripeCharge } from './getPaymentIdForStripeCharge.js';
 import { WebmasterReport } from './WebmasterReport.js';
+
+/**
+ * Who paid an application fee: normally the organization of the Stripe account it was deducted
+ * from, and otherwise the organization our own charge metadata names.
+ */
+type ApplicationFeePayer = {
+    organizationId: string;
+
+    /**
+     * NULL when we no longer have the stripe_accounts row the fee was deducted from.
+     */
+    stripeAccountId: string | null;
+
+    /**
+     * Whether our records of this payer are still complete. Only false when its stripe_accounts
+     * row is gone, which means its organization was deleted: what can't be resolved anymore is
+     * then the consequence of that deletion, not a problem to repair. A deleted account keeps its
+     * row, and its organization keeps its payments, so those stay strictly checked.
+     */
+    intact: boolean;
+};
 
 /**
  * Walks paid payouts and stores every balance transaction in them: payments become
@@ -36,6 +57,38 @@ export class StripeSettlementSync {
      * Explicitly fetched charges (when an expansion came back as an id), per run.
      */
     private fetchedCharges = new Map<string, Stripe.Charge>();
+
+    /**
+     * Stripe accounts already reported as unattributable, so a month of their fees is one problem
+     * instead of thousands.
+     */
+    static #reportedUnattributedAccounts = new Set<string>();
+
+    /**
+     * For tests only.
+     */
+    static resetWarnings() {
+        this.#reportedUnattributedAccounts.clear();
+    }
+
+    /**
+     * A fee we can't fully attribute is stored anyway (it is our income), so it would otherwise
+     * only exist as a number nobody looks at: the invoicer skips it, and no payout of the payer
+     * links it. Reported once per account, so someone decides whether to repair or write it off.
+     */
+    static reportUnattributedFee(payingAccountId: string, payer: ApplicationFeePayer | null) {
+        if (this.#reportedUnattributedAccounts.has(payingAccountId)) {
+            return;
+        }
+        this.#reportedUnattributedAccounts.add(payingAccountId);
+
+        WebmasterReport.report(
+            'Applicatiekosten van Stripe account ' + payingAccountId + ' worden niet aangerekend',
+            payer
+                ? 'Dat account staat niet meer in onze database. De kosten zijn wel opgeslagen op vereniging ' + payer.organizationId + ', maar worden niet automatisch gefactureerd.'
+                : 'Dat account en de vereniging erachter staan niet meer in onze database. De kosten zijn opgeslagen als niet-aanrekenbare inkomsten.',
+        );
+    }
 
     constructor({ secretKey, stripeAccount }: { secretKey: string; stripeAccount?: StripeAccount | null }) {
         this.stripeAccount = stripeAccount ?? null;
@@ -155,24 +208,11 @@ export class StripeSettlementSync {
     }
 
     /**
-     * Stores one application_fee balance transaction: per non-zero part the payer's negative
-     * deduction charge (its settlement link belongs to the payer's own payout walk) and the
-     * application fee row. The platform payout walk passes `settlementId` to link the fee rows to
-     * the payout that contains them. Throws instead of writing a guessed row: missing serviceFee
-     * metadata, an unknown Stripe account or an unresolvable payment all mean someone has to look
-     * at it first.
+     * Stores the SettlementCharge for the connected account (costs) and ApplicationFee for the platform account (revenue), related to an application fee in Stripe.
      */
     async #handleApplicationFee(transaction: Stripe.BalanceTransaction, options: { settlementId?: string } = {}): Promise<{ fees: ApplicationFee[]; charges: SettlementCharge[] }> {
         const fee = transaction.source as Stripe.ApplicationFee;
         const payingAccountId = typeof fee.account === 'string' ? fee.account : fee.account.id;
-
-        const payingStripeAccount = await StripeAccount.select().where('accountId', payingAccountId).first(false);
-        if (!payingStripeAccount) {
-            throw new SimpleError({
-                code: 'stripe_account_not_found',
-                message: 'No Stripe account found for ' + payingAccountId,
-            });
-        }
 
         const originatingTransaction = fee.originating_transaction;
         if (!originatingTransaction || typeof originatingTransaction === 'string') {
@@ -181,28 +221,18 @@ export class StripeSettlementSync {
                 message: 'Application fee ' + fee.id + ' has no expanded originating transaction',
             });
         }
-
+        const originatingCharge = originatingTransaction as Stripe.Charge;
         const details = ApplicationFeeDetails.fromStripe(transaction);
-
-        const paymentId = await getPaymentIdForStripeCharge(originatingTransaction as Stripe.Charge, {
+        const resolvedPaymentId = await getPaymentIdForStripeCharge(originatingCharge, {
             stripePlatform: this.stripePlatform,
         });
+        const resolvedPayment = (resolvedPaymentId ? await Payment.getByID(resolvedPaymentId) : null) ?? null;
 
-        if (!paymentId) {
-            throw new SimpleError({
-                code: 'payment_not_found',
-                message: 'No payment found for application fee ' + fee.id,
-            });
-        }
+        const payer = await this.#resolveApplicationFeePayer(payingAccountId, originatingCharge, resolvedPayment);
+        const paymentId = this.#getApplicationFeePaymentId(fee, payer, { paymentId: resolvedPaymentId, payment: resolvedPayment });
 
-        // Charge metadata is writable by the connected account's owner: the fee is deducted from
-        // this account, so it can only be about a payment of its own organization
-        const payment = await Payment.getByID(paymentId);
-        if (!payment || payment.organizationId !== payingStripeAccount.organizationId) {
-            throw new SimpleError({
-                code: 'payment_scope_mismatch',
-                message: 'Payment ' + paymentId + ' of application fee ' + fee.id + ' does not belong to organization ' + payingStripeAccount.organizationId,
-            });
+        if (!payer?.stripeAccountId) {
+            StripeSettlementSync.reportUnattributedFee(payingAccountId, payer);
         }
 
         const occurredAt = new Date(transaction.created * 1000);
@@ -222,37 +252,113 @@ export class StripeSettlementSync {
                 continue;
             }
 
-            const charge = await SettlementService.upsertCharge({
-                type: chargeType,
-                externalId: fee.id + ':' + chargeType,
-                amount: -amount,
-                applicationFeeId: fee.id,
-                paymentId,
+            const charge = payer
+                ? await SettlementService.upsertCharge({
+                        type: chargeType,
+                        externalId: fee.id + ':' + chargeType,
+                        amount: -amount,
+                        applicationFeeId: fee.id,
 
-                // The charge sits in the paying organization's payout
-                organizationId: payingStripeAccount.organizationId,
-                stripeAccountId: payingStripeAccount.id,
-                occurredAt,
+                        // Unresolvable stays undefined: a re-sync may not clear earlier stored links
+                        paymentId: paymentId ?? undefined,
+                        organizationId: payer.organizationId ?? undefined,
+                        stripeAccountId: payer.stripeAccountId ?? undefined,
+                        occurredAt,
 
-                // settlementId (settlement of the paying organization where the costs are deducted): still unknown, will be filled when looping the payouts of the paying organization
-            });
-            charges.push(charge);
+                        // settlementId (settlement of the paying organization where the costs are deducted): still unknown, will be filled when looping the payouts of the paying organization
+                    })
+                : null;
+
+            if (charge) {
+                charges.push(charge);
+            }
 
             fees.push(await ApplicationFeeService.upsertFee({
                 externalId: fee.id,
                 type: feeType,
                 amount,
                 organizationId: receivingOrganizationId,
-                payingOrganizationId: payingStripeAccount.organizationId,
-                payingStripeAccountId: payingStripeAccount.id,
-                payingPaymentId: paymentId,
-                settlementChargeId: charge.id,
+
+                // Unresolvable stays undefined: a re-sync may not clear earlier stored links
+                payingOrganizationId: payer?.organizationId ?? undefined,
+                payingStripeAccountId: payer?.stripeAccountId ?? undefined,
+                payingPaymentId: paymentId ?? undefined,
+                settlementChargeId: charge?.id ?? undefined,
+                settlementId: options.settlementId,
                 occurredAt,
-                ...(options.settlementId !== undefined ? { settlementId: options.settlementId } : {}),
             }));
         }
 
         return { fees, charges };
+    }
+
+    /**
+     * The organization an application fee was deducted from. Its Stripe account is the first
+     * source. A deleted organization takes its stripe_accounts row with it, and accounts deleted
+     * before we started keeping deleted ones are gone too; what is left of the payment then still
+     * names the organization: our own payment row first, and otherwise the metadata we wrote on the
+     * charge. Only a destination charge has an originating transaction, and that charge sits on our
+     * platform account, so the connected account could not have changed either.
+     *
+     * NULL when even that organization no longer exists: the fee is then income without a payer.
+     */
+    async #resolveApplicationFeePayer(payingAccountId: string, originatingCharge: Stripe.Charge, payment: Payment | null): Promise<ApplicationFeePayer | null> {
+        const stripeAccount = await StripeAccount.select().where('accountId', payingAccountId).first(false);
+        if (stripeAccount) {
+            return {
+                organizationId: stripeAccount.organizationId,
+                stripeAccountId: stripeAccount.id,
+                intact: true,
+            };
+        }
+
+        if (payment?.organizationId) {
+            return { organizationId: payment.organizationId, stripeAccountId: null, intact: false };
+        }
+
+        const organizationId = originatingCharge.metadata?.organization;
+        if (!organizationId || !await Organization.getByID(organizationId)) {
+            return null;
+        }
+
+        return { organizationId, stripeAccountId: null, intact: false };
+    }
+
+    /**
+     * The payer's payment an application fee was charged on. Charge metadata is writable by the
+     * connected account's owner: the fee is deducted from this account, so it can only be about a
+     * payment of its own organization.
+     *
+     * A payer whose records are no longer intact keeps whatever still resolves: its payments may
+     * have been deleted with its account, so a missing one is expected instead of something to
+     * repair.
+     */
+    #getApplicationFeePaymentId(fee: Stripe.ApplicationFee, payer: ApplicationFeePayer | null, { paymentId, payment }: { paymentId: string | null; payment: Payment | null }): string | null {
+        if (!payer) {
+            return null;
+        }
+
+        if (!paymentId) {
+            if (!payer.intact) {
+                return null;
+            }
+            throw new SimpleError({
+                code: 'payment_not_found',
+                message: 'No payment found for application fee ' + fee.id,
+            });
+        }
+
+        if (!payment || payment.organizationId !== payer.organizationId) {
+            if (!payer.intact) {
+                return null;
+            }
+            throw new SimpleError({
+                code: 'payment_scope_mismatch',
+                message: 'Payment ' + paymentId + ' of application fee ' + fee.id + ' does not belong to organization ' + payer.organizationId,
+            });
+        }
+
+        return paymentId;
     }
 
     /**

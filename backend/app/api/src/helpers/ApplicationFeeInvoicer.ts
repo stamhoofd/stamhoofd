@@ -84,9 +84,7 @@ export class ApplicationFeeInvoicer {
         const snapshot = truncateToSecond(new Date());
 
         const currentPeriodStart = SettlementService.getPeriodStart(new Date());
-        const oldest = await ApplicationFee.select()
-            .where('organizationId', sellingOrganization.id)
-            .where('balanceItemId', null)
+        const oldest = await this.#selectBillableFees(sellingOrganization)
             .where('occurredAt', '<', currentPeriodStart)
             .where('createdAt', '<', snapshot)
             .orderBy('occurredAt', 'ASC')
@@ -149,15 +147,16 @@ export class ApplicationFeeInvoicer {
         const reference = ApplicationFeeInvoicer.reference(periodStart);
 
         await QueueHandler.schedule(reference, async () => {
-            const totalsPerAccount = new Map<string | null, AccountTotals>();
+            const totalsPerAccount = new Map<string, AccountTotals>();
 
+            // Both ids are non-null: #selectUninvoicedFees only returns fees that can be billed
             for await (const fee of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot).all()) {
-                const totals = totalsPerAccount.get(fee.payingStripeAccountId) ?? {
-                    payingOrganizationId: fee.payingOrganizationId,
+                const totals = totalsPerAccount.get(fee.payingStripeAccountId!) ?? {
+                    payingOrganizationId: fee.payingOrganizationId!,
                     amountPerType: new Map<ApplicationFeeType, number>(),
                 };
                 totals.amountPerType.set(fee.type, (totals.amountPerType.get(fee.type) ?? 0) + fee.amount);
-                totalsPerAccount.set(fee.payingStripeAccountId, totals);
+                totalsPerAccount.set(fee.payingStripeAccountId!, totals);
             }
 
             for (const [payingStripeAccountId, totals] of totalsPerAccount) {
@@ -171,19 +170,32 @@ export class ApplicationFeeInvoicer {
         });
     }
 
+    /**
+     * A fee this invoicer cannot bill is left out everywhere, or every run would walk its month at
+     * Stripe and report it again: without a paying organization there is nobody left to bill, and
+     * without its Stripe account a month cannot be checked against what the legacy invoicer billed
+     * per account — billing it anyway risks charging it twice. Both are reported by the sync that
+     * stored them (StripeSettlementSync.reportUnattributedFee).
+     */
     #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot: Date) {
-        return ApplicationFee.select()
-            .where('organizationId', sellingOrganization.id)
-            .where('balanceItemId', null)
+        return this.#selectBillableFees(sellingOrganization)
             .where('occurredAt', '>=', periodStart)
             .where('occurredAt', '<', nextPeriodStart)
             .where('createdAt', '<', snapshot)
             .limit(FEE_BATCH_SIZE);
     }
 
+    #selectBillableFees(sellingOrganization: Organization) {
+        return ApplicationFee.select()
+            .where('organizationId', sellingOrganization.id)
+            .where('balanceItemId', null)
+            .where('payingOrganizationId', '!=', null)
+            .where('payingStripeAccountId', '!=', null);
+    }
+
     async #invoiceGroup({ sellingOrganization, payingStripeAccountId, totals, periodStart, nextPeriodStart, snapshot }: {
         sellingOrganization: Organization;
-        payingStripeAccountId: string | null;
+        payingStripeAccountId: string;
         totals: AccountTotals;
         periodStart: Date;
         nextPeriodStart: Date;
@@ -192,13 +204,6 @@ export class ApplicationFeeInvoicer {
         const seller = sellingOrganization.meta.companies[0];
         if (!seller) {
             return;
-        }
-
-        if (!payingStripeAccountId) {
-            throw new SimpleError({
-                code: 'missing_stripe_account',
-                message: 'Uninvoiced application fees without a Stripe account',
-            });
         }
 
         const stripeAccount = await StripeAccount.getByID(payingStripeAccountId);

@@ -46,9 +46,11 @@ export class ApplicationFee extends QueryableModel {
 
     /**
      * The paying organization: the connected organization whose payout the fee was deducted from.
+     * NULL when that organization no longer exists: the fee stays as income of the receiving
+     * organization, but can never be invoiced anymore.
      */
-    @column({ type: 'string' })
-    payingOrganizationId: string;
+    @column({ type: 'string', nullable: true })
+    payingOrganizationId: string | null = null;
 
     /**
      * The Stripe account of the paying organization the fee was deducted from. An organization can
@@ -65,10 +67,11 @@ export class ApplicationFee extends QueryableModel {
 
     /**
      * The deduction charge on the paying organization's payout
-     * (ApplicationFeeService/ApplicationFeeTransfer, same amount but negative).
+     * (ApplicationFeeService/ApplicationFeeTransfer, same amount but negative). NULL when there is
+     * no payout left to deduct it from: the payer is unknown or its organization is deleted.
      */
-    @column({ type: 'string' })
-    settlementChargeId: string;
+    @column({ type: 'string', nullable: true })
+    settlementChargeId: string | null = null;
 
     /**
      * The payout in which the receiving organization was paid this fee. NULL until that payout is
