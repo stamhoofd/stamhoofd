@@ -16255,10 +16255,6 @@
     "original": "Informatie",
     "translation": "Information"
   },
-  "%W5": {
-    "original": "Opgelet: deze bestelling werd nog niet betaald.",
-    "translation": "Note: this order has not yet been paid."
-  },
   "%W6": {
     "original": "Bestelling",
     "translation": "Order"
@@ -17503,37 +17499,13 @@
     "original": "Je kan de geboortedatum van een bestaand lid enkel beperkt corrigeren, niet de dag, maand én jaar tegelijk wijzigen. Neem contact op met een hoofdbeheerder als dit toch nodig is.",
     "translation": "You can only make limited corrections to a member's date of birth; you can't change the day, month, and year all at once. Please contact a main administrator if this is required."
   },
-  "%Zbs": {
-    "original": "Al {count} transacties verwerkt",
-    "translation": "Already processed {count} transactions"
-  },
-  "%Zbt": {
-    "original": "Uitbetalingen exporteren",
-    "translation": "Export payouts"
-  },
-  "%Zbu": {
-    "original": "Je ontvangt het rapport via e-mail zodra het klaar is. Zo kunnen we controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
-    "translation": "You'll receive the report by email once it's ready. This way we can double-check whether all charged Stripe fees were invoiced correctly."
-  },
   "%Zbv": {
     "original": "Er bestaat geen lid met het ID \"{id}\". Kijk na of het ID juist is: een rij met een ID kan nooit een nieuw lid aanmaken.",
     "translation": "There is no member with ID \"{id}\". Please check if the ID is correct: a row with an ID can never create a new member."
   },
-  "%Zby": {
-    "original": "Stripe uitbetalingen exporteren",
-    "translation": "Export Stripe payouts"
-  },
-  "%Zbz": {
-    "original": "Van {start} tot {end}",
-    "translation": "From {start} to {end}"
-  },
   "%Zc": {
     "original": "Geen uitgesloten domeinnamen",
     "translation": "No excluded domain names"
-  },
-  "%Zc0": {
-    "original": "Ontvang een rapport via e-mail om te controleren of alle aangerekende Stripe kosten correct werden gefactureerd.",
-    "translation": "Receive a report by email to check whether all charged Stripe fees were invoiced correctly."
   },
   "%Zc1": {
     "original": "N.v.t.",
@@ -17546,10 +17518,6 @@
   "%Zc3": {
     "original": "Niet uitbetaald",
     "translation": "Not paid out"
-  },
-  "%Zc5": {
-    "original": "Je ontvangt een e-mail met de uitbetalingen zodra het rapport klaar is",
-    "translation": "You will receive an email with the payouts as soon as the report is ready"
   },
   "%Zc6": {
     "original": "Ben je zeker dat je factuur {number} wil verwijderen?",
@@ -19167,9 +19135,89 @@
     "original": "Deze betalingen hebben ook voor andere dingen betaald. Het bedrag hierboven en de export bevatten enkel het deel dat hier meetelt.",
     "translation": "These payments also paid for other items. The amount above and the export include only the portion that applies here."
   },
+  "%Zjv": {
+    "original": "Hoeveel van de betalingen van deze factuur in elke uitbetaling zat.",
+    "translation": "How much of the payments from this invoice were included in each payout."
+  },
+  "%Zjw": {
+    "original": "Loopt ook alle uitbetalingen opnieuw af die al volledig gesynchroniseerd waren.",
+    "translation": "This also rechecks all payouts that were already fully synchronized."
+  },
+  "%Zjx": {
+    "original": "Exporteer de opgeslagen uitbetalingen, betalingen en kosten als Excel-bestand.",
+    "translation": "Export the saved payouts, payments, and fees as an Excel file."
+  },
+  "%Zjy": {
+    "original": "{count} uitbetalingen verwerkt, {failed} mislukt",
+    "translation": "{count} payouts processed, {failed} failed"
+  },
+  "%Zjz": {
+    "original": "Uitbetalingen synchroniseren",
+    "translation": "Synchronize payouts"
+  },
   "%Zk": {
     "original": "Inloggen via SSO",
     "translation": "Login via SSO"
+  },
+  "%Zk0": {
+    "original": "Nog niet (volledig) uitbetaald",
+    "translation": "Not yet (fully) paid out"
+  },
+  "%Zk1": {
+    "original": "Toont bij verrekeningen of het volledige bedrag al is uitbetaald.",
+    "translation": "Shows during settlements whether the entire amount has already been paid out."
+  },
+  "%Zk2": {
+    "original": "Opgeslagen uitbetalingen exporteren",
+    "translation": "Export saved payouts"
+  },
+  "%Zk3": {
+    "original": "Haalt de uitbetalingen, betalingen en kosten van de betaalproviders op en slaat ze lokaal op. Alles wordt idempotent weggeschreven: opnieuw uitvoeren is goedkoop, al gesynchroniseerde uitbetalingen worden overgeslagen.",
+    "translation": "Retrieves payouts, payments, and fees from the payment providers and stores them locally. Everything is written idempotently: running it again is easy, already synchronized payouts are skipped."
+  },
+  "%Zk4": {
+    "original": "Gebruikt de opgeslagen uitbetalingen in de betalings- en factuurexports van deze organisatie. Op de ledenorganisatie van het platform toont dit ook de export en synchronisatie in het financiënmenu.",
+    "translation": "Uses the saved payouts in the payment and invoice exports of this organization. On the member organization of the platform, it also shows the export and synchronization under the finances menu."
+  },
+  "%Zk5": {
+    "original": "Bouwt het overzicht van de opgeslagen uitbetalingen, betalingen en kosten (zonder de betaalproviders opnieuw te bevragen) en mailt het resultaat als Excel-bestand naar jouw e-mailadres.",
+    "translation": "Generates a summary of the saved payouts, payments, and fees (without re-querying the payment providers) and emails the result as an Excel file to your email address."
+  },
+  "%Zk7": {
+    "original": "Platform",
+    "translation": "Platform"
+  },
+  "%Zk8": {
+    "original": "Haal de uitbetalingen van de betaalproviders op en sla ze lokaal op.",
+    "translation": "Retrieve payouts from the payment providers and store them locally."
+  },
+  "%ZkA": {
+    "original": "Uitbetaald",
+    "translation": "Paid out"
+  },
+  "%ZkB": {
+    "original": "Alle providers",
+    "translation": "All providers"
+  },
+  "%ZkC": {
+    "original": "De export is gestart. Je ontvangt het resultaat via e-mail.",
+    "translation": "The export has started. You will receive the result via email."
+  },
+  "%ZkD": {
+    "original": "Synchronisatie sinds {start}",
+    "translation": "Synchronization since {start}"
+  },
+  "%ZkE": {
+    "original": "Uitbetalingen opslaan en exporteren",
+    "translation": "Save and export payouts"
+  },
+  "%ZkF": {
+    "original": "Al gesynchroniseerde uitbetalingen opnieuw verwerken",
+    "translation": "Reprocess payouts that were already synchronized"
+  },
+  "%ZkG": {
+    "original": "De synchronisatie is gestart.",
+    "translation": "Synchronization has started."
   },
   "%Zl": {
     "original": "Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",

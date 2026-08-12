@@ -1,9 +1,9 @@
 <template>
-    <SaveView :loading="saving" :title="$t('Uitbetalingen synchroniseren')" :save-text="$t('Starten')" @save="save">
+    <SaveView :loading="saving" :title="$t('%Zjz')" :save-text="$t('%Vm')" @save="save">
         <h1>
-            {{ $t('Uitbetalingen synchroniseren') }}
+            {{ $t('%Zjz') }}
         </h1>
-        <p>{{ $t('Haalt de uitbetalingen, betalingen en kosten van de betaalproviders op en slaat ze lokaal op. Alles wordt idempotent weggeschreven: opnieuw uitvoeren is goedkoop, al gesynchroniseerde uitbetalingen worden overgeslagen.') }}</p>
+        <p>{{ $t('%Zk3') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -18,10 +18,10 @@
                     <Checkbox v-model="force" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Al gesynchroniseerde uitbetalingen opnieuw verwerken') }}
+                    {{ $t('%ZkF') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Loopt ook alle uitbetalingen opnieuw af die al volledig gesynchroniseerd waren.') }}
+                    {{ $t('%Zjw') }}
                 </p>
             </STListItem>
         </STList>
@@ -31,10 +31,10 @@
             <STList>
                 <STListItem v-for="(runningJob, index) in runningJobs" :key="index">
                     <h3 class="style-title-list">
-                        {{ $t('Synchronisatie sinds {start}', {start: formatDateTime(runningJob.start)}) }}
+                        {{ $t('%ZkD', {start: formatDateTime(runningJob.start)}) }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('{count} uitbetalingen verwerkt, {failed} mislukt', {count: runningJob.count.toString(), failed: runningJob.failed.toString()}) }}
+                        {{ $t('%Zjy', {count: runningJob.count.toString(), failed: runningJob.failed.toString()}) }}
                     </p>
                 </STListItem>
             </STList>
@@ -131,7 +131,7 @@ async function save() {
             },
             owner: requestOwner,
         });
-        new Toast($t('De synchronisatie is gestart.'), 'success').show();
+        new Toast($t('%ZkG'), 'success').show();
         await pop({ force: true });
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);

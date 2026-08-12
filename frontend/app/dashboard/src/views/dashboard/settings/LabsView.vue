@@ -256,7 +256,7 @@
 
         <div v-if="hasPlatformFullAccess" key="platform-settings" class="container">
             <hr><h2>
-                {{ $t('Platform') }}
+                {{ $t('%Zk7') }}
             </h2>
 
             <STList>
@@ -265,10 +265,10 @@
                         <Checkbox :model-value="getFeatureFlag('settlements')" @update:model-value="setFeatureFlag('settlements', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Uitbetalingen opslaan en exporteren') }}
+                        {{ $t('%ZkE') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Gebruikt de opgeslagen uitbetalingen in de betalings- en factuurexports van deze organisatie. Op de ledenorganisatie van het platform toont dit ook de export en synchronisatie in het financiënmenu.') }}
+                        {{ $t('%Zk4') }}
                     </p>
                 </STListItem>
             </STList>

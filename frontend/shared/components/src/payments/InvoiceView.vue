@@ -157,9 +157,9 @@
 
             <template v-if="hasSettlementsFlag && invoiceSettlements.length > 0">
                 <hr>
-                <h2>{{ $t('Uitbetalingen') }}</h2>
+                <h2>{{ $t('%Zj6') }}</h2>
                 <p class="style-description">
-                    {{ $t('Hoeveel van de betalingen van deze factuur in elke uitbetaling zat.') }}
+                    {{ $t('%Zjv') }}
                 </p>
 
                 <STList>

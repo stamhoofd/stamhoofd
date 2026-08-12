@@ -80,10 +80,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Opgeslagen uitbetalingen exporteren') }}
+                            {{ $t('%Zk2') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Exporteer de opgeslagen uitbetalingen, betalingen en kosten als Excel-bestand.') }}
+                            {{ $t('%Zjx') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -95,10 +95,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/sync.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Uitbetalingen synchroniseren') }}
+                            {{ $t('%Zjz') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Haal de uitbetalingen van de betaalproviders op en sla ze lokaal op.') }}
+                            {{ $t('%Zk8') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
