@@ -103,6 +103,14 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 totals.skipped += result.skipped;
                 totals.failed += result.failed;
             } catch (e) {
+                if (e instanceof Stripe.errors.StripePermissionError && e.message.includes(account.accountId) && e.message.includes('does not have access to account')) {
+                    // Stripe account no longer in active use
+                    console.error(e, 'marking stripe account', account.id, account.accountId, 'as deleted because we do not seem to have access to it any longer');
+                    account.status = 'deleted';
+                    await account.save();
+                    totals.skipped += 1;
+                    continue;
+                }
                 console.error('Failed to sync payouts of Stripe account ' + account.accountId, e);
                 totals.failed += 1;
 
