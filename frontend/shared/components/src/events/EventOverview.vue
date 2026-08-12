@@ -585,6 +585,9 @@ defineRoute({
                         if (updatedWaitingList) {
                             waitingList.deepSet(updatedWaitingList);
 
+                            // deepSet copies parentGroup (null on a standalone-decoded group), restore the back-reference
+                            waitingList.parentGroup = props.event.group;
+
                             if (updatedWaitingList.deletedAt) {
                                 props.event.group.waitingList = null;
                             }
