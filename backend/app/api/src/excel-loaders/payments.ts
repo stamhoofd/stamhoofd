@@ -596,7 +596,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'settlement.check',
-            name: $t('Uitbetaald'),
+            name: $t('%ZkA'),
             width: 24,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 // Only meaningful for fee payments: their payout lines are derived from the
@@ -607,7 +607,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                 }
                 const settled = object.settlements.reduce((total, line) => total + line.amount, 0);
                 return {
-                    value: settled === object.price ? '✓' : $t('Nog niet (volledig) uitbetaald'),
+                    value: settled === object.price ? '✓' : $t('%Zk0'),
                 };
             },
         },

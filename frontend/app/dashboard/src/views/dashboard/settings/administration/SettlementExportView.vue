@@ -1,9 +1,9 @@
 <template>
-    <SaveView :loading="saving" :title="$t('Opgeslagen uitbetalingen exporteren')" :save-text="$t('Exporteren')" @save="save">
+    <SaveView :loading="saving" :title="$t('%Zk2')" :save-text="$t('%Oy')" @save="save">
         <h1>
-            {{ $t('Opgeslagen uitbetalingen exporteren') }}
+            {{ $t('%Zk2') }}
         </h1>
-        <p>{{ $t('Bouwt het overzicht van de opgeslagen uitbetalingen, betalingen en kosten (zonder de betaalproviders opnieuw te bevragen) en mailt het resultaat als Excel-bestand naar jouw e-mailadres.') }}</p>
+        <p>{{ $t('%Zk5') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -27,10 +27,10 @@
 
         <hr><h2>{{ $t('%P1') }}</h2>
 
-        <STInputBox error-fields="provider" :error-box="errorBox" :title="$t('Betaalprovider')">
+        <STInputBox error-fields="provider" :error-box="errorBox" :title="$t('%wX')">
             <Dropdown v-model="provider">
                 <option :value="null">
-                    {{ $t('Alle providers') }}
+                    {{ $t('%ZkB') }}
                 </option>
                 <option v-for="p in providers" :key="p" :value="p">
                     {{ p }}
@@ -151,7 +151,7 @@ async function save() {
             },
             owner: requestOwner,
         });
-        new Toast($t('De export is gestart. Je ontvangt het resultaat via e-mail.'), 'success').show();
+        new Toast($t('%ZkC'), 'success').show();
         await pop({ force: true });
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);
