@@ -30,6 +30,7 @@ Create the following checklist in your memory and review the code changes in sco
    - Tests named after an endpoint should not contain tests that call a different endpoint. 
    - When patterns emerge where we do certain things a couple of times, or when a group of files could be published as a (useful) open-sourced library, always prefer to create new package (in shared, frontend/shared or backend/shared) over adding it in an existing package;
    - This is not limited to the examples above, use common sense and best practices for code placement.
+9. .sql migrations can never contain more than 1 statement, unless the migration is idempotent
 
 ## Pre-existing issues count — don't grade on a curve
 
