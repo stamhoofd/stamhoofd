@@ -4,8 +4,8 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>webcredentials:stamhoofd.app?mode=developer</string>
-		<string>applinks:stamhoofd.app?mode=developer</string>
+		<string>webcredentials:staging.stamhoofd.app?mode=developer</string>
+		<string>applinks:staging.stamhoofd.app?mode=developer</string>
 	</array>
 </dict>
 </plist>

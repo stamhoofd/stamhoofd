@@ -23,7 +23,7 @@
 		}
 	},
 	"server": {
-		"hostname": "stamhoofd.app",
+		"hostname": "staging.stamhoofd.app",
 		"androidScheme": "https"
 	},
 	"packageClassList": [
