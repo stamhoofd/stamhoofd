@@ -22,7 +22,7 @@
         </template>
 
         <div v-for="group of groupedDraggableResponsibilites" :key="group.id" class="container">
-            <template v-if="groupedDraggableResponsibilites.length > 1">
+            <template v-if="groupedDraggableResponsibilites.length > 1 || inheritedResponsibilitiesWithGroup.length">
                 <hr>
                 <h2>{{ group.title }}</h2>
                 <p v-if="group.description">
