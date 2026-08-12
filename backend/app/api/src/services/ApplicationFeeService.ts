@@ -149,7 +149,25 @@ export class ApplicationFeeService {
             return cached;
         }
 
-        const payments = await Payment.select()
+        // Prefer matching stripeAccountId
+        let payments = await Payment.select()
+            .where('organizationId', organizationId)
+            .where('payingOrganizationId', payingOrganizationId)
+            .where(
+                SQL.where('stripeAccountId', payingStripeAccountId),
+            )
+            .where('reference', reference)
+            .where('method', PaymentMethod.AccountDeductions)
+            .where('provider', PaymentProvider.Stripe)
+            .where('status', PaymentStatus.Succeeded)
+            .fetch();
+
+        if (payments.length) {
+            this.legacyFeePayments.set(key, payments);
+            return payments;
+        }
+
+        payments = await Payment.select()
             .where('organizationId', organizationId)
             .where('payingOrganizationId', payingOrganizationId)
             .where(
