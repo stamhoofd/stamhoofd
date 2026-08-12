@@ -624,17 +624,16 @@ export class MemberActionBuilder {
     }
 
     private getInviteMemberForGroupActionsWithGroups(): TableAction<PlatformMember>[] {
-        if (this.organizations.length === 0) {
-            return [];
-        }
-
         // Each entry is a period (null for waiting lists) and the category tree to invite into.
         const periodTrees: { period: OrganizationRegistrationPeriod | null; categoryTree: GroupCategoryTree }[] = [];
 
         if (this.isWaitingList) {
-            const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
-            if (tree) {
-                periodTrees.push({ period: null, categoryTree: tree });
+            // Platform admins have no organization in context: they can still invite via parentGroup below.
+            if (this.organizations.length > 0) {
+                const tree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], periods: this.getResolvedPeriods(this.organizations[0]) });
+                if (tree) {
+                    periodTrees.push({ period: null, categoryTree: tree });
+                }
             }
         } else if (this.organizations.length === 1) {
             for (const period of this.getResolvedPeriods(this.organizations[0])) {

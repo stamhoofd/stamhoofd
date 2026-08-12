@@ -35,11 +35,15 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (organization) {
+            if (!await Context.auth.hasSomeAccess(organization.id)) {
+                throw Context.auth.error();
+            }
+        } else if (!Context.auth.hasSomePlatformAccess()) {
             throw Context.auth.error();
         }
 
@@ -48,11 +52,11 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
         const puts = request.body.getPuts();
         for (const { put } of puts) {
-            await this.checkCanCreateRegistrationInvitation(put, organization.id);
+            const group = await this.checkCanCreateRegistrationInvitation(put, organization?.id ?? null);
 
             const invitation = new RegistrationInvitation();
             invitation.id = put.id;
-            invitation.organizationId = organization.id;
+            invitation.organizationId = group.organizationId;
             invitation.groupId = put.groupId;
             invitation.memberId = put.memberId;
 
@@ -125,12 +129,13 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
     /**
      * Will throw if not allowed to invite.
      * @param invitation
-     * @param organizationId id of organization to invite for, should match the organizationId in the invitation
+     * @param organizationId organization scope of the request; when set, the group must belong to it (platform admins can invite without a scope)
+     * @returns the group to invite for
      */
-    private async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationRequest, organizationId: string) {
+    private async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationRequest, organizationId: string | null): Promise<Group> {
         const group = await Group.getByID(invitation.groupId);
 
-        if (!group || group.organizationId !== organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+        if (!group || (organizationId !== null && group.organizationId !== organizationId) || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
             throw Context.auth.error($t(`%1ST`));
         }
 
@@ -147,7 +152,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
         if (!member
             // in userMode 'organization' we can only invite members from the same organization
-            || (STAMHOOFD.userMode === 'organization' && member.organizationId !== organizationId)
+            || (STAMHOOFD.userMode === 'organization' && member.organizationId !== group.organizationId)
             // read access is suficient
             || !await Context.auth.canAccessMember(member, PermissionLevel.Read)
         ) {
@@ -163,5 +168,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 human: $t('%1S2'),
             });
         }
+
+        return group;
     }
 }
