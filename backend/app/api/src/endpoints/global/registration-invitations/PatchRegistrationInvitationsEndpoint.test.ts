@@ -2,17 +2,18 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationInvitationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationInvitation, RegistrationInvitationFactory, Token, UserFactory } from '@stamhoofd/models';
 import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
-import { PermissionLevel, Permissions, PermissionsResourceType, RegistrationInvitationRequest, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { GroupType, PermissionLevel, Permissions, PermissionsResourceType, RegistrationInvitationRequest, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchRegistrationInvitationsEndpoint } from './PatchRegistrationInvitationsEndpoint.js';
 
 describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
     const endpoint = new PatchRegistrationInvitationsEndpoint();
 
-    const patchInvitations = async ({ patch, organization, user }: { patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest>; organization: Organization; user: User | null }) => {
-        const request = Request.buildJson('PATCH', '/registration-invitations', organization.getApiHost(), patch);
+    const patchInvitations = async ({ patch, organization, user }: { patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest>; organization: Organization | null; user: User | null }) => {
+        const request = Request.buildJson('PATCH', '/registration-invitations', organization?.getApiHost(), patch);
         if (user) {
             const token = await Token.createToken(user);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -399,6 +400,155 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 user,
             })).rejects.toThrow('Je hebt geen toegangsrechten om deze uitnodiging te verwijderen.');
+        });
+    });
+
+    describe('Without organization scope (platform admins)', () => {
+        beforeEach(() => {
+            TestUtils.setEnvironment('userMode', 'platform');
+        });
+
+        test('A platform admin can invite for an event group', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const member = await new MemberFactory({
+                organization,
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: { year: 1994, month: 6, day: 24 },
+            }).create();
+
+            const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+
+            patch.addPut(RegistrationInvitationRequest.create({
+                groupId: group.id,
+                memberId: member.id,
+            }));
+
+            const response = await patchInvitations({
+                patch,
+                organization: null,
+                user: admin,
+            });
+
+            expect(response.body).toHaveLength(1);
+            expect(response.body[0].group.id).toBe(group.id);
+            expect(response.body[0].member.id).toBe(member.id);
+
+            // The invitation belongs to the organization of the group
+            const invitation = await RegistrationInvitation.getByID(response.body[0].id);
+            expect(invitation?.organizationId).toBe(organization.id);
+        });
+
+        test('Should fail for a user without platform access', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const member = await new MemberFactory({
+                organization,
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: { year: 1994, month: 6, day: 24 },
+            }).create();
+
+            const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+
+            patch.addPut(RegistrationInvitationRequest.create({
+                groupId: group.id,
+                memberId: member.id,
+            }));
+
+            await expect(patchInvitations({
+                patch,
+                organization: null,
+                user,
+            })).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+        });
+
+        test('Should fail for a platform admin without access to the group', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+
+            // Some platform access (passes the fast throw), but no rights on this group or its organization
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([
+                        [PermissionsResourceType.OrganizationTags, new Map([
+                            ['unrelated-tag-id', ResourcePermissions.create({
+                                level: PermissionLevel.Read,
+                            })],
+                        ])],
+                    ]),
+                }),
+            }).create();
+
+            const member = await new MemberFactory({
+                organization,
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: { year: 1994, month: 6, day: 24 },
+            }).create();
+
+            const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+
+            patch.addPut(RegistrationInvitationRequest.create({
+                groupId: group.id,
+                memberId: member.id,
+            }));
+
+            await expect(patchInvitations({
+                patch,
+                organization: null,
+                user: admin,
+            })).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+        });
+
+        test('A platform admin can delete an invitation', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const member = await new MemberFactory({
+                organization,
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: { year: 1994, month: 6, day: 24 },
+            }).create();
+
+            const invitation = await new RegistrationInvitationFactory({ member, group, organization }).create();
+
+            const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+
+            patch.addDelete(invitation.id);
+
+            const response = await patchInvitations({
+                patch,
+                organization: null,
+                user: admin,
+            });
+
+            expect(response.body).toHaveLength(0);
+            expect(await RegistrationInvitation.getByID(invitation.id)).toBeUndefined();
         });
     });
 });

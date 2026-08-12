@@ -42,22 +42,22 @@ function buildEventWaitingList(organizationId: string, periodId: string) {
 // The invite actions only depend on groups, organizations and the resolved periods, so the
 // other collaborators can stay empty stubs.
 const builderFactories = {
-    MemberActionBuilder: (waitingList: Group, organization: Organization) => new MemberActionBuilder({
+    MemberActionBuilder: (waitingList: Group, organizations: Organization[]) => new MemberActionBuilder({
         present: (async () => {}) as any,
         context: {} as any,
         groups: [waitingList],
         platform: {} as any,
-        organizations: [organization],
+        organizations,
         platformFamilyManager: {} as any,
         owner: {},
         categories: [],
     }),
-    RegistrationActionBuilder: (waitingList: Group, organization: Organization) => new RegistrationActionBuilder({
+    RegistrationActionBuilder: (waitingList: Group, organizations: Organization[]) => new RegistrationActionBuilder({
         present: (async () => {}) as any,
         context: {} as any,
         groups: [waitingList],
         platform: {} as any,
-        organizations: [organization],
+        organizations,
         platformFamilyManager: {} as any,
         owner: {},
         categories: [],
@@ -78,7 +78,7 @@ describe.each(Object.entries(builderFactories))('%s.getInviteMemberForGroupActio
         const organization = buildOrganization(currentPeriod);
         const { eventGroup, waitingList } = buildEventWaitingList(organization.id, eventPeriod.id);
 
-        const builder = buildBuilder(waitingList, organization);
+        const builder = buildBuilder(waitingList, [organization]);
         const actions = getInviteActions(builder);
 
         expect(actions).toHaveLength(2);
@@ -90,7 +90,7 @@ describe.each(Object.entries(builderFactories))('%s.getInviteMemberForGroupActio
         const organization = buildOrganization(currentPeriod);
         const { eventGroup, waitingList } = buildEventWaitingList(organization.id, currentPeriod.id);
 
-        const builder = buildBuilder(waitingList, organization);
+        const builder = buildBuilder(waitingList, [organization]);
         const actions = getInviteActions(builder);
 
         expect(actions).toHaveLength(2);
@@ -115,7 +115,7 @@ describe.each(Object.entries(builderFactories))('%s.getInviteMemberForGroupActio
         waitingList.organizationId = organization.id;
         membershipGroup.organizationId = organization.id;
 
-        const builder = buildBuilder(waitingList, organization);
+        const builder = buildBuilder(waitingList, [organization]);
         const actions = getInviteActions(builder);
 
         expect(actions).toHaveLength(2);
@@ -132,7 +132,33 @@ describe.each(Object.entries(builderFactories))('%s.getInviteMemberForGroupActio
             settings: GroupSettings.create({}),
         });
 
-        const builder = buildBuilder(waitingList, organization);
+        const builder = buildBuilder(waitingList, [organization]);
+        const actions = getInviteActions(builder);
+
+        expect(actions).toHaveLength(0);
+    });
+
+    test('offers invite actions for an event waiting list without an organization in context', () => {
+        // Platform admins in the admin app have no organization in context.
+        const eventPeriod = RegistrationPeriod.create({ id: 'period-current' });
+        const { eventGroup, waitingList } = buildEventWaitingList('organization-1', eventPeriod.id);
+
+        const builder = buildBuilder(waitingList, []);
+        const actions = getInviteActions(builder);
+
+        expect(actions).toHaveLength(2);
+        expect(builder.allGroupsLinkedToWaitingList.map(g => g.id)).toEqual([eventGroup.id]);
+    });
+
+    test('offers no invite actions for a membership waiting list without an organization in context', () => {
+        const waitingList = Group.create({
+            organizationId: 'organization-1',
+            periodId: 'period-current',
+            type: GroupType.WaitingList,
+            settings: GroupSettings.create({}),
+        });
+
+        const builder = buildBuilder(waitingList, []);
         const actions = getInviteActions(builder);
 
         expect(actions).toHaveLength(0);
