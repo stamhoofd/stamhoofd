@@ -8,7 +8,7 @@
         "./index.ts",
         "./migrations.ts",
         "./src",
-        "../../stamhoofd.d.ts"
+        "./stamhoofd.d.ts"
     ],
     "exclude": [
         "./src/**/*.spec.ts",

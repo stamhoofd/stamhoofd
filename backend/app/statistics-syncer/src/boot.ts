@@ -1,9 +1,9 @@
 import { Column, Database } from '@simonbackx/simple-database';
-import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { endStatisticsConnection } from '@stamhoofd/statistics-db/connection';
+import { statisticsLanguage } from './rows.js';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -23,16 +23,15 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 /**
- * The sync reads models, whose structures reach for the global $t while they decode. There is no
- * request to take a language from here, so everything resolves in the platform default.
+ * The sync reads models, whose structures reach for the global $t while they decode. Nothing it
+ * writes is translated — rows.ts resolves group names per language and every other name it copies is
+ * a plain string — so returning the key is enough to keep decoding from throwing, and this service
+ * needs no locales of its own.
  */
 function loadGlobalTranslateFunction() {
-    function getI18n() {
-        return I18n.override ?? new I18n(I18n.defaultLanguage, STAMHOOFD.fixedCountry ?? I18n.defaultCountry);
-    }
-    (global as any).$t = (key: string, replace?: Record<string, string>) => getI18n().$t(key, replace);
-    (global as any).$getLanguage = () => getI18n().language;
-    (global as any).$getCountry = () => getI18n().country;
+    (global as any).$t = (key: string) => key;
+    (global as any).$getLanguage = () => statisticsLanguage;
+    (global as any).$getCountry = () => 'BE';
 }
 
 const shutdown = async () => {
@@ -55,7 +54,6 @@ const start = async () => {
     console.log('Started Statistics.');
     loadLogger();
 
-    await I18n.load();
     loadGlobalTranslateFunction();
 
     process.on('SIGTERM', () => {

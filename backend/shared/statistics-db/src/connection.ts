@@ -1,17 +1,17 @@
 import { DatabaseInstance } from '@simonbackx/simple-database';
-import { getStatisticsDatabase } from './migrations.js';
+import { getStatisticsDatabaseConfig, getStatisticsPoolOptions } from './migrations.js';
 
 let connection: DatabaseInstance | undefined;
 
 /**
  * A connection of its own to the platform statistics database.
  *
- * The shared `Database` stays pointed at the main database: the sync runs inside the API process,
- * next to request handling, so the trick the migrations use (repointing the shared connection) would
- * pull every concurrent query along with it.
+ * The shared `Database` stays pointed at the main administration, which the sync reads through the
+ * models: the statistics database lives on the Metabase server, so the two are not even the same
+ * MySQL to point a single connection at.
  */
 export function getStatisticsConnection(): DatabaseInstance {
-    connection ??= new DatabaseInstance({ database: getStatisticsDatabase() });
+    connection ??= new DatabaseInstance({ ...getStatisticsPoolOptions(), database: getStatisticsDatabaseConfig().DB_DATABASE });
     return connection;
 }
 

@@ -1,4 +1,4 @@
-import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
+import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment, StatisticsEnvironment } from '@stamhoofd/types/Environment';
 import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
 import path from 'node:path';
@@ -42,8 +42,14 @@ export type DevelopmentConfig = {
     databases: DevelopmentDatabases;
     ports: ReturnType<typeof buildPorts>;
     backendEnv: NodeJS.ProcessEnv;
-    appEnv: SharedEnvironment;
+    appEnv: AppEnvironment;
 };
+
+/**
+ * The statistics syncer is the one service that runs on none of the platform configuration: it moves
+ * rows between two databases and needs nothing else.
+ */
+export type AppEnvironment = SharedEnvironment | StatisticsEnvironment;
 
 type EnvironmentPreset = {
     userMode: SharedEnvironment['userMode'];
@@ -78,7 +84,6 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
         DB_USER: 'root',
         DB_PASS: 'root',
         DB_DATABASE: instanceDatabase,
-        DB_STATISTICS_DATABASE: databases.platformStatistics,
         DB_PORT: process.env.DB_PORT ?? String(ports.mysql),
         SPACES_ENDPOINT: domains.files,
         SPACES_BUCKET: bucket,
@@ -91,7 +96,7 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
         databases,
         ports,
         backendEnv,
-        appEnv: buildAppEnvironment(context, domains, ports, backendEnv, service),
+        appEnv: buildAppEnvironment(context, domains, databases, ports, backendEnv, service),
     };
 }
 
@@ -108,9 +113,10 @@ function buildDevelopmentDatabases(context: CliContext) {
     };
 }
 
+export async function buildDevelopmentEnvironment(env: string, service: { backend: 'statistics-syncer' }): Promise<StatisticsEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: BackendAppService): Promise<BackendEnvironment>;
 export async function buildDevelopmentEnvironment(env: string, service: FrontendAppService): Promise<FrontendEnvironment>;
-export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<SharedEnvironment> {
+export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<AppEnvironment> {
     const context = await createContext({ env, verbose: false });
     const appEnv = buildDevelopmentConfig(context, service).appEnv;
     return await applyInternalSecrets(context, service, appEnv);
@@ -144,8 +150,13 @@ function buildDevelopmentDomains(context: CliContext) {
     };
 }
 
-function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, service: AppService): SharedEnvironment {
+function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, service: AppService): AppEnvironment {
     const preset = environmentPreset(context.env);
+
+    if ('backend' in service && (service.backend as BackendApp) === BackendApp.StatisticsSyncer) {
+        return buildStatisticsEnvironment(databases, ports, backendEnv, preset);
+    }
+
     const stamhoofdDomains = buildStamhoofdDomains(domains, preset);
     const shared = {
         environment: 'development',
@@ -177,8 +188,6 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, p
         DB_USER: backendEnv.DB_USER!,
         DB_PASS: backendEnv.DB_PASS!,
         DB_DATABASE: backendEnv.DB_DATABASE!,
-        DB_STATISTICS_DATABASE: backendEnv.DB_STATISTICS_DATABASE!,
-        STATISTICS_IMPORTED_UNTIL: preset.statisticsImportedUntil,
         DB_PORT: Number.parseInt(backendEnv.DB_PORT ?? String(mysqlInternalPort), 10),
         SMTP_HOST: localIpv4Host,
         SMTP_USERNAME: maildevUsername,
@@ -216,6 +225,27 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, p
         MEMBER_NUMBER_ALGORITHM: preset.memberNumberAlgorithm,
         MEMBER_NUMBER_ALGORITHM_LENGTH: preset.memberNumberAlgorithmLength,
     } as BackendEnvironment;
+}
+
+/**
+ * Both databases sit on the one development MySQL, where production keeps the statistics database on
+ * the Metabase server: same credentials and port, only the name differs.
+ */
+function buildStatisticsEnvironment(databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, preset: EnvironmentPreset): StatisticsEnvironment {
+    const connection = {
+        DB_HOST: backendEnv.DB_HOST!,
+        DB_USER: backendEnv.DB_USER!,
+        DB_PASS: backendEnv.DB_PASS!,
+        DB_PORT: Number.parseInt(backendEnv.DB_PORT ?? String(mysqlInternalPort), 10),
+    };
+
+    return {
+        environment: 'development',
+        PORT: ports.api,
+        statisticsDatabase: { ...connection, DB_DATABASE: databases.platformStatistics },
+        stamhoofdDatabase: { ...connection, DB_DATABASE: databases.main },
+        IMPORTED_UNTIL: preset.statisticsImportedUntil,
+    };
 }
 
 function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType<typeof buildPorts>): number | undefined {

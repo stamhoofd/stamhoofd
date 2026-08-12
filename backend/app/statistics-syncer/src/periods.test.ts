@@ -3,19 +3,19 @@ import { getImportedUntil, isFrozen } from './periods.js';
 
 describe('getImportedUntil', () => {
     it('reads the boundary of a platform that has external history', () => {
-        TestUtils.setEnvironment('STATISTICS_IMPORTED_UNTIL', '2024-09-01');
+        TestUtils.setEnvironment('IMPORTED_UNTIL', '2024-09-01');
 
         expect(getImportedUntil()).toEqual(new Date('2024-09-01'));
     });
 
     it('has no boundary for a platform without external history, so nothing is frozen up front', () => {
-        TestUtils.setEnvironment('STATISTICS_IMPORTED_UNTIL', undefined);
+        TestUtils.setEnvironment('IMPORTED_UNTIL', undefined);
 
         expect(getImportedUntil()).toBeNull();
     });
 
     it('refuses a boundary it cannot read rather than silently freezing nothing', () => {
-        TestUtils.setEnvironment('STATISTICS_IMPORTED_UNTIL', 'last september');
+        TestUtils.setEnvironment('IMPORTED_UNTIL', 'last september');
 
         expect(() => getImportedUntil()).toThrow('not a valid date');
     });

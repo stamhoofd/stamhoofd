@@ -1,7 +1,7 @@
-import { Database } from '@simonbackx/simple-database';
 import { TestUtils } from '@stamhoofd/test-utils';
+import type { StatisticsEnvironment } from '@stamhoofd/types/Environment';
 import { getStatisticsConnection } from './connection.js';
-import { getStatisticsDatabase } from './migrations.js';
+import { getStatisticsDatabaseConfig, getStatisticsPoolOptions } from './migrations.js';
 
 /**
  * Column names that would mean a natural person ended up in the statistics database. This guards
@@ -26,17 +26,50 @@ const personalDataColumns = [
     'recordanswers',
 ];
 
-describe('getStatisticsDatabase', () => {
+describe('getStatisticsDatabaseConfig', () => {
     it('refuses to migrate the main database, whose tables it would collide with', () => {
-        TestUtils.setEnvironment('DB_STATISTICS_DATABASE', STAMHOOFD.DB_DATABASE);
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.stamhoofdDatabase });
 
-        expect(() => getStatisticsDatabase()).toThrow('has to be a separate one');
+        expect(() => getStatisticsDatabaseConfig()).toThrow('has to be a separate one');
+    });
+
+    it('refuses the main database even when it inherits its port instead of naming one', () => {
+        TestUtils.setEnvironment('stamhoofdDatabase', { ...STAMHOOFD.stamhoofdDatabase, DB_PORT: 3307 });
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.stamhoofdDatabase, DB_PORT: undefined });
+
+        expect(() => getStatisticsDatabaseConfig()).toThrow('has to be a separate one');
+    });
+
+    it('accepts the same database name on another server, which is a database of its own', () => {
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.stamhoofdDatabase, DB_HOST: 'statistics.example' });
+
+        expect(getStatisticsDatabaseConfig().DB_HOST).toBe('statistics.example');
     });
 
     it('refuses to run when no statistics database is configured', () => {
-        TestUtils.setEnvironment('DB_STATISTICS_DATABASE', undefined);
+        TestUtils.setEnvironment('statisticsDatabase', undefined as unknown as StatisticsEnvironment['statisticsDatabase']);
 
-        expect(() => getStatisticsDatabase()).toThrow('is not set');
+        expect(() => getStatisticsDatabaseConfig()).toThrow('is not set');
+    });
+});
+
+describe('getStatisticsPoolOptions', () => {
+    it('follows the port of the main database while both are on one server', () => {
+        expect(STAMHOOFD.statisticsDatabase.DB_HOST).toBe(STAMHOOFD.stamhoofdDatabase.DB_HOST);
+
+        expect(getStatisticsPoolOptions().port).toBeUndefined();
+    });
+
+    it('falls back to the default port on another server, whose ports are its own', () => {
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example' });
+
+        expect(getStatisticsPoolOptions().port).toBe(3306);
+    });
+
+    it('uses the port it was given', () => {
+        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', DB_PORT: 3399 });
+
+        expect(getStatisticsPoolOptions().port).toBe(3399);
     });
 });
 
@@ -58,9 +91,9 @@ const allowedPersonalDataColumns = new Set([
 
 describe('migration.platform-statistics-schema', () => {
     async function getColumns(): Promise<{ tableName: string; columnName: string; dataType: string }[]> {
-        const [rows] = await Database.select(
+        const [rows] = await getStatisticsConnection().select(
             'SELECT TABLE_NAME as tableName, COLUMN_NAME as columnName, COLUMN_TYPE as dataType FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ?',
-            [getStatisticsDatabase()],
+            [getStatisticsDatabaseConfig().DB_DATABASE],
             { nestTables: false },
         );
         return rows as unknown as { tableName: string; columnName: string; dataType: string }[];

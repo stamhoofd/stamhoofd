@@ -9,7 +9,7 @@
         { "path": "./tsconfig.build.json" }
     ],
     "include": [
-        "../../stamhoofd.d.ts",
+        "./stamhoofd.d.ts",
         "../../../jest-extended.d.ts",
         "./src/**/*.spec.ts",
         "./src/**/*.test.ts",

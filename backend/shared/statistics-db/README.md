@@ -3,8 +3,11 @@
 The schema of the platform statistics database: the separate, de-identified database Metabase reports
 on. Owns its migrations, the connection to it and the rule that it can never be the main database.
 
-It keeps a migration history of its own, in its own `migrations` table, so the database can be moved
-to another server without dragging the main one along.
+It keeps a migration history of its own, in its own `migrations` table, and takes its full connection
+details from `STAMHOOFD.statisticsDatabase`: the database lives on the Metabase server, not on the one
+the syncer runs on. `DB_PORT` may be left out — it then follows the main database while both are on
+the same host, which is what lets development and tests keep them on one MySQL, and is 3306 on any
+other host.
 
 Two packages read this:
 

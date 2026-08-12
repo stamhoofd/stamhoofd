@@ -6,14 +6,14 @@ import { getStatisticsConnection } from '@stamhoofd/statistics-db/connection';
  * Unset means the platform has no external history and nothing is frozen up front.
  */
 export function getImportedUntil(): Date | null {
-    const configured = STAMHOOFD.STATISTICS_IMPORTED_UNTIL;
+    const configured = STAMHOOFD.IMPORTED_UNTIL;
     if (!configured) {
         return null;
     }
 
     const parsed = new Date(configured);
     if (Number.isNaN(parsed.getTime())) {
-        throw new Error(`STAMHOOFD.STATISTICS_IMPORTED_UNTIL is not a valid date: ${configured}`);
+        throw new Error(`STAMHOOFD.IMPORTED_UNTIL is not a valid date: ${configured}`);
     }
 
     return parsed;

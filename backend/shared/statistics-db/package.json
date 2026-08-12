@@ -26,6 +26,7 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "2.140.0",
+        "@stamhoofd/types": "2.140.0",
         "vitest": "4.1.10"
     },
     "peerDependencies": {

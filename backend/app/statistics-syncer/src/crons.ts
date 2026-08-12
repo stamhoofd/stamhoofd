@@ -4,19 +4,6 @@ import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 registerCron('syncPlatformStatistics', syncPlatformStatistics);
 
 /**
- * The platforms the statistics sync runs for while it is being rolled out. The reports it feeds are
- * about units, takken and leiding, which only exist on a platform: an organization-mode deployment
- * has nothing to report on.
- */
-export const statisticsPlatforms = ['keeo', 'ravot'];
-
-export function isStatisticsSyncEnabled(): boolean {
-    return STAMHOOFD.userMode === 'platform'
-        && statisticsPlatforms.includes(STAMHOOFD.platformName)
-        && !!STAMHOOFD.DB_STATISTICS_DATABASE;
-}
-
-/**
  * Both passes read the whole administration, which is far more than the five-minute cron cadence is
  * meant for and does not need to be current to the minute: the reports they feed are read by day.
  */
@@ -36,10 +23,6 @@ export function shouldRunStatisticsSync({ now, lastRun }: { now: Date; lastRun: 
 let lastRun: Date | null = null;
 
 async function syncPlatformStatistics() {
-    if (!isStatisticsSyncEnabled()) {
-        return;
-    }
-
     if (!shouldRunStatisticsSync({ now: new Date(), lastRun })) {
         return;
     }

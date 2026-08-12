@@ -16,7 +16,8 @@
         "chalk": "5.6.2"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.140.0"
+        "@stamhoofd/test-utils": "2.140.0",
+        "@stamhoofd/types": "2.140.0"
     },
     "peerDependencies": {
         "@stamhoofd/cli": "*"
