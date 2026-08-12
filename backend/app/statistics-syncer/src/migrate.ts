@@ -1,4 +1,4 @@
-import { Column, Database } from '@simonbackx/simple-database';
+import { Column } from '@simonbackx/simple-database';
 import { Version } from '@stamhoofd/structures';
 import { runStatisticsMigrations } from './schema.js';
 
@@ -29,7 +29,6 @@ const start = async () => {
     } finally {
         process.off('SIGTERM', handler);
         process.off('SIGINT', handler);
-        await Database.end();
     }
 };
 
