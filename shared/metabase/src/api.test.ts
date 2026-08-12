@@ -7,7 +7,7 @@ type Route = { status?: number; body: unknown };
  * Answer each `METHOD /path` with a canned response and record what was sent.
  */
 function mockFetch(routes: Record<string, Route>) {
-    const calls: { key: string; body: any }[] = [];
+    const calls: { key: string; body: any; headers: Record<string, string> }[] = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
         const key = `${init?.method ?? 'GET'} ${new URL(url).pathname}`;
@@ -16,7 +16,7 @@ function mockFetch(routes: Record<string, Route>) {
             throw new Error(`Unexpected request ${key}`);
         }
         const body = typeof init?.body === 'string' ? init.body : undefined;
-        calls.push({ key, body: body === undefined ? undefined : JSON.parse(body) });
+        calls.push({ key, body: body === undefined ? undefined : JSON.parse(body), headers: (init?.headers ?? {}) as Record<string, string> });
         return new Response(JSON.stringify(route.body), { status: route.status ?? 200 });
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -159,5 +159,77 @@ describe('MetabaseApi.ensureDatabase', () => {
         });
 
         expect((await new MetabaseApi('http://localhost:3030').ensureDatabase(input)).created).toBe(false);
+    });
+});
+
+describe('MetabaseApi with an api key', () => {
+    const key = 'mb_TESTKEY';
+
+    it('sends the key on every request, so no session is needed', async () => {
+        const calls = mockFetch({
+            'GET /api/user/current': { body: { id: 3, email: 'reports@stamhoofd.be', is_superuser: true } },
+        });
+
+        await new MetabaseApi('https://metabase.example', { apiKey: key }).verifyApiKey();
+
+        expect(calls[0].headers['x-api-key']).toBe(key);
+        expect(calls[0].headers['X-Metabase-Session']).toBeUndefined();
+    });
+
+    it('returns the account the key belongs to', async () => {
+        mockFetch({
+            'GET /api/user/current': { body: { id: 3, email: 'reports@stamhoofd.be', is_superuser: true } },
+        });
+
+        expect((await new MetabaseApi('https://metabase.example', { apiKey: key }).verifyApiKey()).email).toBe('reports@stamhoofd.be');
+    });
+
+    /**
+     * A key is created by hand and can be revoked there, so this has to fail before anything is
+     * written rather than as a 401 halfway through the report.
+     */
+    it('explains a revoked key instead of failing halfway through', async () => {
+        mockFetch({
+            'GET /api/user/current': { status: 401, body: { message: 'Unauthenticated' } },
+        });
+
+        await expect(new MetabaseApi('https://metabase.example', { apiKey: key }).verifyApiKey())
+            .rejects.toThrow('rejected the api key');
+    });
+
+    it('refuses a key that is not an admin, which cannot write questions', async () => {
+        mockFetch({
+            'GET /api/user/current': { body: { id: 4, email: 'viewer@stamhoofd.be', is_superuser: false } },
+        });
+
+        await expect(new MetabaseApi('https://metabase.example', { apiKey: key }).verifyApiKey())
+            .rejects.toThrow('is not an admin');
+    });
+
+    it('does not send a key when none was configured', async () => {
+        const calls = mockFetch({ 'GET /api/database': { body: { data: [] } } });
+
+        await new MetabaseApi('http://localhost:3030').listDatabases();
+
+        expect(calls[0].headers['x-api-key']).toBeUndefined();
+    });
+});
+
+describe('MetabaseApi.requireDatabaseByName', () => {
+    it('finds the data source the report writes against', async () => {
+        mockFetch({ 'GET /api/database': { body: { data: [{ id: 7, name: 'Platform statistics (keeo)', engine: 'mysql' }] } } });
+
+        expect((await new MetabaseApi('https://metabase.example').requireDatabaseByName('Platform statistics (keeo)')).id).toBe(7);
+    });
+
+    /**
+     * A server's data source holds credentials of its own and connects over SSL, so it is added by
+     * hand. Naming what is registered turns a typo into an answer instead of a silent miss.
+     */
+    it('lists what is registered when the data source is missing', async () => {
+        mockFetch({ 'GET /api/database': { body: { data: [{ id: 7, name: 'Platform statistics (ravot)', engine: 'mysql' }] } } });
+
+        await expect(new MetabaseApi('https://metabase.example').requireDatabaseByName('Platform statistics (keeo)'))
+            .rejects.toThrow('only: Platform statistics (ravot)');
     });
 });

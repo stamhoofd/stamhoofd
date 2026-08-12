@@ -62,15 +62,31 @@ export class MetabaseApiError extends Error {
     }
 }
 
+export type MetabaseUser = {
+    id: number;
+    email: string;
+    is_superuser?: boolean;
+};
+
 /**
  * Minimal client for the Metabase HTTP API, enough to complete the setup wizard and register the
  * databases Metabase reports on. Metabase has no declarative provisioning in the open source
  * edition (the config file is an enterprise feature), so this is the only way to automate it.
+ *
+ * Two ways to authenticate, because the two environments differ in what they can hold:
+ *
+ * - An admin account, which also completes the setup wizard. Used against a local Metabase, where
+ *   the CLI creates that account itself and knows the password.
+ * - An `apiKey`, created by hand in Metabase (Admin > Settings > Authentication > API keys) and kept
+ *   in 1Password. Used against a server, where nothing may hold a human's password and where the
+ *   first account was made by a person.
  */
 export class MetabaseApi {
     private session: string | undefined;
+    private readonly apiKey: string | undefined;
 
-    constructor(private readonly baseUrl: string) {
+    constructor(private readonly baseUrl: string, options: { apiKey?: string } = {}) {
+        this.apiKey = options.apiKey;
     }
 
     /**
@@ -126,9 +142,62 @@ export class MetabaseApi {
         return { created: false };
     }
 
+    /** Who the current credentials belong to. */
+    async currentUser(): Promise<MetabaseUser> {
+        return await this.request<MetabaseUser>('GET', '/api/user/current');
+    }
+
+    /**
+     * Check that the api key is accepted and belongs to an admin, before anything is written.
+     *
+     * A key is created by hand and can be revoked or downgraded there, so without this a stale one
+     * surfaces as a 401 somewhere halfway through writing the report.
+     */
+    async verifyApiKey(): Promise<MetabaseUser> {
+        if (this.apiKey === undefined) {
+            throw new Error('No api key was configured on this client');
+        }
+
+        let user: MetabaseUser;
+        try {
+            user = await this.currentUser();
+        }
+        catch (error) {
+            if (error instanceof MetabaseApiError && (error.status === 401 || error.status === 403)) {
+                throw new Error(`${this.baseUrl} rejected the api key. Create a new one under Admin > Settings > Authentication > API keys and update it in 1Password.`, { cause: error });
+            }
+            throw error;
+        }
+
+        if (!user.is_superuser) {
+            throw new Error(`The api key of ${this.baseUrl} belongs to ${user.email}, which is not an admin. Writing questions and dashboards needs a key in the Administrators group.`);
+        }
+
+        return user;
+    }
+
     async listDatabases(): Promise<MetabaseDatabase[]> {
         const result = await this.request<{ data: MetabaseDatabase[] } | MetabaseDatabase[]>('GET', '/api/database');
         return Array.isArray(result) ? result : result.data;
+    }
+
+    async findDatabaseByName(name: string): Promise<MetabaseDatabase | undefined> {
+        return (await this.listDatabases()).find(database => database.name === name);
+    }
+
+    /**
+     * The registered database to write questions against, which has to be there already.
+     *
+     * Deliberately not created here: on a server the data source holds credentials of its own and
+     * connects over SSL, so it is added once by hand and this only ever looks it up.
+     */
+    async requireDatabaseByName(name: string): Promise<MetabaseDatabase> {
+        const match = await this.findDatabaseByName(name);
+        if (!match) {
+            const known = (await this.listDatabases()).map(database => database.name);
+            throw new Error(`${this.baseUrl} has no data source named "${name}"${known.length > 0 ? `, only: ${known.join(', ')}` : ''}. Add it under Admin > Databases first.`);
+        }
+        return match;
     }
 
     /**
@@ -136,8 +205,7 @@ export class MetabaseApi {
      * registered. An existing one is left untouched, so changes made in the UI survive.
      */
     async ensureDatabase(input: MetabaseDatabaseInput): Promise<{ id: number; created: boolean }> {
-        const existing = await this.listDatabases();
-        const match = existing.find(database => database.name === input.name);
+        const match = await this.findDatabaseByName(input.name);
         if (match) {
             return { id: match.id, created: false };
         }
@@ -334,6 +402,7 @@ export class MetabaseApi {
             method,
             headers: {
                 'Content-Type': 'application/json',
+                ...(this.apiKey ? { 'x-api-key': this.apiKey } : {}),
                 ...(this.session ? { 'X-Metabase-Session': this.session } : {}),
             },
             body: body === undefined ? undefined : JSON.stringify(body),
