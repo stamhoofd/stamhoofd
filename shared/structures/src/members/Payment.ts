@@ -244,7 +244,7 @@ export class PrivatePayment extends Payment {
      * All settlements this payment was part of (e.g. the payment in one payout, its refund in a
      * later one). Admin-only, stripped like the legacy settlement blob.
      */
-    @field({ decoder: new ArrayDecoder(PaymentSettlementDetailed), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(PaymentSettlementDetailed), version: 409 })
     settlements: PaymentSettlementDetailed[] = [];
 
     @field({ decoder: StringDecoder, nullable: true, version: 153 })
