@@ -947,11 +947,15 @@ export class RegistrationActionBuilder {
             }
         }
 
-        if (periodTrees.length === 0) {
+        // An event waiting list reaches its event group only via parentGroup (event groups are
+        // never part of a category tree), so a missing period tree may not block those invites.
+        const parentGroups = this.groups.flatMap(g => g.parentGroup ? [g.parentGroup] : []);
+
+        if (periodTrees.length === 0 && parentGroups.length === 0) {
             return [];
         }
 
-        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(this.groups.flatMap(g => g.parentGroup ? [g.parentGroup] : []));
+        const allGroups = periodTrees.flatMap(t => t.categoryTree.getAllGroups()).concat(parentGroups);
         this._allGroupsLinkedToWaitingList = allGroups;
 
         if (allGroups.length === 0) {
@@ -1034,6 +1038,10 @@ export class RegistrationActionBuilder {
                         childActions: () => buildForTree(entry.categoryTree),
                     });
                 }));
+            }
+
+            if (periodTrees.length === 0) {
+                return childActions;
             }
 
             return childActions.concat(buildForTree(periodTrees[0].categoryTree));
