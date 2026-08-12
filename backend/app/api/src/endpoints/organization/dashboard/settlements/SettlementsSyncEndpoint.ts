@@ -2,13 +2,14 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementsSyncStatus } from '@stamhoofd/structures/settlements/SettlementsSyncStatus.js';
 
+import { Context } from '../../../../helpers/Context.js';
 import { SettlementSyncRunner } from '../../../../helpers/SettlementSyncRunner.js';
-import { StripeFeeInvoiceBackfill } from '../../../../helpers/StripeFeeInvoiceBackfill.js';
-import { StripePayoutsExportEndpoint } from '../stripe/StripePayoutsExportEndpoint.js';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {
@@ -23,13 +24,6 @@ class Body extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, optional: true })
     force = false;
-
-    /**
-     * Afterwards, mark the Received fee rows of months the old invoicer already billed as
-     * invoiced (see StripeFeeInvoiceBackfill).
-     */
-    @field({ decoder: BooleanDecoder, optional: true })
-    backfillInvoiced = true;
 }
 type Query = undefined;
 type ResponseBody = undefined;
@@ -56,10 +50,34 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const { organization } = await StripePayoutsExportEndpoint.authenticate();
+    /**
+     * A sync covers the provider accounts of the whole platform: only platform admins, and only
+     * scoped to the platform membership organization (the owner of the platform's own payouts).
+     */
+    static async authenticate() {
+        const organization = await Context.setOrganizationScope();
+        const { user } = await Context.authenticate();
 
-        const { start, end, providers, force, backfillInvoiced } = request.body;
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw Context.auth.error();
+        }
+
+        const platform = await Platform.getShared();
+        if (!platform.membershipOrganizationId || platform.membershipOrganizationId !== organization.id) {
+            throw new SimpleError({
+                code: 'not_available',
+                message: 'Settlement syncs are only available for the platform membership organization',
+                statusCode: 400,
+            });
+        }
+
+        return { organization, user };
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        await SettlementsSyncEndpoint.authenticate();
+
+        const { start, end, providers, force } = request.body;
 
         const item = SettlementsSyncStatus.create({
             start,
@@ -76,10 +94,6 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
                     item.failed = summary.failed + summary.failedFeeMonths;
                 };
                 await runner.run({ start, end, providers, stripe: { force } });
-
-                if (backfillInvoiced) {
-                    await StripeFeeInvoiceBackfill.backfillAll(organization, { start });
-                }
             } finally {
                 SettlementsSyncEndpoint.queue.splice(SettlementsSyncEndpoint.queue.indexOf(item), 1);
             }

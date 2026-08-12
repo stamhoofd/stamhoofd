@@ -4,8 +4,8 @@ import type { SettlementChargeType } from '@stamhoofd/structures/settlements/Set
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Every charge in a settlement that is not a payment: application fees (mirrored on both the organization
- * and the platform payout), provider fees, VAT, transfers, reserves and disputes.
+ * Every charge in a settlement that is not a payment: application fee deductions on the payer's
+ * payout, provider fees, VAT, transfers, reserves and disputes.
  */
 export class SettlementCharge extends QueryableModel {
     static table = 'settlement_charges';
@@ -40,8 +40,8 @@ export class SettlementCharge extends QueryableModel {
     settlementId: string | null = null;
 
     /**
-     * Stripe fee_… id: links the deduction rows on the organization payout to the Received rows on our
-     * platform payout of the same application fee.
+     * Stripe fee_… id: links the deduction rows on the organization payout to the application_fees
+     * rows of the same application fee.
      */
     @column({ type: 'string', nullable: true })
     applicationFeeId: string | null = null;
@@ -50,21 +50,19 @@ export class SettlementCharge extends QueryableModel {
     paymentId: string | null = null;
 
     /**
-     * Stamped when the charge is invoiced (Received rows only).
+     * The organization that was charged. Always the organization of the payout it is deducted
+     * from, and of the payment it relates to: a charge never crosses organizations.
      */
-    @column({ type: 'string', nullable: true })
-    balanceItemId: string | null = null;
-
-    @column({ type: 'string', nullable: true })
-    organizationId: string | null = null;
+    @column({ type: 'string' })
+    organizationId: string;
 
     @column({ type: 'string', nullable: true })
     stripeAccountId: string | null = null;
 
     /**
-     * Which monthly provider invoice bills this fee: Mollie's real invoice id (inv_…) or the
-     * derived `stripe-YYYY-MM`. Only set on provider-fee rows (ProviderTransactionFee,
-     * ProviderAccountFee, Tax).
+     * Which invoice bills this fee to the charged party: Mollie's real invoice id (inv_…), the
+     * derived `stripe-YYYY-MM` for Stripe provider fees, or the Stamhoofd invoice number for
+     * application fee deductions.
      */
     @column({ type: 'string', nullable: true })
     providerInvoiceId: string | null = null;

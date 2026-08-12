@@ -547,6 +547,8 @@ describe('Breakdown builders', () => {
                 $and: [
                     // A payment that failed can still carry the payout it was meant to be part of
                     { status: PaymentStatus.Succeeded },
+                    // A deduction is grouped on its own, never under a payout
+                    { method: { $neq: PaymentMethod.AccountDeductions } },
                     { provider: PaymentProvider.Mollie },
                     { settlement: { reference: '1234567.0312.01' } },
                     { settlement: { settledAt: march.settledAt } },
@@ -754,6 +756,7 @@ describe('Breakdown builders', () => {
                 payment: {
                     $and: [
                         { status: PaymentStatus.Succeeded },
+                        { method: { $neq: PaymentMethod.AccountDeductions } },
                         { provider: PaymentProvider.Mollie },
                         { settlement: { reference: '1234567.0312.01' } },
                         { settlement: { settledAt: march.settledAt } },
@@ -769,6 +772,7 @@ describe('Breakdown builders', () => {
                         payment: {
                             $and: [
                                 { status: PaymentStatus.Succeeded },
+                                { method: { $neq: PaymentMethod.AccountDeductions } },
                                 { provider: PaymentProvider.Mollie },
                                 { settlement: { reference: '1234567.0312.01' } },
                                 { settlement: { settledAt: march.settledAt } },

@@ -1,15 +1,18 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Payment } from '@stamhoofd/models';
-import { Order, Platform } from '@stamhoofd/models';
+import { BalanceItemPayment, Order, Platform } from '@stamhoofd/models';
+import { Payment as PaymentModel } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
-import { SettlementReference } from '@stamhoofd/structures';
-import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
+import { PaymentMethod, SettlementReference } from '@stamhoofd/structures';
+import type { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import type { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export type SettlementData = {
     provider: PaymentProvider;
@@ -26,7 +29,11 @@ export type SettlementData = {
 export type PaymentLineData = {
     paymentId: string;
     amount: number;
-    externalId: string;
+
+    /**
+     * NULL for a line derived from application fees: it has no provider transaction behind it.
+     */
+    externalId: string | null;
     occurredAt: Date;
 };
 
@@ -34,10 +41,16 @@ export type ChargeData = {
     type: SettlementChargeType;
     externalId: string;
     amount: number;
+
+    /**
+     * The charged organization: always the one of the payout it is deducted from, and of the
+     * payment it relates to.
+     */
+    organizationId: string;
+
     settlementId?: string | null;
     applicationFeeId?: string | null;
     paymentId?: string | null;
-    organizationId?: string | null;
     stripeAccountId?: string | null;
     providerInvoiceId?: string | null;
     description?: string;
@@ -45,13 +58,9 @@ export type ChargeData = {
 };
 
 /**
- * The Received rows are the invoicing source: the sweep never deletes them and upserts never clear
- * their balanceItemId.
+ * Rows updated per statement when a whole month of charges is stamped at once.
  */
-const RECEIVED_FEE_TYPES: SettlementChargeType[] = [
-    SettlementChargeType.ReceivedApplicationFeeService,
-    SettlementChargeType.ReceivedApplicationFeeTransfer,
-];
+const CHARGE_UPDATE_BATCH_SIZE = 500;
 
 /**
  * Collects which rows the provider still reports in a settlement while a sync walks it. A stored
@@ -61,8 +70,12 @@ const RECEIVED_FEE_TYPES: SettlementChargeType[] = [
 export class ReportedRows {
     readonly paymentLineExternalIds = new Set<string>();
     readonly chargeExternalIds = new Set<string>();
+    readonly applicationFeeIds = new Set<string>();
 
     paymentLine(line: PaymentSettlement) {
+        if (line.externalId === null) {
+            return;
+        }
         this.paymentLineExternalIds.add(line.externalId);
     }
 
@@ -73,6 +86,16 @@ export class ReportedRows {
     charges(charges: SettlementCharge[]) {
         for (const charge of charges) {
             this.charge(charge);
+        }
+    }
+
+    applicationFee(fee: ApplicationFee) {
+        this.applicationFeeIds.add(fee.id);
+    }
+
+    applicationFees(fees: ApplicationFee[]) {
+        for (const fee of fees) {
+            this.applicationFee(fee);
         }
     }
 }
@@ -93,7 +116,7 @@ export class SettlementService {
 
     /**
      * Month bucket of a charge, in server-local time: the same boundaries as
-     * StripeInvoicer.getMonthUnixStartEnd, which drive the monthly invoice grouping.
+     * getMonthUnixStartEnd, which drive the monthly invoice grouping.
      */
     static getPeriodStart(date: Date): Date {
         return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -104,6 +127,16 @@ export class SettlementService {
      */
     static getPeriodKey(date: Date): string {
         return date.getFullYear() + '-' + (date.getMonth() + 1).toString().padStart(2, '0');
+    }
+
+    /**
+     * The same month bucket as getPeriodStart, as unix second bounds (inclusive end, one second
+     * before the next month).
+     */
+    static getMonthUnixStartEnd(date: Date) {
+        const start = Math.floor((new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0).getTime()) / 1000);
+        const end = Math.ceil((new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0, 0).getTime() - 1000) / 1000);
+        return { start, end };
     }
 
     /**
@@ -157,21 +190,44 @@ export class SettlementService {
 
     /**
      * Upsert on (settlementId, externalId): one payment can be part of multiple settlements, but a
-     * provider transaction appears in a settlement only once.
+     * provider transaction appears in a settlement only once. A derived fee line has no provider
+     * transaction, so it upserts on (settlementId, paymentId): one per fee payment and payout.
      */
     static async upsertPaymentLine(settlement: Settlement, data: PaymentLineData): Promise<PaymentSettlement> {
-        const line = await PaymentSettlement.select()
+        const query = PaymentSettlement.select()
             .where('settlementId', settlement.id)
-            .where('externalId', data.externalId)
-            .first(false) ?? new PaymentSettlement();
+            .where('externalId', data.externalId);
+
+        if (data.externalId === null) {
+            query.where('paymentId', data.paymentId);
+        }
+
+        const line = await query.first(false) ?? new PaymentSettlement();
 
         line.settlementId = settlement.id;
+        line.organizationId = settlement.organizationId;
         line.externalId = data.externalId;
         line.paymentId = data.paymentId;
         line.amount = data.amount;
         line.occurredAt = data.occurredAt;
 
         await line.save();
+
+        // A provider transaction sits in exactly one payout: when it moved, the row it left behind
+        // would count the same money twice until that payout happens to be walked again. Derived
+        // fee lines are the exception, they legitimately exist per payout
+        if (data.externalId !== null) {
+            const moved = await PaymentSettlement.select()
+                .where('externalId', data.externalId)
+                .where('settlementId', '!=', settlement.id)
+                .fetch();
+
+            for (const stale of moved) {
+                await stale.delete();
+            }
+            await this.refreshTotalsForIds(Formatter.uniqueArray(moved.map(l => l.settlementId)));
+        }
+
         return line;
     }
 
@@ -186,9 +242,14 @@ export class SettlementService {
             .where('externalId', data.externalId)
             .first(false) ?? new SettlementCharge();
 
+        // A charge that moves to another payout leaves the one it came from with cached totals
+        // that still count it
+        const previousSettlementId = charge.settlementId;
+
         charge.type = data.type;
         charge.externalId = data.externalId;
         charge.amount = data.amount;
+        charge.organizationId = data.organizationId;
         charge.occurredAt = data.occurredAt;
 
         if (data.settlementId !== undefined) {
@@ -200,9 +261,6 @@ export class SettlementService {
         if (data.paymentId !== undefined) {
             charge.paymentId = data.paymentId;
         }
-        if (data.organizationId !== undefined) {
-            charge.organizationId = data.organizationId;
-        }
         if (data.stripeAccountId !== undefined) {
             charge.stripeAccountId = data.stripeAccountId;
         }
@@ -213,33 +271,68 @@ export class SettlementService {
             charge.description = data.description;
         }
         await charge.save();
+
+        if (previousSettlementId && previousSettlementId !== charge.settlementId) {
+            await this.refreshTotalsForIds([previousSettlementId]);
+        }
+
         return charge;
     }
 
     /**
-     * Records that the charge was invoiced, and by which balance item. The only writer of
-     * balanceItemId: called when the fee is invoiced, or by StripeFeeInvoiceBackfill for months
-     * that were already invoiced before these rows existed.
+     * Stamps which invoice bills a charge to the charged party. Kept here so all
+     * settlement_charges writes stay in this service; ApplicationFeeService decides when.
      */
-    static async markInvoiced(charge: SettlementCharge, balanceItemId: string) {
-        charge.balanceItemId = balanceItemId;
-        await charge.save();
+    static async setChargeProviderInvoiceId(settlementChargeId: string, providerInvoiceId: string | null) {
+        await this.setChargeProviderInvoiceIds([settlementChargeId], providerInvoiceId);
+    }
+
+    /**
+     * One invoice can bill a whole month of fees, so the charges are stamped in one statement per
+     * batch instead of loading and saving every row.
+     */
+    static async setChargeProviderInvoiceIds(settlementChargeIds: string[], providerInvoiceId: string | null) {
+        for (let offset = 0; offset < settlementChargeIds.length; offset += CHARGE_UPDATE_BATCH_SIZE) {
+            const batch = settlementChargeIds.slice(offset, offset + CHARGE_UPDATE_BATCH_SIZE);
+            await SQL.update(SettlementCharge.table)
+                .set('providerInvoiceId', providerInvoiceId)
+                .where('id', batch)
+                .update();
+        }
     }
 
     /**
      * After a complete walk of a settlement: remove rows the provider no longer reports in this
      * settlement (a transaction can move to another payout). Rows that only exist because of the
-     * payout are deleted; the Received fee rows are only unlinked, because they are the invoicing
-     * source and may already carry a balanceItemId.
+     * payout are deleted; rows that outlive the payout link are only unlinked: derived fee lines
+     * (owned by updatePaymentSettlementsForAccountDeductionPayment), deduction charges referenced
+     * by an application fee (RESTRICT FK), and the application fee rows themselves.
+     *
+     * Returns the fees unlinked from this settlement, so the caller can refresh the derived lines
+     * of their fee payments.
      */
-    static async sweepSettlement(settlement: Settlement, reported: ReportedRows) {
+    static async sweepSettlement(settlement: Settlement, reported: ReportedRows): Promise<{ unlinkedFees: ApplicationFee[] }> {
         const lines = await PaymentSettlement.select()
             .where('settlementId', settlement.id)
             .fetch();
 
+        const sweptPaymentIds = new Set<string>();
         for (const line of lines) {
+            if (line.externalId === null) {
+                continue;
+            }
             if (!reported.paymentLineExternalIds.has(line.externalId)) {
                 await line.delete();
+                sweptPaymentIds.add(line.paymentId);
+            }
+        }
+
+        // The legacy blob points at one of the lines, so a payment that lost one has to be
+        // repointed at what is left
+        if (sweptPaymentIds.size > 0) {
+            const payments = await PaymentModel.getByIDs(...sweptPaymentIds);
+            for (const payment of payments) {
+                await this.updateLegacySettlementReference(payment);
             }
         }
 
@@ -247,25 +340,58 @@ export class SettlementService {
             .where('settlementId', settlement.id)
             .fetch();
 
-        for (const charge of charges) {
-            if (reported.chargeExternalIds.has(charge.externalId)) {
-                continue;
-            }
+        const unreportedCharges = charges.filter(charge => !reported.chargeExternalIds.has(charge.externalId));
+        const referencedChargeIds = unreportedCharges.length > 0
+            ? new Set((await ApplicationFee.select()
+                    .where('settlementChargeId', unreportedCharges.map(c => c.id))
+                    .fetch()).map(fee => fee.settlementChargeId))
+            : new Set<string>();
 
-            if (RECEIVED_FEE_TYPES.includes(charge.type)) {
+        for (const charge of unreportedCharges) {
+            if (referencedChargeIds.has(charge.id)) {
                 charge.settlementId = null;
                 await charge.save();
             } else {
                 await charge.delete();
             }
         }
+
+        const fees = await ApplicationFee.select()
+            .where('settlementId', settlement.id)
+            .fetch();
+
+        const unlinkedFees: ApplicationFee[] = [];
+        for (const fee of fees) {
+            if (!reported.applicationFeeIds.has(fee.id)) {
+                fee.settlementId = null;
+                await fee.save();
+                unlinkedFees.push(fee);
+            }
+        }
+
+        return { unlinkedFees };
     }
 
     /**
-     * Marks a complete, error-free sync: caches the reconciliation delta and sets syncedAt.
-     * `unexplainedAmount` should be 0 — a non-zero value is a real question to answer.
+     * Recomputes the cached reconciliation columns from the stored rows: `unexplainedAmount` should
+     * be 0 — a non-zero value is a real question to answer — and `pendingFees` holds what is
+     * received but not invoiced yet, which takes up to a month and only becomes a problem when it
+     * stays non-zero too long.
+     *
+     * Every write that changes what a payout holds ends here, or the export and the problem report
+     * keep reading numbers from the last sync.
      */
-    static async finishSync(settlement: Settlement, { transactionCount }: { transactionCount: number }): Promise<Settlement> {
+    static async refreshTotals(settlement: Settlement): Promise<Settlement> {
+        await this.applyTotals(settlement);
+        await settlement.save();
+        return settlement;
+    }
+
+    /**
+     * The recomputation itself, without saving: callers that write more of the settlement in the
+     * same breath save once.
+     */
+    private static async applyTotals(settlement: Settlement): Promise<void> {
         const paymentSum = await PaymentSettlement.select()
             .where('settlementId', settlement.id)
             .sum(SQL.column('amount')) ?? 0;
@@ -274,7 +400,36 @@ export class SettlementService {
             .where('settlementId', settlement.id)
             .sum(SQL.column('amount')) ?? 0;
 
-        settlement.unexplainedAmount = settlement.amount - paymentSum - chargeSum;
+        // Once a fee is invoiced it drops out of this sum and its payment's derived line takes
+        // over, so the two never count the same fee twice
+        const pendingFees = await ApplicationFee.select()
+            .where('settlementId', settlement.id)
+            .where('balanceItemId', null)
+            .sum(SQL.column('amount')) ?? 0;
+
+        settlement.pendingFees = pendingFees;
+        settlement.unexplainedAmount = settlement.amount - paymentSum - chargeSum - pendingFees;
+    }
+
+    /**
+     * Same for settlements the caller only knows by id.
+     */
+    static async refreshTotalsForIds(settlementIds: string[]): Promise<void> {
+        if (settlementIds.length === 0) {
+            return;
+        }
+        const settlements = await Settlement.select().where('id', settlementIds).fetch();
+        for (const settlement of settlements) {
+            await this.refreshTotals(settlement);
+        }
+    }
+
+    /**
+     * Marks a complete, error-free sync: caches the reconciliation delta and sets syncedAt.
+     */
+    static async finishSync(settlement: Settlement, { transactionCount }: { transactionCount: number }): Promise<Settlement> {
+        await this.applyTotals(settlement);
+
         settlement.transactionCount = transactionCount;
         settlement.syncFailureCount = 0;
 
@@ -284,6 +439,97 @@ export class SettlementService {
 
         await settlement.save();
         return settlement;
+    }
+
+    /**
+     * Rebuilds the derived payment lines of an AccountDeductions fee payment: one line per platform
+     * payout that contains fees billed by this payment, amount = the sum of those fees. When the
+     * total of the lines matches the payment's price, the payment is completely paid out.
+     */
+    static async updatePaymentSettlementsForAccountDeductionPayment(payment: Payment): Promise<void> {
+        if (payment.method !== PaymentMethod.AccountDeductions) {
+            return;
+        }
+
+        const balanceItemPayments = await BalanceItemPayment.select()
+            .where('paymentId', payment.id)
+            .fetch();
+
+        const fees = balanceItemPayments.length > 0
+            ? await ApplicationFee.select()
+                    .where('balanceItemId', balanceItemPayments.map(b => b.balanceItemId))
+                    .fetch()
+            : [];
+
+        const perSettlement = new Map<string, { amount: number; occurredAt: Date }>();
+        for (const fee of fees) {
+            if (!fee.settlementId) {
+                continue;
+            }
+            const group = perSettlement.get(fee.settlementId);
+            if (group) {
+                group.amount += fee.amount;
+                if (fee.occurredAt > group.occurredAt) {
+                    group.occurredAt = fee.occurredAt;
+                }
+            } else {
+                perSettlement.set(fee.settlementId, { amount: fee.amount, occurredAt: fee.occurredAt });
+            }
+        }
+
+        // Every payout whose stored rows change has to be recomputed: a fee that was pending is now
+        // explained by the line instead, and a payout that lost its line has it pending again
+        const touchedSettlementIds = new Set<string>(perSettlement.keys());
+
+        const existingLines = await PaymentSettlement.select()
+            .where('paymentId', payment.id)
+            .fetch();
+        for (const line of existingLines) {
+            if (line.externalId === null && !perSettlement.has(line.settlementId)) {
+                touchedSettlementIds.add(line.settlementId);
+                await line.delete();
+            }
+        }
+
+        if (perSettlement.size > 0) {
+            const settlements = await Settlement.select()
+                .where('id', [...perSettlement.keys()])
+                .fetch();
+            for (const settlement of settlements) {
+                const group = perSettlement.get(settlement.id)!;
+                await this.upsertPaymentLine(settlement, {
+                    paymentId: payment.id,
+                    amount: group.amount,
+                    externalId: null,
+                    occurredAt: group.occurredAt,
+                });
+            }
+        }
+
+        await this.refreshTotalsForIds([...touchedSettlementIds]);
+    }
+
+    /**
+     * Refreshes the derived lines of every fee payment that billed one of these balance items:
+     * called after a walk linked or unlinked invoiced fees, so the lines follow the fees.
+     */
+    static async updatePaymentSettlementsForAccountDeductionBalanceItems(balanceItemIds: string[]): Promise<void> {
+        if (balanceItemIds.length === 0) {
+            return;
+        }
+
+        const balanceItemPayments = await BalanceItemPayment.select()
+            .where('balanceItemId', balanceItemIds)
+            .fetch();
+        const paymentIds = Formatter.uniqueArray(balanceItemPayments.map(b => b.paymentId));
+        if (paymentIds.length === 0) {
+            return;
+        }
+
+        const payments = await PaymentModel.getByIDs(...paymentIds);
+        for (const payment of payments) {
+            await this.updatePaymentSettlementsForAccountDeductionPayment(payment);
+        }
     }
 
     /**
@@ -312,14 +558,13 @@ export class SettlementService {
 
         const settlements = await Settlement.select()
             .where('id', lines.map(l => l.settlementId))
+            .where('organizationId', payment.organizationId)
             .fetch();
         const settlementsById = new Map(settlements.map(s => [s.id, s]));
 
-        // A destination charge sits in two payouts (gross in the organization payout, gross in our
-        // platform payout): only the payout of the payment's own account may become the blob, or
-        // the organization would see our platform payout. No scoped lines (e.g. the own-account
-        // payout isn't synced yet) means the blob stays untouched.
-        const candidates = lines.filter(line => settlementsById.get(line.settlementId)!.stripeAccountId === payment.stripeAccountId);
+        // Only payouts of the payment's own organization settle it. None stored yet (e.g. that
+        // payout isn't synced) means the blob stays untouched.
+        const candidates = lines.filter(line => settlementsById.has(line.settlementId));
         if (candidates.length === 0) {
             return;
         }
@@ -333,7 +578,7 @@ export class SettlementService {
             if (settledA !== settledB) {
                 return settledA - settledB;
             }
-            return a.externalId.localeCompare(b.externalId);
+            return (a.externalId ?? '').localeCompare(b.externalId ?? '');
         })[0];
 
         const settlement = settlementsById.get(primary.settlementId)!;

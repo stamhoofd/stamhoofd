@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, IntegerDecoder, NullableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Settlement } from './Settlement.js';
@@ -25,9 +25,10 @@ export class PaymentSettlement extends AutoEncoder {
 
     /**
      * The provider's id for this entry (Stripe txn_… / Mollie entry id), unique per settlement.
+     * NULL for the lines derived from application fees: those don't exist at the provider.
      */
-    @field({ decoder: StringDecoder })
-    externalId = '';
+    @field({ decoder: new NullableDecoder(StringDecoder) })
+    externalId: string | null = null;
 
     /**
      * When the provider moved the money (not the same as payments.paidAt).

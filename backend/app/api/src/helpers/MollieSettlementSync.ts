@@ -1,7 +1,7 @@
 import type { MollieToken } from '@stamhoofd/models';
-import { MolliePayment, Order, Payment } from '@stamhoofd/models';
+import { MolliePayment, Payment } from '@stamhoofd/models';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
-import { PaymentProvider, SettlementReference } from '@stamhoofd/structures';
+import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import axios from 'axios';
@@ -30,7 +30,7 @@ type MollieSettlement = {
     settledAt: string;
     status: 'open' | 'pending' | 'paidout' | 'failed';
     amount: {
-        currenty: string;
+        currency: string;
         value: string;
     };
     /**
@@ -289,6 +289,14 @@ export class MollieSettlementSync {
             const mp = mps[0];
             const payment = await Payment.getByID(mp.paymentId);
             if (payment) {
+                // A payment is only ever settled by the payouts of its own organization. The
+                // platform's own Mollie account can reach payments of other systems on the same
+                // token, and those may not be linked here
+                if (payment.organizationId !== state.settlementRow.organizationId) {
+                    console.log('Skipped payment ' + payment.id + ' of another organization in Mollie settlement ' + settlement.id);
+                    return;
+                }
+
                 state.reported.paymentLine(await SettlementService.upsertPaymentLine(state.settlementRow, {
                     paymentId: payment.id,
                     amount: payment.price,
@@ -296,25 +304,9 @@ export class MollieSettlementSync {
                     occurredAt: new Date(settlement.settledAt),
                 }));
 
-                payment.settlement = SettlementReference.create({
-                    id: settlement.id,
-                    reference: settlement.reference,
-                    settledAt: new Date(settlement.settledAt),
-                    amount: mollieAmountToUnits(settlement.amount.value),
-                });
-                const saved = await payment.save();
-
-                if (saved) {
-                    // Mark order as 'updated', or the frontend won't pull in the updates
-                    const order = await Order.getForPayment(null, payment.id);
-                    if (order) {
-                        order.updatedAt = new Date();
-                        order.forceSaveProperty('updatedAt');
-                        await order.save();
-                    }
-
-                    // TODO: Mark registrations as 'saved'
-                }
+                // The blob is written from the stored rows, so it stays deterministic across
+                // re-syncs and keeps its scoping rules in one place
+                await SettlementService.updateLegacySettlementReference(payment);
 
                 if (STAMHOOFD.environment === 'development') {
                     console.log('Updated settlement of payment ' + payment.id);

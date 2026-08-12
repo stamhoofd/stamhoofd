@@ -3,9 +3,11 @@ import { AutoEncoder, DateDecoder, EnumDecoder, field } from '@simonbackx/simple
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Email } from '@stamhoofd/email';
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
 import { SettlementExporter } from '../../../../helpers/SettlementExporter.js';
@@ -81,6 +83,14 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
 
         const { start, end, provider } = request.body;
 
+        if (end.getTime() < start.getTime()) {
+            throw new SimpleError({
+                code: 'invalid_range',
+                message: 'The export ends before it starts',
+                statusCode: 400,
+            });
+        }
+
         if (end.getTime() - start.getTime() > MAXIMUM_RANGE_MS) {
             throw new SimpleError({
                 code: 'range_too_large',
@@ -89,8 +99,7 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        // The membership organization sells the platform's fee invoices, and its own export is the
-        // platform-wide one (its payouts hold the received fees of every organization)
+        // The membership organization sells the platform's fee invoices
         const membershipOrganization = platform.membershipOrganizationId ? await Organization.getByID(platform.membershipOrganizationId) : null;
         if (!membershipOrganization) {
             throw new SimpleError({
@@ -99,7 +108,6 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
                 statusCode: 400,
             });
         }
-        const platformScope = membershipOrganization.id === organization.id;
 
         // Serialized so concurrent exports can't compete for memory; the result arrives by email
         QueueHandler.schedule('settlements-export', async () => {
@@ -107,15 +115,25 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
                 start,
                 end,
                 provider,
-                organizationId: organization.id,
-                platformScope,
+                organization,
                 sellingOrganization: membershipOrganization,
             });
 
             await exporter.sendEmail({
                 to: [{ email: user.email, name: user.name }],
             });
-        }).catch(console.error);
+        }).catch((e) => {
+            // The request already returned: without this the export just never arrives
+            console.error('Settlements export failed', e);
+
+            Email.send({
+                from: Email.getWebmasterFromEmail(),
+                to: [{ email: user.email, name: user.name }],
+                subject: 'Uitbetalingen export mislukt',
+                text: 'Het maken van de export van ' + Formatter.dateTime(start) + ' tot ' + Formatter.dateTime(end) + ' is mislukt. Probeer een kortere periode of neem contact op.\n',
+                type: 'transactional',
+            });
+        });
 
         return new Response(undefined);
     }

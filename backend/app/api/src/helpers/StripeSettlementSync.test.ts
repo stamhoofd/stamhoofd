@@ -1,15 +1,20 @@
+import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, StripeAccount } from '@stamhoofd/models';
 import { OrganizationFactory, Payment, Platform } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
+import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
+import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import type { StripeObject } from '../../tests/helpers/StripeMocker.js';
 import { StripeSettlementSync } from './StripeSettlementSync.js';
 import { StripeSettlementSyncRunner } from './StripeSettlementSyncRunner.js';
+import { WebmasterReport } from './WebmasterReport.js';
 
 describe('StripeSettlementSync', () => {
     const stripeMocker = new StripeMocker();
@@ -43,6 +48,7 @@ describe('StripeSettlementSync', () => {
     });
 
     const createSync = () => new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
+    const createConnectedSync = () => new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY!, stripeAccount });
 
     const createPayment = async ({ price = 100_00_00, type = PaymentType.Payment, reversingPaymentId = null as string | null } = {}) => {
         const payment = new Payment();
@@ -119,20 +125,33 @@ describe('StripeSettlementSync', () => {
         });
         expect(settlement.syncedAt).not.toBeNull();
 
+        // The payment belongs to the connected organization: it only passes through our balance on
+        // its way there, so nothing of it is stored here. What remains is what Stripe charged us
         const lines = await PaymentSettlement.select().where('settlementId', settlement.id).fetch();
-        expect(lines).toHaveLength(1);
-        expect(lines[0]).toMatchObject({ paymentId: payment.id, amount: 100_00_00, externalId: chargeTxn.id });
+        expect(lines).toHaveLength(0);
 
         const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
-        const byType = (type: SettlementChargeType) => charges.filter(c => c.type === type);
-        expect(byType(SettlementChargeType.ProviderTransactionFee)[0]).toMatchObject({
+        expect(charges).toHaveLength(1);
+        expect(charges[0]).toMatchObject({
+            type: SettlementChargeType.ProviderTransactionFee,
             amount: -25_00,
-            paymentId: payment.id,
+            paymentId: null,
             providerInvoiceId: 'stripe-2026-01',
         });
-        expect(byType(SettlementChargeType.Transfer)[0]).toMatchObject({ amount: -100_00_00 });
-        expect(byType(SettlementChargeType.ReceivedApplicationFeeService)[0]).toMatchObject({ amount: 30_00, stripeAccountId: stripeAccount.id });
-        expect(byType(SettlementChargeType.ReceivedApplicationFeeTransfer)[0]).toMatchObject({ amount: 2_20_00 });
+
+        // The received fees are application fee rows, waiting to be invoiced
+        const fees = await ApplicationFee.select().where('settlementId', settlement.id).fetch();
+        const feeByType = new Map(fees.map(f => [f.type, f]));
+        expect(feeByType.get(ApplicationFeeType.Service)).toMatchObject({
+            amount: 30_00,
+            organizationId: membershipOrganization.id,
+            payingOrganizationId: organization.id,
+            payingStripeAccountId: stripeAccount.id,
+            payingPaymentId: payment.id,
+            balanceItemId: null,
+        });
+        expect(feeByType.get(ApplicationFeeType.Transfer)!.amount).toBe(2_20_00);
+        expect(settlement.pendingFees).toBe(2_50_00);
 
         // The legacy blob only ever shows the payout of the payment's own account: after just the
         // platform walk it stays untouched (the connected walk writes it)
@@ -144,28 +163,31 @@ describe('StripeSettlementSync', () => {
         const original = await createPayment({ price: 100_00_00 });
         const refund = await createPayment({ price: -20_00_00, type: PaymentType.Refund, reversingPaymentId: original.id });
 
-        const payout = stripeMocker.createPayout({ amount: 8000, arrivalDate });
+        // The organization's own payout settles its payments
+        const payout = stripeMocker.createPayout({ amount: 8000, arrivalDate, stripeAccount: stripeAccount.accountId });
         stripeMocker.createBalanceTransaction({
-            type: 'charge',
+            type: 'payment',
             amount: 10000,
             created,
             payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
             source: stripeMocker.createChargeObject({ metadata: { payment: original.id } }),
         });
         stripeMocker.createBalanceTransaction({
-            type: 'refund',
+            type: 'payment_refund',
             amount: -2000,
             created,
             payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
             source: {
                 object: 'refund',
                 id: stripeMocker.createId('re'),
                 charge: stripeMocker.createChargeObject({ metadata: { payment: original.id } }),
             },
         });
-        stripeMocker.createBalanceTransaction({ type: 'payout', amount: -8000, created, payout: payout.id, source: null });
+        stripeMocker.createBalanceTransaction({ type: 'payout', amount: -8000, created, payout: payout.id, stripeAccount: stripeAccount.accountId, source: null });
 
-        const result = await createSync().syncPayouts({ start });
+        const result = await createConnectedSync().syncPayouts({ start });
         expect(result).toEqual({ synced: 1, skipped: 0, failed: 0 });
 
         const settlement = await getSettlement(payout);
@@ -181,12 +203,13 @@ describe('StripeSettlementSync', () => {
     test('a refund without reversing payment fails the payout', async () => {
         const original = await createPayment({ price: 100_00_00 });
 
-        const payout = stripeMocker.createPayout({ amount: -2000, arrivalDate });
+        const payout = stripeMocker.createPayout({ amount: -2000, arrivalDate, stripeAccount: stripeAccount.accountId });
         stripeMocker.createBalanceTransaction({
-            type: 'refund',
+            type: 'payment_refund',
             amount: -2000,
             created,
             payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
             source: {
                 object: 'refund',
                 id: stripeMocker.createId('re'),
@@ -194,7 +217,7 @@ describe('StripeSettlementSync', () => {
             },
         });
 
-        const result = await createSync().syncPayouts({ start });
+        const result = await createConnectedSync().syncPayouts({ start });
         expect(result).toEqual({ synced: 0, skipped: 0, failed: 1 });
 
         const settlement = await getSettlement(payout);
@@ -208,13 +231,14 @@ describe('StripeSettlementSync', () => {
         const first = await createPayment({ price: -20_00_00, type: PaymentType.Refund, reversingPaymentId: original.id });
         const second = await createPayment({ price: -20_00_00, type: PaymentType.Refund, reversingPaymentId: original.id });
 
-        const payout = stripeMocker.createPayout({ amount: -4000, arrivalDate });
+        const payout = stripeMocker.createPayout({ amount: -4000, arrivalDate, stripeAccount: stripeAccount.accountId });
         for (const _ of [first, second]) {
             stripeMocker.createBalanceTransaction({
-                type: 'refund',
+                type: 'payment_refund',
                 amount: -2000,
                 created,
                 payout: payout.id,
+                stripeAccount: stripeAccount.accountId,
                 source: {
                     object: 'refund',
                     id: stripeMocker.createId('re'),
@@ -223,7 +247,7 @@ describe('StripeSettlementSync', () => {
             });
         }
 
-        const sync = createSync();
+        const sync = createConnectedSync();
         expect(await sync.syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
 
         const settlement = await getSettlement(payout);
@@ -260,7 +284,7 @@ describe('StripeSettlementSync', () => {
     test('an unknown transaction type fails the payout instead of inventing a row', async () => {
         const payout = stripeMocker.createPayout({ amount: 1000, arrivalDate });
         stripeMocker.createBalanceTransaction({
-            type: 'connect_collection_transfer',
+            type: 'issuing_authorization_hold',
             amount: 1000,
             created,
             payout: payout.id,
@@ -274,17 +298,134 @@ describe('StripeSettlementSync', () => {
         expect(settlement.syncedAt).toBeNull();
     });
 
-    test('fee refunds, account fees, reserves and disputes become their own rows', async () => {
-        const payment = await createPayment();
+    test('balance movements around the payouts themselves are stored, not refused', async () => {
+        const payout = stripeMocker.createPayout({ amount: 5000, arrivalDate });
+        for (const type of ['payout_failure', 'topup', 'connect_collection_transfer']) {
+            stripeMocker.createBalanceTransaction({
+                type,
+                amount: type === 'connect_collection_transfer' ? 1000 : 2000,
+                created,
+                payout: payout.id,
+                source: null,
+            });
+        }
 
-        const payout = stripeMocker.createPayout({ amount: -3600, arrivalDate });
-        const feeRefund = stripeMocker.createBalanceTransaction({
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+        const settlement = await getSettlement(payout);
+        const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
+        expect(charges).toHaveLength(3);
+        expect(charges.every(c => c.type === SettlementChargeType.BalanceMovement)).toBe(true);
+        expect(settlement.unexplainedAmount).toBe(0);
+    });
+
+    test('a payout Stripe has not reconciled yet is left for the next run', async () => {
+        const payout = stripeMocker.createPayout({ amount: 1000, arrivalDate, reconciliation_status: 'in_progress' });
+        stripeMocker.createBalanceTransaction({ type: 'stripe_fee', amount: 1000, created, payout: payout.id, source: null });
+
+        // Stripe would return no transactions for it: syncing anyway would store an empty payout
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 1, failed: 0 });
+        expect((await getSettlement(payout)).syncedAt).toBeNull();
+    });
+
+    test('a payout Stripe never reports the transactions of fails loudly', async () => {
+        const payout = stripeMocker.createPayout({ amount: 1000, arrivalDate, reconciliation_status: 'not_applicable' });
+
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+        expect((await getSettlement(payout)).syncedAt).toBeNull();
+    });
+
+    test('a payout without transactions is not stored as a complete sync', async () => {
+        const payout = stripeMocker.createPayout({ amount: 1000, arrivalDate });
+
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+        expect((await getSettlement(payout)).syncedAt).toBeNull();
+    });
+
+    test('failing payouts are reported in one email', async () => {
+        const first = stripeMocker.createPayout({ amount: 1000, arrivalDate });
+        const second = stripeMocker.createPayout({ amount: 2000, arrivalDate });
+
+        await WebmasterReport.group('Synchroniseren uitbetalingen', async () => {
+            expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 2 });
+        });
+
+        // Emails of the other tests in this file can still be in the queue: only this group counts
+        const emails = (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith('Synchroniseren uitbetalingen'));
+        expect(emails).toHaveLength(1);
+        expect(emails[0].html).toContain(first.id);
+        expect(emails[0].html).toContain(second.id);
+    });
+
+    test('a payout that failed after being paid keeps its status current', async () => {
+        const payment = await createPayment();
+        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate, stripeAccount: stripeAccount.accountId });
+        stripeMocker.createBalanceTransaction({
+            type: 'payment',
+            amount: 10000,
+            created,
+            payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
+            source: stripeMocker.createChargeObject({ metadata: { payment: payment.id } }),
+        });
+
+        const sync = createConnectedSync();
+        expect(await sync.syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+        expect((await getSettlement(payout)).status).toBe(SettlementStatus.Paid);
+
+        // Stripe can still flip a paid payout to failed within five business days
+        payout.status = 'failed';
+        expect(await sync.syncPayouts({ start })).toEqual({ synced: 0, skipped: 1, failed: 0 });
+        expect((await getSettlement(payout)).status).toBe(SettlementStatus.Failed);
+    });
+
+    test('a payout with more transactions than one page is walked completely', async () => {
+        const payout = stripeMocker.createPayout({ amount: -101 * 100, arrivalDate });
+        for (let i = 0; i < 101; i++) {
+            stripeMocker.createBalanceTransaction({
+                type: 'stripe_fee',
+                amount: -100,
+                description: 'Billing - Usage Fee',
+                created,
+                payout: payout.id,
+                source: null,
+            });
+        }
+
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+        const settlement = await getSettlement(payout);
+        expect(settlement.transactionCount).toBe(101);
+        expect(settlement.unexplainedAmount).toBe(0);
+    });
+
+    test('a payout in another currency is refused instead of stored as euros', async () => {
+        const payout = stripeMocker.createPayout({ amount: 1000, arrivalDate, currency: 'usd' });
+
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+        expect(await Settlement.select().where('externalId', payout.id).first(false)).toBeNull();
+    });
+
+    test('a refunded application fee fails the payout instead of billing it in full', async () => {
+        const payout = stripeMocker.createPayout({ amount: -100, arrivalDate });
+        stripeMocker.createBalanceTransaction({
             type: 'application_fee_refund',
             amount: -100,
             created,
             payout: payout.id,
             source: { object: 'fee_refund', id: stripeMocker.createId('fr'), fee: 'fee_original' },
         });
+
+        // We never refund application fees ourselves: what to give back to the organization is a
+        // decision someone has to make, so the payout waits instead of silently over-billing
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+        expect((await getSettlement(payout)).syncedAt).toBeNull();
+    });
+
+    test('account fees, reserves and disputes become their own rows', async () => {
+        const payment = await createPayment();
+
+        const payout = stripeMocker.createPayout({ amount: -3500, arrivalDate });
         stripeMocker.createBalanceTransaction({
             type: 'stripe_fee',
             amount: -500,
@@ -317,63 +458,116 @@ describe('StripeSettlementSync', () => {
         const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
         const byType = new Map(charges.map(c => [c.type, c]));
 
-        expect(byType.get(SettlementChargeType.ApplicationFeeRefund)).toMatchObject({
-            externalId: (feeRefund.source as StripeObject).id,
-            amount: -1_00_00,
-            applicationFeeId: 'fee_original',
-        });
         expect(byType.get(SettlementChargeType.ProviderAccountFee)).toMatchObject({
             amount: -5_00_00,
             description: 'Billing - Usage Fee',
             providerInvoiceId: 'stripe-2026-01',
         });
         expect(byType.get(SettlementChargeType.Reserve)).toMatchObject({ amount: -10_00_00 });
-        expect(byType.get(SettlementChargeType.Adjustment)).toMatchObject({ amount: -20_00_00, paymentId: payment.id });
+
+        // The dispute is deducted from our balance, but the disputed payment belongs to the
+        // connected organization: the cost is ours, the payment link would cross organizations
+        expect(byType.get(SettlementChargeType.Adjustment)).toMatchObject({
+            amount: -20_00_00,
+            paymentId: null,
+            organizationId: membershipOrganization.id,
+        });
+    });
+
+    test('a dispute on the organization\'s own payout stays linked to its payment', async () => {
+        const payment = await createPayment();
+
+        const payout = stripeMocker.createPayout({ amount: -2000, arrivalDate, stripeAccount: stripeAccount.accountId });
+        stripeMocker.createBalanceTransaction({
+            type: 'adjustment',
+            amount: -2000,
+            created,
+            payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
+            source: { object: 'dispute', id: stripeMocker.createId('dp'), charge: stripeMocker.createChargeObject({ metadata: { payment: payment.id } }) },
+        });
+
+        expect(await createConnectedSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+        const settlement = await getSettlement(payout);
+        const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
+        expect(charges).toHaveLength(1);
+        expect(charges[0]).toMatchObject({
+            type: SettlementChargeType.Adjustment,
+            amount: -20_00_00,
+            paymentId: payment.id,
+            organizationId: organization.id,
+        });
     });
 
     test('re-running skips synced payouts and stays idempotent under force', async () => {
         const payment = await createPayment();
-        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate });
+        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate, stripeAccount: stripeAccount.accountId });
         stripeMocker.createBalanceTransaction({
-            type: 'charge',
+            type: 'payment',
             amount: 10000,
             created,
             payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
             source: stripeMocker.createChargeObject({ metadata: { payment: payment.id } }),
         });
 
-        const sync = createSync();
+        const sync = createConnectedSync();
         expect(await sync.syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
 
         const settlement = await getSettlement(payout);
         const rowIds = (await PaymentSettlement.select().where('settlementId', settlement.id).fetch()).map(r => r.id);
 
         expect(await sync.syncPayouts({ start })).toEqual({ synced: 0, skipped: 1, failed: 0 });
-        expect(await createSync().syncPayouts({ start, force: true })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+        expect(await createConnectedSync().syncPayouts({ start, force: true })).toEqual({ synced: 1, skipped: 0, failed: 0 });
 
         const after = (await PaymentSettlement.select().where('settlementId', settlement.id).fetch()).map(r => r.id);
         expect(after).toEqual(rowIds);
     });
 
-    test('a transaction that moved to another payout is swept, but Received rows only unlink', async () => {
+    test('a payment that moved to another payout is swept', async () => {
         const payment = await createPayment();
         const otherPayment = await createPayment({ price: 50_00_00 });
-        const payout = stripeMocker.createPayout({ amount: 15250, arrivalDate });
+        const payout = stripeMocker.createPayout({ amount: 15000, arrivalDate, stripeAccount: stripeAccount.accountId });
 
         stripeMocker.createBalanceTransaction({
-            type: 'charge',
+            type: 'payment',
             amount: 10000,
             created,
             payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
             source: stripeMocker.createChargeObject({ metadata: { payment: payment.id } }),
         });
-        const movedCharge = stripeMocker.createBalanceTransaction({
-            type: 'charge',
+        const moved = stripeMocker.createBalanceTransaction({
+            type: 'payment',
             amount: 5000,
             created,
             payout: payout.id,
+            stripeAccount: stripeAccount.accountId,
             source: stripeMocker.createChargeObject({ metadata: { payment: otherPayment.id } }),
         });
+
+        const sync = createConnectedSync();
+        expect(await sync.syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+        const settlement = await getSettlement(payout);
+        expect(await PaymentSettlement.select().where('settlementId', settlement.id).count()).toBe(2);
+
+        // Stripe moved the second payment to a later payout
+        moved.payout = stripeMocker.createId('po');
+        payout.amount = 10000;
+
+        expect(await sync.syncPayouts({ start, force: true })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+        const lines = await PaymentSettlement.select().where('settlementId', settlement.id).fetch();
+        expect(lines).toHaveLength(1);
+        expect(lines[0].paymentId).toBe(payment.id);
+        expect((await getSettlement(payout)).unexplainedAmount).toBe(0);
+    });
+
+    test('an application fee that moved to another payout is only unlinked', async () => {
+        const payment = await createPayment();
+        const payout = stripeMocker.createPayout({ amount: 250, arrivalDate });
         const movedFee = stripeMocker.createBalanceTransaction({
             type: 'application_fee',
             amount: 250,
@@ -390,26 +584,30 @@ describe('StripeSettlementSync', () => {
         expect(await sync.syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
 
         const settlement = await getSettlement(payout);
-        expect(await PaymentSettlement.select().where('settlementId', settlement.id).count()).toBe(2);
+        const applicationFeeId = ((movedFee.source as StripeObject)).id;
+        expect(await ApplicationFee.select().where('settlementId', settlement.id).count()).toBe(2);
 
-        // Stripe moved the second charge and the fee to a later payout
-        movedCharge.payout = stripeMocker.createId('po');
         movedFee.payout = stripeMocker.createId('po');
-        payout.amount = 10000;
+        payout.amount = 0;
 
         expect(await sync.syncPayouts({ start, force: true })).toEqual({ synced: 1, skipped: 0, failed: 0 });
 
-        const lines = await PaymentSettlement.select().where('settlementId', settlement.id).fetch();
-        expect(lines).toHaveLength(1);
-        expect(lines[0].paymentId).toBe(payment.id);
-
-        const received = await SettlementCharge.select().where('applicationFeeId', ((movedFee.source as StripeObject)).id).fetch();
-        expect(received).toHaveLength(2);
-        for (const row of received) {
+        // The fee rows outlive the payout: they are only unlinked, and so are the deduction
+        // charges they point at (a foreign key forbids deleting those)
+        const fees = await ApplicationFee.select().where('externalId', applicationFeeId).fetch();
+        expect(fees).toHaveLength(2);
+        for (const fee of fees) {
+            expect(fee.settlementId).toBeNull();
+        }
+        const deductions = await SettlementCharge.select().where('applicationFeeId', applicationFeeId).fetch();
+        expect(deductions).toHaveLength(2);
+        for (const row of deductions) {
             expect(row.settlementId).toBeNull();
         }
 
-        expect((await getSettlement(payout)).unexplainedAmount).toBe(0);
+        const after = await getSettlement(payout);
+        expect(after.unexplainedAmount).toBe(0);
+        expect(after.pendingFees).toBe(0);
     });
 
     describe('Connected accounts', () => {
@@ -449,9 +647,8 @@ describe('StripeSettlementSync', () => {
             });
             stripeMocker.createBalanceTransaction({ type: 'payout', amount: -9725, created, payout: payout.id, stripeAccount: stripeAccount.accountId, source: null });
 
-            const cache = new Map<string, string>();
-            expect(await new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY!, cache }).syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
-            expect(await new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY!, cache }).syncConnectedPayouts({ start })).toMatchObject({ synced: 1, failed: 0 });
+            expect(await new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! }).syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+            expect(await new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! }).syncConnectedPayouts({ start })).toMatchObject({ synced: 1, failed: 0 });
 
             const settlement = await getSettlement(payout);
             expect(settlement).toMatchObject({
@@ -472,9 +669,16 @@ describe('StripeSettlementSync', () => {
             });
             expect(byType.get(SettlementChargeType.ApplicationFeeTransfer)).toMatchObject({ amount: -2_20_00, settlementId: settlement.id });
 
-            // Both sides of the same fee cancel out per kind
-            expect(byType.get(SettlementChargeType.ReceivedApplicationFeeService)!.amount + byType.get(SettlementChargeType.ApplicationFeeService)!.amount).toBe(0);
-            expect(byType.get(SettlementChargeType.ReceivedApplicationFeeTransfer)!.amount + byType.get(SettlementChargeType.ApplicationFeeTransfer)!.amount).toBe(0);
+            // Both sides of the same fee cancel out per kind: what the organization pays is what we
+            // receive
+            const fees = await ApplicationFee.select().where('externalId', fee.id).fetch();
+            const feeByType = new Map(fees.map(f => [f.type, f]));
+            expect(feeByType.get(ApplicationFeeType.Service)!.amount + byType.get(SettlementChargeType.ApplicationFeeService)!.amount).toBe(0);
+            expect(feeByType.get(ApplicationFeeType.Transfer)!.amount + byType.get(SettlementChargeType.ApplicationFeeTransfer)!.amount).toBe(0);
+
+            // Each fee points at the deduction charge of its own kind
+            expect(feeByType.get(ApplicationFeeType.Service)!.settlementChargeId).toBe(byType.get(SettlementChargeType.ApplicationFeeService)!.id);
+            expect(feeByType.get(ApplicationFeeType.Transfer)!.settlementChargeId).toBe(byType.get(SettlementChargeType.ApplicationFeeTransfer)!.id);
 
             // The legacy blob is dual-written with the payment's own payout, never our platform one
             const updated = await Payment.getByID(payment.id);
@@ -503,8 +707,7 @@ describe('StripeSettlementSync', () => {
             });
             stripeMocker.createBalanceTransaction({ type: 'payout', amount: -10000, created, payout: platformPayout.id, source: null });
 
-            const cache = new Map<string, string>();
-            expect(await new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY!, cache }).syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+            expect(await new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! }).syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
             expect((await Payment.getByID(payment.id))!.transferFee).toBe(12_34);
 
             // The organization payout holds the payment with the application fee withheld
@@ -521,7 +724,7 @@ describe('StripeSettlementSync', () => {
             });
             stripeMocker.createBalanceTransaction({ type: 'payout', amount: -9750, created, payout: payout.id, stripeAccount: stripeAccount.accountId, source: null });
 
-            expect(await new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY!, cache }).syncConnectedPayouts({ start })).toMatchObject({ synced: 1, failed: 0 });
+            expect(await new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! }).syncConnectedPayouts({ start })).toMatchObject({ synced: 1, failed: 0 });
             expect((await Payment.getByID(payment.id))!.transferFee).toBe(2_50_00);
         });
 

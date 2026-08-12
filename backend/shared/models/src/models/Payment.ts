@@ -325,11 +325,9 @@ export class Payment extends QueryableModel {
                                 if (line.paymentId !== payment.id) {
                                     return false;
                                 }
-                                // A destination charge also sits gross in our platform payout:
-                                // only the payout of the payment's own account may be returned,
-                                // or the organization would see our platform payout
+                                // A payment is only settled by the payouts of its own organization
                                 const settlement = (settlements ?? []).find(s => s.id === line.settlementId);
-                                return settlement !== undefined && settlement.stripeAccountId === payment.stripeAccountId;
+                                return settlement !== undefined && settlement.organizationId === payment.organizationId;
                             }).map((line) => {
                                 const settlement = (settlements ?? []).find(s => s.id === line.settlementId);
                                 return PaymentSettlementDetailed.create({
@@ -373,7 +371,8 @@ export class Payment extends QueryableModel {
     }
 
     /**
-     * Mirrors loadBalanceItems for the settlements a payment was part of.
+     * Mirrors loadBalanceItems for the settlements a payment was part of. Only payouts of the
+     * payments' own organizations: a payment is never settled by another organization's payout.
      */
     static async loadSettlements(payments: Payment[]) {
         if (payments.length === 0) {
@@ -387,8 +386,9 @@ export class Payment extends QueryableModel {
             .fetch();
 
         const ids = Formatter.uniqueArray(paymentSettlements.map(line => line.settlementId));
+        const organizationIds = Formatter.uniqueArray(payments.map(p => p.organizationId));
         const settlements = ids.length > 0
-            ? await Settlement.select().where('id', ids).fetch()
+            ? await Settlement.select().where('id', ids).where('organizationId', organizationIds).fetch()
             : [];
 
         return { paymentSettlements, settlements };

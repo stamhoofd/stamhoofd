@@ -4,12 +4,14 @@ import { MollieSettlementSyncRunner } from './MollieSettlementSyncRunner.js';
 import type { SettlementSyncSummary } from './ProviderSettlementSyncRunner.js';
 import type { StripeSyncOptions } from './StripeSettlementSyncRunner.js';
 import { StripeSettlementSyncRunner } from './StripeSettlementSyncRunner.js';
+import { WebmasterReport } from './WebmasterReport.js';
 
 /**
  * Runs a full settlement sync over a period by wiring up one runner per provider, all sharing one
- * summary and one progress callback. Provider-specific configuration is opaque here: the `stripe`
- * options go to the StripeSettlementSyncRunner constructor verbatim; Mollie needs none. Everything
- * is an upsert, so re-running (the nightly cron and a manual backfill) is cheap.
+ * summary, one progress callback and one problem report. Provider-specific configuration is opaque
+ * here: the `stripe` options go to the StripeSettlementSyncRunner constructor verbatim; Mollie
+ * needs none. Everything is an upsert, so re-running (the nightly cron and a manual backfill) is
+ * cheap.
  */
 export class SettlementSyncRunner {
     /**
@@ -30,28 +32,33 @@ export class SettlementSyncRunner {
         const includeStripe = !providers || providers.includes(PaymentProvider.Stripe);
         const includeMollie = !providers || providers.includes(PaymentProvider.Mollie);
 
-        // One provider's outage must not starve the others (or the caller's follow-up reporting):
-        // unsynced settlements stay behind with syncedAt null, so the next run picks them up
-        if (includeStripe && STAMHOOFD.STRIPE_SECRET_KEY) {
-            const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY, ...stripe });
-            try {
-                await runner.run({ start, end: rangeEnd, summary, onProgress });
-            } catch (e) {
-                console.error('Stripe settlement sync failed', e);
-                summary.failed += 1;
+        // A single cause (a first sync, a bug) fails every payout it touches: report all of them in
+        // one email instead of one per payout
+        return await WebmasterReport.group('Synchroniseren uitbetalingen', async () => {
+            // One provider's outage must not starve the others (or the caller's follow-up
+            // reporting): unsynced settlements stay behind with syncedAt null, so the next run picks
+            // them up
+            if (includeStripe && STAMHOOFD.STRIPE_SECRET_KEY) {
+                const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY, ...stripe });
+                try {
+                    await runner.run({ start, end: rangeEnd, summary, onProgress });
+                } catch (e) {
+                    console.error('Stripe settlement sync failed', e);
+                    summary.failed += 1;
+                }
             }
-        }
 
-        if (includeMollie) {
-            const runner = new MollieSettlementSyncRunner();
-            try {
-                await runner.run({ start, end: rangeEnd, summary, onProgress });
-            } catch (e) {
-                console.error('Mollie settlement sync failed', e);
-                summary.failed += 1;
+            if (includeMollie) {
+                const runner = new MollieSettlementSyncRunner();
+                try {
+                    await runner.run({ start, end: rangeEnd, summary, onProgress });
+                } catch (e) {
+                    console.error('Mollie settlement sync failed', e);
+                    summary.failed += 1;
+                }
             }
-        }
 
-        return summary;
+            return summary;
+        });
     }
 }

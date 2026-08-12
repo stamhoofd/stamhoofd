@@ -1,9 +1,12 @@
 import type { Organization } from '@stamhoofd/models';
-import { OrganizationFactory, Payment, StripeAccount } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, OrganizationFactory, Payment, StripeAccount } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
+import type { Settlement as SettlementModel } from '@stamhoofd/models/models/Settlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { PaymentMethod, PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
+import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { v4 as uuidv4 } from 'uuid';
 import { ReportedRows, SettlementService } from './SettlementService.js';
@@ -15,16 +18,77 @@ describe('SettlementService', () => {
         organization = await new OrganizationFactory({}).create();
     });
 
-    async function createPayment(price = 50_00_00) {
+    async function createPayment(price = 50_00_00, method = PaymentMethod.Bancontact, organizationId = organization.id) {
         const payment = new Payment();
-        payment.organizationId = organization.id;
-        payment.method = PaymentMethod.Bancontact;
+        payment.organizationId = organizationId;
+        payment.method = method;
         payment.provider = PaymentProvider.Stripe;
         payment.status = PaymentStatus.Succeeded;
         payment.price = price;
         payment.paidAt = new Date();
         await payment.save();
         return payment;
+    }
+
+    async function createStripeAccount() {
+        const stripeAccount = new StripeAccount();
+        stripeAccount.organizationId = organization.id;
+        stripeAccount.accountId = 'acct_' + uuidv4();
+        await stripeAccount.save();
+        return stripeAccount;
+    }
+
+    /**
+     * A fee with its deduction charge, as the sync stores them.
+     */
+    async function createApplicationFee({ amount = 1_00_00, type = ApplicationFeeType.Service, settlement = null as SettlementModel | null, balanceItemId = null as string | null, occurredAt = new Date(2026, 0, 14) } = {}) {
+        const externalId = 'fee_' + uuidv4();
+        const charge = await SettlementService.upsertCharge({
+            type: type === ApplicationFeeType.Service ? SettlementChargeType.ApplicationFeeService : SettlementChargeType.ApplicationFeeTransfer,
+            externalId: externalId + ':' + type,
+            amount: -amount,
+            applicationFeeId: externalId,
+            organizationId: organization.id,
+            occurredAt,
+        });
+
+        const fee = new ApplicationFee();
+        fee.externalId = externalId;
+        fee.type = type;
+        fee.amount = amount;
+        fee.organizationId = organization.id;
+        fee.payingOrganizationId = organization.id;
+        fee.settlementChargeId = charge.id;
+        fee.settlementId = settlement?.id ?? null;
+        fee.balanceItemId = balanceItemId;
+        fee.occurredAt = occurredAt;
+        await fee.save();
+        return { fee, charge };
+    }
+
+    /**
+     * A fee payment with one balance item, like the invoicer creates.
+     */
+    async function createFeePayment(price = 2_00_00) {
+        const payment = await createPayment(price, PaymentMethod.AccountDeductions);
+
+        const balanceItem = new BalanceItem();
+        balanceItem.type = BalanceItemType.ServiceFee;
+        balanceItem.organizationId = organization.id;
+        balanceItem.payingOrganizationId = organization.id;
+        balanceItem.unitPrice = price;
+        balanceItem.quantity = 1;
+        balanceItem.status = BalanceItemStatus.Hidden;
+        await balanceItem.save();
+
+        const balanceItemPayment = new BalanceItemPayment();
+        balanceItemPayment.balanceItemId = balanceItem.id;
+        balanceItemPayment.paymentId = payment.id;
+        balanceItemPayment.organizationId = organization.id;
+        balanceItemPayment.price = price;
+        await balanceItemPayment.save();
+
+        return { payment, balanceItem };
     }
 
     function settlementData(overrides: Partial<Parameters<typeof SettlementService.upsertSettlement>[0]> = {}) {
@@ -77,70 +141,112 @@ describe('SettlementService', () => {
     });
 
     describe('upsertPaymentLine', () => {
-        test('idempotent per (settlement, externalId), but the same transaction can sit in another settlement', async () => {
+        test('idempotent per (settlement, externalId)', async () => {
             const payment = await createPayment();
-            const s1 = await SettlementService.upsertSettlement(settlementData());
-            const s2 = await SettlementService.upsertSettlement(settlementData());
+            const settlement = await SettlementService.upsertSettlement(settlementData());
 
-            const line = await SettlementService.upsertPaymentLine(s1, {
+            const line = await SettlementService.upsertPaymentLine(settlement, {
                 paymentId: payment.id,
                 amount: 50_00_00,
                 externalId: 'txn_1',
                 occurredAt: new Date(2026, 0, 14),
             });
-            const again = await SettlementService.upsertPaymentLine(s1, {
+            const again = await SettlementService.upsertPaymentLine(settlement, {
                 paymentId: payment.id,
                 amount: 51_00_00,
                 externalId: 'txn_1',
                 occurredAt: new Date(2026, 0, 14),
             });
-            const other = await SettlementService.upsertPaymentLine(s2, {
-                paymentId: payment.id,
-                amount: -20_00_00,
-                externalId: 'txn_1',
-                occurredAt: new Date(2026, 0, 20),
-            });
 
             expect(again.id).toBe(line.id);
             expect(again.amount).toBe(51_00_00);
-            expect(other.id).not.toBe(line.id);
-            expect(await PaymentSettlement.select().where('paymentId', payment.id).count()).toBe(2);
+            expect(await PaymentSettlement.select().where('paymentId', payment.id).count()).toBe(1);
+        });
+
+        test('a transaction that moved to another payout leaves nothing behind', async () => {
+            const payment = await createPayment();
+            const from = await SettlementService.upsertSettlement(settlementData({ amount: 50_00_00 }));
+            const to = await SettlementService.upsertSettlement(settlementData({ amount: 50_00_00 }));
+
+            await SettlementService.upsertPaymentLine(from, {
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_moved',
+                occurredAt: new Date(2026, 0, 14),
+            });
+            await SettlementService.finishSync(from, { transactionCount: 1 });
+            expect(from.unexplainedAmount).toBe(0);
+
+            // Stripe reports the same transaction in a later payout: counting it in both would
+            // settle the payment twice
+            await SettlementService.upsertPaymentLine(to, {
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_moved',
+                occurredAt: new Date(2026, 0, 20),
+            });
+
+            const lines = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
+            expect(lines).toHaveLength(1);
+            expect(lines[0].settlementId).toBe(to.id);
+
+            // The payout it left is recomputed right away, instead of waiting for its next walk
+            expect((await Settlement.getByID(from.id))!.unexplainedAmount).toBe(50_00_00);
+        });
+
+        test('the line is stored on the organization of the payout', async () => {
+            const otherOrganization = await new OrganizationFactory({}).create();
+            const payment = await createPayment(50_00_00, PaymentMethod.Bancontact, otherOrganization.id);
+            const settlement = await SettlementService.upsertSettlement(settlementData({ organizationId: otherOrganization.id }));
+
+            const line = await SettlementService.upsertPaymentLine(settlement, {
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_organization',
+                occurredAt: new Date(2026, 0, 14),
+            });
+
+            expect(line.organizationId).toBe(otherOrganization.id);
+            expect((await PaymentSettlement.getByID(line.id))!.organizationId).toBe(otherOrganization.id);
         });
     });
 
     describe('upsertCharge', () => {
         test('idempotent by externalId, and undefined fields keep their stored value', async () => {
             const settlement = await SettlementService.upsertSettlement(settlementData());
-            const externalId = 'fee_' + uuidv4() + ':ReceivedApplicationFeeService';
+            const externalId = 'fee_' + uuidv4() + ':ApplicationFeeService';
 
             const created = await SettlementService.upsertCharge({
-                type: SettlementChargeType.ReceivedApplicationFeeService,
+                type: SettlementChargeType.ApplicationFeeService,
                 externalId,
-                amount: 1_00_00,
+                amount: -1_00_00,
                 settlementId: settlement.id,
                 applicationFeeId: 'fee_123',
+                organizationId: organization.id,
                 occurredAt: new Date(2026, 0, 14),
             });
 
-            // The fee sync doesn't know the settlement: it may not unlink the row
+            // The fee walk doesn't know the settlement: it may not unlink the row
             const updated = await SettlementService.upsertCharge({
-                type: SettlementChargeType.ReceivedApplicationFeeService,
+                type: SettlementChargeType.ApplicationFeeService,
                 externalId,
-                amount: 1_10_00,
+                amount: -1_10_00,
+                organizationId: organization.id,
                 occurredAt: new Date(2026, 0, 14),
             });
 
             expect(updated.id).toBe(created.id);
-            expect(updated.amount).toBe(1_10_00);
+            expect(updated.amount).toBe(-1_10_00);
             expect(updated.settlementId).toBe(settlement.id);
             expect(updated.applicationFeeId).toBe('fee_123');
 
             // An explicit null does clear the link
             const cleared = await SettlementService.upsertCharge({
-                type: SettlementChargeType.ReceivedApplicationFeeService,
+                type: SettlementChargeType.ApplicationFeeService,
                 externalId,
-                amount: 1_10_00,
+                amount: -1_10_00,
                 settlementId: null,
+                organizationId: organization.id,
                 occurredAt: new Date(2026, 0, 14),
             });
             expect(cleared.settlementId).toBe(null);
@@ -148,7 +254,7 @@ describe('SettlementService', () => {
     });
 
     describe('sweepSettlement', () => {
-        test('deletes payout-only rows, but only unlinks the Received fee rows', async () => {
+        test('deletes payout-only rows, but unlinks what outlives the payout', async () => {
             const payment = await createPayment();
             const settlement = await SettlementService.upsertSettlement(settlementData());
 
@@ -158,18 +264,19 @@ describe('SettlementService', () => {
             const movedLine = await SettlementService.upsertPaymentLine(settlement, {
                 paymentId: payment.id, amount: 10_00_00, externalId: 'txn_moved', occurredAt: new Date(2026, 0, 14),
             });
-            const received = await SettlementService.upsertCharge({
-                type: SettlementChargeType.ReceivedApplicationFeeService,
-                externalId: 'fee_' + uuidv4() + ':ReceivedApplicationFeeService',
-                amount: 1_00_00,
-                settlementId: settlement.id,
-                occurredAt: new Date(2026, 0, 14),
+
+            // A derived fee line is never reported by a walk: it belongs to the fee payment
+            const derivedLine = await SettlementService.upsertPaymentLine(settlement, {
+                paymentId: payment.id, amount: 2_00_00, externalId: null, occurredAt: new Date(2026, 0, 14),
             });
+
+            const { fee, charge: referencedCharge } = await createApplicationFee({ settlement });
             const providerFee = await SettlementService.upsertCharge({
                 type: SettlementChargeType.ProviderTransactionFee,
                 externalId: 'txn_moved:fee:0',
                 amount: -30_00,
                 settlementId: settlement.id,
+                organizationId: organization.id,
                 occurredAt: new Date(2026, 0, 14),
             });
             const keptFee = await SettlementService.upsertCharge({
@@ -177,22 +284,120 @@ describe('SettlementService', () => {
                 externalId: 'txn_kept:fee:0',
                 amount: -25_00,
                 settlementId: settlement.id,
+                organizationId: organization.id,
                 occurredAt: new Date(2026, 0, 14),
             });
+
+            // The deduction charge is linked to this settlement too, but no longer reported
+            referencedCharge.settlementId = settlement.id;
+            await referencedCharge.save();
 
             const reported = new ReportedRows();
             reported.paymentLine(keptLine);
             reported.charge(keptFee);
-            await SettlementService.sweepSettlement(settlement, reported);
+            const { unlinkedFees } = await SettlementService.sweepSettlement(settlement, reported);
 
             expect(await PaymentSettlement.getByID(keptLine.id)).toBeDefined();
             expect(await PaymentSettlement.getByID(movedLine.id)).toBeUndefined();
+            expect(await PaymentSettlement.getByID(derivedLine.id)).toBeDefined();
             expect(await SettlementCharge.getByID(providerFee.id)).toBeUndefined();
             expect((await SettlementCharge.getByID(keptFee.id))?.settlementId).toBe(settlement.id);
 
-            const unlinked = await SettlementCharge.getByID(received.id);
-            expect(unlinked).toBeDefined();
-            expect(unlinked!.settlementId).toBe(null);
+            // A charge an application fee points at may never be deleted (foreign key), only unlinked
+            const unlinkedCharge = await SettlementCharge.getByID(referencedCharge.id);
+            expect(unlinkedCharge).toBeDefined();
+            expect(unlinkedCharge!.settlementId).toBe(null);
+
+            expect(unlinkedFees.map(f => f.id)).toEqual([fee.id]);
+            expect((await ApplicationFee.getByID(fee.id))!.settlementId).toBe(null);
+        });
+
+        test('keeps the application fees the walk reported', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData());
+            const { fee } = await createApplicationFee({ settlement });
+
+            const reported = new ReportedRows();
+            reported.applicationFee(fee);
+            const { unlinkedFees } = await SettlementService.sweepSettlement(settlement, reported);
+
+            expect(unlinkedFees).toHaveLength(0);
+            expect((await ApplicationFee.getByID(fee.id))!.settlementId).toBe(settlement.id);
+        });
+    });
+
+    describe('updatePaymentSettlementsForAccountDeductionPayment', () => {
+        test('one line per payout, summing the fees it contained', async () => {
+            const { payment, balanceItem } = await createFeePayment(3_25_00);
+            const first = await SettlementService.upsertSettlement(settlementData({ settledAt: new Date(2026, 0, 10) }));
+            const second = await SettlementService.upsertSettlement(settlementData({ settledAt: new Date(2026, 0, 20) }));
+
+            await createApplicationFee({ settlement: first, balanceItemId: balanceItem.id, amount: 1_00_00, occurredAt: new Date(2026, 0, 5) });
+            await createApplicationFee({ settlement: first, balanceItemId: balanceItem.id, amount: 50_00, occurredAt: new Date(2026, 0, 8) });
+            await createApplicationFee({ settlement: second, balanceItemId: balanceItem.id, amount: 1_50_00, occurredAt: new Date(2026, 0, 15) });
+
+            // A fee that isn't paid out yet doesn't produce a line
+            const { fee: pending } = await createApplicationFee({ balanceItemId: balanceItem.id, amount: 25_00 });
+
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+
+            const lines = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
+            expect(lines).toHaveLength(2);
+            expect(lines.every(line => line.externalId === null)).toBe(true);
+
+            const bySettlement = new Map(lines.map(line => [line.settlementId, line]));
+            expect(bySettlement.get(first.id)!.amount).toBe(1_50_00);
+            expect(bySettlement.get(first.id)!.occurredAt).toEqual(new Date(2026, 0, 8));
+            expect(bySettlement.get(second.id)!.amount).toBe(1_50_00);
+
+            // Not settled completely yet: the lines don't add up to the payment price
+            expect(lines.reduce((total, line) => total + line.amount, 0)).not.toBe(payment.price);
+
+            // Paying out the last fee completes the payment
+            pending.settlementId = second.id;
+            await pending.save();
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+
+            const completed = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
+            expect(completed.reduce((total, line) => total + line.amount, 0)).toBe(payment.price);
+        });
+
+        test('every fee payment keeps its own line in the same payout', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData());
+            const first = await createFeePayment(1_00_00);
+            const second = await createFeePayment(2_00_00);
+            await createApplicationFee({ settlement, balanceItemId: first.balanceItem.id, amount: 1_00_00 });
+            await createApplicationFee({ settlement, balanceItemId: second.balanceItem.id, amount: 2_00_00 });
+
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(first.payment);
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(second.payment);
+            // Re-running may not duplicate: the lines have no externalId to upsert on
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(first.payment);
+
+            const lines = await PaymentSettlement.select().where('settlementId', settlement.id).fetch();
+            expect(lines).toHaveLength(2);
+            expect(lines.find(line => line.paymentId === first.payment.id)!.amount).toBe(1_00_00);
+            expect(lines.find(line => line.paymentId === second.payment.id)!.amount).toBe(2_00_00);
+        });
+
+        test('a line disappears again when its fees are unlinked from the payout', async () => {
+            const { payment, balanceItem } = await createFeePayment(1_00_00);
+            const settlement = await SettlementService.upsertSettlement(settlementData());
+            const { fee } = await createApplicationFee({ settlement, balanceItemId: balanceItem.id, amount: 1_00_00 });
+
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+            expect(await PaymentSettlement.select().where('paymentId', payment.id).count()).toBe(1);
+
+            fee.settlementId = null;
+            await fee.save();
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+
+            expect(await PaymentSettlement.select().where('paymentId', payment.id).count()).toBe(0);
+        });
+
+        test('other payment methods are left alone', async () => {
+            const payment = await createPayment();
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+            expect(await PaymentSettlement.select().where('paymentId', payment.id).count()).toBe(0);
         });
     });
 
@@ -212,6 +417,7 @@ describe('SettlementService', () => {
                 externalId: 'fee_' + uuidv4() + ':ApplicationFeeService',
                 amount: -1_00_00,
                 settlementId: settlement.id,
+                organizationId: organization.id,
                 occurredAt: new Date(2026, 0, 14),
             });
 
@@ -219,9 +425,51 @@ describe('SettlementService', () => {
 
             // 48.70 - (50.00 - 1.00) = -0.30 unexplained
             expect(settlement.unexplainedAmount).toBe(-30_00);
+            expect(settlement.pendingFees).toBe(0);
             expect(settlement.transactionCount).toBe(2);
             expect(settlement.syncedAt).not.toBe(null);
             expect(settlement.syncFailureCount).toBe(0);
+        });
+
+        test('fees waiting to be invoiced explain the payout until their payment does', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+            const { fee } = await createApplicationFee({ settlement, amount: 1_00_00 });
+
+            await SettlementService.finishSync(settlement, { transactionCount: 1 });
+            expect(settlement.pendingFees).toBe(1_00_00);
+            expect(settlement.unexplainedAmount).toBe(0);
+
+            // Once invoiced, the fee payment's derived line explains it instead: counting both
+            // would explain the same money twice. Nothing re-syncs a healthy payout, so the cached
+            // columns have to follow the line right away
+            const { payment, balanceItem } = await createFeePayment(1_00_00);
+            fee.balanceItemId = balanceItem.id;
+            await fee.save();
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+
+            const invoiced = await Settlement.getByID(settlement.id);
+            expect(invoiced!.pendingFees).toBe(0);
+            expect(invoiced!.unexplainedAmount).toBe(0);
+        });
+
+        test('a payout that loses its derived line has the fee pending again', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+            const { payment, balanceItem } = await createFeePayment(1_00_00);
+            const { fee } = await createApplicationFee({ settlement, balanceItemId: balanceItem.id, amount: 1_00_00 });
+
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+            await SettlementService.finishSync(settlement, { transactionCount: 1 });
+            expect(settlement.pendingFees).toBe(0);
+            expect(settlement.unexplainedAmount).toBe(0);
+
+            // The payout no longer contains the fee: its line goes, and so does what it explained
+            fee.settlementId = null;
+            await fee.save();
+            await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+
+            const unlinked = await Settlement.getByID(settlement.id);
+            expect(unlinked!.pendingFees).toBe(0);
+            expect(unlinked!.unexplainedAmount).toBe(1_00_00);
         });
     });
 
@@ -276,23 +524,18 @@ describe('SettlementService', () => {
             expect(payment.settlement?.fee).toBe(0);
         });
 
-        test('the payout of the payment\'s own account beats an equal platform payout line', async () => {
-            const stripeAccount = new StripeAccount();
-            stripeAccount.organizationId = organization.id;
-            stripeAccount.accountId = 'acct_' + uuidv4();
-            await stripeAccount.save();
-
+        test('a payout of another organization is never the payment\'s payout', async () => {
+            const stripeAccount = await createStripeAccount();
             const payment = await createPayment();
             payment.stripeAccountId = stripeAccount.id;
             await payment.save();
 
-            // A destination charge: gross in our platform payout (settles first) and gross in the
-            // organization payout
-            const platformPayout = await SettlementService.upsertSettlement(settlementData({ stripeAccountId: null, settledAt: new Date(2026, 0, 10) }));
+            const otherOrganization = await new OrganizationFactory({}).create();
+            const foreignPayout = await SettlementService.upsertSettlement(settlementData({ organizationId: otherOrganization.id, settledAt: new Date(2026, 0, 10) }));
             const organizationPayout = await SettlementService.upsertSettlement(settlementData({ stripeAccountId: stripeAccount.id, settledAt: new Date(2026, 0, 15) }));
 
-            await SettlementService.upsertPaymentLine(platformPayout, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_platform', occurredAt: new Date(2026, 0, 9),
+            await SettlementService.upsertPaymentLine(foreignPayout, {
+                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_foreign', occurredAt: new Date(2026, 0, 9),
             });
             await SettlementService.upsertPaymentLine(organizationPayout, {
                 paymentId: payment.id, amount: 50_00_00, externalId: 'txn_organization', occurredAt: new Date(2026, 0, 9),

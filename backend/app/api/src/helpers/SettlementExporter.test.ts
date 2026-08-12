@@ -1,6 +1,9 @@
 import type { Organization } from '@stamhoofd/models';
-import { OrganizationFactory, Payment } from '@stamhoofd/models';
-import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPayment, Invoice, OrganizationFactory, Payment } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
+import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
+import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -50,6 +53,7 @@ describe('SettlementExporter', () => {
             externalId: settlement.externalId + ':cost:0',
             amount: -30_00,
             settlementId: settlement.id,
+            organizationId: settlement.organizationId,
             providerInvoiceId: 'inv_123',
             description: 'Transactiekosten',
             occurredAt: new Date(2026, 0, 15),
@@ -59,6 +63,7 @@ describe('SettlementExporter', () => {
             externalId: settlement.externalId + ':cost:0:tax',
             amount: -6_30,
             settlementId: settlement.id,
+            organizationId: settlement.organizationId,
             providerInvoiceId: 'inv_123',
             description: 'BTW op transactiekosten',
             occurredAt: new Date(2026, 0, 15),
@@ -72,7 +77,7 @@ describe('SettlementExporter', () => {
         return new SettlementExporter({
             start: new Date(2026, 0, 1),
             end: new Date(2026, 1, 1),
-            organizationId: organization.id,
+            organization,
             sellingOrganization: membershipOrganization,
         });
     };
@@ -138,10 +143,11 @@ describe('SettlementExporter', () => {
 
         // Money movement: part of no invoice
         await SettlementService.upsertCharge({
-            type: SettlementChargeType.Transfer,
-            externalId: 'trf_' + uuidv4(),
+            type: SettlementChargeType.Reserve,
+            externalId: 'rsv_' + uuidv4(),
             amount: -10_00_00,
             settlementId: settlement.id,
+            organizationId: settlement.organizationId,
             occurredAt: new Date(2026, 0, 15),
         });
 
@@ -155,21 +161,206 @@ describe('SettlementExporter', () => {
         expect(totals).toContainEqual({
             invoicedBy: PaymentProvider.Mollie,
             invoiceId: 'inv_123',
+            stamped: true,
+            isSellingOrganization: false,
             transactionFees: 30_00,
             serviceFees: 0,
             accountFees: 0,
             vat: 6_30,
         });
 
-        // The deducted application fees on the platform's monthly fee invoice, as billed
-        // (positive) amounts
+        // The deducted application fees, still waiting for the invoice that bills them: grouped
+        // per month until its number is stamped on them
         expect(totals).toContainEqual({
             invoicedBy: membershipOrganization.name,
             invoiceId: '2026-01',
+            stamped: false,
+            isSellingOrganization: true,
             transactionFees: 50_00,
             serviceFees: 1_00_00,
             accountFees: 0,
             vat: 0,
+        });
+    });
+
+    test('application fees group per invoice once its number is stamped on them', async () => {
+        const { organization, payment, settlement } = await createSettledPayment();
+
+        await SettlementService.upsertCharge({
+            type: SettlementChargeType.ApplicationFeeService,
+            externalId: 'fee_' + uuidv4() + ':ApplicationFeeService',
+            amount: -1_00_00,
+            settlementId: settlement.id,
+            paymentId: payment.id,
+            organizationId: organization.id,
+            providerInvoiceId: '2026042',
+            occurredAt: new Date(2026, 0, 15),
+        });
+
+        const exporter = createExporter(organization);
+        await exporter.build();
+
+        expect(exporter.getProviderInvoiceTotals()).toContainEqual({
+            invoicedBy: membershipOrganization.name,
+            invoiceId: '2026042',
+            stamped: true,
+            isSellingOrganization: true,
+            transactionFees: 0,
+            serviceFees: 1_00_00,
+            accountFees: 0,
+            vat: 0,
+        });
+    });
+
+    describe('the platform invoice check', () => {
+        /**
+         * The fee as the sync stores it: a deduction charge on the payer's payout with the
+         * application fee row that says what we received for it.
+         */
+        const addFeeCharge = async (organization: Organization, settlement: Settlement | null, payment: Payment | null, providerInvoiceId: string | null, { amount = 1_00_00, occurredAt = new Date(2026, 0, 15) } = {}) => {
+            const externalId = 'fee_' + uuidv4();
+            const charge = await SettlementService.upsertCharge({
+                type: SettlementChargeType.ApplicationFeeService,
+                externalId: externalId + ':ApplicationFeeService',
+                amount: -amount,
+                applicationFeeId: externalId,
+                ...(settlement ? { settlementId: settlement.id } : {}),
+                ...(payment ? { paymentId: payment.id } : {}),
+                organizationId: organization.id,
+                ...(providerInvoiceId ? { providerInvoiceId } : {}),
+                occurredAt,
+            });
+
+            const fee = new ApplicationFee();
+            fee.externalId = externalId;
+            fee.type = ApplicationFeeType.Service;
+            fee.amount = amount;
+            fee.organizationId = membershipOrganization.id;
+            fee.payingOrganizationId = organization.id;
+            fee.settlementChargeId = charge.id;
+            fee.occurredAt = occurredAt;
+            await fee.save();
+
+            return fee;
+        };
+
+        /**
+         * The invoice that bills those fees: one balance item for them, paid by one deduction
+         * payment, invoiced next to whatever else the organization owed.
+         */
+        const billFees = async (organization: Organization, fees: ApplicationFee[], number: string, { billed, otherTotal = 0 }: { billed?: number; otherTotal?: number } = {}) => {
+            const total = billed ?? fees.reduce((sum, fee) => sum + fee.amount, 0);
+
+            const balanceItem = new BalanceItem();
+            balanceItem.type = BalanceItemType.ServiceFee;
+            balanceItem.organizationId = membershipOrganization.id;
+            balanceItem.payingOrganizationId = organization.id;
+            balanceItem.unitPrice = total;
+            balanceItem.quantity = 1;
+            balanceItem.status = BalanceItemStatus.Hidden;
+            await balanceItem.save();
+
+            for (const fee of fees) {
+                fee.balanceItemId = balanceItem.id;
+                await fee.save();
+            }
+
+            const invoice = new Invoice();
+            invoice.organizationId = membershipOrganization.id;
+            invoice.payingOrganizationId = organization.id;
+            invoice.number = number;
+            invoice.totalWithVAT = total + otherTotal;
+            await invoice.save();
+
+            const feePayment = new Payment();
+            feePayment.organizationId = membershipOrganization.id;
+            feePayment.payingOrganizationId = organization.id;
+            feePayment.method = PaymentMethod.AccountDeductions;
+            feePayment.provider = PaymentProvider.Stripe;
+            feePayment.status = PaymentStatus.Succeeded;
+            feePayment.price = total;
+            feePayment.invoiceId = invoice.id;
+            await feePayment.save();
+
+            const balanceItemPayment = new BalanceItemPayment();
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = feePayment.id;
+            balanceItemPayment.organizationId = membershipOrganization.id;
+            balanceItemPayment.price = total;
+            await balanceItemPayment.save();
+
+            if (otherTotal !== 0) {
+                const other = new Payment();
+                other.organizationId = membershipOrganization.id;
+                other.payingOrganizationId = organization.id;
+                other.method = PaymentMethod.Transfer;
+                other.status = PaymentStatus.Succeeded;
+                other.price = otherTotal;
+                other.invoiceId = invoice.id;
+                await other.save();
+            }
+
+            return invoice;
+        };
+
+        const buildStatus = async (organization: Organization, invoiceNumber: string) => {
+            const exporter = createExporter(organization);
+            await exporter.build();
+            const totals = exporter.getProviderInvoiceTotals().find(t => t.invoiceId === invoiceNumber)!;
+            return await exporter.getProviderInvoiceStatus(totals);
+        };
+
+        test('an invoice that also bills something else still matches its fees', async () => {
+            const { organization, payment, settlement } = await createSettledPayment();
+            const number = uuidv4();
+            const fee = await addFeeCharge(organization, settlement, payment, number);
+            await billFees(organization, [fee], number, { otherTotal: 250_00_00 });
+
+            expect(await buildStatus(organization, number)).toMatchObject({ check: '✓', outsideExport: 0 });
+        });
+
+        test('an invoice that bills less than was charged does not match', async () => {
+            const { organization, payment, settlement } = await createSettledPayment();
+            const number = uuidv4();
+            const fee = await addFeeCharge(organization, settlement, payment, number, { amount: 1_00_00 });
+            await billFees(organization, [fee], number, { billed: 60_00 });
+
+            expect(await buildStatus(organization, number)).toMatchObject({ check: 'Nog niet (volledig) gefactureerd' });
+        });
+
+        test('charges outside the exported range still count towards the invoice', async () => {
+            const { organization, payment, settlement } = await createSettledPayment();
+            const number = uuidv4();
+            const inRange = await addFeeCharge(organization, settlement, payment, number, { amount: 1_00_00 });
+
+            // A charge of the same invoice in a month this export doesn't cover
+            const outside = await addFeeCharge(organization, null, null, number, { amount: 40_00, occurredAt: new Date(2026, 5, 15) });
+            await billFees(organization, [inRange, outside], number);
+
+            expect(await buildStatus(organization, number)).toMatchObject({ check: '✓', outsideExport: 40_00 });
+        });
+
+        test('fees without an invoice number are not billed yet', async () => {
+            const { organization, payment, settlement } = await createSettledPayment();
+            await addFeeCharge(organization, settlement, payment, null);
+
+            const exporter = createExporter(organization);
+            await exporter.build();
+            const totals = exporter.getProviderInvoiceTotals().find(t => t.isSellingOrganization)!;
+
+            expect(await exporter.getProviderInvoiceStatus(totals)).toMatchObject({
+                check: 'Nog niet (volledig) gefactureerd',
+                outsideExport: null,
+            });
+        });
+
+        test('the provider\'s own invoices carry no verdict', async () => {
+            const { organization } = await createSettledPayment();
+            const exporter = createExporter(organization);
+            await exporter.build();
+            const totals = exporter.getProviderInvoiceTotals().find(t => t.invoiceId === 'inv_123')!;
+
+            expect((await exporter.getProviderInvoiceStatus(totals)).check).toBe('');
         });
     });
 });

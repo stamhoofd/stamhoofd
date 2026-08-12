@@ -2,13 +2,15 @@ import type { CellValue } from '@stamhoofd/excel-writer';
 import { ArchiverWriterAdapter, XlsxBuiltInNumberFormat, XlsxWriter } from '@stamhoofd/excel-writer';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
-import { Invoice, Organization, Payment, StripeAccount } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
+import { BalanceItemPayment, Invoice, Payment } from '@stamhoofd/models';
+import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
-import { PaymentMethod, PaymentProvider as PaymentProviderEnum, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentMethod } from '@stamhoofd/structures';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { Formatter } from '@stamhoofd/utility';
 import { Writable } from 'node:stream';
@@ -17,7 +19,11 @@ import { SettlementService } from '../services/SettlementService.js';
 
 const SETTLEMENT_BATCH_SIZE = 100;
 
-const RECEIVED_FEE_TYPES = [SettlementChargeType.ReceivedApplicationFeeService, SettlementChargeType.ReceivedApplicationFeeTransfer];
+/**
+ * A settlement can hold as many payment lines and charges as it settled payments, so they are
+ * streamed in batches of this size.
+ */
+const ROW_BATCH_SIZE = 500;
 
 function currencyCell(amount: number | null, width?: number): CellValue {
     return {
@@ -55,7 +61,18 @@ const empty = textCell('');
  */
 type ProviderInvoiceTotals = {
     invoicedBy: string;
+
+    /**
+     * The invoice id the charges are stamped with, or a derived month bucket while the invoice
+     * document doesn't exist yet (`stamped` tells them apart).
+     */
     invoiceId: string;
+    stamped: boolean;
+
+    /**
+     * Whether the platform bills this itself, so the invoice behind it is one of ours to check.
+     */
+    isSellingOrganization: boolean;
     transactionFees: number;
     serviceFees: number;
     accountFees: number;
@@ -71,13 +88,11 @@ export class SettlementExporter {
     start: Date;
     end: Date;
     provider: PaymentProvider | null;
-    organizationId: string;
 
     /**
-     * True when the exported organization is the platform membership organization: its export is
-     * the platform-wide one, so the invoicing check covers every organization.
+     * The exported organization: the owner of the exported settlements.
      */
-    platformScope: boolean;
+    organization: Organization;
 
     /**
      * The platform membership organization: the seller of the platform's fee invoices.
@@ -94,18 +109,23 @@ export class SettlementExporter {
      */
     private invoiceTotals = new Map<string, ProviderInvoiceTotals>();
 
-    constructor({ start, end, provider, organizationId, platformScope, sellingOrganization }: { start: Date; end: Date; provider?: PaymentProvider | null; organizationId: string; platformScope?: boolean; sellingOrganization: Organization }) {
+    /**
+     * Whether any exported payout is still waiting for application fees to be invoiced: only then
+     * does that column say anything.
+     */
+    private hasPendingFees = false;
+
+    constructor({ start, end, provider, organization, sellingOrganization }: { start: Date; end: Date; provider?: PaymentProvider | null; organization: Organization; sellingOrganization: Organization }) {
         this.start = start;
         this.end = end;
         this.provider = provider ?? null;
-        this.organizationId = organizationId;
-        this.platformScope = platformScope ?? false;
+        this.organization = organization;
         this.sellingOrganization = sellingOrganization;
     }
 
     private selectSettlements() {
         let query = Settlement.select()
-            .where('organizationId', this.organizationId)
+            .where('organizationId', this.organization.id)
             .where('settledAt', '>=', this.start)
             .where('settledAt', '<=', this.end);
 
@@ -135,13 +155,11 @@ export class SettlementExporter {
         const paymentsSheet = await writer.addSheet('Betalingen');
         const chargesSheet = await writer.addSheet('Kosten');
         const providerInvoicesSheet = await writer.addSheet('Facturen provider');
-        const invoicingCheckSheet = await writer.addSheet('Controle facturatie');
         await writer.ready();
 
         try {
             await this.writeSettlementSheets(writer, { settlementsSheet, paymentsSheet, chargesSheet });
             await this.writeProviderInvoices(writer, providerInvoicesSheet);
-            await this.writeInvoicingCheck(writer, invoicingCheckSheet);
             await writer.close();
         } catch (error) {
             await writer.abort();
@@ -156,6 +174,21 @@ export class SettlementExporter {
      * Sheets 1-3 in one streaming pass over the settlements in range.
      */
     private async writeSettlementSheets(writer: XlsxWriter, sheets: { settlementsSheet: symbol; paymentsSheet: symbol; chargesSheet: symbol }) {
+        // The settlement headers are small (one row per payout) and the batched iterator only
+        // supports id order, so they are collected to sort them; everything that grows with the
+        // number of payments streams per settlement below
+        this.invoiceTotals.clear();
+
+        const settlements: Settlement[] = [];
+        for await (const batch of this.selectSettlements().limit(SETTLEMENT_BATCH_SIZE).allBatched()) {
+            settlements.push(...batch);
+        }
+        settlements.sort((a, b) => a.settledAt.getTime() - b.settledAt.getTime() || a.externalId.localeCompare(b.externalId));
+
+        // Only the organization that charges application fees ever receives any, so for everyone
+        // else the column would be empty
+        this.hasPendingFees = settlements.some(settlement => settlement.pendingFees !== 0);
+
         await writer.addRow(sheets.settlementsSheet, [
             textCell('Provider', 10),
             textCell('Uitbetaling', 30),
@@ -168,7 +201,8 @@ export class SettlementExporter {
             textCell('Gesynchroniseerd', 16),
             textCell('Transacties', 11),
             textCell('Onverklaard', 13),
-            textCell('Check', 12),
+            ...(this.hasPendingFees ? [textCell('Niet-gefactureerde kosten', 22)] : []),
+            textCell('Check', 20),
         ]);
 
         await writer.addRow(sheets.paymentsSheet, [
@@ -179,6 +213,13 @@ export class SettlementExporter {
             textCell('Bedrag', 13),
             textCell('Transactie', 30),
             textCell('Datum', 13),
+            ...(this.organization.meta.invoicesEnabled
+                ? [
+                        textCell('Factuur', 15),
+                        textCell('Factuurdatum', 13),
+                        textCell('Factuurtotaal', 13),
+                    ]
+                : []),
         ]);
 
         await writer.addRow(sheets.chargesSheet, [
@@ -187,42 +228,35 @@ export class SettlementExporter {
             textCell('Bedrag', 13),
             textCell('Beschrijving', 45),
             textCell('Factuur provider', 18),
-            textCell('Periode', 13),
+            textCell('Betaling', 36),
         ]);
 
-        // The settlement headers are small (the heavy line/charge data still streams per batch),
-        // and the batched iterator only supports id order
-        const settlements: Settlement[] = [];
-        for await (const batch of this.selectSettlements().limit(SETTLEMENT_BATCH_SIZE).allBatched()) {
-            settlements.push(...batch);
-        }
-        settlements.sort((a, b) => a.settledAt.getTime() - b.settledAt.getTime() || a.externalId.localeCompare(b.externalId));
-
-        for (let offset = 0; offset < settlements.length; offset += SETTLEMENT_BATCH_SIZE) {
-            const batch = settlements.slice(offset, offset + SETTLEMENT_BATCH_SIZE);
-            const settlementIds = batch.map(s => s.id);
-            const lines = await PaymentSettlement.select().where('settlementId', settlementIds).fetch();
-            const charges = await SettlementCharge.select().where('settlementId', settlementIds).fetch();
-            const payments = lines.length > 0
-                ? await Payment.select().where('id', Formatter.uniqueArray(lines.map(l => l.paymentId))).fetch()
-                : [];
-
-            for (const settlement of batch) {
-                const settlementLines = lines.filter(l => l.settlementId === settlement.id);
-                const settlementCharges = charges.filter(c => c.settlementId === settlement.id);
-                await this.writeSettlement(writer, sheets, settlement, settlementLines, settlementCharges, payments);
-                this.callback?.();
-            }
+        for (const settlement of settlements) {
+            await this.writeSettlement(writer, sheets, settlement);
+            this.callback?.();
         }
     }
 
-    private async writeSettlement(writer: XlsxWriter, sheets: { settlementsSheet: symbol; paymentsSheet: symbol; chargesSheet: symbol }, settlement: Settlement, lines: PaymentSettlement[], charges: SettlementCharge[], payments: Payment[]) {
-        const linesTotal = lines.reduce((total, line) => total + line.amount, 0);
-        const chargesTotal = charges.reduce((total, charge) => total + charge.amount, 0);
-        const unexplained = settlement.amount - linesTotal - chargesTotal;
+    /**
+     * The verdict of one payout: what it paid out has to be explained by its payments and its
+     * costs. Fees we received but haven't invoiced yet have no payment line of their own, so they
+     * explain their part of the difference until the invoicer creates one — that is missing data,
+     * not a mismatch, and it says so.
+     */
+    static getSettlementCheck(settlement: Settlement, { linesTotal, chargesTotal }: { linesTotal: number; chargesTotal: number }): string {
+        if (settlement.amount - linesTotal - chargesTotal - settlement.pendingFees !== 0) {
+            return 'Ontbrekende gegevens';
+        }
+        if (settlement.pendingFees !== 0) {
+            return 'Kosten nog niet gefactureerd';
+        }
+        return '✓';
+    }
 
-        // The payout amount must be explained by its payments and charges:
-        // amount = totaal betalingen + totaal kosten
+    private async writeSettlement(writer: XlsxWriter, sheets: { settlementsSheet: symbol; paymentsSheet: symbol; chargesSheet: symbol }, settlement: Settlement) {
+        const linesTotal = await this.writePaymentLines(writer, sheets.paymentsSheet, settlement);
+        const chargesTotal = await this.writeCharges(writer, sheets.chargesSheet, settlement);
+
         await writer.addRow(sheets.settlementsSheet, [
             textCell(settlement.provider),
             textCell(settlement.externalId),
@@ -233,55 +267,106 @@ export class SettlementExporter {
             currencyCell(chargesTotal),
             textCell(settlement.status),
             textCell(settlement.syncedAt ? '✓' : 'Niet gesynchroniseerd'),
-            textCell(settlement.transactionCount.toString()),
+            { value: settlement.transactionCount },
             currencyCell(settlement.unexplainedAmount),
-            textCell(unexplained === 0 ? '✓' : 'Klopt niet!'),
+            ...(this.hasPendingFees ? [currencyCell(settlement.pendingFees)] : []),
+            textCell(SettlementExporter.getSettlementCheck(settlement, { linesTotal, chargesTotal })),
         ]);
+    }
 
-        for (const [index, line] of lines.entries()) {
-            const payment = payments.find(p => p.id === line.paymentId);
-            await writer.addRow(sheets.paymentsSheet, [
-                index > 0 ? empty : textCell(settlement.externalId),
-                index > 0 ? empty : dateCell(settlement.settledAt),
-                textCell(line.paymentId),
-                textCell(payment?.type ?? ''),
-                currencyCell(line.amount),
-                textCell(line.externalId),
-                dateCell(line.occurredAt),
-            ]);
+    /**
+     * Streams the payment lines of one settlement, and returns their total.
+     */
+    private async writePaymentLines(writer: XlsxWriter, sheet: symbol, settlement: Settlement): Promise<number> {
+        let total = 0;
+        let index = 0;
+
+        for await (const lines of PaymentSettlement.select()
+            .where('settlementId', settlement.id)
+            .limit(ROW_BATCH_SIZE)
+            .allBatched()) {
+            const payments = await Payment.select()
+                .where('id', Formatter.uniqueArray(lines.map(l => l.paymentId)))
+                .fetch();
+            const invoiceIds = this.organization.meta.invoicesEnabled
+                ? Formatter.uniqueArray(payments.map(p => p.invoiceId).filter((id): id is string => id !== null))
+                : [];
+            const invoices = invoiceIds.length > 0
+                ? await Invoice.select().where('id', invoiceIds).fetch()
+                : [];
+
+            for (const line of lines) {
+                const payment = payments.find(p => p.id === line.paymentId);
+                const invoice = payment?.invoiceId ? invoices.find(i => i.id === payment.invoiceId) : undefined;
+                await writer.addRow(sheet, [
+                    index > 0 ? empty : textCell(settlement.externalId),
+                    index > 0 ? empty : dateCell(settlement.settledAt),
+                    textCell(line.paymentId),
+                    textCell(payment?.type ?? ''),
+                    currencyCell(line.amount),
+                    textCell(line.externalId ?? ''),
+                    dateCell(line.occurredAt),
+                    ...(this.organization.meta.invoicesEnabled
+                        ? [
+                                textCell(invoice?.number ?? ''),
+                                dateCell(invoice?.invoicedAt ?? null),
+                                currencyCell(invoice ? invoice.totalWithVAT : null),
+                            ]
+                        : []),
+                ]);
+                total += line.amount;
+                index += 1;
+            }
         }
 
-        if (lines.length > 0) {
-            await writer.addRow(sheets.paymentsSheet, []);
+        if (index > 0) {
+            await writer.addRow(sheet, []);
+        }
+        return total;
+    }
+
+    /**
+     * Streams the charges of one settlement (also accumulating the provider invoice totals), and
+     * returns their total.
+     */
+    private async writeCharges(writer: XlsxWriter, sheet: symbol, settlement: Settlement): Promise<number> {
+        let total = 0;
+        let index = 0;
+
+        for await (const charges of SettlementCharge.select()
+            .where('settlementId', settlement.id)
+            .limit(ROW_BATCH_SIZE)
+            .allBatched()) {
+            for (const charge of charges) {
+                await writer.addRow(sheet, [
+                    index > 0 ? empty : textCell(settlement.externalId),
+                    textCell(charge.type),
+                    currencyCell(charge.amount),
+                    textCell(charge.description),
+                    textCell(charge.providerInvoiceId ?? ''),
+                    textCell(charge.paymentId ?? ''),
+                ]);
+
+                this.addToProviderInvoice(settlement, charge);
+                total += charge.amount;
+                index += 1;
+            }
         }
 
-        for (const [index, charge] of charges.entries()) {
-            await writer.addRow(sheets.chargesSheet, [
-                index > 0 ? empty : textCell(settlement.externalId),
-                textCell(charge.type),
-                currencyCell(charge.amount),
-                textCell(charge.description),
-                textCell(charge.providerInvoiceId ?? ''),
-                dateCell(SettlementService.getPeriodStart(charge.occurredAt)),
-            ]);
-
-            this.addToProviderInvoice(settlement, charge);
+        if (index > 0) {
+            await writer.addRow(sheet, []);
         }
-
-        if (charges.length > 0) {
-            await writer.addRow(sheets.chargesSheet, []);
-        }
+        return total;
     }
 
     /**
      * The invoice that bills a charge to the exported organization. Three parties send such
      * invoices: the provider of the settlement (Mollie, and Stripe both for our platform account
      * and for Standard accounts) bills its own fees and their VAT; the platform membership
-     * organization bills the application fees it deducted, with its monthly fee invoice. Every
-     * other charge type is money movement (transfers, reserves, disputes, the received mirror side
-     * of application fees): no invoice bills those.
+     * organization bills the application fees it deducted. Every other charge type is money
+     * movement (transfers, reserves, disputes): no invoice bills those.
      */
-    private getInvoicingParty(settlement: Settlement, charge: SettlementCharge): { invoicedBy: string; invoiceId: string } | null {
+    private getInvoicingParty(settlement: Settlement, charge: SettlementCharge): { invoicedBy: string; invoiceId: string; stamped: boolean; isSellingOrganization: boolean } | null {
         switch (charge.type) {
             case SettlementChargeType.ProviderTransactionFee:
             case SettlementChargeType.ProviderAccountFee:
@@ -291,22 +376,23 @@ export class SettlementExporter {
                 return {
                     invoicedBy: settlement.provider,
                     invoiceId: charge.providerInvoiceId ?? (settlement.provider.toLowerCase() + '-' + SettlementService.getPeriodKey(charge.occurredAt)),
+                    stamped: charge.providerInvoiceId !== null,
+                    isSellingOrganization: false,
                 };
 
             case SettlementChargeType.ApplicationFeeService:
             case SettlementChargeType.ApplicationFeeTransfer:
-                // Billed per month by the platform's fee invoicers: the month bucket is the invoice
+                // The Stamhoofd invoice number stamped when the fee payment was invoiced, or the
+                // month bucket while that invoice doesn't exist yet
                 return {
                     invoicedBy: this.sellingOrganization.name,
-                    invoiceId: SettlementService.getPeriodKey(charge.occurredAt),
+                    invoiceId: charge.providerInvoiceId ?? SettlementService.getPeriodKey(charge.occurredAt),
+                    stamped: charge.providerInvoiceId !== null,
+                    isSellingOrganization: true,
                 };
 
-            case SettlementChargeType.ReceivedApplicationFeeService:
-            case SettlementChargeType.ReceivedApplicationFeeTransfer:
-            case SettlementChargeType.ApplicationFeeRefund:
-            case SettlementChargeType.Transfer:
-            case SettlementChargeType.TransferReversal:
             case SettlementChargeType.Reserve:
+            case SettlementChargeType.BalanceMovement:
             case SettlementChargeType.Adjustment:
                 return null;
         }
@@ -354,6 +440,21 @@ export class SettlementExporter {
         return [...this.invoiceTotals.values()].sort((a, b) => a.invoicedBy.localeCompare(b.invoicedBy) || a.invoiceId.localeCompare(b.invoiceId));
     }
 
+    /**
+     * What the sheet adds to an invoice row: the charges of the same invoice that fall outside the
+     * exported range, and whether the invoice bills exactly what was charged.
+     */
+    async getProviderInvoiceStatus(totals: ProviderInvoiceTotals): Promise<{ total: number; outsideExport: number | null; check: string }> {
+        const total = totals.transactionFees + totals.serviceFees + totals.accountFees + totals.vat;
+        const outsideExport = totals.stamped ? (await this.getInvoiceChargesTotal(totals.invoiceId)) - total : null;
+
+        return {
+            total,
+            outsideExport,
+            check: await this.getProviderInvoiceCheck(totals, total + (outsideExport ?? 0)),
+        };
+    }
+
     private async writeProviderInvoices(writer: XlsxWriter, sheet: symbol) {
         await writer.addRow(sheet, [
             textCell('Gefactureerd door', 17),
@@ -363,10 +464,12 @@ export class SettlementExporter {
             textCell('Accountkosten', 16),
             textCell('BTW', 13),
             textCell('Totaal', 13),
+            textCell('Kosten buiten dit overzicht', 22),
+            textCell('Check', 28),
         ]);
 
         for (const totals of this.getProviderInvoiceTotals()) {
-            const total = totals.transactionFees + totals.serviceFees + totals.accountFees + totals.vat;
+            const { total, outsideExport, check } = await this.getProviderInvoiceStatus(totals);
 
             await writer.addRow(sheet, [
                 textCell(totals.invoicedBy),
@@ -376,106 +479,83 @@ export class SettlementExporter {
                 currencyCell(totals.accountFees),
                 currencyCell(totals.vat),
                 currencyCell(total),
+                currencyCell(outsideExport),
+                textCell(check),
             ]);
         }
     }
 
     /**
-     * One row per (organization, month): the stored Received fee rows next to the AccountDeductions
-     * payment the old invoicer created. Every row must show a difference of 0,00: that is the
-     * go/no-go check for the invoicer switch. The platform export covers every organization; an
-     * organization's own export only shows its own rows.
+     * Everything the invoice bills the exported organization, also outside the exported range:
+     * comparing a document against a partial sum would always mismatch. Scoped to the organization,
+     * because a provider invoice id like `stripe-2026-01` groups the charges of every organization.
      */
-    private async writeInvoicingCheck(writer: XlsxWriter, sheet: symbol) {
-        await writer.addRow(sheet, [
-            textCell('Stripe account', 36),
-            textCell('Maand', 13),
-            textCell('Opgeslagen kosten', 17),
-            textCell('Aangerekend', 13),
-            textCell('Verschil', 13),
-            textCell('Check', 12),
-            textCell('Factuur', 25),
-        ]);
+    private async getInvoiceChargesTotal(providerInvoiceId: string): Promise<number> {
+        const sum = await SettlementCharge.select()
+            .where('providerInvoiceId', providerInvoiceId)
+            .where('organizationId', this.organization.id)
+            .sum(SQL.column('amount')) ?? 0;
 
-        // Group the stored Received rows per (account, month of the fee's created date): the same
-        // bucket the invoicer bills by. Extended to whole months, or a range ending mid-month
-        // would compare a partial sum against the full month's fee payment
-        const rangeEnd = new Date(this.end.getFullYear(), this.end.getMonth() + 1, 1);
-        const groups = new Map<string, { stripeAccountId: string | null; periodStart: Date; total: number }>();
-        let receivedQuery = SettlementCharge.select()
-            .where('type', RECEIVED_FEE_TYPES)
-            .where('occurredAt', '>=', SettlementService.getPeriodStart(this.start))
-            .where('occurredAt', '<', rangeEnd);
-        if (!this.platformScope) {
-            receivedQuery = receivedQuery.where('organizationId', this.organizationId);
-        }
-        for await (const rows of receivedQuery
-            .limit(SETTLEMENT_BATCH_SIZE)
-            .allBatched()) {
-            for (const row of rows) {
-                const periodStart = SettlementService.getPeriodStart(row.occurredAt);
-                const key = (row.stripeAccountId ?? 'unknown') + ':' + periodStart.getTime();
-                const group = groups.get(key) ?? { stripeAccountId: row.stripeAccountId, periodStart, total: 0 };
-                group.total += row.amount;
-                groups.set(key, group);
-            }
-        }
-
-        const sorted = [...groups.values()].sort((a, b) => a.periodStart.getTime() - b.periodStart.getTime() || (a.stripeAccountId ?? '').localeCompare(b.stripeAccountId ?? ''));
-
-        for (const group of sorted) {
-            const { payment, invoiceNumber, organizationName } = await this.findFeePayment(group.stripeAccountId, group.periodStart);
-            const charged = payment?.price ?? 0;
-            const difference = group.total - charged;
-
-            await writer.addRow(sheet, [
-                textCell(organizationName ?? (group.stripeAccountId ?? 'Onbekend')),
-                dateCell(group.periodStart),
-                currencyCell(group.total),
-                currencyCell(payment ? charged : null),
-                currencyCell(payment ? difference : null),
-                // A month the invoicer didn't reach yet is not a mismatch: it is still waiting
-                textCell(payment ? (difference === 0 ? '✓' : 'Klopt niet!') : 'Nog niet gefactureerd'),
-                textCell(payment ? (invoiceNumber ?? 'Betaling nog niet gefactureerd') : ''),
-            ]);
-        }
+        // Charges reduce the payout (negative); the invoice bills them as positive amounts
+        return -sum;
     }
 
-    private async findFeePayment(stripeAccountId: string | null, periodStart: Date): Promise<{ payment: Payment | null; invoiceNumber: string | null; organizationName: string | null }> {
-        if (!stripeAccountId) {
-            return { payment: null, invoiceNumber: null, organizationName: null };
+    /**
+     * Whether the invoice bills exactly these charges. Only verifiable for the platform's own fee
+     * invoices: the provider's documents (Stripe, Mollie) aren't stored locally.
+     *
+     * An invoice also bills everything else the organization owed that month (memberships,
+     * packages), so it is not the invoice total that has to match, but the part of it that bills
+     * these fees: the balance items the fees themselves point at.
+     */
+    private async getProviderInvoiceCheck(totals: ProviderInvoiceTotals, fullTotal: number): Promise<string> {
+        if (!totals.isSellingOrganization) {
+            return '';
         }
 
-        const stripeAccount = await StripeAccount.getByID(stripeAccountId);
-        if (!stripeAccount) {
-            return { payment: null, invoiceNumber: null, organizationName: null };
+        if (!totals.stamped) {
+            return 'Nog niet (volledig) gefactureerd';
         }
 
-        const organization = await Organization.getByID(stripeAccount.organizationId);
-        const organizationName = organization ? organization.name + ' (' + stripeAccount.accountId + ')' : null;
-
-        const reference = 'stripe-fees-' + Formatter.dateIso(periodStart);
-
-        // Same query as the invoicer's idempotency check (the OR NULL covers legacy payments)
-        const payment = await Payment.select()
+        const invoice = await Invoice.select()
             .where('organizationId', this.sellingOrganization.id)
-            .where('payingOrganizationId', stripeAccount.organizationId)
-            .where(
-                SQL.where('stripeAccountId', stripeAccount.id)
-                    .or('stripeAccountId', null),
-            )
-            .where('reference', reference)
-            .where('method', PaymentMethod.AccountDeductions)
-            .where('provider', PaymentProviderEnum.Stripe)
-            .where('status', PaymentStatus.Succeeded)
+            .where('number', totals.invoiceId)
             .first(false);
 
-        if (!payment) {
-            return { payment: null, invoiceNumber: null, organizationName };
+        if (!invoice) {
+            return 'Nog niet (volledig) gefactureerd';
         }
 
-        const invoice = payment.invoiceId ? await Invoice.getByID(payment.invoiceId) : null;
-        return { payment, invoiceNumber: invoice?.number !== null && invoice?.number !== undefined ? ('Factuur ' + invoice.number) : null, organizationName };
+        // What this invoice bills for exactly these fees: their balance items, as far as this
+        // invoice's payments settled them
+        const charges = await SettlementCharge.select()
+            .where('providerInvoiceId', totals.invoiceId)
+            .where('organizationId', this.organization.id)
+            .fetch();
+        const fees = charges.length > 0
+            ? await ApplicationFee.select().where('settlementChargeId', charges.map(c => c.id)).fetch()
+            : [];
+        const balanceItemIds = Formatter.uniqueArray(fees.map(fee => fee.balanceItemId).filter((id): id is string => id !== null));
+        if (balanceItemIds.length === 0) {
+            return 'Nog niet (volledig) gefactureerd';
+        }
+
+        const invoicedPayments = await Payment.select()
+            .where('invoiceId', invoice.id)
+            .fetch();
+        if (invoicedPayments.length === 0) {
+            return 'Nog niet (volledig) gefactureerd';
+        }
+
+        const invoicedFees = await BalanceItemPayment.select()
+            .where('balanceItemId', balanceItemIds)
+            .where('paymentId', invoicedPayments.map(p => p.id))
+            .sum(SQL.column('price')) ?? 0;
+
+        if (invoicedFees !== fullTotal) {
+            return 'Nog niet (volledig) gefactureerd';
+        }
+        return '✓';
     }
 
     async sendEmail({ to }: { to: EmailInterfaceRecipient[] }): Promise<void> {

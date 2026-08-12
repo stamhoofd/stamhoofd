@@ -23,6 +23,13 @@ export class PaymentSettlement extends QueryableModel {
     paymentId: string;
 
     /**
+     * Owner of the payout, which is also the organization of the payment: a payment is only ever
+     * settled by the payouts of its own organization.
+     */
+    @column({ type: 'string' })
+    organizationId: string;
+
+    /**
      * Signed effect of this payment on the payout amount.
      */
     @column({ type: 'integer' })
@@ -30,9 +37,10 @@ export class PaymentSettlement extends QueryableModel {
 
     /**
      * The provider's id for this entry (Stripe txn_… / Mollie entry id), unique per settlement.
+     * NULL for the lines derived from application fees: those don't exist at the provider.
      */
-    @column({ type: 'string' })
-    externalId: string;
+    @column({ type: 'string', nullable: true })
+    externalId: string | null = null;
 
     /**
      * When the provider moved the money (not the same as payments.paidAt).

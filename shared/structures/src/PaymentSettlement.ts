@@ -103,25 +103,8 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
         return payment.status === PaymentStatus.Failed ? getFailedPaymentGroup() : getPendingPaymentGroup();
     }
 
-    if (expectsSettlement(payment)) {
-        return payment.settlement
-            ? getSettledGroup(payment.provider, payment.settlement)
-            : new PaymentSettlementGroup({
-                id: 'not-settled',
-                name: $t('%Zjn'),
-                description: $t('%Zjd'),
-                icon: 'bank',
-                asideIcon: 'clock',
-                filter: {
-                    $and: [
-                        { status: PaymentStatus.Succeeded },
-                        { provider: { $in: SETTLING_PAYMENT_PROVIDERS } },
-                        { settlement: { settledAt: null } },
-                    ],
-                },
-            });
-    }
-
+    // A deduction moves money between two balances instead of arriving from a provider, so it is
+    // grouped on its own even when it carries the provider it was deducted from
     if (payment.method === PaymentMethod.AccountDeductions) {
         return new PaymentSettlementGroup({
             id: ACCOUNT_DEDUCTIONS_ID,
@@ -135,6 +118,26 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
                 ],
             },
         });
+    }
+
+    if (expectsSettlement(payment)) {
+        return payment.settlement
+            ? getSettledGroup(payment.provider, payment.settlement)
+            : new PaymentSettlementGroup({
+                id: 'not-settled',
+                name: $t('%Zjn'),
+                description: $t('%Zjd'),
+                icon: 'bank',
+                asideIcon: 'clock',
+                filter: {
+                    $and: [
+                        { status: PaymentStatus.Succeeded },
+                        { method: { $neq: PaymentMethod.AccountDeductions } },
+                        { provider: { $in: SETTLING_PAYMENT_PROVIDERS } },
+                        { settlement: { settledAt: null } },
+                    ],
+                },
+            });
     }
 
     if (isOnlinePayment(payment)) {
@@ -214,6 +217,7 @@ function getSettledGroup(provider: PaymentProvider | null, settlement: Settlemen
             $and: [
                 // A payment that failed can still carry the payout it was meant to be part of
                 { status: PaymentStatus.Succeeded },
+                { method: { $neq: PaymentMethod.AccountDeductions } },
                 { provider },
                 { settlement: { reference: settlement.reference } },
                 { settlement: { settledAt: settlement.settledAt } },
