@@ -115,6 +115,12 @@ export class SettlementExporter {
      */
     private hasPendingFees = false;
 
+    /**
+     * Same for fees of organizations that no longer exist: they are only ever received by the
+     * platform, and even there they are the exception.
+     */
+    private hasUncollectibleFees = false;
+
     constructor({ start, end, provider, organization, sellingOrganization }: { start: Date; end: Date; provider?: PaymentProvider | null; organization: Organization; sellingOrganization: Organization }) {
         this.start = start;
         this.end = end;
@@ -186,8 +192,9 @@ export class SettlementExporter {
         settlements.sort((a, b) => a.settledAt.getTime() - b.settledAt.getTime() || a.externalId.localeCompare(b.externalId));
 
         // Only the organization that charges application fees ever receives any, so for everyone
-        // else the column would be empty
+        // else the columns would be empty
         this.hasPendingFees = settlements.some(settlement => settlement.pendingFees !== 0);
+        this.hasUncollectibleFees = settlements.some(settlement => settlement.uncollectibleFees !== 0);
 
         await writer.addRow(sheets.settlementsSheet, [
             textCell('Provider', 10),
@@ -202,6 +209,7 @@ export class SettlementExporter {
             textCell('Transacties', 11),
             textCell('Onverklaard', 13),
             ...(this.hasPendingFees ? [textCell('Niet-gefactureerde kosten', 22)] : []),
+            ...(this.hasUncollectibleFees ? [textCell('Niet-aanrekenbare kosten', 22)] : []),
             textCell('Check', 20),
         ]);
 
@@ -241,10 +249,11 @@ export class SettlementExporter {
      * The verdict of one payout: what it paid out has to be explained by its payments and its
      * costs. Fees we received but haven't invoiced yet have no payment line of their own, so they
      * explain their part of the difference until the invoicer creates one — that is missing data,
-     * not a mismatch, and it says so.
+     * not a mismatch, and it says so. Fees of organizations that no longer exist explain their part
+     * the same way, but never get a payment line: they are not waiting for anything.
      */
     static getSettlementCheck(settlement: Settlement, { linesTotal, chargesTotal }: { linesTotal: number; chargesTotal: number }): string {
-        if (settlement.amount - linesTotal - chargesTotal - settlement.pendingFees !== 0) {
+        if (settlement.amount - linesTotal - chargesTotal - settlement.pendingFees - settlement.uncollectibleFees !== 0) {
             return 'Ontbrekende gegevens';
         }
         if (settlement.pendingFees !== 0) {
@@ -270,6 +279,7 @@ export class SettlementExporter {
             { value: settlement.transactionCount },
             currencyCell(settlement.unexplainedAmount),
             ...(this.hasPendingFees ? [currencyCell(settlement.pendingFees)] : []),
+            ...(this.hasUncollectibleFees ? [currencyCell(settlement.uncollectibleFees)] : []),
             textCell(SettlementExporter.getSettlementCheck(settlement, { linesTotal, chargesTotal })),
         ]);
     }

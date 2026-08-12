@@ -27,7 +27,7 @@ export class StripeAccount extends QueryableModel {
     meta = StripeMetaData.create({});
 
     @column({ type: 'string' })
-    status: 'active' | 'deleted' = 'active';
+    status: 'active' | 'deleted' | 'inaccessible' = 'active';
 
     @column({
         type: 'datetime', beforeSave(old?: any) {

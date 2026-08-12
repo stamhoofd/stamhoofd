@@ -96,7 +96,7 @@ export async function reportProblemSettlements() {
     const total = new Set([...unexplained, ...unsynced, ...stalePendingFees].map(s => s.id)).size;
 
     const describe = (settlement: Settlement) => {
-        return settlement.provider + ' ' + settlement.externalId + ' (' + Formatter.dateIso(settlement.settledAt) + ', ' + Formatter.price(settlement.unexplainedAmount) + ' onverklaard, ' + Formatter.price(settlement.pendingFees) + ' niet-gefactureerde kosten, ' + settlement.syncFailureCount + ' mislukte pogingen)';
+        return settlement.provider + ' ' + settlement.externalId + ' (' + Formatter.dateIso(settlement.settledAt) + ', ' + Formatter.price(settlement.unexplainedAmount) + ' onverklaard, ' + Formatter.price(settlement.pendingFees) + ' niet-gefactureerde kosten, ' + Formatter.price(settlement.uncollectibleFees) + ' niet-aanrekenbare kosten, ' + settlement.syncFailureCount + ' mislukte pogingen)';
     };
 
     Email.sendWebmaster({

@@ -9,6 +9,7 @@ import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@sta
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
+import { v4 as uuidv4 } from 'uuid';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import type { StripeObject } from '../../tests/helpers/StripeMocker.js';
@@ -45,6 +46,7 @@ describe('StripeSettlementSync', () => {
 
     beforeEach(() => {
         stripeMocker.clear();
+        StripeSettlementSync.resetWarnings();
     });
 
     const createSync = () => new StripeSettlementSync({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
@@ -608,6 +610,173 @@ describe('StripeSettlementSync', () => {
         const after = await getSettlement(payout);
         expect(after.unexplainedAmount).toBe(0);
         expect(after.pendingFees).toBe(0);
+    });
+
+    describe('Payers we can no longer reach', () => {
+        /**
+         * A platform payout that only receives one application fee, plus the payout transaction.
+         * The metadata defaults to a payment that no longer exists.
+         */
+        const createFeePayout = (account: string, metadata: Record<string, string> = {}) => {
+            const payout = stripeMocker.createPayout({ amount: 250, arrivalDate });
+            const fee = stripeMocker.createApplicationFee({
+                amount: 250,
+                account,
+                originatingTransaction: stripeMocker.createChargeObject({ metadata: { payment: uuidv4(), serviceFee: '30', ...metadata } }),
+            });
+            stripeMocker.createBalanceTransaction({ type: 'application_fee', amount: 250, created, payout: payout.id, source: fee });
+            stripeMocker.createBalanceTransaction({ type: 'payout', amount: -250, created, payout: payout.id, source: null });
+            return { payout, fee };
+        };
+
+        test('a fee of an organization that no longer exists is stored as income without a payer', async () => {
+            const { payout, fee } = createFeePayout(stripeMocker.createId('acct'), { organization: uuidv4() });
+
+            expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+            const settlement = await getSettlement(payout);
+            const fees = await ApplicationFee.select().where('externalId', fee.id).fetch();
+            expect(fees).toHaveLength(2);
+            for (const row of fees) {
+                expect(row.organizationId).toBe(membershipOrganization.id);
+                expect(row.settlementId).toBe(settlement.id);
+                expect(row.payingOrganizationId).toBeNull();
+                expect(row.payingStripeAccountId).toBeNull();
+                expect(row.payingPaymentId).toBeNull();
+                expect(row.settlementChargeId).toBeNull();
+            }
+
+            // There is no payout of theirs left to deduct it from, but ours still adds up
+            expect(await SettlementCharge.select().where('applicationFeeId', fee.id).count()).toBe(0);
+            expect(settlement.unexplainedAmount).toBe(0);
+            expect(settlement.pendingFees).toBe(0);
+            expect(settlement.uncollectibleFees).toBe(2_50_00);
+        });
+
+        test('a fee of a Stripe account we no longer have keeps the payer of its payment', async () => {
+            const payment = await createPayment();
+            const { payout, fee } = createFeePayout(stripeMocker.createId('acct'), { payment: payment.id });
+
+            expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+            // The cost is still attributed to the organization, so its own export shows it
+            const charges = await SettlementCharge.select().where('applicationFeeId', fee.id).fetch();
+            expect(charges).toHaveLength(2);
+            for (const charge of charges) {
+                expect(charge.organizationId).toBe(organization.id);
+                expect(charge.stripeAccountId).toBeNull();
+                expect(charge.paymentId).toBe(payment.id);
+            }
+
+            const fees = await ApplicationFee.select().where('externalId', fee.id).fetch();
+            for (const row of fees) {
+                expect(row.payingOrganizationId).toBe(organization.id);
+                expect(row.payingStripeAccountId).toBeNull();
+                expect(row.payingPaymentId).toBe(payment.id);
+                expect(row.settlementChargeId).not.toBeNull();
+            }
+
+            // Without the account it was deducted from, the invoicer can't bill it per account
+            const settlement = await getSettlement(payout);
+            expect(settlement.pendingFees).toBe(0);
+            expect(settlement.uncollectibleFees).toBe(2_50_00);
+            expect(settlement.unexplainedAmount).toBe(0);
+        });
+
+        test('a fee whose payment is gone falls back to the organization in our charge metadata', async () => {
+            const { payout, fee } = createFeePayout(stripeMocker.createId('acct'), { organization: organization.id });
+
+            expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+            const charges = await SettlementCharge.select().where('applicationFeeId', fee.id).fetch();
+            expect(charges).toHaveLength(2);
+            for (const charge of charges) {
+                expect(charge.organizationId).toBe(organization.id);
+                expect(charge.paymentId).toBeNull();
+            }
+
+            const fees = await ApplicationFee.select().where('externalId', fee.id).fetch();
+            for (const row of fees) {
+                expect(row.payingOrganizationId).toBe(organization.id);
+                expect(row.payingPaymentId).toBeNull();
+            }
+
+            expect((await getSettlement(payout)).uncollectibleFees).toBe(2_50_00);
+        });
+
+        test('every unattributable account is reported once, not once per fee', async () => {
+            const unknownAccount = stripeMocker.createId('acct');
+            createFeePayout(unknownAccount, { organization: uuidv4() });
+            createFeePayout(unknownAccount, { organization: uuidv4() });
+
+            await WebmasterReport.group('Onaanrekenbare applicatiekosten', async () => {
+                expect(await createSync().syncPayouts({ start })).toEqual({ synced: 2, skipped: 0, failed: 0 });
+            });
+
+            const emails = (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith('Onaanrekenbare applicatiekosten'));
+            expect(emails).toHaveLength(1);
+            expect(emails[0].html).toContain(unknownAccount);
+            expect(emails[0].subject).toContain('1 probleem');
+        });
+
+        test('a deleted Stripe account keeps its organization, its account and its payment', async () => {
+            const deletedOrganization = await new OrganizationFactory({}).create();
+            const deletedAccount = await stripeMocker.createStripeAccount(deletedOrganization.id);
+            deletedAccount.status = 'deleted';
+            await deletedAccount.save();
+
+            // Deleting a Stripe account is a soft delete: the organization and its payments stay
+            const payment = new Payment();
+            payment.organizationId = deletedOrganization.id;
+            payment.stripeAccountId = deletedAccount.id;
+            payment.method = PaymentMethod.Bancontact;
+            payment.provider = PaymentProvider.Stripe;
+            payment.status = PaymentStatus.Succeeded;
+            payment.type = PaymentType.Payment;
+            payment.price = 100_00_00;
+            payment.paidAt = created;
+            await payment.save();
+
+            const { payout, fee } = createFeePayout(deletedAccount.accountId, { payment: payment.id });
+
+            expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+
+            const charges = await SettlementCharge.select().where('applicationFeeId', fee.id).fetch();
+            expect(charges).toHaveLength(2);
+            for (const charge of charges) {
+                expect(charge.organizationId).toBe(deletedOrganization.id);
+                expect(charge.stripeAccountId).toBe(deletedAccount.id);
+                expect(charge.paymentId).toBe(payment.id);
+            }
+
+            const fees = await ApplicationFee.select().where('externalId', fee.id).fetch();
+            for (const row of fees) {
+                expect(row.payingOrganizationId).toBe(deletedOrganization.id);
+                expect(row.payingStripeAccountId).toBe(deletedAccount.id);
+                expect(row.payingPaymentId).toBe(payment.id);
+            }
+
+            // Nothing was lost, so it is billed like any other month
+            const settlement = await getSettlement(payout);
+            expect(settlement.pendingFees).toBe(2_50_00);
+            expect(settlement.uncollectibleFees).toBe(0);
+        });
+
+        test('an account still in our database keeps failing the payout on an unresolvable payment', async () => {
+            const deletedAccount = await stripeMocker.createStripeAccount(organization.id);
+            deletedAccount.status = 'deleted';
+            await deletedAccount.save();
+
+            // A deleted account is no reason to stop checking: an organization may not attach
+            // another organization's payment to its fees by deleting its Stripe account first
+            for (const account of [stripeAccount, deletedAccount]) {
+                const { payout } = createFeePayout(account.accountId);
+
+                expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+                expect((await getSettlement(payout)).syncedAt).toBeNull();
+                stripeMocker.clear();
+            }
+        });
     });
 
     describe('Connected accounts', () => {

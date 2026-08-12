@@ -105,8 +105,8 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
             } catch (e) {
                 if (e !== null && typeof e === 'object' && 'type' in e && e.type === 'StripePermissionError' && e.message.includes(account.accountId) && e.message.includes('does not have access to account')) {
                     // Stripe account no longer in active use
-                    console.error(e, 'marking stripe account', account.id, account.accountId, 'as deleted because we do not seem to have access to it any longer');
-                    account.status = 'deleted';
+                    console.error(e, 'marking stripe account', account.id, account.accountId, 'as inaccessible because we do not seem to have access to it any longer');
+                    account.status = 'inaccessible';
                     await account.save();
                     totals.skipped += 1;
                     continue;

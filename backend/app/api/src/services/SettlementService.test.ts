@@ -13,9 +13,11 @@ import { ReportedRows, SettlementService } from './SettlementService.js';
 
 describe('SettlementService', () => {
     let organization: Organization;
+    let stripeAccount: StripeAccount;
 
     beforeAll(async () => {
         organization = await new OrganizationFactory({}).create();
+        stripeAccount = await createStripeAccount();
     });
 
     async function createPayment(price = 50_00_00, method = PaymentMethod.Bancontact, organizationId = organization.id) {
@@ -30,25 +32,25 @@ describe('SettlementService', () => {
         return payment;
     }
 
-    async function createStripeAccount() {
-        const stripeAccount = new StripeAccount();
-        stripeAccount.organizationId = organization.id;
-        stripeAccount.accountId = 'acct_' + uuidv4();
-        await stripeAccount.save();
-        return stripeAccount;
+    async function createStripeAccount(organizationId = organization.id) {
+        const account = new StripeAccount();
+        account.organizationId = organizationId;
+        account.accountId = 'acct_' + uuidv4();
+        await account.save();
+        return account;
     }
 
     /**
      * A fee with its deduction charge, as the sync stores them.
      */
-    async function createApplicationFee({ amount = 1_00_00, type = ApplicationFeeType.Service, settlement = null as SettlementModel | null, balanceItemId = null as string | null, occurredAt = new Date(2026, 0, 14) } = {}) {
+    async function createApplicationFee({ amount = 1_00_00, type = ApplicationFeeType.Service, settlement = null as SettlementModel | null, balanceItemId = null as string | null, occurredAt = new Date(2026, 0, 14), payingOrganizationId = organization.id, payingStripeAccountId = null as string | null } = {}) {
         const externalId = 'fee_' + uuidv4();
         const charge = await SettlementService.upsertCharge({
             type: type === ApplicationFeeType.Service ? SettlementChargeType.ApplicationFeeService : SettlementChargeType.ApplicationFeeTransfer,
             externalId: externalId + ':' + type,
             amount: -amount,
             applicationFeeId: externalId,
-            organizationId: organization.id,
+            organizationId: payingOrganizationId,
             occurredAt,
         });
 
@@ -57,13 +59,30 @@ describe('SettlementService', () => {
         fee.type = type;
         fee.amount = amount;
         fee.organizationId = organization.id;
-        fee.payingOrganizationId = organization.id;
+        fee.payingOrganizationId = payingOrganizationId;
+        fee.payingStripeAccountId = payingStripeAccountId ?? stripeAccount.id;
         fee.settlementChargeId = charge.id;
         fee.settlementId = settlement?.id ?? null;
         fee.balanceItemId = balanceItemId;
         fee.occurredAt = occurredAt;
         await fee.save();
         return { fee, charge };
+    }
+
+    /**
+     * A fee the invoicer will never bill: its payer is gone, so there is no payout of theirs to
+     * deduct it from either.
+     */
+    async function createUncollectibleApplicationFee({ amount = 1_00_00, settlement = null as SettlementModel | null, occurredAt = new Date(2026, 0, 14) } = {}) {
+        const fee = new ApplicationFee();
+        fee.externalId = 'fee_' + uuidv4();
+        fee.type = ApplicationFeeType.Service;
+        fee.amount = amount;
+        fee.organizationId = organization.id;
+        fee.settlementId = settlement?.id ?? null;
+        fee.occurredAt = occurredAt;
+        await fee.save();
+        return fee;
     }
 
     /**
@@ -470,6 +489,60 @@ describe('SettlementService', () => {
             const unlinked = await Settlement.getByID(settlement.id);
             expect(unlinked!.pendingFees).toBe(0);
             expect(unlinked!.unexplainedAmount).toBe(1_00_00);
+        });
+
+        test('fees the invoicer will never bill explain the payout without ever being invoiced', async () => {
+            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 3_00_00 }));
+            await createApplicationFee({ settlement, amount: 1_00_00 });
+            await createUncollectibleApplicationFee({ settlement, amount: 1_00_00 });
+
+            // A payer we know, but not the account the fee was deducted from: the invoicer skips it
+            const accountless = await createApplicationFee({ settlement, amount: 1_00_00 });
+            accountless.fee.payingStripeAccountId = null;
+            await accountless.fee.save();
+
+            await SettlementService.finishSync(settlement, { transactionCount: 3 });
+
+            // Only the fee that can still be billed is worth waiting for
+            expect(settlement.pendingFees).toBe(1_00_00);
+            expect(settlement.uncollectibleFees).toBe(2_00_00);
+            expect(settlement.unexplainedAmount).toBe(0);
+        });
+    });
+
+    describe('getApplicationFeeSettlementIdsForPayingOrganization', () => {
+        test('deleting the paying organization keeps its fees as uncollectible income', async () => {
+            const payer = await new OrganizationFactory({}).create();
+            const payerAccount = await createStripeAccount(payer.id);
+            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+            const { fee, charge } = await createApplicationFee({ settlement, amount: 1_00_00, payingOrganizationId: payer.id, payingStripeAccountId: payerAccount.id });
+
+            // An organization that took Stripe payments is the only kind that owes fees: its
+            // payments reference the account the delete has to cascade through
+            const payerPayment = await createPayment(10_00_00, PaymentMethod.Bancontact, payer.id);
+            payerPayment.stripeAccountId = payerAccount.id;
+            await payerPayment.save();
+
+            await SettlementService.finishSync(settlement, { transactionCount: 1 });
+            expect(settlement.pendingFees).toBe(1_00_00);
+
+            const settlementIds = await SettlementService.getApplicationFeeSettlementIdsForPayingOrganization(payer.id);
+            expect(settlementIds).toEqual([settlement.id]);
+
+            await payer.delete();
+            await SettlementService.refreshTotalsForIds(settlementIds);
+
+            // The deduction charge went with the organization; the fee itself is our income and stays
+            expect(await SettlementCharge.getByID(charge.id)).toBeUndefined();
+            const stored = await ApplicationFee.getByID(fee.id);
+            expect(stored).toBeDefined();
+            expect(stored!.payingOrganizationId).toBeNull();
+            expect(stored!.settlementChargeId).toBeNull();
+
+            const after = await Settlement.getByID(settlement.id);
+            expect(after!.pendingFees).toBe(0);
+            expect(after!.uncollectibleFees).toBe(1_00_00);
+            expect(after!.unexplainedAmount).toBe(0);
         });
     });
 

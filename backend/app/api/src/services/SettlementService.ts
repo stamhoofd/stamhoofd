@@ -63,6 +63,11 @@ export type ChargeData = {
 const CHARGE_UPDATE_BATCH_SIZE = 500;
 
 /**
+ * Fees read per batch when a whole organization's fees are walked.
+ */
+const FEE_BATCH_SIZE = 500;
+
+/**
  * Collects which rows the provider still reports in a settlement while a sync walks it. A stored
  * row of the settlement that is not in here after the walk has moved or disappeared at the
  * provider, and gets swept.
@@ -306,7 +311,7 @@ export class SettlementService {
      * settlement (a transaction can move to another payout). Rows that only exist because of the
      * payout are deleted; rows that outlive the payout link are only unlinked: derived fee lines
      * (owned by updatePaymentSettlementsForAccountDeductionPayment), deduction charges referenced
-     * by an application fee (RESTRICT FK), and the application fee rows themselves.
+     * by an application fee, and the application fee rows themselves.
      *
      * Returns the fees unlinked from this settlement, so the caller can refresh the derived lines
      * of their fee payments.
@@ -376,7 +381,9 @@ export class SettlementService {
      * Recomputes the cached reconciliation columns from the stored rows: `unexplainedAmount` should
      * be 0 — a non-zero value is a real question to answer — and `pendingFees` holds what is
      * received but not invoiced yet, which takes up to a month and only becomes a problem when it
-     * stays non-zero too long.
+     * stays non-zero too long. Fees the invoicer can never bill land in `uncollectibleFees`
+     * instead: they explain their part of the payout, but waiting for them to be invoiced is
+     * waiting forever.
      *
      * Every write that changes what a payout holds ends here, or the export and the problem report
      * keep reading numbers from the last sync.
@@ -405,10 +412,46 @@ export class SettlementService {
         const pendingFees = await ApplicationFee.select()
             .where('settlementId', settlement.id)
             .where('balanceItemId', null)
+            .where('payingOrganizationId', '!=', null)
+            .where('payingStripeAccountId', '!=', null)
+            .sum(SQL.column('amount')) ?? 0;
+
+        // The negation of what the invoicer bills (ApplicationFeeInvoicer#selectBillableFees), so
+        // every uninvoiced fee sits in exactly one of the two sums
+        const uncollectibleFees = await ApplicationFee.select()
+            .where('settlementId', settlement.id)
+            .where('balanceItemId', null)
+            .where(
+                SQL.where('payingOrganizationId', null)
+                    .or('payingStripeAccountId', null),
+            )
             .sum(SQL.column('amount')) ?? 0;
 
         settlement.pendingFees = pendingFees;
-        settlement.unexplainedAmount = settlement.amount - paymentSum - chargeSum - pendingFees;
+        settlement.uncollectibleFees = uncollectibleFees;
+        settlement.unexplainedAmount = settlement.amount - paymentSum - chargeSum - pendingFees - uncollectibleFees;
+    }
+
+    /**
+     * The payouts holding application fees this organization paid: after deleting it, they have to
+     * recount, because those fees moved from pending to uncollectible.
+     */
+    static async getApplicationFeeSettlementIdsForPayingOrganization(organizationId: string): Promise<string[]> {
+        // An organization has one fee row per payment per type, so they are never all loaded at
+        // once just to collect the handful of payouts behind them
+        const settlementIds = new Set<string>();
+
+        for await (const fees of ApplicationFee.select()
+            .where('payingOrganizationId', organizationId)
+            .where('settlementId', '!=', null)
+            .limit(FEE_BATCH_SIZE)
+            .allBatched()) {
+            for (const fee of fees) {
+                settlementIds.add(fee.settlementId!);
+            }
+        }
+
+        return [...settlementIds];
     }
 
     /**

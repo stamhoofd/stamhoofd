@@ -73,10 +73,20 @@ export class Settlement extends QueryableModel {
 
     /**
      * Application fees received in this platform payout that are not invoiced yet, so no payment
-     * line explains them yet. Expected to reach 0 within a month, when the invoicer runs.
+     * line explains them yet. Expected to reach 0 within a month, when the invoicer runs, so the
+     * fees that can never be invoiced are counted in uncollectibleFees instead.
      */
     @column({ type: 'integer' })
     pendingFees = 0;
+
+    /**
+     * Application fees received in this platform payout that the invoicer will never bill: their
+     * paying organization or its Stripe account is no longer in our database. They explain their
+     * part of the payout like pendingFees does, but no invoicer run will ever turn them into a
+     * payment line, so they are counted apart from what is only waiting.
+     */
+    @column({ type: 'integer' })
+    uncollectibleFees = 0;
 
     /**
      * Balance transactions processed during the last sync (diagnostic).
