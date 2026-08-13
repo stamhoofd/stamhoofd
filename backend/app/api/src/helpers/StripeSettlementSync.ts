@@ -4,6 +4,7 @@ import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import type { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
+import type { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
@@ -111,7 +112,7 @@ export class StripeSettlementSync {
      * Sync all paid payouts that arrived in the window. A failing payout is marked, reported and
      * skipped so the other payouts still sync; the summary tells the caller how bad it was.
      */
-    async syncPayouts({ start, end, force = false }: { start: Date; end?: Date; force?: boolean }): Promise<{ synced: number; skipped: number; failed: number }> {
+    async syncPayouts({ start, end, force = false, abort }: { start: Date; end?: Date; force?: boolean; abort?: AbortSignal }): Promise<{ synced: number; skipped: number; failed: number }> {
         const result = { synced: 0, skipped: 0, failed: 0 };
 
         // Fail once up front when no organization can own these payouts, instead of once per payout
@@ -127,14 +128,20 @@ export class StripeSettlementSync {
             },
             limit: 100,
         })) {
+            abort?.throwIfAborted();
+
             try {
-                const { skipped } = await this.syncPayout(payout, { force });
+                const { skipped } = await this.syncPayout(payout, { force, abort });
                 if (skipped) {
                     result.skipped += 1;
                 } else {
                     result.synced += 1;
                 }
             } catch (e) {
+                // An interrupted payout is not a failing payout: counting or reporting it would
+                // turn every restart into a wave of problems to look into
+                abort?.throwIfAborted();
+
                 console.error('Failed to sync Stripe payout ' + payout.id, e);
                 result.failed += 1;
 
@@ -150,7 +157,7 @@ export class StripeSettlementSync {
     /**
      * Re-sync one payout by its id, e.g. to retry a settlement that stayed unsynced.
      */
-    async syncPayoutById(externalId: string, options: { force?: boolean } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
+    async syncPayoutById(externalId: string, options: { force?: boolean; abort?: AbortSignal } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
         const payout = await this.stripe.payouts.retrieve(externalId);
         return await this.syncPayout(payout, options);
     }
@@ -161,7 +168,7 @@ export class StripeSettlementSync {
      * in the settlement links later. A broken fee doesn't block storing the others, but the walk
      * still fails loudly at the end: a month is only invoiced after a run without errors.
      */
-    async syncFees({ start, end }: { start: Date; end: Date }) {
+    async syncFees({ start, end, abort }: { start: Date; end: Date; abort?: AbortSignal }) {
         if (this.stripeAccount) {
             throw new SimpleError({
                 code: 'invalid_scope',
@@ -185,9 +192,16 @@ export class StripeSettlementSync {
                 expand: ['data.source', 'data.source.originating_transaction'],
                 limit: 100,
             })) {
+                abort?.throwIfAborted();
+
                 try {
                     await this.#handleApplicationFee(transaction, { invoicedFeeBalanceItemIds });
                 } catch (e) {
+                    // The month is only invoiced after a walk without errors, so an interrupted
+                    // walk has to stop the walk itself instead of joining the errors of its
+                    // transactions
+                    abort?.throwIfAborted();
+
                     console.error('Failed to sync application fee transaction ' + transaction.id, e);
                     errors.push(e);
                 }
@@ -388,7 +402,7 @@ export class StripeSettlementSync {
         return this.#organizationId;
     }
 
-    async syncPayout(payout: Stripe.Payout, { force = false }: { force?: boolean } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
+    async syncPayout(payout: Stripe.Payout, { force = false, abort }: { force?: boolean; abort?: AbortSignal } = {}): Promise<{ settlement: Settlement; skipped: boolean }> {
         // All amounts are stored in the same unit: a payout in another currency would be stored as
         // a plausible but wrong number
         if (payout.currency && payout.currency.toUpperCase() !== 'EUR') {
@@ -398,7 +412,7 @@ export class StripeSettlementSync {
             });
         }
 
-        return await SettlementService.lock(PaymentProvider.Stripe, payout.id, async () => {
+        return await SettlementService.lock(PaymentProvider.Stripe, payout.id, async (signal) => {
             const settlement = await SettlementService.upsertSettlement({
                 provider: PaymentProvider.Stripe,
                 externalId: payout.id,
@@ -436,17 +450,23 @@ export class StripeSettlementSync {
             }
 
             try {
-                await this.#walkPayout(payout, settlement);
+                await this.#walkPayout(payout, settlement, signal);
             } catch (e) {
-                await SettlementService.markSyncFailed(settlement);
+                // A walk that was interrupted stored only part of the payout: it has to be walked
+                // again, but it didn't fail
+                if (signal.isAborted) {
+                    await SettlementService.markSyncInterrupted(settlement);
+                } else {
+                    await SettlementService.markSyncFailed(settlement);
+                }
                 throw e;
             }
 
             return { settlement, skipped: false };
-        });
+        }, { abort });
     }
 
-    async #walkPayout(payout: Stripe.Payout, settlement: Settlement) {
+    async #walkPayout(payout: Stripe.Payout, settlement: Settlement, abort: AbortSignal) {
         const reported = new ReportedRows();
         let transactionCount = 0;
 
@@ -462,6 +482,10 @@ export class StripeSettlementSync {
                     ? ['data.source', 'data.source.application_fee', 'data.source.application_fee.originating_transaction', 'data.source.charge']
                     : ['data.source', 'data.source.originating_transaction', 'data.source.charge'],
             })) {
+                // Between two transactions is a safe point to stop: only a complete walk sweeps
+                // and marks the settlement synced, so an interrupted one is re-walked from scratch
+                abort.throwIfAborted();
+
                 transactionCount += 1;
                 await this.#handleTransaction(transaction, settlement, reported, invoicedFeeBalanceItemIds);
             }

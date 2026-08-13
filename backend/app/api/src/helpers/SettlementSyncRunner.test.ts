@@ -1,7 +1,9 @@
 import type { Organization } from '@stamhoofd/models';
 import { MolliePayment, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
+import { AbortSignal } from '@stamhoofd/queues';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { STExpect } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { vi } from 'vitest';
 
@@ -138,6 +140,34 @@ describe('Helper.SettlementSyncRunner', () => {
 
         const mollieRow = await Settlement.select().where('externalId', mollieSettlement.id).first(true);
         expect(mollieRow.syncedAt).not.toBeNull();
+    });
+
+    test('An aborted run walks nothing and does not report a failure', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const stripePayment = await createStripePayment(organization);
+
+        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate: new Date(2026, 0, 20) });
+        stripeMocker.createBalanceTransaction({
+            type: 'charge',
+            amount: 10000,
+            created: new Date(2026, 0, 15),
+            payout: payout.id,
+            source: stripeMocker.createChargeObject({ metadata: { payment: stripePayment.id } }),
+        });
+
+        const abort = new AbortSignal();
+        abort.abort();
+
+        // Throwing instead of returning a summary: a caller may not read an interrupted run as a
+        // completed one
+        await expect(new SettlementSyncRunner().run({
+            start: new Date(2026, 0, 1),
+            end: new Date(2026, 0, 31),
+            providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
+            abort,
+        })).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
+
+        expect(await Settlement.select().where('externalId', payout.id).first(false)).toBeNull();
     });
 
     test('The stripe retryUnsynced option flows through the run', async () => {

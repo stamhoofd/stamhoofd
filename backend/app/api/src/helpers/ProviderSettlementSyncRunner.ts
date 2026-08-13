@@ -1,3 +1,5 @@
+import type { AbortSignal } from '@stamhoofd/queues';
+
 export type SettlementSyncSummary = {
     feeMonths: number;
     failedFeeMonths: number;
@@ -26,6 +28,12 @@ export type ProviderSyncRunOptions = {
      * Fired after each unit of work (a month for Stripe, an account for Mollie).
      */
     onProgress?: () => void;
+
+    /**
+     * Stops the walk at the next safe point (a restart). Aborting is not a sync failure: it leaves
+     * everything it touched retryable instead of counting or reporting it.
+     */
+    abort: AbortSignal;
 };
 
 /**
