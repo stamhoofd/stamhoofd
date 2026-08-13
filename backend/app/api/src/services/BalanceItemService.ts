@@ -11,6 +11,7 @@ import { OrderService } from './OrderService.js';
 import { PaymentReallocationService } from './PaymentReallocationService.js';
 import { RegistrationService } from './RegistrationService.js';
 import { STPackageService } from './STPackageService.js';
+import { WebshopCrowdfundingService } from './WebshopCrowdfundingService.js';
 
 const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
     await CachedBalance.updateForMembers(organizationId, memberIds);
@@ -182,6 +183,10 @@ export class BalanceItemService {
 
             if (item.registrationId) {
                 registrationUpdateQueue.addItem(item.organizationId, item.registrationId);
+            }
+
+            if (item.orderId) {
+                WebshopCrowdfundingService.scheduleUpdateForOrder(item.orderId);
             }
         }
     }

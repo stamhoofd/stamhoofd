@@ -15,6 +15,7 @@ import { Context } from '../../../helpers/Context.js';
 import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
 import { AuditLogService } from '../../../services/AuditLogService.js';
+import { BalanceItemService } from '../../../services/BalanceItemService.js';
 import { MollieService } from '../../../services/MollieService.js';
 import { OrderService } from '../../../services/OrderService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
@@ -355,6 +356,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         throw new Error('Unknown payment provider');
                     }
                 }
+
+                // Update the cached pricePending of the balance item, so the unresolved payment is visible
+                await BalanceItemService.updatePaidAndPending([balanceItem]);
 
                 return new Response(OrderResponse.create({
                     paymentUrl: paymentUrl,

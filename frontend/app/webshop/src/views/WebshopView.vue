@@ -30,6 +30,11 @@
                         </figure>
                         <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
 
+                        <template v-if="webshop.meta.crowdfunding">
+                            <CrowdfundingBar :crowdfunding="webshop.meta.crowdfunding" />
+                            <hr class="style-hr">
+                        </template>
+
                         <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
                         <div v-if="webshop.meta.description.html" class="style-wysiwyg gray" v-html="webshop.meta.description.html" />
                         <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
@@ -94,6 +99,7 @@ import type { CheckoutStep } from './checkout/CheckoutStepsManager';
 import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 
 import FullPageProduct from './FullPageProduct.vue';
+import CrowdfundingBar from './components/CrowdfundingBar.vue';
 
 const visible = ref(true);
 

@@ -110,7 +110,8 @@
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
             <template v-if="canOrder && canSelectAmount">
-                <hr><h2>{{ $t('%M4') }}</h2>
+                <hr>
+                <h2>{{ $t('%M4') }}</h2>
 
                 <STInputBox class="max">
                     <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" data-testid="amount-number-input" />

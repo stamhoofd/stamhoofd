@@ -12,6 +12,7 @@ import { sleep } from '@stamhoofd/utility';
 import * as jose from 'jose';
 import { GlobalHelper } from '../src/helpers/GlobalHelper.js';
 import { BalanceItemService } from '../src/services/BalanceItemService.js';
+import { WebshopCrowdfundingService } from '../src/services/WebshopCrowdfundingService.js';
 import { PayconiqMocker } from './helpers/PayconiqMocker.js';
 import { resetNock } from './helpers/resetNock.js';
 
@@ -92,6 +93,7 @@ afterAll(async () => {
     // Call twice to also wait on items that are scheduled withing scheduled tasks
     await BalanceItemService.flushAll();
     await BalanceItemService.flushAll();
+    await WebshopCrowdfundingService.flush();
     QueueHandler.abortAll(
         new SimpleError({
             code: 'SHUTDOWN',

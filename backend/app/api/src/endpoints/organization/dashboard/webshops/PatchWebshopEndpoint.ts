@@ -9,6 +9,7 @@ import { Formatter, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
+import { WebshopCrowdfundingService } from '../../../../services/WebshopCrowdfundingService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -224,6 +225,11 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     });
                 }
                 throw e;
+            }
+
+            if (request.body.meta?.crowdfunding !== undefined) {
+                // A changed crowdfunding configuration (e.g. just enabled) requires a recalculation of the cached amounts
+                await WebshopCrowdfundingService.updateWebshop(webshop);
             }
 
             return new Response(PrivateWebshop.create(webshop));
