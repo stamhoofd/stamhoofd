@@ -58,7 +58,7 @@ if (new Date().getTimezoneOffset() !== 0) {
  * a request: a job that never checks it, or that hangs on a network call, may not keep the restart
  * waiting. Everything left behind runs again after the restart.
  */
-const MAXIMUM_SHUTDOWN_WAIT = 60 * 1000;
+const MAXIMUM_SHUTDOWN_WAIT = 29 * 1000;
 
 const seeds = async (options: { shutdown: () => Promise<void> }) => {
     if (await checkReadOnly()) {
@@ -219,13 +219,15 @@ export const boot = async (options: { killProcess: boolean }) => {
         if (shuttingDown) {
             return;
         }
+        const deadline = new Date(Date.now() + MAXIMUM_SHUTDOWN_WAIT);
+
         shuttingDown = true;
         QueryableModel.shutdownMigrations = true;
         productionLog('Shutting down...');
         // Disable keep alive
         routerServer.defaultHeaders = Object.assign(routerServer.defaultHeaders, { Connection: 'close' });
         if (routerServer.server) {
-            routerServer.server.headersTimeout = 5000;
+            routerServer.server.headersTimeout = 1000;
             routerServer.server.keepAliveTimeout = 1;
         }
 
@@ -245,26 +247,25 @@ export const boot = async (options: { killProcess: boolean }) => {
             console.error('Failed to stop HTTP server:');
             console.error(err);
         }
-
-        await BalanceItemService.flushAll();
-        await WebshopCrowdfundingService.flush();
-
         const shutdownError = new SimpleError({
             code: 'SHUTDOWN',
             message: 'Shutting down',
             statusCode: 503,
         });
-        const deadline = new Date(Date.now() + MAXIMUM_SHUTDOWN_WAIT);
-
-        // A cron can be waiting on a long queue job (a settlement sync walks months of payouts):
-        // tell those jobs to stop before waiting for the crons, or the restart waits for the job
         QueueHandler.abortAll(shutdownError);
-        await waitUntilDeadline(waitForCrons(), { deadline, description: 'crons' });
 
-        // Again for anything the crons started while they were finishing up
+        await Promise.allSettled([
+            BalanceItemService.flushAll(),
+            WebshopCrowdfundingService.flush(),
+            waitUntilDeadline(waitForCrons(), { deadline, description: 'crons' }),
+            waitUntilDeadline(QueueHandler.awaitAll(), { deadline, description: 'queues' }),
+        ]);
+
+        // Any last queues started in above jobs
         QueueHandler.abortAll(shutdownError);
         await waitUntilDeadline(QueueHandler.awaitAll(), { deadline, description: 'queues' });
 
+        // Wait for emails
         await waitUntilDeadline((async () => {
             while (Email.currentQueue.length > 0) {
                 console.log(`${Email.currentQueue.length} emails still in queue. Waiting 500ms...`);
