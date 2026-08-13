@@ -6,7 +6,7 @@ import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { QueueHandler } from '@stamhoofd/queues';
+import { AbortSignal, QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { PaymentMethod, SettlementReference } from '@stamhoofd/structures';
@@ -114,9 +114,20 @@ export class SettlementService {
      * Serializes syncs of the same settlement, so cron and manual backfill can't race. In-process
      * only: across multiple API instances the tables' unique keys are the real guard, so a
      * concurrent sync surfaces as a duplicate-key error and is retryable.
+     *
+     * Interrupting a walk is opt-in: the caller's signal governs the whole sync (so it stops as
+     * one, and every caller in it recognizes the abort), and a caller without one walks to the end.
      */
-    static lock<T>(provider: PaymentProvider, externalId: string, handler: () => Promise<T>): Promise<T> {
-        return QueueHandler.schedule('settlement-sync-' + provider + '-' + externalId, handler);
+    static lock<T>(provider: PaymentProvider, externalId: string, handler: (abort: AbortSignal) => Promise<T>, { abort }: { abort?: AbortSignal } = {}): Promise<T> {
+        return QueueHandler.schedule('settlement-sync-' + provider + '-' + externalId, async () => {
+            const signal = abort ?? new AbortSignal();
+
+            // Waiting behind another settlement may have taken a while: don't start a walk that is
+            // interrupted at its first step anyway
+            signal.throwIfAborted();
+
+            return await handler(signal);
+        });
     }
 
     /**
@@ -573,6 +584,18 @@ export class SettlementService {
         for (const payment of payments) {
             await this.updatePaymentSettlementsForAccountDeductionPayment(payment);
         }
+    }
+
+    /**
+     * A walk that was interrupted halfway (a restart aborted it) stored only part of what the
+     * provider reports, so the settlement may not keep claiming it is synced: the next run walks it
+     * again. Unlike a failed sync it doesn't count towards the retry cap — nothing is wrong with
+     * this settlement.
+     */
+    static async markSyncInterrupted(settlement: Settlement): Promise<Settlement> {
+        settlement.syncedAt = null;
+        await settlement.save();
+        return settlement;
     }
 
     /**
