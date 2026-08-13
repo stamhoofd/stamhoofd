@@ -43,7 +43,7 @@ export class ProductPrice extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 219 })
     hidden = false;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 410 })
     allowCustomPrice = false;
 
     /**

@@ -654,7 +654,7 @@ export class WebshopMetaData extends AutoEncoder {
      * Enables crowdfunding: publicly shows the (goal and) progress of the total revenue of this webshop.
      * When null, the cached amounts are not calculated or updated.
      */
-    @field({ decoder: WebshopCrowdfunding, nullable: true, ...NextVersion })
+    @field({ decoder: WebshopCrowdfunding, nullable: true, version: 410 })
     crowdfunding: WebshopCrowdfunding | null = null;
 
     /**
