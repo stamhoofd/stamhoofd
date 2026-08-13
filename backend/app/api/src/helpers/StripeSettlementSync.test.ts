@@ -2,17 +2,24 @@ import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, StripeAccount } from '@stamhoofd/models';
 import { OrganizationFactory, Payment, Platform } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
+import { BalanceItem } from '@stamhoofd/models/models/BalanceItem.js';
+import { BalanceItemPayment } from '@stamhoofd/models/models/BalanceItemPayment.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
+import type { Settlement as SettlementModel } from '@stamhoofd/models/models/Settlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
+import { STExpect } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { vi } from 'vitest';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import type { StripeObject } from '../../tests/helpers/StripeMocker.js';
+import { ApplicationFeeService } from '../services/ApplicationFeeService.js';
+import { SettlementService } from '../services/SettlementService.js';
 import { StripeSettlementSync } from './StripeSettlementSync.js';
 import { StripeSettlementSyncRunner } from './StripeSettlementSyncRunner.js';
 import { WebmasterReport } from './WebmasterReport.js';
@@ -69,6 +76,54 @@ describe('StripeSettlementSync', () => {
 
     const getSettlement = async (payout: StripeObject) => {
         return await Settlement.select().where('externalId', payout.id).first(true);
+    };
+
+    /**
+     * A fee we already invoiced to the organization, like the ApplicationFeeInvoicer stores it: the
+     * membership organization bills it, the organization pays it. Every payout that contains such a
+     * fee needs a derived line on its fee payment.
+     */
+    const createInvoicedFee = async (externalId: string, amount: number, { settlement = null as SettlementModel | null } = {}) => {
+        const payment = new Payment();
+        payment.organizationId = membershipOrganization.id;
+        payment.payingOrganizationId = organization.id;
+        payment.stripeAccountId = stripeAccount.id;
+        payment.method = PaymentMethod.AccountDeductions;
+        payment.provider = PaymentProvider.Stripe;
+        payment.status = PaymentStatus.Succeeded;
+        payment.price = amount;
+        payment.paidAt = created;
+        await payment.save();
+
+        const balanceItem = new BalanceItem();
+        balanceItem.type = BalanceItemType.ServiceFee;
+        balanceItem.organizationId = membershipOrganization.id;
+        balanceItem.payingOrganizationId = organization.id;
+        balanceItem.unitPrice = amount;
+        balanceItem.quantity = 1;
+        balanceItem.status = BalanceItemStatus.Hidden;
+        await balanceItem.save();
+
+        const balanceItemPayment = new BalanceItemPayment();
+        balanceItemPayment.balanceItemId = balanceItem.id;
+        balanceItemPayment.paymentId = payment.id;
+        balanceItemPayment.organizationId = payment.organizationId;
+        balanceItemPayment.price = amount;
+        await balanceItemPayment.save();
+
+        const fee = new ApplicationFee();
+        fee.externalId = externalId;
+        fee.type = ApplicationFeeType.Service;
+        fee.amount = amount;
+        fee.organizationId = membershipOrganization.id;
+        fee.payingOrganizationId = organization.id;
+        fee.payingStripeAccountId = stripeAccount.id;
+        fee.balanceItemId = balanceItem.id;
+        fee.settlementId = settlement?.id ?? null;
+        fee.occurredAt = created;
+        await fee.save();
+
+        return { payment, fee };
     };
 
     test('a full destination-charge payout reconciles to zero', async () => {
@@ -357,6 +412,85 @@ describe('StripeSettlementSync', () => {
         expect(emails).toHaveLength(1);
         expect(emails[0].html).toContain(first.id);
         expect(emails[0].html).toContain(second.id);
+    });
+
+    test('a walk that fails still updates the fee payments of what it stored', async () => {
+        const payerPayment = await createPayment();
+        const stripeFee = stripeMocker.createApplicationFee({
+            amount: 250,
+            account: stripeAccount.accountId,
+            originatingTransaction: stripeMocker.createChargeObject({ metadata: { payment: payerPayment.id, serviceFee: '250' } }),
+        });
+        const { payment: feePayment } = await createInvoicedFee(stripeFee.id, 2_50_00);
+
+        const payout = stripeMocker.createPayout({ amount: 250, arrivalDate });
+        stripeMocker.createBalanceTransaction({ type: 'application_fee', amount: 250, created, payout: payout.id, source: stripeFee });
+
+        // Fails the walk after the fee was linked to the payout
+        stripeMocker.createBalanceTransaction({ type: 'issuing_authorization_hold', amount: 100, created, payout: payout.id, source: null });
+
+        expect(await createSync().syncPayouts({ start })).toEqual({ synced: 0, skipped: 0, failed: 1 });
+
+        // The walk linked the fee to this payout before it failed, so the fee payment gets its
+        // derived line: a fee may never sit in a payout that has no line for it
+        const settlement = await getSettlement(payout);
+        expect(settlement.syncedAt).toBeNull();
+
+        const derived = await PaymentSettlement.select().where('paymentId', feePayment.id).fetch();
+        expect(derived).toHaveLength(1);
+        expect(derived[0]).toMatchObject({
+            settlementId: settlement.id,
+            externalId: null,
+            amount: 2_50_00,
+        });
+    });
+
+    test('a fee walk updates the fee payments of the fees it stored before one failed', async () => {
+        const payerPayment = await createPayment();
+        const stripeFee = stripeMocker.createApplicationFee({
+            amount: 250,
+            account: stripeAccount.accountId,
+            // Both a service and a transfer part, so the fee is stored as two rows
+            originatingTransaction: stripeMocker.createChargeObject({ metadata: { payment: payerPayment.id, serviceFee: '30' } }),
+        });
+
+        // Already paid out and invoiced before this walk: the payout it sits in explains it through
+        // the derived line of its fee payment
+        const settlement = await SettlementService.upsertSettlement({
+            provider: PaymentProvider.Stripe,
+            externalId: 'po_' + uuidv4(),
+            organizationId: membershipOrganization.id,
+            amount: 30_00,
+            settledAt: arrivalDate,
+        });
+        const { payment: feePayment } = await createInvoicedFee(stripeFee.id, 30_00, { settlement });
+
+        stripeMocker.createBalanceTransaction({ type: 'application_fee', amount: 250, created, source: stripeFee });
+
+        // The service fee is stored, the transfer fee of the same transaction fails after it
+        const upsertFee = ApplicationFeeService.upsertFee.bind(ApplicationFeeService);
+        const spy = vi.spyOn(ApplicationFeeService, 'upsertFee').mockImplementation(async (data) => {
+            if (data.type === ApplicationFeeType.Transfer) {
+                throw new Error('Storing the transfer fee failed');
+            }
+            return await upsertFee(data);
+        });
+
+        try {
+            await expect(createSync().syncFees({ start, end: arrivalDate })).rejects.toThrow(
+                STExpect.simpleError({ code: 'stripe_fee_sync_failed' }),
+            );
+        } finally {
+            spy.mockRestore();
+        }
+
+        const derived = await PaymentSettlement.select().where('paymentId', feePayment.id).fetch();
+        expect(derived).toHaveLength(1);
+        expect(derived[0]).toMatchObject({
+            settlementId: settlement.id,
+            externalId: null,
+            amount: 30_00,
+        });
     });
 
     test('a payout that failed after being paid keeps its status current', async () => {

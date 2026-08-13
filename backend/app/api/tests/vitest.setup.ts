@@ -56,9 +56,10 @@ beforeAll(async () => {
     await Database.delete('DELETE FROM `groups`');
     await Database.delete('DELETE FROM `email_addresses`');
 
-    // invoiced_balance_items restricts deleting balance items, which blocks the organizations
-    // cascade below, so it has to be cleared first
+    // invoiced_balance_items and application_fees restrict deleting balance items, which blocks the
+    // organizations cascade below, so they have to be cleared first
     await Database.delete('DELETE FROM `invoiced_balance_items`');
+    await Database.delete('DELETE FROM `application_fees`');
     await Database.delete('DELETE FROM `invoices`');
 
     // payments restrict deleting stripe accounts (which cascade from organizations), and a payment
