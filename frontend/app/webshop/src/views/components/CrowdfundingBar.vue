@@ -4,7 +4,7 @@
             <div class="progress" :style="{width: progress.toFixed(2) + '%'}" />
         </div>
 
-        <div class="split-inputs">
+        <div class="split">
             <div>
                 <h3 class="style-definition-label">
                     {{ $t('Opgehaald') }}
@@ -73,6 +73,12 @@ const progress = computed(() => {
             background: $color-primary-gray-light;
             border-radius: 10px;
         }
+    }
+
+    .split {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 15px;
     }
 }
 </style>
