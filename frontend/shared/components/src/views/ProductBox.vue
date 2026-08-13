@@ -72,6 +72,11 @@ const priceString = computed(() => {
         return prices.length > 0 ? $t('Vrij bedrag') : '';
     }
 
+    if (fixedPrices.length < prices.length) {
+        // Hide ugly selection list
+        return '';
+    }
+
     const priceRanges = Formatter.uniqueArray(fixedPrices.map(p => p.price));
     if (priceRanges.length === 1) {
         if (priceRanges[0] === 0) {
