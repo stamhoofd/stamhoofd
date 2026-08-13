@@ -309,15 +309,15 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditCrowdfunding)">
+                    <STListItem v-if="webshopManager.preview.meta.type === WebshopType.Donations" :selectable="true" class="left-center" @click="$navigate(Routes.EditCrowdfunding)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Ingezameld bedrag en vooruitgang') }}
+                            {{ $t('Doelbedrag en vooruitgang') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Toon de vooruitgang van je inzameling, crowdfunding of totale donaties.') }}
+                            {{ $t('Toon de vooruitgang van je inzameling, crowdfunding of donaties.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
