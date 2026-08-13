@@ -170,6 +170,29 @@ describe('Helper.SettlementSyncRunner', () => {
         expect(await Settlement.select().where('externalId', payout.id).first(false)).toBeNull();
     });
 
+    test('An aborted run walks nothing of a provider Stripe never reached', async () => {
+        const mollieOrganization = await new OrganizationFactory({}).create();
+        await mollieMocker.setupToken(mollieOrganization);
+        const { mockPayment } = await createMolliePayment(mollieOrganization);
+        const mollieSettlement = mollieMocker.createSettlement({
+            payments: [mockPayment],
+            value: '50.00',
+            settledAt: new Date(2026, 0, 20),
+        });
+
+        const abort = new AbortSignal();
+        abort.abort();
+
+        await expect(new SettlementSyncRunner().run({
+            start: new Date(2026, 0, 1),
+            end: new Date(2026, 0, 31),
+            providers: [PaymentProvider.Mollie],
+            abort,
+        })).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
+
+        expect(await Settlement.select().where('externalId', mollieSettlement.id).first(false)).toBeNull();
+    });
+
     test('The stripe retryUnsynced option flows through the run', async () => {
         const organization = await new OrganizationFactory({}).create();
         const settlement = await SettlementService.upsertSettlement({
