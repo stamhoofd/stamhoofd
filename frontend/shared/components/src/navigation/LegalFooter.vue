@@ -31,8 +31,7 @@
             </aside>
             <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
             <div v-else>
-                <a v-if="hasTickets" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%Y3') }} <Logo /></a>
-                <a v-else-if="isWebshop" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%gB') }} <Logo /></a>
+                <a v-if="isWebshop" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('Gemaakt met') }} <Logo /></a>
                 <a v-else :href="'https://'+ LocalizedDomains.marketing +'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('%XC') }} <Logo /></a>
             </div>
         </div>
@@ -41,7 +40,7 @@
 
 <script lang="ts" setup>
 import type { Company, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
-import { LanguageHelper, WebshopTicketType } from '@stamhoofd/structures';
+import { LanguageHelper } from '@stamhoofd/structures';
 
 import { useContext } from '#hooks/useContext.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
@@ -90,8 +89,6 @@ const privacyUrl = computed(() => {
 });
 
 const policies = computed(() => props.webshop?.meta.policies ?? []);
-
-const hasTickets = computed(() => props.webshop?.meta.ticketType === WebshopTicketType.Tickets);
 
 const isWebshop = computed(() => !!props.webshop);
 const { hasLanguages, switchLanguage } = useSwitchLanguage();

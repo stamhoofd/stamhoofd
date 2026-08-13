@@ -9,15 +9,12 @@
 
             <main>
                 <p v-if="!webshop.meta.reduceBranding && STAMHOOFD.platformName === 'stamhoofd'" class="stamhoofd-header">
-                    <a :href="'https://' + LocalizedDomains.marketing + '?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('%Y4') }}</span>  <Logo /></a>
+                    <a :href="'https://' + LocalizedDomains.marketing + '?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('Gemaakt met') }}</span>  <Logo /></a>
                 </p>
                 <div class="box">
                     <main>
-                        <h1 v-if="success">
-                            {{ $t('%Y5') }}
-                        </h1>
-                        <h1 v-else>
-                            {{ $t('%Y6') }}
+                        <h1>
+                            {{ title }}
                         </h1>
 
                         <p v-if="success">
@@ -118,14 +115,14 @@
                             <hr><h2>{{ $t('%YI') }}</h2>
                         </template>
                         <p v-else-if="!isCanceled && !isPaid && isTransfer" class="warning-box">
-                            {{ $t('%YR') }}
+                            {{ $t('Je betaling wordt handmatig bevestigd. Zodra ze als betaald is gemarkeerd, ontvang je een bevestigingsmail. Dit kan enkele dagen duren. Via de knop onderaan bekijk je de instructies opnieuw.') }}
                         </p>
                         <p v-else-if="!isCanceled && !isPaid && !isTransfer" class="warning-box">
                             {{ $t('%YS') }} {{ getLowerCaseName(order.data.paymentMethod) }}
                         </p>
 
                         <STList class="info">
-                            <STListItem>
+                            <STListItem v-if="!success && order.createdAt < new Date(Date.now() - 1000 * 60 * 60 * 24 * 31)">
                                 <h3 class="style-definition-label">
                                     {{ $t('%1AV') }}
                                 </h3>
@@ -223,7 +220,7 @@
                                 </p>
                             </STListItem>
 
-                            <STListItem class="right-description">
+                            <STListItem v-if="order.status !== OrderStatus.Created" class="right-description">
                                 <h3 class="style-definition-label">
                                     {{ $t('%1A') }}
                                 </h3>
@@ -384,7 +381,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import type { Payment } from '@stamhoofd/structures';
-import { Gender, getGenderName, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import { Gender, getGenderName, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -419,6 +416,65 @@ const singleTicket = computed(() => tickets.value.length === 1 || webshop.value.
 const canShare = computed(() => !!navigator.share);
 const isPaid = computed(() => order.value && (order.value.payment === null || order.value.payment.status === PaymentStatus.Succeeded));
 const isTransfer = computed(() => getDefaultTransferPayment() !== null);
+
+const title = computed(() => {
+    if (props.success && isPaid.value) {
+        if (webshop.value.meta.type === WebshopType.Donations) {
+            return $t('Bijdrage bevestigd');
+        }
+
+        if (hasTickets.value) {
+            if (singleTicket.value) {
+                return $t('Jouw ticket is bevestigd');
+            }
+            return $t('Jouw tickets zijn bevestigd');
+        }
+
+        if (webshop.value.meta.type === WebshopType.Registrations) {
+            return $t('Inschrijving bevestigd');
+        }
+
+        return $t('Bestelling bevestigd');
+    } else if (!isPaid.value && !isCanceled.value && !isFailed.value && order.value?.data.paymentMethod !== PaymentMethod.PointOfSale) {
+        if (isTransfer.value) {
+            return $t('In afwachting van handmatige bevestiging');
+        }
+
+        if (webshop.value.meta.type === WebshopType.Donations) {
+            return $t('In afwachting van betaling');
+        }
+
+        if (hasTickets.value) {
+            if (singleTicket.value) {
+                return $t('Je ontvangt jouw ticket na betaling');
+            }
+            return $t('Je ontvangt jouw tickets na betaling');
+        }
+
+        if (webshop.value.meta.type === WebshopType.Registrations) {
+            return $t('Je inschrijving wordt bevestigd na je betaling');
+        }
+
+        return $t('Je bestelling wordt bevestigd na je betaling');
+    }
+
+    if (webshop.value.meta.type === WebshopType.Donations) {
+        return $t('Jouw bijdrage');
+    }
+
+    if (hasTickets.value) {
+        if (singleTicket.value) {
+            return $t('Jouw ticket');
+        }
+        return $t('Jouw tickets');
+    }
+
+    if (webshop.value.meta.type === WebshopType.Registrations) {
+        return $t('Jouw inschrijving');
+    }
+
+    return $t('%Y6');
+});
 
 // Make sure the url is overriden
 setUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), 'Bestelling ' + (order.value?.number ?? ''));

@@ -1,5 +1,5 @@
 <template>
-    <article class="product-box" :class="{ selected: count > 0}" data-testid="product-box" @click="onClicked">
+    <article class="product-box" :class="{ selected: count > 0, 'show-count': product.allowMultiple}" data-testid="product-box" @click="onClicked">
         <div class="left" />
         <div class="content">
             <div>
@@ -359,7 +359,7 @@ function formatDateRange(dateRange: ProductDateRange) {
         position: relative;
     }
 
-    &.selected {
+    &.selected.show-count {
         > .content > div {
             > h3 {
                 transform: translateX(30px);

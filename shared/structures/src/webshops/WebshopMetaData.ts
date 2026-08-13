@@ -405,6 +405,33 @@ export enum WebshopAuthType {
     Required = 'Required',
 }
 
+export class WebshopCrowdfunding extends AutoEncoder {
+    /**
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    goalAmount: number | null = null;
+
+    /**
+     * Cached sum of the paid amounts (pricePaid) of all balance items of this webshop.
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     */
+    @field({ decoder: IntegerDecoder })
+    progressAmount = 0;
+
+    /**
+     * Cached sum of the pending payment amounts (pricePending) of all balance items of this webshop.
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     */
+    @field({ decoder: IntegerDecoder })
+    pendingAmount = 0;
+}
+
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = '';
@@ -622,6 +649,13 @@ export class WebshopMetaData extends AutoEncoder {
      */
     @field({ decoder: new EnumDecoder(Language), version: 404 })
     defaultLanguage: Language = Language.Dutch;
+
+    /**
+     * Enables crowdfunding: publicly shows the (goal and) progress of the total revenue of this webshop.
+     * When null, the cached amounts are not calculated or updated.
+     */
+    @field({ decoder: WebshopCrowdfunding, nullable: true, ...NextVersion })
+    crowdfunding: WebshopCrowdfunding | null = null;
 
     /**
      * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not

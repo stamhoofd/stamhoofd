@@ -89,7 +89,8 @@
             {{ $t('%RX') }}
         </p>
 
-        <hr><h2>{{ $t('%2D') }}</h2>
+        <hr>
+        <h2>{{ $t('%2D') }}</h2>
         <p>
             {{ $t('%RY') }}
         </p>
@@ -101,7 +102,8 @@
         <LogoEditor v-if="!useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch" />
 
         <template v-if="hasTickets">
-            <hr><EditSponsorsBox :config="sponsorConfig" @patch="patchSponsorConfig" />
+            <hr>
+            <EditSponsorsBox :config="sponsorConfig" @patch="patchSponsorConfig" />
 
             <p class="style-button-bar">
                 <button type="button" class="button text" @click="previewTicket">
