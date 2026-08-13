@@ -1,13 +1,14 @@
+import { Formatter } from '@stamhoofd/utility';
 import type { ComputedRef } from 'vue';
 import { computed } from 'vue';
 
-type UseNumberInputOptions = { required: boolean; min: number | null; max: number | null; fractionDigits: number; roundFractionDigits: number | null;  };
+type UseNumberInputOptions = { required: boolean; min: number | null; max: number | null; suffix?: string | null; suffixSingular?: string | null; fractionDigits: number; roundFractionDigits: number | null };
 
 export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
     const multipier = computed(() => Math.pow(10, options.value.fractionDigits));
 
     const roundFractions = (v: number) => {
-        const {roundFractionDigits, fractionDigits} = options.value;
+        const { roundFractionDigits, fractionDigits } = options.value;
 
         if (roundFractionDigits === null) {
             return v;
@@ -21,7 +22,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         const roundMultiplier = Math.pow(10, multiplyAmount);
 
         return Math.round(v / roundMultiplier) * roundMultiplier;
-    } 
+    };
 
     const validateText = (value: string, { valueIfNaN }: { valueIfNaN: number | null }): { isValid: boolean; value: number | null } => {
         const { required } = options.value;
@@ -116,8 +117,11 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
     }
 
     const formatValue = (value: number) => {
-        return (value / multipier.value).toString();
-    }
+        // Use all fraction digits so a min/max bound is never displayed rounded in error messages
+        const float = value / multipier.value;
+        const suffix = (float === 1 ? options.value.suffixSingular : null) ?? options.value.suffix;
+        return Formatter.float(float, { maximumFractionDigits: options.value.fractionDigits }) + (suffix ? ' ' + suffix : '');
+    };
 
     const validateConstraints = (value: number): { isValid: false; errorMessage: string; value: number } | { isValid: true; value: number } => {
         const { min, max, required } = options.value;
@@ -166,7 +170,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
     };
 
     const numberToString = (value: number | null, { valueIfNaN }: { valueIfNaN: string }) => {
-        const {fractionDigits} = options.value;
+        const { fractionDigits } = options.value;
 
         if (value === null) {
             return '';
@@ -191,7 +195,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
                     + getDecimalSeparator()
                     + ('' + fractions / 100).padStart(fractionDigits - 2, '0');
             }
-            
+
             if (fractions % 10 === 0) {
                 return (float < 0 ? '-' : '')
                     + Math.floor(abs)
@@ -236,7 +240,6 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         const { min, max } = options.value;
 
         if (value === null || isNaN(value)) {
-            
             return min ?? 0;
         }
 
@@ -251,7 +254,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         }
 
         return newValue;
-    }
+    };
 
     /**
      * Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
@@ -269,6 +272,6 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         numberToString,
         stringToNumber,
         step,
-        multipier
+        multipier,
     };
 }
