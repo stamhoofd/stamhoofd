@@ -352,6 +352,7 @@ const route = {
 const actionBuilder = usePaymentActions({
     configurationId,
     methods: props.methods,
+    reload: () => tableObjectFetcher.reset(true, true),
 });
 
 const actions = actionBuilder.getActions();
