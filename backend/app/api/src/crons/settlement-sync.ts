@@ -3,6 +3,7 @@
 import { registerCron } from '@stamhoofd/crons';
 import { Email } from '@stamhoofd/email';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
+import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -25,7 +26,10 @@ const MAXIMUM_PENDING_FEES_AGE_MS = 31 * 24 * 60 * 60 * 1000;
 
 let lastSettlementSync: Date | null = null;
 
-async function syncSettlements() {
+/**
+ * Exported for tests only.
+ */
+export async function syncSettlements() {
     if (STAMHOOFD.environment !== 'production') {
         return;
     }
@@ -46,14 +50,21 @@ async function syncSettlements() {
 
     const start = new Date(today.getTime() - SYNC_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
-    const runner = new SettlementSyncRunner();
-    await runner.run({
-        start,
-        providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
-        stripe: { retryUnsynced: true },
-    });
+    // The same queue as the manual backfill: the two never walk the same period at once, and a
+    // shutdown aborts this run instead of waiting for the whole window. An aborted run throws, so
+    // it is not remembered as the sync of this day: a later tick within the hour runs it again,
+    // and otherwise the next day re-walks the same window anyway
+    await QueueHandler.schedule('settlement-sync', async ({ abort }) => {
+        const runner = new SettlementSyncRunner();
+        await runner.run({
+            start,
+            providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
+            stripe: { retryUnsynced: true },
+            abort,
+        });
 
-    await reportProblemSettlements();
+        await reportProblemSettlements();
+    });
 
     lastSettlementSync = new Date();
 }
