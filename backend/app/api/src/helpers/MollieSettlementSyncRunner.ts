@@ -10,7 +10,7 @@ import type { ProviderSettlementSyncRunner, ProviderSyncRunOptions } from './Pro
  * (STAMHOOFD.MOLLIE_ORGANIZATION_TOKEN for the platform, a MollieToken row per organization).
  */
 export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner {
-    async run({ start, end, summary, onProgress }: ProviderSyncRunOptions): Promise<void> {
+    async run({ start, end, summary, onProgress, abort }: ProviderSyncRunOptions): Promise<void> {
         const accessToken = STAMHOOFD.MOLLIE_ORGANIZATION_TOKEN;
         if (!accessToken) {
             console.error('Missing mollie organization token');
@@ -24,8 +24,11 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 // A plain access token without a refresh flow: the future expiry keeps
                 // refreshIfNeeded from attempting one
                 token.expiresOn = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-                await new MollieSettlementSync({ token }).syncSettlements({ start, end, summary });
+                await new MollieSettlementSync({ token }).syncSettlements({ start, end, summary, abort });
             } catch (e) {
+                // An interrupted account is not a failing account
+                abort.throwIfAborted();
+
                 console.error(e);
                 summary.failed += 1;
             }
@@ -34,6 +37,8 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
 
         const mollieTokens = await MollieToken.all();
         for (const token of mollieTokens) {
+            abort.throwIfAborted();
+
             // Tokens created before the settlements permission was added to the OAuth scope
             // cannot read settlements
             if (token.createdAt < new Date(2021, 8 /* september! */, 8)) {
@@ -42,8 +47,10 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
             }
 
             try {
-                await new MollieSettlementSync({ token }).syncSettlements({ start, end, summary });
+                await new MollieSettlementSync({ token }).syncSettlements({ start, end, summary, abort });
             } catch (e) {
+                abort.throwIfAborted();
+
                 console.error(e);
                 summary.failed += 1;
             }

@@ -1,6 +1,7 @@
 import type { MollieToken } from '@stamhoofd/models';
 import { MolliePayment, Payment } from '@stamhoofd/models';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
+import type { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
@@ -47,6 +48,11 @@ type MollieSettlement = {
 type SettlementSyncState = {
     settlementRow: Settlement;
     reported: ReportedRows;
+
+    /**
+     * Stops the walk at the next entry (a restart).
+     */
+    abort: AbortSignal;
 };
 
 /**
@@ -89,14 +95,17 @@ export class MollieSettlementSync {
     /**
      * Walk the settlements newest first, until they settle before `start`.
      */
-    async syncSettlements({ start, end = new Date(), summary }: {
+    async syncSettlements({ start, end = new Date(), summary, abort }: {
         start: Date;
         end?: Date;
         summary?: SettlementSyncSummary;
+        abort?: AbortSignal;
     }): Promise<void> {
         let url: string | null = 'https://api.mollie.com/v2/settlements?limit=250';
 
         while (url) {
+            abort?.throwIfAborted();
+
             const request = await this.#get(url);
 
             if (request.status !== 200) {
@@ -112,6 +121,8 @@ export class MollieSettlementSync {
             }
 
             for (const settlement of settlements) {
+                abort?.throwIfAborted();
+
                 if (settlement.settledAt === null) {
                     // Skip: this is the open settlement
                     continue;
@@ -134,11 +145,14 @@ export class MollieSettlementSync {
                 }
 
                 try {
-                    await SettlementService.lock(PaymentProvider.Mollie, settlement.id, () => this.#syncSettlement(settlement));
+                    await SettlementService.lock(PaymentProvider.Mollie, settlement.id, signal => this.#syncSettlement(settlement, signal), { abort });
                     if (summary) {
                         summary.synced += 1;
                     }
                 } catch (e) {
+                    // An interrupted settlement is not a failing settlement
+                    abort?.throwIfAborted();
+
                     console.error('Sync of Mollie settlement ' + settlement.id + ' failed', e);
                     if (summary) {
                         summary.failed += 1;
@@ -163,7 +177,7 @@ export class MollieSettlementSync {
         });
     }
 
-    async #syncSettlement(settlement: MollieSettlement) {
+    async #syncSettlement(settlement: MollieSettlement, abort: AbortSignal) {
         const settlementRow = await SettlementService.upsertSettlement({
             provider: PaymentProvider.Mollie,
             externalId: settlement.id,
@@ -178,6 +192,7 @@ export class MollieSettlementSync {
         const state: SettlementSyncState = {
             settlementRow,
             reported: new ReportedRows(),
+            abort,
         };
 
         try {
@@ -200,7 +215,13 @@ export class MollieSettlementSync {
                 transactionCount: state.reported.paymentLineExternalIds.size + state.reported.chargeExternalIds.size,
             });
         } catch (e) {
-            await SettlementService.markSyncFailed(settlementRow);
+            // A walk that was interrupted stored only part of the settlement: it has to be walked
+            // again, but it didn't fail
+            if (abort.isAborted) {
+                await SettlementService.markSyncInterrupted(settlementRow);
+            } else {
+                await SettlementService.markSyncFailed(settlementRow);
+            }
             throw e;
         }
     }
@@ -265,6 +286,10 @@ export class MollieSettlementSync {
             const entries = request.data._embedded[resource] as MollieSettlementEntryJSON[];
 
             for (const entry of entries) {
+                // Between two entries is a safe point to stop: the settlement only claims to be
+                // synced after the sweep, so an interrupted walk is re-walked from the start
+                state.abort.throwIfAborted();
+
                 await this.#applySettlementToPayment(settlement, entry.id, state);
             }
 

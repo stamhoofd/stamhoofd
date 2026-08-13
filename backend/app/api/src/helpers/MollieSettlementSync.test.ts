@@ -3,10 +3,14 @@ import { MolliePayment, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
+import { AbortSignal } from '@stamhoofd/queues';
 import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
+import { STExpect } from '@stamhoofd/test-utils';
+import { vi } from 'vitest';
 import type { MollieMockPayment, MollieMockRefund } from '../../tests/helpers/MollieMocker.js';
 import { MollieMocker } from '../../tests/helpers/MollieMocker.js';
+import { SettlementService } from '../services/SettlementService.js';
 import { MollieSettlementSync } from './MollieSettlementSync.js';
 import type { SettlementSyncSummary } from './ProviderSettlementSyncRunner.js';
 
@@ -338,6 +342,45 @@ describe('Helper.MollieSettlementSync', () => {
 
         expect(summary.synced).toBe(1);
         expect(summary.failed).toBe(0);
+    });
+
+    test('An interrupted walk gives up its synced state without counting a failure', async () => {
+        const { token, mockPayment, mockRefund } = await init();
+
+        const settlement = mollieMocker.createSettlement({ payments: [mockPayment], refunds: [mockRefund], value: '30.00', settledAt: new Date(2026, 2, 3) });
+
+        await runCron(token);
+        expect((await Settlement.select().where('externalId', settlement.id).first(true)).syncedAt).not.toBeNull();
+
+        // Older, so the newest-first walk only reaches it after the one it is interrupted in
+        const untouched = mollieMocker.createSettlement({ payments: [mockPayment], value: '50.00', settledAt: new Date(2026, 2, 2) });
+
+        // Abort while the walk stores its first entry, so the settlement is only walked halfway
+        const abort = new AbortSignal();
+        const upsertPaymentLine = SettlementService.upsertPaymentLine.bind(SettlementService);
+        const spy = vi.spyOn(SettlementService, 'upsertPaymentLine').mockImplementation(async (row, data) => {
+            abort.abort();
+            return await upsertPaymentLine(row, data);
+        });
+
+        const summary: SettlementSyncSummary = { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
+        try {
+            await expect(new MollieSettlementSync({ token }).syncSettlements({
+                start: new Date(2020, 0, 1),
+                summary,
+                abort,
+            })).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
+        } finally {
+            spy.mockRestore();
+        }
+
+        const row = await Settlement.select().where('externalId', settlement.id).first(true);
+        expect(row.syncedAt).toBeNull();
+        expect(row.syncFailureCount).toBe(0);
+        expect(summary).toMatchObject({ synced: 0, failed: 0 });
+
+        // The walk stopped at the settlement it was in: the next one was never started
+        expect(await Settlement.select().where('externalId', untouched.id).count()).toBe(0);
     });
 
     test('An unlinked refund entry in a settlement is skipped without affecting the known refund', async () => {
