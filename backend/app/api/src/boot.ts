@@ -16,6 +16,7 @@ import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { resumeEmails } from './helpers/EmailResumer.js';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
+import { waitUntilDeadline } from './helpers/waitUntilDeadline.js';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
 import { ContextMiddleware } from './middleware/ContextMiddleware.js';
 import { TenantScopeMiddleware } from './middleware/TenantScopeMiddleware.js';
@@ -50,6 +51,13 @@ if (STAMHOOFD.environment === 'development') {
 if (new Date().getTimezoneOffset() !== 0) {
     throw new Error('Process should always run in UTC timezone');
 }
+
+/**
+ * How long a shutdown waits for the running crons, queue jobs and emails together. Aborting them is
+ * a request: a job that never checks it, or that hangs on a network call, may not keep the restart
+ * waiting. Everything left behind runs again after the restart.
+ */
+const MAXIMUM_SHUTDOWN_WAIT = 60 * 1000;
 
 const seeds = async (options: { shutdown: () => Promise<void> }) => {
     if (await checkReadOnly()) {
@@ -238,25 +246,29 @@ export const boot = async (options: { killProcess: boolean }) => {
         }
 
         await BalanceItemService.flushAll();
-        await waitForCrons();
-        QueueHandler.abortAll(
-            new SimpleError({
-                code: 'SHUTDOWN',
-                message: 'Shutting down',
-                statusCode: 503,
-            }),
-        );
-        await QueueHandler.awaitAll();
 
-        try {
+        const shutdownError = new SimpleError({
+            code: 'SHUTDOWN',
+            message: 'Shutting down',
+            statusCode: 503,
+        });
+        const deadline = new Date(Date.now() + MAXIMUM_SHUTDOWN_WAIT);
+
+        // A cron can be waiting on a long queue job (a settlement sync walks months of payouts):
+        // tell those jobs to stop before waiting for the crons, or the restart waits for the job
+        QueueHandler.abortAll(shutdownError);
+        await waitUntilDeadline(waitForCrons(), { deadline, description: 'crons' });
+
+        // Again for anything the crons started while they were finishing up
+        QueueHandler.abortAll(shutdownError);
+        await waitUntilDeadline(QueueHandler.awaitAll(), { deadline, description: 'queues' });
+
+        await waitUntilDeadline((async () => {
             while (Email.currentQueue.length > 0) {
                 console.log(`${Email.currentQueue.length} emails still in queue. Waiting 500ms...`);
                 await sleep(500);
             }
-        } catch (err) {
-            console.error('Failed to wait for emails to finish:');
-            console.error(err);
-        }
+        })(), { deadline, description: 'emails' });
 
         try {
             await Database.end();
