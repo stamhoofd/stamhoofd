@@ -418,7 +418,7 @@ const isPaid = computed(() => order.value && (order.value.payment === null || or
 const isTransfer = computed(() => getDefaultTransferPayment() !== null);
 
 const title = computed(() => {
-    if (props.success && isPaid.value) {
+    if (props.success && (isPaid.value || !isTransfer.value)) {
         if (webshop.value.meta.type === WebshopType.Donations) {
             return $t('%Zke');
         }
