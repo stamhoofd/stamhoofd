@@ -309,7 +309,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="webshopManager.preview.meta.type === WebshopType.Donations" :selectable="true" class="left-center" @click="$navigate(Routes.EditCrowdfunding)">
+                    <STListItem v-if="webshopManager.preview.meta.type === WebshopType.Donations || webshopManager.preview.meta.crowdfunding" :selectable="true" class="left-center" @click="$navigate(Routes.EditCrowdfunding)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
