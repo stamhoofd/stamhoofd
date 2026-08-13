@@ -175,26 +175,28 @@ export class StripeSettlementSync {
         // billed). When it is already paid out, its payout needs the derived line for it
         const invoicedFeeBalanceItemIds = new Set<string>();
 
-        for await (const transaction of this.stripe.balanceTransactions.list({
-            type: 'application_fee',
-            created: {
-                gte: Math.floor(start.getTime() / 1000),
-                lte: Math.floor(end.getTime() / 1000),
-            },
-            expand: ['data.source', 'data.source.originating_transaction'],
-            limit: 100,
-        })) {
-            try {
-                const { fees } = await this.#handleApplicationFee(transaction);
-                for (const fee of fees) {
-                    if (fee.balanceItemId && fee.settlementId) {
-                        invoicedFeeBalanceItemIds.add(fee.balanceItemId);
-                    }
+        try {
+            for await (const transaction of this.stripe.balanceTransactions.list({
+                type: 'application_fee',
+                created: {
+                    gte: Math.floor(start.getTime() / 1000),
+                    lte: Math.floor(end.getTime() / 1000),
+                },
+                expand: ['data.source', 'data.source.originating_transaction'],
+                limit: 100,
+            })) {
+                try {
+                    await this.#handleApplicationFee(transaction, { invoicedFeeBalanceItemIds });
+                } catch (e) {
+                    console.error('Failed to sync application fee transaction ' + transaction.id, e);
+                    errors.push(e);
                 }
-            } catch (e) {
-                console.error('Failed to sync application fee transaction ' + transaction.id, e);
-                errors.push(e);
             }
+        } catch (e) {
+            // The payouts of the fees stored so far still need their derived lines, but failing to
+            // update them may not hide what broke the walk
+            await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]).catch(console.error);
+            throw e;
         }
 
         await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]);
@@ -210,7 +212,16 @@ export class StripeSettlementSync {
     /**
      * Stores the SettlementCharge for the connected account (costs) and ApplicationFee for the platform account (revenue), related to an application fee in Stripe.
      */
-    async #handleApplicationFee(transaction: Stripe.BalanceTransaction, options: { settlementId?: string } = {}): Promise<{ fees: ApplicationFee[]; charges: SettlementCharge[] }> {
+    async #handleApplicationFee(transaction: Stripe.BalanceTransaction, options: {
+        settlementId?: string;
+
+        /**
+         * Collects the balance items of the invoiced fees stored here, so their fee payments can
+         * be updated afterwards. Filled while storing, not from the return value: a fee that is
+         * stored before a later one throws still needs its derived line.
+         */
+        invoicedFeeBalanceItemIds?: Set<string>;
+    } = {}): Promise<{ fees: ApplicationFee[]; charges: SettlementCharge[] }> {
         const fee = transaction.source as Stripe.ApplicationFee;
         const payingAccountId = typeof fee.account === 'string' ? fee.account : fee.account.id;
 
@@ -273,7 +284,7 @@ export class StripeSettlementSync {
                 charges.push(charge);
             }
 
-            fees.push(await ApplicationFeeService.upsertFee({
+            const storedFee = await ApplicationFeeService.upsertFee({
                 externalId: fee.id,
                 type: feeType,
                 amount,
@@ -286,7 +297,14 @@ export class StripeSettlementSync {
                 settlementChargeId: charge?.id ?? undefined,
                 settlementId: options.settlementId,
                 occurredAt,
-            }));
+            });
+            fees.push(storedFee);
+
+            // An invoiced fee is explained by the derived line of its fee payment instead of by
+            // itself, so the payouts it sits in have to rebuild those lines
+            if (storedFee.balanceItemId && storedFee.settlementId) {
+                options.invoicedFeeBalanceItemIds?.add(storedFee.balanceItemId);
+            }
         }
 
         return { fees, charges };
@@ -436,31 +454,41 @@ export class StripeSettlementSync {
         // payments' derived lines must follow
         const invoicedFeeBalanceItemIds = new Set<string>();
 
-        for await (const transaction of this.stripe.balanceTransactions.list({
-            payout: payout.id,
-            limit: 100,
-            expand: this.stripeAccount
-                ? ['data.source', 'data.source.application_fee', 'data.source.application_fee.originating_transaction', 'data.source.charge']
-                : ['data.source', 'data.source.originating_transaction', 'data.source.charge'],
-        })) {
-            transactionCount += 1;
-            await this.#handleTransaction(transaction, settlement, reported, invoicedFeeBalanceItemIds);
-        }
-
-        // Stripe reported nothing for money that did move: storing that as a complete sync would
-        // silently hide the whole payout
-        if (transactionCount === 0 && settlement.amount !== 0) {
-            throw new SimpleError({
-                code: 'empty_payout',
-                message: 'Payout ' + payout.id + ' of ' + settlement.amount + ' has no balance transactions',
-            });
-        }
-
-        const { unlinkedFees } = await SettlementService.sweepSettlement(settlement, reported);
-        for (const fee of unlinkedFees) {
-            if (fee.balanceItemId) {
-                invoicedFeeBalanceItemIds.add(fee.balanceItemId);
+        try {
+            for await (const transaction of this.stripe.balanceTransactions.list({
+                payout: payout.id,
+                limit: 100,
+                expand: this.stripeAccount
+                    ? ['data.source', 'data.source.application_fee', 'data.source.application_fee.originating_transaction', 'data.source.charge']
+                    : ['data.source', 'data.source.originating_transaction', 'data.source.charge'],
+            })) {
+                transactionCount += 1;
+                await this.#handleTransaction(transaction, settlement, reported, invoicedFeeBalanceItemIds);
             }
+
+            // Stripe reported nothing for money that did move: storing that as a complete sync
+            // would silently hide the whole payout
+            if (transactionCount === 0 && settlement.amount !== 0) {
+                throw new SimpleError({
+                    code: 'empty_payout',
+                    message: 'Payout ' + payout.id + ' of ' + settlement.amount + ' has no balance transactions',
+                });
+            }
+
+            // Only a complete walk may sweep: it can't tell a row that moved away from one this
+            // walk never reached
+            const { unlinkedFees } = await SettlementService.sweepSettlement(settlement, reported);
+            for (const fee of unlinkedFees) {
+                if (fee.balanceItemId) {
+                    invoicedFeeBalanceItemIds.add(fee.balanceItemId);
+                }
+            }
+        } catch (e) {
+            // The fee payments still follow the fees this walk linked before it broke (a fee may
+            // never sit in a payout that has no line for it), but failing to update them may not
+            // hide what broke the walk
+            await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]).catch(console.error);
+            throw e;
         }
 
         await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]);
@@ -528,15 +556,8 @@ export class StripeSettlementSync {
 
             case 'application_fee': {
                 // The fee rows, now linked to the platform payout that contains them
-                const { fees } = await this.#handleApplicationFee(transaction, { settlementId: settlement.id });
+                const { fees } = await this.#handleApplicationFee(transaction, { settlementId: settlement.id, invoicedFeeBalanceItemIds });
                 reported.applicationFees(fees);
-                for (const fee of fees) {
-                    if (fee.balanceItemId) {
-                        // Make sure we update the AccountDeduction payments and settlements that are connected to this
-                        // application fee.
-                        invoicedFeeBalanceItemIds.add(fee.balanceItemId);
-                    }
-                }
                 await this.#storePaidFeesForTransaction(transaction, settlement, reported, { paymentId: null });
                 return;
             }
