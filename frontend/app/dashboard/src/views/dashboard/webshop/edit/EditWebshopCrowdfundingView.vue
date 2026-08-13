@@ -4,9 +4,9 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
-            <CheckboxListItem v-model="enableCrowdfunding" :label="$t('Toon ingezameld bedrag')" />
-            <CheckboxListItem v-if="enableCrowdfunding" v-model="enableGoal" :label="$t('Toon doelbedrag')">
-                <PriceInputBox v-if="enableGoal" v-model="goalAmount" :validator="errors.validator" :title="$t('Doelbedrag')" :min="0" />
+            <CheckboxListItem v-model="enableCrowdfunding" :label="$t('%ZkJ')" />
+            <CheckboxListItem v-if="enableCrowdfunding" v-model="enableGoal" :label="$t('%ZkL')">
+                <PriceInputBox v-if="enableGoal" v-model="goalAmount" :validator="errors.validator" :title="$t('%ZkV')" :min="0" />
             </CheckboxListItem>
         </STList>
     </SaveView>
@@ -30,7 +30,7 @@ const props = defineProps<UseEditWebshopProps>();
 const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway, originalWebshop } = useEditWebshop({
     getProps: () => props,
 });
-const viewTitle = $t('Crowdfunding instellen');
+const viewTitle = $t('%Zku');
 
 const enableCrowdfunding = computed({
     get: () => webshop.value.meta.crowdfunding !== null,

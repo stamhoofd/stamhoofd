@@ -1327,6 +1327,14 @@
     "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Groep ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
     "translation": "- Select the correct company type in Stripe\n- Do you not have a non-profit, but instead an informal association? Then choose ‘Group WITHOUT legal personality’. You will not be able to change this afterwards.\n- Fill out all the information carefully and completely as requested, and take your time.\n- Be sure to enter a website address.\n- You can find templates and more info in the documentation. Check there first if you’re unsure.\n- Only upload documents that are on the list of permitted documents."
   },
+  "%ZkS": {
+    "original": "De groep staat nu op inactief",
+    "translation": "The group is now set to inactive"
+  },
+  "%Zkr": {
+    "original": "Deze groep kan niet verwijderd worden",
+    "translation": "This group cannot be deleted"
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oops, this website is only for administrators of {organization}. Go to 'My account' if you want to register as a member."

@@ -7,7 +7,7 @@
         <div class="split">
             <div>
                 <h3 class="style-definition-label">
-                    {{ $t('Opgehaald') }}
+                    {{ $t('%Zkj') }}
                 </h3>
                 <p class="style-definition-text">
                     {{ formatPrice(crowdfunding.progressAmount + crowdfunding.pendingAmount) }}
@@ -16,7 +16,7 @@
 
             <div v-if="crowdfunding.goalAmount">
                 <h3 class="style-definition-label">
-                    {{ $t('Doel') }}
+                    {{ $t('%Zkd') }}
                 </h3>
                 <p class="style-definition-text">
                     {{ formatPrice(crowdfunding.goalAmount) }}

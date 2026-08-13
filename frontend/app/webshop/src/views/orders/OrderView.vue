@@ -9,7 +9,7 @@
 
             <main>
                 <p v-if="!webshop.meta.reduceBranding && STAMHOOFD.platformName === 'stamhoofd'" class="stamhoofd-header">
-                    <a :href="'https://' + LocalizedDomains.marketing + '?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('Gemaakt met') }}</span>  <Logo /></a>
+                    <a :href="'https://' + LocalizedDomains.marketing + '?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('%Zkw') }}</span>  <Logo /></a>
                 </p>
                 <div class="box">
                     <main>
@@ -115,7 +115,7 @@
                             <hr><h2>{{ $t('%YI') }}</h2>
                         </template>
                         <p v-else-if="!isCanceled && !isPaid && isTransfer" class="warning-box">
-                            {{ $t('Je betaling wordt handmatig bevestigd. Zodra ze als betaald is gemarkeerd, ontvang je een bevestigingsmail. Dit kan enkele dagen duren. Via de knop onderaan bekijk je de instructies opnieuw.') }}
+                            {{ $t('%ZkU') }}
                         </p>
                         <p v-else-if="!isCanceled && !isPaid && !isTransfer" class="warning-box">
                             {{ $t('%YS') }} {{ getLowerCaseName(order.data.paymentMethod) }}
@@ -420,57 +420,57 @@ const isTransfer = computed(() => getDefaultTransferPayment() !== null);
 const title = computed(() => {
     if (props.success && isPaid.value) {
         if (webshop.value.meta.type === WebshopType.Donations) {
-            return $t('Bijdrage bevestigd');
+            return $t('%Zke');
         }
 
         if (hasTickets.value) {
             if (singleTicket.value) {
-                return $t('Jouw ticket is bevestigd');
+                return $t('%ZkH');
             }
-            return $t('Jouw tickets zijn bevestigd');
+            return $t('%Zkt');
         }
 
         if (webshop.value.meta.type === WebshopType.Registrations) {
-            return $t('Inschrijving bevestigd');
+            return $t('%Zko');
         }
 
-        return $t('Bestelling bevestigd');
+        return $t('%ZkX');
     } else if (!isPaid.value && !isCanceled.value && !isFailed.value && order.value?.data.paymentMethod !== PaymentMethod.PointOfSale) {
         if (isTransfer.value) {
-            return $t('In afwachting van handmatige bevestiging');
+            return $t('%ZkW');
         }
 
         if (webshop.value.meta.type === WebshopType.Donations) {
-            return $t('In afwachting van betaling');
+            return $t('%ZkQ');
         }
 
         if (hasTickets.value) {
             if (singleTicket.value) {
-                return $t('Je ontvangt jouw ticket na betaling');
+                return $t('%ZkM');
             }
-            return $t('Je ontvangt jouw tickets na betaling');
+            return $t('%Zkh');
         }
 
         if (webshop.value.meta.type === WebshopType.Registrations) {
-            return $t('Je inschrijving wordt bevestigd na je betaling');
+            return $t('%ZkP');
         }
 
-        return $t('Je bestelling wordt bevestigd na je betaling');
+        return $t('%Zkq');
     }
 
     if (webshop.value.meta.type === WebshopType.Donations) {
-        return $t('Jouw bijdrage');
+        return $t('%eP');
     }
 
     if (hasTickets.value) {
         if (singleTicket.value) {
-            return $t('Jouw ticket');
+            return $t('%YC');
         }
-        return $t('Jouw tickets');
+        return $t('%YD');
     }
 
     if (webshop.value.meta.type === WebshopType.Registrations) {
-        return $t('Jouw inschrijving');
+        return $t('%ZkZ');
     }
 
     return $t('%Y6');

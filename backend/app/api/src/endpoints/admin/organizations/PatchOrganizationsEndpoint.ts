@@ -74,7 +74,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'organization_has_financial_records',
                     message: 'Organization is still referenced as paying organization',
-                    human: $t('Er zijn nog openstaande bedragen, betalingen, transactiekosten of facturen waarvoor {organization} moet betalen of betaald heeft. Die gegevens mogen niet verloren gaan.', { organization: organization.name }),
+                    human: $t('%Zks', { organization: organization.name }),
                 });
             }
 

@@ -31,7 +31,7 @@
             </aside>
             <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
             <div v-else>
-                <a v-if="isWebshop" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('Gemaakt met') }} <Logo /></a>
+                <a v-if="isWebshop" :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%Zkw') }} <Logo /></a>
                 <a v-else :href="'https://'+ LocalizedDomains.marketing +'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('%XC') }} <Logo /></a>
             </div>
         </div>

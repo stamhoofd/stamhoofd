@@ -79,13 +79,13 @@
                             <Radio v-model="selectedPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
                         </template>
                         <h4 class="style-title-list">
-                            {{ price.name || $t('Naamloos') }}
+                            {{ price.name || $t('%CL') }}
                         </h4>
 
                         <p v-if="price.discountPrice" class="style-description-small">
                             {{ price.discountAmount === 1
-                                ? $t('{price} / stuk vanaf {amount} stuk', { price: formatPrice(price.discountPrice), amount: price.discountAmount.toString() })
-                                : $t('{price} / stuk vanaf {amount} stuks', { price: formatPrice(price.discountPrice), amount: price.discountAmount.toString() }) }}
+                                ? $t('%ZkK', { price: formatPrice(price.discountPrice), amount: price.discountAmount.toString() })
+                                : $t('%Zkc', { price: formatPrice(price.discountPrice), amount: price.discountAmount.toString() }) }}
                         </p>
 
                         <p v-if="getPriceStockText(price)" class="style-description-small">
@@ -101,7 +101,7 @@
 
             <template v-if="cartItem.productPrice.allowCustomPrice">
                 <hr>
-                <h2>{{ cartItem.productPrice.name || $t('Kies een bedrag') }}</h2>
+                <h2>{{ cartItem.productPrice.name || $t('%Zkv') }}</h2>
                 <PriceInputBox v-model="cartItem.productPrice.price" class="max" data-testid="custom-price-input" :validator="errors.validator" :min="ProductPrice.customPriceMinimum" :max="ProductPrice.customPriceMaximum" />
             </template>
 
