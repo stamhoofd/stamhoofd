@@ -19,7 +19,7 @@ import { orderFilterCompilers } from '../../src/sql-filters/orders.js';
  *
  * Filters that only exist in one engine are intentionally not covered here (no counterpart to compare to):
  * - in-memory only: location, openBalance, ticketScanStatus, ticketScannedAt, ticketCount
- * - SQL only: organizationId, updatedAt, paymentMethod
+ * - SQL only: organizationId, updatedAt
  */
 describe('Order filters (in-memory vs backend SQL parity)', () => {
     let organization: Organization;
@@ -72,6 +72,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         discountCodes?: DiscountCode[];
         items?: CartItem[];
         recordAnswers?: Map<string, RecordCheckboxAnswer | RecordTextAnswer | RecordChooseOneAnswer | RecordMultipleChoiceAnswer | RecordDateAnswer | RecordIntegerAnswer>;
+        paymentMethod?: PaymentMethod;
     } = {}): OrderData {
         return OrderData.create({
             customer: Customer.create({
@@ -85,6 +86,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             discountCodes: options.discountCodes ?? [],
             cart: Cart.create({ items: options.items ?? [] }),
             recordAnswers: options.recordAnswers ?? new Map(),
+            paymentMethod: options.paymentMethod ?? PaymentMethod.Unknown,
         });
     }
 
@@ -225,6 +227,27 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             await expectFilter({ status: { $eq: OrderStatus.Created } }, [created]);
             await expectFilter({ status: { $in: [OrderStatus.Created, OrderStatus.Completed] } }, [created, completed]);
             await expectFilter({ status: { $neq: OrderStatus.Prepared } }, [created, completed]);
+        });
+    });
+
+    describe('paymentMethod', () => {
+        it('$eq / $in / $neq on the enum', async () => {
+            const transfer = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Transfer }) });
+            const bancontact = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Bancontact }) });
+            const pointOfSale = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.PointOfSale }) });
+
+            await expectFilter({ paymentMethod: { $eq: PaymentMethod.Transfer } }, [transfer]);
+            await expectFilter({ paymentMethod: { $eq: PaymentMethod.Bancontact } }, [bancontact]);
+            await expectFilter({ paymentMethod: { $in: [PaymentMethod.Transfer, PaymentMethod.PointOfSale] } }, [transfer, pointOfSale]);
+            await expectFilter({ paymentMethod: { $neq: PaymentMethod.Bancontact } }, [transfer, pointOfSale]);
+        });
+
+        it('$gt / $lt as used by the pagination filter when sorting', async () => {
+            const bancontact = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Bancontact }) });
+            const transfer = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Transfer }) });
+
+            await expectFilter({ paymentMethod: { $gt: PaymentMethod.Bancontact } }, [transfer]);
+            await expectFilter({ paymentMethod: { $lt: PaymentMethod.Transfer } }, [bancontact]);
         });
     });
 

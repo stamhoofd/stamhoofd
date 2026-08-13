@@ -133,6 +133,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     createdAt: createInMemoryFilterCompiler('createdAt'),
     number: createInMemoryFilterCompiler('number'),
     status: createInMemoryFilterCompiler('status'),
+    paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
     checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
     checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id'),
     discountCodes: {

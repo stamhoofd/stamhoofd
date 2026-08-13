@@ -725,6 +725,67 @@ function registerWebshopOrderTests() {
         await adminContext.close();
     });
 
+    test('Sorting the orders on a column keeps loading pages while scrolling', async ({ browser }) => {
+        // Sorting is done by the local order database: it walks an IndexedDB index (the sorters in
+        // ordersIndexedDBSorters) and builds a filter for the next page out of the last order of the
+        // current page. That filter is run by the in-memory filter compilers, so a column that has a
+        // sorter but no compiler only breaks once a second page is needed — the first page still
+        // renders fine, the error only appears while scrolling.
+        const organization = await createWebshopOrganization('SortScroll');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Sort scroll ${WorkerData.id}`,
+            ticketType: WebshopTicketType.None,
+            productCount: 1,
+            cartEnabled: false,
+            // The payment method column is only added when the webshop has more than one method
+            paymentMethods: [PaymentMethod.Bancontact, PaymentMethod.PointOfSale, PaymentMethod.Transfer],
+        });
+        const admin = await createAdmin(organization);
+
+        // More orders than fit on one page, so the table has to load a next page while scrolling
+        // down. 'Klant 01' comes last for every column below: it has the lowest number, name and
+        // e-mail address, and it is the only order with the lowest payment method.
+        const orderCount = 40;
+        for (let number = 1; number <= orderCount; number++) {
+            const label = number.toString().padStart(2, '0');
+            await new OrderFactory({
+                webshop,
+                number,
+                firstName: 'Klant',
+                lastName: label,
+                email: `klant-${label}@example.com`,
+                paymentMethod: number === 1 ? PaymentMethod.Bancontact : (number <= 20 ? PaymentMethod.PointOfSale : PaymentMethod.Transfer),
+            }).create();
+        }
+
+        const adminContext = await browser.newContext();
+        const adminPage = await adminContext.newPage();
+        await loginAs({ page: adminPage, user: admin });
+
+        const table = await openWebshopOrders(adminPage, organization, webshop.meta.name);
+        await expect(adminPage.getByTestId('table').locator('.title-suffix')).toHaveText(orderCount.toString());
+
+        // Every sortable column needs a sorter (ordersIndexedDBSorters) *and* an in-memory filter
+        // compiler (privateOrderFilterCompilers). Add a column here to cover that pair.
+        const columnNames = ['Betaalmethode', 'Naam', 'E-mailadres', '#'];
+
+        for (const columnName of columnNames) {
+            await table.scrollToTop();
+            await table.sortBy(columnName);
+            await table.waitForFirstRow();
+
+            await table.scrollToBottom();
+
+            // The table sorts descending by default, so the last order is at the bottom. Reaching it
+            // means every page in between loaded.
+            await expect(table.getRow('Klant 01')).toBeVisible();
+            await expect(table.getErrorBox()).toHaveCount(0);
+        }
+
+        await adminContext.close();
+    });
+
     test('Bancontact via Mollie: admin can refund the payment online', async ({ page, browser }) => {
         const organization = await createWebshopOrganization('MollieRefund');
         organization.privateMeta.mollieOnboarding = MollieOnboarding.create({

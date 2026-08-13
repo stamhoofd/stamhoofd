@@ -42,6 +42,41 @@ function testFilter(filter: StamhoofdFilter, objects: any[], doNotMatch: any[]) 
 }
 
 describe('privateOrderWithTicketsFilterCompilers', () => {
+    describe('paymentMethod', () => {
+        it('supports filtering on the payment method', () => {
+            testFilter(
+                { paymentMethod: { $eq: 'Transfer' } },
+                [
+                    makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Transfer' } }),
+                ],
+                [
+                    makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
+                    makeOrder(),
+                ],
+            );
+        });
+
+        it('supports the pagination filter that is built when sorting on the payment method', () => {
+            // Same shape as getSortFilter builds for the next page
+            testFilter(
+                {
+                    $or: [
+                        { paymentMethod: { $gt: 'Bancontact' } },
+                        { $and: [{ paymentMethod: 'Bancontact' }, { id: { $gt: 'order-1' } }] },
+                    ],
+                },
+                [
+                    makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Transfer' } }),
+                    makeOrder({ id: 'order-2', data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
+                ],
+                [
+                    makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
+                    makeOrder({ id: 'order-0', data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
+                ],
+            );
+        });
+    });
+
     describe('recordAnswers', () => {
         it('supports filtering on a checkbox record answer', () => {
             testFilter(

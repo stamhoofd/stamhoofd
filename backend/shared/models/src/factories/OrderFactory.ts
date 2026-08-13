@@ -1,5 +1,5 @@
 import { Database, Factory } from '@simonbackx/simple-database';
-import { Cart, Customer, OrderData, OrderStatus } from '@stamhoofd/structures';
+import { Cart, Customer, OrderData, OrderStatus, PaymentMethod } from '@stamhoofd/structures';
 
 import { WebshopCounter } from '../helpers/WebshopCounter.js';
 import { Order } from '../models/index.js';
@@ -11,6 +11,8 @@ class Options {
     firstName?: string;
     lastName?: string;
     email?: string;
+    /** Payment method the customer chose. Note that this doesn't create a payment. */
+    paymentMethod?: PaymentMethod;
     /** Order number. Defaults to the next sequential number of the webshop. */
     number?: number;
     status?: OrderStatus;
@@ -35,6 +37,7 @@ export class OrderFactory extends Factory<Options, Order> {
                 email: this.options.email ?? 'john.doe@example.com',
             }),
             cart: Cart.create({}),
+            paymentMethod: this.options.paymentMethod ?? PaymentMethod.Unknown,
         });
 
         const order = new Order();
