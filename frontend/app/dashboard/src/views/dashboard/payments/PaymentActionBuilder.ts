@@ -23,7 +23,7 @@ import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 
 type ObjectType = PaymentGeneral;
 
-export function usePaymentActions({ configurationId, methods }: { configurationId: ComputedRef<string>; methods: PaymentMethod[] | null }) {
+export function usePaymentActions({ configurationId, methods, reload }: { configurationId: ComputedRef<string>; methods: PaymentMethod[] | null; reload?: (() => Promise<void> | void) | null }) {
     const platform = usePlatform();
     const organization = useOrganization();
     const markPaid = useMarkPaymentsPaid();
@@ -44,6 +44,7 @@ export function usePaymentActions({ configurationId, methods }: { configurationI
         $feature,
         methods,
         context,
+        reload: reload ?? null,
     });
 }
 
@@ -59,6 +60,7 @@ export class PaymentActionBuilder {
     private methods: PaymentMethod[] | null;
     private isSettingPaymentStatus: boolean = false;
     private context: Ref<SessionContext, SessionContext>;
+    private reload: (() => Promise<void> | void) | null;
 
     constructor(settings: {
         markPaid: ReturnType<typeof useMarkPaymentsPaid>;
@@ -71,6 +73,7 @@ export class PaymentActionBuilder {
         $feature: ReturnType<typeof useFeatureFlag>;
         methods: PaymentMethod[] | null;
         context: Ref<SessionContext, SessionContext>;
+        reload?: (() => Promise<void> | void) | null;
     }) {
         this.markPaid = settings.markPaid;
         this.present = settings.present;
@@ -82,6 +85,7 @@ export class PaymentActionBuilder {
         this.$feature = settings.$feature;
         this.methods = settings.methods;
         this.context = settings.context;
+        this.reload = settings.reload ?? null;
     }
 
     getActions(): TableAction<ObjectType>[] {
@@ -111,6 +115,7 @@ export class PaymentActionBuilder {
                 },
             }),
             this.getCancelPaymentsAction(),
+            this.getRefundPaymentsAction(),
             this.$feature('payment-breakdown')
                 ? new AsyncTableAction({
                         name: $t('%Pa'),
@@ -221,6 +226,53 @@ export class PaymentActionBuilder {
             });
         }
         return null;
+    }
+
+    /**
+     * Refund a selection of online payments via the API of the payment provider (Mollie only).
+     * The view itself splits the selection into what can and cannot be refunded.
+     */
+    private getRefundPaymentsAction(): TableAction<ObjectType> | null {
+        if (!this.$feature('bulk-refund-payments')) {
+            return null;
+        }
+
+        // The refunds run through the Mollie account of the organization: mollieOnboarding is
+        // cleared as soon as that account is gone
+        if (!this.organization?.privateMeta?.mollieOnboarding) {
+            return null;
+        }
+
+        // A table that only lists methods that never pass through a payment provider (e.g. the
+        // transfers to check) can never contain a payment that is refundable online
+        if (this.methods && !this.methods.some(method => PaymentMethodHelper.isOnline(method))) {
+            return null;
+        }
+
+        return new InMemoryTableAction({
+            name: $t('Online terugbetalen'),
+            icon: 'undo',
+            priority: 0,
+            groupIndex: 4,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            destructive: true,
+            handler: async (payments: PaymentGeneral[]) => {
+                if (payments.length === 0) {
+                    return;
+                }
+
+                await this.present({
+                    components: [
+                        AsyncComponent(() => import('@stamhoofd/components/payments/RefundPaymentsView.vue'), {
+                            payments,
+                            onRefunded: this.reload,
+                        }),
+                    ],
+                    modalDisplayStyle: 'popup',
+                });
+            },
+        });
     }
 
     private async setPaymentStatus(status: PaymentStatus, payments: PaymentGeneral[]) {
