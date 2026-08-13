@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/cli",
-    "version": "2.142.0",
+    "version": "2.143.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -33,7 +33,7 @@
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.11.14",
         "@stamhoofd/metabase": "2.140.0",
-        "@stamhoofd/types": "2.142.0",
+        "@stamhoofd/types": "2.143.0",
         "chalk": "5.6.2",
         "log-update": "8.0.0",
         "openai": "4.104.0",
