@@ -119,8 +119,8 @@ export class SettlementService {
      * one, and every caller in it recognizes the abort), and a caller without one walks to the end.
      */
     static lock<T>(provider: PaymentProvider, externalId: string, handler: (abort: AbortSignal) => Promise<T>, { abort }: { abort?: AbortSignal } = {}): Promise<T> {
-        return QueueHandler.schedule('settlement-sync-' + provider + '-' + externalId, async () => {
-            const signal = abort ?? new AbortSignal();
+        return QueueHandler.schedule('settlement-sync-' + provider + '-' + externalId, async (o) => {
+            const signal = abort ?? o.abort;
 
             // Waiting behind another settlement may have taken a while: don't start a walk that is
             // interrupted at its first step anyway
