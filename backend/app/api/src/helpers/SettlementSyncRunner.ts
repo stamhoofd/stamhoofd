@@ -1,3 +1,4 @@
+import { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 
 import { MollieSettlementSyncRunner } from './MollieSettlementSyncRunner.js';
@@ -19,11 +20,17 @@ export class SettlementSyncRunner {
      */
     callback: ((summary: SettlementSyncSummary) => void) | null = null;
 
-    async run({ start = new Date(2025, 0, 1), end, providers, stripe }: {
+    async run({ start = new Date(2025, 0, 1), end, providers, stripe, abort = new AbortSignal() }: {
         start?: Date;
         end?: Date | null;
         providers?: PaymentProvider[] | null;
         stripe?: StripeSyncOptions;
+
+        /**
+         * Stops the run at the next safe point, and throws what it was aborted with: a caller that
+         * treats a completed run as "done for today" may not mistake an interrupted one for it.
+         */
+        abort?: AbortSignal;
     } = {}): Promise<SettlementSyncSummary> {
         const summary: SettlementSyncSummary = { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
         const rangeEnd = end ?? new Date();
@@ -41,8 +48,12 @@ export class SettlementSyncRunner {
             if (includeStripe && STAMHOOFD.STRIPE_SECRET_KEY) {
                 const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY, ...stripe });
                 try {
-                    await runner.run({ start, end: rangeEnd, summary, onProgress });
+                    await runner.run({ start, end: rangeEnd, summary, onProgress, abort });
                 } catch (e) {
+                    // An interrupted provider stops the whole run: it didn't fail, and the
+                    // providers after it would only be interrupted at their first step too
+                    abort.throwIfAborted();
+
                     console.error('Stripe settlement sync failed', e);
                     summary.failed += 1;
                 }
@@ -51,12 +62,18 @@ export class SettlementSyncRunner {
             if (includeMollie) {
                 const runner = new MollieSettlementSyncRunner();
                 try {
-                    await runner.run({ start, end: rangeEnd, summary, onProgress });
+                    await runner.run({ start, end: rangeEnd, summary, onProgress, abort });
                 } catch (e) {
+                    abort.throwIfAborted();
+
                     console.error('Mollie settlement sync failed', e);
                     summary.failed += 1;
                 }
             }
+
+            // A provider that ignores the signal (or a run without providers) may not hand back a
+            // summary that reads as a completed run
+            abort.throwIfAborted();
 
             return summary;
         });

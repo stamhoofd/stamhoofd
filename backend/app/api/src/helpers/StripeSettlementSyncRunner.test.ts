@@ -1,7 +1,9 @@
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
+import { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
+import { STExpect } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
@@ -62,5 +64,21 @@ describe('Helper.StripeSettlementSyncRunner', () => {
 
         const fresh = await Settlement.getByID(settlement.id);
         expect(fresh!.syncFailureCount).toBe(5);
+    });
+
+    test('an interrupted retry does not count towards the cap', async () => {
+        const settlement = await createUnsyncedSettlement(1);
+
+        const abort = new AbortSignal();
+        abort.abort();
+
+        const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
+        await expect(runner.retryUnsyncedSettlements({ windowStart, abort })).rejects.toThrow(
+            STExpect.simpleError({ code: 'queue-aborted' }),
+        );
+
+        // A restart is not an attempt: the payout is still waiting for a real one
+        const fresh = await Settlement.getByID(settlement.id);
+        expect(fresh!.syncFailureCount).toBe(1);
     });
 });

@@ -8,6 +8,7 @@ import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js
 import type { Settlement as SettlementModel } from '@stamhoofd/models/models/Settlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
+import { AbortSignal } from '@stamhoofd/queues';
 import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
@@ -1126,6 +1127,76 @@ describe('StripeSettlementSync', () => {
 
             const settlement = await getSettlement(payout);
             expect(settlement.syncedAt).toBeNull();
+        });
+    });
+
+    describe('Aborting', () => {
+        /**
+         * Aborts the walk while it stores its first row, so the payout is interrupted halfway.
+         */
+        const abortDuringWalk = () => {
+            const abort = new AbortSignal();
+            const upsertCharge = SettlementService.upsertCharge.bind(SettlementService);
+
+            const spy = vi.spyOn(SettlementService, 'upsertCharge').mockImplementation(async (data) => {
+                abort.abort();
+                return await upsertCharge(data);
+            });
+
+            return { abort, restore: () => spy.mockRestore() };
+        };
+
+        test('an interrupted walk gives up its synced state without counting a failure', async () => {
+            const payout = stripeMocker.createPayout({ amount: 2000, arrivalDate });
+            for (let i = 0; i < 2; i++) {
+                stripeMocker.createBalanceTransaction({ type: 'stripe_fee', amount: 1000, created, payout: payout.id, source: null });
+            }
+
+            expect(await createSync().syncPayouts({ start })).toEqual({ synced: 1, skipped: 0, failed: 0 });
+            expect((await getSettlement(payout)).syncedAt).not.toBeNull();
+
+            const { abort, restore } = abortDuringWalk();
+            try {
+                await WebmasterReport.group('Onderbroken synchronisatie', async () => {
+                    await expect(createSync().syncPayouts({ start, force: true, abort })).rejects.toThrow(
+                        STExpect.simpleError({ code: 'queue-aborted' }),
+                    );
+                });
+            } finally {
+                restore();
+            }
+
+            // Only part of the payout was walked, so it may not keep claiming it is synced. A
+            // restart is not a failure of this payout: it doesn't count towards the retry cap
+            const settlement = await getSettlement(payout);
+            expect(settlement.syncedAt).toBeNull();
+            expect(settlement.syncFailureCount).toBe(0);
+
+            const emails = (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith('Onderbroken synchronisatie'));
+            expect(emails).toHaveLength(0);
+        });
+
+        test('the payouts after an interrupted one are left untouched', async () => {
+            const interrupted = stripeMocker.createPayout({ amount: 2000, arrivalDate });
+            for (let i = 0; i < 2; i++) {
+                stripeMocker.createBalanceTransaction({ type: 'stripe_fee', amount: 1000, created, payout: interrupted.id, source: null });
+            }
+
+            const untouched = stripeMocker.createPayout({ amount: 1000, arrivalDate });
+            stripeMocker.createBalanceTransaction({ type: 'stripe_fee', amount: 1000, created, payout: untouched.id, source: null });
+
+            const { abort, restore } = abortDuringWalk();
+            try {
+                await expect(createSync().syncPayouts({ start, abort })).rejects.toThrow(
+                    STExpect.simpleError({ code: 'queue-aborted' }),
+                );
+            } finally {
+                restore();
+            }
+
+            // The loop stopped at the payout it was walking: the other one was never started
+            expect((await getSettlement(interrupted)).syncedAt).toBeNull();
+            expect(await Settlement.select().where('externalId', untouched.id).count()).toBe(0);
         });
     });
 });
