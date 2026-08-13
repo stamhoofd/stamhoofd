@@ -2955,10 +2955,6 @@
     "original": "Elk ticket moet een UiTPAS-evenement gekoppeld hebben om een automatische terugbetaling te krijgen van je UiTPAS-regio.",
     "translation": "Chaque ticket doit être lié à un événement UiTPAS afin de recevoir un remboursement automatique de votre région UiTPAS."
   },
-  "%1C2": {
-    "original": "Kortingen bij de UiTPAS officiële flow zijn niet mogelijk.",
-    "translation": "Les réductions dans le flux officiel UiTPAS ne sont pas possibles."
-  },
   "%1C3": {
     "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.",
     "translation": "Ce membre n'est pas inscrit dans un groupe d'âge standard pour l'année associative en cours. Supprimez la fonction ou inscrivez le membre pour l'année associative actuelle."
@@ -16847,10 +16843,6 @@
     "original": "Verkoop ook tickets via",
     "translation": "Vente de tickets via"
   },
-  "%Y4": {
-    "original": "Bouw je betaalbare webshop via",
-    "translation": "Construisez votre boutique en ligne abordable via"
-  },
   "%Y5": {
     "original": "Jouw bestelling is geplaatst",
     "translation": "Votre commande a été passée"
@@ -16938,10 +16930,6 @@
   "%YQ": {
     "original": "Tickets bekijken",
     "translation": "Voir les tickets"
-  },
-  "%YR": {
-    "original": "Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.",
-    "translation": "Attention : cette commande doit être payée par virement, nous ne savons donc pas automatiquement si elle a déjà été payée ou non. Assurez-vous de la payer immédiatement afin que le montant soit crédité à temps sur notre compte. Cliquez sur le bouton ci-dessous pour afficher à nouveau les instructions."
   },
   "%YS": {
     "original": "Opgelet: je zal deze bestelling nog moeten betalen",
@@ -19403,6 +19391,158 @@
     "original": "De synchronisatie is gestart.",
     "translation": "La synchronisation a démarré."
   },
+  "%ZkH": {
+    "original": "Jouw ticket is bevestigd",
+    "translation": "Ton ticket est confirmé"
+  },
+  "%ZkI": {
+    "original": "Vrij bedrag",
+    "translation": "Montant libre"
+  },
+  "%ZkJ": {
+    "original": "Toon ingezameld bedrag",
+    "translation": "Afficher le montant récolté"
+  },
+  "%ZkK": {
+    "original": "{price} / stuk vanaf {amount} stuk",
+    "translation": "{price} / pièce à partir de {amount} pièce"
+  },
+  "%ZkL": {
+    "original": "Toon doelbedrag",
+    "translation": "Afficher l'objectif"
+  },
+  "%ZkM": {
+    "original": "Je ontvangt jouw ticket na betaling",
+    "translation": "Tu recevras ton ticket après le paiement"
+  },
+  "%ZkO": {
+    "original": "Inschrijving bevestigen",
+    "translation": "Confirmer l'inscription"
+  },
+  "%ZkP": {
+    "original": "Je inschrijving wordt bevestigd na je betaling",
+    "translation": "Ton inscription sera confirmée après réception de ton paiement"
+  },
+  "%ZkQ": {
+    "original": "In afwachting van betaling",
+    "translation": "En attente de paiement"
+  },
+  "%ZkR": {
+    "original": "Zet ze op inactief in plaats van ze te verwijderen.",
+    "translation": "Mets-les inactifs au lieu de les supprimer."
+  },
+  "%ZkS": {
+    "original": "De vereniging staat nu op inactief",
+    "translation": "L'association est désormais inactive"
+  },
+  "%ZkU": {
+    "original": "Je betaling wordt handmatig bevestigd. Zodra ze als betaald is gemarkeerd, ontvang je een bevestigingsmail. Dit kan enkele dagen duren. Via de knop onderaan bekijk je de instructies opnieuw.",
+    "translation": "Ton paiement sera confirmé manuellement. Dès qu’il sera marqué comme payé, tu recevras un e-mail de confirmation. Cela peut prendre quelques jours. Tu peux revoir les instructions en cliquant sur le bouton ci-dessous."
+  },
+  "%ZkV": {
+    "original": "Doelbedrag",
+    "translation": "Objectif"
+  },
+  "%ZkW": {
+    "original": "In afwachting van handmatige bevestiging",
+    "translation": "En attente de confirmation manuelle"
+  },
+  "%ZkX": {
+    "original": "Bestelling bevestigd",
+    "translation": "Commande confirmée"
+  },
+  "%ZkY": {
+    "original": "Stel een doelbedrag in, of toon het totaal ingezamelde bedrag",
+    "translation": "Définis un objectif ou affiche le total récolté"
+  },
+  "%ZkZ": {
+    "original": "Jouw inschrijving",
+    "translation": "Ton inscription"
+  },
+  "%Zkb": {
+    "original": "Doelbedrag en vooruitgang",
+    "translation": "Objectif et progression"
+  },
+  "%Zkc": {
+    "original": "{price} / stuk vanaf {amount} stuks",
+    "translation": "{price} / pièce à partir de {amount} pièces"
+  },
+  "%Zkd": {
+    "original": "Doel",
+    "translation": "Objectif"
+  },
+  "%Zke": {
+    "original": "Bijdrage bevestigd",
+    "translation": "Contribution confirmée"
+  },
+  "%Zkf": {
+    "original": "Voeg een vooruitgangsbalk toe",
+    "translation": "Ajouter une barre de progression"
+  },
+  "%Zkg": {
+    "original": "Bezoekers kiezen zelf hoeveel ze willen betalen, met de hierboven ingestelde prijs als suggestie. Als je het optioneel gratis wilt maken, voeg dan nog een extra prijskeuze van 0 euro toe.",
+    "translation": "Les visiteurs décident eux-mêmes du montant qu’ils souhaitent verser, avec le prix ci-dessus comme suggestion. Si tu veux rendre la contribution optionnellement gratuite, ajoute aussi un choix à 0 euro."
+  },
+  "%Zkh": {
+    "original": "Je ontvangt jouw tickets na betaling",
+    "translation": "Tu recevras tes tickets après le paiement"
+  },
+  "%Zki": {
+    "original": "Aankoop bevestigen",
+    "translation": "Confirmer l'achat"
+  },
+  "%Zkj": {
+    "original": "Opgehaald",
+    "translation": "Ramassé"
+  },
+  "%Zkl": {
+    "original": "Vrije invoer van bedrag (minstens 1 euro)",
+    "translation": "Saisie libre du montant (minimum 1 euro)"
+  },
+  "%Zkm": {
+    "original": "Bijdrage bevestigen",
+    "translation": "Confirmer la contribution"
+  },
+  "%Zkn": {
+    "original": "Toon de vooruitgang van je inzameling, crowdfunding of donaties.",
+    "translation": "Affiche la progression de ta collecte, crowdfunding ou des dons."
+  },
+  "%Zko": {
+    "original": "Inschrijving bevestigd",
+    "translation": "Inscription confirmée"
+  },
+  "%Zkq": {
+    "original": "Je bestelling wordt bevestigd na je betaling",
+    "translation": "Ta commande sera confirmée après paiement"
+  },
+  "%Zkr": {
+    "original": "Deze vereniging kan niet verwijderd worden",
+    "translation": "Cette association ne peut pas être supprimée"
+  },
+  "%Zks": {
+    "original": "Er zijn nog openstaande bedragen, betalingen, transactiekosten of facturen waarvoor {organization} moet betalen of betaald heeft. Die gegevens mogen niet verloren gaan.",
+    "translation": "Il existe encore des montants dus, des paiements, des frais de transaction ou des factures pour lesquels {organization} doit payer ou a payé. Ces données ne peuvent pas être perdues."
+  },
+  "%Zkt": {
+    "original": "Jouw tickets zijn bevestigd",
+    "translation": "Tes tickets sont confirmés"
+  },
+  "%Zku": {
+    "original": "Crowdfunding instellen",
+    "translation": "Configurer le crowdfunding"
+  },
+  "%Zkv": {
+    "original": "Kies een bedrag",
+    "translation": "Choisir un montant"
+  },
+  "%Zkw": {
+    "original": "Gemaakt met",
+    "translation": "Créé avec"
+  },
+  "%Zkx": {
+    "original": "Op inactief zetten",
+    "translation": "Mettre en inactif"
+  },
   "%Zl": {
     "original": "Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
     "translation": "Ou créez un nouveau compte si vous n'en avez pas encore un. Utilisez de préférence une adresse e-mail à laquelle nous vous envoyons déjà des e-mails."
@@ -20926,10 +21066,6 @@
   "%gA": {
     "original": "Aansluiting of verzekering toevoegen in {period}",
     "translation": "Ajouter une adhésion ou une assurance dans {period}"
-  },
-  "%gB": {
-    "original": "Bouw je webshop via",
-    "translation": "Construisez votre boutique en ligne via"
   },
   "%gC": {
     "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke vereniging als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",

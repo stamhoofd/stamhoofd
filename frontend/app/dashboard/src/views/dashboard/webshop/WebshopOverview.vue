@@ -314,10 +314,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Doelbedrag en vooruitgang') }}
+                            {{ $t('%Zkb') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Toon de vooruitgang van je inzameling, crowdfunding of donaties.') }}
+                            {{ $t('%Zkn') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -991,8 +991,8 @@ const todoList = computed(() => {
     if (webshopManager.value.preview.meta.type === WebshopType.Donations) {
         list.push({
             icon: 'partially',
-            title: $t('Voeg een vooruitgangsbalk toe'),
-            description: $t('Stel een doelbedrag in, of toon het totaal ingezamelde bedrag'),
+            title: $t('%Zkf'),
+            description: $t('%ZkY'),
             action: () => $navigate(Routes.EditCrowdfunding),
             done: !!webshop.value?.meta.crowdfunding,
         });

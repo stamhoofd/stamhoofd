@@ -69,7 +69,7 @@ const priceString = computed(() => {
     const fixedPrices = prices.filter(p => !p.allowCustomPrice);
     if (fixedPrices.length === 0) {
         // The customer chooses the price
-        return prices.length > 0 ? $t('Vrij bedrag') : '';
+        return prices.length > 0 ? $t('%ZkI') : '';
     }
 
     if (fixedPrices.length < prices.length) {

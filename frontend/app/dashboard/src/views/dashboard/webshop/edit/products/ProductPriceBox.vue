@@ -20,11 +20,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Vrije invoer van bedrag (minstens 1 euro)') }}
+                    {{ $t('%Zkl') }}
                 </h3>
 
                 <p v-if="allowCustomPrice" class="style-description-small">
-                    {{ $t("Bezoekers kiezen zelf hoeveel ze willen betalen, met de hierboven ingestelde prijs als suggestie. Als je het optioneel gratis wilt maken, voeg dan nog een extra prijskeuze van 0 euro toe.") }}
+                    {{ $t("%Zkg") }}
                 </p>
             </STListItem>
 

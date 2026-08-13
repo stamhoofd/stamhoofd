@@ -1611,6 +1611,14 @@
     "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Eenheid ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
     "translation": "- Sélectionnez la bonne forme d'entreprise dans Stripe\n- Si vous n’êtes pas une ASBL mais une association de fait, choisissez « Unité SANS personnalité juridique ». Ce choix ne pourra plus être modifié ensuite.\n- Complétez chaque champ correctement et complètement, prenez le temps nécessaire.\n- Assurez-vous de bien indiquer une adresse de site web.\n- Vous trouvez des modèles et des informations dans la documentation, consultez-la d’abord en cas de doute.\n- Téléchargez uniquement les documents figurant sur la liste des documents autorisés."
   },
+  "%ZkS": {
+    "original": "De eenheid staat nu op inactief",
+    "translation": "L’unité est désormais inactive"
+  },
+  "%Zkr": {
+    "original": "Deze eenheid kan niet verwijderd worden",
+    "translation": "Cette unité ne peut pas être supprimée"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

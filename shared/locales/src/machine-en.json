@@ -2935,10 +2935,6 @@
     "original": "Elk ticket moet een UiTPAS-evenement gekoppeld hebben om een automatische terugbetaling te krijgen van je UiTPAS-regio.",
     "translation": "Each ticket must have a UiTPAS event linked to receive an automatic refund from your UiTPAS region."
   },
-  "%1C2": {
-    "original": "Kortingen bij de UiTPAS officiële flow zijn niet mogelijk.",
-    "translation": "Discounts are not possible in the official UiTPAS flow."
-  },
   "%1C3": {
     "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.",
     "translation": "This member is not registered for a default age group in the current work year. Remove the role or register the member for the current work year."
@@ -16667,10 +16663,6 @@
     "original": "Verkoop ook tickets via",
     "translation": "Also sell tickets via"
   },
-  "%Y4": {
-    "original": "Bouw je betaalbare webshop via",
-    "translation": "Build your affordable webshop via"
-  },
   "%Y5": {
     "original": "Jouw bestelling is geplaatst",
     "translation": "Your order has been placed"
@@ -16758,10 +16750,6 @@
   "%YQ": {
     "original": "Tickets bekijken",
     "translation": "View tickets"
-  },
-  "%YR": {
-    "original": "Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.",
-    "translation": "Please note: this order must be paid by bank transfer, so we do not automatically know whether it has already been paid or not. Make sure you pay immediately so that the amount reaches our account on time. Click on the button below to show the instructions again."
   },
   "%YS": {
     "original": "Opgelet: je zal deze bestelling nog moeten betalen",
@@ -19219,6 +19207,158 @@
     "original": "De synchronisatie is gestart.",
     "translation": "Synchronization has started."
   },
+  "%ZkH": {
+    "original": "Jouw ticket is bevestigd",
+    "translation": "Your ticket has been confirmed"
+  },
+  "%ZkI": {
+    "original": "Vrij bedrag",
+    "translation": "Free amount"
+  },
+  "%ZkJ": {
+    "original": "Toon ingezameld bedrag",
+    "translation": "Show amount collected"
+  },
+  "%ZkK": {
+    "original": "{price} / stuk vanaf {amount} stuk",
+    "translation": "{price} / each from {amount} pieces"
+  },
+  "%ZkL": {
+    "original": "Toon doelbedrag",
+    "translation": "Show target amount"
+  },
+  "%ZkM": {
+    "original": "Je ontvangt jouw ticket na betaling",
+    "translation": "You will receive your ticket after payment"
+  },
+  "%ZkO": {
+    "original": "Inschrijving bevestigen",
+    "translation": "Confirm registration"
+  },
+  "%ZkP": {
+    "original": "Je inschrijving wordt bevestigd na je betaling",
+    "translation": "Your registration will be confirmed after your payment"
+  },
+  "%ZkQ": {
+    "original": "In afwachting van betaling",
+    "translation": "Awaiting payment"
+  },
+  "%ZkR": {
+    "original": "Zet ze op inactief in plaats van ze te verwijderen.",
+    "translation": "Mark them as inactive instead of deleting them."
+  },
+  "%ZkS": {
+    "original": "De vereniging staat nu op inactief",
+    "translation": "The association is now inactive"
+  },
+  "%ZkU": {
+    "original": "Je betaling wordt handmatig bevestigd. Zodra ze als betaald is gemarkeerd, ontvang je een bevestigingsmail. Dit kan enkele dagen duren. Via de knop onderaan bekijk je de instructies opnieuw.",
+    "translation": "Your payment will be confirmed manually. Once it's marked as paid, you will receive a confirmation email. This may take a few days. Use the button below to view the instructions again."
+  },
+  "%ZkV": {
+    "original": "Doelbedrag",
+    "translation": "Target amount"
+  },
+  "%ZkW": {
+    "original": "In afwachting van handmatige bevestiging",
+    "translation": "Awaiting manual confirmation"
+  },
+  "%ZkX": {
+    "original": "Bestelling bevestigd",
+    "translation": "Order confirmed"
+  },
+  "%ZkY": {
+    "original": "Stel een doelbedrag in, of toon het totaal ingezamelde bedrag",
+    "translation": "Set a target amount or show the total amount collected"
+  },
+  "%ZkZ": {
+    "original": "Jouw inschrijving",
+    "translation": "Your registration"
+  },
+  "%Zkb": {
+    "original": "Doelbedrag en vooruitgang",
+    "translation": "Target amount and progress"
+  },
+  "%Zkc": {
+    "original": "{price} / stuk vanaf {amount} stuks",
+    "translation": "{price} / each from {amount} pieces"
+  },
+  "%Zkd": {
+    "original": "Doel",
+    "translation": "Goal"
+  },
+  "%Zke": {
+    "original": "Bijdrage bevestigd",
+    "translation": "Contribution confirmed"
+  },
+  "%Zkf": {
+    "original": "Voeg een vooruitgangsbalk toe",
+    "translation": "Add a progress bar"
+  },
+  "%Zkg": {
+    "original": "Bezoekers kiezen zelf hoeveel ze willen betalen, met de hierboven ingestelde prijs als suggestie. Als je het optioneel gratis wilt maken, voeg dan nog een extra prijskeuze van 0 euro toe.",
+    "translation": "Visitors choose how much they want to pay, with the above price as a suggestion. If you want to make it optionally free, add an extra price option of 0 euro."
+  },
+  "%Zkh": {
+    "original": "Je ontvangt jouw tickets na betaling",
+    "translation": "You will receive your tickets after payment"
+  },
+  "%Zki": {
+    "original": "Aankoop bevestigen",
+    "translation": "Confirm purchase"
+  },
+  "%Zkj": {
+    "original": "Opgehaald",
+    "translation": "Collected"
+  },
+  "%Zkl": {
+    "original": "Vrije invoer van bedrag (minstens 1 euro)",
+    "translation": "Enter free amount (at least 1 euro)"
+  },
+  "%Zkm": {
+    "original": "Bijdrage bevestigen",
+    "translation": "Confirm contribution"
+  },
+  "%Zkn": {
+    "original": "Toon de vooruitgang van je inzameling, crowdfunding of donaties.",
+    "translation": "Show the progress of your collection, crowdfunding or donations."
+  },
+  "%Zko": {
+    "original": "Inschrijving bevestigd",
+    "translation": "Registration confirmed"
+  },
+  "%Zkq": {
+    "original": "Je bestelling wordt bevestigd na je betaling",
+    "translation": "Your order will be confirmed after your payment"
+  },
+  "%Zkr": {
+    "original": "Deze vereniging kan niet verwijderd worden",
+    "translation": "This association cannot be deleted"
+  },
+  "%Zks": {
+    "original": "Er zijn nog openstaande bedragen, betalingen, transactiekosten of facturen waarvoor {organization} moet betalen of betaald heeft. Die gegevens mogen niet verloren gaan.",
+    "translation": "There are still open amounts, payments, transaction costs or invoices that {organization} needs to pay or has paid. That data must not be lost."
+  },
+  "%Zkt": {
+    "original": "Jouw tickets zijn bevestigd",
+    "translation": "Your tickets have been confirmed"
+  },
+  "%Zku": {
+    "original": "Crowdfunding instellen",
+    "translation": "Set up crowdfunding"
+  },
+  "%Zkv": {
+    "original": "Kies een bedrag",
+    "translation": "Choose an amount"
+  },
+  "%Zkw": {
+    "original": "Gemaakt met",
+    "translation": "Made with"
+  },
+  "%Zkx": {
+    "original": "Op inactief zetten",
+    "translation": "Set as inactive"
+  },
   "%Zl": {
     "original": "Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
     "translation": "Or create a new account if you don't already have one. Preferably use an email address to which we already send emails."
@@ -20722,10 +20862,6 @@
   "%gA": {
     "original": "Aansluiting of verzekering toevoegen in {period}",
     "translation": "Add affiliation or insurance in {period}"
-  },
-  "%gB": {
-    "original": "Bouw je webshop via",
-    "translation": "Build your webshop via"
   },
   "%gC": {
     "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke vereniging als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",

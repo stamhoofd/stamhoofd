@@ -385,13 +385,13 @@ async function deleteMe() {
 function suggestDeactivation(description: string) {
     const canDeactivate = props.organization.active;
     const message = new CenteredMessage(
-        $t('Deze vereniging kan niet verwijderd worden'),
-        canDeactivate ? description + ' ' + $t('Zet ze op inactief in plaats van ze te verwijderen.') : description,
+        $t('%Zkr'),
+        canDeactivate ? description + ' ' + $t('%ZkR') : description,
         'error',
     );
 
     if (canDeactivate) {
-        message.addButton(new CenteredMessageButton($t('Op inactief zetten'), {
+        message.addButton(new CenteredMessageButton($t('%Zkx'), {
             action: deactivate,
         }));
     }
@@ -411,7 +411,7 @@ async function deactivate() {
     });
 
     props.organization.deepSet(response.data);
-    Toast.success($t('De vereniging staat nu op inactief')).show();
+    Toast.success($t('%ZkS')).show();
 }
 
 </script>

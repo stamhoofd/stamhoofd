@@ -1495,6 +1495,14 @@
     "original": "- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan ‘Groep ZONDER rechtspersoonlijkheid’. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.",
     "translation": "- Sélectionnez la bonne forme d'entreprise dans Stripe\n- Vous n'êtes pas une ASBL mais une association de fait ? Choisissez alors « Groupe SANS personnalité juridique ». Cette option ne pourra plus être modifiée par la suite.\n- Complétez soigneusement et entièrement toutes les informations demandées, prenez le temps nécessaire.\n- N'oubliez pas d'indiquer une adresse de site internet.\n- Des modèles et des informations utiles sont disponibles dans la documentation ; en cas de doute, consultez-la d'abord.\n- Téléchargez uniquement les documents figurant sur la liste des documents autorisés."
   },
+  "%ZkS": {
+    "original": "De groep staat nu op inactief",
+    "translation": "Le groupe est maintenant inactif"
+  },
+  "%Zkr": {
+    "original": "Deze groep kan niet verwijderd worden",
+    "translation": "Ce groupe ne peut pas être supprimé"
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

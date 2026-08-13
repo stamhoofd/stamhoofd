@@ -74,11 +74,11 @@ const paymentConfiguration = computed(() => webshop.value.meta.paymentConfigurat
 
 const confirmText = computed(() => {
     if (webshop.value.meta.type === WebshopType.Donations) {
-        return $t('Bijdrage bevestigen');
+        return $t('%Zkm');
     }
 
     if (webshop.value.meta.type === WebshopType.Registrations) {
-        return $t('Inschrijving bevestigen');
+        return $t('%ZkO');
     }
 
     if (webshop.value.meta.type === WebshopType.Webshop) {
@@ -86,9 +86,9 @@ const confirmText = computed(() => {
     }
 
     if (checkout.value.totalPrice > 0) {
-        return $t('Aankoop bevestigen');
+        return $t('%Zki');
     }
-    return $t('Bevestigen');
+    return $t('%X9');
 });
 
 async function goToOrder(id: string, args: NavigationActions) {
