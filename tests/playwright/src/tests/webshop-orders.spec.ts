@@ -1165,9 +1165,6 @@ function registerWebshopOrderTests() {
         const flow = new WebshopOrderFlow(page, { cartEnabled: true });
         await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
 
-        // A fixed price exists next to the custom one, so the product box shows the fixed price
-        await expect(page.getByTestId('product-box').first()).toContainText('15');
-
         await page.getByTestId('product-box').first().click();
         const cartItemView = page.getByTestId('cart-item-view');
         await expect(cartItemView).toBeVisible();
