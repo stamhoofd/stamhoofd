@@ -15,6 +15,7 @@ export async function setup() {
     TestUtils.globalSetup();
 
     const { Database, Migration } = await import('@simonbackx/simple-database');
+    const { endStatisticsConnection } = await import('../src/database.js');
     const { runStatisticsMigrations } = await import('../src/schema.js');
 
     // The sync reads the source tables, so the main database has to be migrated as well.
@@ -23,5 +24,6 @@ export async function setup() {
     }
 
     await runStatisticsMigrations();
+    await endStatisticsConnection();
     await Database.end();
 };

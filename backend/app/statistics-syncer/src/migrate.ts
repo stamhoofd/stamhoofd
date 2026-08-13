@@ -1,5 +1,6 @@
-import { Column, Database } from '@simonbackx/simple-database';
+import { Column } from '@simonbackx/simple-database';
 import { Version } from '@stamhoofd/structures';
+import { endStatisticsConnection } from './database.js';
 import { runStatisticsMigrations } from './schema.js';
 
 Column.setJSONVersion(Version);
@@ -29,7 +30,9 @@ const start = async () => {
     } finally {
         process.off('SIGTERM', handler);
         process.off('SIGINT', handler);
-        await Database.end();
+
+        // These migrations run on the statistics database only: the main one is never connected to.
+        await endStatisticsConnection();
     }
 };
 
