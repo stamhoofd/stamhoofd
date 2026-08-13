@@ -2,7 +2,7 @@
     <form class="st-view cart-item-view" data-testid="cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name">
             <template #left>
-                <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()">
+                <p v-if="(!webshop.isAllFree || pricedItem.getPriceWithDiscounts()) && !cartItem.productPrice.allowCustomPrice">
                     <span v-if="formattedPriceWithDiscount" class="style-tag discount">{{ formattedPriceWithDiscount }}</span>
                     <span v-else class="style-tag">{{ formattedPriceWithoutDiscount }}</span>
                 </p>
@@ -72,29 +72,38 @@
             </STList>
 
             <div v-if="cartItem.product.filteredPrices({admin}).length > 1" class="container">
-                <hr><STList>
+                <hr>
+                <STList>
                     <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="canSelectPrice(price)" :disabled="!canSelectPrice(price)" element-name="label">
                         <template #left>
-                            <Radio v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
+                            <Radio v-model="selectedPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
                         </template>
                         <h4 class="style-title-list">
-                            {{ price.name || 'Naamloos' }}
+                            {{ price.name || $t('Naamloos') }}
                         </h4>
 
                         <p v-if="price.discountPrice" class="style-description-small">
-                            {{ formatPrice(price.discountPrice) }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount === 1 ? 'stuk' : 'stuks' }}
+                            {{ price.discountAmount === 1
+                                ? $t('{price} / stuk vanaf {amount} stuk', { price: formatPrice(price.discountPrice), amount: price.discountAmount.toString() })
+                                : $t('{price} / stuk vanaf {amount} stuks', { price: formatPrice(price.discountPrice), amount: price.discountAmount.toString() }) }}
                         </p>
 
                         <p v-if="getPriceStockText(price)" class="style-description-small">
                             {{ getPriceStockText(price) }}
                         </p>
 
-                        <template #right>
+                        <template v-if="!price.allowCustomPrice" #right>
                             {{ formatPrice(price.price) }}
                         </template>
                     </STListItem>
                 </STList>
             </div>
+
+            <template v-if="cartItem.productPrice.allowCustomPrice">
+                <hr>
+                <h2>{{ cartItem.productPrice.name || $t('Kies een bedrag') }}</h2>
+                <PriceInputBox v-model="cartItem.productPrice.price" class="max" data-testid="custom-price-input" :validator="errors.validator" :min="ProductPrice.customPriceMinimum" :max="ProductPrice.customPriceMaximum" />
+            </template>
 
             <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :error-box="errors.errorBox" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop" />
 
@@ -167,10 +176,10 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { CartItem, Checkout, ProductDateRange, ProductPrice, Webshop } from '@stamhoofd/structures';
-import { CartStockHelper, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
+import type { CartItem, Checkout, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { CartStockHelper, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
@@ -194,6 +203,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
+import PriceInputBox from '#inputs/PriceInputBox.vue';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -221,6 +231,18 @@ const owner = useRequestOwner();
 const willNeedSeats = computed(() => withSeats.value);
 const cart = computed(() => props.checkout.cart);
 const originalSelectedPriceId = ref('');
+
+// Match on id: the cart item price can differ from the product price when allowCustomPrice is enabled
+const selectedPrice = computed({
+    get: () => props.cartItem.product.filteredPrices({ admin: props.admin }).find(p => p.id === props.cartItem.productPrice.id) ?? props.cartItem.productPrice,
+    set: (price: ProductPrice) => {
+        if (props.cartItem.productPrice.id === price.id) {
+            return;
+        }
+        // Clone: the cart item owns its own instance, so a custom price never mutates the webshop structure
+        props.cartItem.productPrice = price.clone();
+    },
+});
 
 onMounted(() => {
     onChangeItem();

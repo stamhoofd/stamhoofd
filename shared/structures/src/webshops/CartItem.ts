@@ -220,9 +220,10 @@ export class CartItem extends AutoEncoder {
         }
 
         // Default
+        // Clone the price: the cart item owns its own instance, so a custom price never mutates the webshop structure
         return CartItem.create({
             product: product,
-            productPrice: chosenPrice ?? product.filteredPrices(data)[0],
+            productPrice: (chosenPrice ?? product.filteredPrices(data)[0]).clone(),
             options,
         });
     }
@@ -261,7 +262,9 @@ export class CartItem extends AutoEncoder {
     }
 
     get codeWithoutFields(): string {
-        return this.product.id + '.' + this.productPrice.id + '.' + this.options.map(o => o.option.id).join('.');
+        // A chosen custom price is part of the identity: only items with the same price may merge in the cart
+        const customPrice = this.productPrice.allowCustomPrice ? '.' + this.productPrice.price : '';
+        return this.product.id + '.' + this.productPrice.id + customPrice + '.' + this.options.map(o => o.option.id).join('.');
     }
 
     /**
@@ -584,7 +587,14 @@ export class CartItem extends AutoEncoder {
                 }
             } else {
                 // Only set product if we did find our product price
-                this.productPrice = productPrice;
+                const savedPrice = this.productPrice.price;
+                this.productPrice = productPrice.clone();
+
+                if (productPrice.allowCustomPrice) {
+                    // Keep the price the customer chose: rounded to whole cents and clamped to the allowed bounds
+                    const customPrice = Math.round(savedPrice / 100) * 100;
+                    this.productPrice.price = Math.min(Math.max(customPrice, ProductPrice.customPriceMinimum), ProductPrice.customPriceMaximum);
+                }
             }
 
             // Check all options

@@ -7,7 +7,7 @@ import type { Browser, Page } from '@playwright/test';
 import { devices, expect } from '@playwright/test';
 import { MollieMocker, PayconiqMocker, STPackageService, StripeMocker } from '@stamhoofd/backend/tests/helpers';
 import type { User } from '@stamhoofd/models';
-import { OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory } from '@stamhoofd/models';
+import { Order, OrderFactory, Organization, OrganizationFactory, Payment, TicketFactory, Token, UserFactory } from '@stamhoofd/models';
 import {
     MollieOnboarding,
     MollieStatus,
@@ -17,6 +17,7 @@ import {
     PaymentType,
     PermissionLevel,
     Permissions,
+    ProductPrice,
     STPackageBundle,
     Token as TokenStruct,
     Version,
@@ -1034,6 +1035,108 @@ function registerWebshopOrderTests() {
         // The failure message is shown; closing it returns to the payment selection step
         await page.getByTestId('centered-message-button').click();
         await flow.expectBackOnPaymentSelection();
+    });
+
+    test('Pay-what-you-want product: customer chooses the price', async ({ page }) => {
+        const organization = await createWebshopOrganization('CustomPrice');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Custom price shop ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildPrices: () => [ProductPrice.create({ name: 'Steun ons', price: 15_00_00, allowCustomPrice: true })],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: false });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+
+        // The product box shows a free-choice label instead of a fixed price
+        await expect(page.getByTestId('product-box').first()).toContainText('Vrij bedrag');
+
+        await page.getByTestId('product-box').first().click();
+        const cartItemView = page.getByTestId('cart-item-view');
+        await expect(cartItemView).toBeVisible();
+
+        // The configured price is prefilled as a suggestion (€ 15)
+        const priceInput = cartItemView.getByTestId('custom-price-input').locator('input');
+        await expect(priceInput).toHaveValue('15');
+
+        // Below the € 1 minimum: saving is blocked with an error
+        await priceInput.fill('0,50');
+        await cartItemView.getByTestId('save-button').click();
+        await expect(cartItemView).toContainText('Het minimum is 1 euro');
+
+        // Choose € 20,50 and complete the order
+        await priceInput.fill('20,5');
+        await cartItemView.getByTestId('save-button').click();
+
+        await flow.goToCheckout();
+        await flow.fillCustomer();
+        await flow.selectPaymentMethod(PaymentLabel.PointOfSale);
+        await flow.confirmPayment();
+        await flow.expectOrderConfirmed();
+
+        // The order total is the chosen price
+        await expect(page.getByTestId('order-view')).toContainText('20,50');
+
+        // The backend stored the chosen price (4 decimal places)
+        const orders = await Order.where({ webshopId: webshop.id });
+        expect(orders).toHaveLength(1);
+        expect(orders[0].data.cart.items[0].productPrice.price).toBe(20_50_00);
+        expect(orders[0].data.totalPrice).toBe(20_50_00);
+    });
+
+    test('Custom price and selection survive editing the cart item, without altering the shop', async ({ page }) => {
+        const organization = await createWebshopOrganization('CustomPriceEdit');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Custom price edit ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildPrices: () => [
+                ProductPrice.create({ name: 'Standaard', price: 15_00_00 }),
+                ProductPrice.create({ name: 'Kies zelf', price: 15_00_00, allowCustomPrice: true }),
+            ],
+        });
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: true });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+
+        // A fixed price exists next to the custom one, so the product box shows the fixed price
+        await expect(page.getByTestId('product-box').first()).toContainText('15');
+
+        await page.getByTestId('product-box').first().click();
+        const cartItemView = page.getByTestId('cart-item-view');
+        await expect(cartItemView).toBeVisible();
+
+        // Select the custom price: the price input appears with the suggested amount
+        await cartItemView.locator('label').filter({ hasText: 'Kies zelf' }).click();
+        const priceInput = cartItemView.getByTestId('custom-price-input').locator('input');
+        await expect(priceInput).toHaveValue('15');
+
+        // Choose € 20,50 and add it to the cart
+        await priceInput.fill('20,5');
+        await cartItemView.getByTestId('save-button').click();
+        await expect(page.getByTestId('cart-add-more-button')).toBeVisible();
+        await expect(page.locator('.cart-item-row')).toContainText('20,50');
+
+        // Reopen the item from the cart: the custom price is still selected with the chosen amount
+        await page.locator('.cart-item-row h3').click();
+        await expect(cartItemView).toBeVisible();
+        await expect(cartItemView.locator('label').filter({ hasText: 'Kies zelf' }).locator('input[type="radio"]')).toBeChecked();
+        await expect(priceInput).toHaveValue(/^20[.,]50$/);
+        await cartItemView.getByTestId('save-button').click();
+        await expect(page.getByTestId('cart-add-more-button')).toBeVisible();
+
+        // A new item of the same product still gets the original suggestion:
+        // the chosen amount never leaks into the webshop structure
+        await page.getByTestId('cart-add-more-button').click();
+        await page.getByTestId('product-box').first().click();
+        await expect(cartItemView).toBeVisible();
+        await cartItemView.locator('label').filter({ hasText: 'Kies zelf' }).click();
+        await expect(priceInput).toHaveValue('15');
     });
 
     test('Zero-price order skips payment and tickets are downloadable', async ({ page }) => {
