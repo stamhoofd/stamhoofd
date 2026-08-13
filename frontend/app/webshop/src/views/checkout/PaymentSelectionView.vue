@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="$t('%Xv')" :prefer-large-button="true" data-testid="payment-step" @save="goNext">
+    <SaveView :title="title" :loading="loading" :save-text="confirmText" :prefer-large-button="true" data-testid="payment-step" @save="goNext">
         <template v-if="checkout.totalPrice > 0" #left>
             <span>{{ $t('%xL') }}: {{ formatPrice(checkout.totalPrice) }}</span>
         </template>
@@ -36,7 +36,7 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler.ts';
 import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
 import type { Payment } from '@stamhoofd/structures';
-import { OrderData, OrderResponse, PaymentMethod } from '@stamhoofd/structures';
+import { OrderData, OrderResponse, PaymentMethod, WebshopType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
@@ -71,6 +71,29 @@ const webshop = computed(() => webshopManager.webshop);
 const organization = computed(() => webshopManager.organization);
 const isTrial = computed(() => organization.value.meta.packages.isWebshopsTrial);
 const paymentConfiguration = computed(() => webshop.value.meta.paymentConfiguration);
+
+const confirmText = computed(() => {
+    if (webshop.value.meta.type === WebshopType.Donations) {
+        return $t('Bijdrage bevestigen');
+    }
+
+    if (webshop.value.meta.type === WebshopType.Registrations) {
+        return $t('Inschrijving bevestigen');
+    }
+
+    if (webshop.value.meta.type === WebshopType.Event) {
+        return $t('Inschrijving bevestigen');
+    }
+
+    if (webshop.value.meta.type === WebshopType.Webshop) {
+        return $t('%Xv');
+    }
+
+    if (checkout.value.totalPrice > 0) {
+        return $t('Aankoop bevestigen');
+    }
+    return $t('Bevestigen');
+});
 
 async function goToOrder(id: string, args: NavigationActions) {
     // Force reload webshop (stock will have changed: prevent invalidating the cart)

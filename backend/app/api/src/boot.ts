@@ -30,6 +30,7 @@ import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueMemberNumberService } from './services/UniqueMemberNumberService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
 import { QueryableModel, SQLLogger } from '@stamhoofd/sql';
+import { WebshopCrowdfundingService } from './services/WebshopCrowdfundingService.js';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -246,6 +247,7 @@ export const boot = async (options: { killProcess: boolean }) => {
         }
 
         await BalanceItemService.flushAll();
+        await WebshopCrowdfundingService.flush();
 
         const shutdownError = new SimpleError({
             code: 'SHUTDOWN',

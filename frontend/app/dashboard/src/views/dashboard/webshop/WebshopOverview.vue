@@ -210,7 +210,7 @@
                         </p>
 
                         <template #right>
-                            <span class="icon error " v-tooltip="$t('%Pq')" />
+                            <span v-tooltip="$t('%Pq')" class="icon error " />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -303,6 +303,21 @@
                         </h2>
                         <p class="style-description">
                             {{ $t('%Pu') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditCrowdfunding)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/credits.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Ingezameld bedrag en vooruitgang') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Toon de vooruitgang van je inzameling, crowdfunding of totale donaties.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -508,6 +523,7 @@ enum Routes {
     Statistics = 'statistieken',
     EditGeneral = 'algemeen',
     EditPage = 'vormgeving',
+    EditCrowdfunding = 'crowdfunding',
     EditLink = 'link',
     EditProducts = 'artikels',
     EditDiscounts = 'kortingen',
@@ -565,6 +581,13 @@ defineRoute({
     url: Routes.EditPage,
     present: 'popup',
     component: async () => (await import('./edit/EditWebshopPageView.vue')).default,
+    defaultProperties: loadWebshopProperties,
+});
+
+defineRoute({
+    url: Routes.EditCrowdfunding,
+    present: 'popup',
+    component: async () => (await import('./edit/EditWebshopCrowdfundingView.vue')).default,
     defaultProperties: loadWebshopProperties,
 });
 
@@ -962,6 +985,16 @@ const todoList = computed(() => {
                 || !!webshopManager.value.preview.meta.useLogo
                 || !!webshopManager.value.preview.meta.color
                 || !!webshopManager.value.preview.meta.title,
+        });
+    }
+
+    if (webshopManager.value.preview.meta.type === WebshopType.Donations) {
+        list.push({
+            icon: 'partially',
+            title: $t('Voeg een vooruitgangsbalk toe'),
+            description: $t('Stel een doelbedrag in, of toon het totaal ingezamelde bedrag'),
+            action: () => $navigate(Routes.EditCrowdfunding),
+            done: !!webshop.value?.meta.crowdfunding,
         });
     }
 

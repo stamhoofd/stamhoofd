@@ -10,6 +10,7 @@ import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceIt
 import { Context } from '../../../../helpers/Context.js';
 import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
+import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { OrderService } from '../../../../services/OrderService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
@@ -232,6 +233,9 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         balanceItem.description = order.generateBalanceDescription(webshop);
                         await balanceItem.save();
+
+                        // Update the cached pricePending of the balance item, so the unresolved payment is visible
+                        await BalanceItemService.updatePaidAndPending([balanceItem]);
                     }
                 } catch (e) {
                     await order.deleteOrderBecauseOfCreationError();
