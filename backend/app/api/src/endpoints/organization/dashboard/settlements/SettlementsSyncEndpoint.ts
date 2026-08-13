@@ -86,17 +86,18 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
         });
         SettlementsSyncEndpoint.queue.push(item);
 
-        QueueHandler.schedule('settlement-sync', async () => {
-            try {
-                const runner = new SettlementSyncRunner();
-                runner.callback = (summary) => {
-                    item.count = summary.synced + summary.skipped + summary.failed;
-                    item.failed = summary.failed + summary.failedFeeMonths;
-                };
-                await runner.run({ start, end, providers, stripe: { force } });
-            } finally {
-                SettlementsSyncEndpoint.queue.splice(SettlementsSyncEndpoint.queue.indexOf(item), 1);
-            }
+        // A shutdown aborts the queue: the run stops at its next safe point instead of holding up
+        // the restart, and the status list is cleaned up whether the run finished, was aborted, or
+        // was canceled before it started
+        QueueHandler.schedule('settlement-sync', async ({ abort }) => {
+            const runner = new SettlementSyncRunner();
+            runner.callback = (summary) => {
+                item.count = summary.synced + summary.skipped + summary.failed;
+                item.failed = summary.failed + summary.failedFeeMonths;
+            };
+            await runner.run({ start, end, providers, stripe: { force }, abort });
+        }).finally(() => {
+            SettlementsSyncEndpoint.queue = SettlementsSyncEndpoint.queue.filter(queued => queued !== item);
         }).catch(console.error);
 
         return new Response(undefined);
