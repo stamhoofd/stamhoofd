@@ -15,7 +15,7 @@
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
-                    <span class="price-value">{{ priceString }}</span>
+                    <span v-if="priceString" class="price-value">{{ priceString }}</span>
 
                     <span v-if="product.enableInFuture" class="style-tag">{{ $t('%kR', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('%Tk') }}</span>
@@ -65,7 +65,19 @@ const canDismiss = useCanDismiss();
 const cart = computed(() => props.checkout.cart);
 
 const priceString = computed(() => {
-    const priceRanges = Formatter.uniqueArray(props.product.filteredPrices({ admin: props.admin }).map(p => p.price));
+    const prices = props.product.filteredPrices({ admin: props.admin });
+    const fixedPrices = prices.filter(p => !p.allowCustomPrice);
+    if (fixedPrices.length === 0) {
+        // The customer chooses the price
+        return prices.length > 0 ? $t('Vrij bedrag') : '';
+    }
+
+    if (fixedPrices.length < prices.length) {
+        // Hide ugly selection list
+        return '';
+    }
+
+    const priceRanges = Formatter.uniqueArray(fixedPrices.map(p => p.price));
     if (priceRanges.length === 1) {
         if (priceRanges[0] === 0) {
             if (props.webshop.isAllFree) {

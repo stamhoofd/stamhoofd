@@ -17,6 +17,8 @@ export interface CreateWebshopOptions {
     withSeatingPlan?: boolean;
     /** Price per product in cents (default € 15,00). Use 0 for a free shop. */
     price?: number;
+    /** Build the prices of each product (called once per product). Defaults to one fixed price of `price` cents. */
+    buildPrices?: () => ProductPrice[];
     /** Allowed payment methods on the webshop */
     paymentMethods?: PaymentMethod[];
     /** Link a Stripe account so online payments route to Stripe */
@@ -51,6 +53,7 @@ export class TestWebshops {
             cartEnabled = true,
             withSeatingPlan = false,
             price = 15_0000,
+            buildPrices,
             paymentMethods = [PaymentMethod.PointOfSale],
             stripeAccountId,
             customDomainPrefix,
@@ -77,7 +80,7 @@ export class TestWebshops {
         for (let i = 0; i < productCount; i++) {
             products.push(Product.create({
                 name: `Product ${i + 1}`,
-                prices: [ProductPrice.create({ name: `Price ${i + 1}`, price })],
+                prices: buildPrices?.() ?? [ProductPrice.create({ name: `Price ${i + 1}`, price })],
                 type: productType,
                 seatingPlanId: withSeatingPlan ? seatingPlanId : null,
             }));

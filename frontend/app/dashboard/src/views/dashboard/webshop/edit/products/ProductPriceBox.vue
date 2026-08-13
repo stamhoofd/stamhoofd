@@ -6,7 +6,7 @@
 
         <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`%1IP`)">
             <LoadingInputBox :loading="uitpasSocialTariffLoading">
-                <PriceInput v-model="price" :min="null" :placeholder="$t(`%1Mn`)" :disabled="uitpasFeature && !!product.uitpasEvent && enableUitpasSocialTariff" />
+                <PriceInput v-model="price" :min="allowCustomPrice ? ProductPrice.customPriceMinimum : null" :placeholder="$t(`%1Mn`)" :disabled="uitpasFeature && !!product.uitpasEvent && enableUitpasSocialTariff" />
             </LoadingInputBox>
             <p v-if="uitpasFeature && !!product.uitpasEvent" class="style-description-small">
                 {{ $t('%1AL') }}
@@ -14,6 +14,20 @@
         </STInputBox>
 
         <STList>
+            <STListItem v-if="customPricePossible" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="allowCustomPrice" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Vrije invoer van bedrag (minstens 1 euro)') }}
+                </h3>
+
+                <p v-if="allowCustomPrice" class="style-description-small">
+                    {{ $t("Bezoekers kiezen zelf hoeveel ze willen betalen, met de hierboven ingestelde prijs als suggestie. Als je het optioneel gratis wilt maken, voeg dan nog een extra prijskeuze van 0 euro toe.") }}
+                </p>
+            </STListItem>
+
             <STListItem v-if="discountPossible" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="useDiscount" />
@@ -25,9 +39,6 @@
 
                 <p v-if="useDiscount" class="style-description-small" @click.stop.prevent>
                     {{ $t("%U9") }}
-                </p>
-                <p v-if="!discountPossible" class="style-description-small" @click.stop.prevent>
-                    {{ $t('%1C2') }}
                 </p>
 
                 <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>
@@ -68,7 +79,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="uitpasFeature && (!isSingle || enableUitpasSocialTariff)" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
+            <STListItem v-if="uitpasFeature && (!isSingle || enableUitpasSocialTariff) && !allowCustomPrice" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
                 <template #left>
                     <Checkbox v-model="enableUitpasSocialTariff" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0" />
                 </template>
@@ -144,8 +155,14 @@ const { goToUitpasConfiguration } = useGoToUitpasConfiguration(patchedProduct, a
 const uitpasSocialTariffLoading = ref(false);
 
 const discountPossible = computed(() => {
-    // if not UiTPAS social tariff
-    return !patchedProductPrice.value.uitpasBaseProductPriceId;
+    // Not possible for a UiTPAS social tariff or when the customer chooses the price
+    return !patchedProductPrice.value.uitpasBaseProductPriceId && !patchedProductPrice.value.allowCustomPrice;
+});
+
+const customPricePossible = computed(() => {
+    // Not possible for a UiTPAS social tariff or its base price: those prices are calculated and verified
+    return !patchedProductPrice.value.uitpasBaseProductPriceId
+        && !patchedProduct.value.prices.some(p => p.uitpasBaseProductPriceId === patchedProductPrice.value.id);
 });
 
 onMounted(async () => {
@@ -159,6 +176,17 @@ const name = computed({
     get: () => patchedProductPrice.value.name,
     set: (name: string) => {
         addPricePatch(ProductPrice.patch({ name }));
+    },
+});
+
+const allowCustomPrice = computed({
+    get: () => patchedProductPrice.value.allowCustomPrice,
+    set: (allowCustomPrice: boolean) => {
+        if (allowCustomPrice) {
+            // A quantity discount would silently override the chosen price
+            useDiscount.value = false;
+        }
+        addPricePatch(ProductPrice.patch({ allowCustomPrice }));
     },
 });
 
@@ -191,8 +219,7 @@ const useDiscount = computed({
         }
         if (value) {
             discountPrice.value = price.value;
-        }
-        else {
+        } else {
             discountPrice.value = null;
         }
     },
@@ -259,11 +286,9 @@ async function updateUitpasSocialTariff() {
         const basePrice = patchedProduct.value.prices.find(p => p.id === uitpasBaseProductPriceId.value)?.price ?? 0;
         try {
             price.value = await getOfficialUitpasSocialTariff(patchedProduct.value.uitpasEvent.url, basePrice);
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
-        }
-        finally {
+        } finally {
             uitpasSocialTariffLoading.value = false;
         }
     }
@@ -299,7 +324,7 @@ const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
         // This price is already a base price for another uitpas social tariff, so it cannot be a UiTPAS social tariff.
         return [];
     }
-    return patchedProduct.value.prices.filter(p => (p.uitpasBaseProductPriceId === null && p.id !== patchedProductPrice.value.id));
+    return patchedProduct.value.prices.filter(p => (p.uitpasBaseProductPriceId === null && p.id !== patchedProductPrice.value.id && !p.allowCustomPrice));
 });
 
 </script>

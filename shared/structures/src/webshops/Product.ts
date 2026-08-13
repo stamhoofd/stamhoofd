@@ -11,6 +11,13 @@ import { WebshopField } from './WebshopField.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class ProductPrice extends AutoEncoder {
+    /**
+     * Bounds for the price a customer can choose when `allowCustomPrice` is enabled.
+     * Enforced in the checkout UI and in `CartItem.refresh` (which also runs server side).
+     */
+    static readonly customPriceMinimum = 1_00_00;
+    static readonly customPriceMaximum = 25_000_00_00;
+
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -35,6 +42,9 @@ export class ProductPrice extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 219 })
     hidden = false;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    allowCustomPrice = false;
 
     /**
      * Total stock, excluding already sold items into account
