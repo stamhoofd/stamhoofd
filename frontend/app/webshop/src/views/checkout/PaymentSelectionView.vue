@@ -81,10 +81,6 @@ const confirmText = computed(() => {
         return $t('Inschrijving bevestigen');
     }
 
-    if (webshop.value.meta.type === WebshopType.Event) {
-        return $t('Inschrijving bevestigen');
-    }
-
     if (webshop.value.meta.type === WebshopType.Webshop) {
         return $t('%Xv');
     }
