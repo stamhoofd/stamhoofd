@@ -1,4 +1,5 @@
 import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import { Upload } from '@aws-sdk/lib-storage';
 import { Database } from '@simonbackx/simple-database';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -70,8 +71,7 @@ export function getHealth(): BackupHealth {
 
     if (!LAST_BINARY_BACKUP || !LAST_BACKUP) {
         status = 'error';
-    }
-    else {
+    } else {
         if (now.getTime() - LAST_BINARY_BACKUP.date.getTime() > 60 * 10 * 1000) {
             status = 'error';
         }
@@ -123,8 +123,7 @@ export async function cleanBackups() {
                     Bucket: STAMHOOFD.SPACES_BUCKET,
                     Key: file.key,
                 }));
-            }
-            else {
+            } else {
                 if (!lastBackup || lastBackup.key < file.key) {
                     lastBackup = file;
                 }
@@ -404,8 +403,6 @@ export async function backup() {
         await execPromise('rm ' + escapeShellArg(compressedFile));
 
         // Upload
-
-        // Download last backup file
         const client = getS3Client();
 
         // Create read stream
@@ -413,23 +410,35 @@ export async function backup() {
         const key = objectStoragePath + '/' + encryptedFile.split('/').pop();
         const fileSize = fs.statSync(encryptedFile).size;
 
-        console.log('Calculating MD5...');
-        const md5 = await hashFile(encryptedFile);
-
         console.log('Uploading backup to object storage at ' + key + '...');
 
-        const command = new PutObjectCommand({
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: key,
-            Body: stream,
-            ContentType: 'application/octet-stream',
-            ContentLength: fileSize,
-            ACL: 'private' as const,
-            CacheControl: 'no-cache',
-            ContentMD5: md5,
+        const upload = new Upload({
+            client,
+            params: {
+                Bucket: STAMHOOFD.SPACES_BUCKET,
+                Key: key,
+                Body: stream,
+                ContentType: 'application/octet-stream',
+                ACL: 'private' as const,
+                CacheControl: 'no-cache',
+            },
+            partSize: 20 * 1024 * 1024,
+            queueSize: 5,
         });
 
-        const response = await client.send(command);
+        let lastLoggedPercentage = -1;
+        upload.on('httpUploadProgress', (progress) => {
+            if (progress.loaded === undefined) {
+                return;
+            }
+            const percentage = Math.floor(progress.loaded / fileSize * 100);
+            if (percentage > lastLoggedPercentage) {
+                lastLoggedPercentage = percentage;
+                console.log(`Uploaded ${percentage}% (${Formatter.fileSize(progress.loaded)} of ${Formatter.fileSize(fileSize)})`);
+            }
+        });
+
+        const response = await upload.done();
 
         if (response.$metadata.httpStatusCode !== 200) {
             throw new Error('Failed to upload backup');
@@ -521,8 +530,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
             }));
             console.log('Binary log already exists: ' + uploadedName);
             return;
-        }
-        catch (e) {
+        } catch (e) {
             if (e.name !== 'NotFound') {
                 throw e;
             }
@@ -567,8 +575,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     // Delete encrypted file if it exists
     try {
         await execPromise('rm ' + escapeShellArg(encryptedFile));
-    }
-    catch (e) {
+    } catch (e) {
         if (e.code !== 1) {
             throw e;
         }
@@ -635,8 +642,7 @@ async function deletePartial(client: S3Client, uploadedName: string, binaryLogPa
 
             console.log('Partial binary log deleted');
         }
-    }
-    catch (e) {
+    } catch (e) {
         if (e.name !== 'NotFound') {
             throw e;
         }
