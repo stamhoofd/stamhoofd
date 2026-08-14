@@ -96,9 +96,27 @@ ORDER BY MIN(COALESCE(f.tak_min_age, 99)), f.`Tak`
 -- size: half
 -- dimensions: Geslacht
 -- metrics: Aantal leden
--- @include facts
+WITH filteredMembers AS (
+    SELECT
+        r.memberId AS member_id,
+        CASE m.gender
+            WHEN 'Male' THEN 'Man'
+            WHEN 'Female' THEN 'Vrouw'
+            WHEN 'Other' THEN 'Andere'
+            ELSE 'Onbekend'
+        END AS `Geslacht`
+    FROM members m
+	INNER JOIN registrations r ON r.memberId = m.id
+	INNER JOIN registration_periods p ON p.id = m.periodId
+    INNER JOIN organizations o ON o.id = r.organizationId
+    WHERE r.deactivatedAt IS NULL
+      AND r.waitingList = 0
+      AND r.registeredAt IS NOT NULL
+      [[AND p.name = {{scoutsjaar}}]]
+      [[AND o.name = {{eenheid}}]]
+)
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leden`
-FROM facts
+FROM filteredMembers
 GROUP BY `Geslacht`
 ORDER BY `Aantal leden` DESC
 
