@@ -37,18 +37,10 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
 -- size: half
 -- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- @include facts
-, gtp_basis AS (
-    SELECT
-        COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS kinderen,
-        COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS leiding,
-        -- @include gtp-waarden
-            AS gtp_waarden
-    FROM facts
-)
 SELECT
     -- @include gtp
         AS `GTP Index`
-FROM gtp_basis gb
+FROM facts
 
 -- @card eenheid-omkaderingscijfer
 -- title: Omkaderingscijfer
@@ -106,23 +98,13 @@ ORDER BY MIN(period_start)
 -- dimensions: Scoutsjaar
 -- metrics: GTP index
 -- @include facts-alle-jaren
-, gtp_basis AS (
-    SELECT
-        `Scoutsjaar`,
-        MIN(period_start) AS period_start,
-        COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS kinderen,
-        COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS leiding,
-        -- @include gtp-waarden
-            AS gtp_waarden
-    FROM facts
-    GROUP BY `Scoutsjaar`
-)
 SELECT
-    gb.`Scoutsjaar`,
+    `Scoutsjaar`,
     -- @include gtp
         AS `GTP index`
-FROM gtp_basis gb
-ORDER BY gb.period_start
+FROM facts
+GROUP BY `Scoutsjaar`
+ORDER BY MIN(period_start)
 
 -- @card eenheid-omkaderingscijfer-per-scoutsjaar
 -- title: Omkaderingscijfer per Scoutsjaar

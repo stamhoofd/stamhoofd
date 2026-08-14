@@ -49,24 +49,14 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
 -- Rechtop, niet schuin: Metabase laat een label vallen zodra het het vorige raakt, en schuin heeft
 -- een naam per eenheid daar net te weinig plaats voor.
 -- @include facts
-, gtp_basis AS (
-    SELECT
-        `Eenheid`,
-        COUNT(DISTINCT member_id) AS leden,
-        COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS kinderen,
-        COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS leiding,
-        -- @include gtp-waarden
-            AS gtp_waarden
-    FROM facts
-    GROUP BY `Eenheid`
-)
 SELECT
-    gb.`Eenheid`,
-    gb.leden AS `Aantal leden`,
+    `Eenheid`,
+    COUNT(DISTINCT member_id) AS `Aantal leden`,
     -- @include gtp
         AS `GTP index`
-FROM gtp_basis gb
-ORDER BY gb.leden DESC
+FROM facts
+GROUP BY `Eenheid`
+ORDER BY `Aantal leden` DESC
 
 -- @card leden-per-tak-vergelijking
 -- title: Vergelijking aantal leden per tak met vorig scoutsjaar
