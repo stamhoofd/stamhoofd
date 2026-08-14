@@ -59,21 +59,23 @@ describe('report', () => {
         });
 
         /**
-         * The weights of the index, kept here because nothing else checks them: the bands are age
-         * ranges, so a wrong weight is a plausible number rather than a failure.
+         * The weights of the index, kept here because nothing else checks them: a wrong weight, or a
+         * tak spelled differently from the row in `default_age_groups`, is a plausible number rather
+         * than a failure.
          */
-        it('weighs each age band of the GTP index as the formula does', () => {
+        it('weighs each tak of the GTP index as the formula does', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
-            for (const [band, term] of [
-                ['leden < 10 jaar', "COUNT(DISTINCT CASE WHEN categorie = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
-                ['leden 10-13 jaar', "+ COUNT(DISTINCT CASE WHEN categorie = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
-                ['leden 14-15 jaar', "+ 2 * COUNT(DISTINCT CASE WHEN categorie = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
-                ['leden 16 jaar', "+ 3 * COUNT(DISTINCT CASE WHEN categorie = 'child' AND leeftijd >= 16 THEN member_id END)"],
-                ['leiding', "+ COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0) / 2"],
+            for (const [tak, term] of [
+                ['Bevers, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN `Tak` = 'Bevers' THEN member_id END) + COUNT(DISTINCT CASE WHEN `Tak` = 'Eekhoorns' THEN member_id END) + COUNT(DISTINCT CASE WHEN `Tak` = 'Welpen' THEN member_id END) ) / 3"],
+                ['Wolven', "+ COUNT(DISTINCT CASE WHEN `Tak` = 'Wolven' THEN member_id END)"],
+                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN `Tak` = 'Jongverkenners/Jonggidsen - Aspiranten' THEN member_id END)"],
+                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN `Tak` = 'Verkenners/Gidsen - Juniors' THEN member_id END)"],
+                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN `Tak` = 'Seniors' THEN member_id END)"],
+                ['Leiding', "+ COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END)"],
+                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0)"],
             ]) {
-                expect(`${band}: ${sql.includes(term)}`).toEqual(`${band}: true`);
+                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
             }
         });
 
@@ -83,7 +85,7 @@ describe('report', () => {
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
             const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
-                .map(([tab, key]) => cardOf(dashboards, tab, key).sql.replaceAll(/\s+/g, ' ').match(/ROUND\( COUNT\(DISTINCT CASE WHEN categorie = 'child' AND leeftijd < 10.*?, 2\)/)?.[0]);
+                .map(([tab, key]) => cardOf(dashboards, tab, key).sql.replaceAll(/\s+/g, ' ').match(/ROUND\( \( COUNT\(DISTINCT CASE WHEN `Tak` = 'Bevers'.*?, 2\)/)?.[0]);
 
             expect(expressions.filter(expression => expression !== undefined)).toHaveLength(3);
             expect(new Set(expressions).size).toBe(1);
