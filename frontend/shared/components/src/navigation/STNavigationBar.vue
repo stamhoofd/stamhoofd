@@ -298,6 +298,15 @@ onDeactivated(() => {
     margin-top: -1px;
     pointer-events: none; // Overwritten by children where required
 
+    @media (min-width: 550px) {
+        padding-top: max(var(--st-safe-area-top, 0px), 5px);
+    }
+
+    &.large {
+        // Force remove 5px top padding
+        padding: var(--st-safe-area-top, 0px) max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-right, 0px)) 0 max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-left, 0px));
+    }
+
     .debug-overlay {
         position: absolute;
         left: 0;
@@ -328,12 +337,13 @@ onDeactivated(() => {
             background: $color-current-background;
         }
     }
+
     body.web-iOS &, body.native-iOS & {
         &::before {
             background: linear-gradient(
-                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 1) 0%,
-                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.95) calc(var(--st-safe-area-top, 0px) + var(--st-navigation-bar-height) * 0.8),
-                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0) 100%
+                rgba(var(--rgb-current-background, 255), var(--rgb-current-background, 255), var(--rgb-current-background, 255), 1) 0%,
+                rgba(var(--rgb-current-background, 255), var(--rgb-current-background, 255), var(--rgb-current-background, 255), 0.95) calc(var(--st-safe-area-top, 0px) + var(--st-navigation-bar-height) * 0.8),
+                rgba(var(--rgb-current-background, 255), var(--rgb-current-background, 255), var(--rgb-current-background, 255), 0) 100%
             );
             border-bottom: none;
             bottom: -50px;
@@ -357,15 +367,15 @@ onDeactivated(() => {
         }
     }
 
-    &.large::before {
-        box-shadow: 0px 2px 5px $color-shadow;
-        border-bottom-color: transparent;
-    }
+    //&.large::before {
+    //    box-shadow: 0px 2px 5px $color-shadow;
+    //    border-bottom-color: transparent;
+    //}
 
     &.negative {
         &::before {
             body.web-iOS &, body.native-iOS & {
-                background: linear-gradient($color-background, rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.5) 100%);
+                background: linear-gradient($color-current-background, rgba(var(--rgb-current-background, 255), var(--rgb-current-background, 255), var(--rgb-current-background, 255), 0.5) 100%);
                 backdrop-filter: blur(5px);
                 bottom: 0px;
             }
@@ -382,10 +392,6 @@ onDeactivated(() => {
             opacity: 1;
             //transition: opacity 0.2s 0.2s; // Delay when expanding
         }
-    }
-
-    @media (min-width: 550px) {
-        padding-top: max(var(--st-safe-area-top, 0px), 5px);
     }
 
     .footer {
@@ -414,6 +420,15 @@ onDeactivated(() => {
 
         body.native-iOS &, body.web-iOS & {
             height: 70px;
+        }
+
+        &.large {
+            height: 80px;
+            margin-bottom: 0px;
+
+            body.native-android &, body.web-android & {
+                height: 70px;
+            }
         }
 
         display: grid;
@@ -502,24 +517,6 @@ onDeactivated(() => {
             > h1 {
                 opacity: 1;
             }
-        }
-
-        &.large {
-            height: 80px;
-            margin-bottom: 0px;
-
-            body.native-android &, body.web-android & {
-                height: 70px;
-            }
-        }
-
-    }
-
-    &.large {
-        padding: var(--st-safe-area-top, 0px) 20px 0 20px;
-
-        @media (max-width: 450px) {
-            padding: var(--st-safe-area-top, 0px) 15px 0 15px;
         }
     }
 

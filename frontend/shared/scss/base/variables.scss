@@ -18,16 +18,27 @@ $border-radius: 9px;
 $border-radius-modals: 16px;
 
 @function invertColor($color, $offset: 0) {
-    @return hsl(color.hue($color), calc(var(--color-saturation-factor, 1) * color.saturation($color)), calc(100% - #{color.lightness($color) + $offset}));
+    @return hsl(
+        color.hue($color), 
+        calc(0.5 * color.saturation($color)), 
+        calc(100% - color.lightness($color) - ($offset * 1%))
+    );
 }
 
 @function changeHue($color, $hue) {
-    @return hsl(#{$hue}, calc(var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) * color.saturation($color)), #{color.lightness($color)});
+    @return hsl(
+        #{$hue}, 
+        calc(var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) * color.saturation($color)), 
+        #{color.lightness($color)}
+    );
 }
 
 @function changeHueInvert($color, $hue, $offset: 0) {
-    @return hsl(#{$hue}, calc(var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) * color.saturation($color)), calc(100% - #{color.lightness($color) + $offset}));
-    ;
+    @return hsl(
+        #{$hue}, 
+        calc(var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) * color.saturation($color)), 
+        calc(100% - color.lightness($color) - ($offset * 1%))
+    );
 }
 
 @function shade($color, $times) {
@@ -76,9 +87,9 @@ $dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-
 // -------- Dark (black) -------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-dark-original: #303032; 
+$color-dark-original: hsl(240, 2%, 19%); 
 $color-dark: var(--color-dark, #{changeHue($color-dark-original, $color-primary-hue)});
-$dark-theme-color-dark: invertColor($color-dark-original, -8); // hsl(0deg, 0%, 90%);
+$dark-theme-color-dark: invertColor($color-dark-original, -19); // hsl(0deg, 0%, 90%);
 
 $color-darkest-original: black; 
 $color-darkest: var(--color-darkest, #{$color-darkest-original});
@@ -86,11 +97,11 @@ $dark-theme-color-darkest: white;
 
 $color-dark-lighter-original: shade($color-dark-original, -2);
 $color-dark-lighter: var(--color-dark-lighter, #{changeHue($color-dark-lighter-original, $color-primary-hue)});
-$dark-theme-color-dark-lighter: invertColor($color-dark-lighter-original, -8); 
+$dark-theme-color-dark-lighter: invertColor($color-dark-lighter-original, -19); 
 
 $color-dark-light-original: #5e5959;
 $color-dark-light: var(--color-dark-light, #{changeHue($color-dark-light-original, $color-primary-hue)});
-$dark-theme-color-dark-light: invertColor($color-dark-light-original, -8); // hsl(0deg, 0%, 80%);
+$dark-theme-color-dark-light: invertColor($color-dark-light-original, -19); // hsl(0deg, 0%, 80%);
 
 // -----------------------------------------------------------------------------
 // -------- Background ---------------------------------------------------------
@@ -348,7 +359,8 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     color-scheme: dark;
 
     --rgb-shadow: 255; 
-    --rgb-background: 0; 
+    --rgb-background: #{color.channel($dark-theme-color-background, "red", $space: rgb)};
+    --rgb-background-shade: #{color.channel($dark-theme-color-background-shade, "red", $space: rgb)};
     --is-dark-mode: 1;
 
     // Reduce color a little bit
