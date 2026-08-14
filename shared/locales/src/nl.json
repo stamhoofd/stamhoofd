@@ -6540,5 +6540,20 @@
   "%Zku": "Crowdfunding instellen",
   "%Zkv": "Kies een bedrag",
   "%Zkw": "Gemaakt met",
-  "%Zkx": "Op inactief zetten"
+  "%Zkx": "Op inactief zetten",
+  "%Zky": "{count} betalingen worden terugbetaald",
+  "%Zkz": "Typ het aantal betalingen dat je wil terugbetalen om te bevestigen",
+  "%Zl0": "Voeg een actie toe aan de tabel met betalingen om alle geselecteerde betalingen die via Mollie werden betaald in één keer terug te betalen.",
+  "%Zl1": "Kan niet online terugbetaald worden",
+  "%Zl3": "De geselecteerde betalingen worden volledig terugbetaald via Mollie. Dit kan je niet ongedaan maken.",
+  "%Zl6": "Enkel betalingen die via Mollie werden betaald, volledig gelukt zijn en nog niet (deels) werden terugbetaald kan je hier in bulk terugbetalen. De andere betalingen worden overgeslagen.",
+  "%Zl7": "Bezig met terugbetalen: {count} van {total}",
+  "%Zl8": "De betaling wordt terugbetaald",
+  "%Zl9": "Niet via Mollie betaald",
+  "%ZlA": "{description}: {error}",
+  "%ZlB": "Geen enkele van de geselecteerde betalingen kan online terugbetaald worden.",
+  "%ZlC": "Wordt terugbetaald",
+  "%ZlD": "Meerdere betalingen tegelijk terugbetalen",
+  "%ZlE": "Betalingen terugbetalen",
+  "%ZlG": "Online terugbetalen"
 }

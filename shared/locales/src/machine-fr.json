@@ -19543,9 +19543,69 @@
     "original": "Op inactief zetten",
     "translation": "Mettre en inactif"
   },
+  "%Zky": {
+    "original": "{count} betalingen worden terugbetaald",
+    "translation": "{count} paiements seront remboursés"
+  },
+  "%Zkz": {
+    "original": "Typ het aantal betalingen dat je wil terugbetalen om te bevestigen",
+    "translation": "Tape le nombre de paiements à rembourser pour confirmer"
+  },
   "%Zl": {
     "original": "Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
     "translation": "Ou créez un nouveau compte si vous n'en avez pas encore un. Utilisez de préférence une adresse e-mail à laquelle nous vous envoyons déjà des e-mails."
+  },
+  "%Zl0": {
+    "original": "Voeg een actie toe aan de tabel met betalingen om alle geselecteerde betalingen die via Mollie werden betaald in één keer terug te betalen.",
+    "translation": "Ajoute une action au tableau des paiements pour rembourser en une fois tous les paiements sélectionnés effectués via Mollie."
+  },
+  "%Zl1": {
+    "original": "Kan niet online terugbetaald worden",
+    "translation": "Ne peut pas être remboursé en ligne"
+  },
+  "%Zl3": {
+    "original": "De geselecteerde betalingen worden volledig terugbetaald via Mollie. Dit kan je niet ongedaan maken.",
+    "translation": "Les paiements sélectionnés seront entièrement remboursés via Mollie. Cette action est irréversible."
+  },
+  "%Zl6": {
+    "original": "Enkel betalingen die via Mollie werden betaald, volledig gelukt zijn en nog niet (deels) werden terugbetaald kan je hier in bulk terugbetalen. De andere betalingen worden overgeslagen.",
+    "translation": "Seuls les paiements effectués via Mollie, entièrement réussis et non (partiellement) remboursés peuvent être remboursés en masse ici. Les autres paiements seront ignorés."
+  },
+  "%Zl7": {
+    "original": "Bezig met terugbetalen: {count} van {total}",
+    "translation": "Remboursement en cours : {count} sur {total}"
+  },
+  "%Zl8": {
+    "original": "De betaling wordt terugbetaald",
+    "translation": "Le paiement sera remboursé"
+  },
+  "%Zl9": {
+    "original": "Niet via Mollie betaald",
+    "translation": "Non payé via Mollie"
+  },
+  "%ZlA": {
+    "original": "{description}: {error}",
+    "translation": "{description} : {error}"
+  },
+  "%ZlB": {
+    "original": "Geen enkele van de geselecteerde betalingen kan online terugbetaald worden.",
+    "translation": "Aucun des paiements sélectionnés ne peut être remboursé en ligne."
+  },
+  "%ZlC": {
+    "original": "Wordt terugbetaald",
+    "translation": "En cours de remboursement"
+  },
+  "%ZlD": {
+    "original": "Meerdere betalingen tegelijk terugbetalen",
+    "translation": "Rembourser plusieurs paiements à la fois"
+  },
+  "%ZlE": {
+    "original": "Betalingen terugbetalen",
+    "translation": "Rembourser des paiements"
+  },
+  "%ZlG": {
+    "original": "Online terugbetalen",
+    "translation": "Remboursement en ligne"
   },
   "%Zm": {
     "original": "Log in via de knop hieronder.",

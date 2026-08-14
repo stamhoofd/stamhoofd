@@ -253,10 +253,10 @@
                         <Checkbox :model-value="getFeatureFlag('bulk-refund-payments')" @update:model-value="setFeatureFlag('bulk-refund-payments', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Meerdere betalingen tegelijk terugbetalen') }}
+                        {{ $t('%ZlD') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Voeg een actie toe aan de tabel met betalingen om alle geselecteerde betalingen die via Mollie werden betaald in één keer terug te betalen.') }}
+                        {{ $t('%Zl0') }}
                     </p>
                 </STListItem>
             </STList>

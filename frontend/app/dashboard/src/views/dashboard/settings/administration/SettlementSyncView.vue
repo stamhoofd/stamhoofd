@@ -11,7 +11,7 @@
             <DateSelection v-model="startDate" />
         </STInputBox>
 
-        <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t('Tot en met')">
+        <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t('%3w')">
             <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59}" />
         </STInputBox>
 
