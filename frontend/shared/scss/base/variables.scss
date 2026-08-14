@@ -360,6 +360,7 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-background-shade-4: #{$dark-theme-color-background-shade-4};
     --color-background-shade-5: #{$dark-theme-color-background-shade-5};
 
+
     --color-darkest: #{$dark-theme-color-darkest};
     --color-dark: #{$dark-theme-color-dark};
     --color-dark-lighter: #{$dark-theme-color-dark-lighter};
@@ -369,9 +370,11 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-gray-2: #{$dark-theme-color-gray-2};
     --color-gray-3: #{$dark-theme-color-gray-3};
     --color-gray-4: #{$dark-theme-color-gray-4};
+    --color-gray-5: #{$dark-theme-color-gray-5};
 
     --color-background-lighter: #{$dark-theme-color-background-lighter};
     --color-background-lighter-shade: #{$dark-theme-color-background-lighter-shade};
+    --color-background-lighter-shade-darker: #{$dark-theme-color-background-lighter-shade-darker};
 
     --color-background-highlight: #{$dark-theme-color-background-highlight};
     --color-background-interactive: #{$dark-theme-color-background-interactive};
