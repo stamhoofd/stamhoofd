@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, IntegerDecoder, NullableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Settlement } from './Settlement.js';
