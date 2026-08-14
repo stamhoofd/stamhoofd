@@ -88,10 +88,16 @@ describe('buildVisualizationSettings', () => {
         expect(settings['graph.metrics']).toEqual(['Aantal leden dit jaar', 'Aantal leden vorig jaar']);
     });
 
+    /**
+     * Under `series_settings`, not `graph.series_settings`: Metabase drops a setting it does not
+     * know without a word, which leaves the combo chart on its default of a line for the first
+     * series and bars for the rest -- exactly the wrong way round for this chart.
+     */
     it('draws a combo chart as bars with a line over them, for the GTP index', () => {
         const settings = buildVisualizationSettings(card({ display: 'combo', dimensions: ['Eenheid'], metrics: ['Aantal leden', 'GTP index'] }));
 
-        expect(settings['graph.series_settings']).toEqual({ 'Aantal leden': { display: 'bar' }, 'GTP index': { display: 'line' } });
+        expect(settings['series_settings']).toEqual({ 'Aantal leden': { display: 'bar' }, 'GTP index': { display: 'line' } });
+        expect(settings).not.toHaveProperty('graph.series_settings');
     });
 
     it('stacks a ratio chart to full width', () => {

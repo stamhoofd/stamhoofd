@@ -187,10 +187,12 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         if (card.stacked !== undefined) {
             settings['stackable.stack_type'] = card.stacked === 'normalized' ? 'normalized' : 'stacked';
         }
-        // A combo chart draws its first series as bars and the rest as a line, which is what the
-        // "aantal leden + GTP index" chart of the report needs.
+        // Left to itself a combo chart draws its first series as a line and the rest as bars, the
+        // other way round from what the "aantal leden + GTP index" chart needs, so every series is
+        // given its own shape. Keyed by column name, under `series_settings` -- one of the few
+        // settings without the `graph.` prefix, and an unknown key is dropped without a word.
         if (display === 'combo') {
-            settings['graph.series_settings'] = Object.fromEntries(card.metrics.map((metric, index) => [metric, { display: index === 0 ? 'bar' : 'line' }]));
+            settings['series_settings'] = Object.fromEntries(card.metrics.map((metric, index) => [metric, { display: index === 0 ? 'bar' : 'line' }]));
         }
     }
 
