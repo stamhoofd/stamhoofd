@@ -4,7 +4,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 let lastFullBackup: Date | null = null;
 const backupStartTime = '02:00';
-const backupEndTime = '06:00';
+const backupEndTime = '05:00';
 
 async function createBackups() {
     const now = new Date();
