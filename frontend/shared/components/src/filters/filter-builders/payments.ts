@@ -14,6 +14,7 @@ import type { UIFilterBuilders } from '../UIFilter';
 import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 
 export class PaymentFilterBuilders {
     static get method() {
@@ -70,6 +71,27 @@ export class PaymentFilterBuilders {
         });
     }
 
+    static get settlements() {
+        return new MultipleChoiceFilterBuilder({
+            name: $t(`Uitbetaald`),
+            options: [
+                new MultipleChoiceUIFilterOption($t('Uitbetaald'), {
+                    settlements: {
+                        $elemMatch: {},
+                    },
+                }),
+                new MultipleChoiceUIFilterOption($t('Nog niet uitbetaald'), {
+                    $not: {
+                        settlements: {
+                            $elemMatch: {},
+                        },
+                    },
+                }),
+            ],
+            wrapper: FilterWrapperMarker,
+        });
+    }
+
     static get type() {
         return new MultipleChoiceFilterBuilder({
             name: $t(`%1LP`),
@@ -120,6 +142,7 @@ export function usePaymentsUIFilterBuilders() {
     const getRelationFilterBuilders = useBalanceItemRelationFilterBuilders();
     const organizationsRelationFetcher = useOrganizationsRelationFetcher();
     const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
+    const hasSettlementsFlag = useFeatureFlag()('settlements');
 
     const balanceItemRegistrationWrapper: WrapperFilter = {
         balanceItem: {
@@ -187,6 +210,10 @@ export function usePaymentsUIFilterBuilders() {
 
     if (organization.value && organization.value.meta.invoicesEnabled) {
         builders.push(PaymentFilterBuilders.invoiced);
+    }
+
+    if (hasSettlementsFlag) {
+        builders.push(PaymentFilterBuilders.settlements);
     }
 
     builders.unshift(

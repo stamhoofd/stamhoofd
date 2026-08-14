@@ -33,6 +33,7 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { usePaymentActions } from './PaymentActionBuilder';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag';
 
 const props = withDefaults(
     defineProps<{
@@ -67,6 +68,7 @@ const configurationId = computed(() => {
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = usePaymentsUIFilterBuilders();
 const organization = useOrganization();
+const hasSettlementsFlag = useFeatureFlagComputed('settlements');
 const tableTitle = computed(() => {
     if (props.title) {
         return props.title;
@@ -233,6 +235,17 @@ const allColumns: Column<ObjectType, any>[] = [
         name: $t('%MB'),
         getValue: object => object,
         format: (object, width) => {
+            if (hasSettlementsFlag.value) {
+                const values = object.settlements.map(s => s.settlement.settledAt);
+                if (values.length === 0 && !object.provider) {
+                    return $t('%Zc1');
+                }
+                if (values.length === 0) {
+                    return $t('%Zc3');
+                }
+
+                return (width < 150 ? values.map(value => Formatter.dateNumber(value)).join(', ') : values.map(value => Formatter.date(value)).join(', '));
+            }
             const value = object.settlement?.settledAt ?? null;
             if (!value && !object.provider) {
                 return $t('%Zc1');
@@ -244,6 +257,18 @@ const allColumns: Column<ObjectType, any>[] = [
             return (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true));
         },
         getStyle: (object, width) => {
+            if (hasSettlementsFlag.value) {
+                const values = object.settlements.map(s => s.settlement.settledAt);
+                if (values.length === 0 && !object.provider) {
+                    return 'gray';
+                }
+                if (values.length === 0) {
+                    return 'gray';
+                }
+
+                return '';
+            }
+
             const value = object.settlement?.settledAt ?? null;
             if (!value && !object.provider) {
                 return 'gray';
@@ -265,6 +290,21 @@ const allColumns: Column<ObjectType, any>[] = [
         name: $t('%J8'),
         getValue: object => object,
         format: (object) => {
+            if (hasSettlementsFlag.value) {
+                const values = object.settlements.map(s => s.settlement.reference);
+                if (values.length === 0 && !object.provider) {
+                    if (object.method === PaymentMethod.Transfer) {
+                        return object.transferDescription ?? $t('%Gr');
+                    }
+                    return $t('%Zc1');
+                }
+                if (values.length === 0) {
+                    return $t('%Zc3');
+                }
+
+                return values.join(', ');
+            }
+
             const value = object.settlement?.reference ?? null;
             if (!value && !object.provider) {
                 if (object.method === PaymentMethod.Transfer) {
@@ -279,6 +319,21 @@ const allColumns: Column<ObjectType, any>[] = [
             return value;
         },
         getStyle: (object, width) => {
+            if (hasSettlementsFlag.value) {
+                const values = object.settlements.map(s => s.settlement.reference);
+                if (values.length === 0 && !object.provider) {
+                    if (object.method === PaymentMethod.Transfer) {
+                        return '';
+                    }
+                    return 'gray';
+                }
+                if (values.length === 0) {
+                    return 'gray';
+                }
+
+                return '';
+            }
+
             const value = object.settlement?.reference ?? null;
             if (!value && !object.provider) {
                 if (object.method === PaymentMethod.Transfer) {
