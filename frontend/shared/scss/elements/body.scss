@@ -1,5 +1,6 @@
 @use "@stamhoofd/scss/base/fonts.scss";
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "sass:color";
 
 :root, :host {
     // Always force scroll availability on mobile browsers, this is to fix glitches when
@@ -29,9 +30,14 @@
         --navigation-bar-margin: 0px;
     }
 
+    --rgb-background: #{color.channel($color-background-original, "red", $space: rgb)};
+    --rgb-background-shade: #{color.channel($color-background-shade-original, "red", $space: rgb)};
+
+    --rgb-current-background: var(--rgb-background, 255);
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};
     --color-current-background-shade-darker: #{$color-background-shade-darker};
+
 
     --st-horizontal-padding: 20px;
     --st-vertical-padding: 40px;
