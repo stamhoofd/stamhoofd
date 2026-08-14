@@ -23,12 +23,8 @@ export class PaymentSettlement extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amount = 0;
 
-    /**
-     * The provider's id for this entry (Stripe txn_… / Mollie entry id), unique per settlement.
-     * NULL for the lines derived from application fees: those don't exist at the provider.
-     */
-    @field({ decoder: new NullableDecoder(StringDecoder) })
-    externalId: string | null = null;
+    @field({ decoder: StringDecoder, nullable: true })
+    externalId: string | null;
 
     /**
      * When the provider moved the money (not the same as payments.paidAt).
