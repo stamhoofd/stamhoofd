@@ -3,7 +3,7 @@
         :title="title"
         :loading="refunding"
         :disabled="!isConfirmed"
-        :save-text="$t('Terugbetalen')"
+        :save-text="$t('%ZaM')"
         save-icon="undo"
         save-button-class="destructive"
         :add-extra-cancel="true"
@@ -11,17 +11,17 @@
         @save="refund"
     >
         <h1>{{ title }}</h1>
-        <p>{{ $t('De geselecteerde betalingen worden volledig terugbetaald via Mollie. Dit kan je niet ongedaan maken.') }}</p>
+        <p>{{ $t('%Zl3') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
             <STListItem data-testid="refundable-count">
                 <h3 class="style-definition-label">
-                    {{ $t('Wordt terugbetaald') }}
+                    {{ $t('%ZlC') }}
                 </h3>
                 <p class="style-definition-text">
-                    {{ pluralText(refundablePayments.length, $t('betaling'), $t('betalingen')) }}
+                    {{ pluralText(refundablePayments.length, $t('%14a'), $t('%Zj2')) }}
                 </p>
 
                 <template #right>
@@ -31,31 +31,31 @@
 
             <STListItem v-if="notViaMollie.length" data-testid="not-via-mollie-count">
                 <h3 class="style-definition-label">
-                    {{ $t('Niet via Mollie betaald') }}
+                    {{ $t('%Zl9') }}
                 </h3>
                 <p class="style-definition-text">
-                    {{ pluralText(notViaMollie.length, $t('betaling'), $t('betalingen')) }}
+                    {{ pluralText(notViaMollie.length, $t('%14a'), $t('%Zj2')) }}
                 </p>
             </STListItem>
 
             <STListItem v-if="notRefundable.length" data-testid="not-refundable-count">
                 <h3 class="style-definition-label">
-                    {{ $t('Kan niet online terugbetaald worden') }}
+                    {{ $t('%Zl1') }}
                 </h3>
                 <p class="style-definition-text">
-                    {{ pluralText(notRefundable.length, $t('betaling'), $t('betalingen')) }}
+                    {{ pluralText(notRefundable.length, $t('%14a'), $t('%Zj2')) }}
                 </p>
             </STListItem>
         </STList>
 
         <p v-if="notViaMollie.length || notRefundable.length" class="style-description-small">
-            {{ $t('Enkel betalingen die via Mollie werden betaald, volledig gelukt zijn en nog niet (deels) werden terugbetaald kan je hier in bulk terugbetalen. De andere betalingen worden overgeslagen.') }}
+            {{ $t('%Zl6') }}
         </p>
 
         <template v-if="refundablePayments.length">
             <hr>
 
-            <STInputBox :title="$t('Typ het aantal betalingen dat je wil terugbetalen om te bevestigen')" error-fields="confirmationCode">
+            <STInputBox :title="$t('%Zkz')" error-fields="confirmationCode">
                 <input
                     v-model="confirmationCode"
                     class="input"
@@ -68,11 +68,11 @@
             </STInputBox>
         </template>
         <p v-else class="info-box">
-            {{ $t('Geen enkele van de geselecteerde betalingen kan online terugbetaald worden.') }}
+            {{ $t('%ZlB') }}
         </p>
 
         <p v-if="refunding" class="style-description-small">
-            {{ $t('Bezig met terugbetalen: {count} van {total}', {count: progress, total: progressTotal}) }}
+            {{ $t('%Zl7', {count: progress, total: progressTotal}) }}
         </p>
     </SaveView>
 </template>
@@ -109,7 +109,7 @@ const props = withDefaults(
     },
 );
 
-const title = $t('Betalingen terugbetalen');
+const title = $t('%ZlE');
 const errors = useErrors();
 const context = useContext();
 const organization = useOrganization();
@@ -225,7 +225,7 @@ async function refund() {
             failures.addError(new SimpleError({
                 code: 'refund_failed',
                 message: 'Failed to refund payment ' + payment.id,
-                human: $t('{description}: {error}', { description: describe(payment), error: message }),
+                human: $t('%ZlA', { description: describe(payment), error: message }),
             }));
         }
 
@@ -239,7 +239,7 @@ async function refund() {
 
     if (succeeded > 0) {
         Toast.success(
-            succeeded === 1 ? $t('De betaling wordt terugbetaald') : $t('{count} betalingen worden terugbetaald', { count: succeeded }),
+            succeeded === 1 ? $t('%Zl8') : $t('%Zky', { count: succeeded }),
         ).show();
 
         if (props.onRefunded) {

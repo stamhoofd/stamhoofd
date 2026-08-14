@@ -250,7 +250,7 @@ export class PaymentActionBuilder {
         }
 
         return new InMemoryTableAction({
-            name: $t('Online terugbetalen'),
+            name: $t('%ZlG'),
             icon: 'undo',
             priority: 0,
             groupIndex: 4,
