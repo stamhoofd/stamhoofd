@@ -11,6 +11,10 @@
             <DateSelection v-model="startDate" />
         </STInputBox>
 
+        <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t('Tot en met')">
+            <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59}" />
+        </STInputBox>
+
         <hr><h2>{{ $t('%P1') }}</h2>
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -68,6 +72,7 @@ const errorBox = ref<ErrorBox | null>(null);
 const saving = ref(false);
 // Where the stored settlement history starts, the same default as the endpoint
 const startDate = ref(new Date(2025, 0, 1));
+const endDate = ref(new Date());
 const force = ref(false);
 const runningJobs = shallowRef<SettlementsSyncStatus[]>([]);
 let loadingJobs = false;
@@ -127,6 +132,7 @@ async function save() {
             path: '/settlements/sync',
             body: {
                 start: startDate.value.getTime(),
+                end: endDate.value.getTime(),
                 force: force.value,
             },
             owner: requestOwner,
