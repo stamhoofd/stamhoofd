@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/redirecter",
-    "version": "2.143.0",
+    "version": "2.143.1",
     "type": "module",
     "main": "index.ts",
     "scripts": {
@@ -18,14 +18,14 @@
         "@simonbackx/simple-database": "1.37.1",
         "@simonbackx/simple-endpoints": "1.22.0",
         "@simonbackx/simple-logging": "1.0.1",
-        "@stamhoofd/backend-env": "2.143.0",
-        "@stamhoofd/backend-middleware": "2.143.0",
-        "@stamhoofd/structures": "2.143.0",
-        "@stamhoofd/types": "2.143.0",
-        "@stamhoofd/utility": "2.143.0"
+        "@stamhoofd/backend-env": "2.143.1",
+        "@stamhoofd/backend-middleware": "2.143.1",
+        "@stamhoofd/structures": "2.143.1",
+        "@stamhoofd/types": "2.143.1",
+        "@stamhoofd/utility": "2.143.1"
     },
     "devDependencies": {
-        "@stamhoofd/test-utils": "2.143.0",
+        "@stamhoofd/test-utils": "2.143.1",
         "@types/node": "22.20.1",
         "nock": "14.0.16",
         "vitest": "4.1.10"
