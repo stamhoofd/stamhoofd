@@ -1,6 +1,7 @@
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import type { StamhoofdCompareValue, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import { isEqualFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import type { StyledDescription, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
@@ -8,9 +9,9 @@ import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export class MultipleChoiceUIFilterOption {
     name: string;
-    value: StamhoofdCompareValue;
+    value: StamhoofdFilter;
 
-    constructor(name: string, value: StamhoofdCompareValue) {
+    constructor(name: string, value: StamhoofdFilter) {
         this.name = name;
         this.value = value;
     }
@@ -156,7 +157,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
 
         if (Array.isArray(response)) {
             // Check if all the options are valid
-            const options = this.multipleChoiceOptions.filter(o => response.includes(o.value));
+            const options = this.multipleChoiceOptions.filter(o => !!response.find(q => isEqualFilter(o.value, q)));
 
             if (options.length === response.length) {
                 const uiFilter = new MultipleChoiceUIFilter({
@@ -168,7 +169,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
             }
         }
 
-        const option = this.multipleChoiceOptions.find(o => o.value === response);
+        const option = this.multipleChoiceOptions.find(o => isEqualFilter(o.value, response));
         if (option) {
             const uiFilter = new MultipleChoiceUIFilter({
                 builder: this,
