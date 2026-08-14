@@ -13,6 +13,7 @@ process.on('unhandledRejection', (error: Error) => {
 
 // Set timezone!
 process.env.TZ = 'UTC';
+Error.stackTraceLimit = 50;
 
 // Quick check
 if (new Date().getTimezoneOffset() !== 0) {
@@ -66,8 +67,7 @@ const start = async () => {
         try {
             await routerServer.close();
             console.log('HTTP server stopped');
-        }
-        catch (err) {
+        } catch (err) {
             console.error('Failed to stop HTTP server:');
             console.error(err);
         }

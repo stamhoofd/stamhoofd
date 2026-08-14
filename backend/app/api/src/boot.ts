@@ -43,6 +43,7 @@ Column.setJSONVersion(Version);
 
 // Set timezone to UTC
 process.env.TZ = 'UTC';
+Error.stackTraceLimit = 50;
 
 if (STAMHOOFD.environment === 'development') {
     Error.stackTraceLimit = 100;
