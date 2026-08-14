@@ -87,3 +87,9 @@ import MyView from '@stamhoofd/package-name/views/MyView.vue';
 
 // 🚫 Never create, extend, or reference barrel files (legacy pattern)
 ```
+
+# Writing style
+
+- Keep responses focused, brief, and concise. Avoid metaphors and buzzwords.
+- Avoid adding comments in code that are obvious or are not useful to other people in the future.
+- Match the length of written documents to what the task needs: cover the substance, but do not pad with filler sections, redundant summaries, or boilerplate.
