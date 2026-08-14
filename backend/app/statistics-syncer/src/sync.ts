@@ -1,5 +1,6 @@
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { getStatisticsConnection } from './database.js';
 import type { StatisticsRow } from './rows.js';
 import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
@@ -32,14 +33,21 @@ type IncrementalTable = {
     /**
      * The column holding the period a row belongs to. Rows of a frozen period are neither rewritten
      * nor excluded, which is what keeps a settled year settled. Absent for tables that are not tied
-     * to a period at all, such as members.
+     * to a period at all.
      */
     periodColumn?: string;
     /**
+     * What identifies a row, when it takes more than an id. A table keyed on more than its id can
+     * hold several rows per id, which the delete reconciliation has no way to tell apart -- so it
+     * has to be `neverDelete` as well.
+     */
+    keyColumns?: string[];
+    /**
      * Rows that stay even when their source row is gone. Members and organizations are what the facts
-     * of a settled year join to for their demographics, and deleting one cascades to its
-     * registrations — the ones in frozen years included. Keeping a de-identified row of a birth year
-     * and a gender costs nothing next to losing those numbers.
+     * of a settled year join to for their demographics, and without one every registration it carried
+     * drops out of that year — an organization takes its registrations with it outright, through the
+     * cascade. Keeping a de-identified row of a birth year and a gender costs nothing next to losing
+     * those numbers.
      */
     neverDelete?: boolean;
 };
@@ -77,6 +85,64 @@ function groupByPeriod(organizations: Organization[]): Map<string, Organization[
 async function existingModelIds(model: { select: () => any }, ids: string[]): Promise<Set<string>> {
     const rows = await model.select().where(SQL.column('id'), ids).fetch();
     return new Set(idsOf(rows as { id: string }[]));
+}
+
+/**
+ * The periods each of these members holds a registration in.
+ *
+ * A member row describes a member in a year, and the source has no such row: a member is simply a
+ * member there, and it is their registrations that place them in a year.
+ *
+ * Limited to the periods the statistics database already holds. A registration can point at a period
+ * that has not been synced yet, and a member row for it would be refused by the foreign key, which
+ * would stall the whole table over one row.
+ */
+async function periodIdsByMember(memberIds: string[]): Promise<Map<string, Set<string>>> {
+    const byMember = new Map<string, Set<string>>();
+    if (memberIds.length === 0) {
+        return byMember;
+    }
+
+    const rows = await new SQLSelect(
+        (row: SQLResultNamespacedRow) => ({
+            memberId: row[Registration.table].memberId as string,
+            periodId: row[Registration.table].periodId as string | null,
+        }),
+        SQL.column('memberId'),
+        SQL.column('periodId'),
+    )
+        .from(Registration.table)
+        .where(SQL.column('memberId'), memberIds)
+        .fetch();
+
+    const known = await existingPeriodIds(rows.map(row => row.periodId).filter((id): id is string => id !== null));
+
+    for (const row of rows) {
+        if (row.periodId === null || !known.has(row.periodId)) {
+            continue;
+        }
+
+        const periods = byMember.get(row.memberId);
+        if (periods) {
+            periods.add(row.periodId);
+        }
+        else {
+            byMember.set(row.memberId, new Set([row.periodId]));
+        }
+    }
+
+    return byMember;
+}
+
+async function existingPeriodIds(ids: string[]): Promise<Set<string>> {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) {
+        return new Set();
+    }
+
+    const connection = getStatisticsConnection();
+    const [rows] = await connection.select('SELECT `id` FROM `registration_periods` WHERE `id` IN (?)', [unique], { nestTables: false });
+    return new Set((rows as unknown as { id: string }[]).map(row => row.id));
 }
 
 function incrementalQuery(model: { select: () => any }, since: Date | null, afterId: string, limit: number) {
@@ -146,12 +212,16 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
         },
         {
             table: 'members',
-            columns: ['id', 'birthDate', 'gender', 'postalCode', 'organizationId', 'createdAt', 'updatedAt', 'lastRegisteredAt'],
+            columns: ['id', 'periodId', 'birthDate', 'gender', 'postalCode', 'organizationId', 'createdAt', 'updatedAt', 'lastRegisteredAt'],
             fetch: async (since, afterId, limit) => {
                 const members = await incrementalQuery(Member, since, afterId, limit).fetch() as Member[];
-                return { rows: members.map(flattenMember), updatedAt: members.map(member => member.updatedAt), lastId: members.at(-1)?.id ?? afterId };
+                const periodIds = await periodIdsByMember(members.map(member => member.id));
+                const rows = members.flatMap(member => [...periodIds.get(member.id) ?? []].map(periodId => flattenMember(member, periodId)));
+                return { rows, updatedAt: members.map(member => member.updatedAt), lastId: members.at(-1)?.id ?? afterId };
             },
             existingIds: ids => existingModelIds(Member, ids),
+            periodColumn: 'periodId',
+            keyColumns: ['id', 'periodId'],
             neverDelete: true,
         },
         {
@@ -293,7 +363,7 @@ async function syncIncrementalTable(definition: IncrementalTable, frozen: Set<st
         const live = definition.periodColumn
             ? rows.filter(row => !isFrozen(frozen, row[definition.periodColumn!] as string | null))
             : rows;
-        await upsertRows(definition.table, [...definition.columns, ...sourceColumns], withSource(live));
+        await upsertRows(definition.table, [...definition.columns, ...sourceColumns], withSource(live), definition.keyColumns);
         seen.push(...updatedAt);
         afterId = lastId;
     }
@@ -302,6 +372,12 @@ async function syncIncrementalTable(definition: IncrementalTable, frozen: Set<st
         watermark: nextWatermark(state.watermark, seen, startedAt),
         lastSucceededAt: new Date(),
     });
+}
+
+/** The tables a deleted source row is never taken out of. */
+export function neverDeletedTables(): string[] {
+    const empty = { ageGroups: new Set<string>(), membershipTypes: new Set<string>(), responsibilities: new Set<string>() };
+    return buildIncrementalTables(empty, new Set()).filter(definition => definition.neverDelete).map(definition => definition.table);
 }
 
 /**

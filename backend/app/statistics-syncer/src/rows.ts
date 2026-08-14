@@ -182,6 +182,10 @@ export function flattenGroup(group: GroupSource): StatisticsRow {
 }
 
 /**
+ * One row per member per period: what was true of this member in that year. The source holds only
+ * what is true of them now, so every open period gets the current details and a frozen one keeps the
+ * row it was counted with.
+ *
  * The date of birth and the postal code are carried over because the report needs them: it charts
  * members by age, which is only exact with the date behind it, and maps them by postal code. The
  * rest of the address and everything that names or reaches the member stays behind.
@@ -190,9 +194,10 @@ export function flattenGroup(group: GroupSource): StatisticsRow {
  * born on 17 May is held as midnight in Europe/Brussels, which a process running in UTC would write
  * to a date column as 16 May — a day early for every member.
  */
-export function flattenMember(member: MemberSource): StatisticsRow {
+export function flattenMember(member: MemberSource, periodId: string): StatisticsRow {
     return {
         id: member.id,
+        periodId,
         birthDate: member.details.birthDay ? Formatter.dateIso(member.details.birthDay) : null,
         gender: member.details.gender,
         postalCode: member.details.address ? emptyToNull(member.details.address.postalCode) : null,

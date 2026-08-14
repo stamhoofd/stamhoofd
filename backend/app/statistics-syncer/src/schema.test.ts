@@ -1,4 +1,5 @@
 import { getStatisticsConnection, getStatisticsDatabaseConfig } from './database.js';
+import { neverDeletedTables } from './sync.js';
 
 /**
  * Column names that would mean a natural person ended up in the statistics database. This guards
@@ -81,6 +82,38 @@ describe('migration.platform-statistics-schema', () => {
 
         // Nothing is pre-aggregated: no counts are stored, every figure is computed at query time.
         expect(columns.filter(column => /count$/i.test(column.columnName))).toEqual([]);
+    });
+
+    /**
+     * A member's gender, birth date and postal code all change over their life, so a row describes
+     * them in one year rather than as they are now. The period is part of the key, which is also what
+     * lets the sync leave a settled year alone.
+     */
+    it('keeps a member row per period, so a settled year holds the member as it counted them', async () => {
+        const [rows] = await getStatisticsConnection().select(
+            'SELECT COLUMN_NAME as columnName FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ? ORDER BY SEQ_IN_INDEX',
+            [getStatisticsDatabaseConfig().DB_DATABASE, 'members', 'PRIMARY'],
+            { nestTables: false },
+        );
+
+        expect((rows as unknown as { columnName: string }[]).map(row => row.columnName)).toEqual(['id', 'periodId']);
+    });
+
+    /**
+     * The delete reconciliation walks a table by id and asks the source which ids are still there. A
+     * table holding several rows per id has no way to say which of them a surviving id stands for,
+     * so it must be one the sync never deletes from.
+     */
+    it('never deletes from a table that holds more than one row per id', async () => {
+        const [rows] = await getStatisticsConnection().select(
+            'SELECT TABLE_NAME as tableName, COUNT(*) as columns FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND INDEX_NAME = ? GROUP BY TABLE_NAME HAVING COUNT(*) > 1',
+            [getStatisticsDatabaseConfig().DB_DATABASE, 'PRIMARY'],
+            { nestTables: false },
+        );
+        const composite = (rows as unknown as { tableName: string }[]).map(row => row.tableName).sort();
+
+        expect(composite).toEqual(['members']);
+        expect(neverDeletedTables()).toContain('members');
     });
 
     it('mirrors the column types of the main database', async () => {

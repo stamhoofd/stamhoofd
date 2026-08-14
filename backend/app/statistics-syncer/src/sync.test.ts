@@ -1,5 +1,6 @@
 import type { Member, Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { Gender } from '@stamhoofd/structures';
 import { getStatisticsConnection } from './database.js';
 import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
@@ -35,8 +36,22 @@ describe('statistics sync', () => {
 
         expect(row).toBeDefined();
         expect(row.birthDate).toEqual(new Date(Date.UTC(2011, 4, 17)));
-        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'source', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'periodId', 'postalCode', 'source', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain(member.details.firstName);
+    });
+
+    it('writes the member against the period their registration is in', async () => {
+        const rows = await statisticsRows('members', member.id);
+
+        expect(rows.map(row => row.periodId)).toContain(registration.periodId);
+    });
+
+    it('writes no member row for a member without a registration, since nothing counts one', async () => {
+        const orphan = await new MemberFactory({ organization }).create();
+
+        await syncStatistics();
+
+        expect(await statisticsRows('members', orphan.id)).toHaveLength(0);
     });
 
     it('copies the registration, so a member can hold several', async () => {
@@ -100,6 +115,7 @@ describe('statistics sync', () => {
 
     it('keeps a member whose source row is gone, because deleting one cascades into settled years', async () => {
         const orphan = await new MemberFactory({ organization }).create();
+        await new RegistrationFactory({ member: orphan, group: await new GroupFactory({ organization }).create() }).create();
         await syncStatistics();
         await orphan.delete();
 
@@ -125,6 +141,7 @@ describe('statistics sync', () => {
     describe('a frozen period', () => {
         let frozenPeriod: RegistrationPeriod;
         let frozenRegistration: Registration;
+        let settledMember: Member;
 
         beforeAll(async () => {
             frozenPeriod = await new RegistrationPeriodFactory({}).create();
@@ -135,9 +152,34 @@ describe('statistics sync', () => {
             frozenRegistration.periodId = frozenPeriod.id;
             await frozenRegistration.save();
 
+            // Someone registered in both the year about to settle and the one still running.
+            settledMember = await new MemberFactory({ organization }).create();
+            settledMember.details.gender = Gender.Female;
+            await settledMember.save();
+            await new RegistrationFactory({ member: settledMember, group }).create();
+            await new RegistrationFactory({ member: settledMember, group: await new GroupFactory({ organization }).create() }).create();
+
             await syncStatistics();
             // Settle the period, as an operator would once its numbers are final.
             await getStatisticsConnection().update('UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?', [new Date(Date.now() - 1000), frozenPeriod.id]);
+        });
+
+        /**
+         * The whole reason a member is recorded per period: their details are what they are now, and
+         * a settled year has to keep the ones it was counted with.
+         */
+        it('keeps the member as they were counted, while the year still running follows the source', async () => {
+            const genderPerPeriod = async () => Object.fromEntries((await statisticsRows('members', settledMember.id)).map(row => [row.periodId, row.gender]));
+            const before = await genderPerPeriod();
+
+            settledMember.details.gender = Gender.Male;
+            await settledMember.save();
+            await syncStatistics();
+
+            const after = await genderPerPeriod();
+            expect(before[frozenPeriod.id]).toBe(Gender.Female);
+            expect(after[frozenPeriod.id]).toBe(Gender.Female);
+            expect(after[organization.periodId]).toBe(Gender.Male);
         });
 
         it('is not rewritten by the sync when the source changes', async () => {
@@ -206,8 +248,8 @@ describe('statistics sync', () => {
         // The statistics database is kept between runs, so start from a known state.
         await connection.delete('DELETE FROM `members` WHERE `id` = ?', ['imported-member-1']);
         await connection.insert(
-            'INSERT INTO `members` (`id`, `birthDate`, `gender`, `createdAt`, `updatedAt`, `source`) VALUES (?, ?, ?, ?, ?, ?)',
-            ['imported-member-1', new Date(Date.UTC(2004, 0, 15)), 'Female', new Date(), new Date(), 'import'],
+            'INSERT INTO `members` (`id`, `periodId`, `birthDate`, `gender`, `createdAt`, `updatedAt`, `source`) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            ['imported-member-1', period.id, new Date(Date.UTC(2004, 0, 15)), 'Female', new Date(), new Date(), 'import'],
         );
 
         await syncStatisticsDeletes();

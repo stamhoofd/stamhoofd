@@ -12,7 +12,7 @@ describe('flattenMember', () => {
     };
 
     it('carries the date of birth, which is what makes an age exact', () => {
-        expect(flattenMember(member).birthDate).toBe('2011-05-17');
+        expect(flattenMember(member, 'period-1').birthDate).toBe('2011-05-17');
     });
 
     /**
@@ -22,23 +22,36 @@ describe('flattenMember', () => {
     it('writes the calendar date the application means, not the instant behind it', () => {
         const brusselsMidnight = new Date('2011-05-16T22:00:00.000Z');
 
-        expect(flattenMember({ ...member, details: { ...member.details, birthDay: brusselsMidnight } }).birthDate).toBe('2011-05-17');
+        expect(flattenMember({ ...member, details: { ...member.details, birthDay: brusselsMidnight } }, 'period-1').birthDate).toBe('2011-05-17');
     });
 
     it('never carries a name or a way to contact the member', () => {
-        const row = flattenMember({ ...member, details: { ...member.details, firstName: 'Jan', lastName: 'Jansen', email: 'jan@example.com' } as any });
+        const row = flattenMember({ ...member, details: { ...member.details, firstName: 'Jan', lastName: 'Jansen', email: 'jan@example.com' } as any }, 'period-1');
 
-        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'postalCode', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'periodId', 'postalCode', 'updatedAt']);
         expect(JSON.stringify(row)).not.toContain('Jan');
         expect(JSON.stringify(row)).not.toContain('example.com');
     });
 
+    /**
+     * The same member in two years is two rows, so that correcting a gender or moving house changes
+     * the year it happened in rather than every year the member was ever counted in.
+     */
+    it('describes the member in one period, which is part of what identifies the row', () => {
+        const first = flattenMember(member, 'period-1');
+        const second = flattenMember(member, 'period-2');
+
+        expect(first.periodId).toBe('period-1');
+        expect(second.periodId).toBe('period-2');
+        expect(first.id).toBe(second.id);
+    });
+
     it('keeps a member without a birth date', () => {
-        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other', address: null } }).birthDate).toBeNull();
+        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other', address: null } }, 'period-1').birthDate).toBeNull();
     });
 
     it('keeps the postal code the member map needs, and nothing else of the address', () => {
-        const row = flattenMember({ ...member, details: { ...member.details, address: { postalCode: '9000', street: 'Somewhere', city: 'Gent' } as any } });
+        const row = flattenMember({ ...member, details: { ...member.details, address: { postalCode: '9000', street: 'Somewhere', city: 'Gent' } as any } }, 'period-1');
 
         expect(row.postalCode).toBe('9000');
         expect(JSON.stringify(row)).not.toContain('Somewhere');
@@ -46,7 +59,7 @@ describe('flattenMember', () => {
     });
 
     it('has no postal code for a member without an address', () => {
-        expect(flattenMember({ ...member, details: { ...member.details, address: null } }).postalCode).toBeNull();
+        expect(flattenMember({ ...member, details: { ...member.details, address: null } }, 'period-1').postalCode).toBeNull();
     });
 });
 

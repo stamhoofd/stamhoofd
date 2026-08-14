@@ -174,7 +174,14 @@ CREATE TABLE `groups` (
   CONSTRAINT `groups_ibfk_3` FOREIGN KEY (`defaultAgeGroupId`) REFERENCES `default_age_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- One row per member, carrying only what the reports group by.
+-- One row per member per period, carrying only what the reports group by: what was true of this
+-- member in that year.
+--
+-- A gender, a postal code and even a birth date are answers as they stand today, and they change --
+-- someone moves, or fills in a gender the year after. Keyed on the member alone, one year's answer
+-- would stand in for every year that member was ever counted in, and a correction made now would
+-- reach back into years that were settled long ago. The period is also what lets the sync leave a
+-- settled year alone, the same way it does for every other table here.
 --
 -- `birthDate` and `postalCode` are the two fields here that describe a natural person. The report
 -- charts members by age and by birth year and maps them by postal code, and an age is only exact
@@ -186,10 +193,11 @@ CREATE TABLE `groups` (
 -- it as part of protecting it, not only what is in it.
 --
 -- Members are never deleted from here, even when their source row is gone: their row is what the
--- facts of a settled year join to for demographics, and removing one cascades into the registrations
--- of those years.
+-- facts of a settled year join to for demographics, and without it every registration it carried
+-- drops out of that year's numbers.
 CREATE TABLE `members` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `birthDate` date DEFAULT NULL,
   `gender` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -198,13 +206,17 @@ CREATE TABLE `members` (
   `updatedAt` datetime NOT NULL,
   `lastRegisteredAt` datetime DEFAULT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
-  PRIMARY KEY (`id`),
+  -- The member first: the reports look one up across the years, which reads the key left to right.
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
   KEY `organizationId` (`organizationId`),
   KEY `birthDate` (`birthDate`),
   KEY `gender` (`gender`),
   KEY `postalCode` (`postalCode`),
   KEY `source` (`source`),
-  CONSTRAINT `members_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `members_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  -- Restrict, like the registrations: dropping a period would take the member rows of a settled year with it.
+  CONSTRAINT `members_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- One row per member per group, so a member registered for several groups keeps one row per group.
@@ -233,10 +245,11 @@ CREATE TABLE `registrations` (
   KEY `periodId` (`periodId`),
   KEY `registeredAt` (`registeredAt`),
   KEY `source` (`source`),
-  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `registrations_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `registrations_ibfk_4` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  -- No foreign key on `memberId`: a member is identified by their period as well, and a registration
+  -- names only the member. The same holds for the two tables below.
+  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `registrations_ibfk_3` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Which lidgeld a member holds in a period. The price columns of the source are dropped: these
@@ -261,10 +274,9 @@ CREATE TABLE `member_platform_memberships` (
   KEY `organizationId` (`organizationId`),
   KEY `periodId` (`periodId`),
   KEY `source` (`source`),
-  CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_platform_memberships_ibfk_2` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_platform_memberships_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_platform_memberships_ibfk_4` FOREIGN KEY (`membershipTypeId`) REFERENCES `platform_membership_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_platform_memberships_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_platform_memberships_ibfk_3` FOREIGN KEY (`membershipTypeId`) REFERENCES `platform_membership_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `member_responsibility_records` (
@@ -282,10 +294,9 @@ CREATE TABLE `member_responsibility_records` (
   KEY `organizationId` (`organizationId`),
   KEY `groupId` (`groupId`),
   KEY `source` (`source`),
-  CONSTRAINT `member_responsibility_records_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_responsibility_records_ibfk_2` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_responsibility_records_ibfk_3` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_responsibility_records_ibfk_4` FOREIGN KEY (`responsibilityId`) REFERENCES `responsibilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `member_responsibility_records_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_responsibility_records_ibfk_2` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_responsibility_records_ibfk_3` FOREIGN KEY (`responsibilityId`) REFERENCES `responsibilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Bookkeeping for the sync job. One row per synced table, so every table advances on its own and a

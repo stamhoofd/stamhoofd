@@ -7,9 +7,12 @@ import type { StatisticsRow } from './rows.js';
  */
 export const batchSize = 500;
 
-export function buildUpsertQuery(table: string, columns: string[], escapeId: (value: string) => string): string {
+/** What identifies a row when no other key is given. `members` is keyed per period as well. */
+export const defaultKeyColumns = ['id'];
+
+export function buildUpsertQuery(table: string, columns: string[], escapeId: (value: string) => string, keyColumns: string[] = defaultKeyColumns): string {
     const assignments = columns
-        .filter(column => column !== 'id')
+        .filter(column => !keyColumns.includes(column))
         .map(column => `${escapeId(column)} = new.${escapeId(column)}`);
 
     // The row alias is the MySQL 8 replacement for VALUES(col), which is deprecated.
@@ -21,13 +24,13 @@ export function buildUpsertQuery(table: string, columns: string[], escapeId: (va
  * Write rows, replacing the ones that are already there. Running the same batch twice is a no-op, so
  * a run that crashed halfway can simply be repeated.
  */
-export async function upsertRows(table: string, columns: string[], rows: StatisticsRow[]): Promise<number> {
+export async function upsertRows(table: string, columns: string[], rows: StatisticsRow[], keyColumns: string[] = defaultKeyColumns): Promise<number> {
     if (rows.length === 0) {
         return 0;
     }
 
     const connection = getStatisticsConnection();
-    const query = buildUpsertQuery(table, columns, value => connection.escapeId(value));
+    const query = buildUpsertQuery(table, columns, value => connection.escapeId(value), keyColumns);
 
     for (let index = 0; index < rows.length; index += batchSize) {
         const batch = rows.slice(index, index + batchSize).map(row => columns.map(column => row[column] ?? null));

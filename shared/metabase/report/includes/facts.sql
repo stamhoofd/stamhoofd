@@ -49,7 +49,8 @@ WITH facts AS (
     JOIN registration_periods p ON p.id = r.periodId
     JOIN `groups` g ON g.id = r.groupId AND g.deletedAt IS NULL
     LEFT JOIN default_age_groups dag ON dag.id = g.defaultAgeGroupId
-    JOIN members m ON m.id = r.memberId
+    -- A member row describes a member in one year, so the period is part of what identifies it.
+    JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId
     WHERE r.deactivatedAt IS NULL
       AND r.waitingList = 0
