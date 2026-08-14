@@ -1,17 +1,13 @@
 -- The GTP index (Gezond Toekomst Perspectief).
 --
--- !! The real formula is not known. !!
+--     GTP waarden / (Omkaderingscijfer * 2)
 --
--- The client's report describes it only as weighing potential future leiding (verkenners/gidsen and
--- seniors) heavily, on a scale where 100 or more is healthy and which only says something for units
--- up to roughly 150 members. The one worked example available — 9e Wandelaar in 2023-2024, with 48
--- kinderen, 13 leiding, 6 volwassenen and 10 verkenners/gidsen — scores 42.28, which none of the
--- obvious readings of that description reproduce.
+-- A unit ideally scores 100 or more. The scale only says something up to roughly 150 members.
 --
--- What follows is a stand-in that has the right shape and the right inputs, not the client's number.
--- Replace this one expression once they supply the formula: every card that shows a GTP index reads
--- it from here, so there is nothing else to change.
+-- Reads from a `gtp_basis` CTE aliased `gb`, which supplies `gtp_waarden` (see `gtp-waarden.sql`)
+-- alongside the kinderen and leiding the omkaderingscijfer divides -- unrounded, so the rounding of
+-- the number on screen does not move the index.
 --
--- Reads from a `gtp_basis` CTE aliased `gb`, which supplies per unit: kinderen, leiding, volwassenen
--- and toekomstige_leiding (the verkenners/gidsen and seniors who could take up leiding next).
-ROUND(100 * gb.toekomstige_leiding / NULLIF(gb.leiding, 0), 2)
+-- A unit without leiding has no omkaderingscijfer and therefore no index, which the NULLIF keeps
+-- null rather than turning into a zero the charts would draw.
+ROUND(gb.gtp_waarden / NULLIF(2 * (gb.kinderen / NULLIF(gb.leiding, 0)), 0), 2)

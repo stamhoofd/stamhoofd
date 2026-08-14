@@ -45,7 +45,7 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
 -- dimensions: Eenheid
 -- metrics: Aantal leden, GTP index
 -- xlabels: rotate-90
--- description: De GTP index is een voorlopige berekening, zie de opmerking in de query.
+-- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- Rechtop, niet schuin: Metabase laat een label vallen zodra het het vorige raakt, en schuin heeft
 -- een naam per eenheid daar net te weinig plaats voor.
 -- @include facts
@@ -55,8 +55,8 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
         COUNT(DISTINCT member_id) AS leden,
         COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS kinderen,
         COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS leiding,
-        COUNT(DISTINCT CASE WHEN categorie = 'adult' THEN member_id END) AS volwassenen,
-        COUNT(DISTINCT CASE WHEN categorie = 'child' AND tak_min_age >= 14 THEN member_id END) AS toekomstige_leiding
+        -- @include gtp-waarden
+            AS gtp_waarden
     FROM facts
     GROUP BY `Eenheid`
 )

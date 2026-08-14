@@ -58,6 +58,52 @@ describe('report', () => {
             }
         });
 
+        /**
+         * The index is one expression over a `gtp_basis` that every card writes for its own grain,
+         * so a card can hand it columns that are not there. Nothing says so until someone opens the
+         * dashboard and Metabase reports an unknown column.
+         */
+        it('gives every card showing a GTP index the columns the formula divides', () => {
+            for (const [tab, key] of [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]) {
+                const sql = cardOf(dashboards, tab, key).sql;
+
+                expect(`${key}: ${sql.includes('gb.gtp_waarden /')}`).toEqual(`${key}: true`);
+
+                for (const column of ['gtp_waarden', 'kinderen', 'leiding']) {
+                    expect(`${key} supplies ${column}`).toEqual(sql.includes(`AS ${column}`) ? `${key} supplies ${column}` : `${key} misses ${column}`);
+                }
+            }
+        });
+
+        /**
+         * The weights of the GTP waarden, kept here because nothing else checks them: the takken are
+         * recognised by their age range, so a wrong weight is a plausible number rather than a
+         * failure.
+         */
+        it('weighs each tak of the GTP waarden as the formula does', () => {
+            const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql;
+
+            for (const [tak, term] of [
+                ['Bevers en Welpen', "3 * COUNT(DISTINCT CASE WHEN categorie = 'child' AND COALESCE(tak_min_age, leeftijd) <= 10"],
+                ['JVG/JG-A', "1 * COUNT(DISTINCT CASE WHEN categorie = 'child' AND COALESCE(tak_min_age, leeftijd) BETWEEN 11 AND 13"],
+                ['VG/G-J', "2 * COUNT(DISTINCT CASE WHEN categorie = 'child' AND COALESCE(tak_min_age, leeftijd) BETWEEN 14 AND 16"],
+                ['Seniors', "3 * COUNT(DISTINCT CASE WHEN categorie = 'child' AND COALESCE(tak_min_age, leeftijd) >= 17"],
+                ['Leiding', "+ COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END)"],
+            ]) {
+                expect(`${tak}: ${sql.includes(term)}`).toEqual(`${tak}: true`);
+            }
+        });
+
+        it('counts the omkaderingscijfer the same way wherever it is shown', () => {
+            const expression = "ROUND( COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2)";
+
+            for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
+                const sql = cardOf(dashboards, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');
+
+                expect(`${key}: ${sql.includes(expression)}`).toEqual(`${key}: true`);
+            }
+        });
+
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
             expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid']);
 

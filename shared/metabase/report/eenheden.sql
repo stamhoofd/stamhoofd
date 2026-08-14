@@ -35,14 +35,14 @@ SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE catego
 -- title: GTP Index
 -- display: gauge
 -- size: half
--- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer. Let op: dit is een voorlopige berekening, de formule van de klant is nog niet verwerkt.
+-- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- @include facts
 , gtp_basis AS (
     SELECT
         COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS kinderen,
         COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS leiding,
-        COUNT(DISTINCT CASE WHEN categorie = 'adult' THEN member_id END) AS volwassenen,
-        COUNT(DISTINCT CASE WHEN categorie = 'child' AND tak_min_age >= 14 THEN member_id END) AS toekomstige_leiding
+        -- @include gtp-waarden
+            AS gtp_waarden
     FROM facts
 )
 SELECT
@@ -56,9 +56,9 @@ FROM gtp_basis gb
 -- size: half
 -- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
 -- @include facts
-SELECT ROUND(
-    COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END)
-    / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2) AS `Omkaderingscijfer`
+SELECT
+    -- @include omkaderingscijfer
+        AS `Omkaderingscijfer`
 FROM facts
 
 -- @card eenheid-leden-per-postcode
@@ -105,7 +105,6 @@ ORDER BY MIN(period_start)
 -- size: half
 -- dimensions: Scoutsjaar
 -- metrics: GTP index
--- description: Voorlopige berekening, zie de opmerking in de query.
 -- @include facts-alle-jaren
 , gtp_basis AS (
     SELECT
@@ -113,8 +112,8 @@ ORDER BY MIN(period_start)
         MIN(period_start) AS period_start,
         COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) AS kinderen,
         COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END) AS leiding,
-        COUNT(DISTINCT CASE WHEN categorie = 'adult' THEN member_id END) AS volwassenen,
-        COUNT(DISTINCT CASE WHEN categorie = 'child' AND tak_min_age >= 14 THEN member_id END) AS toekomstige_leiding
+        -- @include gtp-waarden
+            AS gtp_waarden
     FROM facts
     GROUP BY `Scoutsjaar`
 )
@@ -134,9 +133,8 @@ ORDER BY gb.period_start
 -- @include facts-alle-jaren
 SELECT
     `Scoutsjaar`,
-    ROUND(
-        COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END)
-        / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2) AS `Omkaderingscijfer`
+    -- @include omkaderingscijfer
+        AS `Omkaderingscijfer`
 FROM facts
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
