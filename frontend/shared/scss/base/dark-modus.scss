@@ -15,26 +15,20 @@ body.light, :host.light {
     color-scheme: light;
 }
 
-body:not(.light), :host:not(.light) {
-    @media (prefers-color-scheme: dark) {
-        @include dark-modus;
-    }
-}
-
 @media (prefers-color-scheme: dark) {
-    img[src*=".svg"] {
-        filter: contrast(0.7);
-    }
-}
+    body:not(.light), :host:not(.light), :root:not(:has(body.light)) {
+        @include dark-modus;
 
-
-body:not(.light), :host:not(.light) {
-    @media (prefers-color-scheme: dark) {
         .st-color-directive {
             // Colors need to be recalculated using the local color hue and saturation
             @include dark-modus;
         }
+
     }
+    img[src*=".svg"] {
+        filter: contrast(0.7);
+    }
+
 }
 
 body.dark, :host.dark {
