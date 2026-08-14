@@ -12,6 +12,7 @@ process.on('unhandledRejection', (error: Error) => {
 
 // Set timezone!
 process.env.TZ = 'UTC';
+Error.stackTraceLimit = 50;
 
 // Quick check
 if (new Date().getTimezoneOffset() !== 0) {
