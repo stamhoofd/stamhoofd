@@ -1,28 +1,15 @@
 import type { MollieToken } from '@stamhoofd/models';
 import { MolliePayment, Payment } from '@stamhoofd/models';
+import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import type { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import axios from 'axios';
-import { createHash } from 'crypto';
 
 import { SettlementService } from '../services/SettlementService.js';
 import type { SettlementSyncSummary } from './ProviderSettlementSyncRunner.js';
-
-type MollieSettlementCost = {
-    description: string;
-    method: string | null;
-    amountNet: {
-        currency: string;
-        value: string;
-    };
-    amountVat: {
-        currency: string;
-        value: string;
-    } | null;
-};
 
 type MollieSettlement = {
     id: string;
@@ -34,13 +21,39 @@ type MollieSettlement = {
         currency: string;
         value: string;
     };
-    /**
-     * "The ID of the oldest invoice created for all the periods": null until Mollie created it,
-     * filled in by the regular re-walk of recent settlements.
-     */
-    invoiceId?: string | null;
-    periods?: Record<string, Record<string, { costs?: MollieSettlementCost[]; invoiceId?: string | null }>>;
 };
+
+type MollieAmount = {
+    currency: string;
+    value: string;
+};
+
+type MollieBalanceTransaction = {
+    id: string;
+    type: string;
+    createdAt: string;
+
+    /**
+     * Everything Mollie withheld from the movement (negative): fees, but also reserves, partner
+     * commissions and loan repayments. `deductionDetails` separates those.
+     */
+    deductions?: MollieAmount | null;
+    deductionDetails?: {
+        fees?: MollieAmount | null;
+    } | null;
+    context?: {
+        paymentId?: string;
+        refundId?: string;
+        chargebackId?: string;
+    } | null;
+};
+
+/**
+ * A transaction occurs before the settlement that pays it out: up to a month (Mollie settles
+ * daily, weekly or monthly) plus a few days of payout delay. The fee walk looks this much further
+ * back than the settlement window.
+ */
+const TRANSACTION_FEE_LOOKBACK_MS = 45 * 24 * 60 * 60 * 1000;
 
 /**
  * Everything one settlement walk needs to share between the resource pages.
@@ -81,10 +94,10 @@ type MollieSettlementEntryJSON = {
 };
 
 /**
- * Walks the settlements of one Mollie account and stores every entry in them: payments, refunds
- * and chargebacks become payment_settlements rows, Mollie's own costs become settlement_charges
- * rows, and the legacy blob is written in the same pass. Every settlement row written belongs to
- * the organization that owns the token's account.
+ * Walks the settlements of one Mollie account: payments, refunds and chargebacks become
+ * payment_settlements rows, and the legacy blob is written in the same pass. A second walk over
+ * the balance transactions stores the fee Mollie deducted per transaction as a settlement_charges
+ * row. Every row written belongs to the organization that owns the token's account.
  */
 export class MollieSettlementSync {
     private token: MollieToken;
@@ -93,12 +106,23 @@ export class MollieSettlementSync {
         this.token = token;
     }
 
-    /**
-     * Walk the settlements newest first, until they settle before `start`.
-     */
     async syncSettlements({ start, end = new Date(), summary, abort }: {
         start: Date;
         end?: Date;
+        summary?: SettlementSyncSummary;
+        abort?: AbortSignal;
+    }): Promise<void> {
+        // Fees attach to the settlement lines the first walk stores
+        await this.#walkSettlements({ start, end, summary, abort });
+        await this.#syncTransactionFees({ start, end, abort });
+    }
+
+    /**
+     * Walk the settlements newest first, until they settle before `start`.
+     */
+    async #walkSettlements({ start, end, summary, abort }: {
+        start: Date;
+        end: Date;
         summary?: SettlementSyncSummary;
         abort?: AbortSignal;
     }): Promise<void> {
@@ -208,9 +232,6 @@ export class MollieSettlementSync {
             // chargeback payment (created by the mollie-chargebacks cron).
             await this.#syncResource(settlement, 'chargebacks', state);
 
-            // Mollie's own costs, so the settlement reconciles to 0 like a Stripe one
-            await this.#storeMollieCosts(settlement, state);
-
             await SettlementService.finishSync(settlementRow, {
                 transactionCount: state.transactionCount,
             });
@@ -227,47 +248,127 @@ export class MollieSettlementSync {
     }
 
     /**
-     * Mollie invoices its costs per period: every cost line becomes a ProviderTransactionFee row plus
-     * a Tax row for its VAT, carrying the settlement's invoiceId so they can be matched against the
-     * invoice document.
+     * Stores the fee of every settled payment, refund and chargeback, then recounts the
+     * settlements that gained charges: their finishSync ran before the fees existed.
      */
-    async #storeMollieCosts(settlement: MollieSettlement, state: SettlementSyncState) {
-        for (const [year, months] of Object.entries(settlement.periods ?? {})) {
-            for (const [month, period] of Object.entries(months)) {
-                // Mollie states the period explicitly: that month is the cost's date, so the monthly
-                // grouping stays derivable from occurredAt alone
-                const occurredAt = new Date(parseInt(year), parseInt(month) - 1, 1);
+    async #syncTransactionFees({ start, end, abort }: { start: Date; end: Date; abort?: AbortSignal }): Promise<void> {
+        const touchedSettlementIds = new Set<string>();
 
-                // A settlement can straddle a month boundary: each period can be billed on its own
-                // invoice, the settlement-level id is only "the oldest invoice of all the periods"
-                const invoiceId = period.invoiceId ?? settlement.invoiceId;
+        try {
+            await this.#walkTransactionFees({ start, end, abort }, touchedSettlementIds);
+        } catch (e) {
+            // Recount what was stored before the walk broke, without hiding what broke it
+            await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch(console.error);
+            throw e;
+        }
 
-                for (const cost of period.costs ?? []) {
-                    // Mollie aggregates cost lines per description + method, so that pair identifies
-                    // the line within the period (hashed to keep the externalId short)
-                    const hash = createHash('sha256').update(cost.description + ':' + (cost.method ?? '')).digest('hex').slice(0, 16);
-                    const externalId = settlement.id + ':' + year + '-' + month + ':cost:' + hash;
-                    const description = cost.description + (cost.method ? ' (' + cost.method + ')' : '');
+        await SettlementService.refreshTotalsForIds([...touchedSettlementIds]);
+    }
 
-                    const rows = [
-                        { type: SettlementChargeType.ProviderTransactionFee, externalId, amount: -mollieAmountToUnits(cost.amountNet.value) },
-                        ...(cost.amountVat && mollieAmountToUnits(cost.amountVat.value) !== 0
-                            ? [{ type: SettlementChargeType.Tax, externalId: externalId + ':tax', amount: -mollieAmountToUnits(cost.amountVat.value) }]
-                            : []),
-                    ];
+    /**
+     * Walk the balance transactions newest first, until they occur before the window minus the
+     * lookback.
+     */
+    async #walkTransactionFees({ start, end, abort }: { start: Date; end: Date; abort?: AbortSignal }, touchedSettlementIds: Set<string>): Promise<void> {
+        const oldest = new Date(start.getTime() - TRANSACTION_FEE_LOOKBACK_MS);
+        let url: string | null = 'https://api.mollie.com/v2/balances/primary/transactions?limit=250';
 
-                    for (const row of rows) {
-                        await SettlementService.upsertCharge({
-                            ...row,
-                            settlementId: state.settlementRow.id,
-                            organizationId: state.settlementRow.organizationId,
-                            ...(invoiceId ? { providerInvoiceId: invoiceId } : {}),
-                            description,
-                            occurredAt,
-                        });
-                    }
-                }
+        while (url) {
+            abort?.throwIfAborted();
+
+            const request = await this.#get(url);
+
+            if (request.status !== 200) {
+                console.error('Failed to fetch balance transactions for organization', this.token.organizationId);
+                console.error(request.data);
+                return;
             }
+
+            const transactions = request.data._embedded?.balance_transactions as MollieBalanceTransaction[] | undefined;
+            if (!transactions) {
+                console.error('Unreadable balance transactions');
+                return;
+            }
+
+            for (const transaction of transactions) {
+                abort?.throwIfAborted();
+
+                const createdAt = new Date(transaction.createdAt);
+
+                if (isNaN(createdAt.getTime())) {
+                    console.error('Received an invalid balance transaction createdAt from Mollie', transaction, 'for organization', this.token.organizationId);
+                    continue;
+                }
+
+                if (createdAt.getTime() > end.getTime()) {
+                    continue;
+                }
+
+                if (createdAt.getTime() < oldest.getTime()) {
+                    // The list is newest-first: everything from here on occurred before the window
+                    return;
+                }
+
+                await this.#storeTransactionFee(transaction, createdAt, touchedSettlementIds);
+            }
+
+            const next = request.data._links?.next?.href as string | undefined;
+            url = (transactions.length > 0 && next) ? next : null;
+        }
+    }
+
+    /**
+     * The settled entry a balance transaction belongs to. Every other transaction type (transfers,
+     * reserves, corrections, ...) is ignored for now.
+     */
+    #getTransactionEntryId(transaction: MollieBalanceTransaction): string | null {
+        switch (transaction.type) {
+            case 'payment': return transaction.context?.paymentId ?? null;
+            case 'refund': return transaction.context?.refundId ?? null;
+            case 'chargeback': return transaction.context?.chargebackId ?? null;
+            default: return null;
+        }
+    }
+
+    /**
+     * Store the fee Mollie deducted for one settled entry: a charge on the settlement the entry
+     * was paid out in, linked to the local payment.
+     */
+    async #storeTransactionFee(transaction: MollieBalanceTransaction, createdAt: Date, touchedSettlementIds: Set<string>) {
+        const entryId = this.#getTransactionEntryId(transaction);
+        if (!entryId) {
+            return;
+        }
+
+        // Reserves, commissions and repayments are not costs of this entry; a transaction without
+        // the breakdown carries its whole deduction as fees
+        const amount = mollieAmountToUnits(transaction.deductionDetails?.fees?.value ?? transaction.deductions?.value ?? '0');
+        if (amount === 0) {
+            return;
+        }
+
+        // No line: the entry belongs to a different system on the same account, or its settlement
+        // isn't stored yet and a later walk revisits this transaction
+        const line = await PaymentSettlement.select().where('externalId', entryId).first(false);
+        if (!line) {
+            return;
+        }
+
+        await SettlementService.upsertCharge({
+            type: SettlementChargeType.ProviderTransactionFee,
+            externalId: transaction.id,
+            amount,
+            settlementId: line.settlementId,
+            paymentId: line.paymentId,
+            organizationId: line.organizationId,
+            occurredAt: createdAt,
+        });
+        touchedSettlementIds.add(line.settlementId);
+
+        const payment = await Payment.getByID(line.paymentId);
+        if (payment) {
+            payment.transferFee = -amount;
+            await payment.save();
         }
     }
 

@@ -90,8 +90,8 @@ describe('Cron.fake-settlements', () => {
             settledAt: Formatter.luxon(inWeek(2)).startOf('week').plus({ weeks: 1, days: 2 }).toJSDate(),
 
             // Refunds are taken out of the payout, just like the provider does, and so are the
-            // fake Mollie costs: 3 payments x 0.30 + 21% VAT
-            amount: 65_0000 - 90_00 - 18_90,
+            // fake Mollie fees: 3 payments x 0.363
+            amount: 65_0000 - 3 * 36_30,
         });
 
         // All payments of the week point to the same payout
@@ -135,8 +135,7 @@ describe('Cron.fake-settlements', () => {
         ];
 
         // Same week, but four accounts: four payouts, each holding only its own money. The Mollie
-        // payouts are reduced by the fake cost of one payment (0.30 + 21% VAT); the Stripe payments
-        // carry no fees here
+        // payouts are reduced by the fake fee of one payment; the Stripe payments carry no fees here
         expect(settlements.map(s => s!.amount)).toEqual([50_0000 - 36_30, 30_0000 - 36_30, 20_0000, 15_0000]);
         expect(new Set(settlements.map(s => s!.id)).size).toBe(4);
         expect(new Set(settlements.map(s => s!.reference)).size).toBe(4);
@@ -192,7 +191,7 @@ describe('Cron.fake-settlements', () => {
             return await Settlement.select().where('externalId', reference!.id).first(true);
         };
 
-        test('A Mollie payout stores payment lines and cost rows, and reconciles to zero', async () => {
+        test('A Mollie payout stores payment lines and fee rows, and reconciles to zero', async () => {
             const first = await createPayment({ price: 50_0000 });
             const second = await createPayment({ price: -10_0000, type: PaymentType.Refund });
 
@@ -201,7 +200,7 @@ describe('Cron.fake-settlements', () => {
             const settlement = await getSettlementRow(first);
             expect(settlement.provider).toBe(PaymentProvider.Mollie);
             expect(settlement.organizationId).toBe(organization.id);
-            expect(settlement.amount).toBe(40_0000 - 60_00 - 12_60);
+            expect(settlement.amount).toBe(40_0000 - 2 * 36_30);
             expect(settlement.unexplainedAmount).toBe(0);
             expect(settlement.syncedAt).not.toBeNull();
 
@@ -211,12 +210,15 @@ describe('Cron.fake-settlements', () => {
                 [second.id, -10_0000],
             ].sort());
 
-            const settledMonth = settlement.settledAt.getFullYear() + '-' + (settlement.settledAt.getMonth() + 1).toString().padStart(2, '0');
             const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
-            expect(charges.map(c => ({ type: c.type, amount: c.amount, providerInvoiceId: c.providerInvoiceId })).sort((a, b) => a.amount - b.amount)).toEqual([
-                { type: SettlementChargeType.ProviderTransactionFee, amount: -60_00, providerInvoiceId: 'fake-invoice-mollie-' + settledMonth },
-                { type: SettlementChargeType.Tax, amount: -12_60, providerInvoiceId: 'fake-invoice-mollie-' + settledMonth },
-            ]);
+            expect(charges.map(c => [c.paymentId, c.type, c.amount]).sort()).toEqual([
+                [first.id, SettlementChargeType.ProviderTransactionFee, -36_30],
+                [second.id, SettlementChargeType.ProviderTransactionFee, -36_30],
+            ].sort());
+
+            // Each settled payment holds its own fee
+            expect((await Payment.getByID(first.id))!.transferFee).toBe(36_30);
+            expect((await Payment.getByID(second.id))!.transferFee).toBe(36_30);
         });
 
         test('A Stripe application fee is mirrored on the payout and a monthly platform payout', async () => {
