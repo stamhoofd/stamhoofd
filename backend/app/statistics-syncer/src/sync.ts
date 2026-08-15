@@ -2,11 +2,11 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { getStatisticsConnection } from './database.js';
+import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds } from './periods.js';
 import type { StatisticsRow } from './rows.js';
 import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
-import { nextWatermark, readSyncState, writeSyncState } from './sync-state.js';
-import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds } from './periods.js';
 import { syncSource } from './sources.js';
+import { nextWatermark, readSyncState, writeSyncState } from './sync-state.js';
 import { deleteRows, iterateIds, upsertRows } from './writer.js';
 
 /**
@@ -73,8 +73,7 @@ function groupByPeriod(organizations: Organization[]): Map<string, Organization[
         const group = grouped.get(organization.periodId);
         if (group) {
             group.push(organization);
-        }
-        else {
+        } else {
             grouped.set(organization.periodId, [organization]);
         }
     }
@@ -125,8 +124,7 @@ async function periodIdsByMember(memberIds: string[]): Promise<Map<string, Set<s
         const periods = byMember.get(row.memberId);
         if (periods) {
             periods.add(row.periodId);
-        }
-        else {
+        } else {
             byMember.set(row.memberId, new Set([row.periodId]));
         }
     }
@@ -195,7 +193,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
         },
         {
             table: 'groups',
-            columns: ['id', 'type', 'name', 'organizationId', 'periodId', 'defaultAgeGroupId', 'cycle', 'status', 'deletedAt', 'createdAt', 'updatedAt'],
+            columns: ['id', 'type', 'name', 'organizationId', 'periodId', 'defaultAgeGroupId', 'status', 'deletedAt', 'createdAt', 'updatedAt'],
             fetch: async (since, afterId, limit) => {
                 const groups = await incrementalQuery(Group, since, afterId, limit).fetch() as Group[];
                 const rows = groups.map((group) => {
@@ -226,7 +224,7 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
         },
         {
             table: 'registrations',
-            columns: ['id', 'organizationId', 'memberId', 'groupId', 'periodId', 'registeredAt', 'startDate', 'endDate', 'trialUntil', 'deactivatedAt', 'waitingList', 'cycle', 'createdAt', 'updatedAt'],
+            columns: ['id', 'organizationId', 'memberId', 'groupId', 'periodId', 'registeredAt', 'startDate', 'endDate', 'trialUntil', 'deactivatedAt', 'createdAt', 'updatedAt'],
             fetch: async (since, afterId, limit) => {
                 const registrations = await incrementalQuery(Registration, since, afterId, limit).fetch() as Registration[];
                 return { rows: registrations.map(flattenRegistration), updatedAt: registrations.map(registration => registration.updatedAt), lastId: registrations.at(-1)?.id ?? afterId };

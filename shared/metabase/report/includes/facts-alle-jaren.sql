@@ -36,7 +36,6 @@ WITH facts AS (
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
     JOIN organizations o ON o.id = r.organizationId
     WHERE r.deactivatedAt IS NULL
-      AND r.waitingList = 0
       AND r.registeredAt IS NOT NULL
       [[AND o.name = {{eenheid}}]]
 )

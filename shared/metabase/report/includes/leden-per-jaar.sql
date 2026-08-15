@@ -15,6 +15,5 @@
     JOIN registration_periods p ON p.id = r.periodId
     JOIN `groups` g ON g.id = r.groupId AND g.deletedAt IS NULL
     WHERE r.deactivatedAt IS NULL
-      AND r.waitingList = 0
       AND r.registeredAt IS NOT NULL
 )

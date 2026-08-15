@@ -98,7 +98,6 @@ describe('flattenGroup', () => {
             organizationId: 'org-1',
             periodId: 'period-1',
             defaultAgeGroupId: 'age-1',
-            cycle: 0,
             status: 'Open',
             deletedAt: null,
             createdAt: new Date(2025, 0, 1),

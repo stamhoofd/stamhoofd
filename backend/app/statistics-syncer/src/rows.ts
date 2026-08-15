@@ -52,7 +52,6 @@ export type GroupSource = {
     organizationId: string;
     periodId: string | null;
     defaultAgeGroupId: string | null;
-    cycle: number;
     status: string;
     deletedAt: Date | null;
     createdAt: Date;
@@ -173,7 +172,6 @@ export function flattenGroup(group: GroupSource): StatisticsRow {
         organizationId: group.organizationId,
         periodId: group.periodId,
         defaultAgeGroupId: group.defaultAgeGroupId,
-        cycle: group.cycle,
         status: group.status,
         deletedAt: group.deletedAt,
         createdAt: group.createdAt,

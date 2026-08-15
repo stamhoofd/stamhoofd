@@ -110,7 +110,6 @@ WITH filteredMembers AS (
 	INNER JOIN registration_periods p ON p.id = m.periodId
     INNER JOIN organizations o ON o.id = r.organizationId
     WHERE r.deactivatedAt IS NULL
-      AND r.waitingList = 0
       AND r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
