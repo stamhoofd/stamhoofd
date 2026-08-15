@@ -121,7 +121,9 @@ CREATE TABLE `_organizations_organization_tags` (
   `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `organizationsId,organizationTagsId,periodId` (`organizationsId`,`organizationTagsId`,`periodId`) USING BTREE,
+  -- The period before the tag, though the three together are what is unique: the netwerk cards look a
+  -- unit up per year, and a column in between would leave the year unusable to that lookup.
+  UNIQUE KEY `organizationsId,periodId,organizationTagsId` (`organizationsId`,`periodId`,`organizationTagsId`) USING BTREE,
   KEY `organizationTagsId` (`organizationTagsId`),
   KEY `periodId` (`periodId`),
   KEY `source` (`source`),
@@ -255,10 +257,15 @@ CREATE TABLE `registrations` (
   `updatedAt` datetime NOT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
   PRIMARY KEY (`id`),
+  -- Every figure in the report starts here, at `report/includes/facts.sql`: the live registrations of
+  -- one year, and the member, groep and eenheid each of them points at. Those six columns are the
+  -- whole of what that reads, so the scan is answered from this index without touching a row. It
+  -- leads on the period because that is what the scoutsjaar filter fixes, and it stands in for a
+  -- plain index on `periodId`.
+  KEY `facts` (`periodId`,`deactivatedAt`,`registeredAt`,`memberId`,`groupId`,`organizationId`),
   KEY `memberId` (`memberId`) USING BTREE,
   KEY `groupId` (`groupId`),
   KEY `organizationId` (`organizationId`),
-  KEY `periodId` (`periodId`),
   KEY `registeredAt` (`registeredAt`),
   KEY `source` (`source`),
   CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -285,7 +292,8 @@ CREATE TABLE `member_platform_memberships` (
   KEY `memberId` (`memberId`),
   KEY `membershipTypeId` (`membershipTypeId`),
   KEY `organizationId` (`organizationId`),
-  KEY `periodId` (`periodId`),
+  -- The lidgeld cards ask for the memberships of one year held by a set of members, in that order.
+  KEY `periodId,memberId` (`periodId`,`memberId`),
   KEY `source` (`source`),
   CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -106,7 +106,9 @@ WITH filteredMembers AS (
             ELSE 'Onbekend'
         END AS `Geslacht`
     FROM members m
-	INNER JOIN registrations r ON r.memberId = m.id
+	-- Op hetzelfde jaar, niet alleen op het lid: zonder dat telt elke inschrijving van dat lid mee,
+	-- ook die uit een ander scoutsjaar dan het jaar waar deze rij over gaat.
+	INNER JOIN registrations r ON r.memberId = m.id AND r.periodId = m.periodId
 	INNER JOIN registration_periods p ON p.id = m.periodId
     INNER JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.deactivatedAt IS NULL
