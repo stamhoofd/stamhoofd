@@ -34,10 +34,9 @@ const PAYOUT_DELAY_DAYS = 2;
 const BATCH_SIZE = 1000;
 
 /**
- * Fake Mollie transaction fee per settled payment, excluding VAT.
+ * Fake Mollie transaction fee per settled payment, including VAT.
  */
-const MOLLIE_FEE_PER_PAYMENT = 30_00;
-const MOLLIE_FEE_VAT_PERCENTAGE = 21;
+const MOLLIE_FEE_PER_PAYMENT = 36_30;
 
 export async function createFakeSettlements() {
     if (STAMHOOFD.environment !== 'development') {
@@ -183,8 +182,7 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
                 return total + serviceFee + transferFee;
             }, 0);
         } else if (provider === PaymentProvider.Mollie) {
-            const net = MOLLIE_FEE_PER_PAYMENT * group.length;
-            fees = net + Math.round(net * MOLLIE_FEE_VAT_PERCENTAGE / 100);
+            fees = MOLLIE_FEE_PER_PAYMENT * group.length;
         }
 
         const grossAmount = group.reduce((total, payment) => total + payment.price, 0);
@@ -223,7 +221,7 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
         if (provider === PaymentProvider.Stripe) {
             await createStripeFeeRows(settlement, group, settledAt, platformOrganizationId);
         } else if (provider === PaymentProvider.Mollie) {
-            await createMollieCostRows(settlement, group, settledAt);
+            await createMollieFeeRows(settlement, group);
         }
 
         await finishFakeSync(settlement);
@@ -328,37 +326,23 @@ async function createStripeFeeRows(settlement: Settlement, group: Payment[], set
 }
 
 /**
- * Mollie deducts its own costs from the settlement: one fake transaction fee line plus its VAT, so
- * the settlement reconciles to 0 like a real one.
+ * Mollie deducts its fee per transaction: one fake fee charge per settled payment, linked to it
+ * like the real balance transaction walk stores, so the settlement reconciles to 0.
  */
-async function createMollieCostRows(settlement: Settlement, group: Payment[], settledAt: Date) {
-    const externalId = settlement.externalId + ':cost:0';
-    const existing = await SettlementCharge.select().where('externalId', externalId).first(false);
+async function createMollieFeeRows(settlement: Settlement, group: Payment[]) {
+    for (const payment of group) {
+        await SettlementService.upsertCharge({
+            type: SettlementChargeType.ProviderTransactionFee,
+            externalId: 'fake-baltr-' + payment.id,
+            amount: -MOLLIE_FEE_PER_PAYMENT,
+            settlementId: settlement.id,
+            paymentId: payment.id,
+            organizationId: settlement.organizationId,
+            description: 'DEV Mollie transactiekosten',
+            occurredAt: payment.paidAt!,
+        });
 
-    const addedNet = MOLLIE_FEE_PER_PAYMENT * group.length;
-    const net = (existing ? -existing.amount : 0) + addedNet;
-    const vat = Math.round(net * MOLLIE_FEE_VAT_PERCENTAGE / 100);
-    const providerInvoiceId = 'fake-invoice-mollie-' + SettlementService.getPeriodKey(settledAt);
-
-    await SettlementService.upsertCharge({
-        type: SettlementChargeType.ProviderTransactionFee,
-        externalId,
-        amount: -net,
-        settlementId: settlement.id,
-        organizationId: settlement.organizationId,
-        providerInvoiceId,
-        description: 'DEV Mollie transactiekosten',
-        occurredAt: settledAt,
-    });
-
-    await SettlementService.upsertCharge({
-        type: SettlementChargeType.Tax,
-        externalId: externalId + ':tax',
-        amount: -vat,
-        settlementId: settlement.id,
-        organizationId: settlement.organizationId,
-        providerInvoiceId,
-        description: 'DEV BTW op Mollie transactiekosten',
-        occurredAt: settledAt,
-    });
+        payment.transferFee = MOLLIE_FEE_PER_PAYMENT;
+        await payment.save();
+    }
 }

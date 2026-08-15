@@ -191,25 +191,16 @@ describe('Helper.MollieSettlementSync', () => {
         test('legacy JSON and new rows agree, and the settlement reconciles to zero', async () => {
             const { organization, token, payment, refundPayment, mockPayment, mockRefund } = await init();
 
-            // 50.00 - 20.00 in entries, minus 0.30 costs + 0.06 VAT
+            // 50.00 - 20.00 in entries, minus a 0.30 payment fee and a 0.06 refund fee
             const settlement = mollieMocker.createSettlement({
                 payments: [mockPayment],
                 refunds: [mockRefund],
                 value: '29.64',
-                invoiceId: 'inv_123',
-                periods: {
-                    2026: {
-                        '01': {
-                            costs: [{
-                                description: 'Bancontact betalingen',
-                                method: 'bancontact',
-                                amountNet: { currency: 'EUR', value: '0.30' },
-                                amountVat: { currency: 'EUR', value: '0.06' },
-                            }],
-                        },
-                    },
-                },
             });
+            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', createdAt: new Date(2026, 0, 5) });
+
+            // A transaction without the deductionDetails breakdown: its whole deduction is the fee
+            mollieMocker.createBalanceTransaction({ type: 'refund', entryId: mockRefund.id, deductions: '0.06', createdAt: new Date(2026, 0, 6) });
 
             await runCron(token);
 
@@ -230,10 +221,14 @@ describe('Helper.MollieSettlementSync', () => {
             ].sort());
 
             const charges = await SettlementCharge.select().where('settlementId', row.id).fetch();
-            expect(charges.map(c => ({ type: c.type, amount: c.amount, providerInvoiceId: c.providerInvoiceId, occurredAt: c.occurredAt })).sort((a, b) => a.amount - b.amount)).toEqual([
-                { type: SettlementChargeType.ProviderTransactionFee, amount: -30_00, providerInvoiceId: 'inv_123', occurredAt: new Date(2026, 0, 1) },
-                { type: SettlementChargeType.Tax, amount: -6_00, providerInvoiceId: 'inv_123', occurredAt: new Date(2026, 0, 1) },
+            expect(charges.map(c => ({ type: c.type, amount: c.amount, paymentId: c.paymentId, occurredAt: c.occurredAt })).sort((a, b) => a.amount - b.amount)).toEqual([
+                { type: SettlementChargeType.ProviderTransactionFee, amount: -30_00, paymentId: payment.id, occurredAt: new Date(2026, 0, 5) },
+                { type: SettlementChargeType.ProviderTransactionFee, amount: -6_00, paymentId: refundPayment.id, occurredAt: new Date(2026, 0, 6) },
             ]);
+
+            // Each payment holds the fee that was deducted for it
+            expect((await Payment.getByID(payment.id))!.transferFee).toBe(30_00);
+            expect((await Payment.getByID(refundPayment.id))!.transferFee).toBe(6_00);
 
             // The legacy blob agrees with the new settlement row
             const updatedPayment = await Payment.getByID(payment.id);
@@ -241,50 +236,78 @@ describe('Helper.MollieSettlementSync', () => {
             expect(updatedPayment!.settlement!.amount).toBe(row.amount);
         });
 
-        test('the invoiceId is filled in on a later re-walk', async () => {
-            const { token, mockPayment } = await init();
+        test('the fee of a chargeback is stored on its settlement and payment', async () => {
+            const { organization, token, payment, mockPayment } = await init();
+            const { chargebackPayment, mockChargeback } = await addChargeback(organization.id, payment, mockPayment);
+
+            // 50.00 - 50.00 in entries, minus a 0.25 chargeback fee
             const settlement = mollieMocker.createSettlement({
                 payments: [mockPayment],
-                value: '49.70',
-                periods: {
-                    2026: {
-                        '01': {
-                            costs: [{
-                                description: 'Bancontact betalingen',
-                                method: 'bancontact',
-                                amountNet: { currency: 'EUR', value: '0.30' },
-                                amountVat: { currency: 'EUR', value: '0.00' },
-                            }],
-                        },
-                    },
-                },
+                chargebacks: [mockChargeback],
+                value: '-0.25',
             });
+            mollieMocker.createBalanceTransaction({ type: 'chargeback', entryId: mockChargeback.id, fee: '0.25' });
 
             await runCron(token);
+
             const row = await getSettlementRow(settlement.id);
-            const costs = await SettlementCharge.select().where('settlementId', row.id).fetch();
-            expect(costs).toHaveLength(1);
-            expect(costs[0].providerInvoiceId).toBeNull();
+            expect(row.unexplainedAmount).toBe(0);
 
-            // Mollie created the invoice since the last walk
-            settlement.invoiceId = 'inv_later';
+            const charges = await SettlementCharge.select().where('paymentId', chargebackPayment.id).fetch();
+            expect(charges.map(c => ({ type: c.type, amount: c.amount, settlementId: c.settlementId }))).toEqual([
+                { type: SettlementChargeType.ProviderTransactionFee, amount: -25_00, settlementId: row.id },
+            ]);
+            expect((await Payment.getByID(chargebackPayment.id))!.transferFee).toBe(25_00);
+        });
+
+        test('only the fee part of a deduction becomes a charge', async () => {
+            const { token, payment, mockPayment } = await init();
+
+            // Mollie withheld 5.30: a 0.30 fee plus a 5.00 reserve, which stays unexplained
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], value: '44.70' });
+            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', deductions: '5.30' });
+
             await runCron(token);
 
-            const updated = await SettlementCharge.getByID(costs[0].id);
-            expect(updated!.providerInvoiceId).toBe('inv_later');
+            const charges = await SettlementCharge.select().where('paymentId', payment.id).fetch();
+            expect(charges.map(c => c.amount)).toEqual([-30_00]);
+            expect((await Payment.getByID(payment.id))!.transferFee).toBe(30_00);
+            expect((await getSettlementRow(settlement.id)).unexplainedAmount).toBe(-5_0000);
+        });
+
+        test('the fee of a settlement that is not stored yet is stored on a later walk', async () => {
+            const { token, payment, mockPayment } = await init();
+            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30' });
+
+            // The transaction exists before its settlement is paid out: there is nothing to
+            // attach the fee to yet
+            await runCron(token);
+            expect(await SettlementCharge.select().where('paymentId', payment.id).count()).toBe(0);
+
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], value: '49.70' });
+            await runCron(token);
+
+            const row = await getSettlementRow(settlement.id);
+            expect(row.unexplainedAmount).toBe(0);
+            expect(await SettlementCharge.select().where('paymentId', payment.id).count()).toBe(1);
         });
 
         test('re-running stores identical rows', async () => {
             const { token, mockPayment, mockRefund } = await init();
-            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], refunds: [mockRefund], value: '30.00' });
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment], refunds: [mockRefund], value: '29.70' });
+            mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30' });
 
             await runCron(token);
             const row = await getSettlementRow(settlement.id);
             const before = (await PaymentSettlement.select().where('settlementId', row.id).fetch()).map(l => l.id).sort();
+            const chargesBefore = (await SettlementCharge.select().where('settlementId', row.id).fetch()).map(c => c.id).sort();
 
             await runCron(token);
             const after = (await PaymentSettlement.select().where('settlementId', row.id).fetch()).map(l => l.id).sort();
+            const chargesAfter = (await SettlementCharge.select().where('settlementId', row.id).fetch()).map(c => c.id).sort();
             expect(after).toEqual(before);
+            expect(chargesAfter).toEqual(chargesBefore);
+            expect(chargesBefore).toHaveLength(1);
             expect(await Settlement.select().where('externalId', settlement.id).count()).toBe(1);
         });
     });
@@ -331,6 +354,34 @@ describe('Helper.MollieSettlementSync', () => {
             expect(await Settlement.select().where('externalId', settlement.id).count()).toBe(1);
         }
         expect(await Settlement.select().where('externalId', beforeWindow.id).count()).toBe(0);
+    });
+
+    test('The fee walk follows pagination and stops before the window', async () => {
+        const { organization, token, payment, mockPayment, mockRefund } = await init();
+        const { mockChargeback } = await addChargeback(organization.id, payment, mockPayment);
+        mollieMocker.balanceTransactionsPageSize = 2;
+
+        const settlement = mollieMocker.createSettlement({
+            payments: [mockPayment],
+            refunds: [mockRefund],
+            chargebacks: [mockChargeback],
+            value: '100.00',
+        });
+
+        // Three fee transactions across two pages, newest first
+        mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '0.30', createdAt: new Date(2026, 2, 3) });
+        mollieMocker.createBalanceTransaction({ type: 'refund', entryId: mockRefund.id, fee: '0.06', createdAt: new Date(2026, 2, 2) });
+        mollieMocker.createBalanceTransaction({ type: 'chargeback', entryId: mockChargeback.id, fee: '0.25', createdAt: new Date(2026, 2, 1) });
+
+        // Before the window (minus the lookback): the walk may not reach this one
+        const beforeWindow = mollieMocker.createBalanceTransaction({ type: 'payment', entryId: mockPayment.id, fee: '9.99', createdAt: new Date(2019, 0, 1) });
+
+        await runCron(token);
+
+        const row = await Settlement.select().where('externalId', settlement.id).first(true);
+        const charges = await SettlementCharge.select().where('settlementId', row.id).fetch();
+        expect(charges.map(c => c.amount).sort((a, b) => a - b)).toEqual([-30_00, -25_00, -6_00]);
+        expect(charges.map(c => c.externalId)).not.toContain(beforeWindow.id);
     });
 
     test('The summary counts synced settlements', async () => {
@@ -394,11 +445,13 @@ describe('Helper.MollieSettlementSync', () => {
             refunds: [unlinkedRefund, mockRefund],
             value: '100.00',
         });
+        const unlinkedFee = mollieMocker.createBalanceTransaction({ type: 'refund', entryId: unlinkedRefund.id, fee: '0.06' });
 
         await runCron(token);
 
-        // The known refund still gets its settlement, the unlinked one is silently ignored
+        // The known refund still gets its settlement, the unlinked one and its fee are silently ignored
         const updatedRefund = await Payment.getByID(refundPayment.id);
         expect(updatedRefund!.settlement).toMatchObject({ id: settlement.id });
+        expect(await SettlementCharge.select().where('externalId', unlinkedFee.id).count()).toBe(0);
     });
 });

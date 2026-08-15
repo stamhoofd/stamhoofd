@@ -53,13 +53,6 @@ export type MollieMockRefund = {
     metadata: Record<string, unknown> | null;
 };
 
-export type MollieMockSettlementCost = {
-    description: string;
-    method: string | null;
-    amountNet: { currency: string; value: string };
-    amountVat: { currency: string; value: string } | null;
-};
-
 export type MollieMockSettlement = {
     id: string;
     reference: string;
@@ -68,16 +61,21 @@ export type MollieMockSettlement = {
     createdAt: string;
     /** null for the still-open settlement, a date once it has been paid out */
     settledAt: string | null;
-    /** id of the invoice Mollie created for the settlement costs, null until it exists */
-    invoiceId: string | null;
-    /** Mollie's own costs per period, keyed year → month */
-    periods: Record<string, Record<string, { costs: MollieMockSettlementCost[]; invoiceId?: string | null }>>;
     /** Mollie payment ids (tr_...) settled in this settlement */
     paymentIds: string[];
     /** Mollie refund ids (re_...) settled in this settlement */
     refundIds: string[];
     /** Mollie chargeback ids (chb_...) settled in this settlement */
     chargebackIds: string[];
+};
+
+export type MollieMockBalanceTransaction = {
+    id: string;
+    type: string;
+    createdAt: string;
+    deductions: { currency: string; value: string } | null;
+    deductionDetails: { fees?: { currency: string; value: string } } | null;
+    context: Record<string, string> | null;
 };
 
 const MOLLIE_CHECKOUT_URL = 'https://molliecheckout/';
@@ -104,12 +102,18 @@ export class MollieMocker {
     chargebacks: MollieMockChargeback[] = [];
     refunds: MollieMockRefund[] = [];
     settlements: MollieMockSettlement[] = [];
+    balanceTransactions: MollieMockBalanceTransaction[] = [];
 
     /**
      * Cap the settlements list page size below the requested limit, to exercise pagination
      * without creating hundreds of settlements.
      */
     settlementsPageSize: number | null = null;
+
+    /**
+     * Same, for the balance transactions list.
+     */
+    balanceTransactionsPageSize: number | null = null;
 
     #forceFailure = false;
 
@@ -120,7 +124,9 @@ export class MollieMocker {
         this.chargebacks = [];
         this.refunds = [];
         this.settlements = [];
+        this.balanceTransactions = [];
         this.settlementsPageSize = null;
+        this.balanceTransactionsPageSize = null;
         this.#forceFailure = false;
     }
 
@@ -240,6 +246,11 @@ export class MollieMocker {
 
         if (parts[0] === 'chargebacks' && method === 'GET') {
             return this.#listResource('chargebacks', this.chargebacks.map(c => this.#chargebackResource(c)));
+        }
+
+        // balance transactions (drives the transaction fee part of the settlements sync)
+        if (parts[0] === 'balances' && method === 'GET' && parts.length === 3 && parts[2] === 'transactions') {
+            return this.#listBalanceTransactions(uri);
         }
 
         // settlements + nested payments/refunds (drives the settlements sync)
@@ -574,7 +585,7 @@ export class MollieMocker {
      * Register a settled (paid out) settlement that groups the given payments and refunds.
      * Used to drive the MollieSettlementSync walk.
      */
-    createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date; invoiceId?: string | null; periods?: Record<string, Record<string, { costs: MollieMockSettlementCost[]; invoiceId?: string | null }>> } = {}): MollieMockSettlement {
+    createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date } = {}): MollieMockSettlement {
         const settlement: MollieMockSettlement = {
             id: this.createId('stl'),
             reference: '1234567.' + (this.settlements.length + 1).toString().padStart(4, '0') + '.01',
@@ -582,8 +593,6 @@ export class MollieMocker {
             amount: { currency: 'EUR', value: options.value ?? '0.00' },
             createdAt: new Date().toISOString(),
             settledAt: (options.settledAt ?? new Date()).toISOString(),
-            invoiceId: options.invoiceId ?? null,
-            periods: options.periods ?? {},
             paymentIds: (options.payments ?? []).map(p => p.id),
             refundIds: (options.refunds ?? []).map(r => r.id),
             chargebackIds: (options.chargebacks ?? []).map(c => c.id),
@@ -637,9 +646,73 @@ export class MollieMocker {
             amount: settlement.amount,
             createdAt: settlement.createdAt,
             settledAt: settlement.settledAt ?? null,
-            invoiceId: settlement.invoiceId,
-            periods: settlement.periods,
             _links: { self: { href: 'https://api.mollie.com/v2/settlements/' + settlement.id, type: 'application/hal+json' } },
+        };
+    }
+
+    // ---- Balance transactions ---------------------------------------------
+
+    /**
+     * Register the balance transaction of a payment, refund or chargeback, carrying the fee Mollie
+     * deducted for it. `fee` and `deductions` are positive euro values, stored negated like Mollie
+     * reports them. Pass only `deductions` for a transaction without the deductionDetails breakdown.
+     */
+    createBalanceTransaction(options: {
+        type: 'payment' | 'refund' | 'chargeback';
+        entryId: string;
+        fee?: string;
+        deductions?: string;
+        createdAt?: Date;
+    }): MollieMockBalanceTransaction {
+        const contextKey = options.type === 'payment' ? 'paymentId' : options.type === 'refund' ? 'refundId' : 'chargebackId';
+        const deductions = options.deductions ?? options.fee;
+
+        const transaction: MollieMockBalanceTransaction = {
+            id: this.createId('baltr'),
+            type: options.type,
+            createdAt: (options.createdAt ?? new Date()).toISOString(),
+            deductions: deductions ? { currency: 'EUR', value: '-' + deductions } : null,
+            deductionDetails: options.fee ? { fees: { currency: 'EUR', value: '-' + options.fee } } : null,
+            context: { [contextKey]: options.entryId },
+        };
+        this.balanceTransactions.push(transaction);
+        return transaction;
+    }
+
+    /**
+     * Mollie lists balance transactions newest-first, paginated like the settlements list.
+     */
+    #listBalanceTransactions(uri: string): [number, unknown] {
+        const query = new URLSearchParams(uri.split('?')[1] ?? '');
+
+        const sorted = this.balanceTransactions.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        const requestedLimit = parseInt(query.get('limit') ?? '250');
+        const limit = Math.min(requestedLimit, this.balanceTransactionsPageSize ?? requestedLimit);
+
+        const from = query.get('from');
+        const startIndex = from ? sorted.findIndex(t => t.id === from) : 0;
+        if (startIndex === -1) {
+            return [404, { status: 404, title: 'Not Found', detail: 'No balance transaction exists with token ' + from }];
+        }
+
+        const page = sorted.slice(startIndex, startIndex + limit);
+        const nextItem = sorted[startIndex + limit];
+
+        return this.#listResource('balance_transactions', page.map(t => this.#balanceTransactionResource(t)), {
+            next: nextItem ? 'https://api.mollie.com/v2/balances/primary/transactions?limit=' + requestedLimit + '&from=' + nextItem.id : null,
+        });
+    }
+
+    #balanceTransactionResource(transaction: MollieMockBalanceTransaction) {
+        return {
+            resource: 'balance-transaction',
+            id: transaction.id,
+            type: transaction.type,
+            createdAt: transaction.createdAt,
+            deductions: transaction.deductions,
+            deductionDetails: transaction.deductionDetails,
+            context: transaction.context,
         };
     }
 
