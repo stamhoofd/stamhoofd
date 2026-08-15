@@ -1,6 +1,6 @@
 import type { Member, Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { Gender } from '@stamhoofd/structures';
+import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { DefaultAgeGroup, Gender } from '@stamhoofd/structures';
 import { getStatisticsConnection } from './database.js';
 import { syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
@@ -20,8 +20,16 @@ describe('statistics sync', () => {
     let member: Member;
     let registration: Registration;
     let period: RegistrationPeriod;
+    let ageGroup: DefaultAgeGroup;
 
     beforeAll(async () => {
+        // A tak on the platform, so there is a piece of configuration for the reports to group by.
+        const platform = await Platform.getForEditing();
+        ageGroup = DefaultAgeGroup.create({ names: ['Welpen'], minAge: 7, maxAge: 10 });
+        platform.config.defaultAgeGroups = [ageGroup];
+        await platform.save();
+        await Platform.clearCache();
+
         period = await new RegistrationPeriodFactory({}).create();
         organization = await new OrganizationFactory({ period }).create();
         const group = await new GroupFactory({ organization }).create();
@@ -70,6 +78,20 @@ describe('statistics sync', () => {
         expect(row.postalCode).toBe(organization.address.postalCode);
         expect(row.city).toBe(organization.address.city);
         expect(JSON.stringify(row)).not.toContain(organization.address.street);
+    });
+
+    /**
+     * The platform configuration holds one name per tak, netwerk, lidgeldtype and functie and no
+     * history at all, so the name it carries now is written against each year still open.
+     */
+    it('writes the platform configuration against every period that is still open', async () => {
+        const now = new Date();
+        const periods = await statisticsRows('registration_periods');
+        const open = new Set(periods.filter(row => row.cutoffAt === null || row.cutoffAt > now).map(row => row.id));
+        const written = new Set((await statisticsRows('default_age_groups', ageGroup.id)).map(row => row.periodId));
+
+        expect(open.size).toBeGreaterThan(0);
+        expect([...open].filter(periodId => !written.has(periodId))).toEqual([]);
     });
 
     it('records a watermark it can resume from', async () => {
@@ -180,6 +202,34 @@ describe('statistics sync', () => {
             expect(before[frozenPeriod.id]).toBe(Gender.Female);
             expect(after[frozenPeriod.id]).toBe(Gender.Female);
             expect(after[organization.periodId]).toBe(Gender.Male);
+        });
+
+        /**
+         * The same rule as for the member, applied to the two things the source keeps no history for
+         * at all: a unit's own name, and a tak's name from the platform configuration.
+         */
+        it('keeps the unit and the tak named as they were counted, while the year still running follows the source', async () => {
+            const nameOf = async (table: string, id: string) =>
+                Object.fromEntries((await statisticsRows(table, id)).map(row => [row.periodId, row.name]));
+
+            const ageGroupId = ageGroup.id;
+            const before = { unit: await nameOf('organizations', organization.id), tak: await nameOf('default_age_groups', ageGroupId) };
+
+            organization.name = 'Hernoemde eenheid';
+            await organization.save();
+
+            const platform = await Platform.getForEditing();
+            platform.config.defaultAgeGroups.find(group => group.id === ageGroupId)!.names = ['Hernoemde tak'];
+            await platform.save();
+            await Platform.clearCache();
+
+            await syncStatistics();
+
+            const after = { unit: await nameOf('organizations', organization.id), tak: await nameOf('default_age_groups', ageGroupId) };
+            expect(after.unit[frozenPeriod.id]).toBe(before.unit[frozenPeriod.id]);
+            expect(after.tak[frozenPeriod.id]).toBe(before.tak[frozenPeriod.id]);
+            expect(after.unit[organization.periodId]).toBe('Hernoemde eenheid');
+            expect(after.tak[organization.periodId]).toBe('Hernoemde tak');
         });
 
         it('is not rewritten by the sync when the source changes', async () => {

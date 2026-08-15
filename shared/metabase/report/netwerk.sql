@@ -22,7 +22,7 @@ SELECT
 FROM facts f
 JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
-JOIN organization_tags t ON t.id = link.organizationTagsId
+JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
 GROUP BY t.name
 ORDER BY t.name
 
@@ -39,7 +39,7 @@ SELECT
 FROM facts f
 JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
-JOIN organization_tags t ON t.id = link.organizationTagsId
+JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
 GROUP BY t.name
 ORDER BY t.name
 
@@ -78,6 +78,6 @@ SELECT
 FROM facts f
 LEFT JOIN _organizations_organization_tags link
     ON link.organizationsId = f.organization_id AND link.periodId = f.period_id
-LEFT JOIN organization_tags t ON t.id = link.organizationTagsId
+LEFT JOIN organization_tags t ON t.id = link.organizationTagsId AND t.periodId = link.periodId
 GROUP BY f.`Eenheid`, f.eenheid_postcode, f.eenheid_gemeente, t.name
 ORDER BY f.`Eenheid`

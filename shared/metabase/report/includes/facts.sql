@@ -48,10 +48,12 @@ WITH facts AS (
     FROM registrations r
     JOIN registration_periods p ON p.id = r.periodId
     JOIN `groups` g ON g.id = r.groupId AND g.deletedAt IS NULL
-    LEFT JOIN default_age_groups dag ON dag.id = g.defaultAgeGroupId
-    -- A member row describes a member in one year, so the period is part of what identifies it.
+    -- The tak, the member and the eenheid are each recorded per year, so the period is part of what
+    -- identifies the row to join to: a tak that is renamed or a member who moves changes the year it
+    -- happened in, not every year they were ever counted in.
+    LEFT JOIN default_age_groups dag ON dag.id = g.defaultAgeGroupId AND dag.periodId = r.periodId
     JOIN members m ON m.id = r.memberId AND m.periodId = r.periodId
-    JOIN organizations o ON o.id = r.organizationId
+    JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.deactivatedAt IS NULL
       AND r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]

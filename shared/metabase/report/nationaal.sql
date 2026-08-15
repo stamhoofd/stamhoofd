@@ -108,7 +108,7 @@ WITH filteredMembers AS (
     FROM members m
 	INNER JOIN registrations r ON r.memberId = m.id
 	INNER JOIN registration_periods p ON p.id = m.periodId
-    INNER JOIN organizations o ON o.id = r.organizationId
+    INNER JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.deactivatedAt IS NULL
       AND r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
@@ -168,7 +168,7 @@ SELECT
     mt.name AS `Type lidgeld`,
     COUNT(DISTINCT mpm.memberId) AS `Aantal leden`
 FROM member_platform_memberships mpm
-JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId
+JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId AND mt.periodId = mpm.periodId
 WHERE mpm.deletedAt IS NULL
   AND mpm.periodId IN (SELECT DISTINCT period_id FROM facts)
   AND mpm.memberId IN (SELECT DISTINCT member_id FROM facts)

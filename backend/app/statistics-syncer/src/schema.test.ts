@@ -1,5 +1,5 @@
 import { getStatisticsConnection, getStatisticsDatabaseConfig } from './database.js';
-import { neverDeletedTables } from './sync.js';
+import { reconciledTables } from './sync.js';
 
 /**
  * Column names that would mean a natural person ended up in the statistics database. This guards
@@ -84,12 +84,33 @@ describe('migration.platform-statistics-schema', () => {
         expect(columns.filter(column => /count$/i.test(column.columnName))).toEqual([]);
     });
 
+    async function compositeKeyTables(): Promise<string[]> {
+        const [rows] = await getStatisticsConnection().select(
+            'SELECT TABLE_NAME as tableName FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND INDEX_NAME = ? GROUP BY TABLE_NAME HAVING COUNT(*) > 1',
+            [getStatisticsDatabaseConfig().DB_DATABASE, 'PRIMARY'],
+            { nestTables: false },
+        );
+        return (rows as unknown as { tableName: string }[]).map(row => row.tableName).sort();
+    }
+
     /**
-     * A member's gender, birth date and postal code all change over their life, so a row describes
-     * them in one year rather than as they are now. The period is part of the key, which is also what
-     * lets the sync leave a settled year alone.
+     * Everything the source keeps only one current answer for -- a member's gender, a unit's name, a
+     * tak, a netwerk, a lidgeldtype, a functie -- is recorded per period instead, so that a settled
+     * year keeps the answer it was counted with and a correction lands in the year it belongs to.
      */
-    it('keeps a member row per period, so a settled year holds the member as it counted them', async () => {
+    it('keys everything the source holds no history for on its period as well as its id', async () => {
+        expect(await compositeKeyTables()).toEqual([
+            'default_age_groups',
+            'member_responsibility_records',
+            'members',
+            'organization_tags',
+            'organizations',
+            'platform_membership_types',
+            'responsibilities',
+        ]);
+    });
+
+    it('puts the member before the period in the key, which is how the reports read a member across the years', async () => {
         const [rows] = await getStatisticsConnection().select(
             'SELECT COLUMN_NAME as columnName FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ? ORDER BY SEQ_IN_INDEX',
             [getStatisticsDatabaseConfig().DB_DATABASE, 'members', 'PRIMARY'],
@@ -102,18 +123,27 @@ describe('migration.platform-statistics-schema', () => {
     /**
      * The delete reconciliation walks a table by id and asks the source which ids are still there. A
      * table holding several rows per id has no way to say which of them a surviving id stands for,
-     * so it must be one the sync never deletes from.
+     * so it must be one the reconciliation never walks.
      */
-    it('never deletes from a table that holds more than one row per id', async () => {
+    it('reconciles deletes only for the tables keyed on their id alone', async () => {
+        const composite = new Set(await compositeKeyTables());
+
+        expect(reconciledTables().filter(table => composite.has(table))).toEqual([]);
+    });
+
+    /**
+     * `id` no longer identifies a row in those tables, so nothing can point at one. The period is the
+     * exception: it is the one dimension the source does keep history for.
+     */
+    it('leaves no foreign key pointing at a table keyed on more than its id', async () => {
         const [rows] = await getStatisticsConnection().select(
-            'SELECT TABLE_NAME as tableName, COUNT(*) as columns FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND INDEX_NAME = ? GROUP BY TABLE_NAME HAVING COUNT(*) > 1',
-            [getStatisticsDatabaseConfig().DB_DATABASE, 'PRIMARY'],
+            'SELECT DISTINCT REFERENCED_TABLE_NAME as tableName FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = ? AND REFERENCED_TABLE_NAME IS NOT NULL',
+            [getStatisticsDatabaseConfig().DB_DATABASE],
             { nestTables: false },
         );
-        const composite = (rows as unknown as { tableName: string }[]).map(row => row.tableName).sort();
+        const composite = new Set(await compositeKeyTables());
 
-        expect(composite).toEqual(['members']);
-        expect(neverDeletedTables()).toContain('members');
+        expect((rows as unknown as { tableName: string }[]).map(row => row.tableName).filter(table => composite.has(table))).toEqual([]);
     });
 
     it('mirrors the column types of the main database', async () => {
@@ -122,8 +152,6 @@ describe('migration.platform-statistics-schema', () => {
 
         expect(typeOf('members', 'id')).toBe('varchar(36)');
         expect(typeOf('registrations', 'memberId')).toBe('varchar(36)');
-        expect(typeOf('registrations', 'waitingList')).toBe('tinyint(1)');
-        expect(typeOf('registrations', 'cycle')).toBe('int');
         expect(typeOf('registrations', 'registeredAt')).toBe('datetime');
         expect(typeOf('organizations', 'name')).toBe('varchar(100)');
         expect(typeOf('organizations', 'postalCode')).toBe('varchar(36)');

@@ -147,17 +147,23 @@ export function flattenRegistrationPeriod(period: RegistrationPeriodSource): Sta
 }
 
 /**
+ * One row per unit per period: the unit as it was that year. A unit that is renamed or moves keeps
+ * the name and the place it was counted under in the years already settled.
+ *
+ * `periodId` is the year this row describes, not the period the unit is in now — the latter lives on
+ * the source record and is what the netwerk links are recorded against.
+ *
  * Only the postal code and city of the address survive: the report maps units by postal code and
  * lists them by city. An organization is a legal entity rather than a natural person.
  */
-export function flattenOrganization(organization: OrganizationSource): StatisticsRow {
+export function flattenOrganization(organization: OrganizationSource, periodId: string): StatisticsRow {
     return {
         id: organization.id,
+        periodId,
         name: organization.name,
         uri: organization.uri,
         postalCode: emptyToNull(organization.address.postalCode),
         city: emptyToNull(organization.address.city),
-        periodId: organization.periodId,
         active: organization.active,
         createdAt: organization.createdAt,
         updatedAt: organization.updatedAt,
@@ -242,9 +248,14 @@ export function flattenMembership(membership: MembershipSource): StatisticsRow {
     };
 }
 
-export function flattenResponsibilityRecord(record: ResponsibilityRecordSource): StatisticsRow {
+/**
+ * One row per period the record runs through: it carries a date range rather than a year, and a
+ * functie held for three years was held in each of them.
+ */
+export function flattenResponsibilityRecord(record: ResponsibilityRecordSource, periodId: string): StatisticsRow {
     return {
         id: record.id,
+        periodId,
         memberId: record.memberId,
         groupId: record.groupId,
         organizationId: record.organizationId,
@@ -254,12 +265,17 @@ export function flattenResponsibilityRecord(record: ResponsibilityRecordSource):
     };
 }
 
-export function flattenNamedConfig(config: NamedConfigSource): StatisticsRow {
-    return { id: config.id, name: config.name };
+/**
+ * The platform configuration holds one name per tak, netwerk, lidgeldtype and functie: the one it
+ * carries today. Written per period, so renaming one changes what the years still open are reported
+ * under and leaves the settled ones saying what they said.
+ */
+export function flattenNamedConfig(config: NamedConfigSource, periodId: string): StatisticsRow {
+    return { id: config.id, periodId, name: config.name };
 }
 
-export function flattenDefaultAgeGroup(group: { id: string; name: string; minAge: number | null; maxAge: number | null }): StatisticsRow {
-    return { id: group.id, name: group.name, minAge: group.minAge, maxAge: group.maxAge };
+export function flattenDefaultAgeGroup(group: { id: string; name: string; minAge: number | null; maxAge: number | null }, periodId: string): StatisticsRow {
+    return { id: group.id, periodId, name: group.name, minAge: group.minAge, maxAge: group.maxAge };
 }
 
 function emptyToNull(value: string): string | null {

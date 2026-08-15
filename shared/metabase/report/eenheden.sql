@@ -170,7 +170,7 @@ SELECT
     mt.name AS `Type lidgeld`,
     COUNT(DISTINCT mpm.memberId) AS `Aantal leden`
 FROM member_platform_memberships mpm
-JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId
+JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId AND mt.periodId = mpm.periodId
 WHERE mpm.deletedAt IS NULL
   AND mpm.periodId IN (SELECT DISTINCT period_id FROM facts)
   AND mpm.memberId IN (SELECT DISTINCT member_id FROM facts)

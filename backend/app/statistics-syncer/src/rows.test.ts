@@ -76,7 +76,7 @@ describe('flattenOrganization', () => {
     };
 
     it('keeps the postal code the map needs and the city the ULDK table lists, and no more', () => {
-        const row = flattenOrganization(organization);
+        const row = flattenOrganization(organization, 'period-1');
 
         expect(row.postalCode).toBe('9000');
         expect(row.city).toBe('Gent');
@@ -85,7 +85,15 @@ describe('flattenOrganization', () => {
     });
 
     it('stores a missing postal code as null rather than an empty string', () => {
-        expect(flattenOrganization({ ...organization, address: { postalCode: '', city: '' } }).postalCode).toBeNull();
+        expect(flattenOrganization({ ...organization, address: { postalCode: '', city: '' } }, 'period-1').postalCode).toBeNull();
+    });
+
+    /**
+     * A unit that is renamed or moves keeps the name and the place it was counted under in the years
+     * already settled, so the year is what the row describes rather than the period it is in now.
+     */
+    it('describes the unit in one period, not the period the unit is in now', () => {
+        expect(flattenOrganization(organization, 'period-2').periodId).toBe('period-2');
     });
 });
 

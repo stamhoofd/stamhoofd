@@ -22,6 +22,17 @@
 --     in the administration no longer move them. It is per period because the boundary differs per
 --     platform and per year, and it is what makes room for data imported from a client's own
 --     statistics database: those years are frozen, so nothing overwrites them.
+--
+-- Freezing only holds if every row belongs to a period. The source keeps no history of its own: a
+-- unit, a tak, a netwerk and a functie are all just what they are called today, and a name read now
+-- would be the name printed against every year that unit or tak was ever counted in. So each of them
+-- is keyed on its own id *and* a period -- one row per year, saying what that thing was in that year
+-- -- and the sync writes them for the years still open only.
+--
+-- The price is that nothing can point at those tables with a foreign key: `id` no longer identifies a
+-- row, and the period a fact belongs to is not always the period its dimension row would be found
+-- under. The reports join them explicitly on both columns instead. Every foreign key that remains
+-- points at `registration_periods`, which is the one table keyed on `id` alone.
 
 CREATE TABLE `registration_periods` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
@@ -55,13 +66,14 @@ CREATE TABLE `organizations` (
   `uri` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `postalCode` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uri` (`uri`) USING BTREE,
+  PRIMARY KEY (`id`,`periodId`),
+  -- The uri is unique per year rather than outright, for the same reason the primary key is.
+  UNIQUE KEY `uri` (`uri`,`periodId`) USING BTREE,
   KEY `periodId` (`periodId`),
   KEY `name` (`name`),
   KEY `postalCode` (`postalCode`),
@@ -91,9 +103,12 @@ CREATE TABLE `postal_codes` (
 -- flattened into tables here so Metabase can join and group on it.
 CREATE TABLE `organization_tags` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`)
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  CONSTRAINT `organization_tags_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Which netwerk an organization belongs to, per period. The source only knows the tags it carries
@@ -110,9 +125,7 @@ CREATE TABLE `_organizations_organization_tags` (
   KEY `organizationTagsId` (`organizationTagsId`),
   KEY `periodId` (`periodId`),
   KEY `source` (`source`),
-  CONSTRAINT `_organizations_organization_tags_ibfk_1` FOREIGN KEY (`organizationsId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `_organizations_organization_tags_ibfk_2` FOREIGN KEY (`organizationTagsId`) REFERENCES `organization_tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `_organizations_organization_tags_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `_organizations_organization_tags_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- The takken every organization's groups map onto.
@@ -125,28 +138,37 @@ CREATE TABLE `_organizations_organization_tags` (
 -- platform; an import that knows its own takken fills it in directly.
 CREATE TABLE `default_age_groups` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `minAge` int DEFAULT NULL,
   `maxAge` int DEFAULT NULL,
   `category` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'child, leader or adult. Null means unknown, which the reports count separately rather than guessing at.',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
   KEY `minAge` (`minAge`),
-  KEY `category` (`category`)
+  KEY `category` (`category`),
+  CONSTRAINT `default_age_groups_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `platform_membership_types` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`)
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  CONSTRAINT `platform_membership_types_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Which functie a member holds. This is what separates leiding from the members they lead.
 CREATE TABLE `responsibilities` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`)
+  PRIMARY KEY (`id`,`periodId`),
+  KEY `periodId` (`periodId`),
+  KEY `name` (`name`),
+  CONSTRAINT `responsibilities_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- `name` is flattened out of the source `settings` json, which also holds descriptions and prices
@@ -168,9 +190,7 @@ CREATE TABLE `groups` (
   KEY `periodId` (`periodId`),
   KEY `defaultAgeGroupId` (`defaultAgeGroupId`),
   KEY `source` (`source`),
-  CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `groups_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `groups_ibfk_3` FOREIGN KEY (`defaultAgeGroupId`) REFERENCES `default_age_groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- One row per member per period, carrying only what the reports group by: what was true of this
@@ -213,9 +233,8 @@ CREATE TABLE `members` (
   KEY `gender` (`gender`),
   KEY `postalCode` (`postalCode`),
   KEY `source` (`source`),
-  CONSTRAINT `members_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   -- Restrict, like the registrations: dropping a period would take the member rows of a settled year with it.
-  CONSTRAINT `members_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `members_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- One row per member per group, so a member registered for several groups keeps one row per group.
@@ -242,11 +261,8 @@ CREATE TABLE `registrations` (
   KEY `periodId` (`periodId`),
   KEY `registeredAt` (`registeredAt`),
   KEY `source` (`source`),
-  -- No foreign key on `memberId`: a member is identified by their period as well, and a registration
-  -- names only the member. The same holds for the two tables below.
   CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `registrations_ibfk_3` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Which lidgeld a member holds in a period. The price columns of the source are dropped: these
@@ -271,13 +287,15 @@ CREATE TABLE `member_platform_memberships` (
   KEY `organizationId` (`organizationId`),
   KEY `periodId` (`periodId`),
   KEY `source` (`source`),
-  CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_platform_memberships_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_platform_memberships_ibfk_3` FOREIGN KEY (`membershipTypeId`) REFERENCES `platform_membership_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- One row per period a record runs through, which is what makes "wie had deze functie in dit jaar"
+-- answerable: a record carries a date range rather than a year, and a functie held for three years
+-- is held in each of them.
 CREATE TABLE `member_responsibility_records` (
   `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `memberId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `groupId` varchar(36) DEFAULT NULL,
   `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -285,15 +303,15 @@ CREATE TABLE `member_responsibility_records` (
   `startDate` datetime NOT NULL,
   `endDate` datetime DEFAULT NULL,
   `source` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'sync' COMMENT 'Which pipeline produced this row: sync or import',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`periodId`),
   KEY `memberId,organizationId` (`memberId`,`organizationId`) USING BTREE,
   KEY `responsibilityId` (`responsibilityId`) USING BTREE,
+  KEY `periodId` (`periodId`),
   KEY `organizationId` (`organizationId`),
   KEY `groupId` (`groupId`),
   KEY `source` (`source`),
-  CONSTRAINT `member_responsibility_records_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_responsibility_records_ibfk_2` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `member_responsibility_records_ibfk_3` FOREIGN KEY (`responsibilityId`) REFERENCES `responsibilities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `member_responsibility_records_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_responsibility_records_ibfk_2` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Bookkeeping for the sync job. One row per synced table, so every table advances on its own and a
