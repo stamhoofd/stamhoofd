@@ -340,7 +340,7 @@ export class ApplicationFeeInvoicer {
         // Paid now, not in the billed month: the invoices cron only picks up recent payments, so a
         // month that is billed late would otherwise never end up on an invoice
         await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, new Date());
-        await SettlementService.updatePaymentSettlementsForAccountDeductionPayment(payment);
+        await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
     }
 
     /**

@@ -6,7 +6,8 @@ import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { AbortSignal, QueueHandler } from '@stamhoofd/queues';
+import type { AbortSignal } from '@stamhoofd/queues';
+import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { PaymentMethod, SettlementReference } from '@stamhoofd/structures';
@@ -66,44 +67,6 @@ const CHARGE_UPDATE_BATCH_SIZE = 500;
  * Fees read per batch when a whole organization's fees are walked.
  */
 const FEE_BATCH_SIZE = 500;
-
-/**
- * Collects which rows the provider still reports in a settlement while a sync walks it. A stored
- * row of the settlement that is not in here after the walk has moved or disappeared at the
- * provider, and gets swept.
- */
-export class ReportedRows {
-    readonly paymentLineExternalIds = new Set<string>();
-    readonly chargeExternalIds = new Set<string>();
-    readonly applicationFeeIds = new Set<string>();
-
-    paymentLine(line: PaymentSettlement) {
-        if (line.externalId === null) {
-            return;
-        }
-        this.paymentLineExternalIds.add(line.externalId);
-    }
-
-    charge(charge: SettlementCharge) {
-        this.chargeExternalIds.add(charge.externalId);
-    }
-
-    charges(charges: SettlementCharge[]) {
-        for (const charge of charges) {
-            this.charge(charge);
-        }
-    }
-
-    applicationFee(fee: ApplicationFee) {
-        this.applicationFeeIds.add(fee.id);
-    }
-
-    applicationFees(fees: ApplicationFee[]) {
-        for (const fee of fees) {
-            this.applicationFee(fee);
-        }
-    }
-}
 
 /**
  * All writes to the settlements tables go through this service. Every write is an upsert on the
@@ -318,77 +281,6 @@ export class SettlementService {
     }
 
     /**
-     * After a complete walk of a settlement: remove rows the provider no longer reports in this
-     * settlement (a transaction can move to another payout). Rows that only exist because of the
-     * payout are deleted; rows that outlive the payout link are only unlinked: derived fee lines
-     * (owned by updatePaymentSettlementsForAccountDeductionPayment), deduction charges referenced
-     * by an application fee, and the application fee rows themselves.
-     *
-     * Returns the fees unlinked from this settlement, so the caller can refresh the derived lines
-     * of their fee payments.
-     */
-    static async sweepSettlement(settlement: Settlement, reported: ReportedRows): Promise<{ unlinkedFees: ApplicationFee[] }> {
-        const lines = await PaymentSettlement.select()
-            .where('settlementId', settlement.id)
-            .fetch();
-
-        const sweptPaymentIds = new Set<string>();
-        for (const line of lines) {
-            if (line.externalId === null) {
-                continue;
-            }
-            if (!reported.paymentLineExternalIds.has(line.externalId)) {
-                await line.delete();
-                sweptPaymentIds.add(line.paymentId);
-            }
-        }
-
-        // The legacy blob points at one of the lines, so a payment that lost one has to be
-        // repointed at what is left
-        if (sweptPaymentIds.size > 0) {
-            const payments = await PaymentModel.getByIDs(...sweptPaymentIds);
-            for (const payment of payments) {
-                await this.updateLegacySettlementReference(payment);
-            }
-        }
-
-        const charges = await SettlementCharge.select()
-            .where('settlementId', settlement.id)
-            .fetch();
-
-        const unreportedCharges = charges.filter(charge => !reported.chargeExternalIds.has(charge.externalId));
-        const referencedChargeIds = unreportedCharges.length > 0
-            ? new Set((await ApplicationFee.select()
-                    .where('settlementChargeId', unreportedCharges.map(c => c.id))
-                    .fetch()).map(fee => fee.settlementChargeId))
-            : new Set<string>();
-
-        for (const charge of unreportedCharges) {
-            if (referencedChargeIds.has(charge.id)) {
-                charge.settlementId = null;
-                await charge.save();
-            } else {
-                await charge.delete();
-            }
-        }
-
-        const fees = await ApplicationFee.select()
-            .where('settlementId', settlement.id)
-            .fetch();
-
-        const unlinkedFees: ApplicationFee[] = [];
-        for (const fee of fees) {
-            if (!reported.applicationFeeIds.has(fee.id)) {
-                fee.settlementId = null;
-                await fee.save();
-                unlinkedFees.push(fee);
-            }
-        }
-
-        return { unlinkedFees };
-    }
-
-    /**
      * Recomputes the cached reconciliation columns from the stored rows: `unexplainedAmount` should
      * be 0 — a non-zero value is a real question to answer — and `pendingFees` holds what is
      * received but not invoiced yet, which takes up to a month and only becomes a problem when it
@@ -500,7 +392,7 @@ export class SettlementService {
      * payout that contains fees billed by this payment, amount = the sum of those fees. When the
      * total of the lines matches the payment's price, the payment is completely paid out.
      */
-    static async updatePaymentSettlementsForAccountDeductionPayment(payment: Payment): Promise<void> {
+    static async updatePaymentSettlementsForApplicationFeePayment(payment: Payment): Promise<void> {
         if (payment.method !== PaymentMethod.AccountDeductions) {
             return;
         }
@@ -567,7 +459,7 @@ export class SettlementService {
      * Refreshes the derived lines of every fee payment that billed one of these balance items:
      * called after a walk linked or unlinked invoiced fees, so the lines follow the fees.
      */
-    static async updatePaymentSettlementsForAccountDeductionBalanceItems(balanceItemIds: string[]): Promise<void> {
+    static async updatePaymentSettlementsForApplicationFeeBalanceItems(balanceItemIds: string[]): Promise<void> {
         if (balanceItemIds.length === 0) {
             return;
         }
@@ -582,7 +474,7 @@ export class SettlementService {
 
         const payments = await PaymentModel.getByIDs(...paymentIds);
         for (const payment of payments) {
-            await this.updatePaymentSettlementsForAccountDeductionPayment(payment);
+            await this.updatePaymentSettlementsForApplicationFeePayment(payment);
         }
     }
 

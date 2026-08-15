@@ -8,7 +8,7 @@ import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementSt
 import axios from 'axios';
 import { createHash } from 'crypto';
 
-import { ReportedRows, SettlementService } from '../services/SettlementService.js';
+import { SettlementService } from '../services/SettlementService.js';
 import type { SettlementSyncSummary } from './ProviderSettlementSyncRunner.js';
 
 type MollieSettlementCost = {
@@ -47,7 +47,8 @@ type MollieSettlement = {
  */
 type SettlementSyncState = {
     settlementRow: Settlement;
-    reported: ReportedRows;
+
+    transactionCount: 0;
 
     /**
      * Stops the walk at the next entry (a restart).
@@ -191,7 +192,7 @@ export class MollieSettlementSync {
 
         const state: SettlementSyncState = {
             settlementRow,
-            reported: new ReportedRows(),
+            transactionCount: 0,
             abort,
         };
 
@@ -210,9 +211,8 @@ export class MollieSettlementSync {
             // Mollie's own costs, so the settlement reconciles to 0 like a Stripe one
             await this.#storeMollieCosts(settlement, state);
 
-            await SettlementService.sweepSettlement(settlementRow, state.reported);
             await SettlementService.finishSync(settlementRow, {
-                transactionCount: state.reported.paymentLineExternalIds.size + state.reported.chargeExternalIds.size,
+                transactionCount: state.transactionCount,
             });
         } catch (e) {
             // A walk that was interrupted stored only part of the settlement: it has to be walked
@@ -257,7 +257,7 @@ export class MollieSettlementSync {
                     ];
 
                     for (const row of rows) {
-                        const charge = await SettlementService.upsertCharge({
+                        await SettlementService.upsertCharge({
                             ...row,
                             settlementId: state.settlementRow.id,
                             organizationId: state.settlementRow.organizationId,
@@ -265,7 +265,6 @@ export class MollieSettlementSync {
                             description,
                             occurredAt,
                         });
-                        state.reported.charge(charge);
                     }
                 }
             }
@@ -309,6 +308,7 @@ export class MollieSettlementSync {
      */
     async #applySettlementToPayment(settlement: MollieSettlement, mollieId: string, state: SettlementSyncState) {
         // Search payment
+        state.transactionCount += 1;
         const mps = await MolliePayment.where({ mollieId });
         if (mps.length === 1) {
             const mp = mps[0];
@@ -322,21 +322,16 @@ export class MollieSettlementSync {
                     return;
                 }
 
-                state.reported.paymentLine(await SettlementService.upsertPaymentLine(state.settlementRow, {
+                await SettlementService.upsertPaymentLine(state.settlementRow, {
                     paymentId: payment.id,
                     amount: payment.price,
                     externalId: mollieId,
                     occurredAt: new Date(settlement.settledAt),
-                }));
+                });
 
                 // The blob is written from the stored rows, so it stays deterministic across
                 // re-syncs and keeps its scoping rules in one place
                 await SettlementService.updateLegacySettlementReference(payment);
-
-                if (STAMHOOFD.environment === 'development') {
-                    console.log('Updated settlement of payment ' + payment.id);
-                    console.log(payment.settlement);
-                }
             } else {
                 console.log('Missing payment ' + mp.paymentId);
             }

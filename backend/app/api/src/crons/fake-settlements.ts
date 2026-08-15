@@ -322,7 +322,7 @@ async function createStripeFeeRows(settlement: Settlement, group: Payment[], set
 
     // A dev database can contain fee payments (e.g. copied history): keep their derived lines
     // in sync like a real payout walk does
-    await SettlementService.updatePaymentSettlementsForAccountDeductionBalanceItems([...invoicedFeeBalanceItemIds]);
+    await SettlementService.updatePaymentSettlementsForApplicationFeeBalanceItems([...invoicedFeeBalanceItemIds]);
 
     await finishFakeSync(platformSettlement);
 }
