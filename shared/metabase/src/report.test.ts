@@ -101,6 +101,36 @@ describe('report', () => {
             }
         });
 
+        /**
+         * Ledenbehoud counts forward: next to scoutsjaar N stands the share of N's own members that
+         * was still registered in N+1, the way the client's report reads it. Turned around it is the
+         * same figure shifted a year -- a plausible number rather than a failure -- so every card
+         * that measures it is checked here. The last year has no year after it and drops out; left
+         * in, it would read as 0% ledenbehoud instead of as missing.
+         */
+        it('measures ledenbehoud from the scoutsjaar it labels into the year after it', () => {
+            const cards = dashboards.flatMap(dashboard => dashboard.cards
+                .filter(card => card.sql.includes('LEAD(name)'))
+                .map(card => [dashboard.key, card] as const));
+
+            expect(cards.map(([dashboard, card]) => `${dashboard}/${card.key}`)).toEqual([
+                'nationaal/percentage-blijvers-per-eenheid',
+                'eenheden/eenheid-ledenbehoud',
+                'eenheden/eenheid-ledenbehoud-per-tak',
+                'eenheden/eenheid-evolutie-ledenbehoud',
+                'eenheden/eenheid-evolutie-blijvers-per-tak',
+            ]);
+
+            for (const [, card] of cards) {
+                const sql = card.sql.replaceAll(/\s+/g, ' ');
+                const cohort = /JOIN facts huidig ON huidig\.`Scoutsjaar` = \w+\.name/.test(sql);
+                const blijvers = /gebleven\.`Scoutsjaar` = \w+\.volgend/.test(sql);
+
+                expect(`${card.key}: cohort ${cohort}, blijvers ${blijvers}, laatste jaar weg ${sql.includes('volgend IS NOT NULL')}`)
+                    .toEqual(`${card.key}: cohort true, blijvers true, laatste jaar weg true`);
+            }
+        });
+
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
             expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid']);
 

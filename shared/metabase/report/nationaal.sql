@@ -201,26 +201,26 @@ ORDER BY MIN(period_start)
 -- dimensions: Eenheid
 -- metrics: Percentage blijvers
 -- xlabels: rotate-90
--- description: Van de leden in het scoutsjaar voor het gekozen scoutsjaar, het percentage dat in het gekozen scoutsjaar nog lid is, per eenheid waar ze toen zaten. Links = laagste ledenbehoud.
+-- description: Van de leden in het gekozen scoutsjaar, het percentage dat het scoutsjaar erna nog lid is, per eenheid waar ze in het gekozen jaar zaten. Links = laagste ledenbehoud. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- Rechtop, om dezelfde reden als bij de grafiek met het aantal leden per eenheid.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
 -- @include jaren
 , gekozen AS (
-    SELECT name, vorig FROM jaren
-    WHERE vorig IS NOT NULL [[AND name = {{scoutsjaar}}]]
+    SELECT name, volgend FROM jaren
+    WHERE volgend IS NOT NULL [[AND name = {{scoutsjaar}}]]
     ORDER BY startDate DESC
     LIMIT 1
 )
--- Een blijver is lid in het jaar voor het gekozen jaar en nog steeds lid in het gekozen jaar, waar
--- ook op het platform: wie naar een andere eenheid verhuist telt mee, zoals de klant het ook rekent.
+-- Een blijver is lid in het gekozen jaar en nog steeds lid het jaar erna, waar ook op het platform:
+-- wie naar een andere eenheid verhuist telt mee, zoals de klant het ook rekent.
 SELECT
-    vorig.`Eenheid`,
-    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
+    huidig.`Eenheid`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM gekozen g
-JOIN facts vorig ON vorig.`Scoutsjaar` = g.vorig
+JOIN facts huidig ON huidig.`Scoutsjaar` = g.name
 LEFT JOIN leden_per_jaar gebleven
-    ON gebleven.`Scoutsjaar` = g.name
-    AND gebleven.member_id = vorig.member_id
-GROUP BY vorig.`Eenheid`
+    ON gebleven.`Scoutsjaar` = g.volgend
+    AND gebleven.member_id = huidig.member_id
+GROUP BY huidig.`Eenheid`
 ORDER BY `Percentage blijvers`

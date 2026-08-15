@@ -296,21 +296,22 @@ ORDER BY MIN(period_start)
 -- title: Ledenbehoud: blijvers & vertrekkers per scoutsjaar
 -- display: table
 -- size: half
--- description: Per scoutsjaar: hoeveel leden de eenheid het jaar ervoor had, en hoeveel daarvan in dat scoutsjaar nog lid waren.
+-- description: Per scoutsjaar: hoeveel leden de eenheid dat jaar had, en hoeveel daarvan het jaar erna nog lid waren. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
 -- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
-    COUNT(DISTINCT vorig.member_id) AS `Aantal leden vorig jaar`,
+    COUNT(DISTINCT huidig.member_id) AS `Aantal leden`,
     COUNT(DISTINCT gebleven.member_id) AS `Aantal blijvers`,
-    COUNT(DISTINCT vorig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
-    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
+    COUNT(DISTINCT huidig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts vorig ON vorig.`Scoutsjaar` = j.vorig
+JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
 LEFT JOIN leden_per_jaar gebleven
-    ON gebleven.`Scoutsjaar` = j.name
-    AND gebleven.member_id = vorig.member_id
+    ON gebleven.`Scoutsjaar` = j.volgend
+    AND gebleven.member_id = huidig.member_id
+WHERE j.volgend IS NOT NULL
 GROUP BY j.name, j.startDate
 ORDER BY j.startDate
 
@@ -318,29 +319,29 @@ ORDER BY j.startDate
 -- title: Ledenbehoud per tak: blijvers & vertrekkers per scoutsjaar
 -- display: table
 -- size: half
--- description: De leden van het jaar voor het gekozen scoutsjaar, per tak waar ze toen zaten, en hoeveel daarvan in het gekozen scoutsjaar nog lid waren.
+-- description: De leden van het gekozen scoutsjaar, per tak waar ze toen zaten, en hoeveel daarvan het jaar erna nog lid waren. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
 -- @include jaren
 , gekozen AS (
-    SELECT name, vorig FROM jaren
-    WHERE vorig IS NOT NULL [[AND name = {{scoutsjaar}}]]
+    SELECT name, volgend FROM jaren
+    WHERE volgend IS NOT NULL [[AND name = {{scoutsjaar}}]]
     ORDER BY startDate DESC
     LIMIT 1
 )
 SELECT
-    vorig.`Tak`,
-    COUNT(DISTINCT vorig.member_id) AS `Aantal leden vorig jaar`,
+    huidig.`Tak`,
+    COUNT(DISTINCT huidig.member_id) AS `Aantal leden`,
     COUNT(DISTINCT gebleven.member_id) AS `Aantal blijvers`,
-    COUNT(DISTINCT vorig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
-    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
+    COUNT(DISTINCT huidig.member_id) - COUNT(DISTINCT gebleven.member_id) AS `Aantal vertrekkers`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM gekozen g
-JOIN facts vorig ON vorig.`Scoutsjaar` = g.vorig
+JOIN facts huidig ON huidig.`Scoutsjaar` = g.name
 LEFT JOIN leden_per_jaar gebleven
-    ON gebleven.`Scoutsjaar` = g.name
-    AND gebleven.member_id = vorig.member_id
-GROUP BY vorig.`Tak`
-ORDER BY MIN(COALESCE(vorig.tak_min_age, 99)), vorig.`Tak`
+    ON gebleven.`Scoutsjaar` = g.volgend
+    AND gebleven.member_id = huidig.member_id
+GROUP BY huidig.`Tak`
+ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
 
 -- @card eenheid-evolutie-ledenbehoud
 -- title: Evolutie ledenbehoud op eenheidsniveau
@@ -348,17 +349,19 @@ ORDER BY MIN(COALESCE(vorig.tak_min_age, 99)), vorig.`Tak`
 -- size: half
 -- dimensions: Scoutsjaar
 -- metrics: Percentage blijvers
+-- description: Per scoutsjaar het percentage van de leden van dat jaar dat het jaar erna nog lid was. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
 -- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
-    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts vorig ON vorig.`Scoutsjaar` = j.vorig
+JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
 LEFT JOIN leden_per_jaar gebleven
-    ON gebleven.`Scoutsjaar` = j.name
-    AND gebleven.member_id = vorig.member_id
+    ON gebleven.`Scoutsjaar` = j.volgend
+    AND gebleven.member_id = huidig.member_id
+WHERE j.volgend IS NOT NULL
 GROUP BY j.name, j.startDate
 ORDER BY j.startDate
 
@@ -368,17 +371,19 @@ ORDER BY j.startDate
 -- size: half
 -- dimensions: Scoutsjaar, Tak
 -- metrics: Percentage blijvers
+-- description: Per scoutsjaar het percentage van de leden van dat jaar dat het jaar erna nog lid was, per tak waar ze dat jaar zaten. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
 -- @include facts-alle-jaren
 -- @include leden-per-jaar
 -- @include jaren
 SELECT
     j.name AS `Scoutsjaar`,
-    vorig.`Tak`,
-    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT vorig.member_id), 1) AS `Percentage blijvers`
+    huidig.`Tak`,
+    ROUND(100 * COUNT(DISTINCT gebleven.member_id) / COUNT(DISTINCT huidig.member_id), 1) AS `Percentage blijvers`
 FROM jaren j
-JOIN facts vorig ON vorig.`Scoutsjaar` = j.vorig
+JOIN facts huidig ON huidig.`Scoutsjaar` = j.name
 LEFT JOIN leden_per_jaar gebleven
-    ON gebleven.`Scoutsjaar` = j.name
-    AND gebleven.member_id = vorig.member_id
-GROUP BY j.name, j.startDate, vorig.`Tak`
-ORDER BY j.startDate, vorig.`Tak`
+    ON gebleven.`Scoutsjaar` = j.volgend
+    AND gebleven.member_id = huidig.member_id
+WHERE j.volgend IS NOT NULL
+GROUP BY j.name, j.startDate, huidig.`Tak`
+ORDER BY j.startDate, huidig.`Tak`
