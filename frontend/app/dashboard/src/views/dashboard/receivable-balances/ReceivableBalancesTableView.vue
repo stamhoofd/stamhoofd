@@ -244,6 +244,8 @@ async function markAsPaid(items: ReceivableBalance[]) {
         return;
     }
 
+    const hasPending = items.find(i => i.amountPending !== 0);
+
     if (!await CenteredMessage.confirm({
         title: items.length === 1
             ? $t('Het openstaand bedrag van {name} als betaald markeren?', { name: items[0].object.name })
@@ -251,8 +253,41 @@ async function markAsPaid(items: ReceivableBalance[]) {
         description: $t('Voor elk geselecteerd openstaand bedrag maken we een betaling aan met een onbekende betaalmethode. Als betaaldatum gebruiken we de datum van het laatst aangemaakte openstaande bedrag.'),
         confirmText: $t('Betalingen registreren'),
         destructive: true,
+        requireCheckbox: items.length > 10 ? $t('Ik ben zeker') : undefined,
     })) {
         return;
+    }
+
+    let withPending: 'keep' | 'mark-paid' = 'keep';
+
+    if (hasPending) {
+        const result = await CenteredMessage.show({
+            title: $t('Sommige openstaande bedragen hebben al een betaling in verwerking'),
+            description: $t('Een openstaande bedrag is in verwerking. Er werd al een betaling voor aangemaakt, maar die is nog niet als ontvangen gemarkeerd. Bijvoorbeeld omdat een overschrijving nog niet als betaald is gemarkeerd. Wat wil je hiermee doen?'),
+            buttons: [
+                {
+                    text: $t('In verwerking houden'),
+                    type: 'primary',
+                    value: 'keep',
+                    availabilityDelay: 1_000,
+                },
+                {
+                    text: $t('Markeren als betaald'),
+                    type: 'destructive',
+                    value: 'mark-paid',
+                    availabilityDelay: 1_000,
+                },
+                {
+                    text: $t(`%1Lh`),
+                    type: 'secundary',
+                    value: false,
+                },
+            ],
+        });
+        if (result === false) {
+            return;
+        }
+        withPending = result;
     }
 
     const toast = new Toast($t('Betalingen aanmaken...'), 'spinner').setProgress(0).setHide(null);
@@ -303,6 +338,34 @@ async function markAsPaid(items: ReceivableBalance[]) {
                     shouldRetry: false,
                     owner,
                 });
+            }
+
+            if (detailedItem.amountPending !== 0) {
+                if (withPending === 'mark-paid') {
+                    const patchableArray: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+
+                    for (const payment of detailedItem.payments) {
+                        if (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) {
+                            if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.Unknown || payment.method === PaymentMethod.PointOfSale) {
+                                patchableArray.addPatch(PaymentGeneral.patch({
+                                    id: payment.id,
+                                    status: PaymentStatus.Succeeded,
+                                }));
+                            }
+                        }
+                    }
+
+                    if (patchableArray.changes.length) {
+                        await context.value.authenticatedServer.request({
+                            method: 'PATCH',
+                            path: '/organization/payments',
+                            body: patchableArray,
+                            decoder: new ArrayDecoder(PaymentGeneral),
+                            shouldRetry: false,
+                            owner,
+                        });
+                    }
+                }
             }
 
             toast.setProgress((index + 1) / items.length);
