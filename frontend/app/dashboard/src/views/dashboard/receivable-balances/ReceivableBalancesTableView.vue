@@ -18,6 +18,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
@@ -25,6 +27,7 @@ import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@s
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
 import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
@@ -33,13 +36,13 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useChargeReceivableBalances } from '@stamhoofd/components/payments/hooks/useChargeReceivableBalances';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
-import { CountFilteredRequest, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
+import { BalanceItemPaymentDetailed, CountFilteredRequest, DetailedReceivableBalance, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -50,6 +53,7 @@ type ObjectType = ReceivableBalance;
 
 const present = usePresent();
 const owner = useRequestOwner();
+const context = useContext();
 const platform = usePlatform();
 const $feature = useFeatureFlag();
 const organization = useOrganization();
@@ -220,7 +224,100 @@ const actions: TableAction<ObjectType>[] = [
             tableObjectFetcher.reset(true, true);
         },
     }),
+
+    new InMemoryTableAction({
+        name: $t('Markeren als betaald'),
+        icon: 'success',
+        priority: 10,
+        groupIndex: 3,
+        needsSelection: true,
+        allowAutoSelectAll: false,
+        destructive: true,
+        handler: async (items: ReceivableBalance[]) => {
+            await markAsPaid(items);
+        },
+    }),
 ];
+
+async function markAsPaid(items: ReceivableBalance[]) {
+    if (items.length === 0) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm({
+        title: items.length === 1
+            ? $t('Het openstaand bedrag van {name} als betaald markeren?', { name: items[0].object.name })
+            : $t('Het openstaand bedrag voor {count} items als betaald markeren?', { count: items.length }),
+        description: $t('Voor elk geselecteerd openstaand bedrag maken we een betaling aan met een onbekende betaalmethode. Als betaaldatum gebruiken we de datum van het laatst aangemaakte openstaande bedrag.'),
+        confirmText: $t('Betalingen registreren'),
+        destructive: true,
+    })) {
+        return;
+    }
+
+    const toast = new Toast($t('Betalingen aanmaken...'), 'spinner').setProgress(0).setHide(null);
+    toast.show();
+
+    try {
+        for (const [index, item] of items.entries()) {
+            const response = await context.value.authenticatedServer.request({
+                method: 'GET',
+                path: `/receivable-balances/${item.objectType}/${item.object.id}`,
+                decoder: DetailedReceivableBalance as Decoder<DetailedReceivableBalance>,
+                owner,
+            });
+
+            const detailedItem = response.data;
+            const balanceItems = detailedItem.filteredBalanceItems;
+            const totalOpen = balanceItems.reduce((total, balanceItem) => total + balanceItem.priceOpen, 0);
+
+            if (balanceItems.length > 0 && totalOpen !== 0) {
+                const paidAt = balanceItems.map(balanceItem => balanceItem.createdAt).reduce((a, b) => a > b ? a : b);
+
+                const payment = PaymentGeneral.create({
+                    method: PaymentMethod.Unknown,
+                    status: PaymentStatus.Succeeded,
+                    type: totalOpen >= 0 ? PaymentType.Payment : PaymentType.Refund,
+                    paidAt,
+                    customer: detailedItem.object.customers.length > 0
+                        ? detailedItem.object.customers[0]
+                        : null,
+                    balanceItemPayments: balanceItems.filter(b => b.priceOpen !== 0).map(balanceItem => BalanceItemPaymentDetailed.create({
+                        balanceItem,
+                        price: balanceItem.priceOpen,
+                    })),
+                });
+
+                if (item.objectType === ReceivableBalanceType.organization) {
+                    payment.payingOrganizationId = item.object.id;
+                }
+
+                const patchableArray: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+                patchableArray.addPut(payment);
+
+                await context.value.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/payments',
+                    body: patchableArray,
+                    decoder: new ArrayDecoder(PaymentGeneral),
+                    shouldRetry: false,
+                    owner,
+                });
+            }
+
+            toast.setProgress((index + 1) / items.length);
+        }
+
+        Toast.success(items.length === 1
+            ? $t('Het geselecteerde openstaande bedrag is als betaald gemarkeerd')
+            : $t('De geselecteerde openstaande bedragen zijn als betaald gemarkeerd')).show();
+    } catch (e) {
+        Toast.fromError(e).show();
+    } finally {
+        toast.hide();
+        tableObjectFetcher.reset(true, true);
+    }
+}
 
 const route = {
     component: async () => (await import('@stamhoofd/components/payments/ReceivableBalanceView.vue')).default,
