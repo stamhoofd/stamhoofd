@@ -42,7 +42,7 @@ export function cardName(card: ReportCard, tab: ReportTab): string {
 /** Metabase lays a dashboard out on a 24 column grid. */
 const gridWidth = 24;
 
-const widths: Record<ReportCard['size'], number> = { full: 24, half: 12, third: 8, quarter: 6, fifth: 4 };
+const widths: Record<ReportCard['size'], number> = { full: 24, 'two-thirds': 16, half: 12, third: 8, quarter: 6, sixth: 4 };
 
 /**
  * Extra rows for the band the rotated labels sit in.
@@ -60,8 +60,13 @@ const xLabelRows: Record<NonNullable<ReportCard['xLabels']>, number> = {
 };
 
 function heightOf(card: ReportCard): number {
-    if (card.display === 'scalar' || card.display === 'gauge') {
+    if (card.display === 'scalar') {
         return 3;
+    }
+    // A gauge stands next to the chart of the same figure over the years, and only sits level with it
+    // at the height of a chart.
+    if (card.display === 'gauge') {
+        return 6;
     }
     if (card.display === 'table') {
         return 8;

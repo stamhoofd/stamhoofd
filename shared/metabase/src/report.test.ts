@@ -1,5 +1,6 @@
 import type { ReportCard, ReportTab } from './report.js';
 import { loadReport, parseTab, parameterNames, resolveSql } from './report.js';
+import { layoutCards } from './sync-report.js';
 
 function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
     const found = tabs.find(entry => entry.key === tab)?.cards.find(entry => entry.key === card);
@@ -7,6 +8,18 @@ function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
         throw new Error(`No card ${tab}/${card}`);
     }
     return found;
+}
+
+/** The cards of a tab as the rows they end up on, in order, with the width they take up together. */
+function rowsOf(cards: ReportCard[]): { keys: string[]; width: number }[] {
+    const rows = new Map<number, { keys: string[]; width: number }>();
+
+    for (const placed of layoutCards(cards)) {
+        const row = rows.get(placed.row) ?? { keys: [], width: 0 };
+        rows.set(placed.row, { keys: [...row.keys, placed.card.key], width: row.width + placed.sizeX });
+    }
+
+    return [...rows.values()];
 }
 
 describe('report', () => {
@@ -80,21 +93,21 @@ describe('report', () => {
         });
 
         /**
-         * Three cards draw a GTP index at three different grains. They only agree because they share
+         * Four cards draw a GTP index, at three different grains. They only agree because they share
          * one fragment, and nothing but this notices when one grows a copy of its own.
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
-            const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
+            const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-scoutsjaar']]
                 .map(([tab, key]) => cardOf(dashboards, tab, key).sql.replaceAll(/\s+/g, ' ').match(/ROUND\( \( COUNT\(DISTINCT CASE WHEN `Tak` = 'Bevers'.*?, 2\)/)?.[0]);
 
-            expect(expressions.filter(expression => expression !== undefined)).toHaveLength(3);
+            expect(expressions.filter(expression => expression !== undefined)).toHaveLength(4);
             expect(new Set(expressions).size).toBe(1);
         });
 
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
             const expression = "ROUND( COUNT(DISTINCT CASE WHEN categorie = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN categorie = 'leader' THEN member_id END), 0), 2)";
 
-            for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
+            for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']) {
                 const sql = cardOf(dashboards, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');
 
                 expect(`${key}: ${sql.includes(expression)}`).toEqual(`${key}: true`);
@@ -129,6 +142,27 @@ describe('report', () => {
                 expect(`${card.key}: cohort ${cohort}, blijvers ${blijvers}, laatste jaar weg ${sql.includes('volgend IS NOT NULL')}`)
                     .toEqual(`${card.key}: cohort true, blijvers true, laatste jaar weg true`);
             }
+        });
+
+        /**
+         * The page is laid out like the one it mirrors: six figures across the top, each gauge next
+         * to the chart of the same figure over the years, and a pie next to each geslacht chart.
+         * That pairing only holds while every row is full, since a card that no longer fits pushes
+         * the one after it onto a row of its own.
+         */
+        it('lays the eenheden page out in the rows of the report it mirrors', () => {
+            const rows = rowsOf(dashboards.find(dashboard => dashboard.key === 'eenheden')!.cards);
+            const rowWith = (key: string) => rows.find(row => row.keys.includes(key))!.keys;
+
+            expect(rows[0].keys).toEqual([
+                'eenheid-totaal-leden', 'eenheid-aantal-kinderen', 'eenheid-aantal-leiding',
+                'eenheid-aantal-volwassenen', 'eenheid-gtp', 'eenheid-omkaderingscijfer',
+            ]);
+            expect(rowWith('eenheid-gtp-meter')).toEqual(['eenheid-gtp-meter', 'eenheid-gtp-per-scoutsjaar']);
+            expect(rowWith('eenheid-omkaderingscijfer-meter')).toEqual(['eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-scoutsjaar']);
+            expect(rowWith('eenheid-kinderen-per-geslacht')).toEqual(['eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht']);
+            expect(rowWith('eenheid-leiding-per-geslacht')).toEqual(['eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht']);
+            expect(rows.filter(row => row.width !== 24)).toEqual([]);
         });
 
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
@@ -175,6 +209,16 @@ describe('report', () => {
         it('rejects a filter no card can be driven by', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n-- filters: eenheid\n\n-- @card c\n-- title: C\n-- display: table\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('no card uses {{eenheid}}');
+        });
+
+        /**
+         * The same figure is shown twice on the eenheden page, as a number and as a gauge. Under one
+         * title both would be stored as the same question, and the one written last would decide what
+         * both of them show.
+         */
+        it('rejects two cards of a tab under the same title', () => {
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card a\n-- title: C\n-- display: scalar\nSELECT 1\n\n-- @card b\n-- title: C\n-- display: gauge\nSELECT 1', 'x.sql', new Map()))
+                .toThrow('two cards are titled "C"');
         });
 
         it('rejects a card without a title', () => {

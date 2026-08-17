@@ -21,11 +21,26 @@ function tab(overrides: Partial<ReportTab> = {}): ReportTab {
 }
 
 describe('layoutCards', () => {
-    it('puts the five figures the report leads with on one row', () => {
-        const placed = layoutCards(Array.from({ length: 5 }, (_, index) => card({ key: `k${index}`, size: 'fifth' })));
+    it('puts the six figures the report leads with on one row', () => {
+        const placed = layoutCards(Array.from({ length: 6 }, (_, index) => card({ key: `k${index}`, size: 'sixth' })));
 
-        expect(placed.map(entry => entry.col)).toEqual([0, 4, 8, 12, 16]);
+        expect(placed.map(entry => entry.col)).toEqual([0, 4, 8, 12, 16, 20]);
         expect(placed.every(entry => entry.row === 0)).toBe(true);
+    });
+
+    /**
+     * Each gauge of the eenheden page stands beside the chart of the same figure over the years. At
+     * the height of a scalar it would hang above the chart with a band of empty grid under it.
+     */
+    it('makes a gauge as tall as the chart beside it', () => {
+        const [gauge, chart] = layoutCards([
+            card({ key: 'a', size: 'third', display: 'gauge' }),
+            card({ key: 'b', size: 'two-thirds', display: 'line' }),
+        ]);
+
+        expect(gauge).toMatchObject({ row: 0, col: 0, sizeX: 8 });
+        expect(chart).toMatchObject({ row: 0, col: 8, sizeX: 16 });
+        expect(gauge.sizeY).toEqual(chart.sizeY);
     });
 
     it('wraps to a new row below the tallest card of the previous one', () => {

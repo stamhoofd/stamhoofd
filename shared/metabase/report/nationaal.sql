@@ -6,35 +6,35 @@
 -- @card aantal-eenheden
 -- title: Aantal eenheden
 -- display: scalar
--- size: fifth
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT organization_id) AS `Aantal eenheden` FROM facts
 
 -- @card totaal-leden
 -- title: Totaal leden
 -- display: scalar
--- size: fifth
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM facts
 
 -- @card aantal-kinderen
 -- title: Aantal kinderen
 -- display: scalar
--- size: fifth
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE categorie = 'child'
 
 -- @card aantal-leiding
 -- title: Aantal leiding
 -- display: scalar
--- size: fifth
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE categorie = 'leader'
 
 -- @card aantal-volwassenen
 -- title: Aantal volwassenen
 -- display: scalar
--- size: fifth
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE categorie = 'adult'
 

@@ -6,35 +6,35 @@
 -- @card eenheid-totaal-leden
 -- title: Totaal aantal leden
 -- display: scalar
--- size: quarter
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Totaal aantal leden` FROM facts
 
 -- @card eenheid-aantal-kinderen
 -- title: Aantal kinderen
 -- display: scalar
--- size: quarter
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Aantal kinderen` FROM facts WHERE categorie = 'child'
 
 -- @card eenheid-aantal-leiding
 -- title: Aantal leiding
 -- display: scalar
--- size: quarter
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Aantal leiding` FROM facts WHERE categorie = 'leader'
 
 -- @card eenheid-aantal-volwassenen
 -- title: Aantal volwassenen
 -- display: scalar
--- size: quarter
+-- size: sixth
 -- @include facts
 SELECT COUNT(DISTINCT member_id) AS `Aantal volwassenen` FROM facts WHERE categorie = 'adult'
 
 -- @card eenheid-gtp
 -- title: GTP Index
--- display: gauge
--- size: half
+-- display: scalar
+-- size: sixth
 -- description: GTP staat voor Gezond Toekomst Perspectief. Idealiter scoort een eenheid 100 of meer.
 -- @include facts
 SELECT
@@ -44,9 +44,9 @@ FROM facts
 
 -- @card eenheid-omkaderingscijfer
 -- title: Omkaderingscijfer
--- display: gauge
--- size: half
--- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
+-- display: scalar
+-- size: sixth
+-- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op.
 -- @include facts
 SELECT
     -- @include omkaderingscijfer
@@ -91,10 +91,21 @@ FROM facts
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
+-- @card eenheid-gtp-meter
+-- title: GTP Index (meter)
+-- display: gauge
+-- size: third
+-- description: GTP staat voor Gezond Toekomst Perspectief. De berekening schenkt veel waarde aan potentieel toekomstige leiding (VG's & Seniors) op korte termijn. Idealiter scoort een eenheid 100 of meer op deze index. Dit geeft enkel een indicatie voor eenheden tot ongeveer 150 leden, daarna worden ze sowieso gezond geacht.
+-- @include facts
+SELECT
+    -- @include gtp
+        AS `GTP Index`
+FROM facts
+
 -- @card eenheid-gtp-per-scoutsjaar
 -- title: GTP index per Scoutsjaar
 -- display: line
--- size: half
+-- size: two-thirds
 -- dimensions: Scoutsjaar
 -- metrics: GTP index
 -- @include facts-alle-jaren
@@ -106,10 +117,21 @@ FROM facts
 GROUP BY `Scoutsjaar`
 ORDER BY MIN(period_start)
 
+-- @card eenheid-omkaderingscijfer-meter
+-- title: Omkaderingscijfer (meter)
+-- display: gauge
+-- size: third
+-- description: Het omkaderingscijfer geeft weer voor hoeveel leden een leider gemiddeld dient te zorgen. Idealiter scoort een eenheid hier laag op. Bij een cijfer van 10 of meer wordt toezicht houden op de leden moeilijker.
+-- @include facts
+SELECT
+    -- @include omkaderingscijfer
+        AS `Omkaderingscijfer`
+FROM facts
+
 -- @card eenheid-omkaderingscijfer-per-scoutsjaar
 -- title: Omkaderingscijfer per Scoutsjaar
 -- display: line
--- size: half
+-- size: two-thirds
 -- dimensions: Scoutsjaar
 -- metrics: Omkaderingscijfer
 -- @include facts-alle-jaren
@@ -124,7 +146,7 @@ ORDER BY MIN(period_start)
 -- @card eenheid-leden-per-geslacht
 -- title: Aantal leden per geslacht
 -- display: pie
--- size: third
+-- size: half
 -- dimensions: Geslacht
 -- metrics: Aantal leden
 -- @include facts
@@ -132,32 +154,6 @@ SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leden`
 FROM facts
 GROUP BY `Geslacht`
 ORDER BY `Aantal leden` DESC
-
--- @card eenheid-kinderen-per-geslacht
--- title: Aantal kinderen per geslacht
--- display: pie
--- size: third
--- dimensions: Geslacht
--- metrics: Aantal kinderen
--- @include facts
-SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal kinderen`
-FROM facts
-WHERE categorie = 'child'
-GROUP BY `Geslacht`
-ORDER BY `Aantal kinderen` DESC
-
--- @card eenheid-leiding-per-geslacht
--- title: Aantal leiding per geslacht
--- display: pie
--- size: third
--- dimensions: Geslacht
--- metrics: Aantal leiding
--- @include facts
-SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leiding`
-FROM facts
-WHERE categorie = 'leader'
-GROUP BY `Geslacht`
-ORDER BY `Aantal leiding` DESC
 
 -- @card eenheid-leden-per-type-lidgeld
 -- title: Aantal leden per type lidgeld
@@ -214,7 +210,7 @@ ORDER BY MIN(period_start)
 -- @card eenheid-geslacht-kinderen-per-jaar
 -- title: Verhouding tussen de geslachten: kinderen
 -- display: bar
--- size: half
+-- size: two-thirds
 -- dimensions: Scoutsjaar, Geslacht
 -- metrics: Aantal kinderen
 -- stacked: normalized
@@ -228,10 +224,23 @@ WHERE categorie = 'child'
 GROUP BY `Scoutsjaar`, `Geslacht`
 ORDER BY MIN(period_start)
 
+-- @card eenheid-kinderen-per-geslacht
+-- title: Aantal kinderen per geslacht
+-- display: pie
+-- size: third
+-- dimensions: Geslacht
+-- metrics: Aantal kinderen
+-- @include facts
+SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal kinderen`
+FROM facts
+WHERE categorie = 'child'
+GROUP BY `Geslacht`
+ORDER BY `Aantal kinderen` DESC
+
 -- @card eenheid-geslacht-leiding-per-jaar
 -- title: Verhouding tussen de geslachten: leiding
 -- display: bar
--- size: half
+-- size: two-thirds
 -- dimensions: Scoutsjaar, Geslacht
 -- metrics: Aantal leiding
 -- stacked: normalized
@@ -245,10 +254,23 @@ WHERE categorie = 'leader'
 GROUP BY `Scoutsjaar`, `Geslacht`
 ORDER BY MIN(period_start)
 
+-- @card eenheid-leiding-per-geslacht
+-- title: Aantal leiding per geslacht
+-- display: pie
+-- size: third
+-- dimensions: Geslacht
+-- metrics: Aantal leiding
+-- @include facts
+SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leiding`
+FROM facts
+WHERE categorie = 'leader'
+GROUP BY `Geslacht`
+ORDER BY `Aantal leiding` DESC
+
 -- @card eenheid-leden-per-geboortejaar
 -- title: Aantal leden en leiding per geboortejaar
 -- display: bar
--- size: half
+-- size: full
 -- dimensions: Geboortejaar
 -- metrics: Aantal kinderen, Aantal leiding
 -- @include facts
@@ -264,7 +286,7 @@ ORDER BY `Geboortejaar`
 -- @card eenheid-leeftijd-en-geslacht
 -- title: Aantal leden per Leeftijd en Geslacht
 -- display: bar
--- size: half
+-- size: full
 -- dimensions: Leeftijd, Geslacht
 -- metrics: Aantal leden
 -- @include facts
@@ -346,7 +368,7 @@ ORDER BY MIN(COALESCE(huidig.tak_min_age, 99)), huidig.`Tak`
 -- @card eenheid-evolutie-ledenbehoud
 -- title: Evolutie ledenbehoud op eenheidsniveau
 -- display: line
--- size: half
+-- size: full
 -- dimensions: Scoutsjaar
 -- metrics: Percentage blijvers
 -- description: Per scoutsjaar het percentage van de leden van dat jaar dat het jaar erna nog lid was. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.
@@ -368,7 +390,7 @@ ORDER BY j.startDate
 -- @card eenheid-evolutie-blijvers-per-tak
 -- title: Evolutie percentage blijvers per tak
 -- display: line
--- size: half
+-- size: full
 -- dimensions: Scoutsjaar, Tak
 -- metrics: Percentage blijvers
 -- description: Per scoutsjaar het percentage van de leden van dat jaar dat het jaar erna nog lid was, per tak waar ze dat jaar zaten. Het laatste scoutsjaar staat er niet bij: het jaar erna moet eerst bestaan.

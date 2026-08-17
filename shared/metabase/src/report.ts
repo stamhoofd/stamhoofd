@@ -33,7 +33,7 @@ export type ReportCard = {
     /** For a map, the columns holding the coordinates of each point. */
     latitude?: string;
     longitude?: string;
-    /** Width on the dashboard: full, half, third, quarter or fifth of a row. */
+    /** Width on the dashboard: full, two-thirds, half, third, quarter or sixth of a row. */
     size: ReportCardSize;
     description?: string;
     /** Columns to group by, for the chart displays. */
@@ -69,7 +69,7 @@ export type ReportTab = {
     cards: ReportCard[];
 };
 
-export const reportCardSizes = ['full', 'half', 'third', 'quarter', 'fifth'] as const;
+export const reportCardSizes = ['full', 'two-thirds', 'half', 'third', 'quarter', 'sixth'] as const;
 export type ReportCardSize = typeof reportCardSizes[number];
 
 export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
@@ -123,6 +123,13 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
     const cards = sections.filter(section => section.kind === 'card').map(section => parseCard(section, file, includes));
     if (cards.length === 0) {
         throw new Error(`${file} declares no cards`);
+    }
+
+    // A question is stored under its title, so two cards sharing one on the same tab would end up as
+    // the same question: whichever is written last decides what both show.
+    const duplicate = cards.find((card, index) => cards.findIndex(other => other.title === card.title) !== index);
+    if (duplicate) {
+        throw new Error(`${file}: two cards are titled "${duplicate.title}", which would store them as one question`);
     }
 
     const filters = splitList(header.attributes.get('filters'));
