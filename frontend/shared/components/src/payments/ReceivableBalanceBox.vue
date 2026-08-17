@@ -258,7 +258,7 @@ const refundableOnlinePayments = computed(() => {
 });
 
 const showBalanceSettelment = computed(() => {
-    const hasOnlyDeferredPayments = !detailedItem.value?.balanceItems
+    const hasOnlyDeferredPayments = !detailedItem.value?.filteredBalanceItems
         .some(b => b.dueAt < new Date());
 
     return detailedItem.value?.amountOpen === 0 && detailedItem.value?.filteredBalanceItems.length
