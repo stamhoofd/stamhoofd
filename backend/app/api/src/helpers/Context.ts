@@ -47,11 +47,6 @@ export const apiUserRateLimiter = new RateLimiter({
     ],
 });
 
-export class AuthorizationPostBody extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    header_authorization: string;
-}
-
 export class ContextInstance {
     request: Request;
     queries: { query: string; time?: number }[] = [];
@@ -241,16 +236,7 @@ export class ContextInstance {
     async authenticate(options: { allowMFASetupToken: true; allowWithoutAccount?: boolean; allowUnscoped?: boolean }): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }>;
     async authenticate(options?: { allowMFASetupToken?: false | undefined; allowWithoutAccount?: boolean; allowUnscoped?: boolean }): Promise<{ user: User; token: Token }>;
     async authenticate({ allowWithoutAccount = false, allowUnscoped = false, allowMFASetupToken = false }: { allowMFASetupToken?: boolean; allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }> {
-        let header = this.request.headers.authorization;
-
-        if (!header && this.request.method === 'POST') {
-            try {
-                const decoded = await DecodedRequest.fromRequest(this.request, undefined, undefined, AuthorizationPostBody as Decoder<AuthorizationPostBody>);
-                header = decoded.body.header_authorization;
-            } catch (e) {
-                // Ignore: failed to read from body
-            }
-        }
+        const header = this.request.headers.authorization;
 
         if (!header) {
             throw new SimpleError({
