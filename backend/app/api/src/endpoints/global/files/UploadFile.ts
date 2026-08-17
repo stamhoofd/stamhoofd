@@ -89,23 +89,32 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
                 }));
                 return;
             }
-            form.parse(request.request.request, (err, fields, files) => {
-                if (err) {
-                    reject(err);
-                    return;
+            try {
+                if (request.request.request?.destroyed) {
+                    throw new Error('Request destroyed before parsing');
                 }
+                form.parse(request.request.request, (err, fields, files) => {
+                    console.log('form.parse', err, fields, files);
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
 
-                if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
-                    reject(new SimpleError({
-                        code: 'missing_field',
-                        message: 'Missing file',
-                        field: 'file',
-                    }));
-                    return;
-                }
+                    if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
+                        reject(new SimpleError({
+                            code: 'missing_field',
+                            message: 'Missing file',
+                            field: 'file',
+                        }));
+                        return;
+                    }
 
-                resolve(files.file[0]);
-            });
+                    resolve(files.file[0]);
+                });
+            } catch (e) {
+                console.error(e);
+                reject(e);
+            }
         });
 
         try {
