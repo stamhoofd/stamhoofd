@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
@@ -55,9 +55,8 @@ import { useActivatePackages } from '../dashboard/settings/packages/hooks/useAct
 
 import { useMemberAdministrationOnboarding } from './useMemberAdministrationOnboarding';
 
-
 const startMemberAdministrationOnboarding = useMemberAdministrationOnboarding();
-const show = useShow();
+const present = usePresent();
 const activatePackages = useActivatePackages();
 const user = useUser();
 const organization = useRequiredOrganization();
@@ -99,16 +98,15 @@ async function startSelling() {
     if (organization.value.webshops.length > 0) {
         return await activateWebshopsTrial();
     }
-    await show({
+    await present({
         components: [
-            AsyncComponent(() => import('@stamhoofd/components/containers/BoxedController.vue'), {
-                root: AsyncComponent(() => import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'), {
-                    savedHandler: async () => {
-                        return await activateWebshopsTrial();
-                    },
-                }),
+            AsyncComponent(() => import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'), {
+                savedHandler: async () => {
+                    return await activateWebshopsTrial();
+                },
             }),
         ],
+        modalDisplayStyle: 'popup',
     });
 }
 </script>
