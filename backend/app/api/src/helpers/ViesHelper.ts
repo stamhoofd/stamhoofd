@@ -3,7 +3,6 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { Company } from '@stamhoofd/structures';
 import { PeppolScheme } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
-import axios from 'axios';
 import jsvat from 'jsvat-next';
 import { PeppolDirectoryService } from '../services/PeppolDirectoryService.js';
 
@@ -15,17 +14,25 @@ export class ViesHelperStatic {
 
         console.log('[VIES REQUEST]', method, url, content ? '\n [VIES REQUEST] ' : undefined, json);
 
-        const response = await axios.request({
+        const response = await fetch(url, {
             method,
-            url,
             headers: {
                 'Content-Type': json.length > 0 ? 'application/json' : 'text/plain',
             },
-            data: json,
-
+            body: json.length > 0 ? json : undefined,
+            signal: AbortSignal.timeout(5_000),
         });
-        console.log('[VIES RESPONSE]', method, url, '\n[VIES RESPONSE]', JSON.stringify(response.data));
-        return response.data;
+
+        if (!response.ok) {
+            throw new Error(`VIES request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('[VIES RESPONSE]', method, url, '\n[VIES RESPONSE]', JSON.stringify(data));
+        return {
+            data,
+            response,
+        };
     }
 
     async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | Company) {
@@ -177,17 +184,17 @@ export class ViesHelperStatic {
 
         try {
             const cleaned = formatted.substring(2).replace(/(?:\.-\s)+/g, '');
-            const response = await this.request('POST', 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number', {
+            const { data, response } = await this.request('POST', 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number', {
                 countryCode: country,
                 vatNumber: cleaned,
             });
 
-            if (typeof response !== 'object' || response === null || typeof response.valid !== 'boolean') {
-                // APi error
+            if (typeof data !== 'object' || data === null || typeof data.valid !== 'boolean') {
+                console.error('VIES error', response.status, response.statusText, data);
                 throw new Error('Invalid response from VIES');
             }
 
-            if (!response.valid) {
+            if (!data.valid) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: $t('%1TG', { 'vat-number': formatted }),
