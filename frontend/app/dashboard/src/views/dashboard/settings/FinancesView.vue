@@ -60,7 +60,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
+                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector) && organization?.meta.packages.useMembers" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
                         </template>
