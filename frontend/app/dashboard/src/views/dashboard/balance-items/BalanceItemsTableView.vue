@@ -302,29 +302,25 @@ const { getSelectableWorkbook } = useSelectableWorkbook();
 const { openBalanceItems } = useBreakdown();
 const excelTitle = computed(() => [organization.value?.name, $t('%1LA')].filter(Boolean).join(' - '));
 const actions = [
-    ...($feature('payment-breakdown')
-        ? [
-                new AsyncTableAction({
-                    name: $t('%Pa'),
-                    icon: 'stats',
-                    priority: 1,
-                    groupIndex: 2,
-                    needsSelection: true,
-                    allowAutoSelectAll: true,
-                    handler: async (selection) => {
-                        await openBalanceItems({
-                            filter: selection.filter.filter,
-                            search: selection.filter.search,
-                            title: $t('%1LA'),
-                            rootTitle: excelTitle.value,
-                            getSelectableWorkbook,
-                            configurationId: configurationId.value,
-                            present: true,
-                        });
-                    },
-                }),
-            ]
-        : []),
+    new AsyncTableAction({
+        name: $t('%Pa'),
+        icon: 'stats',
+        priority: 1,
+        groupIndex: 2,
+        needsSelection: true,
+        allowAutoSelectAll: true,
+        handler: async (selection) => {
+            await openBalanceItems({
+                filter: selection.filter.filter,
+                search: selection.filter.search,
+                title: $t('%1LA'),
+                rootTitle: excelTitle.value,
+                getSelectableWorkbook,
+                configurationId: configurationId.value,
+                present: true,
+            });
+        },
+    }),
 
     new AsyncTableAction({
         name: $t('%V8'),

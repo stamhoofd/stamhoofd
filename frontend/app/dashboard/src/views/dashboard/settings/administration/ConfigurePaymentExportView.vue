@@ -75,12 +75,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
@@ -91,7 +88,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { ExcelExportType, getPaymentProviderName, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
+import { getPaymentProviderName, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, StripeAccount } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
@@ -114,8 +111,6 @@ class DateRangeSuggestion {
 const context = useContext();
 const organization = useRequiredOrganization();
 const { openPayments } = useBreakdown();
-const show = useShow();
-const hasBreakdown = useFeatureFlag()('payment-breakdown');
 const requestOwner = {};
 const errorBox = ref<ErrorBox | null>(null);
 const saving = ref(false);
@@ -320,42 +315,14 @@ async function save() {
             selectionName,
         ].filter(Boolean).join(' - ');
 
-        if (hasBreakdown) {
-            // Show what the selection adds up to first: from there the user can narrow it down and export
-            await openPayments({
-                filter: buildFilter(),
-                title: selectionName,
-                rootTitle: title,
-                getSelectableWorkbook,
-                configurationId: 'configure-payment-export',
-            });
-        }
-        else {
-            await show({
-                components: [
-                    AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
-                        type: ExcelExportType.Payments,
-                        filter: new LimitedFilteredRequest({
-                            filter: buildFilter(),
-                            limit: 100,
-                            sort: [
-                                {
-                                    key: 'paidAt',
-                                    order: SortItemDirection.ASC,
-                                },
-                                {
-                                    key: 'id',
-                                    order: SortItemDirection.ASC,
-                                },
-                            ],
-                        }),
-                        workbook: getSelectableWorkbook(),
-                        configurationId: 'configure-payment-export',
-                        title,
-                    }),
-                ],
-            });
-        }
+        // Show what the selection adds up to first: from there the user can narrow it down and export
+        await openPayments({
+            filter: buildFilter(),
+            title: selectionName,
+            rootTitle: title,
+            getSelectableWorkbook,
+            configurationId: 'configure-payment-export',
+        });
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);
     }
