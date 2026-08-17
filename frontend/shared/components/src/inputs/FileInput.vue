@@ -114,7 +114,7 @@ function changedFile(event: Event) {
     uploading.value = true;
     errorBox.value = null;
 
-    context.value.authenticatedServer
+    context.value.optionalAuthenticatedServer
         .request({
             method: 'POST',
             path: '/upload-file',

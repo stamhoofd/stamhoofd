@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import { PutObjectCommand } from '@aws-sdk/client-s3'; // ES Modules import
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -59,10 +59,12 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate();
+        const { user } = await Context.optionalAuthenticate();
 
-        if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
-            throw Context.auth.error();
+        if (user) {
+            if (!Context.auth?.canUpload({ private: request.query.isPrivate })) {
+                throw Context.auth.error();
+            }
         }
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
@@ -77,7 +79,15 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new Error('Not supported without real request');
         }
 
-        limiter.track(user.id, 1);
+        if (user) {
+            limiter.track(user.id, 1);
+
+            console.log('Tracked on user');
+        } else {
+            limiter.track(request.request.getIP(), 1);
+
+            console.log('Tracked on IP');
+        }
 
         const form = formidable({ maxFileSize: 20 * 1024 * 1024, maxFields: 1, keepExtensions: true });
         const file = await new Promise<FormidableFile>((resolve, reject) => {
@@ -125,7 +135,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         }
     }
 
-    private async upload(request: DecodedRequest<Params, Query, Body>, file: FormidableFile, user: { id: string }) {
+    private async upload(request: DecodedRequest<Params, Query, Body>, file: FormidableFile, user?: { id: string }) {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: 'not_available',
