@@ -118,8 +118,7 @@
                     <h3 class="style-definition-label">
                         {{ payment.method === PaymentMethod.CreditCard ?
                             $t('%MH')
-                            :
-                            $t('%hJ')
+                            : $t('%hJ')
                         }}
                     </h3>
 
