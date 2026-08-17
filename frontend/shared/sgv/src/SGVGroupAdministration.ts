@@ -326,7 +326,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
 
         while (offset < total) {
             // prevent brute force attack, spread the load
-            await sleep(100);
+            await sleep(200);
             const response = await this.tryRequest<SGVLedenLijstResponse>({
                 method: 'GET',
                 path: '/ledenlijst',
@@ -691,12 +691,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
     async tryRequest<T>(
         request: RequestInitializer<T>,
     ): Promise<RequestResult<T>> {
-        try {
-            return await this.authenticatedServer.request({
-                ...request,
-                timeout: 30_000,
-            });
-        } catch (e) {
+        const handle = async (e: unknown) => {
             if (Request.isTimeout(e)) {
                 await this.reportIssue(
                     SGVReportIssue.create({
@@ -742,6 +737,29 @@ export class SGVGroupAdministration implements RequestMiddleware {
                 });
             }
 
+            throw e;
+        };
+
+        try {
+            return await this.authenticatedServer.request({
+                ...request,
+                timeout: 20_000,
+            });
+        } catch (e) {
+            if (Request.isTimeout(e) || Request.isNetworkError(e)) {
+                // Retry again once
+                try {
+                    return await this.authenticatedServer.request({
+                        ...request,
+                        timeout: 10_000,
+                    });
+                } catch (ee) {
+                    await handle(ee);
+                    throw ee;
+                }
+            }
+
+            await handle(e);
             throw e;
         }
     }
