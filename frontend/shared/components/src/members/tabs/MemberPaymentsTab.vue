@@ -4,7 +4,18 @@
             <p v-if="member.patchedMember.details.hasFinancialSupportOrActiveUitpas" class="info-box">
                 {{ financialSupportWarningText }}
             </p>
+            <p class="style-description-block">
+                <I18nComponent :t="$t('Lees zeker <button>onze documentatie</button> door als je de boekhouding in Stamhoofd beter wilt kunnen opvolgen.')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
+            </p>
 
+            <hr>
+            <h2>{{ $t('Aanrekeningen') }}</h2>
             <ReceivableBalanceBox :item="tmpItem" :member="member" />
         </main>
     </div>
@@ -15,9 +26,10 @@ import ReceivableBalanceBox from '#payments/ReceivableBalanceBox.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import type { PlatformMember} from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel, ReceivableBalance, ReceivableBalanceObject, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = defineProps<{
     member: PlatformMember;

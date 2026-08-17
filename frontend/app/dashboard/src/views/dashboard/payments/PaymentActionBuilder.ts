@@ -116,27 +116,25 @@ export class PaymentActionBuilder {
             }),
             this.getCancelPaymentsAction(),
             this.getRefundPaymentsAction(),
-            this.$feature('payment-breakdown')
-                ? new AsyncTableAction({
-                        name: $t('%Pa'),
-                        icon: 'stats',
-                        priority: 1,
-                        groupIndex: 2,
-                        needsSelection: true,
-                        allowAutoSelectAll: true,
-                        handler: async (selection) => {
-                            await this.openPaymentBreakdown({
-                                filter: selection.filter.filter,
-                                search: selection.filter.search,
-                                title: this.getSelectionName(),
-                                rootTitle: this.getExcelTitle(),
-                                getSelectableWorkbook: this.selectableWorkbook.getSelectableWorkbook,
-                                configurationId: this.configurationId.value,
-                                present: true,
-                            });
-                        },
-                    })
-                : null,
+            new AsyncTableAction({
+                name: $t('%Pa'),
+                icon: 'stats',
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: true,
+                handler: async (selection) => {
+                    await this.openPaymentBreakdown({
+                        filter: selection.filter.filter,
+                        search: selection.filter.search,
+                        title: this.getSelectionName(),
+                        rootTitle: this.getExcelTitle(),
+                        getSelectableWorkbook: this.selectableWorkbook.getSelectableWorkbook,
+                        configurationId: this.configurationId.value,
+                        present: true,
+                    });
+                },
+            }),
             new AsyncTableAction({
                 name: $t('%V8'),
                 icon: 'download',

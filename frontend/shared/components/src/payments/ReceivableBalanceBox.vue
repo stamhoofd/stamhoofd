@@ -144,16 +144,16 @@
             </STList>
 
             <template v-if="invoices.length">
-                <hr><h2>{{ $t('%1JA') }}</h2>
+                <hr>
+                <h2>{{ $t('%1JA') }}</h2>
 
                 <STList>
                     <InvoiceRow v-for="invoice of invoices" :key="invoice.id" :invoice="invoice" :invoices="invoices" />
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('%hc') }}</h2>
-
-            <p>{{ $t('%hd') }}</p>
+            <hr>
+            <h2>{{ $t('Contactgegevens') }}</h2>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">

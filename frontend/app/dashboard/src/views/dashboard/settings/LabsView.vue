@@ -236,18 +236,6 @@
                     </h3>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="label" data-testid="payment-breakdown-checkbox">
-                    <template #left>
-                        <Checkbox :model-value="getFeatureFlag('payment-breakdown')" @update:model-value="setFeatureFlag('payment-breakdown', !!$event)" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('%ZiO') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('%ZjG') }}
-                    </p>
-                </STListItem>
-
                 <STListItem :selectable="true" element-name="label" data-testid="bulk-refund-payments-checkbox">
                     <template #left>
                         <Checkbox :model-value="getFeatureFlag('bulk-refund-payments')" @update:model-value="setFeatureFlag('bulk-refund-payments', !!$event)" />

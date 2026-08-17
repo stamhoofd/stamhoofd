@@ -9,21 +9,33 @@
                 </h1>
                 <BillingWarningBox v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" />
 
-                <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
-                    {{ $t('%1KY') }}
-                </a>
+                <p class="style-description-block">
+                    <I18nComponent :t="$t('Lees zeker <button>onze documentatie</button> door als je de boekhouding in Stamhoofd beter wilt kunnen opvolgen.')">
+                        <template #button="{content}">
+                            <a class="inline-link" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
+                                {{ content }}
+                            </a>
+                        </template>
+                    </I18nComponent>
+                </p>
+
+                <hr>
+
+                <h2>{{ $t('Betalingen') }}</h2>
+                <p>
+                    {{ $t('Betalingen registreren hoe aanrekeningen betaald worden, bijvoorbeeld via Bancontact of overschrijving. Elke betaling is gekoppeld aan één of meerdere aanrekeningen, of aan een deel ervan.') }}
+                </p>
 
                 <STList class="illustration-list">
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Export)">
                         <template #left>
-                            <img v-if="hasBreakdown" src="@stamhoofd/assets/images/illustrations/diagram.svg">
-                            <img v-else src="@stamhoofd/assets/images/illustrations/calculator.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('%95') }}
+                            {{ $t('Statistieken en totalen') }}
                         </h2>
                         <p class="style-description">
-                            {{ hasBreakdown ? $t("%ZjT") : $t("%5Q") }}
+                            {{ $t("%ZjT") }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -32,7 +44,7 @@
 
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Transfers)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/bank.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/check-bank.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('%96') }}
@@ -59,46 +71,22 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+                </STList>
 
+                <hr>
+                <h2>{{ $t('Aanrekeningen') }}</h2>
+                <p>{{ $t('Een aanrekening is een bedrag dat een lid moet betalen, bijvoorbeeld voor een inschrijving of T-shirt. Betalingen worden aan deze aanrekeningen gekoppeld.') }}</p>
+
+                <STList class="illustration-list">
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('%99') }}
+                            {{ $feature('organization-receivable-balances') ? $t('Openstaande bedragen van leden en verenigingen') : $t('Openstaande bedragen van leden') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%NG', {organization: organization!.name}) }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="canExportSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsExport)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/bank.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Zk2') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zjx') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="canSyncSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsSync)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/sync.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Zjz') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zk8') }}
+                            {{ $t('Bekijk hoeveel een lid nog moet betalen, of hoeveel er momenteel in verwerking is.', {organization: organization!.name}) }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -206,6 +194,42 @@
                             </STListItem>
                         </STList>
                     </div>
+                </template>
+
+                <template v-if="canExportSettlements || canSyncSettlements">
+                    <hr>
+                    <h2>{{ $t('Beheerders') }}</h2>
+                    <STList class="illustration-list">
+                        <STListItem v-if="canExportSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsExport)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/bank.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%Zk2') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Zjx') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-if="canSyncSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsSync)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/sync.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%Zjz') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Zk8') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
                 </template>
             </main>
         </div>
@@ -417,7 +441,6 @@ const context = useContext();
 const errors = useErrors();
 const organization = useOrganization();
 const platform = usePlatform();
-const hasBreakdown = useFeatureFlag()('payment-breakdown');
 const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
 
 // Platform tooling: only for full platform admins on the membership organization itself
