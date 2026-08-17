@@ -63,11 +63,13 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate();
+        const organization = await Context.setOptionalOrganizationScope();
+        const { user } = await Context.optionalAuthenticate();
 
-        if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
-            throw Context.auth.error();
+        if (user) {
+            if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
+                throw Context.auth.error();
+            }
         }
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
@@ -82,7 +84,14 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new Error('Not supported without real request');
         }
 
-        limiter.track(user.id, 1);
+        if (user) {
+            limiter.track(user.id, 1);
+        } else {
+            limiter.track(request.request.getIP(), 1);
+            if (organization) {
+                limiter.track(organization.id, 1);
+            }
+        }
 
         const form = formidable({
             maxFileSize: 5 * 1024 * 1024,

@@ -58,7 +58,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.optionalAuthenticate();
 
         if (user) {
@@ -81,12 +81,11 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         if (user) {
             limiter.track(user.id, 1);
-
-            console.log('Tracked on user');
         } else {
             limiter.track(request.request.getIP(), 1);
-
-            console.log('Tracked on IP');
+            if (organization) {
+                limiter.track(organization.id, 1);
+            }
         }
 
         const form = formidable({ maxFileSize: 20 * 1024 * 1024, maxFields: 1, keepExtensions: true });
