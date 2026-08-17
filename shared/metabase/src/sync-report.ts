@@ -266,18 +266,37 @@ export function buildTabs(tabs: ReportTab[], existing: Map<string, number>): { i
     }));
 }
 
-export function buildDashcards(tabs: ReportTab[], cardIds: Map<string, number>, parameters: Record<string, unknown>[], tabIds: Map<string, number>): Record<string, unknown>[] {
+/**
+ * Where each card of the report sits on the dashboard.
+ *
+ * `existing` holds the placed cards the dashboard already has, keyed by tab and card, so a card that
+ * is still there keeps the id it was placed under. Metabase addresses a card on a dashboard by that
+ * id: giving out new ones on every run leaves anyone with the dashboard open asking for placements
+ * that no longer exist, and every card on their screen answers 404 until they load the page again.
+ */
+/** How a placed card is recognised between two runs: the same card on the same tab. */
+export function dashcardKey(tabId: number | null | undefined, cardId: number | null): string {
+    return `${tabId ?? ''}:${cardId ?? ''}`;
+}
+
+export function buildDashcards(tabs: ReportTab[], cardIds: Map<string, number>, parameters: Record<string, unknown>[], tabIds: Map<string, number>, existing: Map<string, number> = new Map()): Record<string, unknown>[] {
     const dashcards: Record<string, unknown>[] = [];
+    const free = new Map(existing);
 
     for (const tab of tabs) {
         for (const placed of layoutCards(tab.cards)) {
             const cardId = cardIds.get(placed.card.key)!;
+            const tabId = tabIds.get(tab.title);
+            const key = dashcardKey(tabId, cardId);
+            const id = free.get(key);
+            // Only once: the same card placed twice on a tab is one placement that stays and one new.
+            free.delete(key);
 
             dashcards.push({
                 // Metabase reads a negative id as "this one is new".
-                id: -1 - dashcards.length,
+                id: id ?? -1 - dashcards.length,
                 card_id: cardId,
-                dashboard_tab_id: tabIds.get(tab.title),
+                dashboard_tab_id: tabId,
                 row: placed.row,
                 col: placed.col,
                 size_x: placed.sizeX,
@@ -350,7 +369,9 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
     const dashboardId = existingDashboards.find(dashboard => dashboard.name === dashboardName)?.id
         ?? await api.createDashboard(dashboardName, undefined, collectionId);
 
-    const existingTabs = new Map((await api.getDashboardTabs(dashboardId)).map(tab => [tab.name, tab.id]));
+    const layout = await api.getDashboardLayout(dashboardId);
+    const existingTabs = new Map(layout.tabs.map(tab => [tab.name, tab.id]));
+    const existingDashcards = new Map(layout.cards.map(placed => [dashcardKey(placed.tabId, placed.cardId), placed.id]));
     const parameters = buildParameters(visible, filterCardIds, orderedValues);
     const dashboardTabs = buildTabs(visible, existingTabs);
     const tabIds = new Map(dashboardTabs.map(tab => [tab.name, tab.id]));
@@ -359,7 +380,7 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         name: dashboardName,
         parameters,
         tabs: dashboardTabs,
-        dashcards: buildDashcards(visible, cardIds, parameters, tabIds),
+        dashcards: buildDashcards(visible, cardIds, parameters, tabIds, existingDashcards),
         collectionPosition: reportCollectionPosition,
     });
 

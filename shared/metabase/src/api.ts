@@ -55,6 +55,12 @@ export type MetabaseDashboard = {
     name: string;
 };
 
+export type MetabaseDashboardLayout = {
+    tabs: { id: number; name: string }[];
+    /** The placed cards. A text box or heading holds no card, and has no `cardId`. */
+    cards: { id: number; cardId: number | null; tabId: number | null }[];
+};
+
 export class MetabaseApiError extends Error {
     constructor(message: string, readonly status: number) {
         super(message);
@@ -348,10 +354,17 @@ export class MetabaseApi {
         return created.id;
     }
 
-    /** The tabs a dashboard already has, so writing it again can keep their ids. */
-    async getDashboardTabs(id: number): Promise<{ id: number; name: string }[]> {
-        const dashboard = await this.request<{ tabs?: { id: number; name: string }[] }>('GET', `/api/dashboard/${id}`);
-        return dashboard.tabs ?? [];
+    /** The tabs and cards a dashboard already has, so writing it again can keep their ids. */
+    async getDashboardLayout(id: number): Promise<MetabaseDashboardLayout> {
+        const dashboard = await this.request<{
+            tabs?: { id: number; name: string }[];
+            dashcards?: { id: number; card_id: number | null; dashboard_tab_id: number | null }[];
+        }>('GET', `/api/dashboard/${id}`);
+
+        return {
+            tabs: dashboard.tabs ?? [],
+            cards: (dashboard.dashcards ?? []).map(dashcard => ({ id: dashcard.id, cardId: dashcard.card_id, tabId: dashcard.dashboard_tab_id })),
+        };
     }
 
     /**

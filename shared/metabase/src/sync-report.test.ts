@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, layoutCards, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, dashcardKey, layoutCards, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -249,6 +249,32 @@ describe('buildDashcards', () => {
         expect(dashcards.map(entry => [entry.card_id, entry.dashboard_tab_id])).toEqual([[1, 10], [2, 11]]);
         // Each tab is laid out on a grid of its own.
         expect(dashcards.map(entry => entry.row)).toEqual([0, 0]);
+    });
+
+    /**
+     * Metabase addresses a card on a dashboard by the id of its placement, which the browser keeps
+     * asking for while the page stays open. Handing out new ones on every run answers each of those
+     * with a 404, so a dashboard someone had open shows an error on every card until it is loaded
+     * again -- and the report is written again on every change to it.
+     */
+    it('leaves a card that is still on the same tab under the id it was placed with', () => {
+        const tabs = [tab({ key: 'eenheden', title: 'Eenheden', cards: [card({ key: 'a' }), card({ key: 'b', title: 'Aantal leiding' })] })];
+        const existing = new Map([[dashcardKey(11, 1), 500]]);
+
+        const dashcards = buildDashcards(tabs, new Map([['a', 1], ['b', 2]]), [], new Map([['Eenheden', 11]]), existing);
+
+        expect(dashcards[0].id).toEqual(500);
+        // The one that was not there yet is new, which Metabase reads from a negative id.
+        expect(dashcards[1].id as number).toBeLessThan(0);
+    });
+
+    it('places a card that moved to another tab anew, since its old placement belongs to the old tab', () => {
+        const tabs = [tab({ key: 'varia', title: 'Varia', cards: [card({ key: 'a' })] })];
+        const existing = new Map([[dashcardKey(11, 1), 500]]);
+
+        const dashcards = buildDashcards(tabs, new Map([['a', 1]]), [], new Map([['Varia', 12]]), existing);
+
+        expect(dashcards[0].id as number).toBeLessThan(0);
     });
 
     /**
