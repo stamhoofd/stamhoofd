@@ -9,10 +9,17 @@ import { localIpv4Host } from '../config/shared-service-config.js';
  * directory), so port bookkeeping always combines the manifests with this probe.
  */
 export async function isPortAvailable(port: number, host: string = localIpv4Host): Promise<boolean> {
-    return await new Promise((resolve) => {
+    return await new Promise((resolve, reject) => {
         const server = net.createServer();
 
-        server.once('error', () => resolve(false));
+        server.once('error', (error: NodeJS.ErrnoException) => {
+            if (error.code === 'EACCES' || error.code === 'EPERM') {
+                reject(error);
+                return;
+            }
+
+            resolve(false);
+        });
         server.once('listening', () => {
             server.close(() => resolve(true));
         });
