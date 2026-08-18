@@ -10,7 +10,7 @@
                 <BillingWarningBox v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" />
 
                 <p class="style-description-block">
-                    <I18nComponent :t="$t('Lees zeker <button>onze documentatie</button> door als je de boekhouding in Stamhoofd beter wilt kunnen opvolgen.')">
+                    <I18nComponent :t="$t('%ZlL')">
                         <template #button="{content}">
                             <a class="inline-link" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
                                 {{ content }}
@@ -19,12 +19,14 @@
                     </I18nComponent>
                 </p>
 
-                <hr>
+                <template v-if="organization?.meta.packages.useMembers">
+                    <hr>
 
-                <h2>{{ $t('Betalingen') }}</h2>
-                <p>
-                    {{ $t('Betalingen registreren hoe aanrekeningen betaald worden, bijvoorbeeld via Bancontact of overschrijving. Elke betaling is gekoppeld aan één of meerdere aanrekeningen, of aan een deel ervan.') }}
-                </p>
+                    <h2>{{ $t('%1JH') }}</h2>
+                    <p>
+                        {{ $t('%Zlh') }}
+                    </p>
+                </template>
 
                 <STList class="illustration-list">
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Export)">
@@ -32,7 +34,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Statistieken, totalen of exporteren') }}
+                            {{ $t('%Zlg') }}
                         </h2>
                         <p class="style-description">
                             {{ $t("%ZjT") }}
@@ -73,41 +75,43 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>{{ $t('Aanrekeningen') }}</h2>
-                <p>{{ $t('Een aanrekening is een bedrag dat een lid moet betalen, bijvoorbeeld voor een inschrijving of T-shirt. Betalingen worden aan deze aanrekeningen gekoppeld.') }}</p>
+                <template v-if="organization?.meta.packages.useMembers">
+                    <hr>
+                    <h2>{{ $t('%1LA') }}</h2>
+                    <p>{{ $t('%Zls') }}</p>
 
-                <STList class="illustration-list">
-                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" data-testid="open-receivable-balances-table" @click="$navigate(Routes.ReceivableBalance)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $feature('organization-receivable-balances') ? $t('Openstaande bedragen van leden en verenigingen') : $t('Openstaande bedragen van leden') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('Bekijk hoeveel een lid nog moet betalen, of hoeveel er momenteel in verwerking is.', {organization: organization!.name}) }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
+                    <STList class="illustration-list">
+                        <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" data-testid="open-receivable-balances-table" @click="$navigate(Routes.ReceivableBalance)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $feature('organization-receivable-balances') ? $t('%Zlv') : $t('%Zlo') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%ZlV', {organization: organization!.name}) }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
 
-                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/box.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%1Ls') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%ZdC') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
+                        <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/box.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%1Ls') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%ZdC') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
+                </template>
 
                 <div v-if="organization?.meta.invoicesEnabled && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" class="container">
                     <hr>
@@ -198,7 +202,7 @@
 
                 <template v-if="canExportSettlements || canSyncSettlements">
                     <hr>
-                    <h2>{{ $t('Beheerders') }}</h2>
+                    <h2>{{ $t('%K5') }}</h2>
                     <STList class="illustration-list">
                         <STListItem v-if="canExportSettlements" :selectable="true" class="left-center" @click="$navigate(Routes.SettlementsExport)">
                             <template #left>

@@ -3,6 +3,7 @@ import { AutoEncoder, BooleanDecoder, field, ObjectData } from '@simonbackx/simp
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import type { Organization } from '@stamhoofd/models';
 import { Image, RateLimiter } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest, supportedImageTypes } from '@stamhoofd/structures';
 import formidable from 'formidable';
@@ -44,6 +45,15 @@ export const limiter = new RateLimiter({
         },
     ],
 });
+export const organizationLimiter = new RateLimiter({
+    limits: [
+        {
+            // Max 200 per day
+            limit: 200,
+            duration: 60 * 1000 * 60 * 24,
+        },
+    ],
+});
 
 export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
@@ -63,11 +73,20 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate();
+        const organization = await Context.setOptionalOrganizationScope();
+        const { user } = await Context.optionalAuthenticate();
 
-        if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
-            throw Context.auth.error();
+        // Webshops allow for file upload, but don't have a user attached
+        if (user) {
+            if (!Context.auth?.canUpload({ private: request.query.isPrivate })) {
+                throw Context.auth.error();
+            }
+        } else if (!organization) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Endpoints needs organization if no user is present',
+                human: $t('%ZlM'),
+            });
         }
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
@@ -82,7 +101,14 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new Error('Not supported without real request');
         }
 
-        limiter.track(user.id, 1);
+        if (user) {
+            limiter.track(user.id, 1);
+        } else {
+            limiter.track(request.request.getIP(), 1);
+            if (organization) {
+                organizationLimiter.track(organization.id, 1);
+            }
+        }
 
         const form = formidable({
             maxFileSize: 5 * 1024 * 1024,
@@ -147,7 +173,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             }
 
             const fileContent = await fs.readFile(file.filepath);
-            const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user);
+            const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user, organization as Organization | null | undefined);
             return new Response(ImageStruct.create(image));
         } finally {
             // Formidable wrote the upload to a temporary file

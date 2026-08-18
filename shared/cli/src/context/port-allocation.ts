@@ -43,7 +43,7 @@ export async function resolvePortOffset(context: CliContext): Promise<CliContext
         };
     }
 
-    throw new Error(`Could not find a free development port range for instance ${context.instance.name}. Please verify whether you have permission to open ports when running inside a sandbox or agent.`);
+    throw new Error(`Could not find a free development port range for instance ${context.instance.name}.`);
 }
 
 async function assertPortsAvailable(context: CliContext): Promise<void> {
@@ -63,13 +63,29 @@ async function appPortsAvailable(context: CliContext): Promise<boolean> {
 
 async function occupiedAppPorts(context: CliContext): Promise<Array<{ name: AppPortName; port: number }>> {
     const ports = buildPorts(context);
-    const results = await Promise.all(appPortNames.map(async name => ({
-        name,
-        port: ports[name],
-        available: await isPortAvailable(ports[name]),
-    })));
+    let results: Array<{ name: AppPortName; port: number; available: boolean }>;
+
+    try {
+        results = await Promise.all(appPortNames.map(async name => ({
+            name,
+            port: ports[name],
+            available: await isPortAvailable(ports[name]),
+        })));
+    } catch (error) {
+        if (isPortPermissionError(error)) {
+            throw new Error(`Could not check development ports for instance ${context.instance.name} because this process does not have permission to open development ports. If you are running inside a sandbox or agent, allow access to open local ports.`, { cause: error });
+        }
+
+        throw error;
+    }
 
     return results
         .filter(result => !result.available)
         .map(({ name, port }) => ({ name, port }));
+}
+
+function isPortPermissionError(error: unknown): error is NodeJS.ErrnoException {
+    return error instanceof Error
+        && 'code' in error
+        && (error.code === 'EACCES' || error.code === 'EPERM');
 }

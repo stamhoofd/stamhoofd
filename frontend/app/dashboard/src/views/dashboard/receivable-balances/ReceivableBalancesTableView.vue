@@ -67,7 +67,7 @@ const props = withDefaults(
 );
 
 const title = computed(() => {
-    return $feature('organization-receivable-balances') ? $t('Openstaande bedragen van leden en verenigingen') : $t('Openstaande bedragen van leden');
+    return $feature('organization-receivable-balances') ? $t('%Zlv') : $t('%Zlo');
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
@@ -106,7 +106,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'name',
-        name: $feature('organization-receivable-balances') ? $t('Schuldenaar') : $t('Lid'),
+        name: $feature('organization-receivable-balances') ? $t('%Mn') : $t('%1PM'),
         getValue: object => object.object.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -119,7 +119,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     id: 'uri',
                     name: '#',
                     getValue: object => object.object.uri,
-                    format: value => value || $t('Geen'),
+                    format: value => value || $t('%1FW'),
                     getStyle: value => !value ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 200,
@@ -134,7 +134,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     id: 'type',
                     name: $t('%1LP'),
                     getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType)),
-                    format: value => value || $t('Geen'),
+                    format: value => value || $t('%1FW'),
                     getStyle: value => !value ? 'gray' : '',
                     minimumWidth: 70,
                     recommendedWidth: 120,
@@ -145,7 +145,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amountOpen',
-        name: $t('Openstaand bedrag'),
+        name: $t('%76'),
         getValue: object => object.amountOpen,
         format: value => Formatter.price(value),
         getStyle: value => value === 0 ? 'gray' : '',
@@ -156,7 +156,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amountPending',
-        name: $t('In verwerking'),
+        name: $t('%1OL'),
         getValue: object => object.amountPending,
         format: value => Formatter.price(value),
         getStyle: value => value === 0 ? 'gray' : '',
@@ -226,7 +226,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 
     new InMemoryTableAction({
-        name: $t('Markeren als betaald'),
+        name: $t('%Zld'),
         icon: 'success',
         priority: 10,
         groupIndex: 3,
@@ -248,12 +248,12 @@ async function markAsPaid(items: ReceivableBalance[]) {
 
     if (!await CenteredMessage.confirm({
         title: items.length === 1
-            ? $t('Het openstaand bedrag van {name} als betaald markeren?', { name: items[0].object.name })
-            : $t('Het openstaand bedrag voor {count} items als betaald markeren?', { count: items.length }),
-        description: $t('Voor elk geselecteerd openstaand bedrag maken we een betaling aan met een onbekende betaalmethode. Als betaaldatum gebruiken we de datum van het laatst aangemaakte openstaande bedrag.'),
-        confirmText: $t('Betalingen registreren'),
+            ? $t('%Zlp', { name: items[0].object.name })
+            : $t('%Zlf', { count: items.length }),
+        description: $t('%Zlr'),
+        confirmText: $t('%ZlZ'),
         destructive: true,
-        requireCheckbox: items.length > 10 ? $t('Ik ben zeker') : undefined,
+        requireCheckbox: items.length > 10 ? $t('%ZlX') : undefined,
     })) {
         return;
     }
@@ -262,17 +262,17 @@ async function markAsPaid(items: ReceivableBalance[]) {
 
     if (hasPending) {
         const result = await CenteredMessage.show({
-            title: $t('Sommige openstaande bedragen hebben al een betaling in verwerking'),
-            description: $t('Een openstaande bedrag is in verwerking. Er werd al een betaling voor aangemaakt, maar die is nog niet als ontvangen gemarkeerd. Bijvoorbeeld omdat een overschrijving nog niet als betaald is gemarkeerd. Wat wil je hiermee doen?'),
+            title: $t('%ZlU'),
+            description: $t('%Zlq'),
             buttons: [
                 {
-                    text: $t('In verwerking houden'),
+                    text: $t('%ZlJ'),
                     type: 'primary',
                     value: 'keep',
                     availabilityDelay: 1_000,
                 },
                 {
-                    text: $t('Markeren als betaald'),
+                    text: $t('%Zld'),
                     type: 'destructive',
                     value: 'mark-paid',
                     availabilityDelay: 1_000,
@@ -290,7 +290,7 @@ async function markAsPaid(items: ReceivableBalance[]) {
         withPending = result;
     }
 
-    const toast = new Toast($t('Betalingen aanmaken...'), 'spinner').setProgress(0).setHide(null);
+    const toast = new Toast($t('%Zlw'), 'spinner').setProgress(0).setHide(null);
     toast.show();
 
     try {
@@ -372,8 +372,8 @@ async function markAsPaid(items: ReceivableBalance[]) {
         }
 
         Toast.success(items.length === 1
-            ? $t('Het geselecteerde openstaande bedrag is als betaald gemarkeerd')
-            : $t('De geselecteerde openstaande bedragen zijn als betaald gemarkeerd')).show();
+            ? $t('%ZlP')
+            : $t('%Zln')).show();
     } catch (e) {
         Toast.fromError(e).show();
     } finally {

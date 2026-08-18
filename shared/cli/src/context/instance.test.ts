@@ -1,3 +1,5 @@
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { describe, expect, it, vi } from 'vitest';
 import { buildInstance } from './instance.js';
 import { buildPorts } from './ports.js';
@@ -6,6 +8,7 @@ import type { CliContext } from './create-context.js';
 import { resolvePortOffset } from './port-allocation.js';
 
 const freeTestPortOffset = 10000;
+const execFileAsync = promisify(execFile);
 
 describe('slug', () => {
     it('normalizes values for domains and container names', () => {
@@ -54,10 +57,9 @@ describe('resolvePortOffset', () => {
         });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('moves to the next port bucket when the current ports are occupied', async () => {
+    it('moves to the next port bucket when the current ports are occupied', async () => {
         const context = testContext(freeTestPortOffset);
-        const occupied = await occupyPort(buildPorts(context).dashboard);
+        const occupied = await occupyPort(buildPorts(context).webApp);
 
         await expect(resolvePortOffset(context)).resolves.toMatchObject({
             instance: expect.objectContaining({ portOffset: freeTestPortOffset + 100 }),
@@ -66,10 +68,9 @@ describe('resolvePortOffset', () => {
         await occupied.close();
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('fails for explicit offsets that are already occupied', async () => {
+    it('fails for explicit offsets that are already occupied', async () => {
         const context = testContext(freeTestPortOffset);
-        const occupied = await occupyPort(buildPorts(context).dashboard);
+        const occupied = await occupyPort(buildPorts(context).webApp);
         vi.stubEnv('STAMHOOFD_PORT_OFFSET', String(freeTestPortOffset));
 
         await expect(resolvePortOffset(context)).rejects.toThrow(new RegExp(`Configured port offset ${freeTestPortOffset} is unavailable`));
@@ -90,6 +91,33 @@ describe('resolvePortOffset', () => {
 
         vi.unstubAllEnvs();
         await occupied.close();
+    });
+
+    it.skipIf(process.platform !== 'darwin')('reports an actual OS-level bind denial separately from occupied ports', async () => {
+        const context = testContext(freeTestPortOffset);
+        const moduleUrl = new URL('../../dist/context/port-allocation.js', import.meta.url).href;
+        const script = `
+            const { resolvePortOffset } = await import(process.argv[1]);
+            try {
+                await resolvePortOffset(JSON.parse(process.argv[2]));
+                process.exitCode = 1;
+            } catch (error) {
+                console.log(error instanceof Error ? error.message : String(error));
+            }
+        `;
+        const { stdout } = await execFileAsync('/usr/bin/sandbox-exec', [
+            '-p',
+            '(version 1) (allow default) (deny network-bind)',
+            process.execPath,
+            '--input-type=module',
+            '--eval',
+            script,
+            moduleUrl,
+            JSON.stringify(context),
+        ]);
+
+        expect(stdout).toMatch(/permission to open development ports/i);
+        expect(stdout).not.toMatch(/free development port range/i);
     });
 });
 

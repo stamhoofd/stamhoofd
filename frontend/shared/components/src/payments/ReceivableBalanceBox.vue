@@ -95,7 +95,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="detailedItem.amountOpen === 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" class="theme-secundary" @click="createPayment(PaymentType.Reallocation)">
+                <STListItem v-if="showBalanceSettelment" :selectable="true" element-name="button" class="theme-secundary" @click="createPayment(PaymentType.Reallocation)">
                     <template #left>
                         <IconContainer icon="wand">
                             <template #aside>
@@ -153,7 +153,7 @@
             </template>
 
             <hr>
-            <h2>{{ $t('Contactgegevens') }}</h2>
+            <h2>{{ $t('%ZlW') }}</h2>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">
@@ -255,6 +255,14 @@ const refundableOnlinePayments = computed(() => {
     return detailedItem.value?.payments
         .filter(p => p.provider === PaymentProvider.Mollie && p.type === PaymentType.Payment && p.isSucceeded && p.price + p.refundedAmount + p.pendingRefundAmount > 0)
         .sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt)) ?? [];
+});
+
+const showBalanceSettelment = computed(() => {
+    const hasOnlyDeferredPayments = !detailedItem.value?.filteredBalanceItems
+        .some(b => b.dueAt && b.dueAt < new Date());
+
+    return detailedItem.value?.amountOpen === 0 && detailedItem.value?.filteredBalanceItems.length
+        && !hasOnlyDeferredPayments;
 });
 
 // Load detailed item
