@@ -1503,6 +1503,14 @@
     "original": "Deze groep kan niet verwijderd worden",
     "translation": "Ce groupe ne peut pas être supprimé"
   },
+  "%ZlL": {
+    "original": "Lees zeker <button>onze documentatie</button> door als je de boekhouding in Ravot beter wilt kunnen opvolgen.",
+    "translation": "Lisez bien <button>notre documentation</button> si vous souhaitez mieux suivre la comptabilité dans Ravot."
+  },
+  "%Zlv": {
+    "original": "Openstaande bedragen van leden en groepen",
+    "translation": "Montants en attente des membres et des groupes"
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

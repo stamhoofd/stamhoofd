@@ -1,9 +1,9 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%16p')" :title="$t(`Statistieken`)" save-icon-right="arrow-right" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%16p')" :title="$t(`%Pa`)" save-icon-right="arrow-right" @save="save">
         <h1>
-            {{ $t('Statistieken en totalen berekenen') }}
+            {{ $t('%ZlO') }}
         </h1>
-        <p>{{ $t('Je kan ook exporteren naar Excel.') }}</p>
+        <p>{{ $t('%ZlQ') }}</p>
 
         <p v-if="$isStamhoofd" class="warning-box icon feature">
             {{ $t(('Dit is vernieuwd! Feedback is steeds welkom via hallo@stamhoofd.be')) }}
@@ -44,17 +44,17 @@
 
         <template v-if="getPaymentMethod(PaymentMethod.Transfer) || getPaymentMethod(PaymentMethod.PointOfSale) || getPaymentMethod(PaymentMethod.Unknown)">
             <hr>
-            <h2>{{ $t('Datumbereik') }}</h2>
+            <h2>{{ $t('%ZlT') }}</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox v-model="usePaidAt" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Filter op betaaldatum in plaats van aanmaakdatum') }}
+                        {{ $t('%ZlI') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Als veel overschrijvingen pas laat als betaald gemarkeerd werden, is de aanmaakdatum vaak accurater.') }}
+                        {{ $t('%Zli') }}
                     </p>
                 </STListItem>
             </STList>
@@ -78,7 +78,7 @@
 
         <template v-if="showWebshopsFilter">
             <hr>
-            <h2>{{ $t('Webshops') }}</h2>
+            <h2>{{ $t('%1Pd') }}</h2>
 
             <div v-if="!allWebshopsSelected && shouldShowWebshopSearch" class="input-with-buttons">
                 <div>
@@ -94,7 +94,7 @@
                         <Checkbox v-model="allWebshopsSelected" :indeterminate="!!selectedWebshopIds && selectedWebshopIds.length > 0" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Alle webshops') }}
+                        {{ $t('%1AW') }}
                     </h3>
                 </STListItem>
 
@@ -107,7 +107,7 @@
                             {{ webshop.meta.name }}
                         </h3>
                         <p v-if="webshop.meta.status === WebshopStatus.Archived" class="style-description-small">
-                            {{ $t('Gearchiveerd') }}
+                            {{ $t('%1Pg') }}
                         </p>
                     </STListItem>
                 </template>
@@ -120,7 +120,7 @@
 
         <template v-if="showGroupsFilter">
             <hr>
-            <h2>{{ $t('Inschrijvingsgroepen') }}</h2>
+            <h2>{{ $t('%aT') }}</h2>
 
             <div v-if="!allGroupsSelected && shouldShowGroupSearch" class="input-with-buttons">
                 <div>
@@ -136,7 +136,7 @@
                         <Checkbox v-model="allGroupsSelected" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Alle inschrijvingsgroepen') }}
+                        {{ $t('%1IJ') }}
                     </h3>
                 </STListItem>
                 <template v-if="!allGroupsSelected">

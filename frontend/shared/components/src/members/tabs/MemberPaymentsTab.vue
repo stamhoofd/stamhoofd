@@ -5,7 +5,7 @@
                 {{ financialSupportWarningText }}
             </p>
             <p class="style-description-block">
-                <I18nComponent :t="$t('Lees zeker <button>onze documentatie</button> door als je de boekhouding in Stamhoofd beter wilt kunnen opvolgen.')">
+                <I18nComponent :t="$t('%ZlL')">
                     <template #button="{content}">
                         <a class="inline-link" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
                             {{ content }}
@@ -15,7 +15,7 @@
             </p>
 
             <hr>
-            <h2>{{ $t('Aanrekeningen') }}</h2>
+            <h2>{{ $t('%1LA') }}</h2>
             <ReceivableBalanceBox :item="tmpItem" :member="member" />
         </main>
     </div>
