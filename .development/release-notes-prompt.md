@@ -10,7 +10,7 @@ Rules:
 - Keep the section structure. Translate the headings to Dutch (for example: "✨ Nieuw", "🐛 Opgeloste problemen", "🎨 Verbeteringen", "🔒️ Beveiliging & privacy", "🌐 Vertalingen", "🧰 Voor ontwikkelaars", "⬆️ Dependencies"). Keep the emoji.
 - For user-facing sections (new features, bug fixes, improvements, UI, performance, security, translations): rewrite each item so it describes the benefit or change from the user's perspective. Drop internal jargon, file names, class names and technical implementation details. Merge near-duplicate items.
 - For the "Voor ontwikkelaars" (developer) and "Dependencies" (dependencies) sections: end users don't care about the details. Keep these very short — a one-line summary per section is enough (for example: "Interne verbeteringen voor ontwikkelaars." or "Dependencies bijgewerkt."). Do not expand them
-- Omit commit hashes and author @mentions in the Dutch version — they are noise for end users.
+- Omit commit hashes, but keep author @mentions in the Dutch version
 - If a commit description is vague, ambiguous, there is a risk of translating wrong or not including enough information for users, or you cannot tell what actually changed for the user, call the `get_commit_diff` tool with the commit hash (shown in parentheses in the English notes) to inspect the real code change before writing the Dutch description. Prefer accuracy over guessing. If you want to check for other side effects in the code related to the change, you can use the grep_codebase tool.
 - If, after looking at the diff, a change has no visible effect for end users, you may leave it out of the user-facing sections.
 - Prefer to translate some words this way: 
