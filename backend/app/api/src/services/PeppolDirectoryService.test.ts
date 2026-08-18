@@ -1,7 +1,7 @@
 import { PeppolEndointId } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
+import { PeppolDirectoryService } from '@stamhoofd/vies/PeppolDirectoryService.js';
 import nock from 'nock';
-import { PeppolDirectoryService } from './PeppolDirectoryService.js';
 
 const DIRECTORY_HOST = 'https://directory.peppol.eu';
 const DIRECTORY_PATH = '/search/1.0/json';

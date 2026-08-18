@@ -12,7 +12,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
-import { ViesHelper } from '../../../../helpers/ViesHelper.js';
+import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

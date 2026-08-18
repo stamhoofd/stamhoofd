@@ -3,9 +3,9 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { Company } from '@stamhoofd/structures';
 import { PeppolScheme } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
-import { ViesService } from '@stamhoofd/vies';
 import jsvat from 'jsvat-next';
-import { PeppolDirectoryService } from '../services/PeppolDirectoryService.js';
+import { PeppolDirectoryService } from './PeppolDirectoryService.js';
+import { ViesService } from './index.js';
 
 export class ViesHelperStatic {
     testMode = false;

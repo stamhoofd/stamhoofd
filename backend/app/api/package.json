@@ -90,7 +90,6 @@
         "handlebars": "4.7.9",
         "jose": "5.10.0",
         "jsonwebtoken": "9.0.3",
-        "jsvat-next": "3.0.4",
         "libphonenumber-js": "1.13.9",
         "luxon": "3.7.2",
         "mailparser": "3.9.14",

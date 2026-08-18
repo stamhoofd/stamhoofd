@@ -14,7 +14,7 @@ import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
 import { Context } from '../helpers/Context.js';
 import { ServiceFeeHelper } from '../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../helpers/StripeHelper.js';
-import { ViesHelper } from '../helpers/ViesHelper.js';
+import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
 import { AuditLogService } from './AuditLogService.js';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';

@@ -5,6 +5,23 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
+        },
+        "./ViesHelper.js": {
+            "types": "./dist/ViesHelper.d.ts",
+            "import": "./dist/ViesHelper.js",
+            "require": "./dist/ViesHelper.js"
+        },
+        "./PeppolDirectoryService.js": {
+            "types": "./dist/PeppolDirectoryService.d.ts",
+            "import": "./dist/PeppolDirectoryService.js",
+            "require": "./dist/PeppolDirectoryService.js"
+        }
+    },
     "files": [
         "dist"
     ],
@@ -16,8 +33,13 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.11",
+        "@simonbackx/simple-errors": "1.5.0",
         "@stamhoofd/models": "2.143.1",
-        "@stamhoofd/types": "2.143.1"
+        "@stamhoofd/structures": "2.143.1",
+        "@stamhoofd/types": "2.143.1",
+        "axios": "1.18.1",
+        "jsvat-next": "3.0.4"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",

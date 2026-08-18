@@ -15,7 +15,7 @@ import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
 import { TagHelper } from '../../../../helpers/TagHelper.js';
-import { ViesHelper } from '../../../../helpers/ViesHelper.js';
+import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { VATService } from '../../../../services/VATService.js';
 import { isAbortedError, isCanceledError } from '@stamhoofd/queues';

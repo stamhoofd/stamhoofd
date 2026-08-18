@@ -2,8 +2,8 @@ import { Database } from '@simonbackx/simple-database';
 import { Address, Company, PeppolEndointId } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
+import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
 import nock from 'nock';
-import { ViesHelper } from './ViesHelper.js';
 
 const VIES_HOST = 'https://ec.europa.eu';
 const VIES_PATH = '/taxation_customs/vies/rest-api/check-vat-number';

@@ -6,7 +6,7 @@ import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ViesHelper } from '../helpers/ViesHelper.js';
+import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
 import { WebmasterReport } from '../helpers/WebmasterReport.js';
 import { ApplicationFeeService } from './ApplicationFeeService.js';
 import { BalanceItemService } from './BalanceItemService.js';
