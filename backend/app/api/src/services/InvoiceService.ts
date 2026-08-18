@@ -6,7 +6,7 @@ import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
+import { ViesService } from '@stamhoofd/vies';
 import { WebmasterReport } from '../helpers/WebmasterReport.js';
 import { ApplicationFeeService } from './ApplicationFeeService.js';
 import { BalanceItemService } from './BalanceItemService.js';
@@ -35,7 +35,7 @@ export class InvoiceService {
         model.customer = struct.customer;
 
         if (model.customer.company) {
-            await ViesHelper.checkCompany(model.customer.company, model.customer.company);
+            await ViesService.checkCompany(model.customer.company, model.customer.company);
         }
 
         struct.updatePrices();

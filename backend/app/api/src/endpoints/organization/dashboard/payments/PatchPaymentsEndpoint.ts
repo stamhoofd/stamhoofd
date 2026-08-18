@@ -12,7 +12,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
-import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
+import { ViesService } from '@stamhoofd/vies';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -112,7 +112,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             if (put.customer?.company) {
-                await ViesHelper.checkCompany(put.customer.company, put.customer.company);
+                await ViesService.checkCompany(put.customer.company, put.customer.company);
             }
             payment.type = put.type;
 

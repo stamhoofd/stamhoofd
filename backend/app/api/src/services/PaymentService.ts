@@ -14,7 +14,7 @@ import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
 import { Context } from '../helpers/Context.js';
 import { ServiceFeeHelper } from '../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../helpers/StripeHelper.js';
-import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
+import { ViesService } from '@stamhoofd/vies';
 import { AuditLogService } from './AuditLogService.js';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';
@@ -749,7 +749,7 @@ export class PaymentService {
         } else {
             if (checkout.customer && checkout.customer.company) {
                 customer.company = checkout.customer.company.clone();
-                await ViesHelper.checkCompany(checkout.customer.company, customer.company);
+                await ViesService.checkCompany(checkout.customer.company, customer.company);
             }
         }
 

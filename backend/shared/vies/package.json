@@ -2,19 +2,14 @@
     "name": "@stamhoofd/vies",
     "version": "2.143.1",
     "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/ViesService.js",
+    "types": "./dist/ViesService.d.ts",
     "sideEffects": false,
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.js"
-        },
-        "./ViesHelper.js": {
-            "types": "./dist/ViesHelper.d.ts",
-            "import": "./dist/ViesHelper.js",
-            "require": "./dist/ViesHelper.js"
+            "types": "./dist/ViesService.d.ts",
+            "import": "./dist/ViesService.js",
+            "require": "./dist/ViesService.js"
         },
         "./PeppolDirectoryService.js": {
             "types": "./dist/PeppolDirectoryService.d.ts",

@@ -15,7 +15,7 @@ import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
 import { TagHelper } from '../../../../helpers/TagHelper.js';
-import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
+import { ViesService } from '@stamhoofd/vies';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { VATService } from '../../../../services/VATService.js';
 import { isAbortedError, isCanceledError } from '@stamhoofd/queues';
@@ -697,7 +697,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 // Changed VAT number
                 const prepatched = original.patch(patch);
-                await ViesHelper.checkCompany(prepatched, patch);
+                await ViesService.checkCompany(prepatched, patch);
             }
 
             let c = 0;
@@ -717,7 +717,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     this.requirePeppolPermission();
                 }
 
-                await ViesHelper.checkCompany(put, put);
+                await ViesService.checkCompany(put, put);
             }
         } else {
             if (companies.length > 5) {
@@ -734,7 +734,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     this.requirePeppolPermission();
                 }
 
-                await ViesHelper.checkCompany(company, company);
+                await ViesService.checkCompany(company, company);
             }
         }
     }
