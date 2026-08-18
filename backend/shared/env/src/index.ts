@@ -104,13 +104,22 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
     process.env.DB_MULTIPLE_STATEMENTS = 'true';
 }
 
+function signWithKey(key: string, ...content: string[]) {
+    return crypto.createHmac('sha256', Buffer.from(key, 'base64')).update(content.join(';')).digest('base64');
+}
+
 export function signInternal(...content: string[]) {
-    return crypto.createHmac('sha256', Buffer.from(STAMHOOFD.INTERNAL_SECRET_KEY, 'base64')).update(content.join(';')).digest('base64');
+    return signWithKey(STAMHOOFD.INTERNAL_SECRET_KEY, ...content);
 }
 
 export function verifyInternalSignature(signature: string, ...content: string[]) {
-    const newSignature = signInternal(...content);
-    return crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(newSignature, 'base64'));
+    const keys = [STAMHOOFD.INTERNAL_SECRET_KEY, ...(STAMHOOFD.EXTRA_INTERNAL_SECRET_KEYS ?? [])];
+    const signatureBuffer = Buffer.from(signature, 'base64');
+
+    return keys.some((key) => {
+        const expectedBuffer = Buffer.from(signWithKey(key, ...content), 'base64');
+        return signatureBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+    });
 }
 
 export default {
