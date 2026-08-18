@@ -54,7 +54,7 @@
                     </template>
 
                     <h1 class="style-title-list">
-                        {{ $t('%a3') }}
+                        {{ $t('Andere vereniging zoeken') }}
                     </h1>
                 </STListItem>
             </STList>
@@ -63,7 +63,7 @@
                 <hr v-if="currentOptions.length || otherOptions.length">
                 <button class="button text" type="button" data-testid="app-switcher-search-others" @click="searchOrganizations">
                     <span class="icon search" />
-                    <span>{{ $t('%a3') }}</span>
+                    <span>{{ $t('Andere vereniging zoeken') }}</span>
                 </button>
             </template>
         </main>
@@ -107,7 +107,6 @@ function isCurrentOption(o: Option) {
     // Current option = logged in with the same user
     return (!organization.value || !o.organization || (organization.value && o.organization?.id === organization.value.id)) && user.value && o.context.user?.id === user.value.id;
 }
-
 const currentOptions = computed(() => {
     const list = options.value.filter(o => isCurrentOption(o));
     if (list.length >= 1) {
