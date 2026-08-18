@@ -861,6 +861,33 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
+            test('an expired organization token falls back to the platform session', async ({ page }) => {
+                const organization = await createOrganization();
+                const expiredToken = await Token.createToken(user);
+                expiredToken.refreshTokenValidUntil = new Date(Date.now() - 1000);
+                const expiredTokenString = JSON.stringify(new TokenStruct(expiredToken).encode({ version: Version }));
+
+                await page.addInitScript(({ organizationId, expiredTokenString }) => {
+                    window.localStorage.setItem('token-' + organizationId, expiredTokenString);
+                }, { organizationId: organization.id, expiredTokenString });
+
+                await testRoute({
+                    page,
+                    user,
+                    url: domain + '/beheerders/' + organization.uri + '/instellingen',
+                    expectedUrl: domain + '/nl-BE/beheerders/' + organization.uri + '/instellingen',
+                    expectedScope: organization,
+                    expectedLocator: '#settings-view',
+                    expectedTopLeft: {
+                        options: [adminOption, scopedMemberPortalOption(organization), dashboardOption(organization), otherOrgOptions(membershipOrganization)],
+                        includeSearchOthers: true,
+                    },
+                });
+
+                expect(await page.evaluate(organizationId => window.localStorage.getItem('token-' + organizationId), organization.id)).toBeNull();
+                expect(await page.evaluate(() => window.localStorage.getItem('token-platform'))).not.toBeNull();
+            });
+
             test('/leden/<uri>', async ({ page }) => {
                 const organization = await createOrganization();
 

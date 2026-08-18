@@ -1,3 +1,4 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import type { SessionLoginMethod, User } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';
@@ -28,10 +29,10 @@ export class SessionService {
      * session to the client is in the URL. Only the refresh token travels along, and the
      * client exchanges it for a usable access token.
      */
-    static async createExpiredSession<U extends User>(user: U, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<Token & { user: U }> {
+    static async createExpiredSession<U extends User>(user: U, { loginMethod, isNativeApp = this.isNativeApp() }: { loginMethod: SessionLoginMethod; isNativeApp?: boolean }): Promise<Token & { user: U }> {
         const token = await Token.createUnsavedToken(user);
         token.loginMethod = loginMethod;
-        token.isNativeApp = this.isNativeApp();
+        token.isNativeApp = isNativeApp;
 
         token.accessTokenValidUntil = new Date(Date.now() - 31 * DAY);
         token.accessTokenValidUntil.setMilliseconds(0);
@@ -46,6 +47,16 @@ export class SessionService {
      * cannot outlive it. Using the session is what postpones the inactivity limit.
      */
     static async rotateSession<U extends User>(oldToken: Token & { user: U }): Promise<Token & { user: U }> {
+        const durations = this.getDurations(oldToken, oldToken.user);
+        if (durations.session !== null && oldToken.sessionStartedAt.getTime() + durations.session <= Date.now()) {
+            await oldToken.delete();
+            throw new SimpleError({
+                code: 'invalid_refresh_token',
+                message: 'Invalid refresh token',
+                statusCode: 400,
+            });
+        }
+
         const token = await Token.createUnsavedToken(oldToken.user);
         token.sessionStartedAt = oldToken.sessionStartedAt;
         token.loginMethod = oldToken.loginMethod;

@@ -8,6 +8,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { LoginProviderType } from '@stamhoofd/structures';
 import { OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
+import { AppManager } from './AppManager';
 import { ContextPermissions } from './ContextPermissions';
 import { loadPlatform, savePlatformToStorage } from './loadPlatform';
 import { ManagedToken } from './ManagedToken';
@@ -204,11 +205,10 @@ export class SessionContext implements RequestMiddleware {
                 try {
                     const parsed = JSON.parse(json);
                     const token = Token.decode(new ObjectData(parsed, { version: Version }));
-                    if (await this.dropExpiredStoredToken(token, key)) {
+                    if (!await this.dropExpiredStoredToken(token, key)) {
+                        this.setTokenWithoutSaving(token, usePlatformStorage);
                         return;
                     }
-                    this.setTokenWithoutSaving(token, usePlatformStorage);
-                    return;
                 } catch (e) {
                     console.error(e);
                 }
@@ -517,6 +517,7 @@ export class SessionContext implements RequestMiddleware {
         const url = new URL(this.identityServer.host + '/openid/start');
         url.searchParams.set('spaState', spaState);
         url.searchParams.set('provider', data.providerType);
+        url.searchParams.set('clientPlatform', AppManager.shared.platform);
         if (data.webshopId) {
             url.searchParams.set('webshopId', data.webshopId);
         }

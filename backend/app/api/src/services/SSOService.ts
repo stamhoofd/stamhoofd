@@ -34,6 +34,7 @@ type SSOSessionContext = {
     spaState: string;
     providerType: LoginProviderType;
     organizationId?: string | null;
+    isNativeApp: boolean;
 
     /**
      * Link this method to this existing user and don't create a new token
@@ -420,7 +421,8 @@ export class SSOService {
             }
         }
 
-        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user, reauthenticateAccessToken);
+        const isNativeApp = data.clientPlatform === 'ios' || data.clientPlatform === 'android';
+        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user, reauthenticateAccessToken, isNativeApp);
     }
 
     validateRedirectUri(uri: string) {
@@ -455,7 +457,7 @@ export class SSOService {
         }
     }
 
-    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User, reauthenticateAccessToken: string | null = null): Promise<Response<undefined>> {
+    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User, reauthenticateAccessToken: string | null = null, isNativeApp = false): Promise<Response<undefined>> {
         const code_verifier = generators.codeVerifier();
         const state = generators.state(); // this is the internal state backend <-> SSO provider
         const nonce = generators.nonce();
@@ -471,6 +473,7 @@ export class SSOService {
             spaState, // this is the state frontend <-> backend (not backend <-> SSO provider)
             providerType: this.provider,
             organizationId: this.organization?.id ?? null,
+            isNativeApp,
             userId: user?.id ?? null,
             reauthenticateAccessToken,
         };
@@ -709,7 +712,7 @@ export class SSOServiceWithSession {
                     redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
                     redirectUri.searchParams.set('s', session.spaState);
                 } else if (requirement.type === 'none') {
-                    const token = await SessionService.createExpiredSession(user, { loginMethod: 'sso' });
+                    const token = await SessionService.createExpiredSession(user, { loginMethod: 'sso', isNativeApp: session.isNativeApp });
 
                     if (!token) {
                         throw new SimpleError({

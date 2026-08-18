@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Platform } from '@stamhoofd/models';
-import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
+import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ContextInstance } from '../helpers/Context.js';
@@ -9,6 +9,7 @@ import { SSOService } from './SSOService.js';
 
 describe('SSOService', () => {
     afterEach(() => {
+        SSOService.sessionStorage.clear();
         vi.restoreAllMocks();
     });
 
@@ -67,6 +68,25 @@ describe('SSOService', () => {
 
             expect(() => service.validateConfiguration()).not.toThrow();
         });
+    });
+
+    it('keeps the native client classification in the SSO session', async () => {
+        const service = createService({
+            ssoConfiguration: OpenIDClientConfiguration.create({}),
+            loginMethods: new Map([[LoginMethod.SSO, LoginMethodConfig.create({})]]),
+            provider: LoginProviderType.SSO,
+        });
+        vi.spyOn(service, 'getClient').mockResolvedValue({
+            authorizationUrl: vi.fn().mockReturnValue('https://idp.example/authorize'),
+        } as any);
+
+        await service.validateAndStartAuthCodeFlow(StartOpenIDFlowStruct.create({
+            spaState: 'a-valid-spa-state',
+            clientPlatform: 'ios',
+        }));
+
+        expect([...SSOService.sessionStorage.values()]).toHaveLength(1);
+        expect([...SSOService.sessionStorage.values()][0].isNativeApp).toBe(true);
     });
 });
 

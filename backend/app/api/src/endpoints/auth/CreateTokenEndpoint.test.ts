@@ -251,8 +251,10 @@ describe('Endpoint.CreateToken', () => {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }
             token.sessionStartedAt = new Date(Date.now() - sessionDuration - DAY);
-            token.refreshTokenValidUntil = new Date(Date.now() - 1000);
+            token.refreshTokenValidUntil = new Date(Date.now() + DAY);
             await token.save();
+
+            const otherSession = await login(organization, admin, 'web');
 
             const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
                 grant_type: 'refresh_token',
@@ -260,6 +262,10 @@ describe('Endpoint.CreateToken', () => {
             });
 
             await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+            expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
+
+            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+            expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
         });
     });
 });

@@ -50,6 +50,9 @@ export class StartOpenIDFlowStruct extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, nullable: true })
     redirectUri: string | null = null;
 
+    @field({ decoder: StringDecoder, optional: true, nullable: true, ...NextVersion })
+    clientPlatform: string | null = null;
+
     /**
      * Allows to connect an external SSO account to the currently logged in user.
      * To use this, you'll need to request a one-time-usage auth token from /openid/auth-token
