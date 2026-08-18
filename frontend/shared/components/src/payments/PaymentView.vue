@@ -116,7 +116,10 @@
 
                 <STListItem v-if="payment.iban">
                     <h3 class="style-definition-label">
-                        {{ $t('%hJ') }}
+                        {{ payment.method === PaymentMethod.CreditCard ?
+                            $t('%MH')
+                            : $t('%hJ')
+                        }}
                     </h3>
 
                     <p class="style-definition-text">
