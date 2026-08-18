@@ -132,7 +132,7 @@ export class MetabaseService extends SharedDockerService {
 
         while (Date.now() - start < timeoutMs) {
             if (!await docker.containerIsRunning(MetabaseService.container)) {
-                throw new Error(`${this.name} stopped while starting up. Check: stam metabase logs`);
+                throw new Error(`${this.name} stopped while starting up. Check: stam platform-report logs`);
             }
             try {
                 const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });

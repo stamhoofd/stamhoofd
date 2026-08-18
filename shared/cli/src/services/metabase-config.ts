@@ -44,8 +44,8 @@ Platform statistics database, registered automatically:
 
 Commands:
 
-  stam metabase start --env keeo
-  stam metabase report
-  stam metabase logs
-  stam metabase stop`;
+  stam platform-report start --env keeo
+  stam platform-report dashboards
+  stam platform-report logs
+  stam platform-report stop`;
 }

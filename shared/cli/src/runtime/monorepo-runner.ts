@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { buildBackendEnv } from '../config/build-config.js';
@@ -119,6 +120,59 @@ export async function typecheck(context: CliContext): Promise<void> {
 export async function migrate(context: CliContext): Promise<void> {
     await buildShared(context);
     await run('yarn', ['-s', 'lerna', 'run', 'migrations', '--concurrency', '1'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
+}
+
+const statisticsSyncerPackage = 'backend/app/statistics-syncer';
+
+/**
+ * Bring the platform statistics database of the selected environment up to date. Only that database:
+ * it keeps a migration history of its own, owned by the syncer that writes into it.
+ */
+export async function migratePlatformStatistics(context: CliContext): Promise<void> {
+    await buildShared(context);
+    await run('yarn', ['--cwd', statisticsSyncerPackage, '-s', 'migrations'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbose: context.verbose });
+}
+
+/**
+ * Run the statistics syncer until it is stopped, so the platform statistics keep following the
+ * administration. In development every cron tick syncs, so this syncs continuously.
+ */
+export async function runPlatformStatisticsSync(context: CliContext): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+        let stopping = false;
+        const child = spawn('yarn', ['--cwd', statisticsSyncerPackage, '-s', 'start'], {
+            cwd: context.rootDir,
+            env: { ...process.env, ...buildBackendEnv(context) },
+            stdio: 'inherit',
+        });
+
+        // Ctrl+C reaches the syncer through the process group. Wait for it to shut down its database
+        // connections instead of exiting from under it, and treat that exit as a normal stop.
+        const stop = () => {
+            stopping = true;
+            child.kill('SIGTERM');
+        };
+        const detach = () => {
+            process.off('SIGINT', stop);
+            process.off('SIGTERM', stop);
+        };
+
+        process.on('SIGINT', stop);
+        process.on('SIGTERM', stop);
+
+        child.on('error', (error) => {
+            detach();
+            reject(error);
+        });
+        child.on('exit', (code) => {
+            detach();
+            if (stopping || code === 0 || code === null) {
+                resolve();
+                return;
+            }
+            reject(new Error(`The statistics syncer exited with status ${code}`));
+        });
+    });
 }
 
 export type UnitTestOptions = {
