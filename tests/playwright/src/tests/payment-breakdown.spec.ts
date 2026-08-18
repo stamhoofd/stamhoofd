@@ -48,14 +48,12 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         TestUtils.setPermanentEnvironment('userMode', 'organization');
     });
 
-    async function createOrganization(name: string, { hasBreakdown = true }: { hasBreakdown?: boolean } = {}): Promise<Organization> {
+    async function createOrganization(name: string): Promise<Organization> {
         const organization = await new OrganizationFactory({
             name,
             packages: [STPackageBundle.Members],
         }).create();
 
-        // The statistics are hidden behind a feature flag by default
-        organization.privateMeta.featureFlags = hasBreakdown ? ['payment-breakdown'] : [];
         await organization.save();
 
         await STPackageService.updateOrganizationPackages(organization.id);
@@ -407,47 +405,6 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         await expect(narrowedView.getByText('Welpen')).toHaveCount(0);
 
         await narrowedView.getByTestId('save-button').click();
-        await expect(page.getByText('Exporteren naar Excel').first()).toBeVisible();
-    });
-
-    test('an admin without the feature flag only gets the Excel export', async ({ page }) => {
-        const organization = await createOrganization(`HiddenBreakdown${WorkerData.id}`, { hasBreakdown: false });
-
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
-        const member = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
-
-        await createPaidRegistration({ organization, member, group: kapoenen, price: 40_0000, method: PaymentMethod.Transfer, iban: 'BE68539007547034' });
-
-        const admin = await new UserFactory({
-            email: `admin-hidden-breakdown-${WorkerData.id}-${Date.now()}@test.be`,
-            organization,
-            permissions: Permissions.create({ level: PermissionLevel.Full }),
-        }).create();
-        await loginAs({ page, user: admin });
-
-        const statisticsAction = page.getByTestId('context-menu-item-title').filter({ hasText: /^\s*Statistieken\s*$/ });
-        const table = new TableHelper(page);
-
-        // Boekhouding > Alle betalingen: only the export is offered
-        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/betalingen`);
-        await table.waitForFirstRow();
-        await table.toggleSelectAllRows();
-        await page.getByTestId('more-button').click();
-        await expect(page.getByTestId('context-menu-item-title').filter({ hasText: 'Exporteer naar Excel' })).toBeVisible();
-        await expect(statisticsAction).toHaveCount(0);
-
-        // Same for Boekhouding > Aanrekeningen
-        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/balance-items`);
-        await table.waitForFirstRow();
-        await table.toggleSelectAllRows();
-        await page.getByTestId('more-button').click();
-        await expect(page.getByTestId('context-menu-item-title').filter({ hasText: 'Exporteer naar Excel' })).toBeVisible();
-        await expect(statisticsAction).toHaveCount(0);
-
-        // Boekhouding > Betalingen exporteren goes straight to the export, without the statistics in between
-        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/exporteren`);
-        await page.getByTestId('save-view').filter({ hasText: 'Betalingen exporteren' }).getByTestId('save-button').click();
-
         await expect(page.getByText('Exporteren naar Excel').first()).toBeVisible();
     });
 });

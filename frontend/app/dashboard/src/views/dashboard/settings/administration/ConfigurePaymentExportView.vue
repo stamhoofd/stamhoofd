@@ -1,8 +1,13 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="hasBreakdown ? $t('%16p') : $t('%Oy')" :title="$t(`%Oy`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%16p')" :title="$t(`Statistieken`)" save-icon-right="arrow-right" @save="save">
         <h1>
-            {{ $t('%95') }}
+            {{ $t('Statistieken en totalen berekenen') }}
         </h1>
+        <p>{{ $t('Je kan ook exporteren naar Excel.') }}</p>
+
+        <p v-if="$isStamhoofd" class="warning-box icon feature">
+            {{ $t(('Dit is vernieuwd! Feedback is steeds welkom via hallo@stamhoofd.be')) }}
+        </p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -15,7 +20,6 @@
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
-
         <p class="style-description-small">
             {{ $t('%P0') }}: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                 <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
@@ -23,7 +27,6 @@
                 </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
             </span>
         </p>
-
         <hr><h2>{{ $t('%O7') }}</h2>
 
         <STList>
@@ -75,12 +78,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
@@ -91,7 +91,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { ExcelExportType, getPaymentProviderName, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
+import { getPaymentProviderName, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, StripeAccount } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
@@ -114,8 +114,6 @@ class DateRangeSuggestion {
 const context = useContext();
 const organization = useRequiredOrganization();
 const { openPayments } = useBreakdown();
-const show = useShow();
-const hasBreakdown = useFeatureFlag()('payment-breakdown');
 const requestOwner = {};
 const errorBox = ref<ErrorBox | null>(null);
 const saving = ref(false);
@@ -320,42 +318,14 @@ async function save() {
             selectionName,
         ].filter(Boolean).join(' - ');
 
-        if (hasBreakdown) {
-            // Show what the selection adds up to first: from there the user can narrow it down and export
-            await openPayments({
-                filter: buildFilter(),
-                title: selectionName,
-                rootTitle: title,
-                getSelectableWorkbook,
-                configurationId: 'configure-payment-export',
-            });
-        }
-        else {
-            await show({
-                components: [
-                    AsyncComponent(() => import('@stamhoofd/frontend-excel-export/ExcelExportView.vue'), {
-                        type: ExcelExportType.Payments,
-                        filter: new LimitedFilteredRequest({
-                            filter: buildFilter(),
-                            limit: 100,
-                            sort: [
-                                {
-                                    key: 'paidAt',
-                                    order: SortItemDirection.ASC,
-                                },
-                                {
-                                    key: 'id',
-                                    order: SortItemDirection.ASC,
-                                },
-                            ],
-                        }),
-                        workbook: getSelectableWorkbook(),
-                        configurationId: 'configure-payment-export',
-                        title,
-                    }),
-                ],
-            });
-        }
+        // Show what the selection adds up to first: from there the user can narrow it down and export
+        await openPayments({
+            filter: buildFilter(),
+            title: selectionName,
+            rootTitle: title,
+            getSelectableWorkbook,
+            configurationId: 'configure-payment-export',
+        });
     } catch (e) {
         errorBox.value = new ErrorBox(e as Error);
     }

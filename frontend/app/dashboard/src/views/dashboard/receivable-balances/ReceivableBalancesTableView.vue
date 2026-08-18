@@ -67,7 +67,7 @@ const props = withDefaults(
 );
 
 const title = computed(() => {
-    return $t('%99');
+    return $feature('organization-receivable-balances') ? $t('Openstaande bedragen van leden en verenigingen') : $t('Openstaande bedragen van leden');
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
@@ -106,7 +106,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'name',
-        name: $feature('organization-receivable-balances') ? 'Schuldenaar' : 'Lid',
+        name: $feature('organization-receivable-balances') ? $t('Schuldenaar') : $t('Lid'),
         getValue: object => object.object.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -119,7 +119,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     id: 'uri',
                     name: '#',
                     getValue: object => object.object.uri,
-                    format: value => value || 'Geen',
+                    format: value => value || $t('Geen'),
                     getStyle: value => !value ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 200,
@@ -134,7 +134,7 @@ const allColumns: Column<ObjectType, any>[] = [
                     id: 'type',
                     name: $t('%1LP'),
                     getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType)),
-                    format: value => value || 'Geen',
+                    format: value => value || $t('Geen'),
                     getStyle: value => !value ? 'gray' : '',
                     minimumWidth: 70,
                     recommendedWidth: 120,
@@ -145,7 +145,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amountOpen',
-        name: 'Openstaand bedrag',
+        name: $t('Openstaand bedrag'),
         getValue: object => object.amountOpen,
         format: value => Formatter.price(value),
         getStyle: value => value === 0 ? 'gray' : '',
@@ -156,7 +156,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amountPending',
-        name: 'In verwerking',
+        name: $t('In verwerking'),
         getValue: object => object.amountPending,
         format: value => Formatter.price(value),
         getStyle: value => value === 0 ? 'gray' : '',
