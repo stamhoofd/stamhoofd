@@ -74,3 +74,34 @@ FROM all_facts f
 JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
 GROUP BY `ID_Organisatie`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
 ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`
+
+-- @card organisatie-lokale-groep
+-- title: Organisatie_Lokale_groep
+-- display: table
+-- size: full
+-- columns: ID_Organisatie, Naam_Organisatie, Postcode
+-- description: Tabblad 'Organisatie_Lokale_groep': elke lokale jeugdbewegingsgroep met haar postcode. De eigen organisatie van de koepel staat hier niet in, die hoort op het tabblad Organisatie_Bovenlokaal. DCJM vult zelf Werkjaar, Type_organisatie en NIS-code aan.
+--
+-- Every organization in the administration except the one the platform runs itself: that one is the
+-- bovenlokale structuur of the sheet above, and the department reads one organization per row across
+-- the two, so a unit on both would be a unit counted twice. Dropped on
+-- `platform.membershipOrganizationId`, the way every card of the ledenstatistieken drops it.
+--
+-- Read from `organizations` rather than from the members: what the sheet lists is which groups
+-- existed in that werkjaar, so a unit that registered nobody is a group with no deelnemers rather
+-- than no group. That also means a unit that has stopped keeps being delivered while its year is
+-- still open, since a row here is not evidence of anything having happened.
+--
+-- The template's datatype for a postcode is a four digit number, and what the administration holds is
+-- free text: a foreign postcode, or an entire address typed into the box. Anything that is not four
+-- digits leaves the cell empty -- a required field the koepel can see and fill in -- rather than
+-- delivering a number that is wrong.
+SELECT
+    o.id AS `ID_Organisatie`,
+    o.name AS `Naam_Organisatie`,
+    CASE WHEN o.postalCode REGEXP '^[0-9]{4}$' THEN CAST(o.postalCode AS UNSIGNED) END AS `Postcode`
+FROM organizations o
+JOIN registration_periods p ON p.id = o.periodId [[AND p.name = {{scoutsjaar}}]]
+WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
+GROUP BY `ID_Organisatie`, `Naam_Organisatie`, `Postcode`
+ORDER BY `Naam_Organisatie`

@@ -128,6 +128,7 @@ describe('report', () => {
             const sheets = [
                 ['organisatie-bovenlokaal', 'Organisatie_Bovenlokaal', ['ID_Organisatie', 'Naam_Organisatie']],
                 ['deelnemers-bovenlokaal', 'Deelnemers_Bovenlokaal', ['ID_Organisatie', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
+                ['organisatie-lokale-groep', 'Organisatie_Lokale_groep', ['ID_Organisatie', 'Naam_Organisatie', 'Postcode']],
             ] as const;
 
             for (const [key, title, columns] of sheets) {
@@ -151,6 +152,30 @@ describe('report', () => {
             const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql.replaceAll(/\s+/g, ' ');
 
             expect(sql).toContain("CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END");
+        });
+
+        /**
+         * The koepel's own organization belongs to the bovenlokale sheet and to no other: the
+         * department reads one organization per row across the two, so a unit on both is a unit
+         * counted twice, and one on neither is a unit the dataset never hears about.
+         */
+        it('delivers the koepel and the local groups to one sheet each, and to no other', () => {
+            const [bovenlokaal, lokaal] = ['organisatie-bovenlokaal', 'organisatie-lokale-groep']
+                .map(key => cardOf(dashboards, 'jeugdbewegingen', key).sql.replaceAll(/\s+/g, ' '));
+
+            expect(bovenlokaal).toContain('JOIN platform pf ON pf.membershipOrganizationId = o.id');
+            expect(lokaal).toContain('WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)');
+        });
+
+        /**
+         * The template asks for a postcode as a four digit number, and the administration holds free
+         * text: a foreign postcode, or a whole address typed into the box. Kept here because the
+         * conversion is what decides between an empty cell the koepel can fix and a wrong number.
+         */
+        it('delivers a postcode as the number the template asks for, and nothing when it is not one', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'organisatie-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+
+            expect(sql).toContain("CASE WHEN o.postalCode REGEXP '^[0-9]{4}$' THEN CAST(o.postalCode AS UNSIGNED) END");
         });
 
         /**
