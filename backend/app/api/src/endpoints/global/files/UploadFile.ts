@@ -11,7 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
 import { Context } from '../../../helpers/Context.js';
-import { limiter } from './UploadImage.js';
+import { limiter, organizationLimiter } from './UploadImage.js';
+import type { Organization } from '@stamhoofd/models';
 import { Image } from '@stamhoofd/models';
 
 type Params = Record<string, never>;
@@ -61,10 +62,17 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.optionalAuthenticate();
 
+        // Webshops allow for file upload, but don't have a user attached
         if (user) {
             if (!Context.auth?.canUpload({ private: request.query.isPrivate })) {
                 throw Context.auth.error();
             }
+        } else if (!organization) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Endpoints needs organization if no user is present',
+                human: $t('Er ging iets mis. Probeer het opnieuw'),
+            });
         }
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
@@ -84,7 +92,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         } else {
             limiter.track(request.request.getIP(), 1);
             if (organization) {
-                limiter.track(organization.id, 1);
+                organizationLimiter.track(organization.id, 1);
             }
         }
 
@@ -127,14 +135,14 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         });
 
         try {
-            return await this.upload(request, file, user);
+            return await this.upload(request, file, organization, user);
         } finally {
             // Formidable wrote the upload to a temporary file
             await fs.rm(file.filepath, { force: true }).catch(() => { /* we can't do anything about this */ });
         }
     }
 
-    private async upload(request: DecodedRequest<Params, Query, Body>, file: FormidableFile, user?: { id: string }) {
+    private async upload(request: DecodedRequest<Params, Query, Body>, file: FormidableFile, organization: Organization | null, user?: { id: string }) {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: 'not_available',
@@ -174,6 +182,8 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         if (request.query.isPrivate && user) {
             // Private files
             prefix += 'users/' + user.id + '/';
+        } else if (request.query.isPrivate && !user && organization) {
+            prefix += 'anonymous/' + organization.id + '/';
         } else {
             // Public files
             prefix += 'p/';

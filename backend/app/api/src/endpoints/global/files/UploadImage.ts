@@ -3,6 +3,7 @@ import { AutoEncoder, BooleanDecoder, field, ObjectData } from '@simonbackx/simp
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import type { Organization } from '@stamhoofd/models';
 import { Image, RateLimiter } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest, supportedImageTypes } from '@stamhoofd/structures';
 import formidable from 'formidable';
@@ -41,6 +42,15 @@ export const limiter = new RateLimiter({
             // Max 50 per hour
             limit: 50,
             duration: 60 * 1000 * 60,
+        },
+    ],
+});
+export const organizationLimiter = new RateLimiter({
+    limits: [
+        {
+            // Max 200 per day
+            limit: 200,
+            duration: 60 * 1000 * 60 * 24,
         },
     ],
 });
@@ -89,7 +99,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         } else {
             limiter.track(request.request.getIP(), 1);
             if (organization) {
-                limiter.track(organization.id, 1);
+                organizationLimiter.track(organization.id, 1);
             }
         }
 
@@ -156,7 +166,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             }
 
             const fileContent = await fs.readFile(file.filepath);
-            const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user);
+            const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user, organization as Organization | null | undefined);
             return new Response(ImageStruct.create(image));
         } finally {
             // Formidable wrote the upload to a temporary file
