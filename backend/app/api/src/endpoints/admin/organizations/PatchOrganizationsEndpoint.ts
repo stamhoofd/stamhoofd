@@ -10,6 +10,7 @@ import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { SQL } from '@stamhoofd/sql';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -64,13 +65,23 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
             // Financial records may not disappear together with the organization that had to pay them
             const payerRecordCounts = await Promise.all([
-                BalanceItem.select().where('payingOrganizationId', id).count(),
-                Payment.select().where('payingOrganizationId', id).count(),
-                ApplicationFee.select().where('payingOrganizationId', id).count(),
-                Invoice.select().where('payingOrganizationId', id).count(),
+                BalanceItem.select().where('payingOrganizationId', id).first(false),
+                Payment.select().where('payingOrganizationId', id).first(false),
+                ApplicationFee.select().where('payingOrganizationId', id).first(false),
+                Invoice.select().where('payingOrganizationId', id).first(false),
+                Payment.select()
+                    .where('organizationId', id)
+                    .where(
+                        SQL.where('serviceFeePayout', '!=', 0)
+                            .or('serviceFeeManual', '!=', 0)
+                            .or('serviceFeeManualCharged', '!=', 0)
+                            .or('transferFeeManual', '!=', 0)
+                            .or('transferFeeManualCharged', '!=', 0),
+                    )
+                    .first(false),
             ]);
 
-            if (payerRecordCounts.some(count => count > 0)) {
+            if (payerRecordCounts.some(hasSome => hasSome !== null)) {
                 throw new SimpleError({
                     code: 'organization_has_financial_records',
                     message: 'Organization is still referenced as paying organization',
