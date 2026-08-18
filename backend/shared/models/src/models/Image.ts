@@ -7,6 +7,7 @@ import type { ResolutionRequest } from '@stamhoofd/structures';
 import { File, Resolution, supportedImageTypes } from '@stamhoofd/structures';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
+import type { Organization } from './Organization.js';
 
 export class Image extends QueryableModel {
     static table = 'images';
@@ -42,7 +43,7 @@ export class Image extends QueryableModel {
         return this.s3Client;
     }
 
-    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false, user: { id: string } | null = null): Promise<Image> {
+    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false, user: { id: string } | null = null, organization: Organization | null = null): Promise<Image> {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: 'not_available',
@@ -59,7 +60,7 @@ export class Image extends QueryableModel {
         console.log('creating image', fileType, type, resolutions);
 
         const supportsTransparency = fileType !== 'jpg';
-        const promises: Promise<{ data: Buffer;info: sharp.OutputInfo }>[] = [];
+        const promises: Promise<{ data: Buffer; info: sharp.OutputInfo }>[] = [];
 
         if (resolutions.length) {
             let sharpStream = sharp(fileContent, fileType === 'svg' ? { density: 600 } : {}).rotate();
@@ -82,8 +83,7 @@ export class Image extends QueryableModel {
                     t = t.jpeg({
                         quality: 80,
                     });
-                }
-                else {
+                } else {
                     t = t.png();
                 }
 
@@ -106,8 +106,9 @@ export class Image extends QueryableModel {
         if (isPrivateFile && user) {
             // Private files
             prefix += 'users/' + user.id + '/';
-        }
-        else {
+        } else if (isPrivateFile && !user && organization) {
+            prefix += 'anonymous/' + organization.id + '/';
+        } else {
             // Public files
             prefix += 'p/';
         }
