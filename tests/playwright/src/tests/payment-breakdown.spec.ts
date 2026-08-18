@@ -167,7 +167,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         // Boekhouding > Betalingen exporteren
         await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/exporteren`);
 
-        const configureView = page.getByTestId('save-view').filter({ hasText: 'Betalingen exporteren' });
+        const configureView = page.getByTestId('save-view').filter({ hasText: 'Statistieken en totalen berekenen' });
         await expect(configureView).toBeVisible();
         await configureView.getByTestId('save-button').click();
 
@@ -308,7 +308,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
 
         await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/exporteren`);
 
-        const configureView = page.getByTestId('save-view').filter({ hasText: 'Betalingen exporteren' });
+        const configureView = page.getByTestId('save-view').filter({ hasText: 'Statistieken en totalen berekenen' });
         await expect(configureView).toBeVisible();
         await configureView.getByTestId('save-button').click();
 
@@ -338,7 +338,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
 
         const openBreakdown = async () => {
             await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/exporteren`);
-            await page.getByTestId('save-view').filter({ hasText: 'Betalingen exporteren' }).getByTestId('save-button').click();
+            await page.getByTestId('save-view').filter({ hasText: 'Statistieken en totalen berekenen' }).getByTestId('save-button').click();
             return page.getByTestId('save-view').last();
         };
 
