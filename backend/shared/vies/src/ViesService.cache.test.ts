@@ -45,21 +45,30 @@ describe('ViesService cache', () => {
         expect(scope.isDone()).toBe(false);
     });
 
-    test.each([true, false])('stores a successful %s API result with the cleaned VAT number', async (result) => {
-        mockVies({ valid: result });
+    test('stores a successful valid API result with the cleaned VAT number', async () => {
+        mockVies({ valid: true });
 
-        const promise = ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847');
-        if (result) {
-            await expect(promise).resolves.toBe(VAT_NUMBER);
-        }
-        else {
-            await expect(promise).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber' }));
-        }
+        await expect(ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847')).resolves.toBe(VAT_NUMBER);
 
         const cached = await ViesCachedResult.getByID(VAT_NUMBER);
         expect(cached).toMatchObject({
             VATNumber: VAT_NUMBER,
-            result,
+            result: true,
+            checkedAt: NOW,
+        });
+    });
+
+    test('stores a successful invalid API result with the cleaned VAT number', async () => {
+        mockVies({ valid: false });
+
+        await expect(ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847')).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber' }),
+        );
+
+        const cached = await ViesCachedResult.getByID(VAT_NUMBER);
+        expect(cached).toMatchObject({
+            VATNumber: VAT_NUMBER,
+            result: false,
             checkedAt: NOW,
         });
     });

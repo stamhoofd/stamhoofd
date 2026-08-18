@@ -11,7 +11,6 @@ import { ViesApi } from './ViesApi.js';
 const CacheMonths = 6;
 
 export class ViesServiceStatic {
-
     async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | Company) {
         // Validate the custom PEPPOL endpoint id, but only when it actually changed.
         // In a patch, `customPeppolEndpointId` is undefined unless the client changed it;
@@ -196,8 +195,7 @@ export class ViesServiceStatic {
         let result: boolean;
         try {
             result = await ViesApi.checkVATNumber(country, VATNumber);
-        }
-        catch (error) {
+        } catch (error) {
             console.error('VIES error', error);
             if (cached) {
                 return cached.result;

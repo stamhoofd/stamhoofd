@@ -229,7 +229,7 @@ describe('ViesService', () => {
                     .query({ participant })
                     .reply(200, {
                         'total-result-count': 1,
-                        matches: [{
+                        'matches': [{
                             participantID: { scheme: 'iso6523-actorid-upis', value: participant.split('::')[1] },
                             entities: [{ name: [{ name: entityName }] }],
                         }],
@@ -240,7 +240,7 @@ describe('ViesService', () => {
                 return nock(DIRECTORY_HOST)
                     .get(DIRECTORY_PATH)
                     .query({ participant })
-                    .reply(200, { 'total-result-count': 0, matches: [] } as nock.Body);
+                    .reply(200, { 'total-result-count': 0, 'matches': [] } as nock.Body);
             }
 
             // Use a GLN endpoint id for the generic directory/entityName tests: it has no

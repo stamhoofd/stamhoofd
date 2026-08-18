@@ -23,9 +23,9 @@ describe('PeppolDirectoryService', () => {
      */
     function matchResponse(value: string) {
         return {
-            version: '1.0',
+            'version': '1.0',
             'total-result-count': 1,
-            matches: [
+            'matches': [
                 {
                     participantID: { scheme: 'iso6523-actorid-upis', value },
                     entities: [{ name: [{ name: 'Demo Company' }], countryCode: 'BE' }],
@@ -57,7 +57,7 @@ describe('PeppolDirectoryService', () => {
     test('sets entityName to null when the directory match has no entity name', async () => {
         mockDirectory('iso6523-actorid-upis::0208:0123456789', {
             'total-result-count': 1,
-            matches: [{ participantID: { scheme: 'iso6523-actorid-upis', value: '0208:0123456789' }, entities: [] }],
+            'matches': [{ participantID: { scheme: 'iso6523-actorid-upis', value: '0208:0123456789' }, entities: [] }],
         });
 
         const endpointId = PeppolEndointId.create({ schemeID: '0208', id: '0123456789', entityName: 'stale' });
@@ -98,9 +98,9 @@ describe('PeppolDirectoryService', () => {
 
     test('rejects when the participant is not found in the directory', async () => {
         mockDirectory('iso6523-actorid-upis::0060:123456789', {
-            version: '1.0',
+            'version': '1.0',
             'total-result-count': 0,
-            matches: [],
+            'matches': [],
         });
 
         await expect(

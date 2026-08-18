@@ -1,4 +1,4 @@
-import { Country } from '@stamhoofd/types/Country';
+import type { Country } from '@stamhoofd/types/Country';
 
 export class ViesApiStatic {
     private async request(method: 'POST', url: string, content: unknown) {
