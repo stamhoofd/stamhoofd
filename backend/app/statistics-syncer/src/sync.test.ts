@@ -81,6 +81,25 @@ describe('statistics sync', () => {
     });
 
     /**
+     * The koepel's own organization, which the jeugdbewegingen report delivers as the bovenlokale
+     * ondersteuningsstructuur. Nothing else in the administration tells that organization apart from
+     * a local group, so the pointer on the platform record is what the report has to read.
+     */
+    it('writes the platform with the organization it runs itself', async () => {
+        const platform = await Platform.getForEditing();
+        platform.membershipOrganizationId = organization.id;
+        await platform.save();
+        await Platform.clearCache();
+
+        await syncStatistics();
+
+        const [row] = await statisticsRows('platform', platform.id);
+        expect(row).toBeDefined();
+        expect(row.name).toBe(platform.config.name);
+        expect(row.membershipOrganizationId).toBe(organization.id);
+    });
+
+    /**
      * The platform configuration holds one name per tak, netwerk, lidgeldtype and functie and no
      * history at all, so the name it carries now is written against each year still open.
      */

@@ -99,6 +99,25 @@ CREATE TABLE `postal_codes` (
   PRIMARY KEY (`postalCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- The platform this database holds the statistics of.
+--
+-- `membershipOrganizationId` points at the organization the platform runs itself, the one that is not
+-- a local group: the jeugdbewegingen report delivers it as the only bovenlokale
+-- ondersteuningsstructuur. Only the pointer is kept, because what that sheet prints -- the name of
+-- that organization in a given werkjaar -- is already in `organizations`. No foreign key on it for
+-- the reason given above: `organizations` is keyed on an id and a period.
+--
+-- Keyed on the id alone rather than per period, unlike the configuration below. Nothing is reported
+-- per year out of this row: it says which platform this is and which organization is its own, so
+-- there is no answer here that a settled year could keep.
+CREATE TABLE `platform` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `membershipOrganizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `membershipOrganizationId` (`membershipOrganizationId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- Platform configuration that lives in json on the platform record in the main database. It is
 -- flattened into tables here so Metabase can join and group on it.
 CREATE TABLE `organization_tags` (

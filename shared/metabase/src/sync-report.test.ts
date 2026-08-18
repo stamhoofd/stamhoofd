@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, dashcardKey, layoutCards, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, dashcardKey, groupByDashboard, layoutCards, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -10,6 +10,7 @@ function card(overrides: Partial<ReportCard> = {}): ReportCard {
         size: 'half',
         dimensions: [],
         metrics: [],
+        columns: [],
         parameters: [],
         sql: 'SELECT 1',
         ...overrides,
@@ -113,6 +114,24 @@ describe('buildVisualizationSettings', () => {
 
         expect(settings['series_settings']).toEqual({ 'Aantal leden': { display: 'bar' }, 'GTP index': { display: 'line' } });
         expect(settings).not.toHaveProperty('graph.series_settings');
+    });
+
+    /**
+     * Metabase writes the header of an export from the column's title and makes one up out of the
+     * alias when the column has none. A sheet delivered to a government department is read by those
+     * headers, so every column of one carries the title the template gives it.
+     */
+    it('titles the columns of a sheet exactly as it is delivered', () => {
+        const settings = buildVisualizationSettings(card({ display: 'table', columns: ['ID_Organisatie', 'Naam_Organisatie'] }));
+
+        expect(settings['column_settings']).toEqual({
+            '["name","ID_Organisatie"]': { column_title: 'ID_Organisatie' },
+            '["name","Naam_Organisatie"]': { column_title: 'Naam_Organisatie' },
+        });
+    });
+
+    it('leaves the columns of a card that names none to Metabase', () => {
+        expect(buildVisualizationSettings(card({ display: 'table' }))).not.toHaveProperty('column_settings');
     });
 
     it('stacks a ratio chart to full width', () => {
@@ -293,5 +312,33 @@ describe('buildDashcards', () => {
 
         expect((dashcards[0].parameter_mappings as { parameter_id: string }[]).length).toEqual(1);
         expect((dashcards[1].parameter_mappings as { parameter_id: string }[]).length).toEqual(2);
+    });
+});
+
+describe('groupByDashboard', () => {
+    /**
+     * The pages of the client's own report belong together on one dashboard, and a tab that mirrors
+     * none of them -- the aanlevering to the department -- is opened on its own terms.
+     */
+    it('puts the pages of the report on one dashboard and gives a tab that asks for its own another', () => {
+        const grouped = groupByDashboard([
+            tab({ key: 'nationaal', title: 'Nationaal' }),
+            tab({ key: 'eenheden', title: 'Eenheden' }),
+            tab({ key: 'jeugdbewegingen', title: 'Jeugdbewegingen', dashboard: 'Aanlevering' }),
+        ], 'Ledenstatistieken');
+
+        expect(grouped.map(dashboard => [dashboard.name, dashboard.tabs.map(entry => entry.title)]))
+            .toEqual([['Ledenstatistieken', ['Nationaal', 'Eenheden']], ['Aanlevering', ['Jeugdbewegingen']]]);
+    });
+
+    it('keeps the tabs of one dashboard together in the order the report lists them', () => {
+        const grouped = groupByDashboard([
+            tab({ key: 'a', title: 'A', dashboard: 'Andere' }),
+            tab({ key: 'b', title: 'B' }),
+            tab({ key: 'c', title: 'C', dashboard: 'Andere' }),
+        ], 'Ledenstatistieken');
+
+        expect(grouped.map(dashboard => dashboard.name)).toEqual(['Andere', 'Ledenstatistieken']);
+        expect(grouped[0].tabs.map(entry => entry.title)).toEqual(['A', 'C']);
     });
 });

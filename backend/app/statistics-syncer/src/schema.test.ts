@@ -63,6 +63,7 @@ describe('migration.platform-statistics-schema', () => {
             'migrations',
             'organization_tags',
             'organizations',
+            'platform',
             'platform_membership_types',
             'postal_codes',
             'registration_periods',

@@ -4,7 +4,7 @@ import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { getStatisticsConnection } from './database.js';
 import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds } from './periods.js';
 import type { StatisticsRow } from './rows.js';
-import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
+import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenPlatform, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
 import { syncSource } from './sources.js';
 import { nextWatermark, readSyncState, writeSyncState } from './sync-state.js';
 import { deleteRows, iterateIds, upsertRows } from './writer.js';
@@ -283,8 +283,8 @@ function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes
 }
 
 /**
- * Copy the platform configuration that lives in json on the platform record into the dimension
- * tables. Small enough to write on every run, and it has to happen before the tables pointing at it.
+ * Copy the platform record and the configuration that lives in json on it into the dimension tables.
+ * Small enough to write on every run, and it has to happen before the tables pointing at it.
  *
  * The configuration holds one answer -- the name a tak, netwerk, lidgeldtype or functie carries
  * today -- and no history at all, so that answer is written against every period still open. The
@@ -296,6 +296,11 @@ async function syncPlatformConfig(openPeriodIds: string[]): Promise<void> {
 
     const perPeriod = <T>(items: T[], flatten: (item: T, periodId: string) => StatisticsRow) =>
         openPeriodIds.flatMap(periodId => items.map(item => flatten(item, periodId)));
+
+    // The platform record itself rather than its configuration, and therefore not per period: the
+    // reports read only which organization it runs, and what they print of that organization comes
+    // from `organizations`, which is recorded per year like everything else.
+    await upsertRows('platform', ['id', 'name', 'membershipOrganizationId'], [flattenPlatform(platform)], ['id']);
 
     await upsertRows('organization_tags', ['id', 'periodId', 'name'], perPeriod(config.tags, flattenNamedConfig), namedConfigKey);
     // `category` is left out on purpose: the platform configuration has no equivalent, and listing it

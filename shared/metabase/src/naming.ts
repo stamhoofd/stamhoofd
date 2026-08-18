@@ -23,7 +23,10 @@ export function metabaseReportCollectionName(env: string): string {
     return `Ledenstatistieken (${env})`;
 }
 
-/** The single dashboard the report writes, one tab per page of the client's own report. */
+/**
+ * The dashboard a tab lands on unless it names one of its own: one tab per page of the client's own
+ * report.
+ */
 export const metabaseReportDashboardName = 'Ledenstatistieken';
 
 /**

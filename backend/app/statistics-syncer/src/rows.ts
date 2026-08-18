@@ -111,6 +111,8 @@ export type ResponsibilityRecordSource = {
 
 export type NamedConfigSource = { id: string; name: string };
 
+export type PlatformSource = { id: string; config: { name: string }; membershipOrganizationId: string | null };
+
 /**
  * The label the reports show for a period, mirroring `RegistrationPeriodBase.nameShort`: the custom
  * name when there is one, otherwise the years it spans.
@@ -272,6 +274,18 @@ export function flattenResponsibilityRecord(record: ResponsibilityRecordSource, 
  */
 export function flattenNamedConfig(config: NamedConfigSource, periodId: string): StatisticsRow {
     return { id: config.id, periodId, name: config.name };
+}
+
+/**
+ * The platform itself, which the reports need for one thing: which organization it runs on its own.
+ * That is the koepel rather than one of its local groups, and the jeugdbewegingen report delivers it
+ * as the bovenlokale ondersteuningsstructuur.
+ *
+ * Not written per period, so the name here is the one the platform carries today. Nothing is reported
+ * per year out of it -- the name a sheet prints is the organization's own, per period.
+ */
+export function flattenPlatform(platform: PlatformSource): StatisticsRow {
+    return { id: platform.id, name: platform.config.name, membershipOrganizationId: platform.membershipOrganizationId };
 }
 
 export function flattenDefaultAgeGroup(group: { id: string; name: string; minAge: number | null; maxAge: number | null }, periodId: string): StatisticsRow {

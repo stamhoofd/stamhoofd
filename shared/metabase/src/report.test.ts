@@ -30,8 +30,8 @@ describe('report', () => {
     });
 
     describe('definition', () => {
-        it('has the four pages of the report as tabs, plus the filter values', () => {
-            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'filters']);
+        it('has the four pages of the report as tabs, plus the aanlevering and the filter values', () => {
+            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
             expect(dashboards.find(tab => tab.key === 'filters')!.hidden).toBe(true);
         });
 
@@ -68,6 +68,49 @@ describe('report', () => {
                         expect(`${card.key} selects ${column}`).toEqual(card.sql.includes(`\`${column}\``) ? `${card.key} selects ${column}` : `${card.key} does not select ${column}`);
                     }
                 }
+            }
+        });
+
+        /**
+         * The aanlevering is opened on its own terms rather than as a page of the ledenstatistieken:
+         * it mirrors none of them, and is read once a year by whoever files it.
+         */
+        it('gives the aanlevering a dashboard of its own and leaves every other tab on the report', () => {
+            expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('groepen en deelnemers - departement jeugd');
+
+            for (const key of ['nationaal', 'eenheden', 'netwerk', 'varia']) {
+                expect(`${key}: ${dashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
+            }
+        });
+
+        /**
+         * The sheet of Bijlage B of the aanleveringsovereenkomst, under the names that document gives
+         * its columns: the department reads the sheet by those headers. Werkjaar and Type_organisatie
+         * are not among them because the department fills those in itself.
+         */
+        it('delivers the Organisatie_Bovenlokaal sheet as the aanleversjabloon defines it', () => {
+            const card = cardOf(dashboards, 'jeugdbewegingen', 'organisatie-bovenlokaal');
+
+            expect(card.title).toEqual('Organisatie_Bovenlokaal');
+            expect(card.columns).toEqual(['ID_Organisatie', 'Naam_Organisatie']);
+            expect(card.display).toEqual('table');
+            expect(card.parameters).toEqual(['scoutsjaar']);
+        });
+
+        /**
+         * A sheet is read by the position of its columns as much as by their names, so a card that is
+         * delivered rather than read on screen selects exactly the columns it declares, in that
+         * order, and each of them under an alias -- an unaliased column would land in the sheet under
+         * whatever the database calls it.
+         */
+        it('selects the columns of a sheet in the order the sheet has them', () => {
+            const exported = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.length > 0));
+            expect(exported.length).toBeGreaterThan(0);
+
+            for (const card of exported) {
+                const selected = [...card.sql.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
+
+                expect(`${card.key}: ${selected.join(', ')}`).toEqual(`${card.key}: ${card.columns.join(', ')}`);
             }
         });
 

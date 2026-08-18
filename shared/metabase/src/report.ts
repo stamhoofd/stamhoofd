@@ -40,6 +40,13 @@ export type ReportCard = {
     dimensions: string[];
     /** Columns to plot, for the chart displays. */
     metrics: string[];
+    /**
+     * The headers a table has to be exported under, in order. Named here because a card that is
+     * downloaded rather than read on screen has an agreed structure to keep: Metabase writes the
+     * header of an export from the column's title, and a title it was not given is whatever it makes
+     * of the alias.
+     */
+    columns: string[];
     /** How bars are stacked: absent, `stacked` or `normalized`. */
     stacked?: 'stacked' | 'normalized';
     /**
@@ -56,6 +63,12 @@ export type ReportTab = {
     key: string;
     title: string;
     description?: string;
+    /**
+     * The dashboard this tab belongs to. Absent puts it on the report's own dashboard, beside the
+     * pages it mirrors. A tab that is not part of the client's report names one of its own, which is
+     * written as a separate dashboard in the same collection.
+     */
+    dashboard?: string;
     /**
      * The filters that drive this tab. Declared rather than taken from the cards: the shared query
      * fragments offer both filters to every card, so a tab that only wants one has to say so.
@@ -75,8 +88,8 @@ export type ReportCardSize = typeof reportCardSizes[number];
 export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
 export type ReportCardXLabels = typeof reportCardXLabels[number];
 
-/** The tabs in the order the client's report shows its pages. */
-export const reportTabOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'filters'];
+/** The order the tabs are written in: the pages of the client's report first, then what is not one. */
+export const reportTabOrder = ['nationaal', 'eenheden', 'netwerk', 'varia', 'jeugdbewegingen', 'filters'];
 
 export function getReportDirectory(): string {
     return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'report');
@@ -143,6 +156,7 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
         key: header.key,
         title: required(header.attributes, 'title', file, header.key),
         description: header.attributes.get('description'),
+        dashboard: header.attributes.get('dashboard'),
         filters,
         hidden: header.attributes.get('hidden') === 'true',
         cards,
@@ -156,7 +170,7 @@ type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, stri
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'stacked', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden']);
+const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'xlabels', 'latitude', 'longitude', 'filters', 'hidden', 'dashboard']);
 
 function splitSections(contents: string, file: string): Section[] {
     const sections: Section[] = [];
@@ -227,6 +241,7 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
         description: section.attributes.get('description'),
         dimensions: splitList(section.attributes.get('dimensions')),
         metrics: splitList(section.attributes.get('metrics')),
+        columns: splitList(section.attributes.get('columns')),
         stacked,
         xLabels: xLabels as ReportCardXLabels | undefined,
         parameters: parameterNames(sql),

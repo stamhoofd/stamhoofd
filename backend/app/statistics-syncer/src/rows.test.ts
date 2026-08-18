@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { flattenGroup, flattenMember, flattenOrganization, flattenRegistration } from './rows.js';
+import { flattenGroup, flattenMember, flattenOrganization, flattenPlatform, flattenRegistration } from './rows.js';
 
 describe('flattenMember', () => {
     const member = {
@@ -94,6 +94,27 @@ describe('flattenOrganization', () => {
      */
     it('describes the unit in one period, not the period the unit is in now', () => {
         expect(flattenOrganization(organization, 'period-2').periodId).toBe('period-2');
+    });
+});
+
+describe('flattenPlatform', () => {
+    const platform = {
+        id: 'platform-1',
+        config: { name: 'Scouts en Gidsen Vlaanderen' },
+        membershipOrganizationId: 'org-1',
+    };
+
+    /**
+     * The organization the koepel runs itself is what the jeugdbewegingen report delivers as the
+     * bovenlokale ondersteuningsstructuur, and nothing else in the administration tells it apart from
+     * a local group.
+     */
+    it('keeps the name and the organization the platform runs itself', () => {
+        expect(flattenPlatform(platform)).toEqual({ id: 'platform-1', name: 'Scouts en Gidsen Vlaanderen', membershipOrganizationId: 'org-1' });
+    });
+
+    it('stores no organization for a platform that runs none', () => {
+        expect(flattenPlatform({ ...platform, membershipOrganizationId: null }).membershipOrganizationId).toBeNull();
     });
 });
 

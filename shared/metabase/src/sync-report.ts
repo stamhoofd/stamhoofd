@@ -161,6 +161,15 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         settings['card.description'] = card.description;
     }
 
+    // What the header of an export reads. Metabase writes it from the column's title and falls back
+    // to what it makes of the alias itself, which is not what a sheet delivered to a government
+    // department may be called. Keyed by name rather than by field, the way a native query's columns
+    // are addressed; a key matching no column is ignored, so a renamed column loses its title
+    // instead of dropping the sheet's other columns.
+    if (card.columns.length > 0) {
+        settings['column_settings'] = Object.fromEntries(card.columns.map(column => [JSON.stringify(['name', column]), { column_title: column }]));
+    }
+
     const display = effectiveDisplay(card, hasCoordinates);
 
     if (display === 'map') {
@@ -317,24 +326,58 @@ export function buildDashcards(tabs: ReportTab[], cardIds: Map<string, number>, 
     return dashcards;
 }
 
+export type ReportSyncDashboard = {
+    name: string;
+    id: number;
+    /** The titles of the tabs it holds, in the order the report lists them. */
+    tabs: string[];
+    bookmarked: boolean;
+};
+
 export type ReportSyncResult = {
     collection: string;
     collectionId: number;
     createdCollection: boolean;
-    dashboardId: number;
+    dashboards: ReportSyncDashboard[];
     cards: number;
-    tabs: string[];
-    bookmarked: boolean;
     /** Map cards drawn as a bar chart because no postal code coordinates are loaded yet. */
     mapsWithoutCoordinates: string[];
 };
 
-/** Pinned to the top of its collection: it is the only thing in there worth opening directly. */
+/**
+ * Where the first dashboard is pinned in its collection; the ones after it follow. Pinned because
+ * the dashboards are the only things in there worth opening directly -- everything else in the
+ * collection is a question one of them draws.
+ */
 export const reportCollectionPosition = 1;
 
 /**
- * Write the whole report to Metabase: one dashboard with a tab per page. Cards first, because a
- * dashboard can only point at cards that exist, and the filter dropdowns point at cards too.
+ * The dashboards to write and the tabs each of them holds, in the order the report lists them. A tab
+ * lands on the report's own dashboard unless it names one, which is what gives a tab that mirrors no
+ * page of the client's report -- the aanlevering to the department -- a dashboard of its own.
+ */
+export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { name: string; tabs: ReportTab[] }[] {
+    const dashboards: { name: string; tabs: ReportTab[] }[] = [];
+
+    for (const tab of tabs) {
+        const name = tab.dashboard ?? dashboardName;
+        const dashboard = dashboards.find(entry => entry.name === name);
+
+        if (dashboard) {
+            dashboard.tabs.push(tab);
+        }
+        else {
+            dashboards.push({ name, tabs: [tab] });
+        }
+    }
+
+    return dashboards;
+}
+
+/**
+ * Write the whole report to Metabase: a dashboard with a tab per page, and one per tab that asked for
+ * its own. Cards first, because a dashboard can only point at cards that exist, and the filter
+ * dropdowns point at cards too.
  */
 export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string, hasCoordinates = false): Promise<ReportSyncResult> {
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
@@ -366,27 +409,34 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
     const visible = tabs.filter(tab => !tab.hidden);
     const orderedValues = await readOrderedValues(api, filterCardIds);
     const existingDashboards = await api.listDashboards(collectionId);
-    const dashboardId = existingDashboards.find(dashboard => dashboard.name === dashboardName)?.id
-        ?? await api.createDashboard(dashboardName, undefined, collectionId);
+    const written: ReportSyncDashboard[] = [];
 
-    const layout = await api.getDashboardLayout(dashboardId);
-    const existingTabs = new Map(layout.tabs.map(tab => [tab.name, tab.id]));
-    const existingDashcards = new Map(layout.cards.map(placed => [dashcardKey(placed.tabId, placed.cardId), placed.id]));
-    const parameters = buildParameters(visible, filterCardIds, orderedValues);
-    const dashboardTabs = buildTabs(visible, existingTabs);
-    const tabIds = new Map(dashboardTabs.map(tab => [tab.name, tab.id]));
+    for (const [index, dashboard] of groupByDashboard(visible, dashboardName).entries()) {
+        const dashboardId = existingDashboards.find(entry => entry.name === dashboard.name)?.id
+            ?? await api.createDashboard(dashboard.name, undefined, collectionId);
 
-    await api.updateDashboard(dashboardId, {
-        name: dashboardName,
-        parameters,
-        tabs: dashboardTabs,
-        dashcards: buildDashcards(visible, cardIds, parameters, tabIds, existingDashcards),
-        collectionPosition: reportCollectionPosition,
-    });
+        const layout = await api.getDashboardLayout(dashboardId);
+        const existingTabs = new Map(layout.tabs.map(tab => [tab.name, tab.id]));
+        const existingDashcards = new Map(layout.cards.map(placed => [dashcardKey(placed.tabId, placed.cardId), placed.id]));
+        const parameters = buildParameters(dashboard.tabs, filterCardIds, orderedValues);
+        const dashboardTabs = buildTabs(dashboard.tabs, existingTabs);
+        const tabIds = new Map(dashboardTabs.map(tab => [tab.name, tab.id]));
 
-    await archiveSupersededDashboards(api, existingDashboards, visible, dashboardName);
+        await api.updateDashboard(dashboardId, {
+            name: dashboard.name,
+            parameters,
+            tabs: dashboardTabs,
+            dashcards: buildDashcards(dashboard.tabs, cardIds, parameters, tabIds, existingDashcards),
+            // Pinned in the order the report writes them, so the pages the client knows stay first.
+            collectionPosition: reportCollectionPosition + index,
+        });
+
+        const { created: bookmarked } = await api.bookmarkDashboard(dashboardId);
+        written.push({ name: dashboard.name, id: dashboardId, tabs: dashboard.tabs.map(tab => tab.title), bookmarked });
+    }
+
+    await archiveSupersededDashboards(api, existingDashboards, visible, written.map(dashboard => dashboard.name));
     await archiveSupersededCards(api, collectionId, tabs);
-    const { created: bookmarked } = await api.bookmarkDashboard(dashboardId);
 
     // Deduplicated: two tabs show a map under the same title, and naming it twice reads as an error.
     const mapsWithoutCoordinates = [...new Set(tabs
@@ -394,7 +444,7 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         .filter(card => card.display === 'map' && !hasCoordinates)
         .map(card => card.title))];
 
-    return { collection, collectionId, createdCollection, dashboardId, cards: cardIds.size, tabs: visible.map(tab => tab.title), bookmarked, mapsWithoutCoordinates };
+    return { collection, collectionId, createdCollection, dashboards: written, cards: cardIds.size, mapsWithoutCoordinates };
 }
 
 /**
@@ -423,12 +473,14 @@ async function archiveSupersededCards(api: MetabaseApi, collectionId: number, ta
 
 /**
  * Clear away the dashboard-per-page layout an earlier version of this command left behind. Only
- * dashboards named exactly after a tab are touched, so anything the client built themselves stays.
+ * dashboards named exactly after a tab are touched, so anything the client built themselves stays,
+ * and never one this run just wrote: a tab may share its name with the dashboard it asked for.
  */
-async function archiveSupersededDashboards(api: MetabaseApi, existing: { id: number; name: string }[], tabs: ReportTab[], dashboardName: string): Promise<void> {
+async function archiveSupersededDashboards(api: MetabaseApi, existing: { id: number; name: string }[], tabs: ReportTab[], written: string[]): Promise<void> {
     const titles = new Set(tabs.map(tab => tab.title));
+    const ours = new Set(written);
 
-    for (const dashboard of existing.filter(dashboard => dashboard.name !== dashboardName && titles.has(dashboard.name))) {
+    for (const dashboard of existing.filter(dashboard => !ours.has(dashboard.name) && titles.has(dashboard.name))) {
         await api.archiveDashboard(dashboard.id);
     }
 }
