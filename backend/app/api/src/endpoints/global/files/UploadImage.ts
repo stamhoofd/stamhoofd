@@ -76,10 +76,17 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.optionalAuthenticate();
 
+        // Webshops allow for file upload, but don't have a user attached
         if (user) {
-            if (!Context.auth.canUpload({ private: request.query.isPrivate })) {
+            if (!Context.auth?.canUpload({ private: request.query.isPrivate })) {
                 throw Context.auth.error();
             }
+        } else if (!organization) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Endpoints needs organization if no user is present',
+                human: $t('Er ging iets mis. Probeer het opnieuw'),
+            });
         }
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
