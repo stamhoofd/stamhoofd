@@ -1218,6 +1218,8 @@ test.describe('Routing on page load @routing', () => {
     });
 
     [true, false].forEach((useRegisterDomain) => {
+        const originalDomain = WorkerData.urls.dashboard;
+
         test.describe(useRegisterDomain ? 'Organization mode on custom domain' : 'Organization mode on default register domain', () => {
             let organization!: Organization;
             let domain!: string;
@@ -1252,12 +1254,12 @@ test.describe('Routing on page load @routing', () => {
                     await loginAs({ user, page });
                 });
 
-                test('/platform/instellingen redirects to /beheerders/leden/instellingen', async ({ page }) => {
+                test('/platform redirects to default dashboard domain /platform/start', async ({ page }) => {
                     await testRoute({
                         page,
                         user,
-                        url: domain + '/platform/instellingen',
-                        expectedUrl: domain + '/nl-BE/beheerders/leden/instellingen',
+                        url: domain + '/platform',
+                        expectedUrl: originalDomain + '/nl-BE/platform/start',
                         expectedScope,
                         expectedLocator: '[data-testid="members-menu"]',
                         expectedTopLeft: {
