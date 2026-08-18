@@ -152,15 +152,16 @@ const usePaidAt = ref(false);
 const startDate = computed({
     get: () => internalStartDate.value,
     set: (value: Date) => {
-        internalStartDate.value = new Date(value.getTime());
-        internalStartDate.value.setHours(0, 0, 0, 0);
+        const d = Formatter.luxon(value).startOf('day');
+        internalStartDate.value = d.toJSDate();
     },
 });
 const endDate = computed({
     get: () => internalEndDate.value,
     set: (value: Date) => {
-        internalEndDate.value = new Date(value.getTime());
-        internalEndDate.value.setHours(23, 59, 59, 0);
+        const d = Formatter.luxon(value).endOf('day');
+
+        internalEndDate.value = d.toJSDate();
     },
 });
 const correctedStartDate = computed(() => {
