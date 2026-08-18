@@ -99,6 +99,16 @@ export const balanceItemFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    orderId: createColumnFilter({
+        expression: SQL.column('balance_items', 'orderId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+    registrationId: createColumnFilter({
+        expression: SQL.column('balance_items', 'registrationId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     type: createColumnFilter({
         expression: SQL.column('balance_items', 'type'),
         type: SQLValueType.String,
