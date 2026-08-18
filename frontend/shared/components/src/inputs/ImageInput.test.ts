@@ -166,7 +166,7 @@ test('Does not cap the image height when maxHeight is explicitly null', () => {
 
 test('Shows an error and does not upload when the file is too large', async () => {
     const request = vi.fn();
-    renderComponent({ modelValue: null }, { authenticatedServer: { request } });
+    renderComponent({ modelValue: null }, { optionalAuthenticatedServer: { request } });
 
     // 6 MB exceeds the 5 MB limit
     const file = new File([new Uint8Array(6 * 1024 * 1024)], 'big.png', { type: 'image/png' });
@@ -183,7 +183,7 @@ test('Uploads the file and emits the resulting image', async () => {
     const uploadedImage = createImage('uploaded.png');
     const request = vi.fn().mockResolvedValue({ data: uploadedImage });
 
-    const result = renderComponent({ modelValue: null }, { authenticatedServer: { request } });
+    const result = renderComponent({ modelValue: null }, { optionalAuthenticatedServer: { request } });
 
     const file = new File([new Uint8Array(10)], 'logo.png', { type: 'image/png' });
     await userEvent.upload(document.querySelector('input[type="file"]')!, file);
@@ -206,7 +206,7 @@ test('Uploads the file and emits the resulting image', async () => {
 test('Passes the private flag in the upload query when isPrivate is set', async () => {
     const request = vi.fn().mockResolvedValue({ data: createImage('uploaded.png') });
 
-    renderComponent({ modelValue: null, isPrivate: true }, { authenticatedServer: { request } });
+    renderComponent({ modelValue: null, isPrivate: true }, { optionalAuthenticatedServer: { request } });
 
     const file = new File([new Uint8Array(10)], 'logo.png', { type: 'image/png' });
     await userEvent.upload(document.querySelector('input[type="file"]')!, file);
