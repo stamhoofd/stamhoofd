@@ -56,6 +56,8 @@ yarn stam test api --skip-build     # skip the automatic build:shared
 yarn stam test api --clear          # reset the test database (drop its volume) before running
 ```
 
+For running tests, your sandbox needs permission to open ports.
+
 The DB MySQL container is shut down after each run, but its data volume persists (per worktree) so migrations aren't reinitialized every time — use `--clear` for a clean database.
 
 **Never hand-roll test infrastructure.** The isolated MySQL, migrations, `build:shared`, and env are all provisioned by `yarn stam test` — don't spin up Docker, create databases, run `build:shared`, or set `DB_PORT`/env vars yourself. If it doesn't work, STOP and ask the user. Tests use **Vitest**; only `api`, `models`, and `sql` need MySQL. The frontend dashboard/web-app "test" is a `vue-tsc` typecheck (run via `yarn typecheck`); UI behavior is covered by Playwright.
