@@ -1,0 +1,4 @@
+interface:
+  display_name: "Self-review"
+  short_description: "Review Codex changes with a fresh sub-agent"
+  default_prompt: "Use $self-review to critically review the current changes."
