@@ -76,6 +76,89 @@
             </STList>
         </template>
 
+        <template v-if="showWebshopsFilter">
+            <hr>
+            <h2>{{ $t('Webshops') }}</h2>
+
+            <div v-if="!allWebshopsSelected && shouldShowWebshopSearch" class="input-with-buttons">
+                <div>
+                    <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
+                        <input v-model="webshopSearchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
+                    </form>
+                </div>
+            </div>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <template #left>
+                        <Checkbox v-model="allWebshopsSelected" :indeterminate="!!selectedWebshopIds && selectedWebshopIds.length > 0" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Alle webshops') }}
+                    </h3>
+                </STListItem>
+
+                <template v-if="!allWebshopsSelected">
+                    <STListItem v-for="webshop in filteredWebshops" :key="webshop.id" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox :model-value="getWebshop(webshop.id)" @update:model-value="setWebshop(webshop.id, $event)" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ webshop.meta.name }}
+                        </h3>
+                        <p v-if="webshop.meta.status === WebshopStatus.Archived" class="style-description-small">
+                            {{ $t('Gearchiveerd') }}
+                        </p>
+                    </STListItem>
+                </template>
+            </STList>
+
+            <p v-if="filteredWebshops.length === 0" class="info-box">
+                {{ $t('%1AX') }}
+            </p>
+        </template>
+
+        <template v-if="showGroupsFilter">
+            <hr>
+            <h2>{{ $t('Inschrijvingsgroepen') }}</h2>
+
+            <div v-if="!allGroupsSelected && shouldShowGroupSearch" class="input-with-buttons">
+                <div>
+                    <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
+                        <input v-model="groupSearchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
+                    </form>
+                </div>
+            </div>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <template #left>
+                        <Checkbox v-model="allGroupsSelected" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Alle inschrijvingsgroepen') }}
+                    </h3>
+                </STListItem>
+                <template v-if="!allGroupsSelected">
+                    <STListItem v-for="group in filteredGroups" :key="group.id" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox :model-value="getGroup(group.id)" @update:model-value="setGroup(group.id, $event)" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ group.settings.name }}
+                        </h3>
+                        <p v-if="group.settings.period" class="style-description-small">
+                            {{ group.settings.period?.nameShort }}
+                        </p>
+                    </STListItem>
+                </template>
+            </STList>
+
+            <p v-if="filteredGroups.length === 0" class="info-box">
+                {{ $t('%1AX') }}
+            </p>
+        </template>
+
         <template v-if="getProvider('Stripe' as any) || useUTCTimezone">
             <hr>
             <h2>{{ $t('%P1') }}</h2>
@@ -113,9 +196,9 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { getPaymentProviderName, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, StripeAccount } from '@stamhoofd/structures';
+import { getPaymentProviderName, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, StripeAccount, WebshopStatus } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
 import { useBreakdown } from '../../breakdown/openBreakdown';
@@ -148,6 +231,13 @@ const stripeAccounts = shallowRef<StripeAccount[]>([]);
 const dateRangeSuggestions = shallowRef<DateRangeSuggestion[]>([]);
 const useUTCTimezone = ref(false);
 const usePaidAt = ref(false);
+
+// null = don't filter (all selected)
+const selectedWebshopIds = ref<string[] | null>(null);
+const selectedGroupIds = ref<string[] | null>(null);
+const webshopSearchQuery = ref('');
+const groupSearchQuery = ref('');
+const MAX_ITEMS_WITHOUT_SEARCH = 5;
 
 const startDate = computed({
     get: () => internalStartDate.value,
@@ -219,11 +309,60 @@ const allPaymentProviders = computed(() => {
     }
     return result;
 });
+const enableWebshopModule = computed(() => organization.value.meta.packages.useWebshops);
+const enableMemberModule = computed(() => organization.value.meta.packages.useMembers);
+
+const allWebshops = computed(() => organization.value.webshops.slice().sort((a, b) => Sorter.stack(Sorter.byBooleanValue(a.meta.status !== WebshopStatus.Archived, b.meta.status !== WebshopStatus.Archived), Sorter.byStringValue(a.meta.name, b.meta.name))));
+const allGroups = computed(() => organization.value.adminAvailableGroups);
+
+const showWebshopsFilter = computed(() => enableWebshopModule.value && allWebshops.value.length > 0);
+const showGroupsFilter = computed(() => enableMemberModule.value && allGroups.value.length > 0);
+
+const allWebshopsSelected = computed({
+    get: () => selectedWebshopIds.value === null,
+    set: (value: boolean) => {
+        selectedWebshopIds.value = value ? null : [];
+        webshopSearchQuery.value = '';
+    },
+});
+const allGroupsSelected = computed({
+    get: () => selectedGroupIds.value === null,
+    set: (value: boolean) => {
+        selectedGroupIds.value = value ? null : [];
+        groupSearchQuery.value = '';
+    },
+});
+
+const shouldShowWebshopSearch = computed(() => allWebshops.value.length > MAX_ITEMS_WITHOUT_SEARCH);
+const shouldShowGroupSearch = computed(() => allGroups.value.length > MAX_ITEMS_WITHOUT_SEARCH);
+
+const filteredWebshops = computed(() => {
+    if (!webshopSearchQuery.value) {
+        const filtered = allWebshops.value.filter(w => getWebshop(w.id));
+        const first = allWebshops.value.slice(0, 10).filter(w => !filtered.find(ff => ff.id === w.id));
+        return [...filtered, ...first];
+    }
+    const query = webshopSearchQuery.value.toLowerCase();
+    return allWebshops.value.filter(webshop => webshop.meta.name.toLowerCase().includes(query));
+});
+const filteredGroups = computed(() => {
+    if (!groupSearchQuery.value) {
+        const filtered = allGroups.value.filter(w => getGroup(w.id));
+        const first = allGroups.value.slice(0, 10).filter(w => !filtered.find(ff => ff.id === w.id));
+        return [...filtered, ...first];
+    }
+    const query = groupSearchQuery.value.toLowerCase();
+    return allGroups.value.filter(group => group.settings.name.toString().toLowerCase().includes(query));
+});
+
 const canContinue = computed(() => methods.value.length > 0 && (
     providers.value.length > 0
     || methods.value.includes(PaymentMethod.Transfer)
     || methods.value.includes(PaymentMethod.PointOfSale)
     || methods.value.includes(PaymentMethod.Unknown)
+) && (
+    selectedWebshopIds.value === null || selectedWebshopIds.value.length > 0
+    || selectedGroupIds.value === null || selectedGroupIds.value.length > 0
 ));
 
 onMounted(() => {
@@ -316,6 +455,34 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean) {
     }
 }
 
+function getWebshop(id: string) {
+    return selectedWebshopIds.value?.includes(id) ?? true;
+}
+
+function setWebshop(id: string, enabled: boolean) {
+    const ids = (selectedWebshopIds.value ?? []).filter(item => item !== id);
+    if (enabled) {
+        ids.push(id);
+    }
+    selectedWebshopIds.value = ids;
+}
+
+function getGroup(id: string) {
+    return selectedGroupIds.value?.includes(id) ?? true;
+}
+
+function setGroup(id: string, enabled: boolean) {
+    const ids = (selectedGroupIds.value ?? []).filter(item => item !== id);
+    if (enabled) {
+        ids.push(id);
+    }
+    selectedGroupIds.value = ids;
+}
+
+function blurFocus() {
+    (document.activeElement as HTMLElement)?.blur();
+}
+
 function getProvider(provider: PaymentProvider) {
     return providers.value.includes(provider);
 }
@@ -361,28 +528,74 @@ async function save() {
 function buildFilter(): StamhoofdFilter {
     const dateField = usePaidAt.value ? 'paidAt' : 'createdAt';
 
+    const filters: StamhoofdFilter[] = [
+        {
+            status: PaymentStatus.Succeeded,
+            method: {
+                $in: methods.value,
+            },
+            provider: {
+                $in: [null, ...providers.value],
+            },
+        },
+        {
+            [dateField]: {
+                $gte: correctedStartDate.value,
+            },
+        },
+        {
+            [dateField]: {
+                $lte: correctedEndDate.value,
+            },
+        },
+    ];
+
+    if (selectedWebshopIds.value !== null || selectedGroupIds.value !== null) {
+        const f: StamhoofdFilter = [];
+
+        if (selectedWebshopIds.value !== null) {
+            f.push({
+                $or: [
+                    {
+                        orderId: null,
+                    },
+                    {
+                        order: {
+                            $elemMatch: { webshopId: { $in: selectedWebshopIds.value } },
+                        },
+                    },
+                ],
+            });
+        }
+
+        if (selectedGroupIds.value !== null) {
+            f.push({
+                $or: [
+                    {
+                        registrationId: null,
+                    },
+                    {
+                        registration: {
+                            $elemMatch: { groupId: { $in: selectedGroupIds.value } },
+                        },
+                    },
+                ],
+            });
+        }
+
+        filters.push({
+            balanceItemPayments: {
+                $elemMatch: {
+                    balanceItem: {
+                        $and: f,
+                    },
+                },
+            },
+        });
+    }
+
     return {
-        $and: [
-            {
-                status: PaymentStatus.Succeeded,
-                method: {
-                    $in: methods.value,
-                },
-                provider: {
-                    $in: [null, ...providers.value],
-                },
-            },
-            {
-                [dateField]: {
-                    $gte: correctedStartDate.value,
-                },
-            },
-            {
-                [dateField]: {
-                    $lte: correctedEndDate.value,
-                },
-            },
-        ],
+        $and: filters,
     };
 }
 </script>
