@@ -12,12 +12,11 @@
 -- `Categorie` is what splits the report into kinderen, leiding and volwassenen. It comes from the tak,
 -- falling back to the tak's age range, and then to the member's own age at the start of the year.
 --
--- That last fallback carries the imported years. The import recorded a tak only for leiding and
--- volwassenen and put every child in a nameless tak with no age range at all, so without it every
--- one of those members counts towards the total while showing up in none of the three categories --
--- "aantal kinderen" was zero until 2019-2020. Age settles it: every registration in that nameless
--- tak is a member under 18, bar 48 in 2019-2020. Those 48 stay null, because nothing here tells
--- leiding from volwassenen.
+-- That last fallback catches what the import could not name. The client's export leaves the tak empty
+-- on the children of the years before 2020-2021; the import reads those from the member's age, except
+-- where a date of birth puts them outside every tak. Without the fallback each of those few counts
+-- towards the total while showing up in none of the three categories. The handful of adults among
+-- them stay null, because nothing here tells leiding from volwassenen.
 WITH facts AS (
     SELECT
         r.memberId AS member_id,

@@ -16,8 +16,8 @@
 -- Leiding comes from the categorie instead, which is set on the Leiding tak and nothing else, so it
 -- is the same members either way and the omkaderingscijfer below divides by the same count.
 --
--- The years before 2020-2021 weigh nothing but their leiding: those were imported with every child
--- in a nameless tak (see `facts.sql`), and there is no tak there to weigh.
+-- What the years before 2020-2021 weigh rests on the import: the client's export names no tak on the
+-- children of those years, so theirs is read from their age and from what their own unit does with it.
 --
 -- The omkaderingscijfer is the one from `omkaderingscijfer.sql`, unrounded -- only what reaches the
 -- screen is rounded. A unit without leiding has none, and NULLIF keeps the index null there rather
