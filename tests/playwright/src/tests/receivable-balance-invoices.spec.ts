@@ -126,7 +126,7 @@ test.describe('Receivable balance invoices', () => {
         }
         await financesTab.first().click();
 
-        await page.getByText('Te ontvangen bedragen').first().click();
+        await page.getByTestId('open-receivable-balances-table').click();
 
         // Open the detail view of the member
         const row = page.getByTestId('table-row').filter({ hasText: memberName });
