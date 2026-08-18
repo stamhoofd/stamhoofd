@@ -6,13 +6,15 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
-import type { BalanceItem, Group, Member, Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, OrganizationFactory, Payment, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { BalanceItem, Group, Member, Organization, User, Webshop } from '@stamhoofd/models';
+import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, OrderFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Payment, RegistrationFactory, RegistrationPeriod, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import {
     appToUri,
     BalanceItemRelation,
     BalanceItemRelationType,
     BalanceItemType,
+    GroupCategory,
+    GroupCategorySettings,
     PaymentMethod,
     PaymentProvider,
     PaymentStatus,
@@ -48,10 +50,10 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         TestUtils.setPermanentEnvironment('userMode', 'organization');
     });
 
-    async function createOrganization(name: string): Promise<Organization> {
+    async function createOrganization(name: string, packages: STPackageBundle[] = [STPackageBundle.Members]): Promise<Organization> {
         const organization = await new OrganizationFactory({
             name,
-            packages: [STPackageBundle.Members],
+            packages,
         }).create();
 
         await organization.save();
@@ -129,6 +131,49 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
             payment.transferSettings = TransferSettings.create({ iban, creditor: 'Hoofdrekening' });
         }
 
+        await payment.save();
+
+        const balanceItemPayment = new BalanceItemPayment();
+        balanceItemPayment.balanceItemId = balanceItem.id;
+        balanceItemPayment.paymentId = payment.id;
+        balanceItemPayment.organizationId = organization.id;
+        balanceItemPayment.price = price;
+        await balanceItemPayment.save();
+
+        return balanceItem;
+    }
+
+    async function createPaidOrder({ organization, webshop, price, paidAt }: {
+        organization: Organization;
+        webshop: Webshop;
+        price: number;
+        /**
+         * When the money was received, so a breakdown has something to show over time.
+         */
+        paidAt?: Date;
+    }): Promise<BalanceItem> {
+        const order = await new OrderFactory({ webshop }).create();
+
+        const balanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            orderId: order.id,
+            type: BalanceItemType.Order,
+            amount: 1,
+            unitPrice: price,
+            pricePaid: price,
+            relations: new Map([
+                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: new TranslatedString(webshop.meta.name) })],
+            ]),
+        }).create();
+
+        const payment = new Payment();
+        payment.organizationId = organization.id;
+        payment.method = PaymentMethod.PointOfSale;
+        payment.status = PaymentStatus.Succeeded;
+        payment.type = PaymentType.Payment;
+        payment.price = price;
+        payment.paidAt = paidAt ?? new Date();
+        payment.createdAt = paidAt ?? new Date();
         await payment.save();
 
         const balanceItemPayment = new BalanceItemPayment();
@@ -406,5 +451,104 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
 
         await narrowedView.getByTestId('save-button').click();
         await expect(page.getByText('Exporteren naar Excel').first()).toBeVisible();
+    });
+
+    test('an admin can narrow the statistics down to chosen webshops', async ({ page }) => {
+        const organization = await createOrganization(`WebshopFilter${WorkerData.id}`, [STPackageBundle.Members, STPackageBundle.Webshops]);
+
+        // A registration next to the webshop orders, to show "all groups" stays included
+        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const member = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
+        await createPaidRegistration({ organization, member, group: kapoenen, price: 40_0000, method: PaymentMethod.PointOfSale, paidAt: dayOfMonth(1) });
+
+        const wafels = await new WebshopFactory({ organizationId: organization.id, name: 'Wafelverkoop' }).create();
+        const truien = await new WebshopFactory({ organizationId: organization.id, name: 'Truienverkoop' }).create();
+        await createPaidOrder({ organization, webshop: wafels, price: 25_0000, paidAt: dayOfMonth(2) });
+        await createPaidOrder({ organization, webshop: truien, price: 10_0000, paidAt: dayOfMonth(3) });
+
+        // More than five webshops, so the list gets a search bar
+        for (const name of ['Koekjesverkoop', 'Kaarsenverkoop', 'Bloemenverkoop', 'Pannenkoekenverkoop']) {
+            await new WebshopFactory({ organizationId: organization.id, name }).create();
+        }
+
+        const admin = await new UserFactory({
+            email: `admin-webshop-filter-${WorkerData.id}-${Date.now()}@test.be`,
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        await loginAs({ page, user: admin });
+
+        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/exporteren`);
+
+        const configureView = page.getByTestId('save-view').filter({ hasText: 'Statistieken en totalen berekenen' });
+        await expect(configureView).toBeVisible();
+
+        // Unchecking "all webshops" shows the webshops with a search bar
+        await configureView.getByText('Alle webshops').click();
+
+        const search = configureView.getByPlaceholder('Zoeken');
+        await expect(search).toBeVisible();
+        await expect(configureView.getByText('Truienverkoop')).toBeVisible();
+
+        await search.fill('Wafel');
+        await expect(configureView.getByText('Truienverkoop')).toHaveCount(0);
+        await configureView.getByText('Wafelverkoop').click();
+
+        await configureView.getByTestId('save-button').click();
+
+        // Only the Wafelverkoop order and the registration are counted: 25 + 40
+        const breakdownView = page.getByTestId('save-view').last();
+        await expect(breakdownView.getByText(/€\s*65\b/).first()).toBeVisible();
+    });
+
+    test('an admin can narrow the statistics down to chosen registration groups', async ({ page }) => {
+        const organization = await createOrganization(`GroupFilter${WorkerData.id}`);
+
+        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const welpen = await new GroupFactory({ organization, name: new TranslatedString('Welpen'), price: 25_0000 }).create();
+
+        // The groups have to be in a category of the period to be listed in the filter
+        const period = (await RegistrationPeriod.getByID(organization.periodId))!;
+        const organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+        const takken = GroupCategory.create({
+            settings: GroupCategorySettings.create({ name: 'Takken' }),
+            groupIds: [kapoenen.id, welpen.id],
+        });
+        organizationPeriod.settings.categories.push(takken);
+        organizationPeriod.settings.rootCategory?.categoryIds.push(takken.id);
+        await organizationPeriod.save();
+
+        const first = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
+        const second = await new MemberFactory({ organization, firstName: 'Jonas', lastName: 'Claes' }).create();
+        await createPaidRegistration({ organization, member: first, group: kapoenen, price: 40_0000, method: PaymentMethod.PointOfSale, paidAt: dayOfMonth(1) });
+        await createPaidRegistration({ organization, member: second, group: welpen, price: 25_0000, method: PaymentMethod.PointOfSale, paidAt: dayOfMonth(2) });
+
+        const admin = await new UserFactory({
+            email: `admin-group-filter-${WorkerData.id}-${Date.now()}@test.be`,
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        await loginAs({ page, user: admin });
+
+        await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}/boekhouding/exporteren`);
+
+        const configureView = page.getByTestId('save-view').filter({ hasText: 'Statistieken en totalen berekenen' });
+        await expect(configureView).toBeVisible();
+
+        // The organization has no webshops, so there is no webshop filter
+        await expect(configureView.getByText('Alle webshops')).toHaveCount(0);
+
+        // Only two groups: no search bar
+        await configureView.getByText('Alle inschrijvingsgroepen').click();
+        await expect(configureView.getByText('Welpen')).toBeVisible();
+        await expect(configureView.getByPlaceholder('Zoeken')).toHaveCount(0);
+
+        await configureView.getByText('Kapoenen').click();
+        await configureView.getByTestId('save-button').click();
+
+        // Only the Kapoenen registration is counted
+        const breakdownView = page.getByTestId('save-view').last();
+        await expect(breakdownView.getByText(/€\s*40\b/).first()).toBeVisible();
+        await expect(breakdownView.getByText('Welpen')).toHaveCount(0);
     });
 });
