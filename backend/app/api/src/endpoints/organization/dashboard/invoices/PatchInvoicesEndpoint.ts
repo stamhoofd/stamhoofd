@@ -8,7 +8,6 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context.js';
 import { Invoice } from '@stamhoofd/models';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ViesHelper } from '../../../../helpers/ViesHelper.js';
 import { InvoiceService } from '../../../../services/InvoiceService.js';
 
 type Params = Record<string, never>;

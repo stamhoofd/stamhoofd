@@ -86,7 +86,7 @@ export class PeppolDirectoryServiceStatic {
         }
 
         // Store the registered entity name from the directory. This is server-controlled
-        // and overwrites any value the client may have sent (see ViesHelper.checkCompany).
+        // and overwrites any value the client may have sent (see ViesService.checkCompany).
         endpointId.entityName = this.extractEntityName(match);
     }
 
