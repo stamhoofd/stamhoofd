@@ -1,7 +1,7 @@
-import { RefundStatus } from '@mollie/api-client';
 import { registerCron } from '@stamhoofd/crons';
 import { MolliePayment, MollieToken, Organization, Payment } from '@stamhoofd/models';
 import { PaymentStatus, PaymentType } from '@stamhoofd/structures';
+import type { ListEntityRefundStatus } from 'mollie-api-typescript/models';
 import { MollieService } from '../services/MollieService.js';
 import { PaymentService } from '../services/PaymentService.js';
 
@@ -49,9 +49,12 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
     // Check last 7 days
     const offset = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
 
-    // due to a bug in mollie client code, testmode paramter is missing in the typescript definitions
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    for await (const refund of service.client.refunds.iterate({ sort: 'desc', testmode: service.testMode } as any)) {
+    const iterator = MollieService.iterate(
+        from => service.client.refunds.all({ sort: 'desc', limit: 250, testmode: service.testMode, from }),
+        result => result.embedded.refunds,
+    );
+
+    for await (const refund of iterator) {
         const createdAt = new Date(refund.createdAt);
 
         if (createdAt < MOLLIE_REFUNDS_MINIMUM_DATE) {
@@ -73,7 +76,7 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
         }
 
         // Refunds that were canceled or failed before we ever registered them can be ignored
-        if (refund.status === RefundStatus.canceled || refund.status === RefundStatus.failed) {
+        if (refund.status === 'canceled' || refund.status === 'failed') {
             continue;
         }
 
@@ -129,7 +132,7 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
  * Update a locally registered refund that is still pending when Mollie reports a final status
  * (refunded, failed or canceled).
  */
-async function reconcileRefundStatus(paymentId: string, mollieStatus: RefundStatus, createdAt: Date) {
+async function reconcileRefundStatus(paymentId: string, mollieStatus: ListEntityRefundStatus, createdAt: Date) {
     const payment = await Payment.getByID(paymentId);
     if (!payment || !payment.organizationId) {
         return;

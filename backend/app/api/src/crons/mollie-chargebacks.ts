@@ -42,9 +42,12 @@ export async function checkMollieChargebacksFor(service: MollieService, checkAll
     // Check last 3 days
     const offset = new Date(Date.now() - 1000 * 60 * 60 * 24 * 4);
 
-    // due to a bug in mollie client code, testmode paramter is missing in the typescript definitions
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    for await (const chargeback of service.client.chargebacks.iterate({ sort: 'desc', testmode: service.testMode } as any)) {
+    const iterator = MollieService.iterate(
+        from => service.client.chargebacks.all({ sort: 'desc', limit: 250, testmode: service.testMode, from }),
+        result => result.embedded.chargebacks,
+    );
+
+    for await (const chargeback of iterator) {
         if (!checkAll && new Date(chargeback.createdAt) < offset) {
             break;
         }

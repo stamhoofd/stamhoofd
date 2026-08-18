@@ -3,9 +3,9 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Response } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, StripeAccount, User } from '@stamhoofd/models';
-import { Order, OrganizationFactory, Payment, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import { MolliePayment, Order, OrganizationFactory, Payment, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
-import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -13,6 +13,7 @@ import { Language } from '@stamhoofd/types/Language';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 
+import { MollieMocker } from '../../../../tests/helpers/MollieMocker.js';
 import { StripeMocker } from '../../../../tests/helpers/StripeMocker.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchWebshopOrdersEndpoint } from '../dashboard/webshops/PatchWebshopOrdersEndpoint.js';
@@ -67,6 +68,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
     let radioOption1: Option;
     let radioOption2: Option;
     let stripeMocker: StripeMocker;
+    let mollieMocker: MollieMocker;
     let stripeAccount: StripeAccount;
     let token: Token;
 
@@ -108,6 +110,8 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
     beforeAll(async () => {
         stripeMocker = new StripeMocker();
         stripeMocker.start();
+        mollieMocker = new MollieMocker();
+        mollieMocker.start();
         organization = await new OrganizationFactory({}).create();
         stripeAccount = await stripeMocker.createStripeAccount(organization.id);
 
@@ -122,6 +126,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
     afterAll(() => {
         stripeMocker.stop();
+        mollieMocker.stop();
     });
 
     afterEach(() => {
@@ -130,6 +135,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
     beforeEach(async () => {
         stripeMocker.reset();
+        mollieMocker.reset();
         let meta = WebshopMetaData.patch({});
 
         productPrice1 = ProductPrice.create({
@@ -638,6 +644,85 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             // Restored afterwards
             expect(I18n.override).toBeNull();
             expect((global as any).$getLanguage()).toEqual(Language.Dutch);
+        });
+    });
+
+    describe('Mollie payments', () => {
+        beforeEach(async () => {
+            organization.privateMeta.mollieOnboarding = MollieOnboarding.create({
+                canReceivePayments: true,
+                canReceiveSettlements: true,
+                status: MollieStatus.Completed,
+            });
+            await organization.save();
+            await mollieMocker.setupToken(organization);
+
+            // Without a Stripe account on the webshop, Bancontact is routed to Mollie
+            webshop.privateMeta.paymentConfiguration.stripeAccountId = null;
+            await webshop.save();
+        });
+
+        function buildOrderData() {
+            return OrderData.create({
+                paymentMethod: PaymentMethod.Bancontact,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 1,
+                        }),
+                    ],
+                }),
+                customer,
+            });
+        }
+
+        test('Placing an order via Mollie returns the checkout url and the order is validated once paid', async () => {
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData());
+            const response: Response<OrderResponse> = await testServer.test(endpoint, r);
+
+            expect(response.body.paymentUrl).toEqual('https://molliecheckout/');
+            const orderStruct = response.body.order;
+            expect(orderStruct.payment).not.toBeNull();
+            expect(orderStruct.payment!.provider).toEqual(PaymentProvider.Mollie);
+            expect(orderStruct.payment!.method).toEqual(PaymentMethod.Bancontact);
+
+            // The payment was created at Mollie with the price and the internal payment id
+            const mockPayment = mollieMocker.getLastPayment();
+            expect(mockPayment.amount).toEqual({ currency: 'EUR', value: '0.01' });
+            expect(mockPayment.internalPaymentId).toEqual(orderStruct.payment!.id);
+
+            // The Mollie payment id is linked, so webhooks and crons can find the payment back
+            const molliePayment = await MolliePayment.select().where('paymentId', orderStruct.payment!.id).first(false);
+            expect(molliePayment).not.toBeNull();
+            expect(molliePayment!.mollieId).toEqual(mockPayment.id);
+
+            // Simulate the payment being paid at Mollie (checkout + webhook)
+            await mollieMocker.succeedPayment();
+
+            const payment = (await Payment.getByID(orderStruct.payment!.id))!;
+            expect(payment.status).toEqual(PaymentStatus.Succeeded);
+
+            const orderModel = (await Order.getByID(orderStruct.id))!;
+            expect(orderModel.validAt).not.toBeNull();
+            expect(orderModel.number).not.toBeNull();
+        });
+
+        test('A failed Mollie payment does not validate the order', async () => {
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData());
+            const response: Response<OrderResponse> = await testServer.test(endpoint, r);
+            const orderStruct = response.body.order;
+
+            await mollieMocker.failPayment();
+
+            const payment = (await Payment.getByID(orderStruct.payment!.id))!;
+            expect(payment.status).toEqual(PaymentStatus.Failed);
+
+            const orderModel = (await Order.getByID(orderStruct.id))!;
+            expect(orderModel.validAt).toBeNull();
         });
     });
 });
