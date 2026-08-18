@@ -32,7 +32,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Statistieken en totalen') }}
+                            {{ $t('Statistieken, totalen of exporteren') }}
                         </h2>
                         <p class="style-description">
                             {{ $t("%ZjT") }}

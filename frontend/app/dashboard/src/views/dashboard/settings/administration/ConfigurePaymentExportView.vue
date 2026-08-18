@@ -1,8 +1,13 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%16p')" :title="$t(`%Oy`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%16p')" :title="$t(`Statistieken`)" save-icon-right="arrow-right" @save="save">
         <h1>
-            {{ $t('%95') }}
+            {{ $t('Statistieken en totalen berekenen') }}
         </h1>
+        <p>{{ $t('Je kan ook exporteren naar Excel.') }}</p>
+
+        <p v-if="$isStamhoofd" class="warning-box icon feature">
+            {{ $t(('Dit is vernieuwd! Feedback is steeds welkom via hallo@stamhoofd.be')) }}
+        </p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -15,7 +20,6 @@
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
-
         <p class="style-description-small">
             {{ $t('%P0') }}: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                 <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
@@ -23,7 +27,6 @@
                 </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
             </span>
         </p>
-
         <hr><h2>{{ $t('%O7') }}</h2>
 
         <STList>
