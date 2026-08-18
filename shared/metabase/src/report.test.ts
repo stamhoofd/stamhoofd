@@ -84,17 +84,37 @@ describe('report', () => {
         });
 
         /**
-         * The sheet of Bijlage B of the aanleveringsovereenkomst, under the names that document gives
-         * its columns: the department reads the sheet by those headers. Werkjaar and Type_organisatie
-         * are not among them because the department fills those in itself.
+         * The sheets of Bijlage B of the aanleveringsovereenkomst, under the names the tabs of that
+         * template carry: a sheet is pasted into one of them and read by its headers. Werkjaar,
+         * Type_organisatie and NIS-code are not among them -- the department fills those in itself.
          */
-        it('delivers the Organisatie_Bovenlokaal sheet as the aanleversjabloon defines it', () => {
-            const card = cardOf(dashboards, 'jeugdbewegingen', 'organisatie-bovenlokaal');
+        it('delivers every sheet as the aanleversjabloon defines it', () => {
+            const sheets = [
+                ['organisatie-bovenlokaal', 'Organisatie_Bovenlokaal', ['ID_Organisatie', 'Naam_Organisatie']],
+                ['deelnemers-bovenlokaal', 'Deelnemers_Bovenlokaal', ['ID_Organisatie', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
+            ] as const;
 
-            expect(card.title).toEqual('Organisatie_Bovenlokaal');
-            expect(card.columns).toEqual(['ID_Organisatie', 'Naam_Organisatie']);
-            expect(card.display).toEqual('table');
-            expect(card.parameters).toEqual(['scoutsjaar']);
+            for (const [key, title, columns] of sheets) {
+                const card = cardOf(dashboards, 'jeugdbewegingen', key);
+
+                expect(`${key}: ${card.title}`).toEqual(`${key}: ${title}`);
+                expect(card.columns).toEqual([...columns]);
+                expect(`${key}: ${card.display}`).toEqual(`${key}: table`);
+                expect(`${key} takes the werkjaar: ${card.parameters.includes('scoutsjaar')}`).toEqual(`${key} takes the werkjaar: true`);
+            }
+
+            expect(dashboards.find(tab => tab.key === 'jeugdbewegingen')!.cards.map(card => card.key)).toEqual(sheets.map(([key]) => key));
+        });
+
+        /**
+         * The three letters the template allows for a geslacht, and no fourth: a member who never
+         * answered leaves the cell empty, which the metadatafiche asks for rather than a value of its
+         * own. Kept here because nothing else notices -- an unmapped value reads as a plausible row.
+         */
+        it('says a geslacht in the letters the template allows, and nothing where there is no answer', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql.replaceAll(/\s+/g, ' ');
+
+            expect(sql).toContain("CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END");
         });
 
         /**
@@ -108,7 +128,10 @@ describe('report', () => {
             expect(exported.length).toBeGreaterThan(0);
 
             for (const card of exported) {
-                const selected = [...card.sql.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
+                // The card's own SELECT, which is the last one that starts a line: the query fragments
+                // it includes name columns of their own, and those do not reach the sheet.
+                const query = card.sql.slice(card.sql.lastIndexOf('\nSELECT'));
+                const selected = [...query.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
 
                 expect(`${card.key}: ${selected.join(', ')}`).toEqual(`${card.key}: ${card.columns.join(', ')}`);
             }

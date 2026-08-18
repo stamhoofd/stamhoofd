@@ -40,3 +40,34 @@ JOIN platform pf ON pf.membershipOrganizationId = o.id
 JOIN registration_periods p ON p.id = o.periodId [[AND p.name = {{scoutsjaar}}]]
 GROUP BY o.id, o.name
 ORDER BY o.name
+
+-- @card deelnemers-bovenlokaal
+-- title: Deelnemers_Bovenlokaal
+-- display: table
+-- size: full
+-- columns: ID_Organisatie, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
+-- description: Tabblad 'Deelnemers_Bovenlokaal': de structuurvrijwilligers van de koepel, per geboortejaar en geslacht. Unieke personen, geen inschrijvingen: zo vraagt de metadatafiche het voor de nationale ploegen.
+--
+-- The deelnemers of the structure the sheet above delivers: everyone registered at the koepel's own
+-- organization in that werkjaar. Being registered there is the engagement that makes someone a
+-- structuurvrijwilliger -- nothing in the administration says what a person does within a ploeg -- so
+-- a registration is what this counts.
+--
+-- Unique people rather than registrations, which is what the metadatafiche asks for at this one
+-- organization: the national ploegen count as a single structure, so someone in two of them is one
+-- deelnemer. Someone who is also leiding at a local group keeps counting there as well, on the sheet
+-- of that group -- the two are counted at different organizations.
+--
+-- An empty cell wherever the administration has no answer, which is what the metadatafiche asks for
+-- rather than a value of its own: a member without a date of birth gets no geboortejaar, and one
+-- whose geslacht was never filled in gets no letter, since the CASE has no ELSE to fall back on.
+-- @include facts
+SELECT
+    f.organization_id AS `ID_Organisatie`,
+    YEAR(f.birth_date) AS `Geboortejaar_deelnemers`,
+    CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END AS `Gender_deelnemers`,
+    COUNT(DISTINCT f.member_id) AS `Aantal_deelnemers`
+FROM facts f
+JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
+GROUP BY `ID_Organisatie`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
+ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`
