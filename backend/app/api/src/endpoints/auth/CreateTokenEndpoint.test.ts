@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
 import { PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
@@ -131,6 +132,11 @@ describe('Endpoint.CreateToken', () => {
         const password = 'test-password-1234';
         const DAY = 24 * 60 * 60 * 1000;
 
+        function expectValidFor(date: Date, duration: number) {
+            expect(date.getTime()).toBeGreaterThan(Date.now() + duration - 5000);
+            expect(date.getTime()).toBeLessThanOrEqual(Date.now() + duration);
+        }
+
         async function login(organization: Organization, user: User, platform: string | null = null): Promise<Token> {
             const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
                 grant_type: 'password',
@@ -178,10 +184,10 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'web');
 
             expect(token.isNativeApp).toBe(false);
-            expect(token.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 3 * DAY);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin.browser.refreshToken);
         });
 
-        test('an administrator that signs in in the native app gets a longer session', async () => {
+        test('an administrator that signs in in the native app has no maximum session length', async () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await new UserFactory({
                 organization,
@@ -192,8 +198,17 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'ios');
 
             expect(token.isNativeApp).toBe(true);
-            expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now() + 29 * DAY);
-            expect(token.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 30 * DAY);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin.nativeApp.refreshToken);
+
+            const browserSessionDuration = SESSION_DURATIONS.admin.browser.session;
+            if (browserSessionDuration === null) {
+                throw new Error('Expected browser administrator sessions to have a maximum length');
+            }
+            token.sessionStartedAt = new Date(Date.now() - 2 * browserSessionDuration);
+            await token.save();
+
+            const renewed = await refresh(organization, token.refreshToken);
+            expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin.nativeApp.refreshToken);
         });
 
         test('renewing an access token does not extend the session past its maximum length', async () => {
@@ -206,7 +221,11 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'web');
 
-            const sessionStartedAt = new Date(Date.now() - 14 * DAY + DAY);
+            const sessionDuration = SESSION_DURATIONS.admin.browser.session;
+            if (sessionDuration === null) {
+                throw new Error('Expected browser administrator sessions to have a maximum length');
+            }
+            const sessionStartedAt = new Date(Date.now() - sessionDuration + DAY);
             sessionStartedAt.setMilliseconds(0);
             token.sessionStartedAt = sessionStartedAt;
             await token.save();
@@ -214,7 +233,7 @@ describe('Endpoint.CreateToken', () => {
             const renewed = await refresh(organization, token.refreshToken);
 
             expect(renewed.sessionStartedAt).toEqual(sessionStartedAt);
-            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + 14 * DAY);
+            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + sessionDuration);
             expect(renewed.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now());
         });
 
@@ -227,7 +246,11 @@ describe('Endpoint.CreateToken', () => {
             }).create();
 
             const token = await login(organization, admin, 'web');
-            token.sessionStartedAt = new Date(Date.now() - 15 * DAY);
+            const sessionDuration = SESSION_DURATIONS.admin.browser.session;
+            if (sessionDuration === null) {
+                throw new Error('Expected browser administrator sessions to have a maximum length');
+            }
+            token.sessionStartedAt = new Date(Date.now() - sessionDuration - DAY);
             token.refreshTokenValidUntil = new Date(Date.now() - 1000);
             await token.save();
 

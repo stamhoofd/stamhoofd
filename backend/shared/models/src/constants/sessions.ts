@@ -22,7 +22,7 @@ export type SessionDurations = {
      * Maximum length of the session, counted from the login. Renewing never extends it, so
      * this is when the user has to sign in again however active they were.
      */
-    session: number;
+    session: number | null;
 
     /**
      * How long the session may go unused before it ends. Every renewal restarts it.
@@ -50,11 +50,11 @@ export const SESSION_DURATIONS: Record<SessionType, Record<SessionClient, Sessio
         nativeApp: { session: 7 * DAY, refreshToken: 36 * HOUR },
     },
     admin: {
-        browser: { session: 14 * DAY, refreshToken: 3 * DAY },
-        nativeApp: { session: 60 * DAY, refreshToken: 30 * DAY },
+        browser: { session: 180 * DAY, refreshToken: 90 * DAY },
+        nativeApp: { session: null, refreshToken: 90 * DAY },
     },
     user: {
-        browser: { session: 14 * DAY, refreshToken: 3 * DAY },
-        nativeApp: { session: 90 * DAY, refreshToken: 30 * DAY },
+        browser: { session: 180 * DAY, refreshToken: 180 * DAY },
+        nativeApp: { session: null, refreshToken: 180 * DAY },
     },
 };

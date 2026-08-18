@@ -92,9 +92,10 @@ export class SessionService {
 
         return 'admin';
     }
+
     private static applyLimits(token: Token, user: User) {
         const durations = this.getDurations(token, user);
-        const sessionEndsAt = token.sessionStartedAt.getTime() + durations.session;
+        const sessionEndsAt = durations.session !== null ? (token.sessionStartedAt.getTime() + durations.session) : (Date.now() + durations.refreshToken);
 
         token.refreshTokenValidUntil = new Date(Math.min(Date.now() + durations.refreshToken, sessionEndsAt));
         token.refreshTokenValidUntil.setMilliseconds(0);

@@ -1,6 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, SessionLoginMethod, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { SessionClient, SessionType } from '@stamhoofd/models/constants/sessions.js';
+import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
@@ -51,23 +53,21 @@ describe('SessionService', () => {
         }).create();
     }
 
-    /**
-     * The policy itself, written out instead of read from SESSION_DURATIONS: a test that
-     * takes its expectations from the constants it checks would accept any change to them.
-     */
-    const policy: { name: string; platform: string; loginMethod: SessionLoginMethod; createUser: () => Promise<User>; session: number; refreshToken: number }[] = [
-        { name: 'a member in a browser', platform: 'web', loginMethod: 'password', createUser: () => createMember(), session: 14 * DAY, refreshToken: 3 * DAY },
-        { name: 'a member in the native app', platform: 'ios', loginMethod: 'password', createUser: () => createMember(), session: 90 * DAY, refreshToken: 30 * DAY },
-        { name: 'an administrator in a browser', platform: 'web', loginMethod: 'password', createUser: () => createAdmin(), session: 14 * DAY, refreshToken: 3 * DAY },
-        { name: 'an administrator in the native app', platform: 'android', loginMethod: 'password', createUser: () => createAdmin(), session: 60 * DAY, refreshToken: 30 * DAY },
-        { name: 'a platform administrator in a browser', platform: 'web', loginMethod: 'password', createUser: () => createPlatformAdmin(), session: 12 * HOUR, refreshToken: 3 * HOUR },
-        { name: 'a platform administrator in the native app', platform: 'ios', loginMethod: 'password', createUser: () => createPlatformAdmin(), session: 7 * DAY, refreshToken: 36 * HOUR },
-        { name: 'an SSO login in a browser', platform: 'web', loginMethod: 'sso', createUser: () => createMember(), session: 12 * HOUR, refreshToken: 3 * HOUR },
-        { name: 'an SSO login in the native app', platform: 'ios', loginMethod: 'sso', createUser: () => createAdmin(), session: 7 * DAY, refreshToken: 36 * HOUR },
+    const policy: { name: string; platform: string; client: SessionClient; sessionType: SessionType; loginMethod: SessionLoginMethod; createUser: () => Promise<User> }[] = [
+        { name: 'a member in a browser', platform: 'web', client: 'browser', sessionType: 'user', loginMethod: 'password', createUser: () => createMember() },
+        { name: 'a member in the native app', platform: 'ios', client: 'nativeApp', sessionType: 'user', loginMethod: 'password', createUser: () => createMember() },
+        { name: 'an administrator in a browser', platform: 'web', client: 'browser', sessionType: 'admin', loginMethod: 'password', createUser: () => createAdmin() },
+        { name: 'an administrator in the native app', platform: 'android', client: 'nativeApp', sessionType: 'admin', loginMethod: 'password', createUser: () => createAdmin() },
+        { name: 'a platform administrator in a browser', platform: 'web', client: 'browser', sessionType: 'platformAdmin', loginMethod: 'password', createUser: () => createPlatformAdmin() },
+        { name: 'a platform administrator in the native app', platform: 'ios', client: 'nativeApp', sessionType: 'platformAdmin', loginMethod: 'password', createUser: () => createPlatformAdmin() },
+        { name: 'an SSO login in a browser', platform: 'web', client: 'browser', sessionType: 'sso', loginMethod: 'sso', createUser: () => createMember() },
+        { name: 'an SSO login in the native app', platform: 'ios', client: 'nativeApp', sessionType: 'sso', loginMethod: 'sso', createUser: () => createAdmin() },
     ];
 
     describe('session length', () => {
-        for (const { name, platform, loginMethod, createUser, session, refreshToken } of policy) {
+        for (const { name, platform, client, sessionType, loginMethod, createUser } of policy) {
+            const { session, refreshToken } = SESSION_DURATIONS[sessionType][client];
+
             test(`${name} may go unused for ${humanDuration(refreshToken)}`, async () => {
                 const user = await createUser();
                 const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
@@ -75,30 +75,47 @@ describe('SessionService', () => {
                 expectValidFor(token.refreshTokenValidUntil, refreshToken);
             });
 
-            test(`${name} is signed out after ${humanDuration(session)}`, async () => {
-                const user = await createUser();
-                const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
+            if (session === null) {
+                test(`${name} has no maximum length`, async () => {
+                    const user = await createUser();
+                    const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
 
-                token.sessionStartedAt = new Date(Date.now() - session + HOUR);
-                await token.save();
+                    token.sessionStartedAt = new Date(Date.now() - 10 * refreshToken);
+                    await token.save();
 
-                const rotated = await SessionService.rotateSession(token);
-                expectValidFor(rotated.refreshTokenValidUntil, HOUR);
-            });
+                    const rotated = await SessionService.rotateSession(token);
+                    expectValidFor(rotated.refreshTokenValidUntil, refreshToken);
+                });
+            } else {
+                test(`${name} is signed out after ${humanDuration(session)}`, async () => {
+                    const user = await createUser();
+                    const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
+
+                    token.sessionStartedAt = new Date(Date.now() - session + HOUR);
+                    await token.save();
+
+                    const rotated = await SessionService.rotateSession(token);
+                    expectValidFor(rotated.refreshTokenValidUntil, HOUR);
+                });
+            }
         }
 
-        test('the access token is valid for 15 minutes', async () => {
+        test('the access token uses the configured duration', async () => {
             const admin = await createAdmin();
             const token = await SessionService.createSession(admin, { loginMethod: 'password' });
 
-            expectValidFor(token.accessTokenValidUntil, 15 * MINUTE);
+            expectValidFor(token.accessTokenValidUntil, ACCESS_TOKEN_DURATION);
         });
 
         test('the access token never outlives the session', async () => {
             const admin = await createPlatformAdmin();
             const token = await SessionService.createSession(admin, { loginMethod: 'sso' });
 
-            token.sessionStartedAt = new Date(Date.now() - 12 * HOUR + MINUTE);
+            const sessionDuration = SESSION_DURATIONS.sso.browser.session;
+            if (sessionDuration === null) {
+                throw new Error('Expected browser SSO sessions to have a maximum length');
+            }
+            token.sessionStartedAt = new Date(Date.now() - sessionDuration + MINUTE);
             await token.save();
 
             const rotated = await SessionService.rotateSession(token);
@@ -115,7 +132,7 @@ describe('SessionService', () => {
             await token.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 3 * DAY);
+            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.admin.browser.refreshToken);
         });
     });
 
@@ -138,20 +155,20 @@ describe('SessionService', () => {
             const rotated = await onPlatform('ios', () => SessionService.rotateSession(token));
 
             expect(rotated.isNativeApp).toBe(false);
-            expectValidFor(rotated.refreshTokenValidUntil, 3 * DAY);
+            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.admin.browser.refreshToken);
         });
 
         test('a member that becomes a platform administrator is limited from that moment on', async () => {
             const user = await createMember();
             const token = await SessionService.createSession(user, { loginMethod: 'password' });
-            expectValidFor(token.refreshTokenValidUntil, 3 * DAY);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.user.browser.refreshToken);
 
             const platformAdmin = await createPlatformAdmin();
             token.user.permissions = platformAdmin.permissions;
             await token.user.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, 3 * HOUR);
+            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.platformAdmin.browser.refreshToken);
         });
     });
 
@@ -189,7 +206,7 @@ describe('SessionService', () => {
             const token = await SessionService.createExpiredSession(admin, { loginMethod: 'sso' });
 
             expect(token.isAccessTokenExpired()).toBe(true);
-            expectValidFor(token.refreshTokenValidUntil, 3 * HOUR);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.sso.browser.refreshToken);
 
             const rotated = await SessionService.rotateSession(token);
             expect(rotated.loginMethod).toBe('sso');
