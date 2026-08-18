@@ -79,6 +79,7 @@
         "@stamhoofd/structures": "2.143.1",
         "@stamhoofd/types": "2.143.1",
         "@stamhoofd/utility": "2.143.1",
+        "@stamhoofd/vies": "2.143.1",
         "archiver": "7.0.1",
         "argon2": "0.44.0",
         "axios": "1.18.1",

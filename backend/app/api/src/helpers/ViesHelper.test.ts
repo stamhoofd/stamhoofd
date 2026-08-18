@@ -1,3 +1,4 @@
+import { Database } from '@simonbackx/simple-database';
 import { Address, Company, PeppolEndointId } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -34,9 +35,10 @@ describe('ViesHelper', () => {
         return { getBody: () => body };
     }
 
-    afterEach(() => {
+    afterEach(async () => {
         nock.cleanAll();
         nock.disableNetConnect();
+        await Database.delete('DELETE FROM `vies_cached_results`');
     });
 
     describe('checkVATNumber', () => {

@@ -3,37 +3,12 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import type { Company } from '@stamhoofd/structures';
 import { PeppolScheme } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
+import { ViesService } from '@stamhoofd/vies';
 import jsvat from 'jsvat-next';
 import { PeppolDirectoryService } from '../services/PeppolDirectoryService.js';
 
 export class ViesHelperStatic {
     testMode = false;
-
-    async request(method: 'GET' | 'POST', url: string, content: any) {
-        const json = content ? JSON.stringify(content) : '';
-
-        console.log('[VIES REQUEST]', method, url, content ? '\n [VIES REQUEST] ' : undefined, json);
-
-        const response = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': json.length > 0 ? 'application/json' : 'text/plain',
-            },
-            body: json.length > 0 ? json : undefined,
-            signal: AbortSignal.timeout(5_000),
-        });
-
-        if (!response.ok) {
-            throw new Error(`VIES request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('[VIES RESPONSE]', method, url, '\n[VIES RESPONSE]', JSON.stringify(data));
-        return {
-            data,
-            response,
-        };
-    }
 
     async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | Company) {
         // Validate the custom PEPPOL endpoint id, but only when it actually changed.
@@ -183,18 +158,7 @@ export class ViesHelperStatic {
         }
 
         try {
-            const cleaned = formatted.substring(2).replace(/(?:\.-\s)+/g, '');
-            const { data, response } = await this.request('POST', 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number', {
-                countryCode: country,
-                vatNumber: cleaned,
-            });
-
-            if (typeof data !== 'object' || data === null || typeof data.valid !== 'boolean') {
-                console.error('VIES error', response.status, response.statusText, data);
-                throw new Error('Invalid response from VIES');
-            }
-
-            if (!data.valid) {
+            if (!await ViesService.checkVATNumber(country, formatted)) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: $t('%1TG', { 'vat-number': formatted }),
@@ -206,8 +170,6 @@ export class ViesHelperStatic {
                 throw e;
             }
             // Unavailable: ignore for now
-            console.error('VIES error', e);
-
             throw new SimpleError({
                 code: 'service_unavailable',
                 message: $t('%1Sf'),
