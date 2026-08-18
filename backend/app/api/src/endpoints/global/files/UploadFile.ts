@@ -71,7 +71,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'Endpoints needs organization if no user is present',
-                human: $t('Er ging iets mis. Probeer het opnieuw'),
+                human: $t('%ZlM'),
             });
         }
 

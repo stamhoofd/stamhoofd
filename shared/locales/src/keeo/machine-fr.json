@@ -1619,6 +1619,14 @@
     "original": "Deze eenheid kan niet verwijderd worden",
     "translation": "Cette unité ne peut pas être supprimée"
   },
+  "%ZlL": {
+    "original": "Lees zeker <button>onze documentatie</button> door als je de boekhouding in Keeo beter wilt kunnen opvolgen.",
+    "translation": "Lisez bien <button>notre documentation</button> si vous souhaitez mieux suivre la comptabilité dans Keeo."
+  },
+  "%Zlv": {
+    "original": "Openstaande bedragen van leden en eenheden",
+    "translation": "Montants ouverts des membres et unités"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Assurez-vous que les utilisateurs puissent se connecter via votre propre système de compte, séparément de Keeo. Pour Microsoft, vous pouvez"

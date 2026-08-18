@@ -73,14 +73,14 @@ export class PaymentFilterBuilders {
 
     static get settlements() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`Uitbetaald`),
+            name: $t(`%ZkA`),
             options: [
-                new MultipleChoiceUIFilterOption($t('Uitbetaald'), {
+                new MultipleChoiceUIFilterOption($t('%ZkA'), {
                     settlements: {
                         $elemMatch: {},
                     },
                 }),
-                new MultipleChoiceUIFilterOption($t('Nog niet uitbetaald'), {
+                new MultipleChoiceUIFilterOption($t('%Zjn'), {
                     $not: {
                         settlements: {
                             $elemMatch: {},

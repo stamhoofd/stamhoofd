@@ -4991,10 +4991,6 @@
     "original": "Andere facturatiegegevens",
     "translation": "Other billing data"
   },
-  "%1KY": {
-    "original": "Lees onze documentatie voor meer informatie over de boekhoudmodule.",
-    "translation": "See our documentation for more details about the accounting module."
-  },
   "%1KZ": {
     "original": "Lees onze documentatie voor meer informatie over het scannen van tickets.",
     "translation": "See our documentation for more information about ticket scanning."
@@ -14143,10 +14139,6 @@
     "original": "Registratie domein",
     "translation": "Registration domain"
   },
-  "%NG": {
-    "original": "Lijst van alle leden die nog een openstaand bedrag hebben tegenover {organization}",
-    "translation": "List of all members who still have an outstanding amount to {organization}"
-  },
   "%NH": {
     "original": "Betalingen aan {organization}",
     "translation": "Payments to {organization}"
@@ -18823,10 +18815,6 @@
     "original": "Het bedrag gedeeld door het aantal dagen tussen de start- en einddatum.",
     "translation": "The amount divided by the number of days between the start and end date."
   },
-  "%ZiO": {
-    "original": "Statistieken van betalingen en aanrekeningen",
-    "translation": "Statistics for payments and charges"
-  },
   "%ZiP": {
     "original": "Ingehouden door de betaalprovider.",
     "translation": "Held by the payment provider."
@@ -19006,10 +18994,6 @@
   "%ZjD": {
     "original": "Deze betalingen hebben ook voor andere dingen betaald. De lijst en de export bevatten de volledige betalingen, het bedrag hierboven is enkel het deel dat hier meetelt.",
     "translation": "These payments also covered other items. The list and export include the full payments, but the amount above is only the part counted here."
-  },
-  "%ZjG": {
-    "original": "Toont waaruit een selectie van betalingen of aanrekeningen bestaat, opgesplitst per rekening, categorie, artikel en uitbetaling, met de export daarvan.",
-    "translation": "Shows how a selection of payments or charges is made up, split by account, category, item, and payout, along with their export."
   },
   "%ZjI": {
     "original": "Week van {date}",
@@ -19422,6 +19406,110 @@
   "%ZlG": {
     "original": "Online terugbetalen",
     "translation": "Refund online"
+  },
+  "%ZlI": {
+    "original": "Filter op betaaldatum in plaats van aanmaakdatum",
+    "translation": "Filter by payment date instead of creation date"
+  },
+  "%ZlJ": {
+    "original": "In verwerking houden",
+    "translation": "Keep as processing"
+  },
+  "%ZlL": {
+    "original": "Lees zeker <button>onze documentatie</button> door als je de boekhouding in Stamhoofd beter wilt kunnen opvolgen.",
+    "translation": "Be sure to read <button>our documentation</button> if you want to better track your accounting in Stamhoofd."
+  },
+  "%ZlM": {
+    "original": "Er ging iets mis. Probeer het opnieuw",
+    "translation": "Something went wrong. Please try again."
+  },
+  "%ZlO": {
+    "original": "Statistieken en totalen berekenen",
+    "translation": "Calculate statistics and totals"
+  },
+  "%ZlP": {
+    "original": "Het geselecteerde openstaande bedrag is als betaald gemarkeerd",
+    "translation": "The selected open amount has been marked as paid"
+  },
+  "%ZlQ": {
+    "original": "Je kan ook exporteren naar Excel.",
+    "translation": "You can also export to Excel."
+  },
+  "%ZlT": {
+    "original": "Datumbereik",
+    "translation": "Date range"
+  },
+  "%ZlU": {
+    "original": "Sommige openstaande bedragen hebben al een betaling in verwerking",
+    "translation": "Some open amounts already have a payment being processed"
+  },
+  "%ZlV": {
+    "original": "Bekijk hoeveel een lid nog moet betalen, of hoeveel er momenteel in verwerking is.",
+    "translation": "See how much a member still needs to pay, or the amount currently in process."
+  },
+  "%ZlW": {
+    "original": "Contactgegevens",
+    "translation": "Contact data"
+  },
+  "%ZlX": {
+    "original": "Ik ben zeker",
+    "translation": "I am sure"
+  },
+  "%ZlZ": {
+    "original": "Betalingen registreren",
+    "translation": "Register payments"
+  },
+  "%Zld": {
+    "original": "Markeren als betaald",
+    "translation": "Mark as paid"
+  },
+  "%Zlf": {
+    "original": "Het openstaand bedrag voor {count} items als betaald markeren?",
+    "translation": "Mark the open amount for {count} items as paid?"
+  },
+  "%Zlg": {
+    "original": "Statistieken, totalen of exporteren",
+    "translation": "Statistics, totals or export"
+  },
+  "%Zlh": {
+    "original": "Betalingen registreren hoe aanrekeningen betaald worden, bijvoorbeeld via Bancontact of overschrijving. Elke betaling is gekoppeld aan één of meerdere aanrekeningen, of aan een deel ervan.",
+    "translation": "Register payments to track how invoices are paid, for example via Bancontact or bank transfer. Each payment is linked to one or more invoices, or part of them."
+  },
+  "%Zli": {
+    "original": "Als veel overschrijvingen pas laat als betaald gemarkeerd werden, is de aanmaakdatum vaak accurater.",
+    "translation": "If many transfers were only marked as paid late, the creation date is often more accurate."
+  },
+  "%Zln": {
+    "original": "De geselecteerde openstaande bedragen zijn als betaald gemarkeerd",
+    "translation": "The selected open amounts have been marked as paid"
+  },
+  "%Zlo": {
+    "original": "Openstaande bedragen van leden",
+    "translation": "Open amounts of members"
+  },
+  "%Zlp": {
+    "original": "Het openstaand bedrag van {name} als betaald markeren?",
+    "translation": "Mark the open amount for {name} as paid?"
+  },
+  "%Zlq": {
+    "original": "Een openstaande bedrag is in verwerking. Er werd al een betaling voor aangemaakt, maar die is nog niet als ontvangen gemarkeerd. Bijvoorbeeld omdat een overschrijving nog niet als betaald is gemarkeerd. Wat wil je hiermee doen?",
+    "translation": "An open amount is being processed. A payment has already been created for it, but it hasn't been marked as received yet. For example, because a transfer hasn't yet been marked as paid. What would you like to do?"
+  },
+  "%Zlr": {
+    "original": "Voor elk geselecteerd openstaand bedrag maken we een betaling aan met een onbekende betaalmethode. Als betaaldatum gebruiken we de datum van het laatst aangemaakte openstaande bedrag.",
+    "translation": "For each selected open amount, we will create a payment with an unknown payment method. The payment date will be the date of the most recently created open amount."
+  },
+  "%Zls": {
+    "original": "Een aanrekening is een bedrag dat een lid moet betalen, bijvoorbeeld voor een inschrijving of T-shirt. Betalingen worden aan deze aanrekeningen gekoppeld.",
+    "translation": "An invoice is an amount a member needs to pay, for example for a registration or T-shirt. Payments are linked to these invoices."
+  },
+  "%Zlv": {
+    "original": "Openstaande bedragen van leden en verenigingen",
+    "translation": "Open amounts for members and associations"
+  },
+  "%Zlw": {
+    "original": "Betalingen aanmaken...",
+    "translation": "Creating payments..."
   },
   "%Zm": {
     "original": "Log in via de knop hieronder.",
@@ -21266,14 +21354,6 @@
   "%hb": {
     "original": "Je hebt nog geen betalingen ontvangen",
     "translation": "You have not received any payments yet"
-  },
-  "%hc": {
-    "original": "Contactpersonen",
-    "translation": "Contact persons"
-  },
-  "%hd": {
-    "original": "Deze personen ontvangen een e-mail bij elke communicatie rond dit openstaand bedrag.",
-    "translation": "These people will receive an email with every communication about this outstanding amount."
   },
   "%he": {
     "original": "Geen contactpersonen gevonden",

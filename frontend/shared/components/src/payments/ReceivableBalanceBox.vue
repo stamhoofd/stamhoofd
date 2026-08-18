@@ -153,7 +153,7 @@
             </template>
 
             <hr>
-            <h2>{{ $t('Contactgegevens') }}</h2>
+            <h2>{{ $t('%ZlW') }}</h2>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">

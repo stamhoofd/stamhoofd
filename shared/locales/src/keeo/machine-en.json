@@ -1611,6 +1611,14 @@
     "original": "Deze eenheid kan niet verwijderd worden",
     "translation": "This unit cannot be deleted"
   },
+  "%ZlL": {
+    "original": "Lees zeker <button>onze documentatie</button> door als je de boekhouding in Keeo beter wilt kunnen opvolgen.",
+    "translation": "Be sure to read <button>our documentation</button> if you want to better track your accounting in Keeo."
+  },
+  "%Zlv": {
+    "original": "Openstaande bedragen van leden en eenheden",
+    "translation": "Open amounts for members and units"
+  },
   "%Zr": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
     "translation": "Ensure that users can log in via your own account system, separate from Keeo. For Microsoft you can"
