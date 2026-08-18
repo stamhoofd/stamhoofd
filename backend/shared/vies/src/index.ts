@@ -31,8 +31,8 @@ export class ViesServiceStatic {
     }
 
     async checkVATNumber(country: Country, vatNumber: string): Promise<boolean> {
-        const id = vatNumber.replace(/[^a-z0-9]+/gi, '').toUpperCase();
-        const cached = await ViesCachedResult.getByID(id);
+        const cleanedVATNumber = vatNumber.replace(/[^a-z0-9]+/gi, '').toUpperCase();
+        const cached = await ViesCachedResult.getByID(cleanedVATNumber);
 
         const freshAfter = new Date();
         freshAfter.setMonth(freshAfter.getMonth() - CacheMonths);
@@ -45,7 +45,7 @@ export class ViesServiceStatic {
         try {
             const { data, response } = await this.request('POST', 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number', {
                 countryCode: country,
-                vatNumber: id.substring(2),
+                vatNumber: cleanedVATNumber.substring(2),
             });
 
             if (typeof data !== 'object' || data === null || !('valid' in data) || typeof data.valid !== 'boolean') {
@@ -63,7 +63,7 @@ export class ViesServiceStatic {
             throw error;
         }
 
-        await ViesCachedResult.saveResult(id, result, new Date());
+        await ViesCachedResult.saveResult(cleanedVATNumber, result, new Date());
         return result;
     }
 }

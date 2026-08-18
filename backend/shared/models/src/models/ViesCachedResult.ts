@@ -5,7 +5,7 @@ export class ViesCachedResult extends QueryableModel {
     static table = 'vies_cached_results';
 
     @column({ primary: true, type: 'string' })
-    id: string;
+    VATNumber: string;
 
     @column({ type: 'datetime' })
     checkedAt: Date;
@@ -13,10 +13,10 @@ export class ViesCachedResult extends QueryableModel {
     @column({ type: 'boolean' })
     result: boolean;
 
-    static async saveResult(id: string, result: boolean, checkedAt: Date): Promise<void> {
+    static async saveResult(VATNumber: string, result: boolean, checkedAt: Date): Promise<void> {
         await Database.insert(
-            `INSERT INTO \`${this.table}\` (\`id\`, \`checkedAt\`, \`result\`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE \`checkedAt\` = VALUES(\`checkedAt\`), \`result\` = VALUES(\`result\`)`,
-            [id, checkedAt, result],
+            `INSERT INTO \`${this.table}\` (\`VATNumber\`, \`checkedAt\`, \`result\`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE \`checkedAt\` = VALUES(\`checkedAt\`), \`result\` = VALUES(\`result\`)`,
+            [VATNumber, checkedAt, result],
         );
     }
 }

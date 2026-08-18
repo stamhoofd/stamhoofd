@@ -34,14 +34,14 @@ describe('ViesService', () => {
         expect(scope.isDone()).toBe(false);
     });
 
-    test.each([true, false])('stores a successful %s result with the cleaned VAT number as id', async (result) => {
+    test.each([true, false])('stores a successful %s result with the cleaned VAT number', async (result) => {
         mockVies({ valid: result });
 
         await expect(ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847')).resolves.toBe(result);
 
         const cached = await ViesCachedResult.getByID(VAT_NUMBER);
         expect(cached).toMatchObject({
-            id: VAT_NUMBER,
+            VATNumber: VAT_NUMBER,
             result,
             checkedAt: NOW,
         });
