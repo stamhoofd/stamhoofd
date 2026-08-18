@@ -25,6 +25,9 @@ export type MollieMockPayment = {
     mandateId: string | null;
     isCancelable: boolean;
     details: Record<string, unknown> | null;
+    description?: string;
+    profileId?: string | null;
+    createdAt?: string;
 };
 
 export type MollieMockMandate = {
@@ -83,9 +86,7 @@ const MOLLIE_CHECKOUT_URL = 'https://molliecheckout/';
 /**
  * Mirrors the StripeMocker (tests/helpers/StripeMocker.ts) but for Mollie.
  *
- * The Mollie node client (@mollie/api-client v4) performs its HTTP requests through node-fetch v2,
- * which uses Node's http/https module under the hood. nock can therefore intercept every call to
- * https://api.mollie.com - exactly like the StripeMocker does for Stripe.
+ * The Mollie client sends every API call to https://api.mollie.com, which nock intercepts here.
  *
  * Usage:
  *   const mollieMocker = new MollieMocker();
@@ -116,6 +117,23 @@ export class MollieMocker {
     balanceTransactionsPageSize: number | null = null;
 
     #forceFailure = false;
+
+    // The SDK validates responses with zod: these links are required on most resources
+    #dashboardLink = { href: 'https://www.mollie.com/dashboard', type: 'text/html' };
+    #documentationLink = { href: 'https://docs.mollie.com', type: 'text/html' };
+
+    /**
+     * A Mollie error body, complete enough for the SDK to parse it as an ErrorResponse.
+     */
+    #errorBody(status: number, title: string, detail: string, field?: string) {
+        return {
+            status,
+            title,
+            detail,
+            field,
+            _links: { documentation: this.#documentationLink },
+        };
+    }
 
     reset() {
         this.payments = [];
@@ -168,15 +186,18 @@ export class MollieMocker {
         const interceptor = nock('https://api.mollie.com').persist();
 
         interceptor.get(matcher).reply((uri) => {
-            return this.#handle('GET', uri, undefined);
+            const [status, body] = this.#handle('GET', uri, undefined);
+            return [status, body, { 'content-type': 'application/hal+json' }];
         });
 
         interceptor.post(matcher).reply((uri, body) => {
-            return this.#handle('POST', uri, body);
+            const [status, responseBody] = this.#handle('POST', uri, body);
+            return [status, responseBody, { 'content-type': 'application/hal+json' }];
         });
 
         interceptor.delete(matcher).reply((uri, body) => {
-            return this.#handle('DELETE', uri, body);
+            const [status, responseBody] = this.#handle('DELETE', uri, body);
+            return [status, responseBody, { 'content-type': 'application/hal+json' }];
         });
     }
 
@@ -244,6 +265,10 @@ export class MollieMocker {
             return [200, this.#onboarding()];
         }
 
+        if (parts[0] === 'onboarding' && method === 'POST') {
+            return [204];
+        }
+
         if (parts[0] === 'chargebacks' && method === 'GET') {
             return this.#listResource('chargebacks', this.chargebacks.map(c => this.#chargebackResource(c)));
         }
@@ -294,6 +319,9 @@ export class MollieMocker {
             mandateId: body.mandateId ?? null,
             isCancelable: true,
             details: null,
+            description: body.description ?? '',
+            profileId: body.profileId ?? null,
+            createdAt: new Date().toISOString(),
         };
         this.payments.push(payment);
         return [201, this.#paymentResource(payment)];
@@ -302,7 +330,7 @@ export class MollieMocker {
     #getPayment(id: string): [number, unknown] {
         const payment = this.payments.find(p => p.id === id);
         if (!payment) {
-            return [404, { detail: 'Payment not found' }];
+            return [404, this.#errorBody(404, 'Not Found', 'No payment exists with token ' + id)];
         }
         return [200, this.#paymentResource(payment)];
     }
@@ -310,7 +338,7 @@ export class MollieMocker {
     #cancelPayment(id: string): [number, unknown] {
         const payment = this.payments.find(p => p.id === id);
         if (!payment) {
-            return [404, { detail: 'Payment not found' }];
+            return [404, this.#errorBody(404, 'Not Found', 'No payment exists with token ' + id)];
         }
         payment.status = 'canceled';
         return [200, this.#paymentResource(payment)];
@@ -329,9 +357,14 @@ export class MollieMocker {
             mandateId: payment.mandateId ?? undefined,
             details: payment.details ?? undefined,
             metadata: payment.internalPaymentId ? { paymentId: payment.internalPaymentId } : undefined,
+            description: payment.description ?? '',
+            profileId: payment.profileId ?? 'pfl_test',
+            createdAt: payment.createdAt ?? new Date().toISOString(),
             _links: {
                 self: { href: 'https://api.mollie.com/v2/payments/' + payment.id, type: 'application/hal+json' },
                 checkout: { href: MOLLIE_CHECKOUT_URL, type: 'text/html' },
+                dashboard: this.#dashboardLink,
+                documentation: this.#documentationLink,
             },
         };
     }
@@ -358,9 +391,15 @@ export class MollieMocker {
             id,
             mode: 'test',
             name: body.name ?? 'Test',
-            email: body.email ?? undefined,
-            metadata: body.metadata ?? undefined,
-            _links: { self: { href: 'https://api.mollie.com/v2/customers/' + id, type: 'application/hal+json' } },
+            email: body.email ?? null,
+            locale: null,
+            metadata: body.metadata ?? null,
+            createdAt: new Date().toISOString(),
+            _links: {
+                self: { href: 'https://api.mollie.com/v2/customers/' + id, type: 'application/hal+json' },
+                dashboard: this.#dashboardLink,
+                documentation: this.#documentationLink,
+            },
         };
     }
 
@@ -406,8 +445,14 @@ export class MollieMocker {
             method: mandate.method,
             details: mandate.details,
             customerId: mandate.customerId,
+            mandateReference: null,
+            signatureDate: mandate.createdAt.substring(0, 10),
             createdAt: mandate.createdAt,
-            _links: { self: { href: 'https://api.mollie.com/v2/customers/' + mandate.customerId + '/mandates/' + mandate.id, type: 'application/hal+json' } },
+            _links: {
+                self: { href: 'https://api.mollie.com/v2/customers/' + mandate.customerId + '/mandates/' + mandate.id, type: 'application/hal+json' },
+                customer: { href: 'https://api.mollie.com/v2/customers/' + mandate.customerId, type: 'application/hal+json' },
+                documentation: this.#documentationLink,
+            },
         };
     }
 
@@ -421,8 +466,16 @@ export class MollieMocker {
             mode: 'test',
             name: 'Stamhoofd',
             website: 'https://www.stamhoofd.be',
+            email: 'hallo@stamhoofd.be',
+            phone: '+32499999999',
+            businessCategory: 'SOCIAL_ASSOCIATIONS',
             status: 'verified',
-            _links: { self: { href: 'https://api.mollie.com/v2/profiles/' + id, type: 'application/hal+json' } },
+            createdAt: new Date().toISOString(),
+            _links: {
+                self: { href: 'https://api.mollie.com/v2/profiles/' + id, type: 'application/hal+json' },
+                dashboard: this.#dashboardLink,
+                documentation: this.#documentationLink,
+            },
         };
     }
 
@@ -433,6 +486,7 @@ export class MollieMocker {
             status: 'completed',
             canReceivePayments: true,
             canReceiveSettlements: true,
+            signedUpAt: new Date().toISOString(),
             _links: { self: { href: 'https://api.mollie.com/v2/onboarding/me', type: 'application/hal+json' } },
         };
     }
@@ -461,7 +515,11 @@ export class MollieMocker {
             amount: chargeback.amount,
             paymentId: chargeback.paymentId,
             createdAt: chargeback.createdAt,
-            _links: { self: { href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId + '/chargebacks/' + chargeback.id, type: 'application/hal+json' } },
+            _links: {
+                self: { href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId + '/chargebacks/' + chargeback.id, type: 'application/hal+json' },
+                payment: { href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId, type: 'application/hal+json' },
+                documentation: this.#documentationLink,
+            },
         };
     }
 
@@ -484,20 +542,20 @@ export class MollieMocker {
     #createRefund(paymentId: string, body: Record<string, any>): [number, unknown] {
         const payment = this.payments.find(p => p.id === paymentId);
         if (!payment) {
-            return [404, { status: 404, title: 'Not Found', detail: 'No payment exists with token ' + paymentId }];
+            return [404, this.#errorBody(404, 'Not Found', 'No payment exists with token ' + paymentId)];
         }
 
         if (payment.status !== 'paid') {
-            return [422, { status: 422, title: 'Unprocessable Entity', detail: 'The payment is not paid; you can only refund paid payments' }];
+            return [422, this.#errorBody(422, 'Unprocessable Entity', 'The payment is not paid; you can only refund paid payments')];
         }
 
         const value = parseFloat(String(body.amount?.value ?? '0'));
         if (!(value > 0)) {
-            return [422, { status: 422, title: 'Unprocessable Entity', detail: 'The amount is invalid', field: 'amount' }];
+            return [422, this.#errorBody(422, 'Unprocessable Entity', 'The amount is invalid', 'amount')];
         }
 
         if (value > this.getRemainingAmount(payment) + 0.000001) {
-            return [422, { status: 422, title: 'Unprocessable Entity', detail: 'The amount is higher than the remaining payment amount', field: 'amount' }];
+            return [422, this.#errorBody(422, 'Unprocessable Entity', 'The amount is higher than the remaining payment amount', 'amount')];
         }
 
         const refund: MollieMockRefund = {
@@ -516,7 +574,7 @@ export class MollieMocker {
     #getRefund(paymentId: string, refundId: string): [number, unknown] {
         const refund = this.refunds.find(r => r.id === refundId && r.paymentId === paymentId);
         if (!refund) {
-            return [404, { status: 404, title: 'Not Found', detail: 'No refund exists with token ' + refundId }];
+            return [404, this.#errorBody(404, 'Not Found', 'No refund exists with token ' + refundId)];
         }
         return [200, this.#refundResource(refund)];
     }
@@ -574,8 +632,12 @@ export class MollieMocker {
             description: refund.description,
             paymentId: refund.paymentId,
             createdAt: refund.createdAt,
-            metadata: refund.metadata ?? undefined,
-            _links: { self: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId + '/refunds/' + refund.id, type: 'application/hal+json' } },
+            metadata: refund.metadata ?? null,
+            _links: {
+                self: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId + '/refunds/' + refund.id, type: 'application/hal+json' },
+                payment: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId, type: 'application/hal+json' },
+                documentation: this.#documentationLink,
+            },
         };
     }
 
@@ -626,7 +688,7 @@ export class MollieMocker {
         const from = query.get('from');
         const startIndex = from ? sorted.findIndex(s => s.id === from) : 0;
         if (startIndex === -1) {
-            return [404, { status: 404, title: 'Not Found', detail: 'No settlement exists with token ' + from }];
+            return [404, this.#errorBody(404, 'Not Found', 'No settlement exists with token ' + from)];
         }
 
         const page = sorted.slice(startIndex, startIndex + limit);
@@ -693,7 +755,7 @@ export class MollieMocker {
         const from = query.get('from');
         const startIndex = from ? sorted.findIndex(t => t.id === from) : 0;
         if (startIndex === -1) {
-            return [404, { status: 404, title: 'Not Found', detail: 'No balance transaction exists with token ' + from }];
+            return [404, this.#errorBody(404, 'Not Found', 'No balance transaction exists with token ' + from)];
         }
 
         const page = sorted.slice(startIndex, startIndex + limit);

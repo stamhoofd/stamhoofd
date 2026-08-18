@@ -1,4 +1,3 @@
-import { PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
@@ -307,26 +306,27 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             });
                         }
                         const molliePayment = await mollieService.client.payments.create({
-                            amount: {
-                                currency: 'EUR',
-                                value: (totalPrice / 10000).toFixed(2), // from 4 decimals to 0 decimals
+                            paymentRequest: {
+                                amount: {
+                                    currency: 'EUR',
+                                    value: (totalPrice / 10000).toFixed(2), // from 4 decimals to 0 decimals
+                                },
+                                method: MollieService.paymentMethodToMollie(payment.method) ?? 'creditcard',
+                                profileId,
+                                description,
+                                redirectUrl,
+                                webhookUrl: exchangeUrl,
+                                metadata: {
+                                    order: order.id,
+                                    organization: organization.id,
+                                    webshop: webshop.id,
+                                    payment: payment.id,
+                                },
+                                locale: mollieService.locale,
                             },
-                            method: payment.method === PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method === PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                            testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
-                            profileId,
-                            description,
-                            redirectUrl,
-                            webhookUrl: exchangeUrl,
-                            metadata: {
-                                order: order.id,
-                                organization: organization.id,
-                                webshop: webshop.id,
-                                payment: payment.id,
-                            },
-                            locale: mollieService.locale,
                         });
                         console.log(molliePayment);
-                        paymentUrl = molliePayment.getCheckoutUrl();
+                        paymentUrl = MollieService.getCheckoutUrl(molliePayment);
 
                         // Save payment
                         const dbPayment = new MolliePayment();
