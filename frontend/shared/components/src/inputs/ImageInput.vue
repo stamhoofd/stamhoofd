@@ -123,7 +123,7 @@ function changedFile(event: Event) {
     errorBox.value = null;
 
     Request.cancelAll(owner);
-    context.value.authenticatedServer
+    context.value.optionalAuthenticatedServer
         .request({
             method: 'POST',
             path: '/upload-image',
