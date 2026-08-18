@@ -512,7 +512,7 @@ export class StripeSettlementSync {
             case 'payment': {
                 const payment = await this.#resolvePayment(transaction);
 
-                if (payment.organizationId !== settlement.organizationId) {
+                if (!payment || payment.organizationId !== settlement.organizationId) {
                     // Destination charge via the platform
                     await this.#storePaidFeesForTransaction(transaction, settlement, { paymentId: null });
                     return;
@@ -692,7 +692,7 @@ export class StripeSettlementSync {
                 continue;
             }
 
-            const charge = await SettlementService.upsertCharge({
+            await SettlementService.upsertCharge({
                 type: getFeeDetailType(detail, transaction),
                 externalId: transaction.id + ':fee:' + index,
                 amount: -detail.amount * 100,
@@ -826,7 +826,7 @@ export class StripeSettlementSync {
         await payment.save();
     }
 
-    async #resolvePayment(transaction: Stripe.BalanceTransaction): Promise<Payment> {
+    async #resolvePayment(transaction: Stripe.BalanceTransaction): Promise<Payment | null> {
         const source = transaction.source;
         if (!source || typeof source === 'string' || source.object !== 'charge') {
             throw new SimpleError({
@@ -848,10 +848,13 @@ export class StripeSettlementSync {
 
         const payment = await Payment.getByID(paymentId);
         if (!payment) {
-            throw new SimpleError({
-                code: 'payment_not_found',
-                message: 'Payment ' + paymentId + ' referenced by charge ' + source.id + ' does not exist',
-            });
+            // Probably deleted
+
+            return null;
+            // throw new SimpleError({
+            //     code: 'payment_not_found',
+            //     message: 'Payment ' + paymentId + ' referenced by charge ' + source.id + ' does not exist',
+            // });
         }
 
         this.#assertPaymentScope(payment, source.id);
