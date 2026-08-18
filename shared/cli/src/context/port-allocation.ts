@@ -43,7 +43,7 @@ export async function resolvePortOffset(context: CliContext): Promise<CliContext
         };
     }
 
-    throw new Error(`Could not find a free development port range for instance ${context.instance.name}`);
+    throw new Error(`Could not find a free development port range for instance ${context.instance.name}. Please verify whether you have permission to open ports when running inside a sandbox or agent.`);
 }
 
 async function assertPortsAvailable(context: CliContext): Promise<void> {
