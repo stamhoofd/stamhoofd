@@ -120,6 +120,12 @@ export type BackendSpecificEnvironment = {
     // Communication with other internal services
     readonly INTERNAL_SECRET_KEY: string;
 
+    /**
+     * Extra keys that are also accepted when verifying internal signatures, so multiple
+     * platforms (each with their own INTERNAL_SECRET_KEY) can share one service.
+     */
+    readonly EXTRA_INTERNAL_SECRET_KEYS?: string[];
+
     // File signing
     readonly FILE_SIGNING_PUBLIC_KEY: jose.JWK;
     readonly FILE_SIGNING_PRIVATE_KEY: jose.JWK;
@@ -217,6 +223,12 @@ export type RendererEnvironment = {
 
     // Communication with other internal services
     readonly INTERNAL_SECRET_KEY: string;
+
+    /**
+     * Extra keys that are also accepted when verifying internal signatures, so multiple
+     * platforms (each with their own INTERNAL_SECRET_KEY) can share one renderer.
+     */
+    readonly EXTRA_INTERNAL_SECRET_KEYS?: string[];
     readonly translationNamespace: string;
     readonly platformName: string;
 
