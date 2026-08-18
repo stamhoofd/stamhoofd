@@ -72,18 +72,9 @@ export class Token extends QueryableModel {
     @column({ type: 'datetime' })
     sessionStartedAt: Date;
 
-    /**
-     * Whether the session was created in the native app. The app stores its tokens in the
-     * secure storage of the device instead of in a browser, so those sessions are not
-     * limited in length.
-     */
     @column({ type: 'boolean' })
     isNativeApp = false;
 
-    /**
-     * The primary credential this session was created with. Copied over on rotation: a
-     * session does not change the way it was authenticated.
-     */
     @column({ type: 'string' })
     loginMethod: SessionLoginMethod = 'password';
 

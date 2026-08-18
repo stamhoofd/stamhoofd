@@ -206,7 +206,6 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'web');
 
-            // Almost at the end of the maximum session length of an organization administrator
             const sessionStartedAt = new Date(Date.now() - 14 * DAY + DAY);
             sessionStartedAt.setMilliseconds(0);
             token.sessionStartedAt = sessionStartedAt;

@@ -15,9 +15,6 @@ function humanDuration(duration: number): string {
     return duration % DAY === 0 ? `${duration / DAY} days` : `${duration / HOUR} hours`;
 }
 
-/**
- * Run inside a request context, so the service sees the platform the request came from.
- */
 async function onPlatform<T>(platform: string, handler: () => Promise<T>): Promise<T> {
     const request = new Request({ method: 'POST', url: '/oauth/token', host: 'api.example.com', headers: { 'x-platform': platform } });
     return await ContextInstance.start(request, handler);
@@ -82,8 +79,6 @@ describe('SessionService', () => {
                 const user = await createUser();
                 const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
 
-                // An hour before the session reaches its maximum length: renewing may not
-                // hand out a refresh token that outlives it.
                 token.sessionStartedAt = new Date(Date.now() - session + HOUR);
                 await token.save();
 

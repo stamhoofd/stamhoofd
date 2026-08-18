@@ -3,7 +3,6 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
- * How long an access token can be used before it has to be renewed with the refresh token.
  * Kept short: this is the window in which a leaked access token is still worth something.
  */
 export const ACCESS_TOKEN_DURATION = 15 * MINUTE;
@@ -14,10 +13,6 @@ export const ACCESS_TOKEN_DURATION = 15 * MINUTE;
  */
 export const DEFAULT_REFRESH_TOKEN_DURATION = 30 * DAY;
 
-/**
- * The kind of session, in the order it is decided: an SSO session is an SSO session no
- * matter which permissions the user has.
- */
 export type SessionType = 'sso' | 'platformAdmin' | 'admin' | 'user';
 
 export type SessionClient = 'browser' | 'nativeApp';

@@ -60,8 +60,8 @@ export class Token implements Encodeable {
     }
 
     /**
-     * Whether this session has ended for sure. Using the refresh token after this signs the
-     * user out of every session, so it may never be sent to the server anymore.
+     * Using the refresh token after it expired signs the user out of every session, so it
+     * may never be sent to the server anymore.
      */
     isRefreshTokenExpired(): boolean {
         return this.refreshTokenValidUntil !== null && this.refreshTokenValidUntil < new Date();
