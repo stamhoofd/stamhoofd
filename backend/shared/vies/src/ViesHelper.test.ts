@@ -1,9 +1,8 @@
-import { Database } from '@simonbackx/simple-database';
 import { Address, Company, PeppolEndointId } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
-import { ViesHelper } from '@stamhoofd/vies/ViesHelper.js';
 import nock from 'nock';
+import { ViesHelper } from './ViesHelper.js';
 
 const VIES_HOST = 'https://ec.europa.eu';
 const VIES_PATH = '/taxation_customs/vies/rest-api/check-vat-number';
@@ -34,12 +33,6 @@ describe('ViesHelper', () => {
             .reply(statusCode, response as nock.Body);
         return { getBody: () => body };
     }
-
-    afterEach(async () => {
-        nock.cleanAll();
-        nock.disableNetConnect();
-        await Database.delete('DELETE FROM `vies_cached_results`');
-    });
 
     describe('checkVATNumber', () => {
         describe('rejects invalid numbers before contacting the API', () => {

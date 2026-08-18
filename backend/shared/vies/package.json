@@ -43,6 +43,7 @@
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.37.1",
+        "@stamhoofd/backend-i18n": "2.143.1",
         "@stamhoofd/test-utils": "2.143.1",
         "nock": "14.0.16",
         "vitest": "4.1.10"

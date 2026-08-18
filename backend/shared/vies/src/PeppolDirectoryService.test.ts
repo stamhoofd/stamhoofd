@@ -1,7 +1,7 @@
 import { PeppolEndointId } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
-import { PeppolDirectoryService } from '@stamhoofd/vies/PeppolDirectoryService.js';
 import nock from 'nock';
+import { PeppolDirectoryService } from './PeppolDirectoryService.js';
 
 const DIRECTORY_HOST = 'https://directory.peppol.eu';
 const DIRECTORY_PATH = '/search/1.0/json';
@@ -33,11 +33,6 @@ describe('PeppolDirectoryService', () => {
             ],
         };
     }
-
-    afterEach(() => {
-        nock.cleanAll();
-        nock.disableNetConnect();
-    });
 
     test('resolves when the participant is registered in the directory', async () => {
         const scope = mockDirectory('iso6523-actorid-upis::0208:0123456789', matchResponse('0208:0123456789'));
