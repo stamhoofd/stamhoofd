@@ -12,11 +12,6 @@ import { ClientError, ErrorResponse } from 'mollie-api-typescript/models/errors'
 import type { EntityRefundResponseStatus, ListEntityRefundStatus, ListMandateResponse, MandateResponse, PaymentResponse } from 'mollie-api-typescript/models';
 import { Context } from '../helpers/Context.js';
 
-type MollieListPage<TResult> = {
-    'result': TResult;
-    '~next'?: { url: string } | undefined;
-};
-
 export class MollieService {
     client: Client;
     sellingOrganization: Organization;
@@ -24,7 +19,10 @@ export class MollieService {
 
     private constructor({ sellingOrganization, accessToken }: { sellingOrganization: Organization; accessToken: string }) {
         this.sellingOrganization = sellingOrganization;
-        this.client = new Client({ security: { advancedAccessToken: accessToken } });
+        this.client = new Client({
+            security: { advancedAccessToken: accessToken },
+            testmode: this.testMode,
+        });
         this.createdAt = new Date();
     }
 
@@ -35,30 +33,6 @@ export class MollieService {
      */
     isOutdated() {
         return this.createdAt.getTime() < Date.now() - 30_000;
-    }
-
-    /**
-     * Iterate the items of a paginated Mollie list endpoint. Pagination re-requests with the
-     * `from` cursor of Mollie's next link instead of letting the SDK follow that link directly:
-     * the SDK requests the next URL verbatim, which would drop query parameters that Mollie
-     * does not echo in the link (notably `testmode`).
-     */
-    static async* iterate<TResult, TItem>(
-        listPage: (from: string | undefined) => Promise<MollieListPage<TResult>>,
-        getItems: (result: TResult) => TItem[],
-    ): AsyncGenerator<TItem, void, undefined> {
-        let from: string | undefined;
-        while (true) {
-            const page = await listPage(from);
-            yield* getItems(page.result);
-
-            const nextUrl = page['~next']?.url;
-            const nextFrom = nextUrl ? new URL(nextUrl).searchParams.get('from') : null;
-            if (!nextFrom || nextFrom === from) {
-                return;
-            }
-            from = nextFrom;
-        }
     }
 
     static async create({ sellingOrganization }: { sellingOrganization: Organization }) {
@@ -145,7 +119,7 @@ export class MollieService {
 
             // check still valid
             try {
-                const c = await this.client.customers.get({ customerId, testmode: this.testMode });
+                const c = await this.client.customers.get({ customerId });
 
                 if ((c.mode === 'test') === this.testMode) {
                     this.#verifiedCustomerIds.add(customerId);
@@ -171,7 +145,6 @@ export class MollieService {
                     organizationId: payingOrganization.id,
                     userId: user?.id,
                 },
-                testmode: this.testMode,
             },
         });
 
@@ -206,20 +179,17 @@ export class MollieService {
         const mandates: PaymentMandate[] = [];
 
         try {
-            const iterator = MollieService.iterate(
-                from => this.client.mandates.list({
-                    customerId,
-                    limit: 250,
-                    testmode: this.testMode,
-                    from,
-                }),
-                result => result.embedded.mandates,
-            );
+            const pages = await this.client.mandates.list({
+                customerId,
+                limit: 250,
+            });
 
-            for await (const mandate of iterator) {
-                const paymentMandate = MollieService.mollieManateToStamhoofd({ mandate, payingOrganization, user });
-                if (paymentMandate) {
-                    mandates.push(paymentMandate);
+            for await (const page of pages) {
+                for (const mandate of page.result.embedded.mandates) {
+                    const paymentMandate = MollieService.mollieManateToStamhoofd({ mandate, payingOrganization, user });
+                    if (paymentMandate) {
+                        mandates.push(paymentMandate);
+                    }
                 }
             }
         } catch (e) {
@@ -243,9 +213,6 @@ export class MollieService {
         await this.client.mandates.revoke({
             mandateId,
             customerId,
-            requestBody: {
-                testmode: this.testMode,
-            },
         });
     }
 
@@ -332,17 +299,16 @@ export class MollieService {
 
     async getProfiles(): Promise<MollieProfile[]> {
         try {
-            const iterator = MollieService.iterate(
-                from => this.client.profiles.list({ limit: 250, from }),
-                result => result.embedded.profiles,
-            );
+            const pages = await this.client.profiles.list({ limit: 250 });
             const profiles: MollieProfile[] = [];
-            for await (const profile of iterator) {
-                profiles.push(MollieProfile.create({
-                    ...profile,
-                    mode: profile.mode === 'live' ? MollieProfileMode.Live : MollieProfileMode.Test,
-                    status: profile.status === 'unverified' ? MollieProfileStatus.Unverified : (profile.status === 'blocked' ? MollieProfileStatus.Blocked : MollieProfileStatus.Verified),
-                }));
+            for await (const page of pages) {
+                for (const profile of page.result.embedded.profiles) {
+                    profiles.push(MollieProfile.create({
+                        ...profile,
+                        mode: profile.mode === 'live' ? MollieProfileMode.Live : MollieProfileMode.Test,
+                        status: profile.status === 'unverified' ? MollieProfileStatus.Unverified : (profile.status === 'blocked' ? MollieProfileStatus.Blocked : MollieProfileStatus.Verified),
+                    }));
+                }
             }
             return profiles;
         } catch (e) {
@@ -372,21 +338,20 @@ export class MollieService {
         }
 
         try {
-            const iterator = MollieService.iterate(
-                from => this.client.profiles.list({ limit: 250, from }),
-                result => result.embedded.profiles,
-            );
+            const pages = await this.client.profiles.list({ limit: 250 });
 
             let firstProfileId: string | undefined;
             let stamhoofdProfileId: string | undefined;
 
-            for await (const profile of iterator) {
-                firstProfileId ??= profile.id;
-                if (website && profile.website.toLowerCase().includes(website)) {
-                    return profile.id;
-                }
-                if (!stamhoofdProfileId && profile.name.toLowerCase().includes('stamhoofd')) {
-                    stamhoofdProfileId = profile.id;
+            for await (const page of pages) {
+                for (const profile of page.result.embedded.profiles) {
+                    firstProfileId ??= profile.id;
+                    if (website && profile.website.toLowerCase().includes(website)) {
+                        return profile.id;
+                    }
+                    if (!stamhoofdProfileId && profile.name.toLowerCase().includes('stamhoofd')) {
+                        stamhoofdProfileId = profile.id;
+                    }
                 }
             }
 
@@ -446,7 +411,6 @@ export class MollieService {
                     value: (Math.round(payment.price / 100) / 100).toFixed(2),
                 },
                 method,
-                testmode: mollieService.testMode,
                 mandateId: mandate?.id,
                 sequenceType: mandate ? 'recurring' : (payment.createMandate ? 'first' : 'oneoff'),
                 customerId,
@@ -540,9 +504,6 @@ export class MollieService {
             try {
                 const newData = await this.client.payments.cancel({
                     paymentId: mollieData.id,
-                    requestBody: {
-                        testmode: this.testMode,
-                    },
                 });
                 console.log('Cancelled Mollie Payment ' + payment.id);
                 return await this.getStatusFor(newData, payment, false);
@@ -612,7 +573,6 @@ export class MollieService {
                 },
                 description,
                 metadata: metadata ?? null,
-                testmode: this.testMode,
             },
         };
 
@@ -680,7 +640,6 @@ export class MollieService {
 
         const mollieData = await this.client.payments.get({
             paymentId: molliePayment.mollieId,
-            testmode: this.testMode,
         });
 
         console.log(mollieData);
@@ -711,7 +670,6 @@ export class MollieService {
         const refund = await this.client.refunds.get({
             refundId: mollieRefund.mollieId,
             paymentId: sourceMolliePayment.mollieId,
-            testmode: this.testMode,
         });
 
         return {

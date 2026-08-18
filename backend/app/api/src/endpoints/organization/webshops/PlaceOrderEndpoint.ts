@@ -312,7 +312,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                     value: (totalPrice / 10000).toFixed(2), // from 4 decimals to 0 decimals
                                 },
                                 method: MollieService.paymentMethodToMollie(payment.method) ?? 'creditcard',
-                                testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
                                 profileId,
                                 description,
                                 redirectUrl,

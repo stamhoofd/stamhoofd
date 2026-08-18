@@ -49,76 +49,75 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
     // Check last 7 days
     const offset = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
 
-    const iterator = MollieService.iterate(
-        from => service.client.refunds.all({ sort: 'desc', limit: 250, testmode: service.testMode, from }),
-        result => result.embedded.refunds,
-    );
+    const pages = await service.client.refunds.all({ sort: 'desc', limit: 250 });
 
-    for await (const refund of iterator) {
-        const createdAt = new Date(refund.createdAt);
+    pagesLoop: for await (const page of pages) {
+        for (const refund of page.result.embedded.refunds) {
+            const createdAt = new Date(refund.createdAt);
 
-        if (createdAt < MOLLIE_REFUNDS_MINIMUM_DATE) {
-            break;
-        }
+            if (createdAt < MOLLIE_REFUNDS_MINIMUM_DATE) {
+                break pagesLoop;
+            }
 
-        if (!checkAll && createdAt < offset) {
-            break;
-        }
+            if (!checkAll && createdAt < offset) {
+                break pagesLoop;
+            }
 
-        // Check if this refund is already registered (refunds created via the API are linked on
-        // creation, so we cannot break here: an older refund created in the Mollie UI could still
-        // be unhandled). Registered refunds that are still pending locally are reconciled: Mollie
-        // refunds can still fail or be canceled until they are actually executed.
-        const existingRefund = await MolliePayment.select().where('mollieId', refund.id).first(false);
-        if (existingRefund) {
-            await reconcileRefundStatus(existingRefund.paymentId, refund.status, createdAt);
-            continue;
-        }
-
-        // Refunds that were canceled or failed before we ever registered them can be ignored
-        if (refund.status === 'canceled' || refund.status === 'failed') {
-            continue;
-        }
-
-        // Safety net: when creating a refund via the API succeeded, but saving the link afterwards
-        // failed, the local refund payment already exists. Restore the link instead of registering
-        // the refund twice (the metadata is set in PaymentService.createRefund).
-        const metadata = refund.metadata as { refundPaymentId?: string } | null;
-        if (metadata?.refundPaymentId) {
-            const localRefund = await Payment.getByID(metadata.refundPaymentId);
-            if (localRefund && localRefund.type === PaymentType.Refund) {
-                console.error('Restoring missing link for Mollie refund ' + refund.id + ' to payment ' + localRefund.id);
-                const link = new MolliePayment();
-                link.paymentId = localRefund.id;
-                link.mollieId = refund.id;
-                await link.save();
-
-                await reconcileRefundStatus(localRefund.id, refund.status, createdAt);
+            // Check if this refund is already registered (refunds created via the API are linked on
+            // creation, so we cannot break here: an older refund created in the Mollie UI could still
+            // be unhandled). Registered refunds that are still pending locally are reconciled: Mollie
+            // refunds can still fail or be canceled until they are actually executed.
+            const existingRefund = await MolliePayment.select().where('mollieId', refund.id).first(false);
+            if (existingRefund) {
+                await reconcileRefundStatus(existingRefund.paymentId, refund.status, createdAt);
                 continue;
             }
-        }
 
-        if (refund.paymentId) {
-            const molliePayment = await MolliePayment.select().where('mollieId', refund.paymentId).first(false);
-            if (molliePayment) {
-                const payment = await Payment.getByID(molliePayment.paymentId);
-                if (payment) {
-                    try {
-                        const amount = Math.round(parseFloat(refund.amount.value) * 100) * 100;
-                        const status = MollieService.refundStatusToPaymentStatus(refund.status) === PaymentStatus.Succeeded ? PaymentStatus.Succeeded : PaymentStatus.Pending;
-                        const createdPayment = await PaymentService.registerRefund(payment, amount, createdAt, status);
+            // Refunds that were canceled or failed before we ever registered them can be ignored
+            if (refund.status === 'canceled' || refund.status === 'failed') {
+                continue;
+            }
 
-                        // Link Mollie refund ID (so we don't register it twice and can set the settlement later)
-                        const molliePayment = new MolliePayment();
-                        molliePayment.paymentId = createdPayment.id;
-                        molliePayment.mollieId = refund.id;
-                        await molliePayment.save();
-                    } catch (e) {
-                        console.error('Failed to register refund ' + refund.id, e);
-                    }
+            // Safety net: when creating a refund via the API succeeded, but saving the link afterwards
+            // failed, the local refund payment already exists. Restore the link instead of registering
+            // the refund twice (the metadata is set in PaymentService.createRefund).
+            const metadata = refund.metadata as { refundPaymentId?: string } | null;
+            if (metadata?.refundPaymentId) {
+                const localRefund = await Payment.getByID(metadata.refundPaymentId);
+                if (localRefund && localRefund.type === PaymentType.Refund) {
+                    console.error('Restoring missing link for Mollie refund ' + refund.id + ' to payment ' + localRefund.id);
+                    const link = new MolliePayment();
+                    link.paymentId = localRefund.id;
+                    link.mollieId = refund.id;
+                    await link.save();
+
+                    await reconcileRefundStatus(localRefund.id, refund.status, createdAt);
+                    continue;
                 }
-            } else {
-                console.error('Invalid refund payment id ' + refund.paymentId + ', not found');
+            }
+
+            if (refund.paymentId) {
+                const molliePayment = await MolliePayment.select().where('mollieId', refund.paymentId).first(false);
+                if (molliePayment) {
+                    const payment = await Payment.getByID(molliePayment.paymentId);
+                    if (payment) {
+                        try {
+                            const amount = Math.round(parseFloat(refund.amount.value) * 100) * 100;
+                            const status = MollieService.refundStatusToPaymentStatus(refund.status) === PaymentStatus.Succeeded ? PaymentStatus.Succeeded : PaymentStatus.Pending;
+                            const createdPayment = await PaymentService.registerRefund(payment, amount, createdAt, status);
+
+                            // Link Mollie refund ID (so we don't register it twice and can set the settlement later)
+                            const molliePayment = new MolliePayment();
+                            molliePayment.paymentId = createdPayment.id;
+                            molliePayment.mollieId = refund.id;
+                            await molliePayment.save();
+                        } catch (e) {
+                            console.error('Failed to register refund ' + refund.id, e);
+                        }
+                    }
+                } else {
+                    console.error('Invalid refund payment id ' + refund.paymentId + ', not found');
+                }
             }
         }
     }
