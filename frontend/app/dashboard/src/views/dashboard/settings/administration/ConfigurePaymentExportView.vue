@@ -27,7 +27,9 @@
                 </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
             </span>
         </p>
-        <hr><h2>{{ $t('%O7') }}</h2>
+
+        <hr>
+        <h2>{{ $t('%O7') }}</h2>
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label">
@@ -40,8 +42,27 @@
             </STListItem>
         </STList>
 
+        <template v-if="getPaymentMethod(PaymentMethod.Transfer) || getPaymentMethod(PaymentMethod.PointOfSale) || getPaymentMethod(PaymentMethod.Unknown)">
+            <hr>
+            <h2>{{ $t('Datumbereik') }}</h2>
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="usePaidAt" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Filter op betaaldatum in plaats van aanmaakdatum') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('Als veel overschrijvingen pas laat als betaald gemarkeerd werden, is de aanmaakdatum vaak accurater.') }}
+                    </p>
+                </STListItem>
+            </STList>
+        </template>
+
         <template v-if="allPaymentProviders.length">
-            <hr><h2>{{ $t('%ZeP') }}</h2>
+            <hr>
+            <h2>{{ $t('%ZeP') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
@@ -56,7 +77,8 @@
         </template>
 
         <template v-if="getProvider('Stripe' as any) || useUTCTimezone">
-            <hr><h2>{{ $t('%P1') }}</h2>
+            <hr>
+            <h2>{{ $t('%P1') }}</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
@@ -125,19 +147,21 @@ const loadingStripeAccounts = ref(false);
 const stripeAccounts = shallowRef<StripeAccount[]>([]);
 const dateRangeSuggestions = shallowRef<DateRangeSuggestion[]>([]);
 const useUTCTimezone = ref(false);
+const usePaidAt = ref(false);
 
 const startDate = computed({
     get: () => internalStartDate.value,
     set: (value: Date) => {
-        internalStartDate.value = new Date(value.getTime());
-        internalStartDate.value.setHours(0, 0, 0, 0);
+        const d = Formatter.luxon(value).startOf('day');
+        internalStartDate.value = d.toJSDate();
     },
 });
 const endDate = computed({
     get: () => internalEndDate.value,
     set: (value: Date) => {
-        internalEndDate.value = new Date(value.getTime());
-        internalEndDate.value.setHours(23, 59, 59, 0);
+        const d = Formatter.luxon(value).endOf('day');
+
+        internalEndDate.value = d.toJSDate();
     },
 });
 const correctedStartDate = computed(() => {
@@ -176,6 +200,7 @@ const sortedPaymentMethods = computed(() => {
     }
     result.push(PaymentMethod.CreditCard);
     result.push(PaymentMethod.PointOfSale);
+    result.push(PaymentMethod.Unknown);
     return result;
 });
 const allPaymentProviders = computed(() => {
@@ -198,6 +223,7 @@ const canContinue = computed(() => methods.value.length > 0 && (
     providers.value.length > 0
     || methods.value.includes(PaymentMethod.Transfer)
     || methods.value.includes(PaymentMethod.PointOfSale)
+    || methods.value.includes(PaymentMethod.Unknown)
 ));
 
 onMounted(() => {
@@ -333,6 +359,8 @@ async function save() {
 }
 
 function buildFilter(): StamhoofdFilter {
+    const dateField = usePaidAt.value ? 'paidAt' : 'createdAt';
+
     return {
         $and: [
             {
@@ -345,12 +373,12 @@ function buildFilter(): StamhoofdFilter {
                 },
             },
             {
-                paidAt: {
+                [dateField]: {
                     $gte: correctedStartDate.value,
                 },
             },
             {
-                paidAt: {
+                [dateField]: {
                     $lte: correctedEndDate.value,
                 },
             },

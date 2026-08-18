@@ -14,7 +14,7 @@ import { fetchToAsyncIterator } from './fetchToAsyncIterator.js';
  * They are read page by page and added up right away, so they are never all in memory at once. Above
  * this many objects a breakdown takes too long to wait for, so we ask the user to narrow down instead.
  */
-export const MAX_BREAKDOWN_OBJECTS = 10000;
+export const MAX_BREAKDOWN_OBJECTS = 50_000;
 
 const PAGE_SIZE = 100;
 

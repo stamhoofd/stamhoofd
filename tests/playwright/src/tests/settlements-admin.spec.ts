@@ -96,7 +96,7 @@ test.describe('Settlements administration (organization mode) @settlements-admin
         await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${membershipOrganization.uri}/boekhouding`);
 
         // The neighbouring payout report entry is visible, the flagged entries are not
-        await expect(page.getByRole('heading', { name: 'Betalingen exporteren', exact: true })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Overschrijvingen controleren', exact: true })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Opgeslagen uitbetalingen exporteren', exact: true })).not.toBeVisible();
         await expect(page.getByRole('heading', { name: 'Uitbetalingen synchroniseren', exact: true })).not.toBeVisible();
     });

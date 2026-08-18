@@ -81,7 +81,7 @@
                     <p>{{ $t('Een aanrekening is een bedrag dat een lid moet betalen, bijvoorbeeld voor een inschrijving of T-shirt. Betalingen worden aan deze aanrekeningen gekoppeld.') }}</p>
 
                     <STList class="illustration-list">
-                        <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
+                        <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" data-testid="open-receivable-balances-table" @click="$navigate(Routes.ReceivableBalance)">
                             <template #left>
                                 <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
                             </template>

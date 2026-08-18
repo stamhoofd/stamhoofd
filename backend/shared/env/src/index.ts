@@ -6,8 +6,7 @@ async function fileExists(path: string): Promise<boolean> {
     try {
         await promises.access(path);
         return true;
-    }
-    catch {
+    } catch {
         return false;
     }
 }
@@ -20,8 +19,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         const builder = await import('@stamhoofd/test-utils');
         builder.TestUtils.loadEnvironment();
         env = STAMHOOFD;
-    }
-    else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
+    } else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
         const builder = await import('@stamhoofd/cli');
         env = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
             backend: settings?.service ?? 'api',
@@ -30,8 +28,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         if (await fileExists(settings?.path ?? '.env.json')) {
             console.warn(chalk.red('Warning: please delete your local .env.json file, as it is not used in development any longer.'));
         }
-    }
-    else {
+    } else {
         env = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
     }
 
@@ -84,13 +81,22 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
     process.env.DB_MULTIPLE_STATEMENTS = 'true';
 }
 
+function signWithKey(key: string, ...content: string[]) {
+    return crypto.createHmac('sha256', Buffer.from(key, 'base64')).update(content.join(';')).digest('base64');
+}
+
 export function signInternal(...content: string[]) {
-    return crypto.createHmac('sha256', Buffer.from(STAMHOOFD.INTERNAL_SECRET_KEY, 'base64')).update(content.join(';')).digest('base64');
+    return signWithKey(STAMHOOFD.INTERNAL_SECRET_KEY, ...content);
 }
 
 export function verifyInternalSignature(signature: string, ...content: string[]) {
-    const newSignature = signInternal(...content);
-    return crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(newSignature, 'base64'));
+    const keys = [STAMHOOFD.INTERNAL_SECRET_KEY, ...(STAMHOOFD.EXTRA_INTERNAL_SECRET_KEYS ?? [])];
+    const signatureBuffer = Buffer.from(signature, 'base64');
+
+    return keys.some((key) => {
+        const expectedBuffer = Buffer.from(signWithKey(key, ...content), 'base64');
+        return signatureBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+    });
 }
 
 export default {
