@@ -25,7 +25,10 @@ ORDER BY MAX(startDate) DESC
 -- title: Eenheden
 -- display: table
 -- size: half
-SELECT name AS `Eenheid`
-FROM organizations
-GROUP BY name
-ORDER BY name
+-- Zonder de eigen organisatie van de koepel: de dashboards tellen die nergens mee, dus als filter zou
+-- ze elke kaart op nul zetten.
+SELECT o.name AS `Eenheid`
+FROM organizations o
+WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
+GROUP BY o.name
+ORDER BY o.name

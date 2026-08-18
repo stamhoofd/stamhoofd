@@ -113,6 +113,9 @@ WITH filteredMembers AS (
     INNER JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.deactivatedAt IS NULL
       AND r.registeredAt IS NOT NULL
+      -- Niet de koepel zelf, net zoals in `facts`: deze kaart telt de leden zelf op en zou hem
+      -- anders als enige kaart van de pagina wel meetellen.
+      AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
 )
@@ -174,6 +177,9 @@ JOIN platform_membership_types mt ON mt.id = mpm.membershipTypeId AND mt.periodI
 WHERE mpm.deletedAt IS NULL
   AND mpm.periodId IN (SELECT DISTINCT period_id FROM facts)
   AND mpm.memberId IN (SELECT DISTINCT member_id FROM facts)
+  -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
+  -- ook in een nationale ploeg zit zou het lidgeldtype daarvan anders in deze grafiek zetten.
+  AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
 GROUP BY mt.name
 ORDER BY `Aantal leden` DESC
 

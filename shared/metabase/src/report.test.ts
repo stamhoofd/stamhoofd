@@ -40,7 +40,7 @@ describe('report', () => {
 
             expect(card.title).toEqual('Totaal leden');
             expect(card.display).toEqual('scalar');
-            expect(card.sql).toContain('WITH facts AS');
+            expect(card.sql).toContain('WITH all_facts AS');
             expect(card.sql).not.toContain('@include');
         });
 
@@ -81,6 +81,42 @@ describe('report', () => {
             for (const key of ['nationaal', 'eenheden', 'netwerk', 'varia']) {
                 expect(`${key}: ${dashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
             }
+        });
+
+        /**
+         * The koepel's own organization is not an eenheid and its structuurvrijwilligers are nobody's
+         * leden, so the ledenstatistieken leave it out wherever they count: every card of that
+         * dashboard drops `platform.membershipOrganizationId`, and so does the eenheid filter, which
+         * would otherwise offer a unit that empties every card on the page.
+         *
+         * Kept here because a card that forgets it reads as a plausible figure: the koepel is one
+         * organization among dozens, and the import writes it under that same id, so it would go
+         * unnoticed in the years the client checks against their own pdf as well.
+         */
+        it('leaves the koepel out of every card of the ledenstatistieken', () => {
+            const drops = (sql: string) => /NOT EXISTS \(SELECT 1 FROM platform pf WHERE pf\.membershipOrganizationId = /.test(sql);
+            const pages = dashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
+
+            expect(pages.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'netwerk', 'varia']);
+
+            for (const dashboard of pages) {
+                for (const card of dashboard.cards) {
+                    expect(`${dashboard.key}/${card.key}: ${drops(card.sql)}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                }
+            }
+
+            expect(drops(cardOf(dashboards, 'filters', 'eenheid').sql)).toBe(true);
+        });
+
+        /**
+         * The one card that is about that organization. It reads `all_facts`, the same rows before
+         * the koepel is dropped -- filtered like the rest, it would deliver an empty sheet.
+         */
+        it('delivers the koepel itself in the aanlevering', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql;
+
+            expect(sql).toContain('FROM all_facts f\nJOIN platform pf ON pf.membershipOrganizationId = f.organization_id');
+            expect(/FROM facts\b/.test(sql)).toBe(false);
         });
 
         /**

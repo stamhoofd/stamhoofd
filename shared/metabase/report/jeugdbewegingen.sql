@@ -61,13 +61,16 @@ ORDER BY o.name
 -- An empty cell wherever the administration has no answer, which is what the metadatafiche asks for
 -- rather than a value of its own: a member without a date of birth gets no geboortejaar, and one
 -- whose geslacht was never filled in gets no letter, since the CASE has no ELSE to fall back on.
+--
+-- Read from `all_facts` rather than from `facts`: the ledenstatistieken leave this organization out,
+-- and this sheet is the one thing that is about it.
 -- @include facts
 SELECT
     f.organization_id AS `ID_Organisatie`,
     YEAR(f.birth_date) AS `Geboortejaar_deelnemers`,
     CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END AS `Gender_deelnemers`,
     COUNT(DISTINCT f.member_id) AS `Aantal_deelnemers`
-FROM facts f
+FROM all_facts f
 JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
 GROUP BY `ID_Organisatie`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
 ORDER BY `Geboortejaar_deelnemers`, `Gender_deelnemers`

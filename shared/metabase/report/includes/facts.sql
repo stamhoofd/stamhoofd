@@ -17,7 +17,11 @@
 -- where a date of birth puts them outside every tak. Without the fallback each of those few counts
 -- towards the total while showing up in none of the three categories. The handful of adults among
 -- them stay null, because nothing here tells leiding from volwassenen.
-WITH facts AS (
+--
+-- Two names for the same rows. `facts` is what every figure of the ledenstatistieken is counted from;
+-- `all_facts` is the same set with the koepel's own organization still in it, for the aanlevering,
+-- which is the one thing here that is about that organization.
+WITH all_facts AS (
     SELECT
         r.memberId AS member_id,
         r.organizationId AS organization_id,
@@ -57,4 +61,13 @@ WITH facts AS (
       AND r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
+),
+-- The koepel's own organization is not an eenheid: it is the national body, and the client's report
+-- counts the structuurvrijwilligers of its ploegen as nobody's leden and nobody's leiding. Which
+-- organization it is comes from `platform.membershipOrganizationId`, the only thing that says so --
+-- the import writes the koepel under that same id, so the years it owns drop out here exactly as the
+-- synced ones do.
+facts AS (
+    SELECT f.* FROM all_facts f
+    WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = f.organization_id)
 )

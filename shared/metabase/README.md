@@ -18,6 +18,14 @@ page of the ledenstatistieken. That is also why those cards name their columns -
 header of an export from the column's title, and a sheet read by a government department has to keep
 the names the template gives it.
 
+The koepel's own organization is treated the other way around by the two. The ledenstatistieken leave
+it out wherever they count -- it is the national body, not an eenheid, and the client's own report
+counts none of its structuurvrijwilligers -- while the aanlevering is about nothing else.
+`platform.membershipOrganizationId` is the only thing that says which organization that is, so
+`report/includes/facts.sql` offers the same rows under two names: `facts` without it, `all_facts` with
+it. The import writes it under that same id, so both hold in the years imported from the client's own
+statistics as well as in the years the sync owns.
+
 Installing Metabase differs per environment — Docker locally (`stam platform-report start`), a jar
 under systemd on a server (`yarn metabase install` in devops) — but configuring it is the same HTTP
 calls either way. That is why this package holds no install logic and no credentials: a caller passes the

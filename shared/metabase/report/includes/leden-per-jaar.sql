@@ -16,4 +16,8 @@
     JOIN `groups` g ON g.id = r.groupId AND g.deletedAt IS NULL
     WHERE r.deactivatedAt IS NULL
       AND r.registeredAt IS NOT NULL
+      -- Wie het jaar erna alleen nog bij de koepel zelf ingeschreven staat is geen blijver: dat is
+      -- dezelfde organisatie die `facts` weglaat, en een cijfer dat hier wel meetelt en daar niet zou
+      -- een ledenbehoud boven de leden zetten waar het over gaat.
+      AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
 )

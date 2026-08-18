@@ -39,5 +39,8 @@ WITH facts AS (
     JOIN organizations o ON o.id = r.organizationId AND o.periodId = r.periodId
     WHERE r.deactivatedAt IS NULL
       AND r.registeredAt IS NOT NULL
+      -- Not the koepel's own organization: it is the national body rather than an eenheid, and the
+      -- ledenstatistieken count none of its structuurvrijwilligers. See `facts.sql`.
+      AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
       [[AND o.name = {{eenheid}}]]
 )
