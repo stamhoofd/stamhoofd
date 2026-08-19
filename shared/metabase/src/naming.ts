@@ -12,22 +12,34 @@ export function metabaseDataSourceName(env: string): string {
     return `Platform statistics (${env})`;
 }
 
+const reportName = 'Ledenstatistieken';
+
 /**
- * The collection the ledenstatistieken dashboards of an environment live in.
+ * The collection the ledenstatistieken dashboards live in.
  *
- * Scoped per environment for the same reason the data source is: one Metabase serves them all, and a
- * question can only read from one database. A shared collection would mean the last environment
- * pushed silently repoints every dashboard of the others.
+ * One collection, whichever platform it counts. A local Metabase holds several environments' data
+ * sources but shows one report: writing the report of an environment points the questions in here at
+ * its data source, so the collection always holds the platform that was written last. A server holds
+ * one platform and never sees the difference.
  */
-export function metabaseReportCollectionName(env: string): string {
-    return `Ledenstatistieken (${env})`;
-}
+export const metabaseReportCollectionName = 'Statistieken';
 
 /**
  * The dashboard a tab lands on unless it names one of its own: one tab per page of the client's own
  * report.
  */
-export const metabaseReportDashboardName = 'Ledenstatistieken';
+export const metabaseReportDashboardName = reportName;
+
+const legacyReportCollectionPattern = new RegExp(`^${reportName} \\([^()]+\\)$`);
+
+/**
+ * Whether a name is the one the collection carried while there was one per environment
+ * (`Ledenstatistieken (keeo)`). Recognised so that collection can be renamed into the one written
+ * now instead of being left beside it.
+ */
+export function isLegacyReportCollectionName(name: string): boolean {
+    return legacyReportCollectionPattern.test(name);
+}
 
 /**
  * Tables of the statistics database that are infrastructure rather than data. They are hidden in

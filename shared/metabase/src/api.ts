@@ -283,19 +283,31 @@ export class MetabaseApi {
         return { removed: true };
     }
 
+    async listCollections(): Promise<MetabaseCollection[]> {
+        const collections = await this.request<MetabaseCollection[]>('GET', '/api/collection');
+        return collections.filter(collection => collection.archived !== true);
+    }
+
     /**
      * The collection the report lives in, created if it is not there yet. Everything the CLI writes
      * goes in one collection so it stays apart from whatever the client builds themselves.
      */
     async ensureCollection(name: string): Promise<{ id: number; created: boolean }> {
-        const collections = await this.request<MetabaseCollection[]>('GET', '/api/collection');
-        const match = collections.find(collection => collection.name === name && collection.archived !== true);
+        const match = (await this.listCollections()).find(collection => collection.name === name);
         if (match) {
             return { id: match.id, created: false };
         }
 
         const created = await this.request<{ id: number }>('POST', '/api/collection', { name, parent_id: null });
         return { id: created.id, created: true };
+    }
+
+    /**
+     * Rename a collection, keeping its id and everything in it. Used to bring a collection this
+     * wrote under an earlier name along rather than leaving it beside a new one.
+     */
+    async renameCollection(id: number, name: string): Promise<void> {
+        await this.request('PUT', `/api/collection/${id}`, { name });
     }
 
     async listCards(collectionId: number): Promise<MetabaseCard[]> {

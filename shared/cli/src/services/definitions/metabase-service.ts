@@ -60,7 +60,11 @@ export class MetabaseService extends SharedDockerService {
     }
 
     /**
-     * Recreate the ledenstatistieken dashboard on top of the statistics data source.
+     * Recreate the ledenstatistieken dashboards on top of the statistics data source.
+     *
+     * The report is written into one collection whichever environment it counts, so this points that
+     * collection at the data source of the selected environment: a local Metabase holds the data of
+     * several platforms and shows the report of the one that was written last.
      */
     async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
@@ -68,7 +72,8 @@ export class MetabaseService extends SharedDockerService {
         const tableCount = await this.countTables(context, database);
         const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 
-        const result = await syncReport(api, id, tabs, metabaseReportCollectionName(context.env), metabaseReportDashboardName, postalCodeCount > 0);
+        const result = await syncReport(api, id, tabs, metabaseReportCollectionName, metabaseReportDashboardName, postalCodeCount > 0);
+
         return { ...result, database, dataSource, tableCount, postalCodeCount };
     }
 

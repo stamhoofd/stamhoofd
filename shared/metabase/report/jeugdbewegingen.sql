@@ -1,6 +1,6 @@
 -- @tab jeugdbewegingen
 -- title: Jeugdbewegingen
--- dashboard: groepen en deelnemers - departement jeugd
+-- dashboard: Groepen en Deelnemers - Departement Jeugd
 -- description: De jaarlijkse aanlevering 'Groepen en Deelnemers Jeugdbewegingen' aan het Departement Cultuur, Jeugd en Media. Eén kaart per tabblad van het sjabloon: download ze via het pijltje rechtsonder op de kaart als .xlsx en plak ze in het aanleversjabloon.
 -- filters: scoutsjaar
 --

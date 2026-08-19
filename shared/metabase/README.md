@@ -37,6 +37,16 @@ base URL, the credentials and the data source to write against.
 | Authenticates with | the admin account the CLI created | an api key from 1Password |
 | Data source | registered by the CLI | added once by hand, looked up by name |
 
+Nothing this writes carries the name of a platform: the collection is `Ledenstatistieken` and holds
+the dashboards `Ledenstatistieken` and `Aanlevering ...`, whichever platform they count. A server
+holds one platform, and a local Metabase shows the report of the environment written last — writing
+another one points the same questions at its data source.
+
+That is also why nothing here trashes a collection. There is one to write into, and a collection this
+wrote under the older per-environment name (`Ledenstatistieken (keeo)`) is renamed into it, keeping
+the id every question, dashboard, link and bookmark points at. The only thing a run ever trashes is a
+dashboard this tool wrote itself under a layout it no longer writes.
+
 The two auth modes exist because the environments differ in what they may hold. Locally the CLI
 completes the setup wizard itself and knows the password. A server's first account is made by a
 person, and nothing may store their password, so it uses an api key created under

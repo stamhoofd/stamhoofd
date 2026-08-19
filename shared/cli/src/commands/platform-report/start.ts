@@ -46,7 +46,7 @@ export default class PlatformReportStart extends BaseCommand {
         }
 
         this.log('');
-        this.log(`Collection:  ${report.collection}`);
+        this.log(`Collection:  ${report.collection}${report.renamedCollection === undefined ? '' : ` (renamed from ${report.renamedCollection})`}`);
 
         for (const dashboard of report.dashboards) {
             const url = `https://${buildDomains(context).metabase}/dashboard/${dashboard.id}`;

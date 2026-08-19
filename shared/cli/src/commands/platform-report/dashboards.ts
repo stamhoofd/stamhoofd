@@ -33,7 +33,7 @@ export default class PlatformReportDashboards extends BaseCommand {
         this.log('');
         this.log(`Environment: ${context.env}`);
         this.log(`Data source: ${result.dataSource} (${result.database})`);
-        this.log(`Collection:  ${result.collection}`);
+        this.log(`Collection:  ${result.collection}${result.renamedCollection === undefined ? '' : ` (renamed from ${result.renamedCollection})`}`);
 
         for (const dashboard of result.dashboards) {
             const url = `https://${buildDomains(context).metabase}/dashboard/${dashboard.id}`;

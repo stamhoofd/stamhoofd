@@ -1,4 +1,5 @@
 import type { MetabaseApi } from './api.js';
+import { isLegacyReportCollectionName } from './naming.js';
 import type { ReportCard, ReportTab } from './report.js';
 
 /**
@@ -338,6 +339,8 @@ export type ReportSyncResult = {
     collection: string;
     collectionId: number;
     createdCollection: boolean;
+    /** The name the collection carried before this run renamed it, when it still had one. */
+    renamedCollection: string | undefined;
     dashboards: ReportSyncDashboard[];
     cards: number;
     /** Map cards drawn as a bar chart because no postal code coordinates are loaded yet. */
@@ -380,6 +383,7 @@ export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { na
  * dropdowns point at cards too.
  */
 export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], collection: string, dashboardName: string, hasCoordinates = false): Promise<ReportSyncResult> {
+    const renamedCollection = await renameLegacyCollection(api, collection);
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
     const existingCards = new Map((await api.listCards(collectionId)).map(card => [card.name, card.id]));
@@ -444,7 +448,35 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         .filter(card => card.display === 'map' && !hasCoordinates)
         .map(card => card.title))];
 
-    return { collection, collectionId, createdCollection, dashboards: written, cards: cardIds.size, mapsWithoutCoordinates };
+    return { collection, collectionId, createdCollection, renamedCollection, dashboards: written, cards: cardIds.size, mapsWithoutCoordinates };
+}
+
+/**
+ * The collection to rename into the one written now: the one this wrote while collections were named
+ * per environment. Renaming keeps its id, and with it every question, dashboard, link and bookmark
+ * that points into it, where writing a new collection would leave all of that behind.
+ *
+ * Only when exactly one is left, which is every instance that serves one platform. A development
+ * machine that served several has no single right answer, so it gets a new collection and can throw
+ * the old ones away itself.
+ */
+export function collectionToRename(collections: { id: number; name: string }[], name: string): { id: number; name: string } | undefined {
+    if (collections.some(collection => collection.name === name)) {
+        return undefined;
+    }
+
+    const legacy = collections.filter(collection => isLegacyReportCollectionName(collection.name));
+    return legacy.length === 1 ? legacy[0] : undefined;
+}
+
+async function renameLegacyCollection(api: MetabaseApi, name: string): Promise<string | undefined> {
+    const legacy = collectionToRename(await api.listCollections(), name);
+    if (!legacy) {
+        return undefined;
+    }
+
+    await api.renameCollection(legacy.id, name);
+    return legacy.name;
 }
 
 /**

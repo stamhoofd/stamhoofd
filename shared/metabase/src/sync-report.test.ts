@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ReportCard, ReportTab } from './report.js';
-import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, dashcardKey, groupByDashboard, layoutCards, templateTagId } from './sync-report.js';
+import { buildDashcards, buildParameters, buildTabs, buildTemplateTags, buildVisualizationSettings, collectionToRename, dashcardKey, groupByDashboard, layoutCards, templateTagId } from './sync-report.js';
 
 function card(overrides: Partial<ReportCard> = {}): ReportCard {
     return {
@@ -340,5 +340,31 @@ describe('groupByDashboard', () => {
 
         expect(grouped.map(dashboard => dashboard.name)).toEqual(['Andere', 'Ledenstatistieken']);
         expect(grouped[0].tabs.map(entry => entry.title)).toEqual(['A', 'C']);
+    });
+});
+
+describe('collectionToRename', () => {
+    /**
+     * An instance that served one platform keeps the collection it has: renaming it holds on to every
+     * question, dashboard, link and bookmark in it, where writing a new one would leave all of that
+     * behind under a name nothing writes any more.
+     */
+    it('renames the collection left from when there was one per environment', () => {
+        const collections = [{ id: 3, name: 'Ledenstatistieken (keeo)' }, { id: 4, name: 'Iets van de klant' }];
+
+        expect(collectionToRename(collections, 'Ledenstatistieken')?.id).toBe(3);
+    });
+
+    it('leaves the collection alone once it carries the name written now', () => {
+        const collections = [{ id: 3, name: 'Ledenstatistieken (keeo)' }, { id: 9, name: 'Ledenstatistieken' }];
+
+        expect(collectionToRename(collections, 'Ledenstatistieken')).toBeUndefined();
+    });
+
+    /** A development machine that served several platforms has no single right answer. */
+    it('renames nothing when several are left', () => {
+        const collections = [{ id: 3, name: 'Ledenstatistieken (keeo)' }, { id: 5, name: 'Ledenstatistieken (ravot)' }];
+
+        expect(collectionToRename(collections, 'Ledenstatistieken')).toBeUndefined();
     });
 });

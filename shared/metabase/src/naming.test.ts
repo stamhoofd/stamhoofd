@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { metabaseDataSourceName, metabaseReportCollectionName } from './naming.js';
+import { isLegacyReportCollectionName, metabaseDataSourceName, metabaseReportCollectionName } from './naming.js';
 
 describe('metabaseDataSourceName', () => {
     it('names the data source after the environment so one Metabase can serve several', () => {
@@ -11,11 +11,24 @@ describe('metabaseDataSourceName', () => {
 
 describe('metabaseReportCollectionName', () => {
     /**
-     * A question reads from exactly one database, so two environments cannot share a collection:
-     * pushing the second would repoint every dashboard of the first at the wrong data.
+     * One collection, whichever platform it counts: a local Metabase shows the report of the
+     * environment written last, and a server holds one platform to begin with.
      */
-    it('gives every environment its own collection', () => {
-        expect(metabaseReportCollectionName('keeo')).toBe('Ledenstatistieken (keeo)');
-        expect(metabaseReportCollectionName('keeo')).not.toBe(metabaseReportCollectionName('stamhoofd'));
+    it('names the collection after the report and not after a platform', () => {
+        expect(metabaseReportCollectionName).toBe('Ledenstatistieken');
+    });
+});
+
+describe('isLegacyReportCollectionName', () => {
+    /** Which collection may be renamed into the one written now, and which may not. */
+    it('recognises the collection this wrote while there was one per environment', () => {
+        expect(isLegacyReportCollectionName('Ledenstatistieken (keeo)')).toBe(true);
+        expect(isLegacyReportCollectionName('Ledenstatistieken (stamhoofd)')).toBe(true);
+    });
+
+    it('leaves anything else alone', () => {
+        expect(isLegacyReportCollectionName(metabaseReportCollectionName)).toBe(false);
+        expect(isLegacyReportCollectionName('Onze cijfers (keeo)')).toBe(false);
+        expect(isLegacyReportCollectionName('Ledenstatistieken (keeo) kopie')).toBe(false);
     });
 });

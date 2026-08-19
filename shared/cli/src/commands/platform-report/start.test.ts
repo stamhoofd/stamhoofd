@@ -68,6 +68,7 @@ describe('Platform report start command', () => {
             collection: 'Ledenstatistieken (stamhoofd)',
             collectionId: 4,
             createdCollection: true,
+            renamedCollection: undefined,
             dashboards: [{ name: 'Ledenstatistieken', id: 2, tabs: ['Ledenaantallen'], bookmarked: true }],
             cards: 24,
             mapsWithoutCoordinates: [],
@@ -107,6 +108,7 @@ describe('Platform report start command', () => {
             collection: 'Ledenstatistieken (stamhoofd)',
             collectionId: 4,
             createdCollection: true,
+            renamedCollection: undefined,
             dashboards: [],
             cards: 24,
             mapsWithoutCoordinates: ['Leden per postcode'],
@@ -119,6 +121,27 @@ describe('Platform report start command', () => {
         await createCommand().run();
 
         expect(warning).toHaveBeenCalledWith(expect.stringContaining('Leden per postcode'));
+    });
+
+    it('says which collection it renamed into the one it writes', async () => {
+        vi.mocked(metabaseService.provisionReport).mockResolvedValue({
+            collection: 'Ledenstatistieken',
+            collectionId: 4,
+            createdCollection: false,
+            renamedCollection: 'Ledenstatistieken (stamhoofd)',
+            dashboards: [],
+            cards: 24,
+            mapsWithoutCoordinates: [],
+            database: 'platform-statistics-development',
+            dataSource: 'Platform statistics (stamhoofd)',
+            tableCount: 12,
+            postalCodeCount: 1149,
+        });
+
+        const command = createCommand();
+        await command.run();
+
+        expect((command as any).log).toHaveBeenCalledWith(expect.stringContaining('renamed from Ledenstatistieken (stamhoofd)'));
     });
 
     it('warns when the statistics database is still empty after migrating', async () => {

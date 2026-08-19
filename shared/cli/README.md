@@ -223,9 +223,13 @@ Every run also tidies up the instance: it drops Metabase's demo database (new co
 one) and hides the `migrations` table of the data source it configured, which is schema history
 rather than something to report on. The tables listed in `metabaseHiddenTables` are the ones hidden.
 
-One Metabase serves every environment. Running the command for a second environment adds that data
-source next to the existing ones, and an already registered data source is left untouched, so edits
-made in the UI survive. Print the settings of an environment with
+One Metabase serves every environment, and shows one report: `Ledenstatistieken`, holding the
+platform that was written last. Starting `--env keeo` points the questions in that collection at
+keeo's data source, so there is never a second report to pick the wrong platform from, and nothing
+carries an environment in its name. Switching back is the same command with another `--env`.
+
+The **data sources** stay registered, all of them, one per environment. An already registered data
+source is left untouched, so edits made in the UI survive. Print the settings of an environment with
 `stam platform-report config --env keeo`.
 
 #### Login

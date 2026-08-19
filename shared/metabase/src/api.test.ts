@@ -233,3 +233,14 @@ describe('MetabaseApi.requireDatabaseByName', () => {
             .rejects.toThrow('only: Platform statistics (ravot)');
     });
 });
+
+describe('MetabaseApi.renameCollection', () => {
+    /** Renaming keeps the id, and with it everything that points into the collection. */
+    it('renames in place', async () => {
+        const calls = mockFetch({ 'PUT /api/collection/5': { body: {} } });
+
+        await new MetabaseApi('http://127.0.0.1:3030').renameCollection(5, 'Ledenstatistieken');
+
+        expect(calls).toEqual([expect.objectContaining({ key: 'PUT /api/collection/5', body: { name: 'Ledenstatistieken' } })]);
+    });
+});
