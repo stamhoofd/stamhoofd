@@ -112,7 +112,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             if (put.customer?.company) {
-                await ViesService.checkCompany(put.customer.company, put.customer.company);
+                await ViesService.checkCompany(put.customer.company, null, { forceValidation: true });
             }
             payment.type = put.type;
 

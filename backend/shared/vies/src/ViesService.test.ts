@@ -168,13 +168,37 @@ describe('ViesService', () => {
                 companyNumber: '0411905847',
                 address: null,
             });
-            const patch = Company.create({});
+
+            await ViesService.checkCompany(company);
+
+            expect(company.VATNumber).toBeNull();
+            expect(company.companyNumber).toBeNull();
+            expect(scope.isDone()).toBe(false);
+        });
+
+        test('clears both numbers when the company has no address, without contacting the API - for patch', async () => {
+            const scope = mockVies({ valid: true });
+
+            const company = Company.create({
+                name: 'Demo Company',
+                VATNumber: 'BE0411905847',
+                companyNumber: '0411905847',
+                address: null,
+            });
+
+            const patch = Company.patch({
+                VATNumber: 'BE0411905847',
+                companyNumber: '0411905847',
+            });
 
             await ViesService.checkCompany(company, patch);
 
+            expect(company.VATNumber).toBeNull();
+            expect(company.companyNumber).toBeNull();
+            expect(scope.isDone()).toBe(false);
+
             expect(patch.VATNumber).toBeNull();
             expect(patch.companyNumber).toBeNull();
-            expect(scope.isDone()).toBe(false);
         });
 
         test('rejects a company name that is too short', async () => {
@@ -183,7 +207,7 @@ describe('ViesService', () => {
                 address: belgianAddress(),
             });
 
-            await expect(ViesService.checkCompany(company, Company.create({}))).rejects.toThrow(
+            await expect(ViesService.checkCompany(company)).rejects.toThrow(
                 STExpect.simpleError({ code: 'invalid_company_name', field: 'companyName' }),
             );
         });
@@ -197,9 +221,30 @@ describe('ViesService', () => {
                 companyNumber: null,
                 address: belgianAddress(),
             });
-            const patch = Company.create({});
+
+            await ViesService.checkCompany(company);
+            expect(company.VATNumber).toBe('BE0411905847');
+            expect(company.companyNumber).toBe('0411905847');
+        });
+
+        test('validates the VAT number and derives the company number for a Belgian company for a patch', async () => {
+            mockVies({ valid: true });
+
+            const company = Company.create({
+                name: 'Demo Company',
+                VATNumber: 'BE0411905847',
+                companyNumber: null,
+                address: belgianAddress(),
+            });
+
+            const patch = Company.patch({
+                VATNumber: 'BE0411905847',
+                companyNumber: null,
+            });
 
             await ViesService.checkCompany(company, patch);
+            expect(company.VATNumber).toBe('BE0411905847');
+            expect(company.companyNumber).toBe('0411905847');
 
             expect(patch.VATNumber).toBe('BE0411905847');
             expect(patch.companyNumber).toBe('0411905847');
@@ -214,10 +259,32 @@ describe('ViesService', () => {
                 companyNumber: null,
                 address: belgianAddress(),
             });
-            const patch = Company.create({});
+
+            await ViesService.checkCompany(company);
+
+            expect(company.VATNumber).toBe('BE0411905847');
+            expect(company.companyNumber).toBe('0411905847');
+        });
+
+        test('derives the company number from the formatted VAT number - for patch', async () => {
+            mockVies({ valid: true });
+
+            const company = Company.create({
+                name: 'Demo Company',
+                VATNumber: 'BE 0411.905.847',
+                companyNumber: null,
+                address: belgianAddress(),
+            });
+
+            const patch = Company.patch({
+                VATNumber: 'BE 0411.905.847',
+                companyNumber: null,
+            });
 
             await ViesService.checkCompany(company, patch);
 
+            expect(company.VATNumber).toBe('BE0411905847');
+            expect(company.companyNumber).toBe('0411905847');
             expect(patch.VATNumber).toBe('BE0411905847');
             expect(patch.companyNumber).toBe('0411905847');
         });
@@ -261,6 +328,29 @@ describe('ViesService', () => {
                 expect(scope.isDone()).toBe(true);
                 // The registered entity name is stored from the directory.
                 expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
+            });
+
+            test('validates the id against the directory when forced validation', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = companyWithPeppol();
+                company.customPeppolEndpointId = PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' });
+
+                await expect(ViesService.checkCompany(company, null, { forceValidation: true })).resolves.toBeUndefined();
+                expect(scope.isDone()).toBe(true);
+                // The registered entity name is stored from the directory.
+                expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
+            });
+
+            test('does not validate the id against the directory without patch and forced validation', async () => {
+                const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
+
+                const company = companyWithPeppol();
+                company.customPeppolEndpointId = PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' });
+
+                await expect(ViesService.checkCompany(company)).resolves.toBeUndefined();
+                expect(scope.isDone()).toBe(false);
+                expect(company.customPeppolEndpointId?.entityName).toBe(null);
             });
 
             test('overwrites a client-supplied entityName with the value from the directory', async () => {

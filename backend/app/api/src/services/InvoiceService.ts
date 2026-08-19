@@ -35,7 +35,7 @@ export class InvoiceService {
         model.customer = struct.customer;
 
         if (model.customer.company) {
-            await ViesService.checkCompany(model.customer.company, model.customer.company);
+            await ViesService.checkCompany(model.customer.company, null, { forceValidation: true });
         }
 
         struct.updatePrices();
