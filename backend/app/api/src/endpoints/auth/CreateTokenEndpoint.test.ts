@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
-import { OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { OrganizationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
 import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
 import { PermissionLevel, Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
 
@@ -173,6 +173,12 @@ describe('Endpoint.CreateToken', () => {
             return token!;
         }
 
+        async function getSession(token: Token): Promise<UserSession> {
+            const session = await UserSession.getByID(token.sessionId);
+            if (!session) throw new Error('Expected user session');
+            return session;
+        }
+
         test('an administrator that signs in in a browser gets a limited session', async () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await new UserFactory({
@@ -183,7 +189,7 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'web');
 
-            expect(token.clientType).toBe(SessionClientType.Browser);
+            expect((await getSession(token)).clientType).toBe(SessionClientType.Browser);
             expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
         });
 
@@ -197,15 +203,16 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'ios');
 
-            expect(token.clientType).toBe(SessionClientType.iOS);
+            expect((await getSession(token)).clientType).toBe(SessionClientType.iOS);
             expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
 
             const browserSessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
             if (browserSessionDuration === null) {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }
-            token.sessionStartedAt = new Date(Date.now() - 2 * browserSessionDuration);
-            await token.save();
+            const userSession = await getSession(token);
+            userSession.startedAt = new Date(Date.now() - 2 * browserSessionDuration);
+            await userSession.save();
 
             const renewed = await refresh(organization, token.refreshToken);
             expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
@@ -227,12 +234,13 @@ describe('Endpoint.CreateToken', () => {
             }
             const sessionStartedAt = new Date(Date.now() - sessionDuration + DAY);
             sessionStartedAt.setMilliseconds(0);
-            token.sessionStartedAt = sessionStartedAt;
-            await token.save();
+            const userSession = await getSession(token);
+            userSession.startedAt = sessionStartedAt;
+            await userSession.save();
 
             const renewed = await refresh(organization, token.refreshToken);
 
-            expect(renewed.sessionStartedAt).toEqual(sessionStartedAt);
+            expect((await getSession(renewed)).startedAt).toEqual(sessionStartedAt);
             expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + sessionDuration);
             expect(renewed.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now());
         });
@@ -250,7 +258,9 @@ describe('Endpoint.CreateToken', () => {
             if (sessionDuration === null) {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }
-            token.sessionStartedAt = new Date(Date.now() - sessionDuration - DAY);
+            const userSession = await getSession(token);
+            userSession.startedAt = new Date(Date.now() - sessionDuration - DAY);
+            await userSession.save();
             token.refreshTokenValidUntil = new Date(Date.now() + DAY);
             await token.save();
 

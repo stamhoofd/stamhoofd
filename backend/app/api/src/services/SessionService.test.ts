@@ -1,9 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
 import type { SessionType } from '@stamhoofd/models/constants/sessions.js';
 import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
-import { PermissionLevel, Permissions, SessionClientType, SessionLoginMethod } from '@stamhoofd/structures';
+import { PermissionLevel, Permissions, SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ContextInstance } from '../helpers/Context.js';
@@ -53,6 +53,12 @@ describe('SessionService', () => {
         }).create();
     }
 
+    async function getSession(token: Token): Promise<UserSession> {
+        const session = await UserSession.getByID(token.sessionId);
+        if (!session) throw new Error('Expected user session');
+        return session;
+    }
+
     const policy: { name: string; platform: string; clientType: SessionClientType; sessionType: SessionType; loginMethod: SessionLoginMethod; createUser: () => Promise<User> }[] = [
         { name: 'a member in a browser', platform: 'web', clientType: SessionClientType.Browser, sessionType: 'user', loginMethod: SessionLoginMethod.Password, createUser: () => createMember() },
         { name: 'a member in the native app', platform: 'ios', clientType: SessionClientType.iOS, sessionType: 'user', loginMethod: SessionLoginMethod.Password, createUser: () => createMember() },
@@ -80,8 +86,9 @@ describe('SessionService', () => {
                     const user = await createUser();
                     const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
 
-                    token.sessionStartedAt = new Date(Date.now() - 10 * refreshToken);
-                    await token.save();
+                    const userSession = await getSession(token);
+                    userSession.startedAt = new Date(Date.now() - 10 * refreshToken);
+                    await userSession.save();
 
                     const rotated = await SessionService.rotateSession(token);
                     expectValidFor(rotated.refreshTokenValidUntil, refreshToken);
@@ -91,8 +98,9 @@ describe('SessionService', () => {
                     const user = await createUser();
                     const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
 
-                    token.sessionStartedAt = new Date(Date.now() - session + HOUR);
-                    await token.save();
+                    const userSession = await getSession(token);
+                    userSession.startedAt = new Date(Date.now() - session + HOUR);
+                    await userSession.save();
 
                     const rotated = await SessionService.rotateSession(token);
                     expectValidFor(rotated.refreshTokenValidUntil, HOUR);
@@ -115,8 +123,9 @@ describe('SessionService', () => {
             if (sessionDuration === null) {
                 throw new Error('Expected browser SSO sessions to have a maximum length');
             }
-            token.sessionStartedAt = new Date(Date.now() - sessionDuration + MINUTE);
-            await token.save();
+            const userSession = await getSession(token);
+            userSession.startedAt = new Date(Date.now() - sessionDuration + MINUTE);
+            await userSession.save();
 
             const rotated = await SessionService.rotateSession(token);
             expectValidFor(rotated.accessTokenValidUntil, MINUTE);
@@ -142,10 +151,10 @@ describe('SessionService', () => {
             const token = await onPlatform('android', () => SessionService.createSession(admin, { loginMethod: SessionLoginMethod.SSO }));
 
             const rotated = await SessionService.rotateSession(token);
-
-            expect(rotated.sessionStartedAt).toEqual(token.sessionStartedAt);
-            expect(rotated.loginMethod).toBe(SessionLoginMethod.SSO);
-            expect(rotated.clientType).toBe(SessionClientType.Android);
+            const session = await getSession(rotated);
+            expect(rotated.sessionId).toBe(token.sessionId);
+            expect(session.loginMethod).toBe(SessionLoginMethod.SSO);
+            expect(session.clientType).toBe(SessionClientType.Android);
         });
 
         test('the platform of the login is kept, not the one of the rotation', async () => {
@@ -154,8 +163,73 @@ describe('SessionService', () => {
 
             const rotated = await onPlatform('ios', () => SessionService.rotateSession(token));
 
-            expect(rotated.clientType).toBe(SessionClientType.Browser);
+            expect((await getSession(rotated)).clientType).toBe(SessionClientType.Browser);
             expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
+        });
+
+        test('a replacement only retires the previous token after it becomes active', async () => {
+            const admin = await createAdmin();
+            const original = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const replacement = await SessionService.rotateSession(original);
+            let session = await getSession(original);
+
+            expect(session.lastActiveTokenId).toBe(original.id);
+            expect(session.lastUsedTokenId).toBe(replacement.id);
+            expect(await Token.getByAccessToken(original.accessToken)).toBeDefined();
+
+            expect(await UserSession.activateToken(replacement)).toBe(true);
+            session = await getSession(replacement);
+            expect(session.lastActiveTokenId).toBe(replacement.id);
+            expect(await Token.getByAccessToken(original.accessToken)).toBeUndefined();
+            expect(await UserSession.activateToken(original)).toBe(false);
+        });
+
+        test('the active token can retry a renewal whose response was lost', async () => {
+            const admin = await createAdmin();
+            const original = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const lostReplacement = await SessionService.rotateSession(original);
+            const retryReplacement = await SessionService.rotateSession(original);
+
+            expect(retryReplacement.sessionId).toBe(original.sessionId);
+            expect(await Token.getByAccessToken(lostReplacement.accessToken)).toBeUndefined();
+            expect(await Token.getByAccessToken(original.accessToken)).toBeDefined();
+        });
+
+        test('renewal updates versions but keeps stable device metadata', async () => {
+            const admin = await createAdmin();
+            const initial = encodeURIComponent(JSON.stringify({
+                deviceType: SessionDeviceType.Phone,
+                deviceName: 'iPhone 15 Pro',
+                osName: SessionOS.iOS,
+                osVersion: '18.1',
+                appVersion: '2.0',
+                nativeAppVersion: '1.0',
+                browserName: null,
+            }));
+            const token = await ContextInstance.start(new Request({ method: 'POST', url: '/oauth/token', host: 'api.example.com', headers: { 'x-platform': 'ios', 'x-session-metadata': initial } }), () => SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password }));
+
+            const changed = encodeURIComponent(JSON.stringify({
+                deviceType: SessionDeviceType.Desktop,
+                deviceName: 'Changed',
+                osName: SessionOS.Windows,
+                osVersion: '18.2',
+                appVersion: '2.1',
+                nativeAppVersion: '1.1',
+                browserName: 'Other',
+            }));
+            await ContextInstance.start(new Request({ method: 'POST', url: '/oauth/token', host: 'api.example.com', headers: { 'x-platform': 'web', 'x-session-metadata': changed } }), () => SessionService.rotateSession(token));
+
+            const session = await getSession(token);
+            expect(session).toMatchObject({
+                clientType: SessionClientType.iOS,
+                deviceType: SessionDeviceType.Phone,
+                deviceName: 'iPhone 15 Pro',
+                osName: SessionOS.iOS,
+                osVersion: '18.2',
+                appVersion: '2.1',
+                nativeAppVersion: '1.1',
+                browserName: null,
+            });
         });
 
         test('a member that becomes a platform administrator is limited from that moment on', async () => {
@@ -209,7 +283,7 @@ describe('SessionService', () => {
             expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.sso[SessionClientType.Browser].refreshToken);
 
             const rotated = await SessionService.rotateSession(token);
-            expect(rotated.loginMethod).toBe(SessionLoginMethod.SSO);
+            expect((await getSession(rotated)).loginMethod).toBe(SessionLoginMethod.SSO);
             expect(rotated.isAccessTokenExpired()).toBe(false);
         });
     });

@@ -1,11 +1,13 @@
 import { Database } from '@simonbackx/simple-database';
-import { SessionClientType, SessionLoginMethod } from '@stamhoofd/structures';
+import { SessionClientType, SessionDeviceType, SessionLoginMethod } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
 
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { UserFactory } from '../factories/UserFactory.js';
 import type { Organization } from './Organization.js';
 import { Token } from './Token.js';
 import type { User } from './User.js';
+import { UserSession } from './UserSession.js';
 
 describe('Model.Token', () => {
     const existingToken = 'ABCDEFG';
@@ -15,15 +17,26 @@ describe('Model.Token', () => {
     beforeAll(async () => {
         organization = await new OrganizationFactory({}).create();
         user = await new UserFactory({ organization }).create();
+        const tokenId = uuidv4();
+        const session = await UserSession.createForToken(user, tokenId, SessionClientType.Browser, SessionLoginMethod.Password, {
+            deviceType: SessionDeviceType.Desktop,
+            deviceName: null,
+            osName: null,
+            osVersion: null,
+            appVersion: null,
+            nativeAppVersion: null,
+            browserName: null,
+        });
 
         await Database.insert('INSERT INTO ' + Token.table + ' SET ?', [
             {
+                id: tokenId,
+                sessionId: session.id,
                 accessToken: existingToken,
                 refreshToken: 'refreshtoken',
 
                 accessTokenValidUntil: '2050-08-29 14:30:15',
                 refreshTokenValidUntil: '2050-08-29 14:30:15',
-                sessionStartedAt: '2020-03-29 14:30:15',
                 userId: user.id,
                 // = "myPassword"
                 createdAt: '2020-03-29 14:30:15',
@@ -56,9 +69,10 @@ describe('Model.Token', () => {
         expect(token.refreshTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
 
         expect(token.userId).toEqual(user.id);
-        expect(token.sessionStartedAt.getTime()).toBeGreaterThan(Date.now() - 60 * 1000);
-        expect(token.clientType).toBe(SessionClientType.Browser);
-        expect(token.loginMethod).toBe(SessionLoginMethod.Password);
+        const session = await UserSession.getByID(token.sessionId);
+        expect(session?.startedAt.getTime()).toBeGreaterThan(Date.now() - 60 * 1000);
+        expect(session?.clientType).toBe(SessionClientType.Browser);
+        expect(session?.loginMethod).toBe(SessionLoginMethod.Password);
 
         const search = await Token.getByAccessToken(token.accessToken);
         // Make sure we do not compare the organization, since that won't be loaded now, but is loaded on user, and on token

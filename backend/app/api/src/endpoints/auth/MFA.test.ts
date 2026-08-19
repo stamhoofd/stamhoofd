@@ -1,7 +1,7 @@
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { EmailMocker } from '@stamhoofd/email';
-import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
+import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, UserSession, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
 import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MFAMethodType, PermissionLevel, Permissions, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';
 import { authenticator } from 'otplib';
 import crypto from 'crypto';
@@ -1462,7 +1462,7 @@ describe('MFA', () => {
             }
 
             const token = await Token.getByAccessToken(response.body.accessToken);
-            expect(token!.loginMethod).toBe(SessionLoginMethod.SSO);
+            expect((await UserSession.getByID(token!.sessionId))!.loginMethod).toBe(SessionLoginMethod.SSO);
             expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 3 * 60 * 60 * 1000);
         });
     });

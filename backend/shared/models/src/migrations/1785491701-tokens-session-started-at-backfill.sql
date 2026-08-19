@@ -1,3 +1,5 @@
--- Existing sessions start counting from the token they are on right now. Tokens rotate
--- every 15 minutes, so this is at most that much extra session length.
-UPDATE `tokens` SET `sessionStartedAt` = `createdAt`;
+UPDATE `tokens` SET `id` = UUID(), `sessionId` = UUID();
+
+INSERT INTO `user_sessions` (`id`, `userId`, `clientType`, `startedAt`, `loginMethod`, `deviceType`, `lastUsedTokenId`, `lastActiveTokenId`)
+SELECT `sessionId`, `userId`, 'Browser', `createdAt`, 'Password', 'Desktop', `id`, `id`
+FROM `tokens`;

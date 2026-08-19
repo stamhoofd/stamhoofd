@@ -3,6 +3,7 @@ import { MemberFactory, OrganizationFactory, Token, UserFactory } from '@stamhoo
 
 import { MFATestHelper } from '../../../tests/helpers/MFATestHelper.js';
 import { testServer } from '../../../tests/helpers/TestServer.js';
+import { SessionService } from '../../services/SessionService.js';
 import { GetUserEndpoint } from './GetUserEndpoint.js';
 import { STExpect } from '@stamhoofd/test-utils';
 
@@ -21,6 +22,25 @@ describe('Endpoint.GetUser', () => {
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         expect(response.body.id).toEqual(user.id);
+    });
+
+    test('using a renewed token retires the previous active token', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization }).create();
+        const original = await Token.createToken(user);
+        const replacement = await SessionService.rotateSession(original);
+
+        const originalRequest = Request.buildJson('GET', '/v1/user', organization.getApiHost());
+        originalRequest.headers.authorization = 'Bearer ' + original.accessToken;
+        await testServer.test(endpoint, originalRequest);
+
+        const replacementRequest = Request.buildJson('GET', '/v1/user', organization.getApiHost());
+        replacementRequest.headers.authorization = 'Bearer ' + replacement.accessToken;
+        await testServer.test(endpoint, replacementRequest);
+
+        await expect(testServer.test(endpoint, originalRequest)).rejects.toThrow(STExpect.simpleError({
+            code: 'invalid_access_token',
+        }));
     });
 
     test('Two-factor authentication is reported on the user and on the accounts of a member', async () => {

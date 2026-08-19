@@ -64,19 +64,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                // Important to create a new token before adjusting the old token
                 const token = await SessionService.rotateSession(oldToken);
-
-                // In the rare event our response doesn't reach the client anymore, we don't want the client to sign out...
-                // So we allow a small rotation overlap period
-                const leeway = 60 * 1000;
-                oldToken.refreshTokenValidUntil = new Date(Math.min(oldToken.refreshTokenValidUntil.getTime(), Date.now() + leeway));
-
-                // Invalidate the corresponding access token
-                oldToken.accessTokenValidUntil = new Date(Date.now() - 60 * 60 * 1000);
-
-                // Do not delete the old one, only expire it fast so it will get deleted in the future
-                await oldToken.save();
 
                 if (!token) {
                     throw new SimpleError({

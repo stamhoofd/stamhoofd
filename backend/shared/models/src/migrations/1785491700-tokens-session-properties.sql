@@ -1,6 +1,23 @@
--- Session properties that have to survive a refresh token rotation, so the total length of
--- a session can be limited instead of only the length of a single token.
+CREATE TABLE `user_sessions` (
+    `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+    `userId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+    `clientType` varchar(32) NOT NULL,
+    `startedAt` datetime NOT NULL,
+    `loginMethod` varchar(32) NOT NULL,
+    `deviceType` varchar(32) NOT NULL,
+    `deviceName` varchar(255) NULL,
+    `osName` varchar(32) NULL,
+    `osVersion` varchar(64) NULL,
+    `appVersion` varchar(64) NULL,
+    `nativeAppVersion` varchar(64) NULL,
+    `browserName` varchar(64) NULL,
+    `lastUsedTokenId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+    `lastActiveTokenId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `user_sessions_userId_index` (`userId`),
+    CONSTRAINT `user_sessions_userId_foreign` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 ALTER TABLE `tokens`
-ADD COLUMN `sessionStartedAt` datetime NULL AFTER `authenticatedAt`,
-ADD COLUMN `clientType` varchar(32) NOT NULL DEFAULT 'Browser' AFTER `sessionStartedAt`,
-ADD COLUMN `loginMethod` varchar(32) NOT NULL DEFAULT 'Password' AFTER `clientType`;
+ADD COLUMN `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL AFTER `userId`,
+ADD COLUMN `sessionId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL AFTER `id`;

@@ -518,6 +518,7 @@ export class SessionContext implements RequestMiddleware {
         url.searchParams.set('spaState', spaState);
         url.searchParams.set('provider', data.providerType);
         url.searchParams.set('clientPlatform', AppManager.shared.platform);
+        url.searchParams.set('sessionMetaData', JSON.stringify(await AppManager.shared.getSessionMetaData()));
         if (data.webshopId) {
             url.searchParams.set('webshopId', data.webshopId);
         }

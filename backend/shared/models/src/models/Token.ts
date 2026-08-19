@@ -1,12 +1,14 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column, Database } from '@simonbackx/simple-database';
 import { QueryableModel, SQLWhereSign } from '@stamhoofd/sql';
-import { ApiUser, SessionClientType, SessionLoginMethod } from '@stamhoofd/structures';
+import { ApiUser, SessionClientType, SessionDeviceType, type SessionMetaData, SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ACCESS_TOKEN_DURATION, DEFAULT_REFRESH_TOKEN_DURATION } from '../constants/sessions.js';
 import { User } from './User.js';
+import { UserSession } from './UserSession.js';
 
 export type TokenWithUser = Token & { user: User };
 
@@ -24,7 +26,6 @@ async function randomBytes(size: number): Promise<Buffer> {
 
 export class Token extends QueryableModel {
     static table = 'tokens';
-    static MAX_DEVICES = 15;
 
     /**
      * How long after authentication a token still counts as "fresh" for sensitive
@@ -34,6 +35,12 @@ export class Token extends QueryableModel {
 
     @column({ type: 'string' })
     userId: string;
+
+    @column({ type: 'string' })
+    id: string;
+
+    @column({ type: 'string' })
+    sessionId: string;
 
     // Columns
     @column({ primary: true, type: 'string' })
@@ -55,20 +62,6 @@ export class Token extends QueryableModel {
      */
     @column({ type: 'datetime', nullable: true })
     authenticatedAt: Date | null = null;
-
-    /**
-     * When the session this token belongs to was first authenticated. A refresh token
-     * rotation creates a new token but continues the same session, so this is copied over
-     * and is what the absolute session length is measured from.
-     */
-    @column({ type: 'datetime' })
-    sessionStartedAt: Date;
-
-    @column({ type: 'string' })
-    clientType = SessionClientType.Browser;
-
-    @column({ type: 'string' })
-    loginMethod = SessionLoginMethod.Password;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
@@ -264,7 +257,12 @@ export class Token extends QueryableModel {
     /***
      * Create a token without saving it
      */
-    static async createUnsavedToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+    static async createUnsavedToken<U extends User>(user: U, options: {
+        session?: UserSession;
+        clientType?: SessionClientType;
+        loginMethod?: SessionLoginMethod;
+        metaData?: SessionMetaData;
+    } = {}): Promise<(Token & { user: U })> {
         if (user.isSystemUser) {
             throw new SimpleError({
                 code: 'internal_error',
@@ -272,30 +270,24 @@ export class Token extends QueryableModel {
                 statusCode: 500,
             });
         }
-        // Get all the tokens of the user that are olde
-
-        // First search if we already have more than 5 tokens (we only allow up to 5 devices)
-        // In case we already have a token for that deviceId, we'll delete it first.
-        try {
-            const [
-                rows,
-            ] = await Database.delete(
-                `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`createdAt\` DESC LIMIT ? OFFSET ?) x)`,
-                [user.id, this.MAX_DEVICES, this.MAX_DEVICES],
-            );
-
-            if (rows.affectedRows > 0) {
-                console.log(`Deleted ${rows.affectedRows} old tokens first`);
-            }
-        }
-        catch (e) {
-            // This is not a crucial operation, so don't fail when there is a deadlock problem in the query
-            console.error(e);
-        }
-
         const token = new Token().setRelation(Token.user, user);
-        token.sessionStartedAt = new Date();
-        token.sessionStartedAt.setMilliseconds(0);
+        token.id = uuidv4();
+        const session = options.session ?? await UserSession.createForToken(
+            user,
+            token.id,
+            options.clientType ?? SessionClientType.Browser,
+            options.loginMethod ?? SessionLoginMethod.Password,
+            options.metaData ?? {
+                deviceType: SessionDeviceType.Desktop,
+                deviceName: null,
+                osName: null,
+                osVersion: null,
+                appVersion: null,
+                nativeAppVersion: null,
+                browserName: null,
+            },
+        );
+        token.sessionId = session.id;
 
         token.accessTokenValidUntil = new Date();
         token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + ACCESS_TOKEN_DURATION);

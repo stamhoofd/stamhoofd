@@ -1,7 +1,7 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
+import { MFAToken, Organization, Platform, RateLimiter, Token, User, UserSession } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
@@ -292,6 +292,15 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
+                human: $t(`%Fi`),
+                statusCode: 401,
+            });
+        }
+
+        if (!await UserSession.activateToken(token)) {
+            throw new SimpleError({
+                code: 'invalid_access_token',
+                message: 'The access token is invalid',
                 human: $t(`%Fi`),
                 statusCode: 401,
             });
