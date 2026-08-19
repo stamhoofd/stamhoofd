@@ -128,12 +128,12 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }),
         // will always be 0 if organization is null
         organization !== null
-            ? new SelectableColumn({
+            ? returnNullIfNoAccessRight(new SelectableColumn({
                     id: 'outstandingBalance',
                     name: $t(`%76`),
                     description: $t('%184'),
                     enabled: false,
-                })
+                }), [AccessRight.MemberReadFinancialData])
             : null,
         new SelectableColumn({
             id: 'createdAt',
