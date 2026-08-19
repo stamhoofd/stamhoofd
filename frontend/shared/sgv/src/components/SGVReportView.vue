@@ -177,7 +177,9 @@ const ReportList = defineComponent({
         return () =>
             props.items.length === 0
                 ? null
-                : h('div', [
+                : h('div', {
+                        class: 'container',
+                    }, [
                         h('hr'),
                         h('h2', props.title),
                         h(STList, {}, () =>
