@@ -560,21 +560,23 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         );
     }
 
-    allColumns.push(
-        new Column<ObjectType, number>({
-            name: $t(`%76`),
-            description: $t('%184'),
-            allowSorting: false,
-            getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
-            format: (outstandingBalance) => {
-                return Formatter.price(outstandingBalance);
-            },
-            getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
-            minimumWidth: 70,
-            recommendedWidth: 200,
-            enabled: false,
-        }),
-    );
+    if (financialRead) {
+        allColumns.push(
+            new Column<ObjectType, number>({
+                name: $t(`%76`),
+                description: $t('%184'),
+                allowSorting: false,
+                getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
+                format: (outstandingBalance) => {
+                    return Formatter.price(outstandingBalance);
+                },
+                getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
+                minimumWidth: 70,
+                recommendedWidth: 200,
+                enabled: false,
+            }),
+        );
+    }
 
     if (category) {
         allColumns.push(

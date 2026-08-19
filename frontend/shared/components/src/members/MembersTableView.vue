@@ -55,7 +55,6 @@ import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filte
 import { useRegistrationInvitationEventListener } from '#registrations/classes/useRegistrationInvitationEventListener.ts';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from '#members/helpers/getMemberColumns.ts';
-import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;
 
