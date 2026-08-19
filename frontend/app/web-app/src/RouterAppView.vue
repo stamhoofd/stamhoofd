@@ -5,12 +5,12 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Organization } from '@stamhoofd/structures';
 import { AppRoute } from '@stamhoofd/structures';
-import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
 import { wrap } from './wrapAndReplace';
@@ -96,6 +96,16 @@ if (isDashboardDomain) {
         url: 'platform',
         component: async () => {
             return await loadAdmin();
+        },
+    });
+} else if (orgInDomain) {
+    defineRoute({
+        name: AppRoute.Admin,
+        url: 'platform',
+        component: async () => {
+            return AsyncComponent(() => import('@stamhoofd/components/auth/RedirectView.vue'), {
+                location: `https://${STAMHOOFD.domains.dashboard}/platform`,
+            });
         },
     });
 }
@@ -274,6 +284,18 @@ if (orgInDomain) {
         replace: 100,
         component: async () => {
             return await loadAuto(await orgInDomain());
+        },
+    });
+    defineRoute({
+        name: AppRoute.UnscopedAuto,
+        url: '',
+        isDefault: {},
+        force: true,
+        replace: 100,
+        component: async () => {
+            return AsyncComponent(() => import('@stamhoofd/components/auth/RedirectView.vue'), {
+                location: `https://${STAMHOOFD.domains.dashboard}`,
+            });
         },
     });
 } else {
