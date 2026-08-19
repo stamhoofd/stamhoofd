@@ -21,6 +21,8 @@ class SessionStorage extends AutoEncoder {
     lastOrganizationId: string | null = null;
 }
 
+const MAX_ORGANIZATIONS_STORED = 10;
+
 type AuthenticationStateListener = (changed: 'preventComplete' | 'user' | 'organization' | 'token' | 'session') => void;
 
 /**
@@ -255,6 +257,8 @@ export class SessionManagerStatic {
 
     saveSessionStorage(storage: SessionStorage, retryWithLess = true) {
         try {
+            // Limit organization storage length
+            storage.organizations.splice(MAX_ORGANIZATIONS_STORED);
             this.cachedStorage = storage;
 
             // keep this method fast, we don't need to wait because we use cached storage
