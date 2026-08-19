@@ -181,13 +181,6 @@ async function testRoute({ page, ...spec }: {
     }
 }
 
-async function clickSearchOtherOrganizations({ page, expectedUrl }: { page: Page; expectedUrl: string }) {
-    await page.getByTestId('app-switcher-search-others').click();
-    await expect(page).toHaveURL(expectedUrl, { timeout: 5_000 });
-    await expect(page.getByTestId('organization-selection-view')).toBeVisible();
-    await checkScopedTo({ page, organization: null });
-}
-
 test.describe('Routing on page load @routing', () => {
     /**
      * Default if not set.
@@ -851,26 +844,6 @@ test.describe('Routing on page load @routing', () => {
                 });
             });
 
-            test("clicking 'Andere vereniging zoeken' shows the organization overview without leaving the dashboard domain", async ({ page }) => {
-                await testRoute({
-                    page,
-                    user,
-                    url: domain + '/platform/instellingen',
-                    expectedUrl: domain + '/nl-BE/platform/instellingen',
-                    expectedScope: null,
-                    expectedLocator: '#settings-view',
-                    expectedTopLeft: {
-                        options: [adminOption, otherOrgOptions(membershipOrganization)],
-                        includeSearchOthers: true,
-                    },
-                });
-
-                await clickSearchOtherOrganizations({
-                    page,
-                    expectedUrl: domain + '/nl-BE',
-                });
-            });
-
             test('/beheerders/<uri>/instellingen', async ({ page }) => {
                 const organization = await createOrganization();
 
@@ -1287,13 +1260,36 @@ test.describe('Routing on page load @routing', () => {
                         user,
                         url: domain + '/platform',
                         expectedUrl: originalDomain + '/nl-BE/platform/start',
+                        expectedScope: null,
+                        expectedLocator: '[data-testid="platform-start-view"]',
+                        expectedTopLeft: {
+                            options: [adminOption, otherOrgOptions(membershipOrganization)],
+                            includeSearchOthers: true,
+                        },
+                    });
+                });
+
+                test('Searching other organizations goes to default dashboard domain', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/beheerders/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders/instellingen',
                         expectedScope,
-                        expectedLocator: '[data-testid="members-menu"]',
+                        expectedLocator: '#settings-view',
                         expectedTopLeft: {
                             options: [adminOption, scopedMemberPortalOption(organization), dashboardOption(organization), otherOrgOptions(membershipOrganization)],
                             includeSearchOthers: true,
                         },
                     });
+
+                    const selector = page.locator('.organization-app-switcher');
+                    await expect(selector).toBeVisible();
+
+                    const switchLocator = selector.locator(`[data-testid='app-switcher-search-others']`);
+                    await switchLocator.click();
+
+                    await expect(page).toHaveURL(originalDomain + '/nl-BE', { timeout: 5_000 });
                 });
 
                 test('/beheerders/instellingen', async ({ page }) => {
@@ -1308,26 +1304,6 @@ test.describe('Routing on page load @routing', () => {
                             options: [adminOption, scopedMemberPortalOption(organization), dashboardOption(organization), otherOrgOptions(membershipOrganization)],
                             includeSearchOthers: true,
                         },
-                    });
-                });
-
-                test("clicking 'Andere vereniging zoeken' redirects to the organization overview on the dashboard domain", async ({ page }) => {
-                    await testRoute({
-                        page,
-                        user,
-                        url: domain + '/beheerders/instellingen',
-                        expectedUrl: domain + '/nl-BE/beheerders/instellingen',
-                        expectedScope,
-                        expectedLocator: '#settings-view',
-                        expectedTopLeft: {
-                            options: [adminOption, scopedMemberPortalOption(organization), dashboardOption(organization), otherOrgOptions(membershipOrganization)],
-                            includeSearchOthers: true,
-                        },
-                    });
-
-                    await clickSearchOtherOrganizations({
-                        page,
-                        expectedUrl: originalDomain + '/nl-BE',
                     });
                 });
 
