@@ -7,6 +7,7 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useUser } from '#hooks/useUser.ts';
+import type { Group } from '@stamhoofd/structures';
 import { FilterWrapperMarker, getGroupStatusName, getGroupTypeName, GroupStatus, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -19,8 +20,15 @@ import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
+import { getFilterBuildersForOptionMenus } from './option-menus';
 
-export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGroups }: { multipleGroups: boolean }) {
+export function useAdvancedRegistrationWithMemberUIFilterBuilders({
+    multipleGroups,
+    currentGroup = null,
+}: {
+    multipleGroups: boolean;
+    currentGroup?: Group | null;
+}) {
     const $platform = usePlatform();
     const isPlatform = STAMHOOFD.userMode === 'platform';
     const $user = useUser();
@@ -41,6 +49,29 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
             name: $t('%zg'),
             key: 'registeredAt',
         }));
+
+        if (currentGroup) {
+            const optionMenusFilters = getFilterBuildersForOptionMenus(currentGroup.settings.optionMenus);
+
+            optionMenusFilters.unshift(
+                new GroupUIFilterBuilder({
+                    builders: optionMenusFilters,
+                }),
+            );
+
+            all.push(
+                new GroupUIFilterBuilder({
+                    name: $t('Bijhorende inschrijving'),
+                    description: $t("Filter op keuzemenu's van de inschrijving"),
+                    builders: optionMenusFilters,
+                    wrapper: {
+                        options: {
+                            $elemMatch: FilterWrapperMarker,
+                        },
+                    },
+                }),
+            );
+        }
 
         if (app === 'admin' && STAMHOOFD.userMode === 'platform') {
             all.push(new RelationFilterBuilder({
