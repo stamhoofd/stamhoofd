@@ -68,7 +68,7 @@ ORDER BY o.name
 SELECT
     f.organization_id AS `ID_Organisatie`,
     YEAR(f.birth_date) AS `Geboortejaar_deelnemers`,
-    CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END AS `Gender_deelnemers`,
+    CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
     COUNT(DISTINCT f.member_id) AS `Aantal_deelnemers`
 FROM all_facts f
 JOIN platform pf ON pf.membershipOrganizationId = f.organization_id
@@ -143,7 +143,7 @@ SELECT
     d.organization_id AS `ID_Organisatie`,
     CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
     YEAR(d.birth_date) AS `Geboortejaar_deelnemers`,
-    CASE d.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END AS `Gender_deelnemers`,
+    CASE d.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
     COUNT(*) AS `Aantal_deelnemers`
 FROM deelnemers d
 GROUP BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
