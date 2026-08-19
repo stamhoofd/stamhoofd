@@ -1218,6 +1218,8 @@ test.describe('Routing on page load @routing', () => {
     });
 
     [true, false].forEach((useRegisterDomain) => {
+        const originalDomain = WorkerData.urls.dashboard;
+
         test.describe(useRegisterDomain ? 'Organization mode on custom domain' : 'Organization mode on default register domain', () => {
             let organization!: Organization;
             let domain!: string;
@@ -1252,19 +1254,42 @@ test.describe('Routing on page load @routing', () => {
                     await loginAs({ user, page });
                 });
 
-                test('/platform/instellingen redirects to /beheerders/leden/instellingen', async ({ page }) => {
+                test('/platform redirects to default dashboard domain /platform/start', async ({ page }) => {
                     await testRoute({
                         page,
                         user,
-                        url: domain + '/platform/instellingen',
-                        expectedUrl: domain + '/nl-BE/beheerders/leden/instellingen',
+                        url: domain + '/platform',
+                        expectedUrl: originalDomain + '/nl-BE/platform/start',
+                        expectedScope: null,
+                        expectedLocator: '[data-testid="platform-start-view"]',
+                        expectedTopLeft: {
+                            options: [adminOption, otherOrgOptions(membershipOrganization)],
+                            includeSearchOthers: true,
+                        },
+                    });
+                });
+
+                test('Searching other organizations goes to default dashboard domain', async ({ page }) => {
+                    await testRoute({
+                        page,
+                        user,
+                        url: domain + '/beheerders/instellingen',
+                        expectedUrl: domain + '/nl-BE/beheerders/instellingen',
                         expectedScope,
-                        expectedLocator: '[data-testid="members-menu"]',
+                        expectedLocator: '#settings-view',
                         expectedTopLeft: {
                             options: [adminOption, scopedMemberPortalOption(organization), dashboardOption(organization), otherOrgOptions(membershipOrganization)],
                             includeSearchOthers: true,
                         },
                     });
+
+                    const selector = page.locator('.organization-app-switcher');
+                    await expect(selector).toBeVisible();
+
+                    const switchLocator = selector.locator(`[data-testid='app-switcher-search-others']`);
+                    await switchLocator.click();
+
+                    await expect(page).toHaveURL(originalDomain + '/nl-BE', { timeout: 5_000 });
                 });
 
                 test('/beheerders/instellingen', async ({ page }) => {
