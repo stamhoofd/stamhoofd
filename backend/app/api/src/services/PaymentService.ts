@@ -749,7 +749,7 @@ export class PaymentService {
         } else {
             if (checkout.customer && checkout.customer.company) {
                 customer.company = checkout.customer.company.clone();
-                await ViesService.checkCompany(checkout.customer.company, customer.company);
+                await ViesService.checkCompany(customer.company, null, { forceValidation: true });
             }
         }
 

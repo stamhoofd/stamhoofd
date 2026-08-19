@@ -717,7 +717,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     this.requirePeppolPermission();
                 }
 
-                await ViesService.checkCompany(put, put);
+                await ViesService.checkCompany(put, null, { forceValidation: true });
             }
         } else {
             if (companies.length > 5) {
@@ -734,7 +734,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     this.requirePeppolPermission();
                 }
 
-                await ViesService.checkCompany(company, company);
+                await ViesService.checkCompany(company, null, { forceValidation: true });
             }
         }
     }

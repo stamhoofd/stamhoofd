@@ -11,11 +11,17 @@ import { ViesApi } from './ViesApi.js';
 const CacheMonths = 6;
 
 export class ViesServiceStatic {
-    async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | Company) {
+    /**
+     * Validate a company.
+     *
+     * If validating a company before a patch is applied, also send the patch (make sure company is already patched with that patch).
+     * This will also apply small corrections to the patch itself, so it is safe to apply later.
+     */
+    async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | null = null, { forceValidation = false }: { forceValidation?: boolean } = {}) {
         // Validate the custom PEPPOL endpoint id, but only when it actually changed.
         // In a patch, `customPeppolEndpointId` is undefined unless the client changed it;
         // for a full company it is always set (null or a value), so we validate a set value.
-        if (patch.customPeppolEndpointId !== undefined && company.customPeppolEndpointId) {
+        if ((forceValidation || (patch && patch.customPeppolEndpointId !== undefined)) && company.customPeppolEndpointId) {
             const endpointId = company.customPeppolEndpointId;
 
             // A KBO (0208) endpoint id is the Belgian enterprise number, so it must belong to a
@@ -46,13 +52,20 @@ export class ViesServiceStatic {
 
             // Write the validated endpoint id back as a full replacement so any client-supplied
             // entityName is discarded: entityName can only ever be set by the server.
-            patch.customPeppolEndpointId = endpointId;
+            if (patch) {
+                patch.customPeppolEndpointId = endpointId;
+            }
+            company.customPeppolEndpointId = endpointId;
         }
 
         if (!company.address) {
             // Not allowed to set
-            patch.companyNumber = null;
-            patch.VATNumber = null;
+            if (patch) {
+                patch.companyNumber = null;
+                patch.VATNumber = null;
+            }
+            company.companyNumber = null;
+            company.VATNumber = null;
             return;
         }
 
@@ -68,10 +81,17 @@ export class ViesServiceStatic {
         if (company.VATNumber !== null) {
             // Changed VAT number
             const VATNumber = await this.checkVATNumber(company.address.country, company.VATNumber);
-            patch.VATNumber = VATNumber;
+
+            if (patch) {
+                patch.VATNumber = VATNumber;
+            }
+            company.VATNumber = VATNumber;
 
             if (company.address.country === Country.Belgium) {
-                patch.companyNumber = VATNumber.substring(2);
+                if (patch) {
+                    patch.companyNumber = VATNumber.substring(2);
+                }
+                company.companyNumber = VATNumber.substring(2);
             }
         }
 
@@ -81,9 +101,16 @@ export class ViesServiceStatic {
             } else {
                 // Need to validate
                 const result = await this.checkCompanyNumber(company.address.country, company.companyNumber);
-                patch.companyNumber = result.companyNumber;
+                if (patch) {
+                    patch.companyNumber = result.companyNumber;
+                }
+                company.companyNumber = result.companyNumber;
+
                 if (result.VATNumber !== undefined) {
-                    patch.VATNumber = result.VATNumber;
+                    if (patch) {
+                        patch.VATNumber = result.VATNumber;
+                    }
+                    company.VATNumber = result.VATNumber;
                 }
             }
         }
