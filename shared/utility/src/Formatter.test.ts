@@ -26,7 +26,7 @@ describe('Formatter.price', () => {
 
     test('removes zero decimals by default but keeps them when asked', () => {
         expect(Formatter.price(5_00_00)).not.toContain(',00');
-        expect(Formatter.price(5_00_00, false)).toContain('5,00');
+        expect(Formatter.price(5_00_00, { removeZeroDecimals: false })).toContain('5,00');
         // A rounded whole euro also drops the decimals
         expect(Formatter.price(4_99_73)).not.toContain(',');
     });
