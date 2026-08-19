@@ -3,7 +3,7 @@ import { Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, StartOpenIDFlowStruct } from '@stamhoofd/structures';
-import { getAppHost, LoginProviderType, OpenIDClientConfiguration, Token as TokenStruct } from '@stamhoofd/structures';
+import { getAppHost, LoginProviderType, OpenIDClientConfiguration, SessionClientType, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
 import { Context } from '../helpers/Context.js';
@@ -34,7 +34,7 @@ type SSOSessionContext = {
     spaState: string;
     providerType: LoginProviderType;
     organizationId?: string | null;
-    isNativeApp: boolean;
+    clientType: SessionClientType;
 
     /**
      * Link this method to this existing user and don't create a new token
@@ -421,8 +421,13 @@ export class SSOService {
             }
         }
 
-        const isNativeApp = data.clientPlatform === 'ios' || data.clientPlatform === 'android';
-        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user, reauthenticateAccessToken, isNativeApp);
+        let clientType = SessionClientType.Browser;
+        if (data.clientPlatform === 'ios') {
+            clientType = SessionClientType.iOS;
+        } else if (data.clientPlatform === 'android') {
+            clientType = SessionClientType.Android;
+        }
+        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user, reauthenticateAccessToken, clientType);
     }
 
     validateRedirectUri(uri: string) {
@@ -457,7 +462,7 @@ export class SSOService {
         }
     }
 
-    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User, reauthenticateAccessToken: string | null = null, isNativeApp = false): Promise<Response<undefined>> {
+    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User, reauthenticateAccessToken: string | null = null, clientType = SessionClientType.Browser): Promise<Response<undefined>> {
         const code_verifier = generators.codeVerifier();
         const state = generators.state(); // this is the internal state backend <-> SSO provider
         const nonce = generators.nonce();
@@ -473,7 +478,7 @@ export class SSOService {
             spaState, // this is the state frontend <-> backend (not backend <-> SSO provider)
             providerType: this.provider,
             organizationId: this.organization?.id ?? null,
-            isNativeApp,
+            clientType,
             userId: user?.id ?? null,
             reauthenticateAccessToken,
         };
@@ -700,7 +705,7 @@ export class SSOServiceWithSession {
                 //
                 // This is a redirect, not a request/response pair, so the client gets the
                 // token of the pending step in the URL and picks the flow up from there.
-                const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, this.service.organization, { loginMethod: 'sso' });
+                const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, this.service.organization, { loginMethod: SessionLoginMethod.SSO });
 
                 if (requirement.type === 'challenge') {
                     redirectUri.searchParams.set('oid_mfa', requirement.challenge.token);
@@ -712,7 +717,7 @@ export class SSOServiceWithSession {
                     redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
                     redirectUri.searchParams.set('s', session.spaState);
                 } else if (requirement.type === 'none') {
-                    const token = await SessionService.createExpiredSession(user, { loginMethod: 'sso', isNativeApp: session.isNativeApp });
+                    const token = await SessionService.createExpiredSession(user, { loginMethod: SessionLoginMethod.SSO, clientType: session.clientType });
 
                     if (!token) {
                         throw new SimpleError({

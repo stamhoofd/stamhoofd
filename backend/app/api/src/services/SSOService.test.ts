@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Platform } from '@stamhoofd/models';
-import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, StartOpenIDFlowStruct } from '@stamhoofd/structures';
+import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, SessionClientType, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ContextInstance } from '../helpers/Context.js';
@@ -70,7 +70,11 @@ describe('SSOService', () => {
         });
     });
 
-    it('keeps the native client classification in the SSO session', async () => {
+    it.each([
+        ['web', SessionClientType.Browser],
+        ['ios', SessionClientType.iOS],
+        ['android', SessionClientType.Android],
+    ])('keeps the %s client classification in the SSO session', async (clientPlatform, expectedClientType) => {
         const service = createService({
             ssoConfiguration: OpenIDClientConfiguration.create({}),
             loginMethods: new Map([[LoginMethod.SSO, LoginMethodConfig.create({})]]),
@@ -82,11 +86,11 @@ describe('SSOService', () => {
 
         await service.validateAndStartAuthCodeFlow(StartOpenIDFlowStruct.create({
             spaState: 'a-valid-spa-state',
-            clientPlatform: 'ios',
+            clientPlatform,
         }));
 
         expect([...SSOService.sessionStorage.values()]).toHaveLength(1);
-        expect([...SSOService.sessionStorage.values()][0].isNativeApp).toBe(true);
+        expect([...SSOService.sessionStorage.values()][0].clientType).toBe(expectedClientType);
     });
 });
 

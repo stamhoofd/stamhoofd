@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, User } from '@stamhoofd/models';
-import { Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
+import { SessionLoginMethod, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
@@ -131,10 +131,10 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // the request already comes from a session of that same user (changing your email
         // address while signed in): the second factor was checked when it was created.
         if (authenticatedUser?.id !== user.id) {
-            await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: 'email', i18n: request.i18n });
+            await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: SessionLoginMethod.Email, i18n: request.i18n });
         }
 
-        const token = await SessionService.createSession(user, { loginMethod: 'email' });
+        const token = await SessionService.createSession(user, { loginMethod: SessionLoginMethod.Email });
         await user.markActive();
 
         const st = new TokenStruct(token);

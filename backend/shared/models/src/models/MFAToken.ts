@@ -1,7 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel, SQLCalculation, SQLColumnExpression, SQLScalar, SQLWhereSign } from '@stamhoofd/sql';
+import { SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';
-import type { SessionLoginMethod } from './Token.js';
 
 export type MFATokenPurpose = 'login' | 'setup';
 
@@ -29,7 +29,7 @@ export class MFAToken extends QueryableModel {
      * user got there.
      */
     @column({ type: 'string' })
-    loginMethod: SessionLoginMethod = 'password';
+    loginMethod = SessionLoginMethod.Password;
 
     @column({ type: 'integer' })
     tries = 0;
@@ -65,7 +65,7 @@ export class MFAToken extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async createFor(userId: string, purpose: MFATokenPurpose, { webauthnChallenge = null, loginMethod = 'password' }: { webauthnChallenge?: string | null; loginMethod?: SessionLoginMethod } = {}): Promise<MFAToken> {
+    static async createFor(userId: string, purpose: MFATokenPurpose, { webauthnChallenge = null, loginMethod = SessionLoginMethod.Password }: { webauthnChallenge?: string | null; loginMethod?: SessionLoginMethod } = {}): Promise<MFAToken> {
         // A new attempt supersedes the previous one. Without this, every single login
         // attempt of a user with 2FA leaves a row behind (anyone who knows the password
         // can create them at will), and the abandoned tokens stay usable until they

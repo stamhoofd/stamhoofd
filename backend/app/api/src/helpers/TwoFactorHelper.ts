@@ -1,9 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
-import type { SessionLoginMethod, User } from '@stamhoofd/models';
+import type { User } from '@stamhoofd/models';
 import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, Token, WebauthnCredential } from '@stamhoofd/models';
 import type { User as UserStruct } from '@stamhoofd/structures';
-import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
+import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, SessionLoginMethod, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
 
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server';
 
@@ -134,14 +134,14 @@ export class TwoFactorHelper {
      * credential was accepted.
      *
      * `loginMethod` describes the credential that was just verified:
-     *  - 'password': the account password. A single credential that says nothing about
+     *  - Password: the account password. A single credential that says nothing about
      *    whether the user still reads the email address on the account, so a required
      *    second factor must be set up here if the user does not have one yet — and a
      *    long-inactive admin has to confirm their email address before they may.
-     *  - 'email': a password token or email verification code. Also a single credential,
+     *  - Email: a password token or email verification code. Also a single credential,
      *    but one that only reaches someone who reads the account's email, so it is the way
      *    out of that email confirmation.
-     *  - 'sso': an external identity provider already authenticated the user, and is
+     *  - SSO: an external identity provider already authenticated the user, and is
      *    trusted to apply its own second factor. An enrolled factor is still verified
      *    (the user asked us to protect their account), but we do not force enrollment —
      *    unless the account ALSO has a password, because then the password remains a way
@@ -152,12 +152,12 @@ export class TwoFactorHelper {
             return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user, { loginMethod }) };
         }
 
-        if (loginMethod === 'sso' && !user.hasPasswordBasedAccount()) {
+        if (loginMethod === SessionLoginMethod.SSO && !user.hasPasswordBasedAccount()) {
             return { type: 'none' };
         }
 
         if (await TwoFactorHelper.isTwoFactorRequired(user, organization)) {
-            if (loginMethod === 'password' && TwoFactorHelper.isInactiveForEnrollment(user)) {
+            if (loginMethod === SessionLoginMethod.Password && TwoFactorHelper.isInactiveForEnrollment(user)) {
                 return { type: 'confirm-email' };
             }
             return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup', { loginMethod }) };
@@ -204,7 +204,7 @@ export class TwoFactorHelper {
      * whoever holds the link could enroll one and get a session anyway, and the client
      * needs a session to let the user choose a password before enrolling.
      */
-    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { loginMethod, i18n, allowTemporarySession = false }: { loginMethod: 'password' | 'email'; i18n: I18n; allowTemporarySession?: boolean }): Promise<void> {
+    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { loginMethod, i18n, allowTemporarySession = false }: { loginMethod: SessionLoginMethod.Password | SessionLoginMethod.Email; i18n: I18n; allowTemporarySession?: boolean }): Promise<void> {
         const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod });
 
         if (requirement.type === 'confirm-email') {

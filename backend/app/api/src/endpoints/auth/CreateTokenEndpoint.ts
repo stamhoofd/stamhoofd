@@ -3,7 +3,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, WebauthnCredential } from '@stamhoofd/models';
 import type { ChallengeGrantStruct, MFAGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
-import { CreateTokenStruct, LoginMethod, MFAMethodType, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+import { CreateTokenStruct, LoginMethod, MFAMethodType, SessionLoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
@@ -151,9 +151,9 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // Second factor / forced enrollment: block the session until the user
                 // completes (or first sets up) a second factor. Shared with every other
                 // grant that mints a session from a single primary credential.
-                await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: 'password', i18n: request.i18n });
+                await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: SessionLoginMethod.Password, i18n: request.i18n });
 
-                const token = await SessionService.createSession(user, { loginMethod: 'password', authenticatedAt: new Date() });
+                const token = await SessionService.createSession(user, { loginMethod: SessionLoginMethod.Password, authenticatedAt: new Date() });
 
                 if (!token) {
                     throw new SimpleError({
@@ -315,10 +315,10 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 //
                 // The link was emailed to the account, so this is also how a long-inactive
                 // admin confirms their email address and gets to enroll after all.
-                await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion(), { loginMethod: 'email', i18n: request.i18n, allowTemporarySession: true });
+                await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion(), { loginMethod: SessionLoginMethod.Email, i18n: request.i18n, allowTemporarySession: true });
 
                 // Important to create a new token before adjusting the old token
-                const token = await SessionService.createSession(passwordToken.user, { loginMethod: 'email', authenticatedAt: new Date() });
+                const token = await SessionService.createSession(passwordToken.user, { loginMethod: SessionLoginMethod.Email, authenticatedAt: new Date() });
 
                 // TODO: make token short lived until renewal
 

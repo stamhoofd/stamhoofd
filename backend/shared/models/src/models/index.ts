@@ -30,7 +30,7 @@ export * from './STInvoice.js';
 export * from './STPackage.js';
 export { STPendingInvoice } from './STPendingInvoice.js';
 export * from './Ticket.js';
-export { type SessionLoginMethod, Token, type TokenWithUser } from './Token.js';
+export { Token, type TokenWithUser } from './Token.js';
 export * from './UsedRegisterCode.js';
 export * from './Webshop.js';
 

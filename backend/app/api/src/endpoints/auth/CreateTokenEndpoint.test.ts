@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
-import { PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
+import { PermissionLevel, Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
@@ -183,8 +183,8 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'web');
 
-            expect(token.isNativeApp).toBe(false);
-            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin.browser.refreshToken);
+            expect(token.clientType).toBe(SessionClientType.Browser);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
         });
 
         test('an administrator that signs in in the native app has no maximum session length', async () => {
@@ -197,10 +197,10 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'ios');
 
-            expect(token.isNativeApp).toBe(true);
-            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin.nativeApp.refreshToken);
+            expect(token.clientType).toBe(SessionClientType.iOS);
+            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
 
-            const browserSessionDuration = SESSION_DURATIONS.admin.browser.session;
+            const browserSessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
             if (browserSessionDuration === null) {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }
@@ -208,7 +208,7 @@ describe('Endpoint.CreateToken', () => {
             await token.save();
 
             const renewed = await refresh(organization, token.refreshToken);
-            expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin.nativeApp.refreshToken);
+            expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
         });
 
         test('renewing an access token does not extend the session past its maximum length', async () => {
@@ -221,7 +221,7 @@ describe('Endpoint.CreateToken', () => {
 
             const token = await login(organization, admin, 'web');
 
-            const sessionDuration = SESSION_DURATIONS.admin.browser.session;
+            const sessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
             if (sessionDuration === null) {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }
@@ -246,7 +246,7 @@ describe('Endpoint.CreateToken', () => {
             }).create();
 
             const token = await login(organization, admin, 'web');
-            const sessionDuration = SESSION_DURATIONS.admin.browser.session;
+            const sessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
             if (sessionDuration === null) {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }

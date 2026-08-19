@@ -1,7 +1,7 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column, Database } from '@simonbackx/simple-database';
 import { QueryableModel, SQLWhereSign } from '@stamhoofd/sql';
-import { ApiUser } from '@stamhoofd/structures';
+import { ApiUser, SessionClientType, SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -9,14 +9,6 @@ import { ACCESS_TOKEN_DURATION, DEFAULT_REFRESH_TOKEN_DURATION } from '../consta
 import { User } from './User.js';
 
 export type TokenWithUser = Token & { user: User };
-
-/**
- * The kind of primary credential a session was authenticated with.
- *
- * 'password' is the account password, 'email' a password token or email verification code,
- * and 'sso' means an external identity provider vouched for the user.
- */
-export type SessionLoginMethod = 'password' | 'email' | 'sso';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -72,11 +64,11 @@ export class Token extends QueryableModel {
     @column({ type: 'datetime' })
     sessionStartedAt: Date;
 
-    @column({ type: 'boolean' })
-    isNativeApp = false;
+    @column({ type: 'string' })
+    clientType = SessionClientType.Browser;
 
     @column({ type: 'string' })
-    loginMethod: SessionLoginMethod = 'password';
+    loginMethod = SessionLoginMethod.Password;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {

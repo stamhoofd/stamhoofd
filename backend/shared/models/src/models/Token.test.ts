@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import { SessionClientType, SessionLoginMethod } from '@stamhoofd/structures';
 
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { UserFactory } from '../factories/UserFactory.js';
@@ -56,8 +57,8 @@ describe('Model.Token', () => {
 
         expect(token.userId).toEqual(user.id);
         expect(token.sessionStartedAt.getTime()).toBeGreaterThan(Date.now() - 60 * 1000);
-        expect(token.isNativeApp).toBe(false);
-        expect(token.loginMethod).toBe('password');
+        expect(token.clientType).toBe(SessionClientType.Browser);
+        expect(token.loginMethod).toBe(SessionLoginMethod.Password);
 
         const search = await Token.getByAccessToken(token.accessToken);
         // Make sure we do not compare the organization, since that won't be loaded now, but is loaded on user, and on token

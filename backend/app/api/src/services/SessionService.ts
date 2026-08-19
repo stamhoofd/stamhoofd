@@ -1,8 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { SessionLoginMethod, User } from '@stamhoofd/models';
+import type { User } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';
 import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
+import { SessionClientType, SessionLoginMethod } from '@stamhoofd/structures';
 
 import { ContextInstance } from '../helpers/Context.js';
 
@@ -17,7 +18,7 @@ export class SessionService {
         const token = await Token.createUnsavedToken(user);
         token.authenticatedAt = authenticatedAt;
         token.loginMethod = loginMethod;
-        token.isNativeApp = this.isNativeApp();
+        token.clientType = this.getClientType();
 
         this.applyLimits(token, user);
         await token.save();
@@ -29,10 +30,10 @@ export class SessionService {
      * session to the client is in the URL. Only the refresh token travels along, and the
      * client exchanges it for a usable access token.
      */
-    static async createExpiredSession<U extends User>(user: U, { loginMethod, isNativeApp = this.isNativeApp() }: { loginMethod: SessionLoginMethod; isNativeApp?: boolean }): Promise<Token & { user: U }> {
+    static async createExpiredSession<U extends User>(user: U, { loginMethod, clientType = this.getClientType() }: { loginMethod: SessionLoginMethod; clientType?: SessionClientType }): Promise<Token & { user: U }> {
         const token = await Token.createUnsavedToken(user);
         token.loginMethod = loginMethod;
-        token.isNativeApp = isNativeApp;
+        token.clientType = clientType;
 
         token.accessTokenValidUntil = new Date(Date.now() - 31 * DAY);
         token.accessTokenValidUntil.setMilliseconds(0);
@@ -60,7 +61,7 @@ export class SessionService {
         const token = await Token.createUnsavedToken(oldToken.user);
         token.sessionStartedAt = oldToken.sessionStartedAt;
         token.loginMethod = oldToken.loginMethod;
-        token.isNativeApp = oldToken.isNativeApp;
+        token.clientType = oldToken.clientType;
 
         this.applyLimits(token, oldToken.user);
         await token.save();
@@ -71,9 +72,15 @@ export class SessionService {
      * Only read when a session is created: it is a client provided header, and a rotation
      * has to keep the value of the login instead of trusting the header again.
      */
-    private static isNativeApp(): boolean {
+    private static getClientType(): SessionClientType {
         const platform = ContextInstance.optional?.request.headers['x-platform'];
-        return platform === 'ios' || platform === 'android';
+        if (platform === 'ios') {
+            return SessionClientType.iOS;
+        }
+        if (platform === 'android') {
+            return SessionClientType.Android;
+        }
+        return SessionClientType.Browser;
     }
 
     /**
@@ -82,13 +89,13 @@ export class SessionService {
      * permissions all along).
      */
     private static getDurations(token: Token, user: User): SessionDurations {
-        return SESSION_DURATIONS[this.getSessionType(token, user)][token.isNativeApp ? 'nativeApp' : 'browser'];
+        return SESSION_DURATIONS[this.getSessionType(token, user)][token.clientType];
     }
 
     private static getSessionType(token: Token, user: User): SessionType {
         // Before the permissions: whoever signs in through the identity provider stays
         // dependent on it, member or administrator.
-        if (token.loginMethod === 'sso') {
+        if (token.loginMethod === SessionLoginMethod.SSO) {
             return 'sso';
         }
 
