@@ -50,14 +50,19 @@ async function loginAs({ page, user }: { page: Page; user: User }) {
 
     if (STAMHOOFD.userMode === 'platform') {
         await page.addInitScript(({ tokenString }) => {
-            window.localStorage.setItem('token-platform', tokenString);
+            if (!window.localStorage.getItem('token-platform')) {
+                window.localStorage.setItem('token-platform', tokenString);
+            }
         }, { tokenString });
     } else {
         const organizationId = user.organizationId;
         await page.addInitScript(({ organizationId, tokenString }) => {
             if (organizationId) {
-                window.localStorage.setItem('token-' + organizationId, tokenString);
-            } else {
+                const key = 'token-' + organizationId;
+                if (!window.localStorage.getItem(key)) {
+                    window.localStorage.setItem(key, tokenString);
+                }
+            } else if (!window.localStorage.getItem('token-platform')) {
                 window.localStorage.setItem('token-platform', tokenString);
             }
         }, { organizationId, tokenString });
