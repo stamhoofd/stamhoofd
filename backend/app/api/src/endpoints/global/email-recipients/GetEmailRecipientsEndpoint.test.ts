@@ -1,10 +1,11 @@
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
 import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
-import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
-import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
+import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { Request } from '@simonbackx/simple-endpoints';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/email-recipients`;
 
@@ -57,7 +58,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         })
             .create();
 
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
 
         user2 = await new UserFactory({
             organization,
@@ -73,7 +74,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         })
             .create();
 
-        token2 = await Token.createToken(user2);
+        token2 = await SessionService.createSession(user2);
     });
 
     test('It can request all email recipients if read permission for all senders', async () => {

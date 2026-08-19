@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Group, Member, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Group, Member, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { IDRegisterCart, IDRegisterCheckout, IDRegisterItem, MemberDetails, MemberWithRegistrationsBlob, PaymentMethod } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
@@ -14,6 +14,7 @@ import { initStripe } from '../init/initStripe.js';
 import { registrationUpdateQueue } from '../../src/services/BalanceItemService.js';
 import { DocumentRenderService } from '../../src/services/DocumentRenderService.js';
 import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 const baseUrl = `/members/register`;
 
@@ -73,7 +74,7 @@ describe('E2E.Documents', () => {
             permissions: null,
         }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const member = await new MemberFactory({ organization, user })
             .create();

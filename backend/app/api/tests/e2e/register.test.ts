@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +11,7 @@ import { BalanceItemService } from '../../src/services/BalanceItemService.js';
 import { PlatformMembershipService } from '../../src/services/PlatformMembershipService.js';
 import { assertBalances } from '../assertions/assertBalances.js';
 import { testServer } from '../helpers/TestServer.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 describe('E2E.Register', () => {
     const registerEndpoint = new RegisterMembersEndpoint();
@@ -74,7 +75,7 @@ describe('E2E.Register', () => {
         })
             .create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const member = await new MemberFactory({ organization, user }).create();
 

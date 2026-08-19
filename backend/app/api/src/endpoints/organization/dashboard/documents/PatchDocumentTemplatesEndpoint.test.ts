@@ -1,13 +1,14 @@
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
-import { DocumentTemplate, DocumentTemplateFactory, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
+import { DocumentTemplate, DocumentTemplateFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { DocumentPrivateSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplatePrivate, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchDocumentTemplatesEndpoint } from './PatchDocumentTemplatesEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 const baseUrl = `/organization/document-templates`;
 const endpoint = new PatchDocumentTemplatesEndpoint();
@@ -40,7 +41,7 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
             }),
         }).create();
 
-        token = await Token.createToken(user);
+        token = await SessionService.createSession(user);
     });
 
     describe('put fiscal document', () => {

@@ -3,6 +3,7 @@ import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, UserPermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { AdminSessionService } from '../../../../services/AdminSessionService.js';
@@ -47,11 +48,11 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
         const otherOrganizationAdmin = await createAdmin(otherOrganization);
         const member = await new UserFactory({ organization }).create();
 
-        const currentToken = await Token.createToken(admin, new Date());
-        const secondDeviceOfAdmin = await Token.createToken(admin, new Date());
-        const otherAdminToken = await Token.createToken(otherAdmin, new Date());
-        const otherOrganizationAdminToken = await Token.createToken(otherOrganizationAdmin, new Date());
-        const memberToken = await Token.createToken(member, new Date());
+        const currentToken = await SessionService.createSession(admin, { authenticatedAt: new Date() });
+        const secondDeviceOfAdmin = await SessionService.createSession(admin, { authenticatedAt: new Date() });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
+        const otherOrganizationAdminToken = await SessionService.createSession(otherOrganizationAdmin, { authenticatedAt: new Date() });
+        const memberToken = await SessionService.createSession(member, { authenticatedAt: new Date() });
 
         const response = await signOut(organization, currentToken);
 
@@ -71,9 +72,9 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
 
         const admin = await createAdmin(organization, PermissionLevel.Write);
         const otherAdmin = await createAdmin(organization);
-        const otherAdminToken = await Token.createToken(otherAdmin, new Date());
+        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
 
-        await expect(signOut(organization, await Token.createToken(admin, new Date()))).rejects.toThrow(STExpect.simpleError({
+        await expect(signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }))).rejects.toThrow(STExpect.simpleError({
             code: 'permission_denied',
         }));
         expect(await tokenExists(otherAdminToken)).toBe(true);
@@ -89,9 +90,9 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
         await apiUser.save();
 
         const otherAdmin = await createAdmin(organization);
-        const otherAdminToken = await Token.createToken(otherAdmin, new Date());
+        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
 
-        await expect(signOut(organization, await Token.createApiToken(apiUser))).rejects.toThrow(STExpect.simpleError({
+        await expect(signOut(organization, await SessionService.createApiSession(apiUser))).rejects.toThrow(STExpect.simpleError({
             code: 'permission_denied',
         }));
         expect(await tokenExists(otherAdminToken)).toBe(true);
@@ -100,7 +101,7 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
     test('an organization without admins is a no-op', async () => {
         const organization = await new OrganizationFactory({}).create();
         const member = await new UserFactory({ organization }).create();
-        const memberToken = await Token.createToken(member, new Date());
+        const memberToken = await SessionService.createSession(member, { authenticatedAt: new Date() });
 
         // Not reachable through the endpoint (the caller is an admin themselves), but the
         // empty list of users may not turn into a query that deletes everything.
@@ -126,10 +127,10 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
             }).create();
             const member = await new UserFactory({ organization }).create();
 
-            const otherAdminToken = await Token.createToken(otherAdmin, new Date());
-            const memberToken = await Token.createToken(member, new Date());
+            const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
+            const memberToken = await SessionService.createSession(member, { authenticatedAt: new Date() });
 
-            const response = await signOut(organization, await Token.createToken(admin, new Date()));
+            const response = await signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }));
 
             expect(response.body.count).toBe(1);
             expect(await tokenExists(otherAdminToken)).toBe(false);
@@ -149,9 +150,9 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
                 organizationPermissions: new Map([[organization.id, Permissions.create({ level: PermissionLevel.Full })]]),
             });
             await apiUser.save();
-            const apiToken = await Token.createApiToken(apiUser);
+            const apiToken = await SessionService.createApiSession(apiUser);
 
-            const response = await signOut(organization, await Token.createToken(admin, new Date()));
+            const response = await signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }));
 
             expect(response.body.count).toBe(0);
             expect(await tokenExists(apiToken)).toBe(true);

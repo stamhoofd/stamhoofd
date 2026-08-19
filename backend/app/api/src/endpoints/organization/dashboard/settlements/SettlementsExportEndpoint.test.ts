@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { initMembershipOrganization } from '../../../../../tests/init/initMembershipOrganization.js';
 import { initPlatformAdmin } from '../../../../../tests/init/initPlatformAdmin.js';
+import { SessionService } from '../../../../services/SessionService.js';
 import { SettlementService } from '../../../../services/SettlementService.js';
 import { SettlementsExportEndpoint } from './SettlementsExportEndpoint.js';
 
@@ -34,7 +35,7 @@ describe('Endpoint.SettlementsExport', () => {
             organization,
             permissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
-        return { user, token: await TokenModel.createToken(user) };
+        return { user, token: await SessionService.createSession(user) };
     };
 
     const post = async (organization: Organization, token: Token, { start = new Date(2026, 0, 1), end = new Date(2026, 1, 1) } = {}) => {
@@ -115,7 +116,7 @@ describe('Endpoint.SettlementsExport', () => {
 
     test('A user without finance access cannot export settlements', async () => {
         const user = await new UserFactory({ organization: membershipOrganization }).create();
-        const token = await TokenModel.createToken(user);
+        const token = await SessionService.createSession(user);
 
         await expect(post(membershipOrganization, token)).rejects.toThrow(
             STExpect.simpleError({ code: 'permission_denied' }),

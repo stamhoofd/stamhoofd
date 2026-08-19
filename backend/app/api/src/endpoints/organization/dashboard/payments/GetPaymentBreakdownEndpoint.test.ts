@@ -12,6 +12,7 @@ import { exportSlice } from '../../../../../tests/helpers/ExportSlice.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetPaymentEndpoint } from '../../shared/GetPaymentEndpoint.js';
 import { GetPaymentBreakdownEndpoint } from './GetPaymentBreakdownEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 /**
  * What was ordered: the name of the product, its unit price, how many, and optionally one chosen
@@ -23,7 +24,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
     const endpoint = new GetPaymentBreakdownEndpoint();
 
     const getBreakdown = async ({ filter, path, search, narrowFilter, organization, user }: { filter?: StamhoofdFilter; path?: BreakdownPathItem[]; search?: string; narrowFilter?: StamhoofdFilter; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const request = Request.get({
             path: '/payments/breakdown',

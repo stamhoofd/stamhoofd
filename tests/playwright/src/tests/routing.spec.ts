@@ -4,6 +4,7 @@ setup();
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { EventFactory, OrganizationFactory, Platform, Token, UserFactory } from '@stamhoofd/models';
 import type { AppType } from '@stamhoofd/structures';
@@ -14,7 +15,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 
 async function loginAs({ page, user }: { page: Page; user: User }) {
     // create token
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );
@@ -863,7 +864,7 @@ test.describe('Routing on page load @routing', () => {
 
             test('an expired organization token falls back to the platform session', async ({ page }) => {
                 const organization = await createOrganization();
-                const expiredToken = await Token.createToken(user);
+                const expiredToken = await SessionService.createSession(user);
                 expiredToken.refreshTokenValidUntil = new Date(Date.now() - 1000);
                 const expiredTokenString = JSON.stringify(new TokenStruct(expiredToken).encode({ version: Version }));
 

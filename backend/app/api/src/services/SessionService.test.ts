@@ -2,7 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
 import type { SessionType } from '@stamhoofd/models/constants/sessions.js';
-import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
+import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS, SSO_HANDOFF_TOKEN_DURATION } from '@stamhoofd/models/constants/sessions.js';
 import { PermissionLevel, Permissions, SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
@@ -69,6 +69,31 @@ describe('SessionService', () => {
         { name: 'an SSO login in a browser', platform: 'web', clientType: SessionClientType.Browser, sessionType: 'sso', loginMethod: SessionLoginMethod.SSO, createUser: () => createMember() },
         { name: 'an SSO login in the native app', platform: 'ios', clientType: SessionClientType.iOS, sessionType: 'sso', loginMethod: SessionLoginMethod.SSO, createUser: () => createAdmin() },
     ];
+
+    test('creates and persists a token with its session', async () => {
+        const user = await createMember();
+        const token = await SessionService.createSession(user);
+
+        expect(token).toBeInstanceOf(Token);
+        expect(token.user).toBe(user);
+        expect(token.userId).toBe(user.id);
+        expect(token.accessToken).toHaveLength(256);
+        expect(token.refreshToken).toHaveLength(256);
+
+        const session = await getSession(token);
+        expect(session).toMatchObject({
+            userId: user.id,
+            lastUsedTokenId: token.id,
+            lastActiveTokenId: token.id,
+            clientType: SessionClientType.Browser,
+            loginMethod: SessionLoginMethod.Password,
+        });
+        expect(await Token.getByAccessToken(token.accessToken)).toMatchObject({
+            id: token.id,
+            sessionId: session.id,
+            refreshToken: token.refreshToken,
+        });
+    });
 
     describe('session length', () => {
         for (const { name, platform, clientType, sessionType, loginMethod, createUser } of policy) {
@@ -177,11 +202,11 @@ describe('SessionService', () => {
             expect(session.lastUsedTokenId).toBe(replacement.id);
             expect(await Token.getByAccessToken(original.accessToken)).toBeDefined();
 
-            expect(await UserSession.activateToken(replacement)).toBe(true);
+            expect(await SessionService.activateToken(replacement)).toBe(true);
             session = await getSession(replacement);
             expect(session.lastActiveTokenId).toBe(replacement.id);
             expect(await Token.getByAccessToken(original.accessToken)).toBeUndefined();
-            expect(await UserSession.activateToken(original)).toBe(false);
+            expect(await SessionService.activateToken(original)).toBe(false);
         });
 
         test('the active token can retry a renewal whose response was lost', async () => {
@@ -254,7 +279,7 @@ describe('SessionService', () => {
             token.refreshTokenValidUntil = new Date(Date.now() - 1000);
             await token.save();
 
-            expect(await Token.getByRefreshToken(token.refreshToken)).toBeUndefined();
+            expect(await SessionService.getByRefreshToken(token.refreshToken)).toBeUndefined();
         });
 
         test('an expired refresh token ends every session of the user', async () => {
@@ -267,7 +292,7 @@ describe('SessionService', () => {
 
             // Using an expired refresh token can mean the token was stolen, so the account
             // is signed out everywhere instead of only on this session.
-            await Token.getByRefreshToken(expired.refreshToken);
+            await SessionService.getByRefreshToken(expired.refreshToken);
 
             expect(await Token.getByAccessToken(expired.accessToken)).toBeUndefined();
             expect(await Token.getByAccessToken(other.accessToken)).toBeUndefined();
@@ -277,14 +302,16 @@ describe('SessionService', () => {
     describe('SSO sessions', () => {
         test('the session still has to be renewed before it can be used', async () => {
             const admin = await createAdmin();
-            const token = await SessionService.createExpiredSession(admin, { loginMethod: SessionLoginMethod.SSO });
+            const token = await SessionService.createSSOHandoff(admin);
 
             expect(token.isAccessTokenExpired()).toBe(true);
-            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.sso[SessionClientType.Browser].refreshToken);
+            expectValidFor(token.refreshTokenValidUntil, SSO_HANDOFF_TOKEN_DURATION);
 
             const rotated = await SessionService.rotateSession(token);
             expect((await getSession(rotated)).loginMethod).toBe(SessionLoginMethod.SSO);
             expect(rotated.isAccessTokenExpired()).toBe(false);
+            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.sso[SessionClientType.Browser].refreshToken);
+            expect(await SessionService.getByRefreshToken(token.refreshToken)).toBeUndefined();
         });
     });
 });

@@ -5,6 +5,7 @@ import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject,
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/registrations`;
 const endpoint = new GetRegistrationsEndpoint();
@@ -48,7 +49,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -117,7 +118,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -182,7 +183,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -259,7 +260,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -326,7 +327,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -401,7 +402,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -456,7 +457,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -542,7 +543,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -632,7 +633,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -713,7 +714,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -788,7 +789,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -875,7 +876,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -961,7 +962,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();

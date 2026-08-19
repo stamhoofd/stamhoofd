@@ -2,6 +2,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 
 import { Context } from '../../helpers/Context.js';
+import { SessionService } from '../../services/SessionService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -25,7 +26,7 @@ export class DeleteTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
     async handle(_: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
         const { token } = await Context.authenticate({ allowWithoutAccount: true });
-        await token.delete();
+        await SessionService.endSession(token);
 
         return new Response(undefined);
     }

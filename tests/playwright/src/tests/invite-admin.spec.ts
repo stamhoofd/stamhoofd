@@ -6,6 +6,7 @@ setup();
 import type { Browser, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { I18n } from '@stamhoofd/backend-i18n';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization } from '@stamhoofd/models';
 import { MFARecoveryCode, MFATOTP, OrganizationFactory, PasswordToken, Platform, Token, User, UserFactory } from '@stamhoofd/models';
 import { PasswordForgotService } from '@stamhoofd/backend/services/PasswordForgotService';
@@ -79,7 +80,7 @@ function randomName(prefix: string) {
  * Sign in by setting the token in local storage (same as routing.spec.ts).
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );

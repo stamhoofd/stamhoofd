@@ -5,6 +5,7 @@ setup();
 // other imports
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { Organization as OrganizationModel, OrganizationFactory, Platform, Token, UserFactory } from '@stamhoofd/models';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
@@ -28,7 +29,7 @@ function randomEmail(prefix: string) {
  * Sign in by putting a token in local storage (same as api-keys.spec.ts).
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user, new Date());
+    const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );
@@ -90,7 +91,7 @@ test.describe('Sign out admins after requiring two-factor authentication @two-fa
                 organization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const otherAdminToken = await Token.createToken(otherAdmin, new Date());
+            const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
 
             const ownToken = await loginAs({ page, user: admin });
             await page.goto(domain + '/' + appToUri('dashboard') + '/' + organization.uri + '/instellingen/experimenten');
@@ -120,7 +121,7 @@ test.describe('Sign out admins after requiring two-factor authentication @two-fa
                 organization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const otherAdminToken = await Token.createToken(otherAdmin, new Date());
+            const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
 
             const ownToken = await loginAs({ page, user: admin });
             await page.goto(domain + '/' + appToUri('dashboard') + '/' + organization.uri + '/instellingen/experimenten');
@@ -169,7 +170,7 @@ test.describe('Sign out admins after requiring two-factor authentication @two-fa
             const otherAdmin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const otherAdminToken = await Token.createToken(otherAdmin, new Date());
+            const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
 
             const ownToken = await loginAs({ page, user: platformAdmin });
             await page.goto(domain + '/platform/instellingen/experimenten');

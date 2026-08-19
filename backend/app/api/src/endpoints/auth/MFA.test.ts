@@ -1,10 +1,14 @@
-import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { Endpoint } from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
+import type { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { EmailMocker } from '@stamhoofd/email';
-import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, UserSession, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
+import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, UserSession, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
 import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MFAMethodType, PermissionLevel, Permissions, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';
 import { authenticator } from 'otplib';
 import crypto from 'crypto';
+import { SessionService } from '../../services/SessionService.js';
 
 import { MFATestHelper } from '../../../tests/helpers/MFATestHelper.js';
 import { testServer } from '../../../tests/helpers/TestServer.js';
@@ -43,8 +47,7 @@ function firstError(e: unknown): SimpleError {
 async function captureError(promise: Promise<unknown>): Promise<SimpleError> {
     try {
         await promise;
-    }
-    catch (e) {
+    } catch (e) {
         return firstError(e);
     }
     throw new Error('Expected the request to throw');
@@ -106,12 +109,12 @@ function bearer(request: Request, token: Token) {
 }
 
 async function freshToken(user: User): Promise<Token> {
-    return await Token.createToken(user, new Date());
+    return await SessionService.createSession(user, { authenticatedAt: new Date() });
 }
 
 async function staleToken(user: User): Promise<Token> {
     // A token as produced by a refresh_token rotation (never authenticatedAt).
-    return await Token.createToken(user);
+    return await SessionService.createSession(user);
 }
 
 async function requireMfa(organization: Organization | null, email: string, password: string): Promise<{ token: string; methods: string[]; webauthnAuthenticationOptions: unknown }> {
@@ -668,8 +671,7 @@ describe('MFA', () => {
                 const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
                 expect(err.code).toBe('require_email_confirmation');
                 expect(send).toHaveBeenCalledOnce();
-            }
-            finally {
+            } finally {
                 send.mockRestore();
             }
         });

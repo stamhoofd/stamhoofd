@@ -1,10 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetEmailTemplatesEndpoint } from './GetEmailTemplatesEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 const baseUrl = `/v${Version}/email-templates`;
 
@@ -66,7 +67,7 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
         const organization = await new OrganizationFactory({ period }).create();
         const group = await new GroupFactory({ organization }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const template = new EmailTemplate();
         template.subject = 'test template 1';
@@ -99,7 +100,7 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
             }),
         }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const template = new EmailTemplate();
         template.subject = 'saved template';

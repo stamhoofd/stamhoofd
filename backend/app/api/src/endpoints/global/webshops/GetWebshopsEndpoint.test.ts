@@ -7,6 +7,7 @@ import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetWebshopsCountEndpoint } from './GetWebshopsCountEndpoint.js';
 import { GetWebshopsEndpoint } from './GetWebshopsEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = '/webshops';
 const endpoint = new GetWebshopsEndpoint();
@@ -30,7 +31,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Webshop A' }).create();
             const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Webshop B' }).create();
@@ -75,7 +76,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const request = Request.get({
                 path: baseUrl,
@@ -101,7 +102,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const request = Request.get({
                 path: baseUrl,
@@ -142,7 +143,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(platformAdmin);
+            const token = await SessionService.createSession(platformAdmin);
 
             const request = Request.get({
                 path: baseUrl,
@@ -170,7 +171,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.None }),
             }).create();
 
-            const token = await Token.createToken(platformUser);
+            const token = await SessionService.createSession(platformUser);
 
             const request = Request.get({
                 path: baseUrl,
@@ -209,7 +210,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(platformUser);
+            const token = await SessionService.createSession(platformUser);
 
             const request = Request.get({
                 path: baseUrl,
@@ -256,7 +257,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(platformUser);
+            const token = await SessionService.createSession(platformUser);
 
             const request = Request.get({
                 path: baseUrl,
@@ -289,7 +290,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const webshop1 = await new WebshopFactory({ organizationId: organization.id }).create();
             const webshop2 = await new WebshopFactory({ organizationId: organization.id }).create();
@@ -318,7 +319,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Summer Sale' }).create();
             const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Winter Collection' }).create();
@@ -350,7 +351,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                     permissions: Permissions.create({ level: PermissionLevel.Full }),
                 }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 const closedWebshop = await new WebshopFactory({
                     organizationId: organization.id,
@@ -398,7 +399,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // Create 5 webshops
             const webshops = await Promise.all(
@@ -468,7 +469,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // Create webshops with deterministic names for ordering
             const names = ['Apple Shop', 'Banana Market', 'Cherry Stand', 'Date Store', 'Elderberry Emporium'];
@@ -516,7 +517,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             await new WebshopFactory({ organizationId: organization.id }).create();
             await new WebshopFactory({ organizationId: organization.id }).create();
@@ -543,7 +544,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Alpha' }).create();
             const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Beta' }).create();
@@ -609,7 +610,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // Use a small page size (10) so we exercise multiple pages.
             const pageSize = 10;
@@ -666,7 +667,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
             const closedWebshop = await new WebshopFactory({
@@ -702,7 +703,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const openWebshop = await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
             await new WebshopFactory({
@@ -740,7 +741,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
             await new WebshopFactory({
@@ -782,7 +783,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             const platformUser = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const token = await Token.createToken(platformUser);
+            const token = await SessionService.createSession(platformUser);
 
             const request = Request.get({
                 path: baseUrl,

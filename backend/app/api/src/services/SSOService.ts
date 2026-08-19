@@ -719,7 +719,7 @@ export class SSOServiceWithSession {
                     redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
                     redirectUri.searchParams.set('s', session.spaState);
                 } else if (requirement.type === 'none') {
-                    const token = await SessionService.createExpiredSession(user, { loginMethod: SessionLoginMethod.SSO, clientType: session.clientType, metaData: session.sessionMetaData ?? SessionService.parseMetaData(null) });
+                    const token = await SessionService.createSSOHandoff(user, { clientType: session.clientType, metaData: session.sessionMetaData ?? SessionService.parseMetaData(null) });
 
                     if (!token) {
                         throw new SimpleError({

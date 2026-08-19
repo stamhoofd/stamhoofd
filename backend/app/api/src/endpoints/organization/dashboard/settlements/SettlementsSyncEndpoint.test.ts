@@ -14,6 +14,7 @@ import { SettlementSyncRunner } from '../../../../helpers/SettlementSyncRunner.j
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { initMembershipOrganization } from '../../../../../tests/init/initMembershipOrganization.js';
 import { initPlatformAdmin } from '../../../../../tests/init/initPlatformAdmin.js';
+import { SessionService } from '../../../../services/SessionService.js';
 import { GetSettlementsSyncStatusEndpoint } from './GetSettlementsSyncStatusEndpoint.js';
 import { SettlementsSyncEndpoint } from './SettlementsSyncEndpoint.js';
 
@@ -174,7 +175,7 @@ describe('Endpoint.SettlementsSync', () => {
 
     test('A user without platform full access cannot run the sync', async () => {
         const user = await new UserFactory({ organization: membershipOrganization }).create();
-        const token = await TokenModel.createToken(user);
+        const token = await SessionService.createSession(user);
 
         await expect(post(membershipOrganization, token)).rejects.toThrow(
             STExpect.simpleError({ code: 'permission_denied' }),

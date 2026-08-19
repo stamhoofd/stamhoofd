@@ -1,12 +1,13 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import type { Organization, User, BalanceItem } from '@stamhoofd/models';
+import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { PaginatedResponse, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Permissions, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { SettlementService } from '../../../../services/SettlementService.js';
 import { GetPaymentsEndpoint } from './GetPaymentsEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 // These tests exercise the balance-item filters reused inside the payments query (balanceItemPayments ->
 // balanceItem -> ...), which is the path where balance_items is joined into another query.
@@ -14,7 +15,7 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
     const endpoint = new GetPaymentsEndpoint();
 
     const getPayments = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const request = Request.get({
             path: '/payments',

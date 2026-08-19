@@ -14,7 +14,7 @@ describe('Endpoint.GetUser', () => {
     test('Request user details when signed in', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v1/user', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
@@ -27,7 +27,7 @@ describe('Endpoint.GetUser', () => {
     test('using a renewed token retires the previous active token', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const original = await Token.createToken(user);
+        const original = await SessionService.createSession(user);
         const replacement = await SessionService.rotateSession(original);
 
         const originalRequest = Request.buildJson('GET', '/v1/user', organization.getApiHost());
@@ -49,7 +49,7 @@ describe('Endpoint.GetUser', () => {
         await new MemberFactory({ organization, user }).create();
         await MFATestHelper.addConfirmedTOTP(user);
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const r = Request.buildJson('GET', '/v1/user', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
@@ -64,7 +64,7 @@ describe('Endpoint.GetUser', () => {
     test('A user without a second factor is not reported as having two-factor authentication', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v1/user', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
@@ -82,7 +82,7 @@ describe('Endpoint.GetUser', () => {
     test('Request user details with invalid token is not working', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v1/user', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken + 'd';
@@ -93,7 +93,9 @@ describe('Endpoint.GetUser', () => {
     test('Request user details with expired token is not working', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createExpiredToken(user);
+        const token = await SessionService.createSession(user);
+        token.accessTokenValidUntil = new Date(Date.now() - 1000);
+        await token.save();
 
         const r = Request.buildJson('GET', '/v1/user', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
@@ -104,7 +106,7 @@ describe('Endpoint.GetUser', () => {
     test('Can request details of an API user by token without knowing the organization scope', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization, apiUser: true }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v1/user');
         r.headers.authorization = 'Bearer ' + token.accessToken;
@@ -118,13 +120,13 @@ describe('Endpoint.GetUser', () => {
     test('Cannot request details of an normal user by token without knowing the organization scope', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v1/user');
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.simpleError({
-            code: 'invalid_access_token'
+            code: 'invalid_access_token',
         }));
     });
 
@@ -132,14 +134,13 @@ describe('Endpoint.GetUser', () => {
         const wrongOrganization = await new OrganizationFactory({}).create();
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization, apiUser: true }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v1/user', wrongOrganization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.simpleError({
-            code: 'invalid_access_token'
+            code: 'invalid_access_token',
         }));
     });
-
 });

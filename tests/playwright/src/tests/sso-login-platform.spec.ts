@@ -55,6 +55,45 @@ test.describe('SSO login', () => {
         expect(user!.meta?.loginProviderIds.get(LoginProviderType.SSO)).toBeTruthy();
     });
 
+    test('the refresh token returned by the SSO callback can only be exchanged once', async ({ page, pages }) => {
+        await pages.dashboard.goto();
+        await page.route('**/oauth/token', async (route) => {
+            if (route.request().postData()?.includes('refresh_token')) {
+                await route.abort();
+                return;
+            }
+            await route.continue();
+        });
+        const exchangeRequestPromise = page.waitForRequest((request) => {
+            if (request.method() !== 'POST' || !request.url().endsWith('/oauth/token')) {
+                return false;
+            }
+            return request.postData()?.includes('refresh_token') ?? false;
+        });
+
+        await signInThroughSSO(page);
+        const exchangeRequest = await exchangeRequestPromise;
+        const refreshToken = exchangeRequest.postDataJSON().refresh_token as string;
+
+        const firstExchange = await page.request.post(`${WorkerData.urls.api}/oauth/token`, {
+            data: {
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken,
+            },
+        });
+        expect(firstExchange.ok()).toBe(true);
+
+        const secondExchange = await page.request.post(`${WorkerData.urls.api}/oauth/token`, {
+            data: {
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken,
+            },
+        });
+
+        expect(secondExchange.status()).toBe(400);
+        expect(await secondExchange.text()).toContain('invalid_refresh_token');
+    });
+
     test('signs in on an existing account and links the SSO provider to it', async ({ page, pages }) => {
         // An admin that was invited but never picked a password: their account is claimed by SSO.
         const existingUser = await new UserFactory({

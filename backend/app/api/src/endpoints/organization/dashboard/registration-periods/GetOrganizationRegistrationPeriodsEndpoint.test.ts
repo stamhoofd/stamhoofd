@@ -1,9 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { GroupType, LimitedFilteredRequest, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetOrganizationRegistrationPeriodsEndpoint } from './GetOrganizationRegistrationPeriodsEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 const baseUrl = `/organization/registration-periods`;
 
@@ -61,7 +62,7 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
                 }),
             })
                 .create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const otherOrganization = await initOrganization(registrationPeriod1);
 
@@ -145,7 +146,7 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const group1 = await new GroupFactory({
                 organization,

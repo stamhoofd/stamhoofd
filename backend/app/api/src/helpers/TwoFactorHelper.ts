@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
-import type { User } from '@stamhoofd/models';
-import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, Token, WebauthnCredential } from '@stamhoofd/models';
+import type { User, Token } from '@stamhoofd/models';
+import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, WebauthnCredential } from '@stamhoofd/models';
 import type { User as UserStruct } from '@stamhoofd/structures';
 import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, SessionLoginMethod, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
 
@@ -174,16 +174,14 @@ export class TwoFactorHelper {
     static async sendEnrollmentConfirmationEmail(user: User, organization: Organization | null, i18n: I18n): Promise<void> {
         try {
             enrollmentConfirmationRateLimiter.track(user.id);
-        }
-        catch {
+        } catch {
             // Sent often enough already.
             return;
         }
 
         try {
             await PasswordForgotService.sendPasswordRecoveryEmail(user, organization, i18n);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Could not send the two-factor enrollment confirmation email', e);
         }
     }
@@ -377,7 +375,7 @@ export class TwoFactorHelper {
         }
 
         // Before minting the new session, so it is never signed out by its own enrollment.
-        await Token.deleteOtherSessions(user.id, currentToken?.accessToken ?? null);
+        await SessionService.deleteOtherSessions({ userId: user.id, keepAccessToken: currentToken?.accessToken ?? null });
 
         let token: TokenStruct | null = null;
         if (setupToken) {
@@ -404,7 +402,7 @@ export class TwoFactorHelper {
             await MFARecoveryCode.deleteForUser(user.id);
         }
 
-        await Token.deleteOtherSessions(user.id, currentToken?.accessToken ?? null);
+        await SessionService.deleteOtherSessions({ userId: user.id, keepAccessToken: currentToken?.accessToken ?? null });
 
         return await TwoFactorHelper.buildStatus(user);
     }

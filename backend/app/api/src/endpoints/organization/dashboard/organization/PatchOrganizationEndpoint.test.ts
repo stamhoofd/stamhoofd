@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, User, Webshop } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import type { Organization, User, Webshop, Token } from '@stamhoofd/models';
+import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { AccessRight, Address, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
@@ -29,7 +30,7 @@ describe('Endpoint.PatchOrganization', () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
         // const groups = await new GroupFactory({ organization }).createMultiple(2)
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
             id: organization.id,
@@ -51,7 +52,7 @@ describe('Endpoint.PatchOrganization', () => {
     test("Can't change organization as a normal user", async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('PATCH', '/organization', organization.getApiHost(), {
             id: organization.id,
@@ -65,7 +66,7 @@ describe('Endpoint.PatchOrganization', () => {
     test("Can't change organization as a user with read access", async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('PATCH', '/organization', organization.getApiHost(), {
             id: organization.id,
@@ -169,7 +170,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // act
                 const response = await patchOrganization({
@@ -275,7 +276,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // act
                 const response = await patchOrganization({
@@ -336,7 +337,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                token = await Token.createToken(user);
+                token = await SessionService.createSession(user);
             });
 
             test('should throw if put roles', async () => {
@@ -687,7 +688,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                const userWithReadAccessToken = await Token.createToken(userWithReadAccess);
+                const userWithReadAccessToken = await SessionService.createSession(userWithReadAccess);
 
                 const userWithWriteAccess = await new UserFactory({
                     organization,
@@ -702,7 +703,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                const userWithWriteAccessToken = await Token.createToken(userWithReadAccess);
+                const userWithWriteAccessToken = await SessionService.createSession(userWithReadAccess);
 
                 const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
@@ -719,7 +720,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                const userWithFullAccessForOtherWebshopToken = await Token.createToken(userWithReadAccess);
+                const userWithFullAccessForOtherWebshopToken = await SessionService.createSession(userWithReadAccess);
 
                 usersWithoutFullAccess = [
                     { user: userWithReadAccess, token: userWithReadAccessToken },
@@ -1002,7 +1003,7 @@ describe('Endpoint.PatchOrganization', () => {
                 })
                     .create();
 
-                token = await Token.createToken(user);
+                token = await SessionService.createSession(user);
             });
 
             test('should not be able to put roles', async () => {
@@ -1299,7 +1300,7 @@ describe('Endpoint.PatchOrganization', () => {
                 .query({ participant: `iso6523-actorid-upis::${schemeID}:${id}` })
                 .reply(200, {
                     'total-result-count': 1,
-                    matches: [{
+                    'matches': [{
                         participantID: { scheme: 'iso6523-actorid-upis', value: `${schemeID}:${id}` },
                         entities: [{ name: [{ name: entityName }] }],
                     }],
@@ -1326,7 +1327,7 @@ describe('Endpoint.PatchOrganization', () => {
             const scope = mockDirectoryFound('0208', '0123456789');
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1354,7 +1355,7 @@ describe('Endpoint.PatchOrganization', () => {
             await organization.save();
 
             const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1375,7 +1376,7 @@ describe('Endpoint.PatchOrganization', () => {
             const scope = mockDirectoryFound('0088', '5412345000013');
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1404,7 +1405,7 @@ describe('Endpoint.PatchOrganization', () => {
             mockDirectoryFound('0088', '5412345000013', 'Directory Name');
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1425,7 +1426,7 @@ describe('Endpoint.PatchOrganization', () => {
         test('a KBO custom PEPPOL endpoint id that does not match the company number is rejected', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1447,11 +1448,11 @@ describe('Endpoint.PatchOrganization', () => {
             nock('https://directory.peppol.eu')
                 .get('/search/1.0/json')
                 .query({ participant: 'iso6523-actorid-upis::0088:5412345000013' })
-                .reply(200, { 'total-result-count': 0, matches: [] } as nock.Body);
+                .reply(200, { 'total-result-count': 0, 'matches': [] } as nock.Body);
 
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1483,7 +1484,7 @@ describe('Endpoint.PatchOrganization', () => {
             await organization.save();
 
             const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const newPeriod = await new RegistrationPeriodFactory({}).create();
 
@@ -1510,7 +1511,7 @@ describe('Endpoint.PatchOrganization', () => {
             await organization.save();
 
             const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const otherOrganization = await new OrganizationFactory({ }).create();
             const newPeriod = await new RegistrationPeriodFactory({ organization: otherOrganization }).create();

@@ -1,6 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Token, UserFactory } from '@stamhoofd/models';
+import type { Token } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -34,7 +36,7 @@ describe('Endpoint.GetPlatformEndpoint', () => {
         })
             .create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const platform = await getPlatform(token);
         expect(platform.body.privateConfig).toBeNull();
     });
@@ -47,7 +49,7 @@ describe('Endpoint.GetPlatformEndpoint', () => {
         })
             .create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const platform = await getPlatform(token);
         expect(platform.body.privateConfig).not.toBeNull();
     });
@@ -60,7 +62,7 @@ describe('Endpoint.GetPlatformEndpoint', () => {
         })
             .create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         token.accessToken = 'invalid-token';
         await token.save();
         await expect(getPlatform(token)).rejects.toThrow('The access token is invalid');

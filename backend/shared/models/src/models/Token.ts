@@ -1,28 +1,11 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column, Database } from '@simonbackx/simple-database';
-import { QueryableModel, SQLWhereSign } from '@stamhoofd/sql';
-import { ApiUser, SessionClientType, SessionDeviceType, type SessionMetaData, SessionLoginMethod } from '@stamhoofd/structures';
-import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { QueryableModel } from '@stamhoofd/sql';
+import { ApiUser } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ACCESS_TOKEN_DURATION, DEFAULT_REFRESH_TOKEN_DURATION } from '../constants/sessions.js';
 import { User } from './User.js';
-import { UserSession } from './UserSession.js';
 
 export type TokenWithUser = Token & { user: User };
-
-async function randomBytes(size: number): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        crypto.randomBytes(size, (err: Error | null, buf: Buffer) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(buf);
-        });
-    });
-}
 
 export class Token extends QueryableModel {
     static table = 'tokens';
@@ -97,49 +80,6 @@ export class Token extends QueryableModel {
      */
     isFresh(): boolean {
         return this.authenticatedAt !== null && this.authenticatedAt.getTime() > Date.now() - Token.FRESH_WINDOW;
-    }
-
-    /**
-     * Sign out every session of a user, except the one the request was made with.
-     *
-     * Used after a security-relevant change to the account (enrolling or removing a
-     * two-factor method): sessions that were created before that change should not
-     * survive it. API users are excluded — their tokens are machine credentials that are
-     * managed separately, not browser sessions.
-     */
-    static async deleteOtherSessions(userId: string, keepAccessToken: string | null): Promise<number> {
-        const user = await User.getByID(userId);
-        if (user?.isApiUser) {
-            return 0;
-        }
-
-        const query = this.delete().where('userId', userId);
-        if (keepAccessToken) {
-            query.where(this.primary.name, SQLWhereSign.NotEqual, keepAccessToken);
-        }
-        const { affectedRows } = await query.delete();
-        return affectedRows;
-    }
-
-    /**
-     * Sign out every session of the given users, except the one the request was made with.
-     *
-     * Used when an administrator forces all admins to sign in again, e.g. right after
-     * making two-factor authentication required. Unlike deleteOtherSessions() the caller
-     * is responsible for leaving out API users, because it already has the list of users
-     * it wants to sign out.
-     */
-    static async deleteForUsers(userIds: string[], keepAccessToken: string | null): Promise<number> {
-        if (userIds.length === 0) {
-            return 0;
-        }
-
-        const query = this.delete().where('userId', userIds);
-        if (keepAccessToken) {
-            query.where(this.primary.name, SQLWhereSign.NotEqual, keepAccessToken);
-        }
-        const { affectedRows } = await query.delete();
-        return affectedRows;
     }
 
     static async getAPIUserWithToken(user: User) {
@@ -219,18 +159,9 @@ export class Token extends QueryableModel {
             return undefined;
         }
 
-        if (token.refreshTokenValidUntil < new Date()) {
-            // If a user tries to use a refresh token that is expired - there is a possibility of a user
-            // being compromised.
-            // So we delete all tokens for this user.
-            console.error('Detected an expired refresh token, deleting all tokens for user', token.userId);
-            await this.delete().where('userId', token.userId);
-            return undefined;
-        }
-
         const user = User.fromRow(rows[0]['user']) || null;
 
-        if (!user || user.isApiUser) {
+        if (!user) {
             console.warn('Selected a token without a user!');
             return undefined;
         }
@@ -238,103 +169,4 @@ export class Token extends QueryableModel {
         return token.setRelation(Token.user, user);
     }
 
-    /**
-     * Create a token that is expired. This can be usefull if renewing the token is restricted by some account state.
-     * E.g. you cannot renew this token until the e-mail address has been verified.
-     * @param user
-     */
-    static async createExpiredToken<U extends User>(user: U): Promise<(Token & { user: U })> {
-        const token = await this.createUnsavedToken(user);
-
-        /// Expired a month ago (to prevent any timezone bugs)
-        token.accessTokenValidUntil = new Date(Date.now() - 24 * 60 * 60 * 1000 * 31);
-        token.accessTokenValidUntil.setMilliseconds(0);
-
-        await token.save();
-        return token;
-    }
-
-    /***
-     * Create a token without saving it
-     */
-    static async createUnsavedToken<U extends User>(user: U, options: {
-        session?: UserSession;
-        clientType?: SessionClientType;
-        loginMethod?: SessionLoginMethod;
-        metaData?: SessionMetaData;
-    } = {}): Promise<(Token & { user: U })> {
-        if (user.isSystemUser) {
-            throw new SimpleError({
-                code: 'internal_error',
-                message: 'Cannot create token for system user',
-                statusCode: 500,
-            });
-        }
-        const token = new Token().setRelation(Token.user, user);
-        token.id = uuidv4();
-        const session = options.session ?? await UserSession.createForToken(
-            user,
-            token.id,
-            options.clientType ?? SessionClientType.Browser,
-            options.loginMethod ?? SessionLoginMethod.Password,
-            options.metaData ?? {
-                deviceType: SessionDeviceType.Desktop,
-                deviceName: null,
-                osName: null,
-                osVersion: null,
-                appVersion: null,
-                nativeAppVersion: null,
-                browserName: null,
-            },
-        );
-        token.sessionId = session.id;
-
-        token.accessTokenValidUntil = new Date();
-        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + ACCESS_TOKEN_DURATION);
-        token.accessTokenValidUntil.setMilliseconds(0);
-
-        token.refreshTokenValidUntil = new Date();
-        token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + DEFAULT_REFRESH_TOKEN_DURATION);
-        token.refreshTokenValidUntil.setMilliseconds(0);
-
-        token.accessToken = (await randomBytes(192)).toString('base64').toUpperCase();
-        token.refreshToken = (await randomBytes(192)).toString('base64').toUpperCase();
-        return token;
-    }
-
-    /**
-     * Create a session without any of the length limits that apply to a real login: use
-     * SessionService in the api package for those.
-     *
-     * @param authenticatedAt Pass the current date when this token is minted by a real
-     * authentication (password/mfa/passkey/password_token) so it counts as "fresh".
-     * Leave null (default) for refresh_token rotations.
-     */
-    static async createToken<U extends User>(user: U, authenticatedAt: Date | null = null): Promise<(Token & { user: U })> {
-        const token = await this.createUnsavedToken(user);
-        token.authenticatedAt = authenticatedAt;
-        await token.save();
-        return token;
-    }
-
-    static async createApiToken<U extends User>(user: U): Promise<(Token & { user: U })> {
-        const token = await this.createUnsavedToken(user);
-
-        // 5 year valid
-        token.accessTokenValidUntil = new Date();
-        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 1000 * 60 * 60 * 24 * 365 * 5);
-        token.accessTokenValidUntil.setMilliseconds(0);
-
-        token.refreshTokenValidUntil = new Date();
-        token.refreshTokenValidUntil.setTime(token.accessTokenValidUntil.getTime());
-        token.refreshTokenValidUntil.setMilliseconds(0);
-
-        await token.save();
-        return token;
-    }
-
-    static async clearFor(userId: string, currentToken: string) {
-        const query = `DELETE from ${this.table} where userId = ? AND accessToken != ?`;
-        await Database.delete(query, [userId, currentToken]);
-    }
 }

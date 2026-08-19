@@ -970,6 +970,25 @@ export class SessionContext implements RequestMiddleware {
 
     isLoggingOut = false;
 
+    async renewToken(): Promise<void> {
+        await QueueHandler.schedule('session-context-token', async () => {
+            await this.loadTokenFromStorage();
+            if (!this.token) {
+                throw new Error('Could not refresh a session without a token');
+            }
+            await this.token.refresh(this.identityServer);
+        });
+    }
+
+    async endSession(accessToken: string): Promise<void> {
+        await this.identityServer.request({
+            method: 'DELETE',
+            path: '/oauth/token',
+            headers: { Authorization: 'Bearer ' + accessToken },
+            shouldRetry: false,
+        });
+    }
+
     async logout(updateUIForLogout = true) {
         if (this.isLoggingOut) {
             // Prevents loops when refreshing inside the logout endpoint
@@ -994,7 +1013,7 @@ export class SessionContext implements RequestMiddleware {
                     this.isLoggingOut = false;
                     throw e;
                 }
-                console.error('Failed to delete token. Probably already deleted?', e);
+                console.error('Failed to end session. Probably already ended?', e);
             }
 
             this.isLoggingOut = false;

@@ -3,6 +3,7 @@ import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
 import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';
 import { PermissionLevel, Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
+import { SessionService } from '../../services/SessionService.js';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
@@ -43,7 +44,7 @@ describe('Endpoint.CreateToken', () => {
         // Also check UTF8 passwords
         const password = '54😂test👌🏾86s&é';
         const user = await new UserFactory({ organization, password }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
             grant_type: 'refresh_token',
@@ -96,7 +97,7 @@ describe('Endpoint.CreateToken', () => {
         test('refreshing a token marks the user as active again', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const monthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
             monthsAgo.setMilliseconds(0);
@@ -239,6 +240,35 @@ describe('Endpoint.CreateToken', () => {
                 refresh_token: firstReplacement.refreshToken,
             });
             await expect(testServer.test(endpoint, forkRequest)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+        });
+
+        test('an SSO handoff refresh token can only be exchanged once', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization }).create();
+            const handoff = await SessionService.createSSOHandoff(user);
+
+            const sessionToken = await refresh(organization, handoff.refreshToken);
+            expect(sessionToken.sessionId).toBe(handoff.sessionId);
+
+            await expect(refresh(organization, handoff.refreshToken)).rejects.toMatchObject({
+                code: 'invalid_refresh_token',
+            });
+        });
+
+        test('concurrent exchanges cannot fork an SSO handoff', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization }).create();
+            const handoff = await SessionService.createSSOHandoff(user);
+
+            const exchanges = await Promise.allSettled([
+                refresh(organization, handoff.refreshToken),
+                refresh(organization, handoff.refreshToken),
+            ]);
+
+            expect(exchanges.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+            const rejected = exchanges.filter(result => result.status === 'rejected');
+            expect(rejected).toHaveLength(1);
+            expect(rejected[0].reason).toMatchObject({ code: 'invalid_refresh_token' });
         });
 
         test('renewing an access token does not extend the session past its maximum length', async () => {

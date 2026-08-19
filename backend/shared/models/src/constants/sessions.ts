@@ -8,12 +8,7 @@ const DAY = 24 * HOUR;
  * Kept short: this is the window in which a leaked access token is still worth something.
  */
 export const ACCESS_TOKEN_DURATION = 15 * MINUTE;
-
-/**
- * Refresh token lifetime of a token that is not part of a login (Token.createToken). Kept
- * at the longest session below, so nothing can live longer than a real session.
- */
-export const DEFAULT_REFRESH_TOKEN_DURATION = 30 * DAY;
+export const SSO_HANDOFF_TOKEN_DURATION = 5 * MINUTE;
 
 export type SessionType = 'sso' | 'platformAdmin' | 'admin' | 'user';
 

@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { BundleDiscountGroupPriceSettings, GroupPrice, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -8,6 +8,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init/index.js';
 import { GetGroupsEndpoint } from './GetGroupsEndpoint.js';
 import { Database } from '@simonbackx/simple-database';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/groups`;
 
@@ -68,7 +69,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
         const { organization: otherOrganization } = await initOrganization(registrationPeriod1);
 
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const waitingList = await new GroupFactory({
             organization,

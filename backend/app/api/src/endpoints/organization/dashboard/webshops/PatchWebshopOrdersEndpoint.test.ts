@@ -6,6 +6,7 @@ import { Cart, CartItem, Customer, OrderData, PaymentMethod, PermissionLevel, Pe
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchWebshopOrdersEndpoint } from './PatchWebshopOrdersEndpoint.js';
@@ -25,7 +26,7 @@ describe('Endpoint.PatchWebshopOrders', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const freeProductPrice = ProductPrice.create({ name: 'Free', price: 0, stock: 100 });
         const product = Product.create({ name: 'Product', stock: 100, prices: [freeProductPrice] });

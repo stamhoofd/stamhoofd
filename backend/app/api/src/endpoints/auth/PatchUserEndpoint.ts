@@ -10,6 +10,7 @@ import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions 
 import { Context } from '../../helpers/Context.js';
 import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
+import { SessionService } from '../../services/SessionService.js';
 import { VerificationCodeService } from '../../services/VerificationCodeService.js';
 
 type Params = { id: string };
@@ -163,7 +164,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             // password changes
             await editUser.changePassword(request.body.password);
             await PasswordToken.clearFor(editUser.id);
-            await Token.clearFor(editUser.id, token.accessToken);
+            await SessionService.clearFor({ userId: editUser.id, keepAccessToken: token.accessToken });
         }
 
         if (request.body.hasPassword === false) {
@@ -179,7 +180,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 }
                 editUser.password = null;
                 await PasswordToken.clearFor(editUser.id);
-                await Token.clearFor(editUser.id, token.accessToken);
+                await SessionService.clearFor({ userId: editUser.id, keepAccessToken: token.accessToken });
             }
         }
 

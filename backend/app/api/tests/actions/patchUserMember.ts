@@ -6,11 +6,12 @@ import { Token } from '@stamhoofd/models';
 import type { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 export async function patchUserMember({ patch, organization, user }: { patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>; organization: Organization; user: User }) {
     expect(patch.id).toEqual(expect.any(String));
 
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
 
     const arr = new PatchableArray();
     arr.addPatch(patch);

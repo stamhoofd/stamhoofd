@@ -5,6 +5,7 @@ import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { UploadImage } from './UploadImage.js';
@@ -52,7 +53,7 @@ describe('Endpoint.UploadImage', () => {
             organization,
             permissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const boundary = '--------------------------StamhoofdTest';
         const body = Buffer.concat([

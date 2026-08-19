@@ -1,14 +1,15 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { EmailContent, EmailTemplate as EmailTemplateStruct, EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchEmailTemplatesEndpoint } from './PatchEmailTemplatesEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 const baseUrl = `/v${Version}/email-templates`;
 
@@ -64,7 +65,7 @@ describe('Endpoint.PatchEmailTemplatesEndpoint', () => {
             const organization = await new OrganizationFactory({ period }).create();
             const group = await new GroupFactory({ organization }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const template = new EmailTemplate();
             template.subject = 'test template 1';
@@ -99,7 +100,7 @@ describe('Endpoint.PatchEmailTemplatesEndpoint', () => {
                     level: PermissionLevel.Full,
                 }),
             }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             return { organization, token };
         };
 

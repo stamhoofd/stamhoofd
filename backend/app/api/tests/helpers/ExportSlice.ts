@@ -6,6 +6,7 @@ import { ExcelExportType, LimitedFilteredRequest, SortItemDirection } from '@sta
 import { ExportToExcelEndpoint } from '../../src/endpoints/global/files/ExportToExcelEndpoint.js';
 import { Context } from '../../src/helpers/Context.js';
 import { testServer } from './TestServer.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 // Registers the balance item payment export, which is what a row that holds a part of its objects is
 // written out with
@@ -56,7 +57,7 @@ class ExportSliceEndpoint extends Endpoint<Record<string, never>, undefined, und
  * How many balance item payments a filter selects, and what they are worth together.
  */
 export async function exportSlice({ organization, user, filter, search = null }: { organization: Organization; user: User; filter: StamhoofdFilter; search?: string | null }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
 
     const request = Request.get({
         path: '/exports/balance-item-payments',

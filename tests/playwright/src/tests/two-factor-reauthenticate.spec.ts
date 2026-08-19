@@ -6,8 +6,9 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { MFATestHelper } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
-import { MFATOTP, Platform, Token, UserFactory, WebauthnCredential } from '@stamhoofd/models';
+import { MFATOTP, Platform, Token, UserFactory, UserSession, WebauthnCredential } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
@@ -45,14 +46,21 @@ async function setPlatformFeatureFlags(featureFlags: string[]) {
  * `authenticatedAt` null is what a refresh_token rotation produces: a session that is signed
  * in, but did not recently prove who the user is.
  */
-async function loginAs({ page, user, authenticatedAt = null }: { page: Page; user: User; authenticatedAt?: Date | null }) {
-    const tokenString = await createTokenString(user, authenticatedAt);
+async function loginAs({ page, user, authenticatedAt = null, accessTokenValidUntil }: { page: Page; user: User; authenticatedAt?: Date | null; accessTokenValidUntil?: Date }) {
+    const token = await SessionService.createSession(user, { authenticatedAt });
+    if (accessTokenValidUntil) {
+        token.accessTokenValidUntil = accessTokenValidUntil;
+        await token.save();
+    }
+    const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
 
     await page.addInitScript(({ tokenString }) => {
         window.localStorage.removeItem('platform');
         window.localStorage.removeItem('user-platform');
         window.localStorage.setItem('token-platform', tokenString);
     }, { tokenString });
+
+    return token.sessionId;
 }
 
 /**
@@ -61,16 +69,14 @@ async function loginAs({ page, user, authenticatedAt = null }: { page: Page; use
  * the token that loginAs keeps setting on every load.
  */
 async function continueWithStaleSession({ page, user }: { page: Page; user: User }) {
-    const tokenString = await createTokenString(user, null);
+    const token = await SessionService.createSession(user);
+    const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
 
     await page.addInitScript(({ tokenString }) => {
         window.localStorage.setItem('token-platform', tokenString);
     }, { tokenString });
-}
 
-async function createTokenString(user: User, authenticatedAt: Date | null) {
-    const token = await Token.createToken(user, authenticatedAt);
-    return JSON.stringify(new TokenStruct(token).encode({ version: Version }));
+    return token.sessionId;
 }
 
 /**
@@ -132,7 +138,7 @@ for (const viewport of viewports) {
             // The interrupted action is an authenticator app: the passkey that confirms the
             // identity is excluded from a second enrollment, so a new passkey could never be
             // created on the same authenticator anyway.
-            await continueWithStaleSession({ page, user });
+            const staleSessionId = await continueWithStaleSession({ page, user });
             const settingsView = await openTwoFactorSettings(page);
             await settingsView.getByTestId('add-totp').click();
 
@@ -157,6 +163,7 @@ for (const viewport of viewports) {
 
             expect(await MFATOTP.getConfirmedForUser(user.id)).toHaveLength(1);
             expect(await WebauthnCredential.getForUser(user.id)).toHaveLength(1);
+            expect(await UserSession.getByID(staleSessionId)).toBeUndefined();
         });
 
         test('an authenticator app confirms the identity before a passkey is added', async ({ page }) => {
@@ -169,7 +176,7 @@ for (const viewport of viewports) {
             }).create();
             const { secret } = await MFATestHelper.addConfirmedTOTP(user);
 
-            await loginAs({ page, user });
+            const staleSessionId = await loginAs({ page, user });
             const settingsView = await openTwoFactorSettings(page);
             await settingsView.getByTestId('add-passkey').click();
 
@@ -187,6 +194,49 @@ for (const viewport of viewports) {
             await expect(page.getByTestId('input-error')).toBeHidden();
 
             expect(await WebauthnCredential.getForUser(user.id)).toHaveLength(1);
+            expect(await UserSession.getByID(staleSessionId)).toBeUndefined();
+        });
+
+        test('a near-expiring token is renewed before reauthentication and its session is ended', async ({ page }) => {
+            await installVirtualAuthenticator(page);
+
+            const user = await new UserFactory({
+                email: randomEmail('mfa-reauth-expired-' + viewport.name),
+                password: PASSWORD,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const { secret } = await MFATestHelper.addConfirmedTOTP(user);
+
+            const staleSessionId = await loginAs({
+                page,
+                user,
+                accessTokenValidUntil: new Date(Date.now() + 60_000),
+            });
+            const settingsView = await openTwoFactorSettings(page);
+            await settingsView.getByTestId('add-passkey').click();
+
+            const reauthView = page.getByTestId('reauthenticate-view');
+            await expect(reauthView).toBeVisible({ timeout: 20_000 });
+
+            const staleSession = await UserSession.getByID(staleSessionId);
+            if (!staleSession || staleSession.lastActiveTokenId === staleSession.lastUsedTokenId) {
+                throw new Error('Expected the session token to be renewed before reauthentication');
+            }
+
+            const [originalToken] = await Token.where({ id: staleSession.lastActiveTokenId }, { limit: 1 });
+            if (!originalToken) {
+                throw new Error('Expected the original session token');
+            }
+            originalToken.accessTokenValidUntil = new Date(Date.now() - 1000);
+            await originalToken.save();
+
+            await reauthView.getByTestId('reauth-password').fill(PASSWORD);
+            await reauthView.getByTestId('reauth-submit').click();
+            await new TwoFactorFlow({ page }).passTOTPChallenge(secret);
+
+            await expect(reauthView).toBeHidden({ timeout: 20_000 });
+            await expect(settingsView.getByTestId('passkey-item')).toHaveCount(1, { timeout: 20_000 });
+            expect(await UserSession.getByID(staleSessionId)).toBeUndefined();
         });
     });
 }

@@ -6,6 +6,7 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Organization, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PaymentMethod, PermissionLevel, Permissions, STPackageBundle, Token as TokenStruct, Version, WebshopTicketType } from '@stamhoofd/structures';
@@ -15,7 +16,7 @@ import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
 
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
     const organizationId = user.organizationId;
 

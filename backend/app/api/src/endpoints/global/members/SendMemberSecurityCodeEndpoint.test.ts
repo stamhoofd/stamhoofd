@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import type { RateLimiter } from '@stamhoofd/models';
-import { AuditLog, EmailTemplateFactory, Member, MemberFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { RateLimiter, Token } from '@stamhoofd/models';
+import { AuditLog, EmailTemplateFactory, Member, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MemberDetails, Parent, ParentType, SecurityCodeSendMethod, SendMemberSecurityCodeRequest } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
@@ -9,6 +9,7 @@ import type { SMSMocker } from '../../../../tests/helpers/SMSMocker.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initSMSApi } from '../../../../tests/init/index.js';
 import { memberPhoneLookupLimiter, memberSecurityCodeSendLimiter, SendMemberSecurityCodeEndpoint, smsOrganizationLimiter, userSecurityCodeSendLimiter } from './SendMemberSecurityCodeEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/members/security-code`;
 const endpoint = new SendMemberSecurityCodeEndpoint();
@@ -41,7 +42,7 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         await new EmailTemplateFactory({ type: EmailTemplateType.MemberSecurityCode }).create();
 
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const details = MemberDetails.create({
             firstName: 'Jef',

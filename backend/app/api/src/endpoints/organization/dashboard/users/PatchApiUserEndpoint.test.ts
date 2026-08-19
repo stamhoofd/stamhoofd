@@ -1,5 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchApiUserEndpoint } from './PatchApiUserEndpoint.js';
@@ -24,7 +25,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -60,7 +61,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -95,7 +96,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -143,7 +144,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({
@@ -190,7 +191,7 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
             }),
             organization,
         }).create();
-        const token = await Token.createToken(user, new Date());
+        const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
         const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
             permissions: UserPermissions.create({

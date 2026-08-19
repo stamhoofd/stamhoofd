@@ -46,7 +46,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         switch (request.body.grantType) {
             case 'refresh_token': {
-                const oldToken = await Token.getByRefreshToken(request.body.refreshToken);
+                const oldToken = await SessionService.getByRefreshToken(request.body.refreshToken);
                 if (!oldToken) {
                     throw new SimpleError({
                         code: 'invalid_refresh_token',

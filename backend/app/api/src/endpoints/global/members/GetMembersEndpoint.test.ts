@@ -1,13 +1,14 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList } from '@stamhoofd/structures';
 import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetMembersEndpoint } from './GetMembersEndpoint.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initPlatformRecordCategory } from '../../../../tests/init/initPlatformRecordCategory.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/members`;
 const endpoint = new GetMembersEndpoint();
@@ -53,7 +54,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -126,7 +127,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -195,7 +196,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -276,7 +277,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -347,7 +348,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -422,7 +423,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -477,7 +478,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -567,7 +568,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -661,7 +662,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -746,7 +747,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -825,7 +826,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -925,7 +926,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -1013,7 +1014,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -1115,7 +1116,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -1220,7 +1221,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
 
@@ -1305,7 +1306,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -1391,7 +1392,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const member2 = await new MemberFactory({ }).create();
             const member3 = await new MemberFactory({ }).create();
@@ -1473,7 +1474,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // The member we are looking for: answered with a time of day that is not midnight
             const member1 = await new MemberFactory({}).create();
@@ -1614,7 +1615,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
 
@@ -1743,7 +1744,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
 
@@ -1840,7 +1841,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const member1 = await new MemberFactory({ }).create();
             const controlMember = await new MemberFactory({ }).create();
             const group = await new GroupFactory({ organization, period }).create();
@@ -2046,7 +2047,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             })
                 .create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // Try to request all members at organization
             const request = Request.get({
@@ -2101,7 +2102,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             const group = await new GroupFactory({ organization, period }).create();
 
             const members: MemberWithUsersRegistrationsAndGroups[] = [];
