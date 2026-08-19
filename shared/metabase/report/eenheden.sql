@@ -1,7 +1,7 @@
 -- @tab eenheden
 -- title: Eenheden
 -- description: Alles over een enkele eenheid. Kies een eenheid en een scoutsjaar bovenaan.
--- filters: scoutsjaar, eenheid
+-- filters: scoutsjaar, eenheid, aansluiting
 
 -- @card eenheid-totaal-leden
 -- title: Totaal aantal leden
@@ -173,6 +173,9 @@ WHERE mpm.deletedAt IS NULL
   -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
   -- ook in een nationale ploeg zit zou het lidgeldtype daarvan anders in deze grafiek zetten.
   AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
+  -- Alleen de gekozen aansluitingen: `facts` houdt de leden over die er een van hebben, en zonder
+  -- dit zou de taart daarnaast ook de andere aansluitingen van net die leden tonen.
+  [[AND mt.name IN ({{aansluiting}})]]
 GROUP BY mt.name
 ORDER BY `Aantal leden` DESC
 

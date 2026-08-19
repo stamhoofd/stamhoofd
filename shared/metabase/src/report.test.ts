@@ -51,7 +51,7 @@ describe('report', () => {
          */
         it('takes the parameters a card uses from its sql, so the two cannot drift', () => {
             expect(cardOf(dashboards, 'nationaal', 'totaal-leden').parameters).toContain('scoutsjaar');
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['scoutsjaar', 'eenheid']);
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['scoutsjaar', 'eenheid', 'aansluiting']);
 
             for (const key of ['leden-per-scoutsjaar', 'percentage-blijvers-per-eenheid']) {
                 expect(`${key}: ${cardOf(dashboards, 'nationaal', key).sql.includes('p.name = {{scoutsjaar}}')}`).toEqual(`${key}: false`);
@@ -317,10 +317,50 @@ describe('report', () => {
         });
 
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
-            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid']);
+            expect(dashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['scoutsjaar', 'eenheid', 'aansluiting']);
 
             for (const key of ['nationaal', 'netwerk', 'varia']) {
-                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: scoutsjaar`);
+                expect(`${key}: ${dashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: scoutsjaar,aansluiting`);
+            }
+        });
+
+        /**
+         * The aansluiting filter stands above every dashboard, so two pages read side by side always
+         * count the same members. It reaches every card that counts them, which the shared fragments
+         * see to; what is left are the two sheets of the aanlevering that list which groups existed
+         * in the werkjaar, a question about organizations rather than about members.
+         */
+        it('offers the aansluiting filter on every dashboard and to every card that counts members', () => {
+            const pages = dashboards.filter(dashboard => !dashboard.hidden);
+
+            for (const dashboard of pages) {
+                expect(`${dashboard.key}: ${dashboard.filters.includes('aansluiting')}`).toEqual(`${dashboard.key}: true`);
+            }
+
+            const without = pages.flatMap(dashboard => dashboard.cards
+                .filter(card => !card.parameters.includes('aansluiting'))
+                .map(card => `${dashboard.key}/${card.key}`));
+
+            expect(without).toEqual(['jeugdbewegingen/organisatie-bovenlokaal', 'jeugdbewegingen/organisatie-lokale-groep']);
+        });
+
+        /**
+         * Several types at once, which is why every card takes the filter in an `IN`: Metabase writes
+         * a multi-value filter out as its values, comma separated, and beside an `=` the second one
+         * is a syntax error rather than a wrong figure.
+         *
+         * Choosing none counts every member, including everyone holding no aansluiting at all, which
+         * what the dashboards open on -- so the clause is optional and disappears with the filter.
+         */
+        it('takes several aansluitingen at once and counts every member while none is chosen', () => {
+            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.parameters.includes('aansluiting')));
+            expect(cards.length).toBeGreaterThan(0);
+
+            for (const card of cards) {
+                const chosen = resolveSql(card.sql, { aansluiting: 'Volledig scoutsjaar' }).replaceAll(/\s+/g, ' ');
+
+                expect(`${card.key}: ${resolveSql(card.sql, {}).includes('mt.name IN')}`).toEqual(`${card.key}: false`);
+                expect(`${card.key}: ${chosen.includes("mt.name IN ('Volledig scoutsjaar')")}`).toEqual(`${card.key}: true`);
             }
         });
 
@@ -375,6 +415,14 @@ describe('report', () => {
         it('rejects a card without a title', () => {
             expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- display: table\nSELECT 1', 'x.sql', new Map()))
                 .toThrow('"c" has no title');
+        });
+
+        /** A fragment that includes another would otherwise expand until it runs out of memory. */
+        it('rejects a fragment that includes itself', () => {
+            const includes = new Map([['facts', '-- @include aansluiting'], ['aansluiting', '-- @include facts']]);
+
+            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include facts\nSELECT 1', 'x.sql', includes))
+                .toThrow('includes "facts" from within itself');
         });
 
         it('rejects an include that does not exist', () => {

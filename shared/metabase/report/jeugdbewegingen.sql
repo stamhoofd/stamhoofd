@@ -2,7 +2,7 @@
 -- title: Jeugdbewegingen
 -- dashboard: Groepen en Deelnemers - Departement Jeugd
 -- description: De jaarlijkse aanlevering 'Groepen en Deelnemers Jeugdbewegingen' aan het Departement Cultuur, Jeugd en Media. Eén kaart per tabblad van het sjabloon: download ze via het pijltje rechtsonder op de kaart als .xlsx en plak ze in het aanleversjabloon.
--- filters: scoutsjaar
+-- filters: scoutsjaar, aansluiting
 --
 -- The dataset a koepel delivers every september, over the werkjaar that ended in august. One card per
 -- sheet of the delivery template, holding the columns the koepel fills in, in the order and under the
@@ -16,6 +16,11 @@
 -- A werkjaar runs september to august, which is what a period spans here, so the scoutsjaar filter is
 -- what picks one. No sheet carries it as a column, since the department fills that in itself, but it
 -- decides which organisations and which deelnemers each of them holds.
+--
+-- The aansluiting filter reaches the two deelnemers sheets and neither of the organisatie ones:
+-- those list which groups existed in the werkjaar, which is not a question about members. Delivering
+-- under a chosen aansluiting therefore hands the department groups whose deelnemers were counted
+-- under it only -- the aanlevering itself is filed with the filter empty.
 
 -- @card organisatie-bovenlokaal
 -- title: Organisatie_Bovenlokaal

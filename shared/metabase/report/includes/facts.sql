@@ -61,6 +61,7 @@ WITH all_facts AS (
       AND r.registeredAt IS NOT NULL
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
+      -- @include aansluiting
 ),
 -- The koepel's own organization is not an eenheid: it is the national body, and the client's report
 -- counts the structuurvrijwilligers of its ploegen as nobody's leden and nobody's leiding. Which

@@ -22,10 +22,17 @@ import type { ReportCard, ReportTab } from './report.js';
  * Those filters get the values written out as a fixed list instead, which Metabase leaves alone —
  * at the cost of being a snapshot, so a new scoutsjaar appears once the report is written again.
  * Unit names read fine alphabetically and stay on the live question.
+ *
+ * `multiple` is whether several values can be picked at once. Metabase writes those out comma
+ * separated, so a query takes such a filter as `IN ({{name}})` and one without as `= {{name}}`. It
+ * is said here for every filter rather than only where it is on, because a filter that drives a
+ * variable is single-select unless told otherwise, and a second value would land beside the `=` of
+ * the others as sql they cannot parse.
  */
 export const reportFilters = [
-    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: true },
-    { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false },
+    { name: 'scoutsjaar', title: 'Scoutsjaar', valuesFrom: 'scoutsjaar', column: 'Scoutsjaar', keepOrder: true, multiple: false },
+    { name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
+    { name: 'aansluiting', title: 'Aansluiting', valuesFrom: 'aansluiting', column: 'Aansluiting', keepOrder: false, multiple: true },
 ] as const;
 
 /**
@@ -236,6 +243,7 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
                 slug: filter.name,
                 type: 'string/=',
                 sectionId: 'string',
+                isMultiSelect: filter.multiple,
                 // Without this the widget is a plain text box, however well the values source is
                 // configured: it is what picks the dropdown over an input box.
                 values_query_type: 'list',

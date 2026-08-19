@@ -1,7 +1,7 @@
 -- @tab nationaal
 -- title: Nationaal
 -- description: Ledenaantallen over het hele platform voor het gekozen scoutsjaar.
--- filters: scoutsjaar
+-- filters: scoutsjaar, aansluiting
 
 -- @card aantal-eenheden
 -- title: Aantal eenheden
@@ -118,6 +118,7 @@ WITH filteredMembers AS (
       AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = r.organizationId)
       [[AND p.name = {{scoutsjaar}}]]
       [[AND o.name = {{eenheid}}]]
+      -- @include aansluiting
 )
 SELECT `Geslacht`, COUNT(DISTINCT member_id) AS `Aantal leden`
 FROM filteredMembers
@@ -180,6 +181,9 @@ WHERE mpm.deletedAt IS NULL
   -- Geen lidmaatschap bij de koepel zelf: `facts` laat die organisatie weg, en wie naast een eenheid
   -- ook in een nationale ploeg zit zou het lidgeldtype daarvan anders in deze grafiek zetten.
   AND NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = mpm.organizationId)
+  -- Alleen de gekozen aansluitingen: `facts` houdt de leden over die er een van hebben, en zonder
+  -- dit zou de taart daarnaast ook de andere aansluitingen van net die leden tonen.
+  [[AND mt.name IN ({{aansluiting}})]]
 GROUP BY mt.name
 ORDER BY `Aantal leden` DESC
 

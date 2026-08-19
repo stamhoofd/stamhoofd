@@ -21,6 +21,17 @@ FROM registration_periods
 GROUP BY name
 ORDER BY MAX(startDate) DESC
 
+-- @card aansluiting
+-- title: Aansluitingen
+-- display: table
+-- size: half
+-- Eén rij per type per scoutsjaar, dus gegroepeerd op de naam: de filter zoekt op de naam en een type
+-- zou anders eenmaal per jaar in de lijst staan.
+SELECT name AS `Aansluiting`
+FROM platform_membership_types
+GROUP BY name
+ORDER BY name
+
 -- @card eenheid
 -- title: Eenheden
 -- display: table

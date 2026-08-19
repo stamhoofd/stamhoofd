@@ -222,6 +222,33 @@ describe('buildParameters', () => {
         expect(parameters[1].values_source_type).toEqual('card');
     });
 
+    /**
+     * Metabase leaves a filter that drives a query variable on a single value unless the parameter
+     * says otherwise, so this is what lets several aansluitingen be picked at once. It is written for
+     * every filter rather than only that one: a second scoutsjaar would land beside the `=` its cards
+     * take it with, which is sql they cannot parse.
+     */
+    it('lets several aansluitingen be picked at once and holds the other filters to one value', () => {
+        const entry = [tab({ filters: ['scoutsjaar', 'aansluiting'], cards: [card({ parameters: ['scoutsjaar', 'aansluiting'] })] })];
+
+        const parameters = buildParameters(entry, new Map());
+
+        expect(parameters.map(parameter => [parameter.slug, parameter.isMultiSelect])).toEqual([['scoutsjaar', false], ['aansluiting', true]]);
+    });
+
+    /**
+     * Nothing chosen is what counts every member, including everyone holding no aansluiting at all, so
+     * the filters open empty: a default would leave the dashboards showing a slice of the platform to
+     * whoever does not look at the filter bar.
+     */
+    it('gives no filter a value to start from', () => {
+        const entry = [tab({ filters: ['scoutsjaar', 'aansluiting'], cards: [card({ parameters: ['scoutsjaar', 'aansluiting'] })] })];
+
+        const started = buildParameters(entry, new Map()).filter(parameter => parameter.default !== undefined);
+
+        expect(started.map(parameter => parameter.slug)).toEqual([]);
+    });
+
     it('falls back to the question when the values could not be read', () => {
         const entry = [tab({ filters: ['scoutsjaar'], cards: [card({ parameters: ['scoutsjaar'] })] })];
 

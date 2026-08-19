@@ -1,7 +1,7 @@
 -- @tab varia
 -- title: Varia
 -- description: Kinderen en leiding per eenheid, uitgesplitst naar geslacht.
--- filters: scoutsjaar
+-- filters: scoutsjaar, aansluiting
 
 -- @card uldk
 -- title: ULDK

@@ -21,8 +21,10 @@ import { fileURLToPath } from 'url';
  *     SELECT COUNT(DISTINCT member_id) AS `Totaal leden` FROM facts
  *
  * `@include <name>` is replaced by `includes/<name>.sql`, which is how every card counts members the
- * same way. `{{name}}` marks a query parameter, the same syntax Metabase uses, and `[[...]]` around a
- * clause drops it when that parameter is empty.
+ * same way, and a fragment may include another. `{{name}}` marks a query parameter, the same syntax
+ * Metabase uses, and `[[...]]` around a clause drops it when that parameter is empty. A parameter
+ * several values can be chosen for is written `IN ({{name}})`, since Metabase replaces it with all of
+ * them, comma separated.
  */
 
 export type ReportCard = {
@@ -249,13 +251,19 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
     };
 }
 
-function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string): string {
+/** A fragment may include another, which is how the two grains of `facts` share their filters. */
+function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string, chain: string[] = []): string {
     return body.replaceAll(/^([ \t]*)--[ \t]*@include[ \t]+(\S+)[ \t]*$/gm, (_match, indent: string, name: string) => {
         const include = includes.get(name);
         if (include === undefined) {
             throw new Error(`${file}: card "${card}" includes "${name}", which has no report/includes/${name}.sql`);
         }
-        return include.split('\n').map(line => indent + line).join('\n');
+        if (chain.includes(name)) {
+            throw new Error(`${file}: card "${card}" includes "${name}" from within itself: ${[...chain, name].join(' -> ')}`);
+        }
+
+        return expandIncludes(include, includes, file, card, [...chain, name])
+            .split('\n').map(line => indent + line).join('\n');
     });
 }
 
