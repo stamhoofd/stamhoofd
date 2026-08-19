@@ -105,3 +105,46 @@ JOIN registration_periods p ON p.id = o.periodId [[AND p.name = {{scoutsjaar}}]]
 WHERE NOT EXISTS (SELECT 1 FROM platform pf WHERE pf.membershipOrganizationId = o.id)
 GROUP BY `ID_Organisatie`, `Naam_Organisatie`, `Postcode`
 ORDER BY `Naam_Organisatie`
+
+-- @card deelnemers-lokale-groep
+-- title: Deelnemers_Lokale_groep
+-- display: table
+-- size: full
+-- columns: ID_Organisatie, Type_deelnemers, Geboortejaar_deelnemers, Gender_deelnemers, Aantal_deelnemers
+-- description: Tabblad 'Deelnemers_Lokale_groep': de leden en de leiding van elke lokale groep, per geboortejaar en geslacht. Wie in dezelfde groep zowel lid als leiding is, telt enkel als leiding.
+--
+-- The deelnemers of the groups the sheet above delivers, split into the two words the template
+-- allows: 'leden' and 'leiding', that exact spelling. Kinderen are the leden; leiding is everyone
+-- else registered at the group, which is what the metadatafiche asks for -- it counts the volwassen
+-- begeleiders, kassabeheerders and secretarissen of a group as leiding as well, and a registration
+-- the import could not place at all belongs to an adult, since anyone under 18 is read as a kind.
+--
+-- Classified per member per group before anything is counted, because someone can be a lid in one tak
+-- and leiding in another of the same unit. The metadatafiche is explicit that they are leiding there
+-- and not a lid, so leiding wins; counted straight off the registrations they would be one person
+-- delivered in both rows.
+--
+-- One row per member per group is also what the counting asks for. The metadatafiche counts
+-- inschrijvingen rather than unique inschrijvers, and says what it means by that: someone registered
+-- at two groups counts at both. Within one group they are one deelnemer, however many takken they are
+-- registered in.
+-- @include facts
+, deelnemers AS (
+    SELECT
+        f.organization_id,
+        f.member_id,
+        f.birth_date,
+        f.`Geslacht`,
+        MAX(CASE WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding
+    FROM facts f
+    GROUP BY f.organization_id, f.member_id, f.birth_date, f.`Geslacht`
+)
+SELECT
+    d.organization_id AS `ID_Organisatie`,
+    CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
+    YEAR(d.birth_date) AS `Geboortejaar_deelnemers`,
+    CASE d.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END AS `Gender_deelnemers`,
+    COUNT(*) AS `Aantal_deelnemers`
+FROM deelnemers d
+GROUP BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
+ORDER BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`

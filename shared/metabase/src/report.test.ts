@@ -129,6 +129,7 @@ describe('report', () => {
                 ['organisatie-bovenlokaal', 'Organisatie_Bovenlokaal', ['ID_Organisatie', 'Naam_Organisatie']],
                 ['deelnemers-bovenlokaal', 'Deelnemers_Bovenlokaal', ['ID_Organisatie', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
                 ['organisatie-lokale-groep', 'Organisatie_Lokale_groep', ['ID_Organisatie', 'Naam_Organisatie', 'Postcode']],
+                ['deelnemers-lokale-groep', 'Deelnemers_Lokale_groep', ['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
             ] as const;
 
             for (const [key, title, columns] of sheets) {
@@ -149,9 +150,32 @@ describe('report', () => {
          * own. Kept here because nothing else notices -- an unmapped value reads as a plausible row.
          */
         it('says a geslacht in the letters the template allows, and nothing where there is no answer', () => {
-            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-bovenlokaal').sql.replaceAll(/\s+/g, ' ');
+            const cards = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.includes('Gender_deelnemers')));
+            expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
 
-            expect(sql).toContain("CASE f.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END");
+            for (const card of cards) {
+                const letters = /CASE \w+\.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' WHEN 'Andere' THEN 'X' END/;
+
+                expect(`${card.key}: ${letters.test(card.sql.replaceAll(/\s+/g, ' '))}`).toEqual(`${card.key}: true`);
+            }
+        });
+
+        /**
+         * Someone can be a lid in one tak of a unit and leiding in another. The metadatafiche is
+         * explicit that they are leiding there and not a lid, so the two are decided per member per
+         * group before anything is counted -- off the registrations they would be one person
+         * delivered in both rows, and the group would report more deelnemers than it has.
+         *
+         * The same grain answers what a deelnemer is: inschrijvingen rather than unique inschrijvers
+         * means someone registered at two groups counts at both, not that two takken count twice.
+         */
+        it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
+            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+
+            expect(sql).toContain("MAX(CASE WHEN f.categorie = 'child' THEN 0 ELSE 1 END) AS is_leiding");
+            expect(sql).toContain('GROUP BY f.organization_id, f.member_id, f.birth_date, f.`Geslacht`');
+            expect(sql).toContain("CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END");
+            expect(sql).toContain('COUNT(*) AS `Aantal_deelnemers`');
         });
 
         /**
