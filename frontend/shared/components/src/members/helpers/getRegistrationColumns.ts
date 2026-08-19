@@ -514,7 +514,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         );
     }
 
-    if (organization !== null) {
+    if (organization !== null && financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({
                 id: 'memberCachedBalance.amountOpen',
