@@ -218,6 +218,29 @@ describe('Endpoint.CreateToken', () => {
             expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
         });
 
+        test('renewing the same active token twice revokes the first replacement', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+            const original = await login(organization, user);
+
+            const firstReplacement = await refresh(organization, original.refreshToken);
+            const secondReplacement = await refresh(organization, original.refreshToken);
+
+            expect(secondReplacement.sessionId).toBe(original.sessionId);
+            expect(await Token.getByAccessToken(firstReplacement.accessToken)).toBeUndefined();
+            expect(await Token.getByAccessToken(original.accessToken)).toBeDefined();
+            expect(await Token.getByAccessToken(secondReplacement.accessToken)).toBeDefined();
+
+            const sessionTokens = await Token.where({ sessionId: original.sessionId });
+            expect(sessionTokens.map(token => token.id).sort()).toEqual([original.id, secondReplacement.id].sort());
+
+            const forkRequest = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'refresh_token',
+                refresh_token: firstReplacement.refreshToken,
+            });
+            await expect(testServer.test(endpoint, forkRequest)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+        });
+
         test('renewing an access token does not extend the session past its maximum length', async () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await new UserFactory({
