@@ -149,7 +149,7 @@ SELECT
     CASE WHEN d.is_leiding = 1 THEN 'leiding' ELSE 'leden' END AS `Type_deelnemers`,
     YEAR(d.birth_date) AS `Geboortejaar_deelnemers`,
     CASE d.`Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END AS `Gender_deelnemers`,
-    COUNT(*) AS `Aantal_deelnemers`
+    COUNT(DISTINCT d.member_id) AS `Aantal_deelnemers`
 FROM deelnemers d
 GROUP BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
 ORDER BY `ID_Organisatie`, `Type_deelnemers`, `Geboortejaar_deelnemers`, `Gender_deelnemers`
