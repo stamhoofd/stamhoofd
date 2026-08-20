@@ -3,6 +3,7 @@ import { Token, UserFactory } from '@stamhoofd/models';
 import type { AccessRight } from '@stamhoofd/structures';
 import { PermissionLevel, PermissionRole, Permissions } from '@stamhoofd/structures';
 import { initPermissionRole } from './initPermissionRole.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 /**
  * You cannot assign access rights directy to a user, but it can be done using roles. So when setting accessRights, a role wil be created and assigned to the user.
@@ -25,6 +26,6 @@ export async function initAdmin({ organization, permissions, accessRights }: { o
         permissions,
     }).create();
 
-    const adminToken = await Token.createToken(admin);
+    const adminToken = await SessionService.createSession(admin);
     return { admin, adminToken };
 }

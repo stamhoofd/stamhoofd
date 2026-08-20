@@ -1,10 +1,13 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, Organization, OrganizationFactory, PasswordToken, Token, User, UserFactory, WebauthnCredential } from '@stamhoofd/models';
+import type { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import type { Organization } from '@stamhoofd/models';
+import { EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, OrganizationFactory, PasswordToken, Token, User, UserFactory, WebauthnCredential } from '@stamhoofd/models';
 import { NewUser, PermissionLevel, Permissions, Token as TokenStruct } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import crypto from 'crypto';
 import { authenticator } from 'otplib';
+import { SessionService } from '../../services/SessionService.js';
 
 import { MFATestHelper } from '../../../tests/helpers/MFATestHelper.js';
 import { testServer } from '../../../tests/helpers/TestServer.js';
@@ -49,8 +52,7 @@ function firstError(e: unknown): SimpleError {
 async function captureError(promise: Promise<unknown>): Promise<SimpleError> {
     try {
         await promise;
-    }
-    catch (e) {
+    } catch (e) {
         return firstError(e);
     }
     throw new Error('Expected the request to be rejected, but it succeeded');
@@ -79,7 +81,7 @@ function withSetup(request: Request, setupToken: string) {
 }
 
 async function freshToken(user: User): Promise<Token> {
-    return await Token.createToken(user, new Date());
+    return await SessionService.createSession(user, { authenticatedAt: new Date() });
 }
 
 async function addConfirmedTOTP(user: User): Promise<{ id: string; secret: string }> {
@@ -649,9 +651,9 @@ describe('MFA security', () => {
             // separately and are not browser sessions.
             const organization = await new OrganizationFactory({}).create();
             const apiUser = await new UserFactory({ organization, apiUser: true }).create();
-            const apiToken = await Token.createToken(apiUser);
+            const apiToken = await SessionService.createSession(apiUser);
 
-            expect(await Token.deleteOtherSessions(apiUser.id, null)).toBe(0);
+            expect(await SessionService.deleteOtherSessions({ userId: apiUser.id, keepAccessToken: null })).toBe(0);
             expect(await Token.getByAccessToken(apiToken.accessToken, true)).toBeDefined();
         });
     });

@@ -1,12 +1,13 @@
 import { Request, Response } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { BalanceItemWithPayments, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
 import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint.js';
+import { SessionService } from '../../src/services/SessionService.js';
 
 describe('E2E.ChargeMembers', () => {
     const chargeMembersEndpoint = new ChargeMembersEndpoint();
@@ -45,7 +46,7 @@ describe('E2E.ChargeMembers', () => {
         })
             .create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         return { organization, user, token };
     };
@@ -148,7 +149,7 @@ describe('E2E.ChargeMembers', () => {
         for (const userFactory of testUserFactories) {
             const user = await userFactory.create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             await expect(postCharge(filter, organization, body, token))
                 .rejects
@@ -234,7 +235,7 @@ describe('E2E.ChargeMembers', () => {
         })
             .create();
 
-        const otherFinancialDirectorToken = await Token.createToken(otherFinancialDirector);
+        const otherFinancialDirectorToken = await SessionService.createSession(otherFinancialDirector);
 
         const body = ChargeRequest.create({
             description: 'test description',

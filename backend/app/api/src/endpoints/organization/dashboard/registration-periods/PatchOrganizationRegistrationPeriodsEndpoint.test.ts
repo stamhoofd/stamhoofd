@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization } from '@stamhoofd/models';
-import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, Token } from '@stamhoofd/models';
+import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
@@ -45,7 +46,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
 
@@ -77,7 +78,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
 
@@ -107,7 +108,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
 
@@ -142,7 +143,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
 
@@ -171,7 +172,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // A waiting list group and a regular group that references it. The regular group is
             // listed BEFORE the waiting list, reproducing the ordering produced by Group.defaultSort
@@ -237,7 +238,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             // create group
             const group = await new GroupFactory({ organization: otherOrganization }).create();

@@ -4,6 +4,7 @@ setup();
 
 // other imports
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { MemberFactory, OrganizationFactory, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { File, PermissionLevel, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
@@ -101,7 +102,7 @@ test.describe('Member file downloads @member-file-download', () => {
             });
         });
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
         await page.addInitScript((tokenString) => {
             window.localStorage.setItem('token-platform', tokenString);

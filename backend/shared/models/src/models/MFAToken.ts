@@ -1,5 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel, SQLCalculation, SQLColumnExpression, SQLScalar, SQLWhereSign } from '@stamhoofd/sql';
+import { SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
 export type MFATokenPurpose = 'login' | 'setup';
@@ -21,6 +22,14 @@ export class MFAToken extends QueryableModel {
 
     @column({ type: 'string' })
     purpose: MFATokenPurpose = 'login';
+
+    /**
+     * The primary credential that was accepted before this challenge was created. The
+     * session is only created once the challenge is completed, and it has to know how the
+     * user got there.
+     */
+    @column({ type: 'string' })
+    loginMethod = SessionLoginMethod.Password;
 
     @column({ type: 'integer' })
     tries = 0;
@@ -56,7 +65,7 @@ export class MFAToken extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async createFor(userId: string, purpose: MFATokenPurpose, webauthnChallenge: string | null = null): Promise<MFAToken> {
+    static async createFor(userId: string, purpose: MFATokenPurpose, { webauthnChallenge = null, loginMethod = SessionLoginMethod.Password }: { webauthnChallenge?: string | null; loginMethod?: SessionLoginMethod } = {}): Promise<MFAToken> {
         // A new attempt supersedes the previous one. Without this, every single login
         // attempt of a user with 2FA leaves a row behind (anyone who knows the password
         // can create them at will), and the abandoned tokens stay usable until they
@@ -67,6 +76,7 @@ export class MFAToken extends QueryableModel {
         model.token = crypto.randomBytes(48).toString('base64url');
         model.userId = userId;
         model.purpose = purpose;
+        model.loginMethod = loginMethod;
         model.webauthnChallenge = webauthnChallenge;
         model.expiresAt = new Date(Date.now() + MFAToken.EXPIRY_MS);
         await model.save();

@@ -2,6 +2,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, WebshopAuthType, WebshopMetaData } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -18,7 +19,7 @@ describe('Endpoint.GetWebshop', () => {
     test('Get webshop as signed in user', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
         const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id, organization.getApiHost());
@@ -71,7 +72,7 @@ describe('Endpoint.GetWebshop', () => {
     test('Allow signed in user access for required-auth webshop', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const webshop = await new WebshopFactory({
             organizationId: organization.id,
             meta: WebshopMetaData.create({
@@ -94,7 +95,7 @@ describe('Endpoint.GetWebshop', () => {
                 level: PermissionLevel.Read,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
@@ -116,7 +117,7 @@ describe('Endpoint.GetWebshop', () => {
                 level: PermissionLevel.None,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
@@ -140,7 +141,7 @@ describe('Endpoint.GetWebshop', () => {
             }),
         }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
         const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id, organization.getApiHost());

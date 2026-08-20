@@ -1,8 +1,8 @@
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +12,7 @@ import { initAdmin, initPermissionRole, initUitpasApi } from '../../../../tests/
 import { initPayconiq } from '../../../../tests/init/initPayconiq.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -76,7 +77,7 @@ describe('Endpoint.RegisterMembers', () => {
         })
             .create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const member = await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })
             .create();

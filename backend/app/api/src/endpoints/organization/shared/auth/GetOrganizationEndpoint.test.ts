@@ -1,6 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { SessionService } from '../../../../services/SessionService.js';
 
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
@@ -17,7 +18,7 @@ describe('Endpoint.GetOrganization', () => {
     test('Get organization as signed in user', async () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v3/organization', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
@@ -42,7 +43,7 @@ describe('Endpoint.GetOrganization', () => {
             }),
         }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v3/organization', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
@@ -68,7 +69,7 @@ describe('Endpoint.GetOrganization', () => {
             }),
         }).create();
 
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const r = Request.buildJson('GET', '/v3/organization', organization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;

@@ -11,6 +11,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -44,7 +45,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             existingMember.details.nationalRegisterNumber = '123454123';
             await existingMember.save();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const put = MemberWithRegistrationsBlob.create({
@@ -73,7 +74,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 generateData: false,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
@@ -137,7 +138,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 group,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
@@ -185,7 +186,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const organization = await new OrganizationFactory({ }).create();
             const user = await new UserFactory({ organization }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const put = MemberWithRegistrationsBlob.create({
@@ -238,7 +239,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             // Check access
             expect(existingMember.users).toHaveLength(1);
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
             const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1000);
@@ -302,7 +303,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 user,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -363,7 +364,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 user,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -414,7 +415,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 user,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -474,7 +475,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 user,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -520,7 +521,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 user,
             }).create();
 
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
@@ -551,7 +552,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 const organization = await new OrganizationFactory({}).create();
 
@@ -597,7 +598,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // create member
                 const member = await new MemberFactory({
@@ -652,7 +653,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // create member
                 const member = await new MemberFactory({
@@ -703,7 +704,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     const user = await new UserFactory({ }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -753,7 +754,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     const user = await new UserFactory({ }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -811,7 +812,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     const user = await new UserFactory({ }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -867,7 +868,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     const user = await new UserFactory({ }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -925,7 +926,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     const user = await new UserFactory({ }).create();
 
-                    const token = await Token.createToken(user);
+                    const token = await SessionService.createSession(user);
 
                     // create member
                     const member = await new MemberFactory({
@@ -988,7 +989,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // create member
                 const member = await new MemberFactory({
@@ -1042,7 +1043,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // create member
                 const member = await new MemberFactory({
@@ -1090,7 +1091,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // create member
                 const member = await new MemberFactory({
@@ -1148,7 +1149,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 const user = await new UserFactory({ }).create();
 
-                const token = await Token.createToken(user);
+                const token = await SessionService.createSession(user);
 
                 // create member
                 const member = await new MemberFactory({
@@ -1212,7 +1213,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 // Give user access to this member
                 user,
             }).create();
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             return { organization, user, member, token };
         }
 

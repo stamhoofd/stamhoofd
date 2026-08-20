@@ -4,6 +4,7 @@ setup();
 
 // other imports
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type {
     Organization,
     User } from '@stamhoofd/models';
@@ -42,7 +43,7 @@ test.describe('Login', () => {
             }),
         }).create();
 
-        await Token.createToken(user);
+        await SessionService.createSession(user);
     });
 
     test.afterAll(async () => {

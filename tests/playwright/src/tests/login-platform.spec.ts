@@ -12,6 +12,7 @@ import {
     UserFactory,
 } from '@stamhoofd/models';
 import { expect } from '@playwright/test';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { MFARecoveryCode, MFATOTP } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -48,7 +49,7 @@ test.describe('Login', () => {
             }),
         }).create();
 
-        await Token.createToken(user);
+        await SessionService.createSession(user);
     });
 
     test.afterAll(async () => {

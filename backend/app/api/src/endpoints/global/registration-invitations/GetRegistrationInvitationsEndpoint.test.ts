@@ -6,6 +6,7 @@ import { LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResour
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationInvitationsEndpoint } from './GetRegistrationInvitationsEndpoint.js';
+import { SessionService } from '../../../services/SessionService.js';
 
 describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
     const endpoint = new GetRegistrationInvitationsEndpoint();
@@ -14,7 +15,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
         let authorization = '';
 
         if (user) {
-            const token = await Token.createToken(user);
+            const token = await SessionService.createSession(user);
             authorization = 'Bearer ' + token.accessToken;
         }
 

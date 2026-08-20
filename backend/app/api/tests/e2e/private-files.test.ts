@@ -1,4 +1,5 @@
 import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
+import { SessionService } from '../../src/services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { encodeObject, EncodeMedium, PatchableArray } from '@simonbackx/simple-encoding';
@@ -48,7 +49,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({
@@ -91,7 +92,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({
@@ -135,7 +136,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({
@@ -197,7 +198,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Public files are not signed, so a malicious user can put anything in them. The url of a file ends up
         // in a link (and in the source of an image), so a javascript: url would run on our own domain.
@@ -260,7 +261,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({
@@ -324,7 +325,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({
@@ -404,7 +405,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({
@@ -662,7 +663,7 @@ describe('E2E.PrivateFiles', () => {
                 level: PermissionLevel.Full,
             }),
         }).create();
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         // Create a user member
         const member = MemberWithRegistrationsBlob.create({

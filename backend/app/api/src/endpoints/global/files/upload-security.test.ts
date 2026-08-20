@@ -7,6 +7,7 @@ import { File, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
+import { SessionService } from '../../../services/SessionService.js';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { FileSignService } from '../../../services/FileSignService.js';
@@ -116,12 +117,12 @@ describe('Upload security', () => {
             permissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
         adminUserId = admin.id;
-        adminToken = (await Token.createToken(admin)).accessToken;
+        adminToken = (await SessionService.createSession(admin)).accessToken;
 
         // A user without any permissions: it may only upload private files
         const member = await new UserFactory({ organization }).create();
         memberUserId = member.id;
-        memberToken = (await Token.createToken(member)).accessToken;
+        memberToken = (await SessionService.createSession(member)).accessToken;
     });
 
     beforeEach(() => {

@@ -2,6 +2,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import { useContext } from '#hooks/useContext.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 
 /**
@@ -14,12 +15,14 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
  */
 export function useFreshAction() {
     const present = usePresent();
+    const $context = useContext();
 
     return async function runFresh<T>(action: () => Promise<T>): Promise<T> {
         try {
             return await action();
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('require_fresh_auth')) {
+                await $context.value.renewToken();
                 const c = await new Promise<boolean>((resolve, reject) => {
                     present({
                         components: [

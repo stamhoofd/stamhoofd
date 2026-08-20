@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization } from '@stamhoofd/models';
-import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, Token } from '@stamhoofd/models';
+import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import { SessionService } from '../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -34,7 +35,7 @@ describe('Endpoint.PatchPlatform', () => {
         const admin = await new UserFactory({
             globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
-        const token = await Token.createToken(admin);
+        const token = await SessionService.createSession(admin);
 
         try {
             const response = await patchPlatform({
@@ -49,8 +50,7 @@ describe('Endpoint.PatchPlatform', () => {
 
             expect(response.body.privateConfig?.requireTwoFactor).toBe(true);
             expect((await Platform.getForEditing()).privateConfig.requireTwoFactor).toBe(true);
-        }
-        finally {
+        } finally {
             // The platform row is shared by every test file
             await setPlatformRequiresTwoFactor(false);
         }
@@ -72,7 +72,7 @@ describe('Endpoint.PatchPlatform', () => {
             admin.organizationId = null;
             await admin.save();
 
-            const token = await Token.createToken(admin);
+            const token = await SessionService.createSession(admin);
 
             const patch = PlatformStruct.patch({
                 config: PlatformConfig.patch({

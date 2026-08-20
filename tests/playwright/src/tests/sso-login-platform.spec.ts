@@ -55,6 +55,40 @@ test.describe('SSO login', () => {
         expect(user!.meta?.loginProviderIds.get(LoginProviderType.SSO)).toBeTruthy();
     });
 
+    test('the refresh token returned by the SSO callback can only be exchanged once', async ({ page, pages }) => {
+        await pages.dashboard.goto();
+        const exchangeRequestPromise = page.waitForRequest((request) => {
+            if (request.method() !== 'POST' || !request.url().endsWith('/oauth/token')) {
+                return false;
+            }
+            return request.postData()?.includes('refresh_token') ?? false;
+        });
+
+        await signInThroughSSO(page);
+        const exchangeRequest = await exchangeRequestPromise;
+        const refreshToken = exchangeRequest.postDataJSON().refresh_token as string;
+        expect(refreshToken).toBeDefined();
+        await expect(page.getByTestId('members-start-view')).toBeVisible({ timeout: 30_000 });
+
+        // Replayed from the browser: a request from the worker process itself can get
+        // intercepted by nock (activated by mockers of specs that shared this worker),
+        // which crashes on Playwright's own HTTP stack.
+        const replayExchange = await page.evaluate(async ({ url, refreshToken }) => {
+            const response = await fetch(`${url}/oauth/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken,
+                }),
+            });
+            return { status: response.status, body: await response.text() };
+        }, { url: WorkerData.urls.api, refreshToken });
+
+        expect(replayExchange.status).toBe(400);
+        expect(replayExchange.body).toContain('invalid_refresh_token');
+    });
+
     test('signs in on an existing account and links the SSO provider to it', async ({ page, pages }) => {
         // An admin that was invited but never picked a password: their account is claimed by SSO.
         const existingUser = await new UserFactory({

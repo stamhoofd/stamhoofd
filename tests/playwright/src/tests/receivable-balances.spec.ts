@@ -6,6 +6,7 @@ setup();
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { MollieMocker, STPackageService } from '@stamhoofd/backend/tests/helpers';
+import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, User } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, CachedBalance, GroupFactory, MemberFactory, MolliePayment, OrganizationFactory, Payment, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import {
@@ -33,7 +34,7 @@ import { TableHelper, WorkerData } from '../helpers/index.js';
  * Write the correct auth token into localStorage (mirrors webshop-orders.spec).
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await Token.createToken(user);
+    const token = await SessionService.createSession(user);
     const tokenString = JSON.stringify(new TokenStruct(token).encode({ version: Version }));
 
     const organizationId = user.organizationId;

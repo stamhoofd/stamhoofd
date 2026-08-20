@@ -5,12 +5,13 @@ import type { BalanceItem as BalanceItemStruct, PaginatedResponse, StamhoofdFilt
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PermissionLevel, Permissions, TranslatedString } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemsEndpoint } from './GetBalanceItemsEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 describe('Endpoint.GetBalanceItemsEndpoint', () => {
     const endpoint = new GetBalanceItemsEndpoint();
 
     const getBalanceItems = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
 
         const request = Request.get({
             path: '/balance-items',

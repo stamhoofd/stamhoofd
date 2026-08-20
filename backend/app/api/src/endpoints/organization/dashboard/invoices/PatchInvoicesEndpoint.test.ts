@@ -8,6 +8,7 @@ import { PaymentMethod, PaymentStatus, PermissionLevel, Permissions } from '@sta
 import { STExpect } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchInvoicesEndpoint } from './PatchInvoicesEndpoint.js';
+import { SessionService } from '../../../../services/SessionService.js';
 
 describe('Endpoint.PatchInvoicesEndpoint', () => {
     const endpoint = new PatchInvoicesEndpoint();
@@ -56,7 +57,7 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
     };
 
     const patchInvoices = async ({ body, organization, user }: { body: PatchableArrayAutoEncoder<InvoiceStruct>; organization: Organization; user: User }) => {
-        const token = await Token.createToken(user);
+        const token = await SessionService.createSession(user);
         const request = Request.buildJson('PATCH', '/invoices', organization.getApiHost(), body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test<InvoiceStruct[]>(endpoint, request);
