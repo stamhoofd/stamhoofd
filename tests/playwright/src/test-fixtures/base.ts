@@ -29,20 +29,18 @@ export function setup() {
         Logger.info('BEFORE ALL' + testInfo.file);
 
         // Note: we use a custom beforeall here for the simple reason that Playwright fixtures are called after the beforeAll inside the tests,
-        // which is too late to reset environments
-        if (testInfo.file !== WorkerData.lastFile) {
-            Logger.info('Worker moved to a new file: ' + testInfo.file);
-            WorkerData.lastFile = testInfo.file;
+        // which is too late to reset environments.
+        // Reset on every run, not only when the file changes: with fullyParallel a file is split into groups and Playwright reruns
+        // the beforeAll hooks for every group, also when one worker runs two groups of the same file in a row.
 
-            // Make sure we also delete the current user
-            WorkerData.clearLoginState();
+        // Make sure we also delete the current user
+        WorkerData.clearLoginState();
 
-            // Resetting database
-            await WorkerData.resetDatabase();
+        // Resetting database
+        await WorkerData.resetDatabase();
 
-            // Reset environment (remove any set environments from different files)
-            WorkerHelper.loadEnvironment({ force: true });
-        }
+        // Reset environment (remove any set environments from different files)
+        WorkerHelper.loadEnvironment({ force: true });
     });
 
     // eslint-disable-next-line no-empty-pattern

@@ -505,20 +505,22 @@ async function patchEmail(async = false) {
         return;
     }
 
+    // Claim the patch before deriving the html/text (async): edits made in the meantime go into a new
+    // patch for the next save instead of being dropped, and send() waits for this save
     let _savingPatch = patch.value;
+    savingPatch.value = _savingPatch;
+    patch.value = null;
 
     try {
         const derived = await contentLanguage.getDerivedContent();
         if (derived) {
             // Merge the derived html/text into the language that is currently in the editor
             _savingPatch = contentLanguage.patchDerivedContent(_savingPatch, derived);
+            savingPatch.value = _savingPatch;
         }
     } catch (e) {
         console.error('failed to set text and html', e);
     }
-
-    savingPatch.value = _savingPatch;
-    patch.value = null;
 
     try {
         await doPatchEmail(email.value, _savingPatch);
@@ -684,6 +686,10 @@ async function send() {
     if (!isConfirm) return;
 
     sending.value = true;
+
+    // An auto save that started while the confirmation was open has to finish first: its PATCH would
+    // otherwise race with the one below (last writer wins on the server)
+    await waitForSave();
 
     try {
         let body = Email.patch({
