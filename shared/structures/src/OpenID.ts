@@ -50,10 +50,10 @@ export class StartOpenIDFlowStruct extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, nullable: true })
     redirectUri: string | null = null;
 
-    @field({ decoder: StringDecoder, optional: true, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, optional: true, nullable: true, version: 411 })
     clientPlatform: string | null = null;
 
-    @field({ decoder: StringDecoder, optional: true, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, optional: true, nullable: true, version: 411 })
     sessionMetaData: string | null = null;
 
     /**
