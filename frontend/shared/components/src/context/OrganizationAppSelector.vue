@@ -54,7 +54,7 @@
                     </template>
 
                     <h1 class="style-title-list">
-                        {{ $t('Andere vereniging zoeken') }}
+                        {{ $t('%Zlz') }}
                     </h1>
                 </STListItem>
             </STList>
@@ -63,7 +63,7 @@
                 <hr v-if="currentOptions.length || otherOptions.length">
                 <button class="button text" type="button" data-testid="app-switcher-search-others" @click="searchOrganizations">
                     <span class="icon search" />
-                    <span>{{ $t('Andere vereniging zoeken') }}</span>
+                    <span>{{ $t('%Zlz') }}</span>
                 </button>
             </template>
         </main>

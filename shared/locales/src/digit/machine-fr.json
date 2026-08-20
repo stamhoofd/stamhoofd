@@ -1511,6 +1511,10 @@
     "original": "Openstaande bedragen van leden en groepen",
     "translation": "Montants en attente des membres et des groupes"
   },
+  "%Zlz": {
+    "original": "Andere groep zoeken",
+    "translation": "Rechercher un autre groupe"
+  },
   "%Zp": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement destiné aux administrateurs de {organization}. Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."

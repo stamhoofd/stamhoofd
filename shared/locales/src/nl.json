@@ -2140,7 +2140,6 @@
   "%Zx": "Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
   "%a0": "Kanaal",
   "%a1": "Vul een URL in",
-  "%a3": "Andere zoeken",
   "%a4": "Kiezen",
   "%a5": "Jouw gegevens en inschrijvingen",
   "%a6": "Portaal voor beroepskrachten",
@@ -5557,7 +5556,6 @@
   "%1WB": "Er zijn nog geen e-mailadressen ingesteld",
   "%1WC": "Beheerdersrollen",
   "%1WD": "Tag verwijderen",
-  "%1WE": "Activeer nieuwe functies",
   "%1WH": "{orgName} heeft de tag {tagName} niet",
   "%1WI": "{x} tot {y} jaar",
   "%1WJ": "Ben je zeker dat je deze categorie wilt verwijderen en de inhoud verplaatsen naar ‘{destinationName}’?",
@@ -6575,5 +6573,6 @@
   "%Zlr": "Voor elk geselecteerd openstaand bedrag maken we een betaling aan met een onbekende betaalmethode. Als betaaldatum gebruiken we de datum van het laatst aangemaakte openstaande bedrag.",
   "%Zls": "Een aanrekening is een bedrag dat een lid moet betalen, bijvoorbeeld voor een inschrijving of T-shirt. Betalingen worden aan deze aanrekeningen gekoppeld.",
   "%Zlv": "Openstaande bedragen van leden en verenigingen",
-  "%Zlw": "Betalingen aanmaken..."
+  "%Zlw": "Betalingen aanmaken...",
+  "%Zlz": "Andere vereniging zoeken"
 }

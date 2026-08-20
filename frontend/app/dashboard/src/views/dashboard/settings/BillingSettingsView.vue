@@ -113,7 +113,7 @@
                             {{ $t('%1HV') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('%1WE') }}
+                            {{ $t('%1HW') }}
                         </p>
 
                         <template #right>
