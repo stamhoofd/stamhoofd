@@ -6,6 +6,7 @@ export default defineConfig({
         globalSetup: './tests/vitest.global.setup.ts',
         setupFiles: ['./tests/vitest.setup.ts'],
         watch: false,
+        testTimeout: 30_000, // launching Chrome and prerendering a live page is slow on CI
         globals: true,
         root: import.meta.dirname,
         isolate: true,
