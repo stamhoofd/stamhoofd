@@ -88,6 +88,7 @@ const waitingList = computed(() => props.group && props.group.type === GroupType
 
 const { filterBuilders, loading: isLoadingFilters } = useAdvancedRegistrationWithMemberUIFilterBuilders({
     multipleGroups: props.organization === null || props.category !== null,
+    currentGroup: props.group,
 });
 
 const actions: Ref<TableAction<ObjectType>[]> = ref([]);
